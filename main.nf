@@ -133,7 +133,7 @@ try {
 
 
 /*
- * Parse software version numbers
+ * Parse software version numbers: TODO testing this
  */
 process get_software_versions {
 
@@ -151,9 +151,9 @@ process get_software_versions {
     echo \$(ClipAndMerge 2>&1) v_clipandmerge.txt
     picard MarkDuplicates --version &> v_markduplicates.txt  || true
     dedup -h > v_dedup.txt
-    angsd > v_angsd.txt
-    realignsamfile > v_circularmapper.txt
-    schmutzi > v_schmutzi.txt
+    #angsd > v_angsd.txt
+    #realignsamfile > v_circularmapper.txt
+    #schmutzi > v_schmutzi.txt
     gatk --version > v_gatk.txt
     qualimap --version > v_qualimap.txt
     vcf2genome > v_vcf2genome.txt
@@ -184,6 +184,23 @@ process fastqc {
     """
 }
 
+
+
+/*
+Step 2: AdapterRemoval or Clip&Merge
+Step 2.1: AdapterRemovalfixprefix
+Step 3: Mapping with BWA, CircularMapper
+Step 4: Conversion to BAM; sorting
+Step 5: Keep unmapped/remove unmapped reads
+Step 5.1: Preseq
+Step 5.2: DMG Assessment
+Step 5.3: Qualimap (before or after Dedup?)
+Step 6: DeDup / MarkDuplicates
+Step 7: angsd
+Step 7: GATK
+Step 8: vcf2genome
+
+*/
 
 
 /*
