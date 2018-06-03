@@ -88,7 +88,7 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
 Channel
     .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
     .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-    .into { read_files_fastqc }
+    .into { ch_read_files_clip, ch_read_files_fastqc }
 
 
 // Header log info
@@ -169,14 +169,14 @@ process get_software_versions {
  */
 process fastqc {
     tag "$name"
-    publishDir "${params.outdir}/fastqc", mode: 'copy',
+    publishDir "${params.outdir}/01-FastQC", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     input:
-    set val(name), file(reads) from read_files_fastqc
+    set val(name), file(reads) from ch_read_files_fastqc
 
     output:
-    file "*_fastqc.{zip,html}" into fastqc_results
+    file "*_fastqc.{zip,html}" into ch_fastqc_results
 
     script:
     """
@@ -184,6 +184,47 @@ process fastqc {
     """
 }
 
+/*
+ * STEP 2 - Adapter Clipping / Read Merging 
+ */
+
+if(params.mergemethod == 'AdapterRemoval'){
+
+process adapter_removal {
+    tag "$name"
+    publishDir "${params.outdir}/02-Merging", mode: 'copy'
+
+    input: 
+    set val(name), file(reads) from ch_read_files_clip
+
+    output:
+    file "*.fastq.gz" into ch_clipped_reads
+
+    script:
+    """
+    Adap
+
+    """
+    
+
+} else { //We use Clip&Merge then
+process clip_merge {
+    tag "$name"
+    publishDir "${params.outdir}/02-Merging", mode: 'copy'
+
+    input: 
+    set val(name), file(reads) from ch_read_files_clip
+
+    output:
+    file "*.fastq.gz" into ch_clipped_reads
+
+    script:
+    """
+    ClipAndMerge -in1 ${reads[0]} -in2 ${reads[1]} -trim3p ${params.clip.3pclip} -trim5p ${params.clip.5pclip} -l ${params.clip.readlength} -m ${params.clip.min_adap_overlap} -qt -q ${params.clip.min_read_quality} -log "ClipAndMergeStats.log"
+    """
+}
+
+}
 
 
 /*
