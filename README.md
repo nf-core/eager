@@ -5,6 +5,8 @@
 [![Gitter](https://img.shields.io/badge/gitter-%20join%20chat%20%E2%86%92-4fb99a.svg)](https://gitter.im/EAGER2-0/Lobby)
 
 ## Introduction
+THIS PIPELINE IS A WORK IN PROGRESS. Thanks for checking it out! Hopefully it will be functional soon.
+
 **nf-core/EAGER2** is a bioinformatics best-practice analysis pipeline for ancient DNA data analysis.
 
 The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FastQ inputs, aligns the reads and performs extensive quality-control on the results. It comes with docker / singularity containers making installation trivial and results highly reproducible.
