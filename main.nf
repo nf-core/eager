@@ -220,7 +220,9 @@ process clip_merge {
 
     script:
     """
-    ClipAndMerge -in1 ${reads[0]} -in2 ${reads[1]} -trim3p ${params.clip.3pclip} -trim5p ${params.clip.5pclip} -l ${params.clip.readlength} -m ${params.clip.min_adap_overlap} -qt -q ${params.clip.min_read_quality} -log "ClipAndMergeStats.log"
+    ClipAndMerge -in1 ${reads[0]} -in2 ${reads[1]} 
+    -f ${params.clip.forward_adaptor} -r ${params.clip.reverse_adaptor}
+    -trim3p ${params.clip.3pclip} -trim5p ${params.clip.5pclip} -l ${params.clip.readlength} -m ${params.clip.min_adap_overlap} -qt -q ${params.clip.min_read_quality} -log "ClipAndMergeStats.log"
     """
 }
 
