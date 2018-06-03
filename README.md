@@ -1,4 +1,4 @@
-# ![nf-core/EAGER2](docs/images/chipseq_logo.png)
+# ![nf-core/EAGER2](docs/images/EAGER2_logo.png)
 
 [![Build Status](https://travis-ci.org/apeltzer/nf-EAGER.svg?branch=master)](https://travis-ci.org/apeltzer/nf-EAGER)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.27.0-brightgreen.svg)](https://www.nextflow.io/)
