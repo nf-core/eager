@@ -5,9 +5,18 @@ channels:
   - bioconda
 dependencies:
   - conda-forge::openjdk # Needed for FastQC docker - see bioconda/bioconda-recipes#5026
-  - fastqc=0.11.5
-  - multiqc=1.5
+  - fastqc=0.11.7
   - adapterremoval=2.2.2
-  - gatk4=4.0.2.1
-  - samtools=1.7
-  - qualimap=2.2.2
+  - adapterremovalfixprefix=0.0.4
+  - clipandmerge=1.7.8
+  - bwa=0.7.17
+  - picard=2.18.5
+  - samtools=1.8
+  - dedup=0.12.3
+  - angsd=0.921
+  - circularmapper=1.93.4
+  - gatk4=4.0.4.0
+  - qualimap=2.2.2a
+  - vcf2genome=0.91
+  - multiqc=1.5
+  #Missing DamageProfiler, Missing Schmutzi, Missing PMDTools
