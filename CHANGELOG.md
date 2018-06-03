@@ -1,3 +1,3 @@
 
-## 2.0 - 2018-03-15
-Initial release of nf-EAGER, created with the NGI-NFcookiecutter template: https://github.com/ewels/NGI-NFcookiecutter.
+## 2.0 - 2018-06-05
+Initial release of EAGER2.0, created with the NGI-NFcookiecutter template: https://github.com/nf-core/cookiecutter

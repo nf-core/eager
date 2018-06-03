@@ -1,4 +1,4 @@
-# nf-EAGER
+# EAGER2
 A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud support.
 
 [![Build Status](https://travis-ci.org/apeltzer/nf-EAGER.svg?branch=master)](https://travis-ci.org/apeltzer/nf-EAGER)
@@ -8,7 +8,7 @@ A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud 
 
 
 ### Introduction
-nf-EAGER: A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud support.
+EAGER2: A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud support.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
 
