@@ -20,4 +20,4 @@ dependencies:
   - vcf2genome=0.91
   - damageprofiler=0.3.11
   - multiqc=1.5
-  #Missing Schmutzi, Missing PMDTools
+  #Missing Schmutzi, Missing PMDTools, Missing SequenceTools
