@@ -134,7 +134,6 @@ try {
 
 /*
  * Parse software version numbers
- * TODO Missing all other tools in the pipeline
  */
 process get_software_versions {
 
@@ -146,6 +145,18 @@ process get_software_versions {
     echo $params.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     fastqc --version > v_fastqc.txt
+    echo \$(bwa 2>&1) > v_bwa.txt
+    samtools --version > v_samtools.txt
+    AdapterRemoval -version > v_adapterremoval.txt
+    echo \$(ClipAndMerge 2>&1) v_clipandmerge.txt
+    picard MarkDuplicates --version &> v_markduplicates.txt  || true
+    dedup -h > v_dedup.txt
+    angsd > v_angsd.txt
+    realignsamfile > v_circularmapper.txt
+    schmutzi > v_schmutzi.txt
+    gatk --version > v_gatk.txt
+    qualimap --version > v_qualimap.txt
+    vcf2genome > v_vcf2genome.txt
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py > software_versions_mqc.yaml
     """
