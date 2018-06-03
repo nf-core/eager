@@ -201,9 +201,9 @@ process adapter_removal {
     file "*.fastq.gz" into ch_clipped_reads
 
     script:
+    prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     """
-    Adap
-
+    AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --baseName ${prefix} --gzip --threads ${process.cpus} --trimns --trimqualities --adapter1 ${params.clip.forward_adaptor} --adapter2 ${params.clip.reverse_adaptor} --minlength ${params.clip.readlength} --minquality ${params.clip.min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
     """
     
 
