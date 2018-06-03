@@ -198,12 +198,16 @@ process adapter_removal {
     set val(name), file(reads) from ch_read_files_clip
 
     output:
-    file "*.fastq.gz" into ch_clipped_reads
+    file "*.combined.fq.gz" into ch_clipped_reads
 
     script:
     prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     """
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --baseName ${prefix} --gzip --threads ${process.cpus} --trimns --trimqualities --adapter1 ${params.clip.forward_adaptor} --adapter2 ${params.clip.reverse_adaptor} --minlength ${params.clip.readlength} --minquality ${params.clip.min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
+    #Fix Prefixes
+    AdapterRemovalFixPrefix  TODO
+    #Combine files
+    zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${prefix}.combined.fq.gz
     """
     
 
@@ -230,7 +234,6 @@ process clip_merge {
 
 
 /*
-Step 2: AdapterRemoval or Clip&Merge
 Step 2.1: AdapterRemovalfixprefix
 Step 3: Mapping with BWA, CircularMapper
 Step 4: Conversion to BAM; sorting
