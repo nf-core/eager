@@ -18,5 +18,6 @@ dependencies:
   - gatk4=4.0.4.0
   - qualimap=2.2.2a
   - vcf2genome=0.91
+  - damageprofiler=0.3.11
   - multiqc=1.5
-  #Missing DamageProfiler, Missing Schmutzi, Missing PMDTools
+  #Missing Schmutzi, Missing PMDTools
