@@ -5,7 +5,7 @@
 ========================================================================================
  nf-EAGER Analysis Pipeline. Started 2018-03-15.
  #### Homepage / Documentation
- https://github.com/apeltzer/nf-EAGER
+ https://github.com/nf-core/EAGER2
  #### Authors
  Alexander Peltzer apeltzer <alex.peltzer@gmail.com> - https://github.com/apeltzer>
 ----------------------------------------------------------------------------------------
