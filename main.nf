@@ -8,7 +8,7 @@
  https://github.com/nf-core/EAGER2
  #### Authors
  Alexander Peltzer apeltzer <alex.peltzer@gmail.com> - https://github.com/apeltzer>
- James Fellows-Yates <yates@shh.mpg.de> - https://github.com/jfy133
+ James A. Fellows Yates <jfy133@gmail.com> - https://github.com/jfy133
 ----------------------------------------------------------------------------------------
 */
 
