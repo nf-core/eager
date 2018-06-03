@@ -3,6 +3,8 @@ A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud 
 
 [![Build Status](https://travis-ci.org/apeltzer/nf-EAGER.svg?branch=master)](https://travis-ci.org/apeltzer/nf-EAGER)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.27.0-brightgreen.svg)](https://www.nextflow.io/)
+[![Gitter](https://img.shields.io/badge/gitter-%20join%20chat%20%E2%86%92-4fb99a.svg)](https://gitter.im/EAGER2-0/Lobby)
+
 
 
 ### Introduction
