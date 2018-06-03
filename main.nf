@@ -3,11 +3,12 @@
 ========================================================================================
                          nf-EAGER
 ========================================================================================
- nf-EAGER Analysis Pipeline. Started 2018-03-15.
+ EAGER2 Analysis Pipeline. Started 2018-06-05
  #### Homepage / Documentation
  https://github.com/nf-core/EAGER2
  #### Authors
  Alexander Peltzer apeltzer <alex.peltzer@gmail.com> - https://github.com/apeltzer>
+ James Fellows-Yates <yates@shh.mpg.de> - https://github.com/jfy133
 ----------------------------------------------------------------------------------------
 */
 
@@ -15,13 +16,13 @@
 def helpMessage() {
     log.info"""
     =========================================
-     nf-EAGER v${params.version}
+    EAGER2 v${params.version}
     =========================================
     Usage:
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run apeltzer/nf-EAGER --reads '*_R{1,2}.fastq.gz' -profile docker
+    nextflow run nf-core/EAGER2 --reads '*_R{1,2}.fastq.gz' -profile docker
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
@@ -133,6 +134,7 @@ try {
 
 /*
  * Parse software version numbers
+ * TODO Missing all other tools in the pipeline
  */
 process get_software_versions {
 
