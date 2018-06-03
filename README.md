@@ -25,4 +25,4 @@ The nf-EAGER pipeline comes with documentation about the pipeline, found in the 
 5. [Troubleshooting](docs/troubleshooting.md)
 
 ### Credits
-This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)) at [Quantitative Biology Center Tuebingen (QBiC)](http://qbic.life).
+This pipeline was entirely written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)).
