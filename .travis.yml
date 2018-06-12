@@ -3,11 +3,11 @@ language: java
 jdk: openjdk8
 services:
   - docker
-python:
-  - "2.7"
-cache: pip
-matrix:
-  fast_finish: true
+
+
+before_install:
+  # Pull the docker image first so the test doesn't wait for this
+- docker pull nfcore/eager2:latest
 
 install:
   # Install Nextflow
@@ -19,13 +19,17 @@ install:
   - git clone https://github.com/nf-core/tools.git /tmp/nf-core-tools
   - cd /tmp/nf-core-tools
   - pip install --user -e .
-  # Reset
-  - cd ${TRAVIS_BUILD_DIR}
+  # Make test directories
+  - mkdir ${TRAVIS_BUILD_DIR}/tests
+  - cd ${TRAVIS_BUILD_DIR}/tests
 
 env:
-  - NXF_VER=0.29.0
-  - NXF_VER=''
+  - NXF_VER=0.30.1
 
 script:
-  - "nf-core lint ${TRAVIS_BUILD_DIR}"
-  - "cd ${TRAVIS_BUILD_DIR}/tests && ./run_test.sh"
+    # Lint the pipeline code
+    - "nf-core lint ${TRAVIS_BUILD_DIR}"
+    # Run, build reference genome (future work once we have something running)
+    #- nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --saveReference
+    # Basic run with supplied reference
+    #- nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --bwa_index ${TRAVIS_BUILD_DIR}/tests/results/reference_genome/BWAIndex/
