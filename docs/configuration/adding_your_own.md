@@ -1,4 +1,4 @@
-# nf-EAGER: Configuration for other clusters
+# nf-core/EAGER2: Configuration for other clusters
 
 It is entirely possible to run this pipeline on other clusters, though you will need to set up your own config file so that the pipeline knows how to work with your cluster.
 
@@ -35,7 +35,7 @@ process {
 To run the pipeline, several software packages are required. How you satisfy these requirements is essentially up to you and depends on your system. If possible, we _highly_ recommend using either Docker or Singularity.
 
 ### Docker
-Docker is a great way to run nf-EAGER, as it manages all software installations and allows the pipeline to be run in an identical software environment across a range of systems.
+Docker is a great way to run nf-core/EAGER2, as it manages all software installations and allows the pipeline to be run in an identical software environment across a range of systems.
 
 Nextflow has [excellent integration](https://www.nextflow.io/docs/latest/docker.html) with Docker, and beyond installing the two tools, not much else is required.
 
@@ -43,10 +43,10 @@ First, install docker on your system: [Docker Installation Instructions](https:/
 
 Then, simply run the analysis pipeline:
 ```bash
-nextflow run apeltzer/nf-EAGER -profile docker --reads '<path to your reads>'
+nextflow run nf-core/EAGER2 -profile docker --reads '<path to your reads>'
 ```
 
-Nextflow will recognise `apeltzer/nf-EAGER` and download the pipeline from GitHub. The `-profile docker` configuration lists the [quay.io/nf-core/nf-eager](https://hub.docker.com/r/quay.io/nf-core/nf-eager/) image that we have created and is hosted at dockerhub, and this is downloaded.
+Nextflow will recognise `nf-core/EAGER2` and download the pipeline from GitHub. The `-profile docker` configuration lists the [nfcore/eager2](https://hub.docker.com/r/nfcore/eager2/) image that we have created and is hosted at dockerhub, and this is downloaded.
 
 The public docker images are tagged with the same version numbers as the code, which you can use to ensure reproducibility. When running the pipeline, specify the pipeline version with `-r`, for example `-r v1.3`. This uses pipeline code and docker image from this tagged version.
 
@@ -63,12 +63,12 @@ process {
 
 The variable `wf_container` is defined dynamically and automatically specifies the image tag if Nextflow is running with `-r`.
 
-A test suite for docker comes with the pipeline, and can be run by moving to the [`tests` directory](https://github.com/apeltzer/nf-EAGER/tree/master/tests) and running `./run_test.sh`. This will download a small yeast genome and some data, and attempt to run the pipeline through docker on that small dataset. This is automatically run using [Travis](https://travis-ci.org/apeltzer/nf-EAGER/) whenever changes are made to the pipeline.
+A test suite for docker comes with the pipeline, and can be run by moving to the [`tests` directory](https://github.com/nf-core/EAGER2/tree/master/tests) and running `./run_test.sh`. This will download a small yeast genome and some data, and attempt to run the pipeline through docker on that small dataset. This is automatically run using [Travis](https://travis-ci.org/nf-core/EAGER2/) whenever changes are made to the pipeline.
 
 ### Singularity image
 Many HPC environments are not able to run Docker due to security issues. [Singularity](http://singularity.lbl.gov/) is a tool designed to run on such HPC systems which is very similar to Docker. Even better, it can use create images directly from dockerhub.
 
-To use the singularity image for a single run, use `-with-singularity 'docker://apeltzer/nf-EAGER'`. This will download the docker container from dockerhub and create a singularity image for you dynamically.
+To use the singularity image for a single run, use `-with-singularity 'docker://nfcore/eager2'`. This will download the docker container from dockerhub and create a singularity image for you dynamically.
 
 To specify singularity usage in your pipeline config file, add the following:
 
@@ -88,13 +88,13 @@ If you intend to run the pipeline offline, nextflow will not be able to automati
 First, pull the image file where you have an internet connection:
 
 ```bash
-singularity pull --name nf-eager.img docker://apeltzer/nf-EAGER
+singularity pull --name eager2.img docker://nfcore/eager2
 ```
 
 Then transfer this file and run the pipeline with this path:
 
 ```bash
-nextflow run /path/to/nf-eager -with-singularity /path/to/nf-eager.img
+nextflow run /path/to/eager2 -with-singularity /path/to/eager2.img
 ```
 
 
@@ -120,8 +120,8 @@ conda config --add channels salilab
 
 #### 3) Create a conda environment, with all necessary packages:
 ```bash
-conda create --name nf-eager_py2.7 python=2.7
-source activate nf-eager_py2.7
+conda create --name nf-core-eager2_py2.7 python=2.7
+source activate nf-core-eager2_py2.7
 conda install --yes \
     fastqc \
     multiqc
@@ -132,7 +132,7 @@ _(Feel free to adjust versions as required.)_
 Once created, the conda environment can be activated before running the pipeline and deactivated afterwards:
 
 ```bash
-source activate nf-eager_py2.7
+source activate nf-core-eager2_py2.7
 # run pipeline
 source deactivate
 ```

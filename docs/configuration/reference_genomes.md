@@ -1,11 +1,11 @@
-# nf-EAGER: Reference Genomes Configuration
+# nf-core/EAGER2: Reference Genomes Configuration
 
-The nf-EAGER pipeline needs a reference genome for alignment and annotation. If not already available, start by downloading the relevant reference, for example from [illumina iGenomes](https://support.illumina.com/sequencing/sequencing_software/igenome.html).
+The nf-core/EAGER2 pipeline needs a reference genome for alignment and annotation. If not already available, start by downloading the relevant reference, for example from [illumina iGenomes](https://support.illumina.com/sequencing/sequencing_software/igenome.html).
 
 The minimal requirements are a FASTA file.
 
 ## Adding paths to a config file
-Specifying long paths every time you run the pipeline is a pain. To make this easier, the pipeline comes configured to understand reference genome keywords which correspond to preconfigured paths, meaning that you can just specify `--genome ID` when running the pipeline. 
+Specifying long paths every time you run the pipeline is a pain. To make this easier, the pipeline comes configured to understand reference genome keywords which correspond to preconfigured paths, meaning that you can just specify `--genome ID` when running the pipeline.
 
 Note that this genome key can also be specified in a config file if you always use the same genome.
 
@@ -36,7 +36,7 @@ If possible, we recommend making this resource available on your cluster. We hav
 To add iGenomes to your config file, add the following line to the end of your config file:
 
 ```nextflow
-includeConfig '/path/to/nf-EAGER/conf/igenomes.config'
+includeConfig '/path/to/nf-core/EAGER2/conf/igenomes.config'
 ```
 
 This works best when you have a `profile` set up in the pipeline - see [`nextflow.config`](../../nextflow.config).

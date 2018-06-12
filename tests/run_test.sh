@@ -84,7 +84,7 @@ else
 fi
 
 # Run name
-run_name="Test nf-EAGER Run: "$(date +%s)
+run_name="Test nf-core/EAGER2 Run: "$(date +%s)
 
 cmd="nextflow run $pipelinescript -resume -name \"$run_name\" $profile $dockerfl $singularityfl --reads \"${data_dir}/*.fastq.gz\""
 echo "Starting nextflow... Command:"

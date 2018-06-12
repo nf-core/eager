@@ -5,19 +5,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <meta name="description" content="nf-EAGER: A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud support.">
-  <title>nf-EAGER Pipeline Report</title>
+  <meta name="description" content="nf-core/EAGER2: A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud support.">
+  <title>nf-core/EAGER2 Pipeline Report</title>
 </head>
 <body>
 <div style="font-family: Helvetica, Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto;">
 
-<h1>nf-EAGER v${version}</h1>
+<h1>nf-core/EAGER2 v${version}</h1>
 <h2>Run Name: $runName</h2>
 
 <% if (!success){
     out << """
     <div style="color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
-        <h4 style="margin-top:0; color: inherit;">nf-EAGER execution completed unsuccessfully!</h4>
+        <h4 style="margin-top:0; color: inherit;">nf-core/EAGER2 execution completed unsuccessfully!</h4>
         <p>The exit status of the task that caused the workflow execution to fail was: <code>$exitStatus</code>.</p>
         <p>The full error message was:</p>
         <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${errorReport}</pre>

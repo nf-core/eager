@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         nf-EAGER
+                         nf-core/EAGER2
 ========================================================================================
  EAGER2 Analysis Pipeline. Started 2018-06-05
  #### Homepage / Documentation
@@ -93,7 +93,7 @@ Channel
 
 // Header log info
 log.info "========================================="
-log.info " nf-EAGER v${params.version}"
+log.info " nf-core/EAGER2 v${params.version}"
 log.info "========================================="
 def summary = [:]
 summary['Run Name']     = custom_runName ?: workflow.runName
@@ -185,7 +185,7 @@ process fastqc {
 }
 
 /*
- * STEP 2 - Adapter Clipping / Read Merging 
+ * STEP 2 - Adapter Clipping / Read Merging
  */
 
 if(params.mergemethod == 'AdapterRemoval'){
@@ -194,7 +194,7 @@ process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/02-Merging", mode: 'copy'
 
-    input: 
+    input:
     set val(name), file(reads) from ch_read_files_clip
 
     output:
@@ -209,14 +209,14 @@ process adapter_removal {
     #Combine files
     zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${prefix}.combined.fq.gz
     """
-    
+
 
 } else { //We use Clip&Merge then
 process clip_merge {
     tag "$name"
     publishDir "${params.outdir}/02-Merging", mode: 'copy'
 
-    input: 
+    input:
     set val(name), file(reads) from ch_read_files_clip
 
     output:
@@ -224,7 +224,7 @@ process clip_merge {
 
     script:
     """
-    ClipAndMerge -in1 ${reads[0]} -in2 ${reads[1]} 
+    ClipAndMerge -in1 ${reads[0]} -in2 ${reads[1]}
     -f ${params.clip.forward_adaptor} -r ${params.clip.reverse_adaptor}
     -trim3p ${params.clip.3pclip} -trim5p ${params.clip.5pclip} -l ${params.clip.readlength} -m ${params.clip.min_adap_overlap} -qt -q ${params.clip.min_read_quality} -log "ClipAndMergeStats.log"
     """
@@ -301,9 +301,9 @@ process output_documentation {
 workflow.onComplete {
 
     // Set up the e-mail variables
-    def subject = "[nf-EAGER] Successful: $workflow.runName"
+    def subject = "[nf-core/EAGER2] Successful: $workflow.runName"
     if(!workflow.success){
-      subject = "[nf-EAGER] FAILED: $workflow.runName"
+      subject = "[nf-core/EAGER2] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = params.version
@@ -352,11 +352,11 @@ workflow.onComplete {
           if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
           // Try to send HTML e-mail using sendmail
           [ 'sendmail', '-t' ].execute() << sendmail_html
-          log.info "[nf-EAGER] Sent summary e-mail to $params.email (sendmail)"
+          log.info "[nf-core/EAGER2] Sent summary e-mail to $params.email (sendmail)"
         } catch (all) {
           // Catch failures and try with plaintext
           [ 'mail', '-s', subject, params.email ].execute() << email_txt
-          log.info "[nf-EAGER] Sent summary e-mail to $params.email (mail)"
+          log.info "[nf-core/EAGER2] Sent summary e-mail to $params.email (mail)"
         }
     }
 
@@ -370,6 +370,6 @@ workflow.onComplete {
     def output_tf = new File( output_d, "pipeline_report.txt" )
     output_tf.withWriter { w -> w << email_txt }
 
-    log.info "[nf-EAGER] Pipeline Complete"
+    log.info "[nf-core/EAGER2] Pipeline Complete"
 
 }
