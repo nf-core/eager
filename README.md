@@ -1,11 +1,11 @@
 # ![nf-core/EAGER2](docs/images/EAGER2_logo.png)
 
-[![Build Status](https://travis-ci.org/apeltzer/nf-EAGER.svg?branch=master)](https://travis-ci.org/apeltzer/nf-EAGER)
+[![Build Status](https://travis-ci.org/nf-core/EAGER2.svg?branch=master)](https://travis-ci.org/nf-core/EAGER2)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.27.0-brightgreen.svg)](https://www.nextflow.io/)
 [![Gitter](https://img.shields.io/badge/gitter-%20join%20chat%20%E2%86%92-4fb99a.svg)](https://gitter.im/nf-core/EAGER2)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
-[![Docker Container available](https://img.shields.io/docker/automated/nfcore/rnaseq.svg)](https://hub.docker.com/r/nfcore/eager2/)
+[![Docker Container available](https://img.shields.io/docker/automated/nfcore/eager2.svg)](https://hub.docker.com/r/nfcore/eager2/)
 ![Singularity Container available](
 https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
@@ -34,7 +34,7 @@ The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow
 
 
 ### Documentation
-The nf-EAGER pipeline comes with documentation about the pipeline, found in the `docs/` directory:
+The nf-core/EAGER2 pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
 1. [Installation](docs/installation.md)
 2. Pipeline configuration

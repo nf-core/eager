@@ -1,4 +1,4 @@
-# nf-EAGER
+# nf-core/EAGER2
 A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud support.
 
 This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.

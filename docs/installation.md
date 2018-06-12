@@ -1,6 +1,6 @@
-# nf-EAGER Installation
+# nf-core/EAGER2 Installation
 
-To start using the nf-EAGER pipeline, there are three steps described below:
+To start using the nf-core/EAGER2 pipeline, there are three steps described below:
 
 1. [Install Nextflow](#install-nextflow)
 2. [Install the pipeline](#install-the-pipeline)
@@ -26,10 +26,11 @@ mv nextflow ~/bin
 
 **You need NextFlow version >= 0.24 to run this pipeline.**
 
-See [nextflow.io](https://www.nextflow.io/) and [NGI-NextflowDocs](https://github.com/SciLifeLab/NGI-NextflowDocs) for further instructions on how to install and configure Nextflow.
+See [Nextflow documentation](https://www.nextflow.io/docs/latest/index.html) or the [nf-core website](https://nf-core.github.io/) for further instructions on how to install and configure Nextflow.
+Join the gitter channels for some direct contact with developers: [nextflow channel](https://gitter.im/nextflow-io/nextflow) or [nf-core Lobby](https://gitter.im/nf-core/Lobby).
 
 ## 2) Install the Pipeline
-This pipeline itself needs no installation - NextFlow will automatically fetch it from GitHub if `apeltzer/nf-EAGER` is specified as the pipeline name.
+This pipeline itself needs no installation - NextFlow will automatically fetch it from GitHub if `nf-core/EAGER2` is specified as the pipeline name.
 
 ### Offline use
 

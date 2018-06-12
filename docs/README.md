@@ -1,6 +1,6 @@
-# nf-EAGER Documentation
+# nf-core/EAGER2 Documentation
 
-The nf-EAGER documentation is split into the following files:
+The nf-core/EAGER2 documentation is split into the following files:
 
 1. [Installation](installation.md)
 2. Pipeline configuration

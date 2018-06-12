@@ -1,13 +1,13 @@
 ========================================
- nf-EAGER v${version}
+ nf-core/EAGER2 v${version}
 ========================================
 Run Name: $runName
 
 <% if (success){
-    out << "## nf-EAGER execution completed successfully! ##"
+    out << "## nf-core/EAGER2 execution completed successfully! ##"
 } else {
     out << """####################################################
-## nf-EAGER execution completed unsuccessfully! ##
+## nf-core/EAGER2 execution completed unsuccessfully! ##
 ####################################################
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
@@ -19,7 +19,7 @@ ${errorReport}
 
 <% if (!success){
     out << """####################################################
-## nf-EAGER execution completed unsuccessfully! ##
+## nf-core/EAGER2 execution completed unsuccessfully! ##
 ####################################################
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
@@ -27,7 +27,7 @@ The full error message was:
 ${errorReport}
 """
 } else {
-    out << "## nf-EAGER execution completed successfully! ##"
+    out << "## nf-core/EAGER2 execution completed successfully! ##"
 }
 %>
 
@@ -52,5 +52,5 @@ Software Versions:
 <% out << software_versions.collect{ k,v -> " - $k: $v" }.join("\n") %>
 
 --
-nf-EAGER
-https://github.com/apeltzer/nf-EAGER
+nf-core/EAGER2
+https://github.com/nf-core/EAGER2
