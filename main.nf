@@ -318,6 +318,8 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  }
 
+if ( params.merge_method.equals ("AdapterRemoval") ) {
+
  process adapter_removal_paired {
 
  label 'short_low_mem_5'
@@ -327,14 +329,38 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  	output:
  		set pair_id, file("adapters-removed.settings") into ch_adapter_clip_log_slurp_paired
- 		set pair_id, file("adapters-removed.collapsed.gz"), file("adapters-removed.collapsed.truncated.gz") into ch_adapters_clipped_paired
+ 		set pair_id, file("adapters-removed.combined.fastq.gz") into ch_adapters_clipped_paired
 
  	shell:
  	"""\
  #!/usr/bin/env bash
 
  AdapterRemoval --file1 ${fastq_file_pair[0]} --file2 ${fastq_file_pair[1]} --basename adapters-removed --gzip --threads 4 --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_min_length} --minquality ${params.clip_min_quality} --minadapteroverlap ${params.clip_min_overlap} --collapse
+ zcat adapters-removed.collapsed.gz adapters-removed.collapsed.truncated.gz | gzip > adapters-removed.combined.fastq.gz
  """
+ }
+
+ } else {
+
+ process clip_merge_paired {
+
+ label 'short_low_mem_5'
+
+ 	input:
+ 		set pair_id, fastq_file_pair from ch_fastq_files_paired.tap (ch_fastqc_merge_group_paired)
+
+ 	output:
+ 		set pair_id, file("ClipAndMergeStats.log") into ch_adapter_clip_log_slurp_paired
+ 		set pair_id, file("adapters-clipped.combined.gz") into ch_adapters_clipped_paired
+
+ 	shell:
+ 	"""\
+ #!/usr/bin/env bash
+
+ ClipAndMerge -in1 ${fastq_file_pair[0]} -in2 ${fastq_file_pair[1]} -f ${params.clip_forward_adaptor} -r ${params.clip_reverse_adaptor} -trim3p ${params.clip_3p_clip} -trim5p ${params.clip_5p_clip} -l ${params.clip_min_length} -m ${params.clip_min_overlap} -qt -q ${params.clip_min_quality} -log ClipAndMergeStats.log -o adapters-clipped.combined.gz
+ """
+ }
+
  }
 
  process adapter_clip_log_slurp_single {
@@ -411,6 +437,8 @@ process adapter_clip_log_single {
 
 }
 
+if ( params.merge_method.equals ("AdapterRemoval") ) {
+
  process adapter_clip_log_paired {
 
  	def m = new HashMap ();
@@ -426,6 +454,27 @@ process adapter_clip_log_single {
  		def lm = new HashMap ()
  		settings_content.split ("\\R", -1).each { if ( it.startsWith ("[") && it.endsWith ("]") ) { stack.push (it) } else if ( it.isEmpty () && stack.size () > 0 ) { stack.pop () } else if ( stack.size () > 0 && stack.peekLast ().equals ("[Trimming statistics]") ) { lm.put (it.split (":")[0],it.split (":")[1].trim ()); } }
  		m.put (pair_id, lm)
+ }
+
+ } else {
+
+ process adapter_clip_log_paired {
+
+ 	def m = new HashMap ();
+
+ 	input:
+ 		set pair_id, val(settings_content) from ch_adapter_clip_log_paired
+
+ 	output:
+ 		set pair_id, val { m.get (pair_id) } into ch_adapter_clip_log_parsed_paired
+
+ 	exec:
+ 		def stack = new ArrayDeque ()
+ 		def lm = new HashMap ()
+ 		settings_content.split ("\\R", -1).each { if ( it.startsWith ("[") && it.endsWith ("]") ) { stack.push (it) } else if ( it.isEmpty () && stack.size () > 0 ) { stack.pop () } else if ( stack.size () > 0 && stack.peekLast ().equals ("[Merging]") ) { lm.put (it.split (":")[0],it.split (":")[1].trim ()); } }
+ 		m.put (pair_id, lm)
+ }
+
  }
 
 if ( params.merge_method.equals ("AdapterRemoval") ) {
@@ -498,7 +547,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
  label 'short_low_mem_5'
 
  	input:
- 		set pair_id, file(collapsed_file), file(collapsed_truncated_file) from ch_adapters_clipped_paired
+ 		set pair_id, file(combined_file) from ch_adapters_clipped_paired
 
  	output:
  		set pair_id, file("adapters-removed.combined.prefixed.fastq.gz") into ch_bwa_align_paired
@@ -507,9 +556,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
  	"""\
  #!/usr/bin/env bash
 
- echo "${pair_id}"
- zcat ${collapsed_file} ${collapsed_truncated_file} | gzip > adapters-removed.combined.fastq.gz
- AdapterRemovalFixPrefix adapters-removed.combined.fastq.gz adapters-removed.combined.prefixed.fastq.gz
+ AdapterRemovalFixPrefix ${combined_file} adapters-removed.combined.prefixed.fastq.gz
  """
  }
 
@@ -593,6 +640,8 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
  #!/usr/bin/env bash
 
  samtools merge ${library_id}.merged.bam ${bams}
+ mkdir -p ${params.outdir}/${library_id}
+ cp ${library_id}.merged.bam ${params.outdir}/${library_id}/
  """
  }
 
