@@ -65,7 +65,7 @@ output_docs = file("$baseDir/docs/output.md")
 params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
 params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
 
-params.clip_3pclip = 0
+params.clip_3p_clip = 0
 params.clip_5p_clip = 0
 
 params.clip_min_length = 30
@@ -248,6 +248,9 @@ process get_software_versions {
  * STEP 1 - FastQC
  */
 process fastqc_merge_single {
+
+  label 'short_min_mem_2'
+
     tag "$name"
     publishDir "${params.outdir}/01-FastQC", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -274,9 +277,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process adapter_removal_single {
 
- 	executor "slurm"
- 	cpus = 5
- 	clusterOptions = "--partition \"short\" --mem 6000"
+ label 'short_low_mem_5'
 
  	input:
  		set pair_id, fastq_file_pair from ch_fastq_files_single.tap (ch_fastqc_merge_group_single)
@@ -297,22 +298,20 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process clip_merge_single {
 
-   executor "slurm"
-   cpus = 5
-   clusterOptions = "--partition \"short\" --mem 6000"
+ label 'short_low_mem_5'
 
  input:
-   set pair_id, fastq_file_pair from ch_fastq_files_single
+   set pair_id, fastq_file_pair from ch_fastq_files_single.tap (ch_fastqc_merge_group_single)
 
  output:
    set pair_id, file("ClipAndMergeStats.log") into ch_adapter_clip_log_slurp_single
-   set pair_id, file("adapters-removed.truncated.gz") into ch_adapters_clipped_single
+   set pair_id, file("adapters-clipped.truncated.gz") into ch_adapters_clipped_single
 
    shell:
    """\
  #!/usr/bin/env bash
 
- ClipAndMerge -in1 ${reads[0]} -f ${params.clip_forward_adaptor} -r ${params.clip_reverse_adaptor} -trim3p ${params.clip_3p_clip} -trim5p ${params.clip_five_p_clip} -l ${params.clip_min_length} -m ${params.clip_min_overlap} -qt -q ${params.clip_min_quality} -log "ClipAndMergeStats.log"
+ ClipAndMerge -in1 ${fastq_file_pair[0]} -f ${params.clip_forward_adaptor} -r ${params.clip_reverse_adaptor} -trim3p ${params.clip_3p_clip} -trim5p ${params.clip_5p_clip} -l ${params.clip_min_length} -m ${params.clip_min_overlap} -qt -q ${params.clip_min_quality} -log ClipAndMergeStats.log -o adapters-clipped.truncated.gz
 
    """
  }
@@ -321,9 +320,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process adapter_removal_paired {
 
- 	executor "slurm"
- 	cpus = 5
- 	clusterOptions = "--partition \"short\" --mem 6000"
+ label 'short_low_mem_5'
 
  	input:
  		set pair_id, fastq_file_pair from ch_fastq_files_paired.tap (ch_fastqc_merge_group_paired)
@@ -372,6 +369,8 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
  """
  }
 
+if ( params.merge_method.equals ("AdapterRemoval") ) {
+
  process adapter_clip_log_single {
 
  	def m = new HashMap ();
@@ -388,6 +387,29 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
  		settings_content.split ("\\R", -1).each { if ( it.startsWith ("[") && it.endsWith ("]") ) { stack.push (it) } else if ( it.isEmpty () && stack.size () > 0 ) { stack.pop () } else if ( stack.size () > 0 && stack.peekLast ().equals ("[Trimming statistics]") ) { lm.put (it.split (":")[0],it.split (":")[1].trim ()); } }
  		m.put (pair_id, lm)
  }
+
+} else {
+
+process adapter_clip_log_single {
+
+ def m = new HashMap ();
+
+ input:
+   set pair_id, val(settings_content) from ch_adapter_clip_log_single
+
+ output:
+   set pair_id, val { m.get (pair_id) } into ch_adapter_clip_log_parsed_single
+
+ exec:
+   def stack = new ArrayDeque ()
+   def lm = new HashMap ()
+   println "parsing clip and merge single"
+   println settings_content.split ("\\R", -1)
+   settings_content.split ("\\R", -1).each { if ( it.startsWith ("[") && it.endsWith ("]") ) { stack.push (it) } else if ( it.isEmpty () && stack.size () > 0 ) { stack.pop () } else if ( stack.size () > 0 && stack.peekLast ().equals ("[Merging]") ) { lm.put (it.split (":")[0],it.split (":")[1].trim ()); } }
+   m.put (pair_id, lm)
+}
+
+}
 
  process adapter_clip_log_paired {
 
@@ -406,36 +428,56 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
  		m.put (pair_id, lm)
  }
 
+if ( params.merge_method.equals ("AdapterRemoval") ) {
+
  process adapter_clip_log_merge {
 
  	input:
  		set val(library_id), settings_list from ch_adapter_clip_log_merge
 
  	exec:
- 		println "settings list";
- 		println settings_list;
- 		def m = new HashMap ();
- 		settings_list.each { it.each { i -> if ( i.key.equals ("Average length of retained reads") ) { m.put (i.key, m.getOrDefault (i.key, 0) + Float.valueOf (i.value) * Long.valueOf (it.get ("Number of retained reads") ) ) } else {  m.put (i.key, m.getOrDefault (i.key, 0) + Long.valueOf (i.value) ) } } };
- 		m.put("Average length of retained reads", m.get ("Average length of retained reads") /  m.get("Number of retained reads") );
- 		println "m";
- 		println m;
+ 		def m = new HashMap ()
+ 		settings_list.each { it.each { i -> if ( i.key.equals ("Average length of retained reads") ) { m.put (i.key, m.getOrDefault (i.key, 0) + Float.valueOf (i.value) * Long.valueOf (it.get ("Number of retained reads") ) ) } else {  m.put (i.key, m.getOrDefault (i.key, 0) + Long.valueOf (i.value) ) } } }
+ 		m.put("Average length of retained reads", m.get ("Average length of retained reads") /  m.get("Number of retained reads") )
 
- 		def fnb = new StringBuilder ();
- 		fnb.append (params.outdir);
- 		fnb.append (File.separator);
- 		fnb.append (library_id);
- 		fnb.append (File.separator);
- 		fnb.append ("adapter-removal.settings");
- 		def ofile = new File ( fnb.toString () );
- 		ofile.getParentFile ().mkdirs ();
- 		ofile.withWriter { w -> w.println "[Trimming statistics]"; m.each { w.println it.key + ": " + it.value; } };
+ 		def fnb = new StringBuilder ()
+ 		fnb.append (params.outdir)
+ 		fnb.append (File.separator)
+ 		fnb.append (library_id)
+ 		fnb.append (File.separator)
+ 		fnb.append ("adapter-removal.settings")
+ 		def ofile = new File ( fnb.toString () )
+ 		ofile.getParentFile ().mkdirs ()
+ 		ofile.withWriter { w -> w.println "[Trimming statistics]"; m.each { w.println it.key + ": " + it.value; } }
+ }
+
+ } else {
+
+ process adapter_clip_log_merge {
+
+ 	input:
+ 		set val(library_id), settings_list from ch_adapter_clip_log_merge
+
+ 	exec:
+ 		def m = new HashMap ()
+ 		settings_list.each { it.findAll { i -> ! ( i.key.startsWith ("- Percentage") || i.key.startsWith ("- Average overlap region size") ) }.each { i -> m.put (i.key, m.getOrDefault (i.key, 0) + Long.valueOf (i.value) ) } }
+
+ 		def fnb = new StringBuilder ()
+ 		fnb.append (params.outdir)
+ 		fnb.append (File.separator)
+ 		fnb.append (library_id)
+ 		fnb.append (File.separator)
+ 		fnb.append ("ClipAndMergeStats.log")
+ 		def ofile = new File ( fnb.toString () )
+ 		ofile.getParentFile ().mkdirs ()
+ 		ofile.withWriter { w -> w.println "[Merging]"; m.each { w.println it.key + ": " + it.value; } }
+ }
+
  }
 
  process prefix_fastq_single {
 
- 	executor "slurm"
- 	cpus = 4
- 	clusterOptions = "--partition \"short\" --mem 6000"
+ label 'short_low_mem_5'
 
  	input:
  		set pair_id, file(truncated_file) from ch_adapters_clipped_single
@@ -453,9 +495,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process prefix_fastq_paired {
 
- 	executor "slurm"
- 	cpus = 4
- 	clusterOptions = "--partition \"short\" --mem 6000"
+ label 'short_low_mem_5'
 
  	input:
  		set pair_id, file(collapsed_file), file(collapsed_truncated_file) from ch_adapters_clipped_paired
@@ -485,9 +525,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process bwa_align {
 
- 	executor "slurm"
- 	cpus = 5
- 	clusterOptions = "--partition \"medium\" --time \"2-0\" --mem 16000"
+ label 'medium_low_mem_5'
 
  	input:
  		set library_lane_id, file(combined_prefixed_file) from ch_bwa_align
@@ -505,9 +543,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process bwa_samse {
 
- 	executor "slurm"
- 	cpus = 5
- 	clusterOptions = "--partition \"medium\" --time \"2-0\" --mem 16000"
+ label 'medium_low_mem_2'
 
  	input:
  		set library_lane_id, file(combined_prefixed_file), file(combined_prefixed_sai_file) from ch_bwa_samse
@@ -519,15 +555,13 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
  	"""\
  #!/usr/bin/env bash
 
- bwa samse -r "@RG\tID:ILLUMINA-${library_lane_id}\tSM:${library_lane_id}\tPL:illumina" ${reference_path} ${combined_prefixed_sai_file} ${combined_prefixed_file} -f adapters-removed.combined.prefixed.sam
+ bwa samse -r "@RG\tID:ILLUMINA-${library_lane_id}\tSM:${library_lane_id}\tPL:illumina" ${params.fasta} ${combined_prefixed_sai_file} ${combined_prefixed_file} -f adapters-removed.combined.prefixed.sam
  """
  }
 
  process samtools_view {
 
- 	executor "slurm"
- 	cpus = 5
- 	clusterOptions = "--partition \"short\" --mem 2000"
+  label 'medium_low_mem_2'
 
  	input:
  		set library_lane_id, file(combined_prefixed_sam_file) from ch_samtools_view
@@ -545,9 +579,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process samtools_merge {
 
- 	executor "slurm"
- 	cpus = 5
- 	clusterOptions = "--partition \"short\" --mem 6000"
+ label 'medium_low_mem_2'
 
  	input:
  		set library_id, file("bams") from ch_samtools_merge
@@ -566,9 +598,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process samtools_flagstat_default {
 
- 	executor "slurm"
- 	cpus = 5
- 	clusterOptions = "--partition \"short\" --mem 2000"
+ label 'short_low_mem_2'
 
  	input:
  		set library_id, file(library_bam) from ch_samtools_flagstat_default
@@ -585,9 +615,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process samtools_extract_mapped_sorted {
 
- 	executor "slurm"
- 	cpus = 5
- 	clusterOptions = "--partition \"short\" --mem 40000"
+ label 'medium_mid_mem_5'
 
  	input:
  		set library_id, file(library_bam) from ch_samtools_extract_mapped_sorted
@@ -608,9 +636,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process samtools_flagstat_extract_mapped_sorted {
 
- 	executor "slurm"
- 	cpus = 5
- 	clusterOptions = "--partition \"short\" --mem 2000"
+ label 'short_low_mem_2'
 
  	input:
  		set library_id, file(library_bam) from ch_samtools_flagstat_extract_mapped_sorted
@@ -627,9 +653,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process samtools_index {
 
- 	executor "slurm"
- 	cpus = 2
- 	clusterOptions = "--partition \"short\" --mem 2000"
+ label 'short_low_mem_2'
 
  	input:
  		set library_id, file(library_bam) from ch_samtools_index
@@ -648,9 +672,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process picard_clean {
 
- 	executor "slurm"
- 	cpus = 2
- 	clusterOptions = "--partition \"short\" --mem 6000"
+  label 'medium_low_mem_2'
 
  	input:
  		set library_id, file(library_bam), file(library_bai) from ch_picard_clean
@@ -667,9 +689,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process dedup {
 
- 	executor "slurm"
- 	cpus = 2
- 	clusterOptions = "--partition \"medium\" --mem 32000"
+ label 'medium_low_mem_2'
 
  	input:
  		set library_id, file(library_bam) from ch_dedup
@@ -686,9 +706,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process samtools_sort_dedup {
 
- 	executor "slurm"
- 	cpus = 5
-         clusterOptions = "--partition \"short\" --mem 40000"
+ label 'medium_mid_mem_5'
 
  	input:
  		set library_id, file(library_bam) from ch_samtools_sort_dedup
@@ -706,9 +724,7 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
 
  process samtools_index_dedup_sorted {
 
- 	executor "slurm"
- 	cpus = 2
- 	clusterOptions = "--partition \"short\" --mem 2000"
+ label 'short_low_mem_2'
 
  	input:
  		set library_id, file(library_bam) from ch_samtools_index_dedup_sorted
@@ -725,6 +741,8 @@ if ( params.merge_method.equals ("AdapterRemoval") ) {
  }
 
  process samtools_flagstat_dedup_sorted {
+
+  label 'short_low_mem_2'
 
  	input:
  		set library_id, file(bam_file) from ch_samtools_flagstat_dedup_sorted
