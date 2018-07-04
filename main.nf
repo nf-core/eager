@@ -140,7 +140,7 @@ try {
 process get_software_versions {
 
     output:
-    file 'software_versions_mqc.yaml' into software_versions_yaml
+    file 'software_versions_mqc.yaml' into ch_software_versions_yaml
 
     script:
     """
@@ -177,7 +177,7 @@ if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
         file fasta from fasta
 
         output:
-        file "${fasta}*" into bwa_indices
+        file "${fasta}*" into ch_bwa_indices
 
         script:
         """
@@ -198,7 +198,7 @@ if(!params.fasta_index && params.fasta && params.aligner == 'bwa'){
         file fasta
 
         output:
-        file "${fasta}.fai" into fasta_index
+        file "${fasta}.fai" into ch_fasta_index
 
         script:
         """
@@ -219,7 +219,7 @@ if(!params.seq_dict && params.fasta){
         file fasta
 
         output:
-        file "${fasta}.dict" into seq_dict
+        file "${fasta}.dict" into ch_seq_dict
 
         script:
         """
