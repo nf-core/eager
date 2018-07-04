@@ -295,11 +295,28 @@ process clip_merge {
     """
 }}
 
+if(params.mergemethod == 'AdapterRemoval'){
+  process adapter_removal_fixprefix {
+      tag "$name"
+      publishDir "${params.outdir}/02-Merging", mode: 'copy'
 
+      input:
+      set val(name), file(reads) from ch_clipped_reads
+
+      output:
+      file "*.fastq.prefixed.gz" into ch_mappable_reads
+
+      script:
+      '''
+      AdapterRemovalFixPrefix ${reads} ${reads}.fastq.prefixed.gz
+      '''
+  }
+} else { //Don't do something with the reads
+    ch_mappable_reads = ch_clipped_reads
+}
 
 
 /*
-Step 2.1: AdapterRemovalfixprefix
 Step 3: Mapping with BWA, CircularMapper
 Step 4: Conversion to BAM; sorting
 Step 5: Keep unmapped/remove unmapped reads
