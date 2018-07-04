@@ -34,6 +34,7 @@ def helpMessage() {
 
     References                      If not specified in the configuration file or you wish to overwrite any of the references.
       --fasta                       Path to Fasta reference
+      --bwa_index                   Path to BWA index
 
     Other options:
       --outdir                      The output directory where the results will be saved
@@ -55,6 +56,7 @@ if (params.help){
 // Configurable variables
 params.name = false
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
+params.saveReference = false
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
 params.plaintext_email = false
@@ -160,6 +162,28 @@ process get_software_versions {
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py > software_versions_mqc.yaml
     """
+}
+
+/* Create BWA indices if they are not present
+* 
+*/ 
+
+if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
+    process makeBWAIndex {
+        tag fasta
+        publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
+
+        input:
+        file fasta from fasta
+
+        output:
+        file "${fasta}*" into bwa_indices
+
+        script:
+        """
+        bwa index $fasta
+        """
+    }
 }
 
 
