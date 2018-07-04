@@ -164,8 +164,8 @@ process get_software_versions {
     """
 }
 
-/* Create BWA indices if they are not present
-* 
+/* 
+* Create BWA indices if they are not present
 */ 
 
 if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
@@ -186,6 +186,47 @@ if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
     }
 }
 
+/*
+ * PREPROCESSING - Index Fasta file
+ */
+if(!params.fasta_index && params.fasta && params.aligner == 'bwa'){
+    process makeFastaIndex {
+        tag fasta
+        publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
+
+        input:
+        file fasta
+
+        output:
+        file "${fasta}.fai" into fasta_index
+
+        script:
+        """
+        samtools faidx $fasta
+        """
+    }
+}
+
+/*
+ * PREPROCESSING - Create Sequence Dictionary for FastA
+ */
+if(!params.seq_dict && params.fasta){
+    process makeSeqDict {
+        tag seqdict
+        publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
+
+        input:
+        file fasta
+
+        output:
+        file "${fasta}.dict" into seq_dict
+
+        script:
+        """
+        picard CreateSequenceDictionary R=$fasta O= $fasta.dict
+        """
+    }
+}
 
 
 /*
@@ -252,9 +293,9 @@ process clip_merge {
     -f ${params.clip.forward_adaptor} -r ${params.clip.reverse_adaptor}
     -trim3p ${params.clip.3pclip} -trim5p ${params.clip.5pclip} -l ${params.clip.readlength} -m ${params.clip.min_adap_overlap} -qt -q ${params.clip.min_read_quality} -log "ClipAndMergeStats.log"
     """
-}
+}}
 
-}
+
 
 
 /*
