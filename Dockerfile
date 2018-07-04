@@ -4,5 +4,4 @@ LABEL authors="alex.peltzer@gmail.com" \
     description="Docker image containing all requirements for nf-core/EAGER2 pipeline"
 
 COPY environment.yml /
-RUN conda env create -f /environment.yml && conda clean -a
-ENV PATH /opt/conda/envs/nfcore-eager2-2.0dev/bin:$PATH
+RUN conda env update -n root -f /environment.yml && conda clean -a 
