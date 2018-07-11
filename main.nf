@@ -14,36 +14,6 @@
 */
 
 
-def helpMessage() {
-    log.info"""
-    =========================================
-    EAGER2 v${params.version}
-    =========================================
-    Usage:
-
-    The typical command for running the pipeline is as follows:
-
-    nextflow run nf-core/EAGER2 --reads '*_R{1,2}.fastq.gz' -profile docker
-
-    Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes)
-      --genome                      Name of iGenomes reference
-      -profile                      Hardware config to use. docker / aws
-
-    Options:
-      --singleEnd                   Specifies that the input is single end reads
-
-    References                      If not specified in the configuration file or you wish to overwrite any of the references.
-      --fasta                       Path to Fasta reference
-      --bwa_index                   Path to BWA index
-
-    Other options:
-      --outdir                      The output directory where the results will be saved
-      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
-    """.stripIndent()
-}
-
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -454,5 +424,40 @@ workflow.onComplete {
     output_tf.withWriter { w -> w << email_txt }
 
     log.info "[nf-core/EAGER2] Pipeline Complete"
+}
 
+/**
+Useful functionality, e.g. help messages etc
+* 
+*/ 
+
+
+def helpMessage() {
+    log.info"""
+    =========================================
+    EAGER2 v${params.version}
+    =========================================
+    Usage:
+
+    The typical command for running the pipeline is as follows:
+
+    nextflow run nf-core/EAGER2 --reads '*_R{1,2}.fastq.gz' -profile docker
+
+    Mandatory arguments:
+      --reads                       Path to input data (must be surrounded with quotes)
+      --genome                      Name of iGenomes reference
+      -profile                      Hardware config to use. docker / aws
+
+    Options:
+      --singleEnd                   Specifies that the input is single end reads
+
+    References                      If not specified in the configuration file or you wish to overwrite any of the references.
+      --fasta                       Path to Fasta reference
+      --bwa_index                   Path to BWA index
+
+    Other options:
+      --outdir                      The output directory where the results will be saved
+      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+    """.stripIndent()
 }
