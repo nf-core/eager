@@ -36,17 +36,9 @@ multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 
 // Validate inputs
-if ( params.fasta ){
-    fasta = file(params.fasta)
-    if( !fasta.exists() ) exit 1, "Fasta file not found: ${params.fasta}"
-}
-//
-// NOTE - THIS IS NOT USED IN THIS PIPELINE, EXAMPLE ONLY
-// If you want to use the above in a process, define the following:
-//   input:
-//   file fasta from fasta
-//
-
+Channel.fromPath("${params.fasta}")
+    .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing}
 
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
@@ -61,12 +53,12 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
 Channel
     .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
     .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-    .into { ch_read_files_clip, ch_read_files_fastqc }
+    .into { ch_read_files_clip; ch_read_files_fastqc; ch_fasta_for_dict_indexing }
 
 
 // Header log info
 log.info "========================================="
-log.info " nf-core/EAGER2 v${params.version}"
+log.info " nf-core/eager v${params.version}"
 log.info "========================================="
 def summary = [:]
 summary['Run Name']     = custom_runName ?: workflow.runName
@@ -145,10 +137,10 @@ if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
         publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
-        file fasta from fasta
+        file fasta from ch_fasta_for_indexing
 
         output:
-        file "${fasta}*" into ch_bwa_indices
+        file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into ch_bwa_index
 
         script:
         """
@@ -166,10 +158,10 @@ if(!params.fasta_index && params.fasta && params.aligner == 'bwa'){
         publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
-        file fasta
+        file fasta from ch_fasta_for_faidx_indexing
 
         output:
-        file "${fasta}.fai" into ch_fasta_index
+        file "${fasta}.fai" into ch_fasta_faidx_index
 
         script:
         """
@@ -187,14 +179,14 @@ if(!params.seq_dict && params.fasta){
         publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
-        file fasta
+        file fasta from ch_fasta_for_dict_indexing
 
         output:
         file "${fasta}.dict" into ch_seq_dict
 
         script:
         """
-        picard CreateSequenceDictionary R=$fasta O= $fasta.dict
+        picard CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
         """
     }
 }
@@ -224,7 +216,6 @@ process fastqc {
  * STEP 2 - Adapter Clipping / Read Merging
  */
 
-if(params.mergemethod == 'AdapterRemoval'){
 
 process adapter_removal {
     tag "$name"
@@ -245,29 +236,9 @@ process adapter_removal {
     #Combine files
     zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${prefix}.combined.fq.gz
     """
+}
 
-
-} else { //We use Clip&Merge then
-process clip_merge {
-    tag "$name"
-    publishDir "${params.outdir}/02-Merging", mode: 'copy'
-
-    input:
-    set val(name), file(reads) from ch_read_files_clip
-
-    output:
-    file "*.fastq.gz" into ch_clipped_reads
-
-    script:
-    """
-    ClipAndMerge -in1 ${reads[0]} -in2 ${reads[1]}
-    -f ${params.clip.forward_adaptor} -r ${params.clip.reverse_adaptor}
-    -trim3p ${params.clip.3pclip} -trim5p ${params.clip.5pclip} -l ${params.clip.readlength} -m ${params.clip.min_adap_overlap} -qt -q ${params.clip.min_read_quality} -log "ClipAndMergeStats.log"
-    """
-}}
-
-if(params.mergemethod == 'AdapterRemoval'){
-  process adapter_removal_fixprefix {
+process adapter_removal_fixprefix {
       tag "$name"
       publishDir "${params.outdir}/02-Merging", mode: 'copy'
 
@@ -281,10 +252,8 @@ if(params.mergemethod == 'AdapterRemoval'){
       '''
       AdapterRemovalFixPrefix ${reads} ${reads}.fastq.prefixed.gz
       '''
-  }
-} else { //Don't do something with the reads
-    ch_mappable_reads = ch_clipped_reads
 }
+
 
 
 /*
