@@ -38,7 +38,7 @@ output_docs = file("$baseDir/docs/output.md")
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing}
 
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
@@ -50,10 +50,28 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
 /*
  * Create a channel for input read files
  */
-Channel
-    .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-    .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-    .into { ch_read_files_clip; ch_read_files_fastqc; ch_fasta_for_dict_indexing }
+
+if(params.readPaths){
+    if(params.singleEnd){
+        Channel
+            .from(params.readPaths)
+            .map { row -> [ row[0], [file(row[1][0])]] }
+            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
+            .into { read_files_fastqc; read_files_trimming }
+    } else {
+        Channel
+            .from(params.readPaths)
+            .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
+            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
+            .into { ch_read_files_clip; ch_read_files_fastqc }
+    }
+} else {
+    Channel
+        .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
+        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
+        .into { ch_read_files_clip; ch_read_files_fastqc }
+}
+
 
 
 // Header log info
