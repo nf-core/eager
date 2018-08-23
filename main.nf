@@ -5,7 +5,7 @@
 ========================================================================================
  EAGER2 Analysis Pipeline. Started 2018-06-05
  #### Homepage / Documentation
- https://github.com/nf-core/EAGER2
+ https://github.com/nf-core/eager
  #### Authors
  Alexander Peltzer apeltzer <alex.peltzer@gmail.com> - https://github.com/apeltzer>
  James A. Fellows Yates <jfy133@gmail.com> - https://github.com/jfy133
