@@ -125,13 +125,12 @@ process get_software_versions {
     echo \$(bwa 2>&1) > v_bwa.txt
     samtools --version > v_samtools.txt
     AdapterRemoval -version > v_adapterremoval.txt
-    echo \$(ClipAndMerge 2>&1) v_clipandmerge.txt
-    picard MarkDuplicates --version &> v_markduplicates.txt  || true
+    picard MarkDuplicates -version &> v_markduplicates.txt  || true
     dedup -h > v_dedup.txt
     #angsd > v_angsd.txt
     #realignsamfile > v_circularmapper.txt
     #schmutzi > v_schmutzi.txt
-    gatk --version > v_gatk.txt
+    gatk BaseRecalibrator --version &> v_gatk.txt
     qualimap --version > v_qualimap.txt
     vcf2genome > v_vcf2genome.txt
     multiqc --version > v_multiqc.txt
@@ -191,7 +190,7 @@ if(!params.seq_dict && params.fasta){
         file fasta from ch_fasta_for_dict_indexing
 
         output:
-        file "${fasta}.dict" into ch_seq_dict
+        file "*.dict" into ch_seq_dict
 
         script:
         """

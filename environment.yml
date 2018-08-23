@@ -20,4 +20,5 @@ dependencies:
   - damageprofiler=0.3.11
   - multiqc=1.6
   - pmdtools=0.60
+  - r-markdown=0.8
   #Missing Schmutzi, Missing PMDTools, Missing SequenceTools
