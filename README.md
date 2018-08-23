@@ -5,7 +5,8 @@
 [![Gitter](https://img.shields.io/badge/gitter-%20join%20chat%20%E2%86%92-4fb99a.svg)](https://gitter.im/nf-core/EAGER2)
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker Container available](https://img.shields.io/docker/automated/nfcore/eager2.svg)](https://hub.docker.com/r/nfcore/eager2/)
-[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/1127)
+![Singularity Container available](
+https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
 
 ## Introduction
