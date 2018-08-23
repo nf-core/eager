@@ -151,11 +151,10 @@ process get_software_versions {
 
 if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
     process makeBWAIndex {
-        tag fasta
         publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
-        file fasta from ch_fasta_for_indexing
+        file fasta from ch_fasta_for_bwa_indexing
 
         output:
         file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into ch_bwa_index
@@ -172,7 +171,6 @@ if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
  */
 if(!params.fasta_index && params.fasta && params.aligner == 'bwa'){
     process makeFastaIndex {
-        tag fasta
         publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
@@ -193,7 +191,6 @@ if(!params.fasta_index && params.fasta && params.aligner == 'bwa'){
  */
 if(!params.seq_dict && params.fasta){
     process makeSeqDict {
-        tag seqdict
         publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
@@ -235,42 +232,42 @@ process fastqc {
  */
 
 
-process adapter_removal {
-    tag "$name"
-    publishDir "${params.outdir}/02-Merging", mode: 'copy'
+// process adapter_removal {
+//     tag "$name"
+//     publishDir "${params.outdir}/02-Merging", mode: 'copy'
 
-    input:
-    set val(name), file(reads) from ch_read_files_clip
+//     input:
+//     set val(name), file(reads) from ch_read_files_clip
 
-    output:
-    file "*.combined.fq.gz" into ch_clipped_reads
+//     output:
+//     file "*.combined.fq.gz" into ch_clipped_reads
 
-    script:
-    prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-    """
-    AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --baseName ${prefix} --gzip --threads ${process.cpus} --trimns --trimqualities --adapter1 ${params.clip.forward_adaptor} --adapter2 ${params.clip.reverse_adaptor} --minlength ${params.clip.readlength} --minquality ${params.clip.min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
-    #Fix Prefixes
-    AdapterRemovalFixPrefix  TODO
-    #Combine files
-    zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${prefix}.combined.fq.gz
-    """
-}
+//     script:
+//     prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+//     """
+//     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --baseName ${prefix} --gzip --threads ${process.cpus} --trimns --trimqualities --adapter1 ${params.clip.forward_adaptor} --adapter2 ${params.clip.reverse_adaptor} --minlength ${params.clip.readlength} --minquality ${params.clip.min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
+//     #Fix Prefixes
+//     AdapterRemovalFixPrefix  TODO
+//     #Combine files
+//     zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${prefix}.combined.fq.gz
+//     """
+// }
 
-process adapter_removal_fixprefix {
-      tag "$name"
-      publishDir "${params.outdir}/02-Merging", mode: 'copy'
+// process adapter_removal_fixprefix {
+//       tag "$name"
+//       publishDir "${params.outdir}/02-Merging", mode: 'copy'
 
-      input:
-      set val(name), file(reads) from ch_clipped_reads
+//       input:
+//       set val(name), file(reads) from ch_clipped_reads
 
-      output:
-      file "*.fastq.prefixed.gz" into ch_mappable_reads
+//       output:
+//       file "*.fastq.prefixed.gz" into ch_mappable_reads
 
-      script:
-      '''
-      AdapterRemovalFixPrefix ${reads} ${reads}.fastq.prefixed.gz
-      '''
-}
+//       script:
+//       '''
+//       AdapterRemovalFixPrefix ${reads} ${reads}.fastq.prefixed.gz
+//       '''
+// }
 
 
 
@@ -297,8 +294,8 @@ process multiqc {
 
     input:
     file multiqc_config
-    file ('fastqc/*') from fastqc_results.collect()
-    file ('software_versions/*') from software_versions_yaml
+    file ('fastqc/*') from ch_fastqc_results.collect()
+    file ('software_versions/*') from ch_software_versions_yaml
 
     output:
     file "*multiqc_report.html" into multiqc_report
