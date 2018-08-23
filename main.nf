@@ -27,6 +27,9 @@ if (params.help){
 // Configurable variables
 params.name = false
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
+params.bwa_index = false
+params.seq_dict = false
+params.fasta_index = false
 params.saveReference = false
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
