@@ -18,7 +18,9 @@
  * SET UP CONFIGURATION VARIABLES
  */
 
-// Show help emssage
+// Show help message
+params.help = false
+
 if (params.help){
     helpMessage()
     exit 0
@@ -26,6 +28,7 @@ if (params.help){
 
 // Configurable variables
 params.name = false
+params.genome = "Custom"
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
 params.bwa_index = false
 params.seq_dict = false
@@ -85,7 +88,7 @@ if(params.readPaths){
 
 // Header log info
 log.info "========================================="
-log.info " nf-core/eager v${params.version}"
+log.info " nf-core/eager v${params.pipelineVersion}"
 log.info "========================================="
 def summary = [:]
 summary['Run Name']     = custom_runName ?: workflow.runName
@@ -119,7 +122,7 @@ process get_software_versions {
 
     script:
     """
-    echo $params.version > v_pipeline.txt
+    echo $params.pipelineVersion > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     fastqc --version > v_fastqc.txt
     echo \$(bwa 2>&1) > v_bwa.txt
@@ -144,6 +147,7 @@ process get_software_versions {
 
 if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
     process makeBWAIndex {
+        tag {fasta}
         publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
@@ -164,6 +168,7 @@ if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
  */
 if(!params.fasta_index && params.fasta && params.aligner == 'bwa'){
     process makeFastaIndex {
+        tag {fasta}
         publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
@@ -184,6 +189,7 @@ if(!params.fasta_index && params.fasta && params.aligner == 'bwa'){
  */
 if(!params.seq_dict && params.fasta){
     process makeSeqDict {
+        tag {fasta}
         publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
@@ -308,7 +314,7 @@ process multiqc {
  * STEP 3 - Output Description HTML
  */
 process output_documentation {
-    tag "$prefix"
+    tag { output_docs }
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
