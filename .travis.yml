@@ -1,11 +1,11 @@
 sudo: required
-language: java
+language: python
 jdk: openjdk8
 services: docker
 python: '3.6'
 cache: pip
 matrix:
-  fast_finish: true
+fast_finish: true
 
 
 before_install:
