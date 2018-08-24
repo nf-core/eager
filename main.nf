@@ -29,7 +29,7 @@ if (params.help){
 // Configurable variables
 params.name = false
 params.genome = "Custom"
-params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
+params.fasta = false
 params.bwa_index = false
 params.seq_dict = false
 params.fasta_index = false
