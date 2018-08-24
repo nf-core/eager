@@ -9,15 +9,16 @@ dependencies:
   - adapterremoval=2.2.2
   - adapterremovalfixprefix=0.0.4
   - bwa=0.7.17
-  - picard=2.18.7
+  - picard=2.18.11
   - samtools=1.9
   - dedup=0.12.3
   - angsd=0.921
   - circularmapper=1.93.4
-  - gatk4=4.0.7.0
+  - gatk4=4.0.8.1
   - qualimap=2.2.2a
   - vcf2genome=0.91
   - damageprofiler=0.3.11
   - multiqc=1.6
   - pmdtools=0.60
+  - r-markdown=0.8
   #Missing Schmutzi, Missing PMDTools, Missing SequenceTools
