@@ -38,6 +38,13 @@ params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
 params.plaintext_email = false
 
+//Read clipping and merging parameters
+params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
+params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
+params.clip_readlength = 30
+params.clip_min_read_quality = 20
+params.min_adap_overlap = 1
+
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 
@@ -238,26 +245,27 @@ process fastqc {
  */
 
 
-// process adapter_removal {
-//     tag "$name"
-//     publishDir "${params.outdir}/02-Merging", mode: 'copy'
+process adapter_removal {
+    tag "$name"
+    publishDir "${params.outdir}/02-Merging", mode: 'copy'
 
-//     input:
-//     set val(name), file(reads) from ch_read_files_clip
+    input:
+    set val(name), file(reads) from ch_read_files_clip
 
-//     output:
-//     file "*.combined.fq.gz" into ch_clipped_reads
+    output:
+    file "*.combined.fq.gz" into ch_clipped_reads
+    file "*.settings" into ch_adapterremoval_logs
 
-//     script:
-//     prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-//     """
-//     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --baseName ${prefix} --gzip --threads ${process.cpus} --trimns --trimqualities --adapter1 ${params.clip.forward_adaptor} --adapter2 ${params.clip.reverse_adaptor} --minlength ${params.clip.readlength} --minquality ${params.clip.min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
-//     #Fix Prefixes
-//     AdapterRemovalFixPrefix  TODO
-//     #Combine files
-//     zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${prefix}.combined.fq.gz
-//     """
-// }
+    script:
+    prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    """
+    AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${prefix} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
+    #Fix Prefixes
+    #AdapterRemovalFixPrefix  TODO
+    #Combine files
+    zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${prefix}.combined.fq.gz
+    """
+}
 
 // process adapter_removal_fixprefix {
 //       tag "$name"
@@ -301,6 +309,7 @@ process multiqc {
     input:
     file multiqc_config
     file ('fastqc/*') from ch_fastqc_results.collect()
+    file ('*') from ch_adapterremoval_logs.collect()
     file ('software_versions/*') from ch_software_versions_yaml
 
     output:
