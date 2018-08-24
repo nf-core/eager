@@ -28,6 +28,7 @@ if (params.help){
 
 // Configurable variables
 params.name = false
+params.singleEnd = false
 params.genome = "Custom"
 params.fasta = false
 params.bwa_index = false
@@ -258,32 +259,15 @@ process adapter_removal {
 
     script:
     prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    //Readprefixing only required for PE data with merging
+    fixprefix = (params.singleEnd) ? "" : "AdapterRemovalFixPrefix ${prefix}.combined.fq.gz ${prefix}.combined.prefixed.fq.gz"
     """
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${prefix} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
-    #Fix Prefixes
-    #AdapterRemovalFixPrefix  TODO
     #Combine files
     zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${prefix}.combined.fq.gz
+    ${fixprefix}
     """
 }
-
-// process adapter_removal_fixprefix {
-//       tag "$name"
-//       publishDir "${params.outdir}/02-Merging", mode: 'copy'
-
-//       input:
-//       set val(name), file(reads) from ch_clipped_reads
-
-//       output:
-//       file "*.fastq.prefixed.gz" into ch_mappable_reads
-
-//       script:
-//       '''
-//       AdapterRemovalFixPrefix ${reads} ${reads}.fastq.prefixed.gz
-//       '''
-// }
-
-
 
 /*
 Step 3: Mapping with BWA, CircularMapper
