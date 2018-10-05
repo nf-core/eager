@@ -74,13 +74,18 @@ params.clip_readlength = 30
 params.clip_min_read_quality = 20
 params.min_adap_overlap = 1
 
+//Read mapping parameters (default = BWA aln default)
+params.bwaalnn = 0.04
+params.bwaalnk = 2
+params.bwaalnl = 32
+
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping}
 
 //AWSBatch sanity checking
 
@@ -329,13 +334,40 @@ process adapter_removal {
     } else {
     """
     AdapterRemoval --file1 ${reads[0]} --basename ${prefix} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} 
+    # Pseudo-Combine
+    mv *.truncated.gz ${prefix}.combined.fq.gz
     """
     }
 }
 
 /*
-Step 3: Mapping with BWA, CircularMapper
-Step 4: Conversion to BAM; sorting
+Step 3: Mapping with BWA
+*/
+
+process bwa {
+    tag "$prefix"
+    publishDir "${params.outdir}/03-Mapping", mode: 'copy'
+
+    input:
+    file(reads) from ch_clipped_reads
+    file "*" from ch_bwa_index
+    file fasta from ch_fasta_for_bwa_mapping
+
+    output:
+    file "*.bam" into ch_mapped_reads
+    
+
+    script:
+    prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    """ 
+    bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads -f "${reads.baseName}".sam | samtools view -@ ${task.cpus} -bS - -o "${reads.baseName}".bam
+    """
+}
+
+
+/*
+Step 4: BAM sorting
 Step 5: Keep unmapped/remove unmapped reads
 Step 5.1: Preseq
 Step 5.2: DMG Assessment
