@@ -85,13 +85,18 @@ params.bam_keep_all = true
 params.bam_filter_reads = false
 params.bam_mapping_quality_threshold = 0
 
+//DamageProfiler settings
+params.damageprofiler_length = 100
+params.damageprofiler_threshold = 0
+
+
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler}
 
 //AWSBatch sanity checking
 
@@ -418,6 +423,7 @@ process samtools_filter {
     if("${params.bam_keep_mapped_only}"){
     """
     samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+    samtools fastq -tn "${prefix}.unmapped.bam" | gzip > "${prefix}.unmapped.fq.gz"
     """
     } else {
     """
@@ -451,6 +457,29 @@ process preseq {
 
 /*
 Step 5.2: DMG Assessment
+*/ 
+
+process damageprofiler {
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/09-DamageProfiler", mode: 'copy'
+
+    when:
+    !params.skip_damage_calculation
+
+    input:
+    file bam from ch_mapped_reads_damageprofiler
+    file fasta from ch_fasta_for_damageprofiler
+
+    output:
+    file "*" into ch_damageprofiler_results
+
+    script:
+    """
+    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . 
+    """
+}
+
+/* 
 Step 5.3: Qualimap (before or after Dedup?)
 Step 6: DeDup / MarkDuplicates
 Step 7: angsd
@@ -473,6 +502,7 @@ process multiqc {
     file ('software_versions/*') from software_versions_yaml.collect()
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect()
     file ('preseq/*') from ch_preseq_results.collect()
+    file ('damageprofiler/*') from ch_damageprofiler_results.collect()
     file workflow_summary from create_workflow_summary(summary)
 
     output:
