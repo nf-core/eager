@@ -10,7 +10,7 @@ output_fn <- args[2]
 
 # Load / install packages
 if (!require("markdown")) {
-  install.packages("markdown", dependencies=TRUE, repos='https://cloud.r-project.org/')
+  install.packages("markdown", dependencies=TRUE, repos='http://cloud.r-project.org/')
   library("markdown")
 }
 

@@ -21,4 +21,5 @@ dependencies:
   - multiqc=1.6
   - pmdtools=0.60
   - r-markdown=0.8
-  #Missing Schmutzi, Missing PMDTools, Missing SequenceTools
+  - sequencetools=1.2.2
+  #Missing Schmutzi

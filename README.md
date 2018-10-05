@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ![nf-core/eager](docs/images/EAGER2_logo.png)
 
 [![Build Status](https://travis-ci.org/nf-core/EAGER2.svg?branch=master)](https://travis-ci.org/nf-core/eager)
@@ -31,6 +32,21 @@ The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow
 * Schmutzi contamination assessment
 * Genotyping using GATK or ANGSD or sequenceTools (optional)
 * Consensus generation with VCF2Genome (optional)
+=======
+# nf-core/eager
+**A fully reproducible aDNA analysis pipeline.**
+
+[![Build Status](https://travis-ci.org/nf-core/eager.svg?branch=master)](https://travis-ci.org/nf-core/eager)
+[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
+
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
+[![Docker](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager)
+![Singularity Container available](
+https://img.shields.io/badge/singularity-available-7E4C74.svg)
+
+### Introduction
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
+>>>>>>> TEMPLATE
 
 
 ### Documentation
@@ -43,6 +59,9 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](docs/troubleshooting.md)
+<<<<<<< HEAD
 
 ### Credits
 This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)).
+=======
+>>>>>>> TEMPLATE

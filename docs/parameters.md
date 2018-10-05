@@ -1,4 +1,4 @@
-# Adjustable parameters for nf-core/EAGER2
+# Adjustable parameters for nf-core/eager
 
 ## Read Clipping / Merging
 params.mergemethod = AdapterRemoval or ClipAndMerge (choice)

@@ -1,19 +1,47 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         nf-core/EAGER2
+                         nf-core/eager
 ========================================================================================
- EAGER2 Analysis Pipeline. Started 2018-06-05
+ EAGER Analysis Pipeline. Started 2018-06-05
  #### Homepage / Documentation
  https://github.com/nf-core/eager
  #### Authors
  Alexander Peltzer apeltzer <alex.peltzer@gmail.com> - https://github.com/apeltzer>
  James A. Fellows Yates <jfy133@gmail.com> - https://github.com/jfy133
  Stephen Clayton <clayton@shh.mpg.de> - https://github.com/sc13-bioinf
-----------------------------------------------------------------------------------------
+========================================================================================
 */
 
+def helpMessage() {
+    log.info"""
+    =========================================
+    eager v${workflow.manifest.version}
+    =========================================
+    Usage:
 
+    The typical command for running the pipeline is as follows:
+
+    nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' -profile docker
+
+    Mandatory arguments:
+      --reads                       Path to input data (must be surrounded with quotes)
+      --genome                      Name of iGenomes reference
+      -profile                      Hardware config to use. docker / aws
+
+    Options:
+      --singleEnd                   Specifies that the input is single end reads
+
+    References                      If not specified in the configuration file or you wish to overwrite any of the references.
+      --fasta                       Path to Fasta reference
+      --bwa_index                   Path to BWA index
+
+    Other options:
+      --outdir                      The output directory where the results will be saved
+      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+    """.stripIndent()
+}
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -21,6 +49,9 @@
 // Show help message
 params.help = false
 
+=======
+// Show help emssage
+>>>>>>> TEMPLATE
 if (params.help){
     helpMessage()
     exit 0
@@ -35,6 +66,7 @@ params.bwa_index = false
 params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
+
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
 params.plaintext_email = false
@@ -55,13 +87,14 @@ Channel.fromPath("${params.fasta}")
     .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing}
 
 //AWSBatch sanity checking
+
 if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
     if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
 }
 
 // Has the run name been specified by the user?
-//  this has the bonus effect of catching both -name and --name
+// this has the bonus effect of catching both -name and --name
 custom_runName = params.name
 if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
   custom_runName = workflow.runName
@@ -106,6 +139,8 @@ log.info "========================================="
 log.info " nf-core/eager v${params.pipelineVersion}"
 log.info "========================================="
 def summary = [:]
+summary['Pipeline Name']  = 'nf-core/eager'
+summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
 summary['Fasta Ref']    = params.fasta
@@ -115,20 +150,45 @@ summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
 summary['Output dir']   = params.outdir
 summary['Working dir']  = workflow.workDir
-summary['Container']    = workflow.container
-if(workflow.revision) summary['Pipeline Release'] = workflow.revision
+summary['Container Engine'] = workflow.containerEngine
+if(workflow.containerEngine) summary['Container'] = workflow.container
 summary['Current home']   = "$HOME"
 summary['Current user']   = "$USER"
 summary['Current path']   = "$PWD"
+summary['Working dir']    = workflow.workDir
+summary['Output dir']     = params.outdir
 summary['Script dir']     = workflow.projectDir
 summary['Config Profile'] = workflow.profile
+if(workflow.profile == 'awsbatch'){
+   summary['AWS Region'] = params.awsregion
+   summary['AWS Queue'] = params.awsqueue
+}
 if(params.email) summary['E-mail Address'] = params.email
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
 
 
+def create_workflow_summary(summary) {
+
+    def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
+    yaml_file.text  = """
+    id: 'nf-core-eager-summary'
+    description: " - this information is collected when the pipeline is started."
+    section_name: 'nf-core/eager Workflow Summary'
+    section_href: 'https://github.com/nf-core/eager'
+    plot_type: 'html'
+    data: |
+        <dl class=\"dl-horizontal\">
+${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
+        </dl>
+    """.stripIndent()
+
+   return yaml_file
+}
+
+
 /*
- * Parse software version numbers: TODO testing this
+ * Parse software version numbers
  */
 process get_software_versions {
 
@@ -137,7 +197,7 @@ process get_software_versions {
 
     script:
     """
-    echo $params.pipelineVersion > v_pipeline.txt
+    echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     fastqc --version > v_fastqc.txt
     echo \$(bwa 2>&1) > v_bwa.txt
@@ -300,9 +360,9 @@ process multiqc {
 
     input:
     file multiqc_config
-    file ('fastqc/*') from ch_fastqc_results.collect()
-    file ('*') from ch_adapterremoval_logs.collect()
-    file ('software_versions/*') from ch_software_versions_yaml
+    file ('fastqc/*') from fastqc_results.collect()
+    file ('software_versions/*') from software_versions_yaml
+    file workflow_summary from create_workflow_summary(summary)
 
     output:
     file "*multiqc_report.html" into multiqc_report
@@ -322,7 +382,7 @@ process multiqc {
  * STEP 3 - Output Description HTML
  */
 process output_documentation {
-    tag { output_docs }
+    tag "$prefix"
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
@@ -339,38 +399,80 @@ process output_documentation {
 
 
 
-/**
-Useful functionality, e.g. help messages etc
-* 
-*/ 
 
+/*
+ * Completion e-mail notification
+ */
+workflow.onComplete {
 
-def helpMessage() {
-    log.info"""
-    =========================================
-    EAGER2 v${params.version}
-    =========================================
-    Usage:
+    // Set up the e-mail variables
+    def subject = "[nf-core/eager] Successful: $workflow.runName"
+    if(!workflow.success){
+      subject = "[nf-core/eager] FAILED: $workflow.runName"
+    }
+    def email_fields = [:]
+    email_fields['version'] = workflow.manifest.version
+    email_fields['runName'] = custom_runName ?: workflow.runName
+    email_fields['success'] = workflow.success
+    email_fields['dateComplete'] = workflow.complete
+    email_fields['duration'] = workflow.duration
+    email_fields['exitStatus'] = workflow.exitStatus
+    email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
+    email_fields['errorReport'] = (workflow.errorReport ?: 'None')
+    email_fields['commandLine'] = workflow.commandLine
+    email_fields['projectDir'] = workflow.projectDir
+    email_fields['summary'] = summary
+    email_fields['summary']['Date Started'] = workflow.start
+    email_fields['summary']['Date Completed'] = workflow.complete
+    email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
+    email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
+    if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+    if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+    if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+    email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
+    email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
+    email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
-    The typical command for running the pipeline is as follows:
+    // Render the TXT template
+    def engine = new groovy.text.GStringTemplateEngine()
+    def tf = new File("$baseDir/assets/email_template.txt")
+    def txt_template = engine.createTemplate(tf).make(email_fields)
+    def email_txt = txt_template.toString()
 
-    nextflow run nf-core/EAGER2 --reads '*_R{1,2}.fastq.gz' -profile docker
+    // Render the HTML template
+    def hf = new File("$baseDir/assets/email_template.html")
+    def html_template = engine.createTemplate(hf).make(email_fields)
+    def email_html = html_template.toString()
 
-    Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes)
-      --genome                      Name of iGenomes reference
-      -profile                      Hardware config to use. docker / aws
+    // Render the sendmail template
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
+    def sf = new File("$baseDir/assets/sendmail_template.txt")
+    def sendmail_template = engine.createTemplate(sf).make(smail_fields)
+    def sendmail_html = sendmail_template.toString()
 
-    Options:
-      --singleEnd                   Specifies that the input is single end reads
+    // Send the HTML e-mail
+    if (params.email) {
+        try {
+          if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
+          // Try to send HTML e-mail using sendmail
+          [ 'sendmail', '-t' ].execute() << sendmail_html
+          log.info "[nf-core/eager] Sent summary e-mail to $params.email (sendmail)"
+        } catch (all) {
+          // Catch failures and try with plaintext
+          [ 'mail', '-s', subject, params.email ].execute() << email_txt
+          log.info "[nf-core/eager] Sent summary e-mail to $params.email (mail)"
+        }
+    }
 
-    References                      If not specified in the configuration file or you wish to overwrite any of the references.
-      --fasta                       Path to Fasta reference
-      --bwa_index                   Path to BWA index
+    // Write summary e-mail HTML to a file
+    def output_d = new File( "${params.outdir}/Documentation/" )
+    if( !output_d.exists() ) {
+      output_d.mkdirs()
+    }
+    def output_hf = new File( output_d, "pipeline_report.html" )
+    output_hf.withWriter { w -> w << email_html }
+    def output_tf = new File( output_d, "pipeline_report.txt" )
+    output_tf.withWriter { w -> w << email_txt }
 
-    Other options:
-      --outdir                      The output directory where the results will be saved
-      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
-    """.stripIndent()
+    log.info "[nf-core/eager] Pipeline Complete"
 }
