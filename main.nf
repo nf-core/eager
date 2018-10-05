@@ -48,10 +48,6 @@ def helpMessage() {
 
 // Show help message
 params.help = false
-
-=======
-// Show help emssage
->>>>>>> TEMPLATE
 if (params.help){
     helpMessage()
     exit 0
@@ -360,12 +356,12 @@ process multiqc {
 
     input:
     file multiqc_config
-    file ('fastqc/*') from fastqc_results.collect()
-    file ('software_versions/*') from software_versions_yaml
-    file workflow_summary from create_workflow_summary(summary)
+    file ('fastqc/*') from ch_fastqc_results.collect()
+    file ('software_versions/*') from ch_software_versions_yaml
+    file workflow_summary from ch_create_workflow_summary
 
     output:
-    file "*multiqc_report.html" into multiqc_report
+    file "*multiqc_report.html" into ch_multiqc_report
     file "*_data"
 
     script:
