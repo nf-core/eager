@@ -354,7 +354,7 @@ process bwa {
     file fasta from ch_fasta_for_bwa_mapping
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads
+    file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter
     
 
     script:
@@ -366,13 +366,31 @@ process bwa {
 }
 
 /*
-Step 5: Keep unmapped/remove unmapped reads
-/*
-
-/*
 * IDXStats
 */
 
+process samtools_idxstats {
+    tag "$prefix"
+    publishDir "${params.outdir}/04-Samtools", mode: 'copy'
+
+    input:
+    file(bam) from ch_mapped_reads_idxstats
+
+    output:
+    file "*.stats" into ch_idxstats_for_multiqc
+
+    script:
+    prefix = "$bam" - ~/(\.bam)?$/
+    """
+    samtools flagstat $bam > ${prefix}.stats
+    """
+
+}
+
+
+/*
+* Step 5: Keep unmapped/remove unmapped reads
+*/
 /*
 Step 5.1: Preseq
 Step 5.2: DMG Assessment
@@ -396,6 +414,7 @@ process multiqc {
     file multiqc_config
     file ('fastqc/*') from ch_fastqc_results.collect()
     file ('software_versions/*') from software_versions_yaml.collect()
+    file ('idxstats/*') from ch_idxstats_for_multiqc.collect()
     file workflow_summary from create_workflow_summary(summary)
 
     output:
