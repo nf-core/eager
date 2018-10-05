@@ -341,7 +341,7 @@ process adapter_removal {
 }
 
 /*
-Step 3: Mapping with BWA
+Step 3: Mapping with BWA, SAm to BAM, Sort BAM
 */
 
 process bwa {
@@ -354,21 +354,26 @@ process bwa {
     file fasta from ch_fasta_for_bwa_mapping
 
     output:
-    file "*.bam" into ch_mapped_reads
+    file "*.sorted.bam" into ch_mapped_reads
     
 
     script:
-    prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads -f "${reads.baseName}".sam | samtools view -@ ${task.cpus} -bS - -o "${reads.baseName}".bam
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     """
 }
 
+/*
+Step 5: Keep unmapped/remove unmapped reads
+/*
 
 /*
-Step 4: BAM sorting
-Step 5: Keep unmapped/remove unmapped reads
+* IDXStats
+*/
+
+/*
 Step 5.1: Preseq
 Step 5.2: DMG Assessment
 Step 5.3: Qualimap (before or after Dedup?)
