@@ -328,7 +328,7 @@ process adapter_removal {
     """
     } else {
     """
-    #todo
+    AdapterRemoval --file1 ${reads[0]} --basename ${prefix} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} 
     """
     }
 }
@@ -344,8 +344,9 @@ Step 6: DeDup / MarkDuplicates
 Step 7: angsd
 Step 7: GATK
 Step 8: vcf2genome
-
 */
+
+
 
 
 /*
