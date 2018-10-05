@@ -189,7 +189,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 process get_software_versions {
 
     output:
-    file 'software_versions_mqc.yaml' into ch_software_versions_yaml
+    file 'software_versions_mqc.yaml' into software_versions_yaml
 
     script:
     """
@@ -357,7 +357,7 @@ process multiqc {
     input:
     file multiqc_config
     file ('fastqc/*') from ch_fastqc_results.collect()
-    file ('software_versions/*') from ch_software_versions_yaml
+    file ('software_versions/*') from software_versions_yaml.collect()
     file workflow_summary from create_workflow_summary(summary)
 
     output:
@@ -378,7 +378,6 @@ process multiqc {
  * STEP 3 - Output Description HTML
  */
 process output_documentation {
-    tag "$prefix"
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
