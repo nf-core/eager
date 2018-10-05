@@ -91,7 +91,7 @@ params.bam_mapping_quality_threshold = 0
 
 //DamageProfiler settings
 params.damageprofiler_length = 100
-params.damageprofiler_threshold = 0
+params.damageprofiler_threshold = 15
 
 
 multiqc_config = file(params.multiqc_config)
