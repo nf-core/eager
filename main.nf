@@ -427,8 +427,29 @@ process samtools_filter {
 }
 
 /*
-
 Step 5.1: Preseq
+*/
+
+process preseq {
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/08-Preseq", mode: 'copy'
+
+    when:
+    !params.skip_preseq
+
+    input:
+    file bam from ch_mapped_reads_preseq
+
+    output:
+    file "${bam.baseName}.ccurve" into ch_preseq_results
+
+    script:
+    """
+    preseq lc_extrap -v -B $bam -o ${bam.baseName}.ccurve
+    """
+}
+
+/*
 Step 5.2: DMG Assessment
 Step 5.3: Qualimap (before or after Dedup?)
 Step 6: DeDup / MarkDuplicates
@@ -451,6 +472,7 @@ process multiqc {
     file ('fastqc/*') from ch_fastqc_results.collect()
     file ('software_versions/*') from software_versions_yaml.collect()
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect()
+    file ('preseq/*') from ch_preseq_results.collect()
     file workflow_summary from create_workflow_summary(summary)
 
     output:
