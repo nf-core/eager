@@ -79,6 +79,12 @@ params.bwaalnn = 0.04
 params.bwaalnk = 2
 params.bwaalnl = 32
 
+//BAM Filtering steps (default = keep mapped and unmapped in BAM file)
+params.bam_keep_mapped_only = false
+params.bam_keep_all = true
+params.bam_filter_reads = false
+params.bam_mapping_quality_threshold = 0
+
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 
@@ -341,7 +347,7 @@ process adapter_removal {
 }
 
 /*
-Step 3: Mapping with BWA, SAm to BAM, Sort BAM
+Step 3: Mapping with BWA, SAM to BAM, Sort BAM
 */
 
 process bwa {
@@ -354,7 +360,7 @@ process bwa {
     file fasta from ch_fasta_for_bwa_mapping
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter
+    file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
     
 
     script:
@@ -365,8 +371,11 @@ process bwa {
     """
 }
 
+//TODO Multi Lane BAM merging here (!)
+
+
 /*
-* IDXStats
+* Step 4 - IDXStats
 */
 
 process samtools_idxstats {
@@ -384,14 +393,41 @@ process samtools_idxstats {
     """
     samtools flagstat $bam > ${prefix}.stats
     """
-
 }
 
 
 /*
 * Step 5: Keep unmapped/remove unmapped reads
 */
+
+process samtools_filter {
+    tag "$prefix"
+    publishDir "${params.outdir}/04-Samtools", mode: 'copy', pattern: "*.bam"
+
+    input: 
+    file bam from ch_mapped_reads_filter
+
+    output:
+    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+
+    when: "${params.bam_filter_reads}"
+
+    script:
+    prefix="$bam" - ~/(\.bam)?/
+
+    if("${params.bam_keep_mapped_only}"){
+    """
+    samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+    """
+    } else {
+    """
+    samtools view -h $bam | samtools view - -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+    """
+    }  
+}
+
 /*
+
 Step 5.1: Preseq
 Step 5.2: DMG Assessment
 Step 5.3: Qualimap (before or after Dedup?)
