@@ -22,4 +22,5 @@ dependencies:
   - pmdtools=0.60
   - r-markdown=0.8
   - sequencetools=1.2.2
+  - preseq=2.0.3
   #Missing Schmutzi
