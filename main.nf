@@ -67,6 +67,10 @@ params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
 params.plaintext_email = false
 
+// Skipping parts of the pipeline for impatient users
+params.skip_preseq = false
+params.skip_damage_calculation = false
+
 //Read clipping and merging parameters
 params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
 params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
