@@ -358,7 +358,7 @@ process multiqc {
     file multiqc_config
     file ('fastqc/*') from ch_fastqc_results.collect()
     file ('software_versions/*') from ch_software_versions_yaml
-    file workflow_summary from ch_create_workflow_summary
+    file workflow_summary from create_workflow_summary(summary)
 
     output:
     file "*multiqc_report.html" into ch_multiqc_report
