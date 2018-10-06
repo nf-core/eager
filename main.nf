@@ -424,7 +424,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_angsd, ch_bam_filtered_gatk
 
     when: "${params.bam_filter_reads}"
 
@@ -530,6 +530,10 @@ process dedup{
     input:
     file bam from ch_bam_filtered_dedup
 
+    output:
+    file "*.{hist,log}" into ch_dedup_results_for_multiqc
+    file "*_rmdup.bam" into ch_dedup_bam
+
     script:
     """
     dedup -i $bam -o . -u 
@@ -544,7 +548,11 @@ process markDup{
     !params.skip_deduplication && params.dedupper != 'dedup'
 
     input:
-    file bam from ch_bam_filtered_dedup
+    file bam from ch_bam_filtered_markdup
+
+    output:
+    file "*.metrics" into ch_markdup_results_for_multiqc
+    file "*.markDup.bam" into ch_markdup_bam
 
     script:
     prefix = "${bam.baseName}"
@@ -552,6 +560,17 @@ process markDup{
     picard MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE=${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
     """
 }
+
+//TODO potentially add in samples where no dedup was executed either!
+//Channel.mix(ch_markdup_bam, ch_dedup_bam)
+//        .into{ ch_dedup_for_angsd; ch_dedup_for_gatk; ch_dedup_for_snpad}
+
+
+
+
+
+
+
 /*
 Step 7: angsd
 Step 7: GATK
@@ -571,10 +590,12 @@ process multiqc {
     file multiqc_config
     file ('fastqc/*') from ch_fastqc_results.collect()
     file ('software_versions/*') from software_versions_yaml.collect()
-    file ('idxstats/*') from ch_idxstats_for_multiqc.collect()
-    file ('preseq/*') from ch_preseq_results.collect()
-    file ('damageprofiler/*') from ch_damageprofiler_results.collect()
-    file ('qualimap/*') from ch_qualimap_results.collect()
+    file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
+    file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
+    file ('damageprofiler/*') from ch_damageprofiler_results.collect().ifEmpty([])
+    file ('qualimap/*') from ch_qualimap_results.collect().ifEmpty([])
+    file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
+    file ('dedup/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
     file workflow_summary from create_workflow_summary(summary)
 
     output:
