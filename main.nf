@@ -227,7 +227,7 @@ process get_software_versions {
     samtools --version > v_samtools.txt
     AdapterRemoval -version > v_adapterremoval.txt
     picard MarkDuplicates -version &> v_markduplicates.txt  || true
-    dedup -h > v_dedup.txt
+    dedup -v > v_dedup.txt
     #angsd > v_angsd.txt
     #realignsamfile > v_circularmapper.txt
     #schmutzi > v_schmutzi.txt
