@@ -220,22 +220,20 @@ process get_software_versions {
 
     script:
     """
-    echo $workflow.manifest.version > v_pipeline.txt
-    echo $workflow.nextflow.version > v_nextflow.txt
-    fastqc --version > v_fastqc.txt
-    echo \$(bwa 2>&1) > v_bwa.txt
-    samtools --version > v_samtools.txt
-    AdapterRemoval -version > v_adapterremoval.txt
-    picard MarkDuplicates -version &> v_markduplicates.txt  || true
-    dedup -v > v_dedup.txt
-    #angsd > v_angsd.txt
-    #realignsamfile > v_circularmapper.txt
-    #schmutzi > v_schmutzi.txt
+    echo $workflow.manifest.version &> v_pipeline.txt
+    echo $workflow.nextflow.version &> v_nextflow.txt
+    fastqc --version &> v_fastqc.txt
+    multiqc --version &> v_multiqc.txt
+    echo \$(bwa 2>&1) &> v_bwa.txt
+    samtools --version &> v_samtools.txt
+    echo \$(AdapterRemoval -version  2>&1) &> v_adapterremoval.txt
+    picard MarkDuplicates --version &> v_markduplicates.txt  || true
+    echo \$(dedup -v 2>&1) &> v_dedup.txt
+    preseq &> v_preseq.txt
     gatk BaseRecalibrator --version &> v_gatk.txt
-    qualimap --version > v_qualimap.txt
-    vcf2genome > v_vcf2genome.txt
-    multiqc --version > v_multiqc.txt
-    scrape_software_versions.py > software_versions_mqc.yaml
+    qualimap --version &> v_qualimap.txt
+    vcf2genome &> v_vcf2genome.txt
+    scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
 

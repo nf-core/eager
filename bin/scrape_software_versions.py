@@ -11,6 +11,9 @@ regexes = {
     'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
     'Preseq': ['v_preseq.txt', r"Version: (\S+)"],
     'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"],
+    'BWA': ['v_bwa.txt', r"Version: (\S+)"],
+    'Qualimap': ['v_qualimap.txt', r"QualiMap v.(\S+)"],
+    'GATK': ['v_gatk.txt', r"Version:([\d\.]+)"],
 }
 results = OrderedDict()
 results['nf-core/eager'] = '<span style="color:#999999;\">N/A</span>'
@@ -20,6 +23,9 @@ results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 results['Picard MarkDuplicates'] = '<span style="color:#999999;\">N/A</span>'
 results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
+results['BWA'] = '<span style="color:#999999;\">N/A</span>'
+results['Qualimap'] = '<span style="color:#999999;\">N/A</span>'
+results['GATK'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
