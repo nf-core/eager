@@ -57,6 +57,8 @@ if (params.help){
 params.name = false
 params.singleEnd = false
 params.genome = "Custom"
+params.snpcapture = false
+params.bedfile = ''
 params.fasta = false
 params.bwa_index = false
 params.seq_dict = false
@@ -70,6 +72,7 @@ params.plaintext_email = false
 // Skipping parts of the pipeline for impatient users
 params.skip_preseq = false
 params.skip_damage_calculation = false
+params.skip_qualimap = false
 
 //Read clipping and merging parameters
 params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
@@ -100,7 +103,7 @@ output_docs = file("$baseDir/docs/output.md")
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap}
 
 //AWSBatch sanity checking
 
@@ -485,6 +488,31 @@ process damageprofiler {
 
 /* 
 Step 5.3: Qualimap (before or after Dedup?)
+*/
+
+process qualimap {
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/06-QualiMap", mode: 'copy'
+
+    when:
+    !params.skip_qualimap
+
+    input:
+    file bam from ch_bam_filtered_qualimap
+    file fasta from ch_fasta_for_qualimap
+
+    output:
+    file "*" into ch_qualimap_results
+
+    script:
+    snpcap = ''
+    if(params.snpcapture) snpcap = "-gff ${params.bedfile}"
+    """
+    qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
+    """
+}
+
+/*
 Step 6: DeDup / MarkDuplicates
 Step 7: angsd
 Step 7: GATK
@@ -507,6 +535,7 @@ process multiqc {
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect()
     file ('preseq/*') from ch_preseq_results.collect()
     file ('damageprofiler/*') from ch_damageprofiler_results.collect()
+    file ('qualimap/*') from ch_qualimap_results.collect()
     file workflow_summary from create_workflow_summary(summary)
 
     output:
