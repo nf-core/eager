@@ -73,6 +73,7 @@ params.plaintext_email = false
 params.skip_preseq = false
 params.skip_damage_calculation = false
 params.skip_qualimap = false
+params.skip_deduplication = false
 
 //Read clipping and merging parameters
 params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
@@ -95,6 +96,9 @@ params.bam_mapping_quality_threshold = 0
 //DamageProfiler settings
 params.damageprofiler_length = 100
 params.damageprofiler_threshold = 15
+
+//DeDuplication settings
+params.dedupper = 'dedup' //default value dedup
 
 
 multiqc_config = file(params.multiqc_config)
@@ -441,6 +445,7 @@ process samtools_filter {
 
 /*
 Step 5.1: Preseq
+SHOULD OPTIONALLY USE DEDUP *.hist files if possible!
 */
 
 process preseq {
@@ -514,6 +519,40 @@ process qualimap {
 
 /*
 Step 6: DeDup / MarkDuplicates
+*/ 
+process dedup{
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/5-DeDup"
+
+    when:
+    !params.skip_deduplication && params.dedupper == 'dedup'
+
+    input:
+    file bam from ch_bam_filtered_dedup
+
+    script:
+    """
+    dedup -i $bam -o . -u 
+    """
+}
+
+process markDup{
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/5-DeDup"
+
+    when:
+    !params.skip_deduplication && params.dedupper != 'dedup'
+
+    input:
+    file bam from ch_bam_filtered_dedup
+
+    script:
+    prefix = "${bam.baseName}"
+    """
+    picard MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE=${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
+    """
+}
+/*
 Step 7: angsd
 Step 7: GATK
 Step 8: vcf2genome
