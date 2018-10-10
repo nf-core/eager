@@ -341,10 +341,10 @@ process fastp {
     when: "${params.complexity_filter}"
 
     input:
-    set val(name), file(reads) from ch_read_files_complexity_filtering //TODO
+    set val(name), file(reads) from ch_read_files_complexity_filtering
 
     output:
-    set val(name), file(reads) into ch_clipped_reads_complexity_filtered //TODO
+    set val("${name}"), file(*fq.gz) into ch_clipped_reads_complexity_filtered
     "*.json" into ch_fastp_for_multiqc
 
     script:
