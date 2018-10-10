@@ -9,7 +9,7 @@ dependencies:
   - adapterremoval=2.2.2
   - adapterremovalfixprefix=0.0.4
   - bwa=0.7.17
-  - picard=2.18.11
+  - picard=2.18.14
   - samtools=1.9
   - dedup=0.12.3
   - angsd=0.921
@@ -23,4 +23,6 @@ dependencies:
   - r-markdown=0.8
   - sequencetools=1.2.2
   - preseq=2.0.3
-  #Missing Schmutzi
+  - fastp=0.19.4
+  - bamutil=1.0.14
+  #Missing Schmutzi,snpAD

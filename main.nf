@@ -75,6 +75,10 @@ params.skip_damage_calculation = false
 params.skip_qualimap = false
 params.skip_deduplication = false
 
+//Complexity filtering reads
+params.complexity_filter = false
+params.complexity_filter_poly_g_min = 10
+
 //Read clipping and merging parameters
 params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
 params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
@@ -135,7 +139,7 @@ if(params.readPaths){
             .map { row -> [ row[0], [file(row[1][0])]] }
             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
             .dump(tag:'input')
-            .into { read_files_fastqc; read_files_trimming }
+            .into { ch_read_files_fastqc; ch_read_files_trimming; ch_read_files_complexity_filtering }
             
     } else {
         Channel
@@ -143,7 +147,7 @@ if(params.readPaths){
             .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
             .dump(tag:'input')
-            .into { ch_read_files_clip; ch_read_files_fastqc }
+            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
             
     }
 } else {
@@ -151,7 +155,7 @@ if(params.readPaths){
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
         .dump(tag:'input')
-        .into { ch_read_files_clip; ch_read_files_fastqc }
+        .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
         
 }
 
@@ -222,17 +226,20 @@ process get_software_versions {
     """
     echo $workflow.manifest.version &> v_pipeline.txt
     echo $workflow.nextflow.version &> v_nextflow.txt
-    fastqc --version &> v_fastqc.txt
-    multiqc --version &> v_multiqc.txt
-    echo \$(bwa 2>&1) &> v_bwa.txt
-    samtools --version &> v_samtools.txt
-    echo \$(AdapterRemoval -version  2>&1) &> v_adapterremoval.txt
-    picard MarkDuplicates --version &> v_markduplicates.txt  || true
-    echo \$(dedup -v 2>&1) &> v_dedup.txt
-    preseq &> v_preseq.txt
-    gatk BaseRecalibrator --version &> v_gatk.txt
-    qualimap --version &> v_qualimap.txt
-    vcf2genome &> v_vcf2genome.txt
+    fastqc --version &> v_fastqc.txt 2>&1 || true
+    multiqc --version &> v_multiqc.txt 2>&1 || true
+    bwa &> v_bwa.txt 2>&1 || true
+    samtools --version &> v_samtools.txt 2>&1 || true
+    AdapterRemoval -version  &> v_adapterremoval.txt 2>&1 || true
+    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
+    dedup -v &> v_dedup.txt 2>&1 || true
+    preseq &> v_preseq.txt 2>&1 || true
+    gatk BaseRecalibrator --version 2>&1 | grep Version: > v_gatk.txt 2>&1 || true
+    vcf2genome &> v_vcf2genome.txt 2>&1 || true
+    fastp --version &> v_fastp.txt 2>&1 || true
+    bam --version &> v_bamutil.txt 2>&1 || true
+    qualimap --version &> v_qualimap.txt 2>&1 || true
+    
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
@@ -322,6 +329,38 @@ process fastqc {
     """
 }
 
+
+/* STEP 2.0 - FastP
+* Optional poly-G complexity filtering step before read merging/adapter clipping etc
+* Note: Clipping, Merging, Quality Trimning are turned off here - we leave this to adapter removal itself!
+*/
+
+process fastp {
+    tag "$name"
+    publishDir "${params.outdir}/01-FastP", mode: 'copy'
+
+    when: params.complexity_filter
+
+    input:
+    set val(name), file(reads) from ch_read_files_complexity_filtering
+
+    output:
+    set val(name), file("*pG.fq.gz") into (ch_clipped_reads_complexity_filtered, ch_debug_complexity_filtering)
+    file("*.json") into ch_fastp_for_multiqc
+
+    script:
+    if(${params.singleEnd}){
+    """
+    fastp -in1 ${reads[0]} -out1 "${reads[0].baseName}.pG.fq.gz" -A -g --poly_g_min_lin "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} -json "${reads[0].baseName}"_fastp.json 
+    """
+    } else {
+    """
+    fastp -in1 ${reads[0]} -in2 ${reads[1]} -out1 "${reads[0].baseName}.pG.fq.gz" -out2 "${reads[1].baseName}.pG.fq.gz" -A -g --poly_g_min_lin "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} -json "$read.baseName}"_fastp.json
+    """
+    }
+}
+
+
 /*
  * STEP 2 - Adapter Clipping / Read Merging
  */
@@ -332,7 +371,7 @@ process adapter_removal {
     publishDir "${params.outdir}/02-Merging", mode: 'copy'
 
     input:
-    set val(name), file(reads) from ch_read_files_clip
+    set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
 
     output:
     file "*.combined*.gz" into ch_clipped_reads
@@ -594,6 +633,8 @@ process multiqc {
     file ('qualimap/*') from ch_qualimap_results.collect().ifEmpty([])
     file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
     file ('dedup/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
+    file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
+
     file workflow_summary from create_workflow_summary(summary)
 
     output:
