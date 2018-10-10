@@ -338,7 +338,7 @@ process fastp {
     tag "$name"
     publishDir "${params.outdir}/01-FastP", mode: 'copy'
 
-    when: "${params.complexity_filter}"
+    when: params.complexity_filter
 
     input:
     set val(name), file(reads) from ch_read_files_complexity_filtering
@@ -372,7 +372,7 @@ process adapter_removal {
     publishDir "${params.outdir}/02-Merging", mode: 'copy'
 
     input:
-    file val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
+    set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
 
     output:
     file "*.combined*.gz" into ch_clipped_reads
