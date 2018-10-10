@@ -226,19 +226,20 @@ process get_software_versions {
     """
     echo $workflow.manifest.version &> v_pipeline.txt
     echo $workflow.nextflow.version &> v_nextflow.txt
-    fastqc --version &> v_fastqc.txt
-    multiqc --version &> v_multiqc.txt
-    echo \$(bwa 2>&1) &> v_bwa.txt
-    samtools --version &> v_samtools.txt
-    echo \$(AdapterRemoval -version  2>&1) &> v_adapterremoval.txt
-    picard MarkDuplicates --version &> v_markduplicates.txt  || true
-    echo \$(dedup -v 2>&1) &> v_dedup.txt
-    preseq &> v_preseq.txt
-    gatk BaseRecalibrator --version &> v_gatk.txt
-    echo \$(vcf2genome 2>&1) > v_vcf2genome.txt
-    fastp --version &> v_fastp.txt
-    bam --version &> v_bamutil.txt
-    qualimap --version > v_qualimap.txt 
+    fastqc --version &> v_fastqc.txt 2>&1 || true
+    multiqc --version &> v_multiqc.txt 2>&1 || true
+    bwa &> v_bwa.txt 2>&1 || true
+    samtools --version &> v_samtools.txt 2>&1 || true
+    AdapterRemoval -version  &> v_adapterremoval.txt 2>&1 || true
+    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
+    dedup -v &> v_dedup.txt 2>&1 || true
+    preseq &> v_preseq.txt 2>&1 || true
+    gatk BaseRecalibrator --version 2>&1 | grep Version: > v_gatk.txt 2>&1 || true
+    vcf2genome &> v_vcf2genome.txt 2>&1 || true
+    fastp --version &> v_fastp.txt 2>&1 || true
+    bam --version &> v_bamutil.txt 2>&1 || true
+    qualimap --version &> v_qualimap.txt 2>&1 || true
+    
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
