@@ -64,6 +64,9 @@ params.bwa_index = false
 params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
+params.udg = false 
+params.udg_type = 'Half'
+params.capture = false
 
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
@@ -108,7 +111,12 @@ params.dedupper = 'dedup' //default value dedup
 params.preseq_step_size = 1000
 
 //PMDTools settings
-params.skip_pmdtools = true
+params.run_pmdtools = false
+params.pmdtools_range = 10
+params.pmdtools_threshold = 3
+params.pmdtools_reference_mask = ''
+params.pmdtools_max_reads = 10000
+
 
 
 multiqc_config = file(params.multiqc_config)
@@ -117,7 +125,7 @@ output_docs = file("$baseDir/docs/output.md")
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools}
 
 //AWSBatch sanity checking
 
@@ -649,12 +657,41 @@ process markDup{
 ch_dedup_for_pmdtools = Channel.create()
 
 if(!params.skip_deduplication){
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam)
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).set {ch_for_pmdtools}
 } else {
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools)
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).set {ch_for_pmdtools}
 }
 
+process pmdtools {
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/04-Samtools", mode: 'copy'
 
+    when: params.run_pmdtools
+
+    input: 
+    file bam from ch_for_pmdtools
+    file fasta from ch_fasta_for_pmdtools
+
+    output:
+    file "*.bam" into ch_bam_after_pmdfiltering
+    file "*.cpg.range*.txt"
+
+    script:
+    //Check which treatment for the libraries was used
+    def treatment = params.udg ? (params.udg_type =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
+    if(params.capture){
+        snpcap = (params.pmdtools_reference_mask != '') ? "--refseq ${params.pmdtools_reference_mask}" : ''
+        log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
+    } else {
+        snpcap = ''
+    }
+    """
+    #Run Filtering step 
+    samtools fillmd -b $bam $fasta | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
+    #Run Calc Range step
+    #samtools fillmd -b $bam $fasta | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt 
+    """
+}
 
 
 
