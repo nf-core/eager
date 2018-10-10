@@ -572,9 +572,16 @@ process dedup{
     file "*_rmdup.bam" into ch_dedup_bam
 
     script:
+    if(params.singleEnd) {
+    """
+    dedup -i $bam -m -o . -u 
+    """  
+    } else {
     """
     dedup -i $bam -o . -u 
-    """
+    """  
+    }
+
 }
 
 process markDup{
