@@ -484,7 +484,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
 
     when: "${params.bam_filter_reads}"
 
@@ -590,7 +590,7 @@ process damageprofiler {
 }
 
 /* 
-Step 5.3: Qualimap (before or after Dedup?)
+Step 5.3: Qualimap
 */
 
 process qualimap {
@@ -642,10 +642,14 @@ process markDup{
     """
 }
 
-//TODO potentially add in samples where no dedup was executed either!
-//Channel.mix(ch_markdup_bam, ch_dedup_bam)
-//        .into{ ch_dedup_for_angsd; ch_dedup_for_gatk; ch_dedup_for_snpad}
+//If no deduplication runs, the input is mixed directly from samtools filter, if it runs either markdup or dedup is used thus mixed from these two channels
+ch_dedup_for_pmdtools = Channel.create()
 
+if(!params.skip_deduplication){
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam)
+} else {
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools)
+}
 
 
 
