@@ -633,9 +633,20 @@ process markDup{
 
 
 /*
-Step 7: angsd
-Step 7: GATK
-Step 8: vcf2genome
+Processing missing:
+- pmdtools
+
+Genotyping tools:
+- angsd
+- gatk (if even suitable anymore?)
+- snpAD
+- sequenceTools
+
+Downstream VCF tools:
+- vcf2genome
+- gencons
+- READ/mcMLKin
+- popGen output? PLINK? 
 */
 
 
