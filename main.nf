@@ -107,6 +107,9 @@ params.dedupper = 'dedup' //default value dedup
 //Preseq settings
 params.preseq_step_size = 1000
 
+//PMDTools settings
+params.skip_pmdtools = true
+
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
