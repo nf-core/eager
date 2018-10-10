@@ -75,6 +75,10 @@ params.skip_damage_calculation = false
 params.skip_qualimap = false
 params.skip_deduplication = false
 
+//Complexity filtering reads
+params.complexity_filter = false
+params.complexity_filter_poly_g_min = 10
+
 //Read clipping and merging parameters
 params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
 params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
@@ -135,7 +139,7 @@ if(params.readPaths){
             .map { row -> [ row[0], [file(row[1][0])]] }
             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
             .dump(tag:'input')
-            .into { read_files_fastqc; read_files_trimming }
+            .into { ch_read_files_fastqc; ch_read_files_trimming; ch_read_files_complexity_filtering }
             
     } else {
         Channel
@@ -143,7 +147,7 @@ if(params.readPaths){
             .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
             .dump(tag:'input')
-            .into { ch_read_files_clip; ch_read_files_fastqc }
+            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
             
     }
 } else {
@@ -151,7 +155,7 @@ if(params.readPaths){
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
         .dump(tag:'input')
-        .into { ch_read_files_clip; ch_read_files_fastqc }
+        .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
         
 }
 
@@ -320,6 +324,33 @@ process fastqc {
     """
     fastqc -q $reads
     """
+}
+
+
+/* STEP 2.0 - FastP
+* Optional poly-G complexity filtering step before read merging/adapter clipping etc
+* Note: Clipping, Merging, QUality Trimning are turned off here - we leave this to adapter removal itself!
+*/
+
+process fastp {
+    tag "$name"
+    publishDir "${params.outdir}/01-FastP", mode: 'copy'
+
+    when: "${params.complexity_filter}"
+
+    input:
+    set val(name), file(reads) from ch_read_files_complexity_filtering //TODO
+
+    output:
+    set val(name), file(reads) into ch_clipped_reads //TODO
+    "*.json" into ch_fastp_for_multiqc
+
+    script:
+    if(${params.singleEnd}){
+        fastp -in1 read1 -out1 "${read.baseName}.pG.fq.gz" -A -g --poly_g_min_lin 10 -Q -L -w ${task.cpus} -json "${read.baseName}"_fastp.json 
+    } else {
+        fastp -in1 read1 -in2  -out1 "${read.baseName}.pG.fq.gz" -out2 "${read.baseName}.pG.fq.gz" -A -g --poly_g_min_lin 10 -Q -L -w ${task.cpus} -json "$read.baseName}"_fastp.json
+    }
 }
 
 /*
@@ -594,6 +625,8 @@ process multiqc {
     file ('qualimap/*') from ch_qualimap_results.collect().ifEmpty([])
     file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
     file ('dedup/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
+    file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
+
     file workflow_summary from create_workflow_summary(summary)
 
     output:
