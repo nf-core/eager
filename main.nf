@@ -349,9 +349,13 @@ process fastp {
 
     script:
     if(${params.singleEnd}){
-        fastp -in1 read1 -out1 "${read.baseName}.pG.fq.gz" -A -g --poly_g_min_lin 10 -Q -L -w ${task.cpus} -json "${read.baseName}"_fastp.json 
+    """
+    fastp -in1 ${reads[0]} -out1 "${reads[0].baseName}.pG.fq.gz" -A -g --poly_g_min_lin 10 -Q -L -w ${task.cpus} -json "${reads[0].baseName}"_fastp.json 
+    """
     } else {
-        fastp -in1 read1 -in2  -out1 "${read.baseName}.pG.fq.gz" -out2 "${read.baseName}.pG.fq.gz" -A -g --poly_g_min_lin 10 -Q -L -w ${task.cpus} -json "$read.baseName}"_fastp.json
+    """
+    fastp -in1 ${reads[0]} -in2 ${reads[1]} -out1 "${reads[0].baseName}.pG.fq.gz" -out2 "${reads[1].baseName}.pG.fq.gz" -A -g --poly_g_min_lin "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} -json "$read.baseName}"_fastp.json
+    """
     }
 }
 
