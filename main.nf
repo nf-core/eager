@@ -377,7 +377,7 @@ process adapter_removal {
     set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
 
     output:
-    file "*.combined*.gz" into ch_clipped_reads
+    file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc)
     file "*.settings" into ch_adapterremoval_logs
 
     script:
@@ -400,6 +400,26 @@ process adapter_removal {
     mv *.truncated.gz ${prefix}.combined.fq.gz
     """
     }
+}
+
+/*
+ * STEP 2.1 - FastQC after clipping/merging (if applied!)
+ */
+process fastqc_after_clipping {
+    tag "${reads[0].baseName}"
+    publishDir "${params.outdir}/01-FastQC/after_clipping", mode: 'copy',
+        saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
+
+    input:
+    file(reads) from ch_clipped_reads_for_fastqc
+
+    output:
+    file "*_fastqc.{zip,html}"
+
+    script:
+    """
+    fastqc -q $reads
+    """
 }
 
 /*
