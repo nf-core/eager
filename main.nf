@@ -345,17 +345,17 @@ process fastp {
     set val(name), file(reads) from ch_read_files_complexity_filtering
 
     output:
-    set val(name), file("*pG.fq.gz") into (ch_clipped_reads_complexity_filtered, ch_debug_complexity_filtering)
+    set val(name), file("*pG.fq.gz") into ch_clipped_reads_complexity_filtered
     file("*.json") into ch_fastp_for_multiqc
 
     script:
-    if(${params.singleEnd}){
+    if(params.singleEnd){
     """
-    fastp -in1 ${reads[0]} -out1 "${reads[0].baseName}.pG.fq.gz" -A -g --poly_g_min_lin "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} -json "${reads[0].baseName}"_fastp.json 
+    fastp --in1 ${reads[0]} --out1 "${reads[0].baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${reads[0].baseName}"_fastp.json 
     """
     } else {
     """
-    fastp -in1 ${reads[0]} -in2 ${reads[1]} -out1 "${reads[0].baseName}.pG.fq.gz" -out2 "${reads[1].baseName}.pG.fq.gz" -A -g --poly_g_min_lin "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} -json "$read.baseName}"_fastp.json
+    fastp --in1 ${reads[0]} --in2 ${reads[1]} --out1 "${reads[0].baseName}.pG.fq.gz" --out2 "${reads[1].baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${reads[0].baseName}"_fastp.json 
     """
     }
 }
