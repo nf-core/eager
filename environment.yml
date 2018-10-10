@@ -9,7 +9,7 @@ dependencies:
   - adapterremoval=2.2.2
   - adapterremovalfixprefix=0.0.4
   - bwa=0.7.17
-  - picard=2.18.14
+  - picard=2.18.11
   - samtools=1.9
   - dedup=0.12.3
   - angsd=0.921
