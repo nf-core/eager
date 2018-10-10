@@ -4,16 +4,28 @@ from collections import OrderedDict
 import re
 
 regexes = {
-    'nf-core/EAGER2': ['v_pipeline.txt', r"(\S+)"],
+    'nf-core/eager': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'FastQC': ['v_fastqc.txt', r"FastQC v(\S+)"],
+    'Picard MarkDuplicates': ['v_markduplicates.txt', r"([\d\.]+)-SNAPSHOT"],
+    'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
+    'Preseq': ['v_preseq.txt', r"Version: (\S+)"],
     'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"],
+    'BWA': ['v_bwa.txt', r"Version: (\S+)"],
+    'Qualimap': ['v_qualimap.txt', r"QualiMap v.(\S+)"],
+    'GATK': ['v_gatk.txt', r"Version:([\d\.]+)"],
 }
 results = OrderedDict()
-results['nf-core/EAGER2'] = '<span style="color:#999999;\">N/A</span>'
+results['nf-core/eager'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
+results['Picard MarkDuplicates'] = '<span style="color:#999999;\">N/A</span>'
+results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
+results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
+results['BWA'] = '<span style="color:#999999;\">N/A</span>'
+results['Qualimap'] = '<span style="color:#999999;\">N/A</span>'
+results['GATK'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
@@ -25,9 +37,9 @@ for k, v in regexes.items():
 
 # Dump to YAML
 print ('''
-id: 'nf-eager-software-versions'
-section_name: 'nf-core/EAGER2 Software Versions'
-section_href: 'https://github.com/nf-core/EAGER2'
+id: 'nf-core/eager-software-versions'
+section_name: 'nf-core/eager Software Versions'
+section_href: 'https://github.com/nf-core/eager'
 plot_type: 'html'
 description: 'are collected at run time from the software output.'
 data: |

@@ -1,13 +1,14 @@
 ========================================
- nf-core/EAGER2 v${version}
+ nf-core/eager v${version}
 ========================================
 Run Name: $runName
 
 <% if (success){
-    out << "## nf-core/EAGER2 execution completed successfully! ##"
+    out << "## nf-core/eager execution completed successfully! ##"
 } else {
     out << """####################################################
-## nf-core/EAGER2 execution completed unsuccessfully! ##
+## nf-core/eager execution completed unsuccessfully! ##
+
 ####################################################
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
@@ -18,8 +19,8 @@ ${errorReport}
 
 
 <% if (!success){
-    out << """####################################################
-## nf-core/EAGER2 execution completed unsuccessfully! ##
+out << """####################################################
+## nf-core/eager execution completed unsuccessfully! ##
 ####################################################
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
@@ -27,7 +28,7 @@ The full error message was:
 ${errorReport}
 """
 } else {
-    out << "## nf-core/EAGER2 execution completed successfully! ##"
+    out << "## nf-core/eager execution completed successfully! ##"
 }
 %>
 
@@ -46,11 +47,6 @@ Pipeline Configuration:
 -----------------------
 <% out << summary.collect{ k,v -> " - $k: $v" }.join("\n") %>
 
-
-Software Versions:
------------------------
-<% out << software_versions.collect{ k,v -> " - $k: $v" }.join("\n") %>
-
 --
-nf-core/EAGER2
-https://github.com/nf-core/EAGER2
+nf-core/eager
+https://github.com/nf-core/eager
