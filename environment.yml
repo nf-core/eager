@@ -5,7 +5,7 @@ channels:
   - bioconda
 dependencies:
   - conda-forge::openjdk=8.0.144 # Needed for FastQC docker - see bioconda/bioconda-recipes#5026
-  - fastqc=0.11.8
+  - fastqc=0.11.6
   - adapterremoval=2.2.2
   - adapterremovalfixprefix=0.0.4
   - bwa=0.7.17
@@ -23,4 +23,5 @@ dependencies:
   - r-markdown=0.8
   - sequencetools=1.2.2
   - preseq=2.0.3
+  - fastp=0.19.4
   #Missing Schmutzi
