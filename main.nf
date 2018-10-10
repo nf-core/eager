@@ -104,6 +104,9 @@ params.damageprofiler_threshold = 15
 //DeDuplication settings
 params.dedupper = 'dedup' //default value dedup
 
+//Preseq settings
+params.preseq_step_size = 1000
+
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
@@ -480,28 +483,66 @@ process samtools_filter {
     }  
 }
 
+
+/*
+Step 6: DeDup / MarkDuplicates
+*/ 
+
+process dedup{
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/5-DeDup"
+
+    when:
+    !params.skip_deduplication && params.dedupper == 'dedup'
+
+    input:
+    file bam from ch_bam_filtered_dedup
+
+    output:
+    file "*.hist" into ch_hist_for_preseq
+    file "*.log" into ch_dedup_results_for_multiqc
+    file "*_rmdup.bam" into ch_dedup_bam
+
+    script:
+    if(params.singleEnd) {
+    """
+    dedup -i $bam -m -o . -u 
+    """  
+    } else {
+    """
+    dedup -i $bam -o . -u 
+    """  
+    }
+}
+
 /*
 Step 5.1: Preseq
-SHOULD OPTIONALLY USE DEDUP *.hist files if possible!
 */
 
 process preseq {
-    tag "${bam.baseName}"
+    tag "${input.baseName}"
     publishDir "${params.outdir}/08-Preseq", mode: 'copy'
 
     when:
     !params.skip_preseq
 
     input:
-    file bam from ch_mapped_reads_preseq
+    file input from (params.skip_deduplication ? ch_mapped_reads_preseq : ch_hist_for_preseq )
 
     output:
-    file "${bam.baseName}.ccurve" into ch_preseq_results
+    file "${input.baseName}.ccurve" into ch_preseq_results
 
     script:
+    if(!params.skip_deduplication){
     """
-    preseq lc_extrap -v -B $bam -o ${bam.baseName}.ccurve
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -H $input
     """
+
+    } else {
+    """
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B $input
+    """
+    }
 }
 
 /*
@@ -554,35 +595,11 @@ process qualimap {
     """
 }
 
+
+
 /*
-Step 6: DeDup / MarkDuplicates
-*/ 
-process dedup{
-    tag "${bam.baseName}"
-    publishDir "${params.outdir}/5-DeDup"
-
-    when:
-    !params.skip_deduplication && params.dedupper == 'dedup'
-
-    input:
-    file bam from ch_bam_filtered_dedup
-
-    output:
-    file "*.{hist,log}" into ch_dedup_results_for_multiqc
-    file "*_rmdup.bam" into ch_dedup_bam
-
-    script:
-    if(params.singleEnd) {
-    """
-    dedup -i $bam -m -o . -u 
-    """  
-    } else {
-    """
-    dedup -i $bam -o . -u 
-    """  
-    }
-
-}
+ Step 6: MarkDuplicates
+ */
 
 process markDup{
     tag "${bam.baseName}"
