@@ -1,31 +1,27 @@
-Hi there!
+---
+name: Bug report
+about: Create a report to help us improve
 
-Thanks for telling us about a problem with the pipeline. Please delete this text and anything that's not relevant from the template below:
+---
 
-#### Describe the bug
-A clear and concise description of what the bug is.
+**Describe the bug**
+A clear and concise description of what the bug is. What does not work and what did you do to produce a problem?
 
-#### Steps to reproduce
-Steps to reproduce the behaviour:
-1. Command line: `nextflow run ...`
-2. See error: _Please provide your error message_
+**To Reproduce**
+Steps to make me able to reproduce the behavior:
+1. Run the pipeline with parameters X
+2. Describe your input data: What did you provide as input? Ideally, you could send me a parameter file + your input data or at least tell me what the latter looks like.
 
-#### Expected behaviour
+**Expected behavior**
 A clear and concise description of what you expected to happen.
 
-#### System:
- - Hardware: [e.g. HPC, Desktop, Cloud...]
- - Executor: [e.g. slurm, local, awsbatch...]
- - OS: [e.g. CentOS Linux, macOS, Linux Mint...]
- - Version [e.g. 7, 10.13.6, 18.3...]
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
 
-#### Nextflow Installation:
- - Version: [e.g. 0.31.0]
+**Operating System:**
+ - OS: [e.g. which Linux did you use?]
 
-#### Container engine:
- - Engine: [e.g. Conda, Docker or Singularity]
- - version: [e.g. 1.0.0]
- - Image tag: [e.g. nfcore/eager:1.0.0]
-
-#### Additional context
-Add any other context about the problem here.
+**Additional context**
+Please provide me with the following files:
+- `.nextflow.log`
+- `results/pipeline_info/...`
