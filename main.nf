@@ -331,7 +331,7 @@ process fastqc {
 
 /* STEP 2.0 - FastP
 * Optional poly-G complexity filtering step before read merging/adapter clipping etc
-* Note: Clipping, Merging, QUality Trimning are turned off here - we leave this to adapter removal itself!
+* Note: Clipping, Merging, Quality Trimning are turned off here - we leave this to adapter removal itself!
 */
 
 process fastp {
