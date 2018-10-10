@@ -235,10 +235,10 @@ process get_software_versions {
     echo \$(dedup -v 2>&1) &> v_dedup.txt
     preseq &> v_preseq.txt
     gatk BaseRecalibrator --version &> v_gatk.txt
-    qualimap --version &> v_qualimap.txt
-    vcf2genome &> v_vcf2genome.txt
+    echo \$(vcf2genome 2>&1) > v_vcf2genome.txt
     fastp --version &> v_fastp.txt
-    bamutil --version &> v_bamutil.txt
+    bam --version &> v_bamutil.txt
+    qualimap --version > v_qualimap.txt 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
@@ -359,8 +359,6 @@ process fastp {
     }
 }
 
-ch_debug_complexity_filtering
-    .dump()
 
 /*
  * STEP 2 - Adapter Clipping / Read Merging
