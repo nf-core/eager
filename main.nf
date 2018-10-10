@@ -139,7 +139,7 @@ if(params.readPaths){
             .map { row -> [ row[0], [file(row[1][0])]] }
             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
             .dump(tag:'input')
-            .into { ch_read_files_fastqc; ch_read_files_trimming; ch_read_files_complexity_filtering }
+            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
             
     } else {
         Channel
