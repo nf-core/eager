@@ -237,6 +237,8 @@ process get_software_versions {
     gatk BaseRecalibrator --version &> v_gatk.txt
     qualimap --version &> v_qualimap.txt
     vcf2genome &> v_vcf2genome.txt
+    fastp --version &> v_fastp.txt
+    bamutil --version &> v_bamutil.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }

@@ -14,6 +14,8 @@ regexes = {
     'BWA': ['v_bwa.txt', r"Version: (\S+)"],
     'Qualimap': ['v_qualimap.txt', r"QualiMap v.(\S+)"],
     'GATK': ['v_gatk.txt', r"Version:([\d\.]+)"],
+    'bamUtil' : ['v_bamutil.txt'], r"Version: ([\d\.]+)"],
+    'fastP': ['v_fastp.txt', r"([\d\.]+)"],
 }
 results = OrderedDict()
 results['nf-core/eager'] = '<span style="color:#999999;\">N/A</span>'
