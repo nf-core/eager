@@ -26,7 +26,7 @@ java -version
 # Install Nextflow
 curl -fsSL get.nextflow.io | bash
 
-# Add Nextflow binary to your PATH:
+# Add the Nextflow binary to your PATH:
 mv nextflow ~/bin/
 # OR system-wide installation:
 # sudo mv nextflow /usr/local/bin
@@ -76,7 +76,7 @@ First, install docker on your system: [Docker Installation Instructions](https:/
 Then, running the pipeline with the option `-profile standard,docker` tells Nextflow to enable Docker for this run. An image containing all of the software requirements will be automatically fetched and used from dockerhub (https://hub.docker.com/r/nfcore/eager).
 
 #### 3.1) Software deps: Singularity
-If you're not able to use Docker then [Singularity](http://singularity.lbl.gov/) is a great alternative.
+If you're not able to use Docker then [Singularity](http://sylabs.io) is a great alternative.
 The process is very similar: running the pipeline with the option `-profile standard,singularity` tells Nextflow to enable singularity for this run. An image containing all of the software requirements will be automatically fetched and used from singularity hub.
 
 If running offline with Singularity, you'll need to download and transfer the Singularity image first:
