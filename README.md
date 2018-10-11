@@ -44,4 +44,4 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 5. [Troubleshooting](docs/troubleshooting.md)
 
 ### Credits
-This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)). With contributions from 
+This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with major contributions from Stephen Clayton, ideas and documentation from James Fellows-Yates and Raphael Eisenhofer.
