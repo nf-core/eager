@@ -64,6 +64,8 @@ params.bwa_index = false
 params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
+params.udg = false 
+params.udg_type = 'Half'
 
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
@@ -104,6 +106,17 @@ params.damageprofiler_threshold = 15
 //DeDuplication settings
 params.dedupper = 'dedup' //default value dedup
 
+//Preseq settings
+params.preseq_step_size = 1000
+
+//PMDTools settings
+params.run_pmdtools = false
+params.pmdtools_range = 10
+params.pmdtools_threshold = 3
+params.pmdtools_reference_mask = ''
+params.pmdtools_max_reads = 10000
+
+
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
@@ -111,7 +124,7 @@ output_docs = file("$baseDir/docs/output.md")
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools}
 
 //AWSBatch sanity checking
 
@@ -374,7 +387,7 @@ process adapter_removal {
     set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
 
     output:
-    file "*.combined*.gz" into ch_clipped_reads
+    file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc)
     file "*.settings" into ch_adapterremoval_logs
 
     script:
@@ -397,6 +410,26 @@ process adapter_removal {
     mv *.truncated.gz ${prefix}.combined.fq.gz
     """
     }
+}
+
+/*
+ * STEP 2.1 - FastQC after clipping/merging (if applied!)
+ */
+process fastqc_after_clipping {
+    tag "${reads[0].baseName}"
+    publishDir "${params.outdir}/01-FastQC/after_clipping", mode: 'copy',
+        saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
+
+    input:
+    file(reads) from ch_clipped_reads_for_fastqc
+
+    output:
+    file "*_fastqc.{zip,html}"
+
+    script:
+    """
+    fastqc -q $reads
+    """
 }
 
 /*
@@ -461,7 +494,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
 
     when: "${params.bam_filter_reads}"
 
@@ -480,28 +513,66 @@ process samtools_filter {
     }  
 }
 
+
+/*
+Step 6: DeDup / MarkDuplicates
+*/ 
+
+process dedup{
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/5-DeDup"
+
+    when:
+    !params.skip_deduplication && params.dedupper == 'dedup'
+
+    input:
+    file bam from ch_bam_filtered_dedup
+
+    output:
+    file "*.hist" into ch_hist_for_preseq
+    file "*.log" into ch_dedup_results_for_multiqc
+    file "*_rmdup.bam" into ch_dedup_bam
+
+    script:
+    if(params.singleEnd) {
+    """
+    dedup -i $bam -m -o . -u 
+    """  
+    } else {
+    """
+    dedup -i $bam -o . -u 
+    """  
+    }
+}
+
 /*
 Step 5.1: Preseq
-SHOULD OPTIONALLY USE DEDUP *.hist files if possible!
 */
 
 process preseq {
-    tag "${bam.baseName}"
+    tag "${input.baseName}"
     publishDir "${params.outdir}/08-Preseq", mode: 'copy'
 
     when:
     !params.skip_preseq
 
     input:
-    file bam from ch_mapped_reads_preseq
+    file input from (params.skip_deduplication ? ch_mapped_reads_preseq : ch_hist_for_preseq )
 
     output:
-    file "${bam.baseName}.ccurve" into ch_preseq_results
+    file "${input.baseName}.ccurve" into ch_preseq_results
 
     script:
+    if(!params.skip_deduplication){
     """
-    preseq lc_extrap -v -B $bam -o ${bam.baseName}.ccurve
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -H $input
     """
+
+    } else {
+    """
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B $input
+    """
+    }
 }
 
 /*
@@ -529,7 +600,7 @@ process damageprofiler {
 }
 
 /* 
-Step 5.3: Qualimap (before or after Dedup?)
+Step 5.3: Qualimap
 */
 
 process qualimap {
@@ -554,35 +625,11 @@ process qualimap {
     """
 }
 
+
+
 /*
-Step 6: DeDup / MarkDuplicates
-*/ 
-process dedup{
-    tag "${bam.baseName}"
-    publishDir "${params.outdir}/5-DeDup"
-
-    when:
-    !params.skip_deduplication && params.dedupper == 'dedup'
-
-    input:
-    file bam from ch_bam_filtered_dedup
-
-    output:
-    file "*.{hist,log}" into ch_dedup_results_for_multiqc
-    file "*_rmdup.bam" into ch_dedup_bam
-
-    script:
-    if(params.singleEnd) {
-    """
-    dedup -i $bam -m -o . -u 
-    """  
-    } else {
-    """
-    dedup -i $bam -o . -u 
-    """  
-    }
-
-}
+ Step 6: MarkDuplicates
+ */
 
 process markDup{
     tag "${bam.baseName}"
@@ -605,20 +652,64 @@ process markDup{
     """
 }
 
-//TODO potentially add in samples where no dedup was executed either!
-//Channel.mix(ch_markdup_bam, ch_dedup_bam)
-//        .into{ ch_dedup_for_angsd; ch_dedup_for_gatk; ch_dedup_for_snpad}
+//If no deduplication runs, the input is mixed directly from samtools filter, if it runs either markdup or dedup is used thus mixed from these two channels
+ch_dedup_for_pmdtools = Channel.create()
 
+if(!params.skip_deduplication){
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).set {ch_for_pmdtools}
+} else {
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).set {ch_for_pmdtools}
+}
 
+process pmdtools {
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/04-Samtools", mode: 'copy'
 
+    when: params.run_pmdtools
+
+    input: 
+    file bam from ch_for_pmdtools
+    file fasta from ch_fasta_for_pmdtools
+
+    output:
+    file "*.bam" into ch_bam_after_pmdfiltering
+    file "*.cpg.range*.txt"
+
+    script:
+    //Check which treatment for the libraries was used
+    def treatment = params.udg ? (params.udg_type =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
+    if(params.snpcapture){
+        snpcap = (params.pmdtools_reference_mask != '') ? "--refseq ${params.pmdtools_reference_mask}" : ''
+        log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
+    } else {
+        snpcap = ''
+    }
+    """
+    #Run Filtering step 
+    samtools fillmd -b $bam $fasta | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
+    #Run Calc Range step
+    #samtools fillmd -b $bam $fasta | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt 
+    """
+}
 
 
 
 
 /*
-Step 7: angsd
-Step 7: GATK
-Step 8: vcf2genome
+Processing missing:
+- pmdtools
+
+Genotyping tools:
+- angsd
+- gatk (if even suitable anymore?)
+- snpAD
+- sequenceTools
+
+Downstream VCF tools:
+- vcf2genome
+- gencons
+- READ/mcMLKin
+- popGen output? PLINK? 
 */
 
 
