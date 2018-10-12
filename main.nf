@@ -260,67 +260,69 @@ process get_software_versions {
 /* 
 * Create BWA indices if they are not present
 */ 
+process makeBWAIndex {
+    tag {fasta}
+    publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
-if(!params.bwa_index && params.fasta && params.aligner == 'bwa'){
-    process makeBWAIndex {
-        tag {fasta}
-        publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
+    when: !params.bwa_index && params.fasta && params.aligner == 'bwa'
 
-        input:
-        file fasta from ch_fasta_for_bwa_indexing
+    input:
+    file fasta from ch_fasta_for_bwa_indexing
 
-        output:
-        file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into ch_bwa_index
+    output:
+    file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into ch_bwa_index
 
-        script:
-        """
-        bwa index $fasta
-        """
-    }
+    script:
+    """
+    bwa index $fasta
+    """
 }
+
 
 /*
- * PREPROCESSING - Index Fasta file
+ * PREPROCESSING - Index Fasta file if not specified on CLI 
  */
-if(!params.fasta_index && params.fasta && params.aligner == 'bwa'){
-    process makeFastaIndex {
-        tag {fasta}
-        publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
+process makeFastaIndex {
+    tag {fasta}
+    publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
-        input:
-        file fasta from ch_fasta_for_faidx_indexing
+    when: !params.fasta_index && params.fasta && params.aligner == 'bwa'
+    input:
+    file fasta from ch_fasta_for_faidx_indexing
 
-        output:
-        file "${fasta}.fai" into ch_fasta_faidx_index
-        file "${fasta}"
+    output:
+    file "${fasta}.fai" into ch_fasta_faidx_index
+    file "${fasta}"
 
-        script:
-        """
-        samtools faidx $fasta
-        """
-    }
+    script:
+    """
+    samtools faidx $fasta
+    """
 }
+
 
 /*
- * PREPROCESSING - Create Sequence Dictionary for FastA
+ * PREPROCESSING - Create Sequence Dictionary for FastA if not specified on CLI 
  */
-if(!params.seq_dict && params.fasta){
-    process makeSeqDict {
-        tag {fasta}
-        publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
-        input:
-        file fasta from ch_fasta_for_dict_indexing
+process makeSeqDict {
+    tag {fasta}
+    publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
-        output:
-        file "*.dict" into ch_seq_dict
+    when: !params.seq_dict && params.fasta
 
-        script:
-        """
-        picard CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
-        """
-    }
+    input:
+    file fasta from ch_fasta_for_dict_indexing
+
+    output:
+    file "*.dict" into ch_seq_dict
+
+    script:
+    """
+    picard CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
+    """
 }
+
 
 
 /*
