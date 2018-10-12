@@ -292,6 +292,7 @@ if(!params.fasta_index && params.fasta && params.aligner == 'bwa'){
 
         output:
         file "${fasta}.fai" into ch_fasta_faidx_index
+        file "${fasta}"
 
         script:
         """
