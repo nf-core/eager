@@ -424,7 +424,7 @@ process fastqc_after_clipping {
     file(reads) from ch_clipped_reads_for_fastqc
 
     output:
-    file "*_fastqc.{zip,html}"
+    file "*_fastqc.{zip,html}" optional true into ch_fastqc_after_clipping
 
     script:
     """

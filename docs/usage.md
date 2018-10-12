@@ -11,6 +11,7 @@
         * [`docker`](#docker)
         * [`awsbatch`](#awsbatch)
         * [`standard`](#standard)
+        * [`uzh`](#uzh)
         * [`none`](#none)
     * [`--reads`](#--reads)
     * [`--singleEnd`](#--singleend)
@@ -87,6 +88,9 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 * `standard`
     * The default profile, used if `-profile` is not specified at all.
     * Runs locally and expects all software to be installed and available on the `PATH`.
+* `uzh`
+    * A profile for the University of Zurich Research Cloud
+    * Loads Singularity and defines appropriate resources for running the pipeline.
 * `docker`
     * A generic configuration profile to be used with [Docker](http://docker.com/)
     * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
