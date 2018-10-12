@@ -412,6 +412,9 @@ process adapter_removal {
     }
 }
 
+ch_read_files_clip.close()
+ch_clipped_reads_complexity_filtered.close()
+
 /*
  * STEP 2.1 - FastQC after clipping/merging (if applied!)
  */
@@ -431,6 +434,9 @@ process fastqc_after_clipping {
     fastqc -q $reads
     """
 }
+
+//Close that channel
+ch_fastqc_after_clipping.close()
 
 /*
 Step 3: Mapping with BWA, SAM to BAM, Sort BAM
@@ -661,6 +667,10 @@ if(!params.skip_deduplication){
     ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).set {ch_for_pmdtools}
 }
 
+if(!params.run_pmdtools){
+    ch_dedup_for_pmdtools.close()
+}
+
 process pmdtools {
     tag "${bam.baseName}"
     publishDir "${params.outdir}/04-Samtools", mode: 'copy'
@@ -691,6 +701,8 @@ process pmdtools {
     #samtools fillmd -b $bam $fasta | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt 
     """
 }
+
+//Close Channel for pmdtools as it 
 
 
 
@@ -723,8 +735,8 @@ process multiqc {
 
     input:
     file multiqc_config
-    file ('fastqc/*') from ch_fastqc_results.collect()
-    file ('software_versions/*') from software_versions_yaml.collect()
+    file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
+    file ('software_versions/*') from software_versions_yaml.collect().ifEmpty([])
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
     file ('damageprofiler/*') from ch_damageprofiler_results.collect().ifEmpty([])
