@@ -412,9 +412,6 @@ process adapter_removal {
     }
 }
 
-ch_read_files_clip.close()
-ch_clipped_reads_complexity_filtered.close()
-
 /*
  * STEP 2.1 - FastQC after clipping/merging (if applied!)
  */
