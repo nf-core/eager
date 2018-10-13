@@ -453,6 +453,7 @@ process bwa {
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
+    file "*.bai" 
     
 
     script:
@@ -460,6 +461,7 @@ process bwa {
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
+    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
     """
 }
 
@@ -494,13 +496,14 @@ process samtools_idxstats {
 
 process samtools_filter {
     tag "$prefix"
-    publishDir "${params.outdir}/04-Samtools", mode: 'copy', pattern: "*.bam"
+    publishDir "${params.outdir}/04-Samtools", mode: 'copy'
 
     input: 
     file bam from ch_mapped_reads_filter
 
     output:
     file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*.bai"
 
     when: "${params.bam_filter_reads}"
 
@@ -511,10 +514,12 @@ process samtools_filter {
     """
     samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
     samtools fastq -tn "${prefix}.unmapped.bam" | gzip > "${prefix}.unmapped.fq.gz"
+    samtools index -@ ${task.cpus} ${prefix}.filtered.bam
     """
     } else {
     """
     samtools view -h $bam | samtools view - -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+    samtools index -@ ${task.cpus} ${prefix}.filtered.bam
     """
     }  
 }
@@ -537,16 +542,22 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "*_rmdup.bam" into ch_dedup_bam
+    file "${prefix}.sorted.bam" into ch_dedup_bam
+    file "*.bai"
 
     script:
+    prefix="${bam.baseName}"
     if(params.singleEnd) {
     """
     dedup -i $bam -m -o . -u 
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
+    samtools index -@ ${task.cpus} "$prefix".sorted.bam
     """  
     } else {
     """
     dedup -i $bam -o . -u 
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
+    samtools index -@ ${task.cpus} "$prefix".sorted.bam
     """  
     }
 }
