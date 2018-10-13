@@ -424,3 +424,19 @@ Can be used to set a reference genome mask for PMDTools.
 ### `--pmdtools_max_reads`
 
 The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results. 
+
+## BAM Trimming Parameters
+
+For some library preparation protocols, users might want to clip off damaged bases before applying genotyping methods. This can be done in nf-core/eager automatically by turning on the `--trim_bam` parameter.
+
+### `--trim_bam`
+
+Turns on the BAM trimming method. Trims off `[n]` bases from reads in the deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently.
+
+### `--bamutils_clip_left` / `--bamutils_clip_right`
+
+Default set to `1` and clipps off one base of the left or right side of reads. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).
+
+### `--bamutils_softclip`
+
+By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string.
