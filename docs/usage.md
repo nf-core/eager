@@ -249,7 +249,7 @@ process.$multiqc.module = []
 
 ### `--max_memory`
 Use to set a top-limit for the default memory requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_memory '8.GB'``
+Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`
 
 ### `--max_time`
 Use to set a top-limit for the default time requirement for each process.
