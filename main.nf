@@ -120,6 +120,7 @@ params.pmdtools_max_reads = 10000
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
+wherearemyfiles = file("$baseDir/assets/where_are_my_files.txt")
 
 // Validate inputs
 Channel.fromPath("${params.fasta}")
@@ -262,15 +263,21 @@ process get_software_versions {
 */ 
 process makeBWAIndex {
     tag {fasta}
-    publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
+    publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
+            if (params.saveReference) filename 
+            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            else null
+    }
 
     when: !params.bwa_index && params.fasta && params.aligner == 'bwa'
 
     input:
     file fasta from ch_fasta_for_bwa_indexing
+    file wherearemyfiles
 
     output:
     file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into ch_bwa_index
+    file "where_are_my_files.txt"
 
     script:
     """
@@ -284,15 +291,21 @@ process makeBWAIndex {
  */
 process makeFastaIndex {
     tag {fasta}
-    publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
-
+    publishDir path: "${params.outdir}/reference_genome/fasta_index", mode: 'copy', saveAs: { filename -> 
+            if (params.saveReference) filename 
+            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            else null
+    }
     when: !params.fasta_index && params.fasta && params.aligner == 'bwa'
+
     input:
     file fasta from ch_fasta_for_faidx_indexing
+    file wherearemyfiles
 
     output:
     file "${fasta}.fai" into ch_fasta_faidx_index
     file "${fasta}"
+    file "where_are_my_files.txt"
 
     script:
     """
@@ -307,15 +320,21 @@ process makeFastaIndex {
 
 process makeSeqDict {
     tag {fasta}
-    publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
-
+    publishDir path: "${params.outdir}/reference_genome/seq_dict", mode: 'copy', saveAs: { filename -> 
+            if (params.saveReference) filename 
+            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            else null
+    }
+    
     when: !params.seq_dict && params.fasta
 
     input:
     file fasta from ch_fasta_for_dict_indexing
+    file wherearemyfiles
 
     output:
     file "*.dict" into ch_seq_dict
+    file "where_are_my_files.txt"
 
     script:
     """
@@ -330,7 +349,7 @@ process makeSeqDict {
  */
 process fastqc {
     tag "$name"
-    publishDir "${params.outdir}/01-FastQC", mode: 'copy',
+    publishDir "${params.outdir}/FastQC", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     input:
@@ -353,7 +372,7 @@ process fastqc {
 
 process fastp {
     tag "$name"
-    publishDir "${params.outdir}/01-FastP", mode: 'copy'
+    publishDir "${params.outdir}/FastP", mode: 'copy'
 
     when: params.complexity_filter
 
@@ -384,7 +403,7 @@ process fastp {
 
 process adapter_removal {
     tag "$name"
-    publishDir "${params.outdir}/02-Merging", mode: 'copy'
+    publishDir "${params.outdir}/read_merging", mode: 'copy'
 
     input:
     set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
@@ -420,7 +439,7 @@ process adapter_removal {
  */
 process fastqc_after_clipping {
     tag "${reads[0].baseName}"
-    publishDir "${params.outdir}/01-FastQC/after_clipping", mode: 'copy',
+    publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     input:
@@ -444,7 +463,7 @@ Step 3: Mapping with BWA, SAM to BAM, Sort BAM
 
 process bwa {
     tag "$prefix"
-    publishDir "${params.outdir}/03-Mapping", mode: 'copy'
+    publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
     input:
     file(reads) from ch_clipped_reads
@@ -472,7 +491,7 @@ process bwa {
 
 process samtools_idxstats {
     tag "$prefix"
-    publishDir "${params.outdir}/04-Samtools", mode: 'copy'
+    publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
     file(bam) from ch_mapped_reads_idxstats
@@ -494,13 +513,21 @@ process samtools_idxstats {
 
 process samtools_filter {
     tag "$prefix"
-    publishDir "${params.outdir}/04-Samtools", mode: 'copy', pattern: "*.bam"
+    publishDir "${params.outdir}/samtools/filter", mode: 'copy',
+    saveAs: {filename ->
+            if (filename.indexOf(".fq.gz") > 0) "unmapped/$filename"
+            else if (filename.indexOf(".unmapped.bam") > 0) "unmapped/$filename"
+            else if (filename.indexOf(".filtered.bam")) filename
+            else null
+}
 
     input: 
     file bam from ch_mapped_reads_filter
 
     output:
     file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*.fq.gz" optional true
+    file "*.unmapped.bam" optional true
 
     when: "${params.bam_filter_reads}"
 
@@ -514,7 +541,7 @@ process samtools_filter {
     """
     } else {
     """
-    samtools view -h $bam | samtools view - -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+    samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
     """
     }  
 }
@@ -526,7 +553,7 @@ Step 6: DeDup / MarkDuplicates
 
 process dedup{
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/5-DeDup"
+    publishDir "${params.outdir}/deduplication/dedup"
 
     when:
     !params.skip_deduplication && params.dedupper == 'dedup'
@@ -557,7 +584,7 @@ Step 5.1: Preseq
 
 process preseq {
     tag "${input.baseName}"
-    publishDir "${params.outdir}/08-Preseq", mode: 'copy'
+    publishDir "${params.outdir}/preseq", mode: 'copy'
 
     when:
     !params.skip_preseq
@@ -587,7 +614,7 @@ Step 5.2: DMG Assessment
 
 process damageprofiler {
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/09-DamageProfiler", mode: 'copy'
+    publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
     when:
     !params.skip_damage_calculation
@@ -611,7 +638,7 @@ Step 5.3: Qualimap
 
 process qualimap {
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/06-QualiMap", mode: 'copy'
+    publishDir "${params.outdir}/qualimap", mode: 'copy'
 
     when:
     !params.skip_qualimap
@@ -639,7 +666,7 @@ process qualimap {
 
 process markDup{
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/5-DeDup"
+    publishDir "${params.outdir}/deduplication/markdup"
 
     when:
     !params.skip_deduplication && params.dedupper != 'dedup'
@@ -673,7 +700,7 @@ if(!params.run_pmdtools){
 
 process pmdtools {
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/04-Samtools", mode: 'copy'
+    publishDir "${params.outdir}/pmdtools", mode: 'copy'
 
     when: params.run_pmdtools
 
