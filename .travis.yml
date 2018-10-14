@@ -38,4 +38,6 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd 
   # Run the same pipeline testing optional step: fastp, complexity 
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --complexity_filter 
+  # Test BAM Trimming
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --trim_bam 
 
