@@ -116,6 +116,13 @@ params.pmdtools_threshold = 3
 params.pmdtools_reference_mask = ''
 params.pmdtools_max_reads = 10000
 
+//bamUtils trimbam settings
+params.trim_bam = false 
+params.bamutils_clip_left = 1 
+params.bamutils_clip_right = 1 
+params.bamutils_softclip = false 
+
+
 
 
 multiqc_config = file(params.multiqc_config)
@@ -699,10 +706,13 @@ process markDup{
 //If no deduplication runs, the input is mixed directly from samtools filter, if it runs either markdup or dedup is used thus mixed from these two channels
 ch_dedup_for_pmdtools = Channel.create()
 
+//Bamutils TrimBam Channel
+ch_for_bamutils = Channel.create()
+
 if(!params.skip_deduplication){
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).set {ch_for_pmdtools}
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).into {ch_for_pmdtools;ch_for_bamutils}
 } else {
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).set {ch_for_pmdtools}
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).into {ch_for_pmdtools;ch_for_bamutils}
 }
 
 if(!params.run_pmdtools){
@@ -740,7 +750,33 @@ process pmdtools {
     """
 }
 
-//Close Channel for pmdtools as it 
+/*
+* Optional BAM Trimming step using bamUtils 
+* Can be used for UDGhalf protocols to clip off -n bases of each read
+*/
+
+process bam_trim {
+    tag "${prefix}" 
+    publishDir "${params.outdir}/trimmed_bam", mode: 'copy'
+ 
+    when: params.trim_bam
+
+    input:
+    file bam from ch_for_bamutils  
+
+    output: 
+    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping
+    file "*.bai"
+
+    script:
+    prefix="${bam.baseName}"
+    softclip = "${params.bamutils_softclip}" ? '-c' : '' 
+    """
+    bam trimBam $bam tmp.bam -L ${params.bamutils_clip_left} -R ${params.bamutils_clip_right} ${softclip}
+    samtools sort -@ ${task.cpus} tmp.bam -o ${prefix}.trimmed.bam 
+    samtools index ${prefix}.trimmed.bam
+    """
+}
 
 
 
