@@ -728,10 +728,11 @@ process bam_trim {
 
     output: 
     file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping
+    file "*.bai"
 
     script:
     prefix="${bam.baseName}"
-    softclip = ${params.bamutils_softclip} ? '-c' : '' 
+    softclip = "${params.bamutils_softclip}" ? '-c' : '' 
     """
     bam trimBam $bam tmp.bam -L ${params.bamutils_clip_left} -R ${params.bamutils_clip_right} ${softclip}
     samtools sort -@ ${task.cpus} tmp.bam -o ${prefix}.trimmed.bam 
