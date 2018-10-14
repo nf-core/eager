@@ -521,6 +521,7 @@ process samtools_filter {
             else if (filename.indexOf(".unmapped.bam") > 0) "unmapped/$filename"
             else if (filename.indexOf(".filtered.bam")) filename
             else null
+    }
 
     input: 
     file bam from ch_mapped_reads_filter
