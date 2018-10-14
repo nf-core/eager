@@ -8,7 +8,6 @@
 ![Singularity Container available](https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
 ## Introduction
-THIS PIPELINE IS A WORK IN PROGRESS. Thanks for checking it out! Hopefully it will be functional soon.
 
 **nf-core/eager** is a bioinformatics best-practice analysis pipeline for ancient DNA data analysis.
 
@@ -16,15 +15,19 @@ The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow
 
 ### Pipeline steps
 
-* Make BWA reference genome index (optional)
-* FastQC
+* Create reference genome indices (optional)
+    * BWA 
+    * Samtools Index
+    * Sequence Dictionary
+* QC with FastQC
 * AdapterRemoval for read clipping and merging
-* Align with BWA
+* Read mapping with BWA
 * Samtools sort, index, stats & conversion to BAM
-* DeDup read deduplication or MarkDuplicates
+* DeDup read deduplication / MarkDuplicates
 * QualiMap BAM QC Checking
 * Preseq estimation
 * DamageProfiler damage profiling
+* PMDTools damagge filtering / assessment
 
 ### Documentation
 The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory:
