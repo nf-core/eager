@@ -609,7 +609,7 @@ process dedup{
 
     script:
     prefix="${bam.baseName}"
-    treat_merged= ${params.dedup_all_merged} ? '-m' : ''
+    treat_merged="${params.dedup_all_merged}" ? '-m' : ''
 
     if(params.singleEnd) {
     """
