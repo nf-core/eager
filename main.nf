@@ -132,6 +132,7 @@ params.damageprofiler_threshold = 15
 
 //DeDuplication settings
 params.dedupper = 'dedup' //default value dedup
+params.dedup_all_merged = false
 
 //Preseq settings
 params.preseq_step_size = 1000
@@ -608,15 +609,17 @@ process dedup{
 
     script:
     prefix="${bam.baseName}"
+    treat_merged= ${params.dedup_all_merged} ? '-m' : ''
+
     if(params.singleEnd) {
     """
-    dedup -i $bam -m -o . -u 
+    dedup -i $bam $treat_merged -o . -u 
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
     samtools index -@ ${task.cpus} "$prefix".sorted.bam
     """  
     } else {
     """
-    dedup -i $bam -o . -u 
+    dedup -i $bam $treat_merged -o . -u 
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
     samtools index -@ ${task.cpus} "$prefix".sorted.bam
     """  
