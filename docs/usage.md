@@ -57,6 +57,8 @@ The typical command for running the pipeline is as follows:
 nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
 
+> Note, that you might need to use `-profile standard,singularity` if you installed Singularity and don't want to use Docker. Also make sure, that you specify how much memory is available on your machine by using the `--max_cpus`, `--max_memory` options.
+
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
