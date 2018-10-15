@@ -390,8 +390,11 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream a
 
 ## Read DeDuplication Parameters
 
-### `--dedupper` dedup
+### `--dedupper`
 Sets the duplicate read removal tool. By default uses `dedup` an ancient DNA specific read deduplication tool. Users can also specify `markdup` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not* merged beforehand. In all other cases, it is advised to use `dedup`. 
+
+### `--dedup_all_merged`
+Sets DeDup to treat all reads as merged reads. This is useful if reads are for example not prefixed with `M_` in all cases.
 
 ## Library Complexity Estimation Parameters
 
