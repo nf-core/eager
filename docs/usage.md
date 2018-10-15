@@ -54,7 +54,7 @@ To access the nextflow help message run: `nextflow run -help`
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
-nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' -profile standard,docker
+nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
