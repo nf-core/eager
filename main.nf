@@ -26,15 +26,42 @@ def helpMessage() {
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
-      --genome                      Name of iGenomes reference
       -profile                      Hardware config to use. docker / aws
 
     Options:
+      --genome                      Name of iGenomes reference
       --singleEnd                   Specifies that the input is single end reads
+      --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
+      --udg                         Specify that your libraries are treated with UDG
+      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'Half' in that case
 
     References                      If not specified in the configuration file or you wish to overwrite any of the references.
       --fasta                       Path to Fasta reference
       --bwa_index                   Path to BWA index
+      --bedfile                     Path to BED file for SNPCapture methods
+      --seq_dict                    Path to sequence dictionary file
+      --fasta_index                 Path to FastA index 
+      --saveReference               Saves reference genome indices for later reusage
+
+    Skipping                        Skip any of the mentioned steps
+      --skip_preseq
+      --skip_damage_calculation
+      --skip_qualimap
+      --skip_deduplication
+    
+    Complexity Filtering 
+      --complexity_filtering            Run complexity filtering on FastQ files
+      --complexity_filter_poly_g_min    Specify poly-g min filter (default: 10) for filtering
+    
+    Clipping / Merging
+      --clip_forward_adaptor        Specify adapter to be clipped off (forward)
+      --clip_reverse_adaptor        Specify adapter to be clipped off (reverse)
+      --clip_readlength             Specify read minimum length to be kept for downstream analysis
+      --clip_min_read_quality       Specify minimum base quality for not trimming off bases
+      --min_adap_overlap            Specify minimum adapter overlap
+
+    For a full list of available parameters, consider the documentation.
+
 
     Other options:
       --outdir                      The output directory where the results will be saved
