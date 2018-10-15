@@ -14,7 +14,6 @@ To start using the nf-core/eager pipeline, follow the steps below:
 4. [Reference genomes](#4-reference-genomes)
 5. [Appendices](#appendices)
     * [Running on UPPMAX](#running-on-uppmax)
->>>>>>> TEMPLATE
 
 ## 1) Install NextFlow
 Nextflow runs on most POSIX systems (Linux, Mac OSX etc). It can be installed by running the following commands:
