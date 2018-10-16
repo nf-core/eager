@@ -355,6 +355,8 @@ Sets the minimum overlap between two reads when read merging is performed. Defau
 
 ## Read Mapping Parameters
 
+## BWA (default)
+
 These parameters configure mapping algorithm parameters. 
 
 ### `--bwaalnn`
@@ -368,6 +370,25 @@ Configures the `bwa aln -k` parameter for the seeding phase in the mapping algor
 ### `--bwaalnl`
 
 Configures the length of the seed used in `bwa aln -l`. Default is set to BWA default of `32`.
+
+## CircularMapper
+
+### `--circularmapper`
+
+This turns on the CircularMapper application, that enhances the mapping procedure with the BWA algorithm on circular references utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). 
+
+### `--circularextension`
+
+The number of bases to extend the reference genome with. By default this is set to `500` if not specified otherwise.
+
+### `--circulartarget`
+
+The chromosome in your FastA reference that you'd like to be treated as circular. By default this is set to `MT` but can be configured to match any other chromosome. 
+
+### `--circularfilter`
+
+If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.
+
 
 ## Read Filtering and Conversion Parameters
 
