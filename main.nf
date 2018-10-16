@@ -614,12 +614,14 @@ process dedup{
     if(params.singleEnd) {
     """
     dedup -i $bam $treat_merged -o . -u 
+    mv *.log dedup.log
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
     samtools index -@ ${task.cpus} "$prefix".sorted.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
+    mv *.log dedup.log
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
     samtools index -@ ${task.cpus} "$prefix".sorted.bam
     """  
@@ -841,6 +843,7 @@ process multiqc {
     file multiqc_config
     file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml.collect().ifEmpty([])
+    file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
     file ('damageprofiler/*') from ch_damageprofiler_results.collect().ifEmpty([])
