@@ -531,20 +531,20 @@ process circularmapper{
     when: params.circularmapper
 
     input:
-    file(reads) from ch_clipped_reads_circularmapper
+    file reads from ch_clipped_reads_circularmapper
     file fasta from ch_fasta_for_circularmapper
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
+    file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm
     file "*.bai" 
     
     script:
-    filter = ${params.circularfilter} ? '-f true -x false' : ''
+    filter = "${params.circularfilter}" ? '' : '-f true -x false'
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     stem_realigned = reads[0].toString()+"_realigned.bam"
     """ 
     circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
-    bwa index "*_${params.circularextension}.fasta"
+    bwa index "${fasta.baseName}_${params.circularextension}.fasta"
     bwa aln -t ${task.cpus} "${fasta.baseName}_${params.circularextension}.fasta" $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
@@ -562,7 +562,7 @@ process samtools_idxstats {
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
-    file(bam) from ch_mapped_reads_idxstats
+    file(bam) from ch_mapped_reads_idxstats.mix(ch_mapped_reads_idxstats_cm)
 
     output:
     file "*.stats" into ch_idxstats_for_multiqc
@@ -590,7 +590,7 @@ process samtools_filter {
     }
 
     input: 
-    file bam from ch_mapped_reads_filter
+    file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm)
 
     output:
     file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
@@ -671,7 +671,7 @@ process preseq {
     !params.skip_preseq
 
     input:
-    file input from (params.skip_deduplication ? ch_mapped_reads_preseq : ch_hist_for_preseq )
+    file input from (params.skip_deduplication ? ch_mapped_reads_preseq.mix(ch_mapped_reads_preseq_cm) : ch_hist_for_preseq )
 
     output:
     file "${input.baseName}.ccurve" into ch_preseq_results
@@ -701,7 +701,7 @@ process damageprofiler {
     !params.skip_damage_calculation
 
     input:
-    file bam from ch_mapped_reads_damageprofiler
+    file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm)
     file fasta from ch_fasta_for_damageprofiler
 
     output:
