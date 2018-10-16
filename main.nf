@@ -166,7 +166,7 @@ wherearemyfiles = file("$baseDir/assets/where_are_my_files.txt")
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index}
 
 //AWSBatch sanity checking
 
@@ -524,6 +524,31 @@ process bwa {
     """
 }
 
+process circulargenerator{
+    tag "$prefix"
+    publishDir "${params.outdir}/reference_genome/circularmapper_index", mode: 'copy', saveAs: { filename -> 
+            if (params.saveReference) filename 
+            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            else null
+    }
+
+    when: params.circularmapper
+
+    input:
+    file fasta from ch_fasta_for_circularmapper_index
+
+    output:
+    file "*.fasta*" into ch_circularmapper_indices
+
+    script:
+    """
+    circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
+    bwa index "${fasta.baseName}_${params.circularextension}.fasta"
+    """
+
+}
+
+
 process circularmapper{
     tag "$prefix"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
@@ -533,6 +558,7 @@ process circularmapper{
     input:
     file reads from ch_clipped_reads_circularmapper
     file fasta from ch_fasta_for_circularmapper
+    file "*" from ch_circularmapper_indices
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm
@@ -541,14 +567,11 @@ process circularmapper{
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-    stem_realigned = reads[0].toString()+"_realigned.bam"
     """ 
-    circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
-    bwa index "${fasta.baseName}_${params.circularextension}.fasta"
     bwa aln -t ${task.cpus} "${fasta.baseName}_${params.circularextension}.fasta" $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads > tmp.out
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" "${fasta.baseName}_${params.circularextension}.fasta" "${reads.baseName}".sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
-    samtools sort -@ ${task.cpus} -O bam ${stem_realigned} > "${prefix}".sorted.bam
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
     samtools index -@ ${task.cpus} "${prefix}".sorted.bam
     """
 }
