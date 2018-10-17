@@ -120,6 +120,12 @@ params.bwaalnn = 0.04
 params.bwaalnk = 2
 params.bwaalnl = 32
 
+//Mapper to use, by default BWA aln will be used
+params.circularmapper = false
+params.circularextension = 500
+params.circulartarget = 'MT'
+params.circularfilter = false
+
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
 params.bam_keep_mapped_only = false
 params.bam_keep_all = true
@@ -160,7 +166,7 @@ wherearemyfiles = file("$baseDir/assets/where_are_my_files.txt")
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index}
 
 //AWSBatch sanity checking
 
@@ -444,7 +450,7 @@ process adapter_removal {
     set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
 
     output:
-    file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc)
+    file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper)
     file "*.settings" into ch_adapterremoval_logs
 
     script:
@@ -489,9 +495,6 @@ process fastqc_after_clipping {
     """
 }
 
-//Close that channel
-ch_fastqc_after_clipping.close()
-
 /*
 Step 3: Mapping with BWA, SAM to BAM, Sort BAM
 */
@@ -499,6 +502,8 @@ Step 3: Mapping with BWA, SAM to BAM, Sort BAM
 process bwa {
     tag "$prefix"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
+
+    when: !params.circularmapper
 
     input:
     file(reads) from ch_clipped_reads
@@ -519,8 +524,57 @@ process bwa {
     """
 }
 
-//TODO Multi Lane BAM merging here (!)
+process circulargenerator{
+    tag "$prefix"
+    publishDir "${params.outdir}/reference_genome/circularmapper_index", mode: 'copy', saveAs: { filename -> 
+            if (params.saveReference) filename 
+            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            else null
+    }
 
+    when: params.circularmapper
+
+    input:
+    file fasta from ch_fasta_for_circularmapper_index
+
+    output:
+    file "*.fasta*" into ch_circularmapper_indices
+
+    script:
+    """
+    circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
+    bwa index "${fasta.baseName}_${params.circularextension}.fasta"
+    """
+
+}
+
+
+process circularmapper{
+    tag "$prefix"
+    publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
+
+    when: params.circularmapper
+
+    input:
+    file reads from ch_clipped_reads_circularmapper
+    file fasta from ch_fasta_for_circularmapper
+    file "*" from ch_circularmapper_indices
+
+    output:
+    file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm
+    file "*.bai" 
+    
+    script:
+    filter = "${params.circularfilter}" ? '' : '-f true -x false'
+    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    """ 
+    bwa aln -t ${task.cpus} "${fasta.baseName}_${params.circularextension}.fasta" $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" "${fasta.baseName}_${params.circularextension}.fasta" "${reads.baseName}".sai $reads > tmp.out
+    realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
+    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
+    """
+}
 
 /*
 * Step 4 - IDXStats
@@ -531,7 +585,7 @@ process samtools_idxstats {
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
-    file(bam) from ch_mapped_reads_idxstats
+    file(bam) from ch_mapped_reads_idxstats.mix(ch_mapped_reads_idxstats_cm)
 
     output:
     file "*.stats" into ch_idxstats_for_multiqc
@@ -559,7 +613,7 @@ process samtools_filter {
     }
 
     input: 
-    file bam from ch_mapped_reads_filter
+    file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm)
 
     output:
     file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
@@ -640,7 +694,7 @@ process preseq {
     !params.skip_preseq
 
     input:
-    file input from (params.skip_deduplication ? ch_mapped_reads_preseq : ch_hist_for_preseq )
+    file input from (params.skip_deduplication ? ch_mapped_reads_preseq.mix(ch_mapped_reads_preseq_cm) : ch_hist_for_preseq )
 
     output:
     file "${input.baseName}.ccurve" into ch_preseq_results
@@ -670,7 +724,7 @@ process damageprofiler {
     !params.skip_damage_calculation
 
     input:
-    file bam from ch_mapped_reads_damageprofiler
+    file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm)
     file fasta from ch_fasta_for_damageprofiler
 
     output:
