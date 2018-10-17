@@ -136,13 +136,22 @@ Please note the following requirements:
 If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
 ### `--singleEnd`
-By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
 
 ```bash
 --singleEnd --reads '*.fastq'
 ```
 
 It is not possible to run a mixture of single-end and paired-end files in one run.
+
+### `--pairedEnd`
+If you have paired-end data, you need to specify `--pairedEnd` on the command line when you launc hthe pipeline. 
+
+A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+
+```bash
+--pairedEnd --reads '*.fastq'
+```
 
 ## Reference Genomes
 
@@ -327,6 +336,7 @@ Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No du
 Performs a poly-G complexity filtering step in the beginning of the pipeline if turne on. This can be useful for especially assembly projects where low-complexity regions might dramatically influence the assembly of contigs.
 
 ## Complexity Filtering Options
+
 ### `--complexity_filter_poly_g_min`
 
 This option can be used to define the minimum value for the poly-G filtering step in low complexity filtering. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.
@@ -355,6 +365,8 @@ Sets the minimum overlap between two reads when read merging is performed. Defau
 
 ## Read Mapping Parameters
 
+## BWA (default)
+
 These parameters configure mapping algorithm parameters. 
 
 ### `--bwaalnn`
@@ -369,13 +381,37 @@ Configures the `bwa aln -k` parameter for the seeding phase in the mapping algor
 
 Configures the length of the seed used in `bwa aln -l`. Default is set to BWA default of `32`.
 
+## CircularMapper
+
+### `--circularmapper`
+
+This turns on the CircularMapper application, that enhances the mapping procedure with the BWA algorithm on circular references utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). 
+
+### `--circularextension`
+
+The number of bases to extend the reference genome with. By default this is set to `500` if not specified otherwise.
+
+### `--circulartarget`
+
+The chromosome in your FastA reference that you'd like to be treated as circular. By default this is set to `MT` but can be configured to match any other chromosome. 
+
+### `--circularfilter`
+
+If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.
+
+## BWA Mem
+
+### `--bwamem`
+
+Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite useful for modern DNA, but is rarely used in projects for ancient DNA.
+
 ## Read Filtering and Conversion Parameters
 
 Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline. 
 
 ### `--bam_keep_mapped_only`
 
-This can be used to only keep mapped reads for downstream analysis. By default turned off, all reads are kept in the BAM file.
+This can be used to only keep mapped reads for downstream analysis. By default turned off, all reads are kept in the BAM file. Unmapped reads are stored both in BAM and FastQ format e.g. for different downstream processing.
 
 ### `--bam_keep_all`
 

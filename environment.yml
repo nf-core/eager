@@ -1,4 +1,4 @@
-name: nf-core-eager-2.0.0dev
+name: nf-core-eager-2.0.0
 channels:
   - defaults
   - conda-forge

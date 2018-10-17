@@ -21,13 +21,14 @@ The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow
     * Sequence Dictionary
 * QC with FastQC
 * AdapterRemoval for read clipping and merging
-* Read mapping with BWA
+* Read mapping with BWA, BWA Mem or CircularMapper
 * Samtools sort, index, stats & conversion to BAM
-* DeDup read deduplication / MarkDuplicates
+* DeDup or MarkDuplicates read deduplication
 * QualiMap BAM QC Checking
-* Preseq estimation
+* Preseq Library Complexity Estimation
 * DamageProfiler damage profiling
-* PMDTools damagge filtering / assessment
+* BAM Clipping for UDG+/UDGhalf protocols
+* PMDTools damage filtering / assessment
 
 ### Documentation
 The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory:
