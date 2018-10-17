@@ -1,13 +1,13 @@
 # nf-core/eager: Changelog
 
-## 2.0 "Kaufbeuren" - 2018-10-14
+## 2.0 "Kaufbeuren" - 2018-10-17
 
 Initial release of nf-core/eager featuring:
 
 * FastQC read quality control
 * (Optional) Read complexity filtering with FastP
 * Read merging and clipping using AdapterRemoval v2
-* Mapping using BWA
+* Mapping using BWA / BWA Mem or CircularMapper
 * Library Complexity Estimation with Preseq
 * Conversion and Filtering of BAM files using Samtools
 * Damage assessment via DamageProfiler, additional filtering using PMDTools
