@@ -126,6 +126,10 @@ params.circularextension = 500
 params.circulartarget = 'MT'
 params.circularfilter = false
 
+//BWAMem Specific Settings 
+params.bwamem = false
+params.bwamem = 
+
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
 params.bam_keep_mapped_only = false
 params.bam_keep_all = true
@@ -166,7 +170,7 @@ wherearemyfiles = file("$baseDir/assets/where_are_my_files.txt")
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index;ch_fasta_for_bwamem_mapping}
 
 //AWSBatch sanity checking
 
@@ -317,7 +321,7 @@ process makeBWAIndex {
     file wherearemyfiles
 
     output:
-    file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into ch_bwa_index
+    file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into (ch_bwa_index,ch_bwa_index_bwamem)
     file "where_are_my_files.txt"
 
     script:
@@ -450,7 +454,7 @@ process adapter_removal {
     set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
 
     output:
-    file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper)
+    file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
     file "*.settings" into ch_adapterremoval_logs
 
     script:
@@ -503,7 +507,7 @@ process bwa {
     tag "$prefix"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: !params.circularmapper
+    when: !params.circularmapper && !params.bwamem
 
     input:
     file(reads) from ch_clipped_reads
@@ -576,6 +580,30 @@ process circularmapper{
     """
 }
 
+process bwamem {
+    tag "$prefix"
+    publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
+
+    when: params.bwamem && !params.circularmapper
+
+    input:
+    file(reads) from ch_clipped_reads_bwamem
+    file "*" from ch_bwa_index_bwamem
+    file fasta from ch_fasta_for_bwamem_mapping
+
+    output:
+    file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler
+    file "*.bai" 
+    
+
+    script:
+    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    """
+    bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
+    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
+    """
+}
+
 /*
 * Step 4 - IDXStats
 */
@@ -585,7 +613,7 @@ process samtools_idxstats {
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
-    file(bam) from ch_mapped_reads_idxstats.mix(ch_mapped_reads_idxstats_cm)
+    file(bam) from ch_mapped_reads_idxstats.mix(ch_mapped_reads_idxstats_cm,ch_bwamem_mapped_reads_idxstats)
 
     output:
     file "*.stats" into ch_idxstats_for_multiqc
@@ -613,7 +641,7 @@ process samtools_filter {
     }
 
     input: 
-    file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm)
+    file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
     file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
@@ -694,7 +722,7 @@ process preseq {
     !params.skip_preseq
 
     input:
-    file input from (params.skip_deduplication ? ch_mapped_reads_preseq.mix(ch_mapped_reads_preseq_cm) : ch_hist_for_preseq )
+    file input from (params.skip_deduplication ? ch_mapped_reads_preseq.mix(ch_mapped_reads_preseq_cm,ch_bwamem_mapped_reads_preseq) : ch_hist_for_preseq )
 
     output:
     file "${input.baseName}.ccurve" into ch_preseq_results
@@ -724,7 +752,7 @@ process damageprofiler {
     !params.skip_damage_calculation
 
     input:
-    file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm)
+    file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
     file fasta from ch_fasta_for_damageprofiler
 
     output:

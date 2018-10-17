@@ -389,6 +389,11 @@ The chromosome in your FastA reference that you'd like to be treated as circular
 
 If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.
 
+## BWA Mem
+
+### `--bwamem`
+
+Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite useful for modern DNA, but is rarely used in projects for ancient DNA.
 
 ## Read Filtering and Conversion Parameters
 

@@ -42,4 +42,5 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --trim_bam 
   # Test running with CircularMapper
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --circularmapper --circulartarget 'NC_007596.2'
-
+  # Test running with BWA Mem
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --bwamem
