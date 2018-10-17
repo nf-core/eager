@@ -327,6 +327,7 @@ Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No du
 Performs a poly-G complexity filtering step in the beginning of the pipeline if turne on. This can be useful for especially assembly projects where low-complexity regions might dramatically influence the assembly of contigs.
 
 ## Complexity Filtering Options
+
 ### `--complexity_filter_poly_g_min`
 
 This option can be used to define the minimum value for the poly-G filtering step in low complexity filtering. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.
@@ -401,7 +402,7 @@ Users can configure to keep/discard/extract certain groups of reads efficiently 
 
 ### `--bam_keep_mapped_only`
 
-This can be used to only keep mapped reads for downstream analysis. By default turned off, all reads are kept in the BAM file.
+This can be used to only keep mapped reads for downstream analysis. By default turned off, all reads are kept in the BAM file. Unmapped reads are stored both in BAM and FastQ format e.g. for different downstream processing.
 
 ### `--bam_keep_all`
 

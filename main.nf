@@ -59,8 +59,49 @@ def helpMessage() {
       --clip_readlength             Specify read minimum length to be kept for downstream analysis
       --clip_min_read_quality       Specify minimum base quality for not trimming off bases
       --min_adap_overlap            Specify minimum adapter overlap
+    
+    BWA Mapping
+      --bwaalnn                     Specify the -n parameter for BWA aln
+      --bwaalnk                     Specify the -k parameter for BWA aln
+      --bwaalnl                     Specify the -l parameter for BWA aln
+    
+    CircularMapper
+      --circularmapper              Turn on CircularMapper (CM)
+      --circularextension           Specify the number of bases to extend
+      --circulartarget              Specify the target chromosome for CM
+      --circularfilter              Specify to filter off-target reads
+    
+    BWA Mem Mapping
+      --bwamem                      Turn on BWA Mem instead of CM/BWA aln for mapping
+    
+    BAM Filtering
+      --bam_keep_mapped_only            Only consider mapped reads for downstream analysis. Unmapped reads are extracted to separate output.
+      --bam_filter_reads                Keep all reads in BAM file for downstream analysis
+      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter
+    
+    DeDuplication
+      --dedupper                    Deduplication method to use
+      --dedup_all_merged            Treat all reads as merged reads
+    
+    Library Complexity Estimation
+      --preseq_step_size            Specify the step size of Preseq
+    
+    (aDNA) Damage Analysis
+      --damageprofiler_length       Specify length filter for DamageProfiler
+      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler
+      --run_pmdtools                Turn on PMDtools
+      --pmdtools_range              Specify range of bases for PMDTools
+      --pmdtools_threshold          Specify PMDScore threshold for PMDTools
+      --pmdtools_reference_mask     Specify a reference mask for PMDTools
+      --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
+    
+    BAM Trimming
+      --trim_bam                    Turn on BAM trimming for UDG(+ or 1/2) protocols
+      --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
+      --bamutils_softclip           Use softclip instead of hard masking
 
-    For a full list of available parameters, consider the documentation.
+
+    For a full list and more information of available parameters, consider the documentation.
 
 
     Other options:
@@ -128,7 +169,6 @@ params.circularfilter = false
 
 //BWAMem Specific Settings 
 params.bwamem = false
-params.bwamem = 
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
 params.bam_keep_mapped_only = false
