@@ -124,6 +124,7 @@ if (params.help){
 // Configurable variables
 params.name = false
 params.singleEnd = false
+params.pairedEnd = false
 params.genome = "Custom"
 params.snpcapture = false
 params.bedfile = ''
@@ -212,12 +213,20 @@ Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
     .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index;ch_fasta_for_bwamem_mapping}
 
-//AWSBatch sanity checking
+//Validate that either pairedEnd or singleEnd has been specified by the user!
+if( params.singleEnd || params.pairedEnd ){
+} else {
+    exit 1, "Please specify either --singleEnd or --pairedEnd to execute the pipeline!"
+}
 
+
+//AWSBatch sanity checking
 if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
     if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
 }
+
+
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
