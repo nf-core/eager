@@ -33,14 +33,14 @@ script:
   # Lint the pipeline code
   - nf-core lint ${TRAVIS_BUILD_DIR}
   # Run the basic pipeline with the test profile
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd
   # Run the basic pipeline with single end data (pretending its single end actually)
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd 
   # Run the same pipeline testing optional step: fastp, complexity 
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --complexity_filter 
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter 
   # Test BAM Trimming
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --trim_bam 
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --trim_bam 
   # Test running with CircularMapper
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --circularmapper --circulartarget 'NC_007596.2'
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --circularmapper --circulartarget 'NC_007596.2'
   # Test running with BWA Mem
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --bwamem
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem
