@@ -1,8 +1,20 @@
 # nf-core/eager: Changelog
+All notable changes to this project will be documented in this file.
 
-## 2.0 "Kaufbeuren" - 2018-10-17
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-Initial release of nf-core/eager featuring:
+## [2.0.1] - 2018-11-02
+
+### `Fixed`s
+
+* [#69](https://github.com/nf-core/eager/issues/67) - FastQC issues with conda environments
+
+## [2.0.0] "Kaufbeuren" - 2018-10-17
+
+Initial release of nf-core/eager:
+
+### `Added`
 
 * FastQC read quality control
 * (Optional) Read complexity filtering with FastP
