@@ -4,10 +4,10 @@ Bootstrap:docker
 %labels
     MAINTAINER Alexander Peltzer <alexander.peltzer@qbic.uni-tuebingen.de>
     DESCRIPTION Container image containing all requirements for the nf-core/eager pipeline
-    VERSION 2.1.0dev
+    VERSION 2.0.1
 
 %environment
-    PATH=/opt/conda/envs/nf-core-eager-2.1.0dev/bin:$PATH
+    PATH=/opt/conda/envs/nf-core-eager-2.0.1/bin:$PATH
     export PATH
 
 %files
