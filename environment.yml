@@ -1,18 +1,18 @@
-name: nf-core-eager-2.0.0
+name: nf-core-eager-2.0.1
 channels:
   - defaults
-  - conda-forge
   - bioconda
+  - conda-forge
 dependencies:
-  - conda-forge::openjdk=8.0.144 # Needed for FastQC docker - see bioconda/bioconda-recipes#5026
+  - defaults::openjdk=8.0.152
   - fastqc=0.11.8
   - adapterremoval=2.2.2
   - adapterremovalfixprefix=0.0.4
   - bwa=0.7.17
-  - picard=2.18.14
+  - picard=2.18.15
   - samtools=1.9
   - dedup=0.12.3
-  - angsd=0.921
+  - angsd=0.923
   - circularmapper=1.93.4
   - gatk4=4.0.10.0
   - qualimap=2.2.2b
