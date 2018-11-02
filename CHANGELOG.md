@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.0.1] - 2018-11-02
 
-### `Fixed`s
+### `Fixed`
 
 * [#69](https://github.com/nf-core/eager/issues/67) - FastQC issues with conda environments
 
