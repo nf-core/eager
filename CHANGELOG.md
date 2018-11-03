@@ -4,13 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.0.2dev]
+## unpublished
+
+
+## [2.0.2] - 2018-11-03
 
 ### `Changed`
 * [#70](https://github.com/nf-core/eager/issues/70) - Uninitialized `readPaths` warning removed
 
 ### `Added`
 * [#73](https://github.com/nf-core/eager/pull/73) - Travis CI Testing of Conda Environment added 
+
+### `Fixed`
+* [#72](https://github.com/nf-core/eager/issues/72) - iconv Issue with R in conda environment
 
 ## [2.0.1] - 2018-11-02
 
