@@ -14,7 +14,7 @@ dependencies:
   - dedup=0.12.3
   - angsd=0.923
   - circularmapper=1.93.4
-  - gatk4=4.0.10.0
+  - gatk4=4.0.11.0
   - qualimap=2.2.2b
   - vcf2genome=0.91
   - damageprofiler=0.3.11
