@@ -20,7 +20,8 @@ dependencies:
   - damageprofiler=0.3.11
   - multiqc=1.6
   - pmdtools=0.60
-  - r-markdown=0.8
+  - r-rmarkdown=1.10
+  - libiconv=1.15
   - sequencetools=1.2.2
   - preseq=2.0.3
   - fastp=0.19.4
