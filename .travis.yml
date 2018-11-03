@@ -13,7 +13,7 @@ before_install:
   # Pull the docker image first so the test doesn't wait for this
   - docker pull nfcore/eager
   # Fake the tag locally so that the pipeline runs properly
-  - docker tag nfcore/eager nfcore/eager:2.0.1
+  - docker tag nfcore/eager nfcore/eager:2.0.2
 
 install:
   # Install Nextflow
@@ -22,6 +22,10 @@ install:
   - sudo ln -s /tmp/nextflow/nextflow /usr/local/bin/nextflow
   # Install nf-core/tools
   - pip install nf-core
+  # Install Conda 
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  - bash Miniconda3-latest-Linux-x86_64.sh -b -f -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
   # Reset
   - mkdir ${TRAVIS_BUILD_DIR}/tests && cd ${TRAVIS_BUILD_DIR}/tests
 
@@ -44,3 +48,5 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --circularmapper --circulartarget 'NC_007596.2'
   # Test running with BWA Mem
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem
+  # Test basic pipeline with Conda too 
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,conda --pairedEnd
