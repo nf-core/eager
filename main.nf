@@ -271,7 +271,7 @@ if(params.readPaths){
 
 // Header log info
 log.info "========================================="
-log.info " nf-core/eager v${params.pipelineVersion}"
+log.info " nf-core/eager v${workflow.manifest.version}"
 log.info "========================================="
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
