@@ -26,7 +26,7 @@ def helpMessage() {
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
-      -profile                      Hardware config to use (standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentatoin.
+      -profile                      Hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentatoin.
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
       --pairedEnd                   Specifies that the input is paired end reads (required if not singleend)
       --fasta                       Path to Fasta reference (required if not iGenome reference)
