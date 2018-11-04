@@ -223,9 +223,6 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
         .fromPath(params.bwa_index)
         .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}" }
 }
-else {
-    exit 1, "No reference genome specified!"
-}
 
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
