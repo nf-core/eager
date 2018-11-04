@@ -26,17 +26,18 @@ def helpMessage() {
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
-      -profile                      Hardware config to use. docker / aws
+      -profile                      Hardware config to use (standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentatoin.
+      --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
+      --pairedEnd                   Specifies that the input is paired end reads (required if not singleend)
+      --fasta                       Path to Fasta reference (required if not iGenome reference)
+      --genome                      Name of iGenomes reference (required if not fasta reference)
 
-    Options:
-      --genome                      Name of iGenomes reference
-      --singleEnd                   Specifies that the input is single end reads
+    Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
       --udg                         Specify that your libraries are treated with UDG
       --udg_type                    Specify here if you have UDG half treated libraries, Set to 'Half' in that case
 
     References                      If not specified in the configuration file or you wish to overwrite any of the references.
-      --fasta                       Path to Fasta reference
       --bwa_index                   Path to BWA index
       --bedfile                     Path to BED file for SNPCapture methods
       --seq_dict                    Path to sequence dictionary file
@@ -54,8 +55,8 @@ def helpMessage() {
       --complexity_filter_poly_g_min    Specify poly-g min filter (default: 10) for filtering
     
     Clipping / Merging
-      --clip_forward_adaptor        Specify adapter to be clipped off (forward)
-      --clip_reverse_adaptor        Specify adapter to be clipped off (reverse)
+      --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward)
+      --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse)
       --clip_readlength             Specify read minimum length to be kept for downstream analysis
       --clip_min_read_quality       Specify minimum base quality for not trimming off bases
       --min_adap_overlap            Specify minimum adapter overlap
