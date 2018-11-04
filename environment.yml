@@ -4,7 +4,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - defaults::openjdk=8.0.152
+  - openjdk=8.0.152
   - fastqc=0.11.8
   - adapterremoval=2.2.2
   - adapterremovalfixprefix=0.0.4
