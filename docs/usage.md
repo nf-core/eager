@@ -116,7 +116,6 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 * `test`
     * A profile with a complete configuration for automated testing
     * Includes links to test data so needs no other parameters
->>>>>>> TEMPLATE
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
