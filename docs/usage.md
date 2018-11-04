@@ -49,11 +49,15 @@ It is recommended to limit the Nextflow Java virtual machines memory. We recomme
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
+To access the nextflow help message run: `nextflow run -help`
+
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
-nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' -profile standard,docker
+nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
+
+> Note, that you might need to use `-profile standard,singularity` if you installed Singularity and don't want to use Docker. Also make sure, that you specify how much memory is available on your machine by using the `--max_cpus`, `--max_memory` options.
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
@@ -65,6 +69,8 @@ results         # Finished results (configurable, see below)
 .nextflow.log   # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
+
+To see the the EAGER pipeline help message run: `nextflow run nf-core/eager --help`
 
 ### Updating the pipeline
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
@@ -130,13 +136,22 @@ Please note the following requirements:
 If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
 ### `--singleEnd`
-By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
 
 ```bash
 --singleEnd --reads '*.fastq'
 ```
 
 It is not possible to run a mixture of single-end and paired-end files in one run.
+
+### `--pairedEnd`
+If you have paired-end data, you need to specify `--pairedEnd` on the command line when you launc hthe pipeline. 
+
+A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+
+```bash
+--pairedEnd --reads '*.fastq'
+```
 
 ## Reference Genomes
 
@@ -322,6 +337,7 @@ Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No du
 Performs a poly-G complexity filtering step in the beginning of the pipeline if turne on. This can be useful for especially assembly projects where low-complexity regions might dramatically influence the assembly of contigs.
 
 ## Complexity Filtering Options
+
 ### `--complexity_filter_poly_g_min`
 
 This option can be used to define the minimum value for the poly-G filtering step in low complexity filtering. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.
@@ -350,6 +366,8 @@ Sets the minimum overlap between two reads when read merging is performed. Defau
 
 ## Read Mapping Parameters
 
+## BWA (default)
+
 These parameters configure mapping algorithm parameters. 
 
 ### `--bwaalnn`
@@ -364,13 +382,37 @@ Configures the `bwa aln -k` parameter for the seeding phase in the mapping algor
 
 Configures the length of the seed used in `bwa aln -l`. Default is set to BWA default of `32`.
 
+## CircularMapper
+
+### `--circularmapper`
+
+This turns on the CircularMapper application, that enhances the mapping procedure with the BWA algorithm on circular references utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). 
+
+### `--circularextension`
+
+The number of bases to extend the reference genome with. By default this is set to `500` if not specified otherwise.
+
+### `--circulartarget`
+
+The chromosome in your FastA reference that you'd like to be treated as circular. By default this is set to `MT` but can be configured to match any other chromosome. 
+
+### `--circularfilter`
+
+If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.
+
+## BWA Mem
+
+### `--bwamem`
+
+Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite useful for modern DNA, but is rarely used in projects for ancient DNA.
+
 ## Read Filtering and Conversion Parameters
 
 Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline. 
 
 ### `--bam_keep_mapped_only`
 
-This can be used to only keep mapped reads for downstream analysis. By default turned off, all reads are kept in the BAM file.
+This can be used to only keep mapped reads for downstream analysis. By default turned off, all reads are kept in the BAM file. Unmapped reads are stored both in BAM and FastQ format e.g. for different downstream processing.
 
 ### `--bam_keep_all`
 
@@ -387,8 +429,11 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream a
 
 ## Read DeDuplication Parameters
 
-### `--dedupper` dedup
+### `--dedupper`
 Sets the duplicate read removal tool. By default uses `dedup` an ancient DNA specific read deduplication tool. Users can also specify `markdup` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not* merged beforehand. In all other cases, it is advised to use `dedup`. 
+
+### `--dedup_all_merged`
+Sets DeDup to treat all reads as merged reads. This is useful if reads are for example not prefixed with `M_` in all cases.
 
 ## Library Complexity Estimation Parameters
 

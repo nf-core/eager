@@ -6,6 +6,9 @@
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker Container available](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager/)
 ![Singularity Container available](https://img.shields.io/badge/singularity-available-7E4C74.svg)
+[![DOI](https://zenodo.org/badge/135918251.svg)](https://zenodo.org/badge/latestdoi/135918251)
+
+
 
 ## Introduction
 
@@ -21,13 +24,14 @@ The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow
     * Sequence Dictionary
 * QC with FastQC
 * AdapterRemoval for read clipping and merging
-* Read mapping with BWA
+* Read mapping with BWA, BWA Mem or CircularMapper
 * Samtools sort, index, stats & conversion to BAM
-* DeDup read deduplication / MarkDuplicates
+* DeDup or MarkDuplicates read deduplication
 * QualiMap BAM QC Checking
-* Preseq estimation
+* Preseq Library Complexity Estimation
 * DamageProfiler damage profiling
-* PMDTools damagge filtering / assessment
+* BAM Clipping for UDG+/UDGhalf protocols
+* PMDTools damage filtering / assessment
 
 ### Documentation
 The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory:

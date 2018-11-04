@@ -26,15 +26,83 @@ def helpMessage() {
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
-      --genome                      Name of iGenomes reference
       -profile                      Hardware config to use. docker / aws
 
     Options:
+      --genome                      Name of iGenomes reference
       --singleEnd                   Specifies that the input is single end reads
+      --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
+      --udg                         Specify that your libraries are treated with UDG
+      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'Half' in that case
 
     References                      If not specified in the configuration file or you wish to overwrite any of the references.
       --fasta                       Path to Fasta reference
       --bwa_index                   Path to BWA index
+      --bedfile                     Path to BED file for SNPCapture methods
+      --seq_dict                    Path to sequence dictionary file
+      --fasta_index                 Path to FastA index 
+      --saveReference               Saves reference genome indices for later reusage
+
+    Skipping                        Skip any of the mentioned steps
+      --skip_preseq
+      --skip_damage_calculation
+      --skip_qualimap
+      --skip_deduplication
+    
+    Complexity Filtering 
+      --complexity_filtering            Run complexity filtering on FastQ files
+      --complexity_filter_poly_g_min    Specify poly-g min filter (default: 10) for filtering
+    
+    Clipping / Merging
+      --clip_forward_adaptor        Specify adapter to be clipped off (forward)
+      --clip_reverse_adaptor        Specify adapter to be clipped off (reverse)
+      --clip_readlength             Specify read minimum length to be kept for downstream analysis
+      --clip_min_read_quality       Specify minimum base quality for not trimming off bases
+      --min_adap_overlap            Specify minimum adapter overlap
+    
+    BWA Mapping
+      --bwaalnn                     Specify the -n parameter for BWA aln
+      --bwaalnk                     Specify the -k parameter for BWA aln
+      --bwaalnl                     Specify the -l parameter for BWA aln
+    
+    CircularMapper
+      --circularmapper              Turn on CircularMapper (CM)
+      --circularextension           Specify the number of bases to extend
+      --circulartarget              Specify the target chromosome for CM
+      --circularfilter              Specify to filter off-target reads
+    
+    BWA Mem Mapping
+      --bwamem                      Turn on BWA Mem instead of CM/BWA aln for mapping
+    
+    BAM Filtering
+      --bam_keep_mapped_only            Only consider mapped reads for downstream analysis. Unmapped reads are extracted to separate output.
+      --bam_filter_reads                Keep all reads in BAM file for downstream analysis
+      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter
+    
+    DeDuplication
+      --dedupper                    Deduplication method to use
+      --dedup_all_merged            Treat all reads as merged reads
+    
+    Library Complexity Estimation
+      --preseq_step_size            Specify the step size of Preseq
+    
+    (aDNA) Damage Analysis
+      --damageprofiler_length       Specify length filter for DamageProfiler
+      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler
+      --run_pmdtools                Turn on PMDtools
+      --pmdtools_range              Specify range of bases for PMDTools
+      --pmdtools_threshold          Specify PMDScore threshold for PMDTools
+      --pmdtools_reference_mask     Specify a reference mask for PMDTools
+      --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
+    
+    BAM Trimming
+      --trim_bam                    Turn on BAM trimming for UDG(+ or 1/2) protocols
+      --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
+      --bamutils_softclip           Use softclip instead of hard masking
+
+
+    For a full list and more information of available parameters, consider the documentation.
+
 
     Other options:
       --outdir                      The output directory where the results will be saved
@@ -56,6 +124,7 @@ if (params.help){
 // Configurable variables
 params.name = false
 params.singleEnd = false
+params.pairedEnd = false
 params.genome = "Custom"
 params.snpcapture = false
 params.bedfile = ''
@@ -93,6 +162,15 @@ params.bwaalnn = 0.04
 params.bwaalnk = 2
 params.bwaalnl = 32
 
+//Mapper to use, by default BWA aln will be used
+params.circularmapper = false
+params.circularextension = 500
+params.circulartarget = 'MT'
+params.circularfilter = false
+
+//BWAMem Specific Settings 
+params.bwamem = false
+
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
 params.bam_keep_mapped_only = false
 params.bam_keep_all = true
@@ -105,6 +183,7 @@ params.damageprofiler_threshold = 15
 
 //DeDuplication settings
 params.dedupper = 'dedup' //default value dedup
+params.dedup_all_merged = false
 
 //Preseq settings
 params.preseq_step_size = 1000
@@ -116,22 +195,38 @@ params.pmdtools_threshold = 3
 params.pmdtools_reference_mask = ''
 params.pmdtools_max_reads = 10000
 
+//bamUtils trimbam settings
+params.trim_bam = false 
+params.bamutils_clip_left = 1 
+params.bamutils_clip_right = 1 
+params.bamutils_softclip = false 
+
+
 
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
+wherearemyfiles = file("$baseDir/assets/where_are_my_files.txt")
 
 // Validate inputs
 Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index;ch_fasta_for_bwamem_mapping}
+
+//Validate that either pairedEnd or singleEnd has been specified by the user!
+if( params.singleEnd || params.pairedEnd ){
+} else {
+    exit 1, "Please specify either --singleEnd or --pairedEnd to execute the pipeline!"
+}
+
 
 //AWSBatch sanity checking
-
 if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
     if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
 }
+
+
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
@@ -176,7 +271,7 @@ if(params.readPaths){
 
 // Header log info
 log.info "========================================="
-log.info " nf-core/eager v${params.pipelineVersion}"
+log.info " nf-core/eager v${workflow.manifest.version}"
 log.info "========================================="
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
@@ -262,15 +357,21 @@ process get_software_versions {
 */ 
 process makeBWAIndex {
     tag {fasta}
-    publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
+    publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
+            if (params.saveReference) filename 
+            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            else null
+    }
 
     when: !params.bwa_index && params.fasta && params.aligner == 'bwa'
 
     input:
     file fasta from ch_fasta_for_bwa_indexing
+    file wherearemyfiles
 
     output:
-    file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into ch_bwa_index
+    file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into (ch_bwa_index,ch_bwa_index_bwamem)
+    file "where_are_my_files.txt"
 
     script:
     """
@@ -284,15 +385,21 @@ process makeBWAIndex {
  */
 process makeFastaIndex {
     tag {fasta}
-    publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
-
+    publishDir path: "${params.outdir}/reference_genome/fasta_index", mode: 'copy', saveAs: { filename -> 
+            if (params.saveReference) filename 
+            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            else null
+    }
     when: !params.fasta_index && params.fasta && params.aligner == 'bwa'
+
     input:
     file fasta from ch_fasta_for_faidx_indexing
+    file wherearemyfiles
 
     output:
     file "${fasta}.fai" into ch_fasta_faidx_index
     file "${fasta}"
+    file "where_are_my_files.txt"
 
     script:
     """
@@ -307,15 +414,21 @@ process makeFastaIndex {
 
 process makeSeqDict {
     tag {fasta}
-    publishDir path: "${params.outdir}/reference_genome", saveAs: { params.saveReference ? it : null }, mode: 'copy'
-
+    publishDir path: "${params.outdir}/reference_genome/seq_dict", mode: 'copy', saveAs: { filename -> 
+            if (params.saveReference) filename 
+            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            else null
+    }
+    
     when: !params.seq_dict && params.fasta
 
     input:
     file fasta from ch_fasta_for_dict_indexing
+    file wherearemyfiles
 
     output:
     file "*.dict" into ch_seq_dict
+    file "where_are_my_files.txt"
 
     script:
     """
@@ -330,7 +443,7 @@ process makeSeqDict {
  */
 process fastqc {
     tag "$name"
-    publishDir "${params.outdir}/01-FastQC", mode: 'copy',
+    publishDir "${params.outdir}/FastQC", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     input:
@@ -353,7 +466,7 @@ process fastqc {
 
 process fastp {
     tag "$name"
-    publishDir "${params.outdir}/01-FastP", mode: 'copy'
+    publishDir "${params.outdir}/FastP", mode: 'copy'
 
     when: params.complexity_filter
 
@@ -384,13 +497,13 @@ process fastp {
 
 process adapter_removal {
     tag "$name"
-    publishDir "${params.outdir}/02-Merging", mode: 'copy'
+    publishDir "${params.outdir}/read_merging", mode: 'copy'
 
     input:
     set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
 
     output:
-    file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc)
+    file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
     file "*.settings" into ch_adapterremoval_logs
 
     script:
@@ -420,7 +533,7 @@ process adapter_removal {
  */
 process fastqc_after_clipping {
     tag "${reads[0].baseName}"
-    publishDir "${params.outdir}/01-FastQC/after_clipping", mode: 'copy',
+    publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     input:
@@ -435,16 +548,15 @@ process fastqc_after_clipping {
     """
 }
 
-//Close that channel
-ch_fastqc_after_clipping.close()
-
 /*
 Step 3: Mapping with BWA, SAM to BAM, Sort BAM
 */
 
 process bwa {
     tag "$prefix"
-    publishDir "${params.outdir}/03-Mapping", mode: 'copy'
+    publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
+
+    when: !params.circularmapper && !params.bwamem
 
     input:
     file(reads) from ch_clipped_reads
@@ -453,6 +565,7 @@ process bwa {
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
+    file "*.bai" 
     
 
     script:
@@ -460,11 +573,85 @@ process bwa {
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
+    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
     """
 }
 
-//TODO Multi Lane BAM merging here (!)
+process circulargenerator{
+    tag "$prefix"
+    publishDir "${params.outdir}/reference_genome/circularmapper_index", mode: 'copy', saveAs: { filename -> 
+            if (params.saveReference) filename 
+            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            else null
+    }
 
+    when: params.circularmapper
+
+    input:
+    file fasta from ch_fasta_for_circularmapper_index
+
+    output:
+    file "*.fasta*" into ch_circularmapper_indices
+
+    script:
+    """
+    circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
+    bwa index "${fasta.baseName}_${params.circularextension}.fasta"
+    """
+
+}
+
+
+process circularmapper{
+    tag "$prefix"
+    publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
+
+    when: params.circularmapper
+
+    input:
+    file reads from ch_clipped_reads_circularmapper
+    file fasta from ch_fasta_for_circularmapper
+    file "*" from ch_circularmapper_indices
+
+    output:
+    file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm
+    file "*.bai" 
+    
+    script:
+    filter = "${params.circularfilter}" ? '' : '-f true -x false'
+    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    """ 
+    bwa aln -t ${task.cpus} "${fasta.baseName}_${params.circularextension}.fasta" $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" "${fasta.baseName}_${params.circularextension}.fasta" "${reads.baseName}".sai $reads > tmp.out
+    realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
+    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
+    """
+}
+
+process bwamem {
+    tag "$prefix"
+    publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
+
+    when: params.bwamem && !params.circularmapper
+
+    input:
+    file(reads) from ch_clipped_reads_bwamem
+    file "*" from ch_bwa_index_bwamem
+    file fasta from ch_fasta_for_bwamem_mapping
+
+    output:
+    file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler
+    file "*.bai" 
+    
+
+    script:
+    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    """
+    bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
+    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
+    """
+}
 
 /*
 * Step 4 - IDXStats
@@ -472,10 +659,10 @@ process bwa {
 
 process samtools_idxstats {
     tag "$prefix"
-    publishDir "${params.outdir}/04-Samtools", mode: 'copy'
+    publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
-    file(bam) from ch_mapped_reads_idxstats
+    file(bam) from ch_mapped_reads_idxstats.mix(ch_mapped_reads_idxstats_cm,ch_bwamem_mapped_reads_idxstats)
 
     output:
     file "*.stats" into ch_idxstats_for_multiqc
@@ -494,13 +681,22 @@ process samtools_idxstats {
 
 process samtools_filter {
     tag "$prefix"
-    publishDir "${params.outdir}/04-Samtools", mode: 'copy', pattern: "*.bam"
+    publishDir "${params.outdir}/samtools/filter", mode: 'copy',
+    saveAs: {filename ->
+            if (filename.indexOf(".fq.gz") > 0) "unmapped/$filename"
+            else if (filename.indexOf(".unmapped.bam") > 0) "unmapped/$filename"
+            else if (filename.indexOf(".filtered.bam")) filename
+            else null
+    }
 
     input: 
-    file bam from ch_mapped_reads_filter
+    file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
     file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*.fq.gz" optional true
+    file "*.unmapped.bam" optional true
+    file "*.bai"
 
     when: "${params.bam_filter_reads}"
 
@@ -511,10 +707,12 @@ process samtools_filter {
     """
     samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
     samtools fastq -tn "${prefix}.unmapped.bam" | gzip > "${prefix}.unmapped.fq.gz"
+    samtools index -@ ${task.cpus} ${prefix}.filtered.bam
     """
     } else {
     """
-    samtools view -h $bam | samtools view - -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+    samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+    samtools index -@ ${task.cpus} ${prefix}.filtered.bam
     """
     }  
 }
@@ -526,7 +724,7 @@ Step 6: DeDup / MarkDuplicates
 
 process dedup{
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/5-DeDup"
+    publishDir "${params.outdir}/deduplication/dedup"
 
     when:
     !params.skip_deduplication && params.dedupper == 'dedup'
@@ -537,16 +735,26 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "*_rmdup.bam" into ch_dedup_bam
+    file "${prefix}.sorted.bam" into ch_dedup_bam
+    file "*.bai"
 
     script:
+    prefix="${bam.baseName}"
+    treat_merged="${params.dedup_all_merged}" ? '-m' : ''
+
     if(params.singleEnd) {
     """
-    dedup -i $bam -m -o . -u 
+    dedup -i $bam $treat_merged -o . -u 
+    mv *.log dedup.log
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
+    samtools index -@ ${task.cpus} "$prefix".sorted.bam
     """  
     } else {
     """
-    dedup -i $bam -o . -u 
+    dedup -i $bam $treat_merged -o . -u 
+    mv *.log dedup.log
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
+    samtools index -@ ${task.cpus} "$prefix".sorted.bam
     """  
     }
 }
@@ -557,13 +765,13 @@ Step 5.1: Preseq
 
 process preseq {
     tag "${input.baseName}"
-    publishDir "${params.outdir}/08-Preseq", mode: 'copy'
+    publishDir "${params.outdir}/preseq", mode: 'copy'
 
     when:
     !params.skip_preseq
 
     input:
-    file input from (params.skip_deduplication ? ch_mapped_reads_preseq : ch_hist_for_preseq )
+    file input from (params.skip_deduplication ? ch_mapped_reads_preseq.mix(ch_mapped_reads_preseq_cm,ch_bwamem_mapped_reads_preseq) : ch_hist_for_preseq )
 
     output:
     file "${input.baseName}.ccurve" into ch_preseq_results
@@ -587,13 +795,13 @@ Step 5.2: DMG Assessment
 
 process damageprofiler {
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/09-DamageProfiler", mode: 'copy'
+    publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
     when:
     !params.skip_damage_calculation
 
     input:
-    file bam from ch_mapped_reads_damageprofiler
+    file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
     file fasta from ch_fasta_for_damageprofiler
 
     output:
@@ -611,7 +819,7 @@ Step 5.3: Qualimap
 
 process qualimap {
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/06-QualiMap", mode: 'copy'
+    publishDir "${params.outdir}/qualimap", mode: 'copy'
 
     when:
     !params.skip_qualimap
@@ -639,7 +847,7 @@ process qualimap {
 
 process markDup{
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/5-DeDup"
+    publishDir "${params.outdir}/deduplication/markdup"
 
     when:
     !params.skip_deduplication && params.dedupper != 'dedup'
@@ -661,10 +869,13 @@ process markDup{
 //If no deduplication runs, the input is mixed directly from samtools filter, if it runs either markdup or dedup is used thus mixed from these two channels
 ch_dedup_for_pmdtools = Channel.create()
 
+//Bamutils TrimBam Channel
+ch_for_bamutils = Channel.create()
+
 if(!params.skip_deduplication){
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).set {ch_for_pmdtools}
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).into {ch_for_pmdtools;ch_for_bamutils}
 } else {
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).set {ch_for_pmdtools}
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).into {ch_for_pmdtools;ch_for_bamutils}
 }
 
 if(!params.run_pmdtools){
@@ -673,7 +884,7 @@ if(!params.run_pmdtools){
 
 process pmdtools {
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/04-Samtools", mode: 'copy'
+    publishDir "${params.outdir}/pmdtools", mode: 'copy'
 
     when: params.run_pmdtools
 
@@ -702,7 +913,33 @@ process pmdtools {
     """
 }
 
-//Close Channel for pmdtools as it 
+/*
+* Optional BAM Trimming step using bamUtils 
+* Can be used for UDGhalf protocols to clip off -n bases of each read
+*/
+
+process bam_trim {
+    tag "${prefix}" 
+    publishDir "${params.outdir}/trimmed_bam", mode: 'copy'
+ 
+    when: params.trim_bam
+
+    input:
+    file bam from ch_for_bamutils  
+
+    output: 
+    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping
+    file "*.bai"
+
+    script:
+    prefix="${bam.baseName}"
+    softclip = "${params.bamutils_softclip}" ? '-c' : '' 
+    """
+    bam trimBam $bam tmp.bam -L ${params.bamutils_clip_left} -R ${params.bamutils_clip_right} ${softclip}
+    samtools sort -@ ${task.cpus} tmp.bam -o ${prefix}.trimmed.bam 
+    samtools index ${prefix}.trimmed.bam
+    """
+}
 
 
 
@@ -737,6 +974,7 @@ process multiqc {
     file multiqc_config
     file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml.collect().ifEmpty([])
+    file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
     file ('damageprofiler/*') from ch_damageprofiler_results.collect().ifEmpty([])
