@@ -1,9 +1,8 @@
 # nf-core/eager: Troubleshooting
->>>>>>> TEMPLATE
 
 ## Input files not found
 
-If only no file, only one input file , or only read one and not read two is picked up then something is wrong with your input file declaration
+If no file, only one input file, or only read one and not read two is picked up then something is wrong with your input file declaration
 
 1. The path must be enclosed in quotes (`'` or `"`)
 2. The path must have at least one `*` wildcard character. This is even if you are only running one paired end sample.
