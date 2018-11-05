@@ -49,4 +49,4 @@ script:
   # Test running with BWA Mem
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem --bwa_index results/reference_genome/bwa_index/
   # Test basic pipeline with Conda too 
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,conda --pairedEnd --bwa_index results/reference_genome/bwa_index/
+  - travis_wait 25 nextflow run ${TRAVIS_BUILD_DIR} -profile test,conda --pairedEnd --bwa_index results/reference_genome/bwa_index/
