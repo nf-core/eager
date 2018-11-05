@@ -211,8 +211,23 @@ wherearemyfiles = file("$baseDir/assets/where_are_my_files.txt")
 
 // Validate inputs
 Channel.fromPath("${params.fasta}")
-    .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
+    .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
     .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index;ch_fasta_for_bwamem_mapping}
+
+//Index files provided? Then check whether they are correct and complete
+if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
+    exit 1, "Invalid aligner option. Default is bwa, but specify --circularmapper or --bwamem to use these."
+}
+if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
+    bwa_index = Channel
+        .fromPath("${params.bwa_index}/**.*")
+        .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}" }
+        .into{ch_bwa_index_existing;ch_bwa_index_bwamem_existing}
+} else {
+    //Create empty channels to make sure later mix() does not fail
+    ch_bwa_index_existing = Channel.empty()
+    ch_bwa_index_bwamem_existing = Channel.empty()
+}
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd ){
@@ -280,6 +295,7 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
 summary['Fasta Ref']    = params.fasta
+if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
@@ -364,7 +380,7 @@ process makeBWAIndex {
             else null
     }
 
-    when: !params.bwa_index && params.fasta && params.aligner == 'bwa'
+    when: !params.bwa_index && params.fasta && (params.aligner == 'bwa' || params.bwamem)
 
     input:
     file fasta from ch_fasta_for_bwa_indexing
@@ -561,7 +577,7 @@ process bwa {
 
     input:
     file(reads) from ch_clipped_reads
-    file "*" from ch_bwa_index
+    file "*" from ch_bwa_index.mix(ch_bwa_index_existing).collect()
     file fasta from ch_fasta_for_bwa_mapping
 
     output:
@@ -638,7 +654,7 @@ process bwamem {
 
     input:
     file(reads) from ch_clipped_reads_bwamem
-    file "*" from ch_bwa_index_bwamem
+    file "*" from ch_bwa_index_bwamem.mix(ch_bwa_index_bwamem_existing).collect()
     file fasta from ch_fasta_for_bwamem_mapping
 
     output:
@@ -868,10 +884,10 @@ process markDup{
 }
 
 //If no deduplication runs, the input is mixed directly from samtools filter, if it runs either markdup or dedup is used thus mixed from these two channels
-ch_dedup_for_pmdtools = Channel.create()
+ch_dedup_for_pmdtools = Channel.empty()
 
 //Bamutils TrimBam Channel
-ch_for_bamutils = Channel.create()
+ch_for_bamutils = Channel.empty()
 
 if(!params.skip_deduplication){
     ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).into {ch_for_pmdtools;ch_for_bamutils}
