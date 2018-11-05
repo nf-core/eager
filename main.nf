@@ -651,7 +651,7 @@ process bwamem {
 
     input:
     file(reads) from ch_clipped_reads_bwamem
-    file "*" from ch_bwa_index_bwamem.mix(ch_bwa_index_bwamem_existing).first()
+    file "*" from ch_bwa_index_bwamem.mix(ch_bwa_index_bwamem_existing).collect()
     file fasta from ch_fasta_for_bwamem_mapping
 
     output:
