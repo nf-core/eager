@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## unpublished
 
-* Index file handling for bwa_index, fasta_index, seq_dict TODO
+### `Added`
+* [#80](https://github.com/nf-core/eager/pull/80) - BWA Index file handling 
 * [#77](https://github.com/nf-core/eager/pull/77) - Lots of documentation updates by [@jfy133](https://github.com/jfy133)
 
 ## [2.0.2] - 2018-11-03
