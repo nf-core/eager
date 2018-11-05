@@ -223,8 +223,7 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
         .fromPath("${params.bwa_index}/**.*")
         .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}" }
         .into{ch_bwa_index_existing;ch_bwa_index_bwamem_existing}
-}
-
+} 
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd ){
@@ -384,7 +383,7 @@ process makeBWAIndex {
     file wherearemyfiles
 
     output:
-    file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into (ch_bwa_index,ch_bwa_index_bwamem)
+    file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into (ch_bwa_index,ch_bwa_index_bwamem_existing)
     file "where_are_my_files.txt"
 
     script:
