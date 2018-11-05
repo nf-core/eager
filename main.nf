@@ -223,11 +223,10 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
         .fromPath("${params.bwa_index}/**.*")
         .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}" }
         .into{ch_bwa_index_existing;ch_bwa_index_bwamem_existing}
-    ch_bwa_index = Channel.create()
-    ch_bwa_index_bwamem = Channel.create()
 } else {
-    ch_bwa_index_existing = Channel.create()
-    ch_bwa_index_bwamem_existing = Channel.create()
+    //Create empty channels to make sure later mix() does not fail
+    ch_bwa_index_existing = Channel.empty()
+    ch_bwa_index_bwamem_existing = Channel.empty()
 }
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
@@ -885,10 +884,10 @@ process markDup{
 }
 
 //If no deduplication runs, the input is mixed directly from samtools filter, if it runs either markdup or dedup is used thus mixed from these two channels
-ch_dedup_for_pmdtools = Channel.create()
+ch_dedup_for_pmdtools = Channel.empty()
 
 //Bamutils TrimBam Channel
-ch_for_bamutils = Channel.create()
+ch_for_bamutils = Channel.empty()
 
 if(!params.skip_deduplication){
     ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).into {ch_for_pmdtools;ch_for_bamutils}
