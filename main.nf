@@ -221,7 +221,6 @@ if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
 if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
     bwa_index = Channel
         .fromPath("${params.bwa_index}/**.*")
-        .flatten()
         .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}" }
         .into{ch_bwa_index_existing;ch_bwa_index_bwamem_existing}
 }
@@ -575,7 +574,7 @@ process bwa {
 
     input:
     file(reads) from ch_clipped_reads
-    file "*" from ch_bwa_index.mix(ch_bwa_index_existing).first()
+    file "*" from ch_bwa_index.mix(ch_bwa_index_existing).collect()
     file fasta from ch_fasta_for_bwa_mapping
 
     output:
