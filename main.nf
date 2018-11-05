@@ -220,8 +220,10 @@ if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
 }
 if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
     bwa_index = Channel
-        .fromPath(params.bwa_index)
+        .fromPath("${params.bwa_index}/**.*")
+        .flatten()
         .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}" }
+        .into{ch_bwa_index_existing;ch_bwa_index_bwamem_existing}
 }
 
 
@@ -291,6 +293,7 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
 summary['Fasta Ref']    = params.fasta
+if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
@@ -375,7 +378,7 @@ process makeBWAIndex {
             else null
     }
 
-    when: !params.bwa_index && params.fasta && params.aligner == 'bwa'
+    when: !params.bwa_index && params.fasta && (params.aligner == 'bwa' || params.bwamem)
 
     input:
     file fasta from ch_fasta_for_bwa_indexing
@@ -572,7 +575,7 @@ process bwa {
 
     input:
     file(reads) from ch_clipped_reads
-    file "*" from ch_bwa_index
+    file "*" from ch_bwa_index.mix(ch_bwa_index_existing).first()
     file fasta from ch_fasta_for_bwa_mapping
 
     output:
@@ -649,7 +652,7 @@ process bwamem {
 
     input:
     file(reads) from ch_clipped_reads_bwamem
-    file "*" from ch_bwa_index_bwamem
+    file "*" from ch_bwa_index_bwamem.mix(ch_bwa_index_bwamem_existing).first()
     file fasta from ch_fasta_for_bwamem_mapping
 
     output:
