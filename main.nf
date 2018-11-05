@@ -76,8 +76,8 @@ def helpMessage() {
       --bwamem                      Turn on BWA Mem instead of CM/BWA aln for mapping
     
     BAM Filtering
-      --bam_keep_mapped_only            Only consider mapped reads for downstream analysis. Unmapped reads are extracted to separate output.
-      --bam_filter_reads                Keep all reads in BAM file for downstream analysis
+      --bam_analyse_mapped_only         Only consider mapped reads for downstream analysis. Unmapped reads are extracted to separate output.
+      --bam_retain_all_reads                Keep all reads in BAM file for downstream analysis
       --bam_mapping_quality_threshold   Minimum mapping quality for reads filter
     
     DeDuplication
@@ -173,9 +173,9 @@ params.circularfilter = false
 params.bwamem = false
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
-params.bam_keep_mapped_only = false
+params.bam_analyse_mapped_only = false
 params.bam_keep_all = true
-params.bam_filter_reads = false
+params.bam_retain_all_reads = false
 params.bam_mapping_quality_threshold = 0
 
 //DamageProfiler settings
@@ -715,12 +715,12 @@ process samtools_filter {
     file "*.unmapped.bam" optional true
     file "*.bai"
 
-    when: "${params.bam_filter_reads}"
+    when: "${params.bam_retain_all_reads}"
 
     script:
     prefix="$bam" - ~/(\.bam)?/
 
-    if("${params.bam_keep_mapped_only}"){
+    if("${params.bam_analyse_mapped_only}"){
     """
     samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
     samtools fastq -tn "${prefix}.unmapped.bam" | gzip > "${prefix}.unmapped.fq.gz"
