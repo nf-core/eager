@@ -385,7 +385,7 @@ Users can configure to keep/discard/extract certain groups of reads efficiently 
 
 ### `--bam_analyse_mapped_only`
 
-This can be used to only keep mapped reads in the BAM file for downstream analysis. By default turned off, all reads are kept in the BAM file. Unmapped reads are stored both in BAM and FastQ format e.g. for different downstream processing.
+This can be used to only keep mapped reads in the BAM file for downstream analysis. By default turned off, where all reads are kept in the bam file. Unmapped reads are stored both in BAM and FastQ format e.g. for different downstream processing.
 
 ### `--bam_keep_all`
 
