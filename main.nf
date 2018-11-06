@@ -719,12 +719,15 @@ process samtools_filter {
 
     script:
     prefix="$bam" - ~/(\.bam)?/
+    rm_unmapped=''
+    "${params.bam_discard_unmapped_entirely} ? rm_unmapped='rm *.unmapped.*' : ''
 
     if("${params.bam_analyse_mapped_only}"){
     """
     samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
     samtools fastq -tn "${prefix}.unmapped.bam" | gzip > "${prefix}.unmapped.fq.gz"
     samtools index -@ ${task.cpus} ${prefix}.filtered.bam
+    ${rm_unmapped}
     """
     } else {
     """
