@@ -719,7 +719,7 @@ process samtools_filter {
 
     script:
     prefix="$bam" - ~/(\.bam)?/
-    rm_unmapped = params.params.bam_discard_unmapped_entirely ? 'rm *.unmapped.*' : ''
+    rm_unmapped = "${params.bam_discard_unmapped_entirely}" ? 'rm *.unmapped.*' : ''
 
     if("${params.bam_analyse_mapped_only}"){
     """
