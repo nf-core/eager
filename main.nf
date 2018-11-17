@@ -590,7 +590,7 @@ process bwa {
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
-    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
+    samtools index "${prefix}".sorted.bam
     """
 }
 
@@ -642,7 +642,7 @@ process circularmapper{
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" "${fasta.baseName}_${params.circularextension}.fasta" "${reads.baseName}".sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
-    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
+    samtools index "${prefix}".sorted.bam
     """
 }
 
@@ -724,12 +724,12 @@ process samtools_filter {
     """
     samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
     samtools fastq -tn "${prefix}.unmapped.bam" | gzip > "${prefix}.unmapped.fq.gz"
-    samtools index -@ ${task.cpus} ${prefix}.filtered.bam
+    samtools index ${prefix}.filtered.bam
     """
     } else {
     """
     samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-    samtools index -@ ${task.cpus} ${prefix}.filtered.bam
+    samtools index ${prefix}.filtered.bam
     """
     }  
 }
@@ -764,14 +764,14 @@ process dedup{
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index -@ ${task.cpus} "$prefix".sorted.bam
+    samtools index "$prefix".sorted.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index -@ ${task.cpus} "$prefix".sorted.bam
+    samtools index "$prefix".sorted.bam
     """  
     }
 }
