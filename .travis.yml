@@ -13,7 +13,7 @@ before_install:
   # Pull the docker image first so the test doesn't wait for this
   - docker pull nfcore/eager
   # Fake the tag locally so that the pipeline runs properly
-  - docker tag nfcore/eager nfcore/eager:2.0.2
+  - docker tag nfcore/eager nfcore/eager:latest
 
 install:
   # Install Nextflow
@@ -37,16 +37,16 @@ script:
   # Lint the pipeline code
   - nf-core lint ${TRAVIS_BUILD_DIR}
   # Run the basic pipeline with the test profile
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --saveReference
   # Run the basic pipeline with single end data (pretending its single end actually)
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd 
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd --bwa_index results/reference_genome/bwa_index/
   # Run the same pipeline testing optional step: fastp, complexity 
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter 
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/
   # Test BAM Trimming
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --trim_bam 
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --trim_bam --bwa_index results/reference_genome/bwa_index/
   # Test running with CircularMapper
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --circularmapper --circulartarget 'NC_007596.2'
   # Test running with BWA Mem
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem --bwa_index results/reference_genome/bwa_index/
   # Test basic pipeline with Conda too 
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,conda --pairedEnd
+  - travis_wait 25 nextflow run ${TRAVIS_BUILD_DIR} -profile test,conda --pairedEnd --bwa_index results/reference_genome/bwa_index/

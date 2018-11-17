@@ -11,7 +11,7 @@ First, install docker on your system: [Docker Installation Instructions](https:/
 
 Then, simply run the analysis pipeline:
 ```bash
-nextflow run nf-core/eager -profile docker --reads '<path to your reads>'
+nextflow run nf-core/eager -profile docker --reads '<path to your reads>' --pairedEnd
 ```
 
 Nextflow will recognise `nf-core/eager` and download the pipeline from GitHub. The `-profile docker` configuration lists the [nf-core/eager](https://hub.docker.com/r/nfcore/eager/) image that we have created and is hosted at dockerhub, and this is downloaded.
@@ -23,9 +23,13 @@ The public docker images are tagged with the same version numbers as the code, w
 
 
 ## Singularity image
-Many HPC environments are not able to run Docker due to security issues. [Singularity](http://singularity.lbl.gov/) is a tool designed to run on such HPC systems which is very similar to Docker. Even better, it can use create images directly from dockerhub.
+Many HPC environments are not able to run Docker due to security issues. [Singularity](http://singularity.lbl.gov/) is a tool designed to run on such HPC systems which is very similar to Docker. There is a particular profile that will download the singularity image for you.
 
-To use the singularity image for a single run, use `-with-singularity 'docker://nfcore/eager'`. This will download the docker container from dockerhub and create a singularity image for you dynamically.
+```bash
+nextflow run nf-core/eager -profile singularity --reads '<path to your reads>' --pairedEnd
+```
+
+Additionally, it can use create images directly from dockerhub. To use the singularity image for a single run, use `-with-singularity 'docker://nfcore/eager'`. This will download the docker container from dockerhub and create a singularity image for you dynamically.
 
 If you intend to run the pipeline offline, nextflow will not be able to automatically download the singularity image for you. Instead, you'll have to do this yourself manually first, transfer the image file and then point to that.
 
@@ -38,5 +42,14 @@ singularity pull --name nf-core-eager.img docker://nfcore/eager
 Then transfer this file and run the pipeline with this path:
 
 ```bash
-nextflow run /path/to/nf-core/eager -with-singularity /path/to/nf-core-eager.img
+nextflow run /path/to/nf-core/eager -with-singularity /path/to/nf-core-eager.img --reads --pairedEnd
 ```
+
+## Conda
+
+You may also use conda (utilising the bioconda repository) to download the pipeline dependencies for you.
+
+```bash
+nextflow run nf-core/eager -profile conda --reads '<path to your reads>' --pairedEnd
+```
+

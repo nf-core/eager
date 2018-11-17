@@ -69,6 +69,19 @@ Be warned of two important points about this default configuration:
     * See the [nextflow docs](https://www.nextflow.io/docs/latest/executor.html) for information about running with other hardware backends. Most job scheduler systems are natively supported.
 2. Nextflow will expect all software to be installed and available on the `PATH`
 
+The following software is currently required to be installed:
+
+* [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+* [Picard Tools](https://broadinstitute.github.io/picard/)
+* [Samtools](http://www.htslib.org/)
+* [Preseq](http://smithlabresearch.org/software/preseq/)
+* [MultiQC](https://multiqc.info/)
+* [BWA](http://bio-bwa.sourceforge.net/)
+* [Qualimap](http://qualimap.bioinfo.cipf.es/)
+* [GATK](https://software.broadinstitute.org/gatk/)
+* [bamUtil](https://genome.sph.umich.edu/wiki/BamUtil)
+* [fastP](https://github.com/OpenGene/fastp)
+
 #### 3.1) Software deps: Docker
 First, install docker on your system: [Docker Installation Instructions](https://docs.docker.com/engine/installation/)
 
