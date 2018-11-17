@@ -7,38 +7,12 @@
 * [Updating the pipeline](#updating-the-pipeline)
 * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
-    * [`-profile`](#-profile-single-dash)
-        * [`docker`](#docker)
-        * [`awsbatch`](#awsbatch)
-        * [`standard`](#standard)
-        * [`binac`](#binac)
-        * [`cfc`](#cfc)
-        * [`uzh`](#uzh)
-        * [`none`](#none)
-    * [`--reads`](#--reads)
-    * [`--singleEnd`](#--singleend)
-* [Reference Genomes](#reference-genomes)
-    * [`--genome`](#--genome)
-    * [`--fasta`](#--fasta)
 * [Job Resources](#job-resources)
 * [Automatic resubmission](#automatic-resubmission)
 * [Custom resource requests](#custom-resource-requests)
 * [AWS batch specific parameters](#aws-batch-specific-parameters)
-    * [`-awsbatch`](#-awsbatch)
-    * [`--awsqueue`](#--awsqueue)
-    * [`--awsregion`](#--awsregion)
 * [Other command line parameters](#other-command-line-parameters)
-    * [`--outdir`](#--outdir)
-    * [`--email`](#--email)
-    * [`-name`](#-name-single-dash)
-    * [`-resume`](#-resume-single-dash)
-    * [`-c`](#-c-single-dash)
-    * [`--max_memory`](#--max_memory)
-    * [`--max_time`](#--max_time)
-    * [`--max_cpus`](#--max_cpus)
-    * [`--plaintext_emails`](#--plaintext_emails)
-    * [`--sampleLevel`](#--sampleLevel)
-    * [`--multiqc_config`](#--multiqc_config)
+* [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
 
 ## General Nextflow info
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
@@ -116,7 +90,6 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 * `test`
     * A profile with a complete configuration for automated testing
     * Includes links to test data so needs no other parameters
->>>>>>> TEMPLATE
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
@@ -155,9 +128,18 @@ A normal glob pattern, enclosed in quotation marks, can then be used for `--read
 
 ## Reference Genomes
 
-The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
+### `--fasta`
+If you prefer, you can specify the full path to your reference genome when you run the pipeline:
+
+```bash
+--fasta '[path to Fasta reference]'
+```
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`.
 
 ### `--genome` (using iGenomes)
+
+The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
+
 There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.
 
 You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
@@ -188,14 +170,6 @@ params {
   }
 }
 ```
-
-### `--fasta`
-If you prefer, you can specify the full path to your reference genome when you run the pipeline:
-
-```bash
---fasta '[path to Fasta reference]'
-```
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`.
 
 ### `--bwa_index`
 
