@@ -14,9 +14,9 @@
 
 **nf-core/eager** is a bioinformatics best-practice analysis pipeline for ancient DNA data analysis.
 
-The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FastQ inputs, aligns the reads and performs extensive quality-control on the results. It comes with docker / singularity containers making installation trivial and results highly reproducible.
+The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FASTQ inputs, aligns the reads and performs extensive quality-control on the results. It comes with docker / singularity containers making installation trivial and results highly reproducible.
 
-### Pipeline steps
+## Pipeline steps
 
 * Create reference genome indices (optional)
     * BWA 
@@ -33,7 +33,25 @@ The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow
 * BAM Clipping for UDG+/UDGhalf protocols
 * PMDTools damage filtering / assessment
 
-### Documentation
+## Quick Start
+
+1. Install [`nextflow`](docs/installation.md)
+2. Install one of [`docker`](https://docs.docker.com/engine/installation/), [`singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`conda`](https://conda.io/miniconda.html)
+3. Download the EAGER pipeline
+
+```bash
+nextflow pull nf-core/eager
+```
+
+4. Set up your job with default parameters
+
+```bash
+nextflow run nf-core -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<REFERENCE.fasta'
+```
+
+5. See the overview of the run with under `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
+
+## Documentation
 The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
 1. [Installation](docs/installation.md)
@@ -44,5 +62,5 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](docs/troubleshooting.md)
 
-### Credits
-This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with major contributions from Stephen Clayton, ideas and documentation from James Fellows-Yates, Raphael Eisenhofer and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
+## Credits
+This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with major contributions from Stephen Clayton, ideas and documentation from James Fellows Yates, Raphael Eisenhofer and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
