@@ -721,7 +721,7 @@ process samtools_filter {
     prefix="$bam" - ~/(\.bam)?/
     rm_type = "${params.bam_unmapped_keep_type}" == 'bam' ? 'bam' : 'fastq.gz'
     rm_unmapped = "${params.bam_discard_unmapped}" ? "rm *.unmapped.${rm_type}" : ''
-    fq_convert = "${params.bam_unmapped_to_fastq}" ? "samtools fastq -tn ${prefix}.unmapped.bam | gzip > ${prefix}.unmapped.fq.gz" : ''
+    fq_convert = "${params.bam_unmapped_to_fastq}" ? "samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fq.gz" : ''
     
 
     if("${params.bam_separate_unmapped}"){
