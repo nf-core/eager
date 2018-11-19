@@ -176,7 +176,8 @@ params.circularfilter = false
 params.bwamem = false
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
-params.bam_retain_unmapped = false
+params.bam_retain_unmapped = true
+params.bam_separate_unmapped = false
 params.bam_discard_unmapped = false
 params.bam_unmapped_to_fastq = false 
 params.bam_unmapped_rm_type = 'bam'
