@@ -719,7 +719,7 @@ process samtools_filter {
 
     script:
     prefix="$bam" - ~/(\.bam)?/
-    rm_type = "${params.bam_unmapped_keep_type}" == 'bam' ? 'bam' : 'fastq'
+    rm_type = "${params.bam_unmapped_keep_type}" == 'bam' ? 'bam' : 'fastq.gz'
     rm_unmapped = "${params.bam_discard_unmapped}" ? "rm *.unmapped.${rm_type}" : ''
     fq_convert = "${params.bam_unmapped_to_fastq}" ? "samtools fastq -tn ${prefix}.unmapped.bam | gzip > ${prefix}.unmapped.fq.gz" : ''
     
