@@ -76,9 +76,12 @@ def helpMessage() {
       --bwamem                      Turn on BWA Mem instead of CM/BWA aln for mapping
     
     BAM Filtering
-      --bam_keep_mapped_only            Only consider mapped reads for downstream analysis. Unmapped reads are extracted to separate output.
-      --bam_filter_reads                Keep all reads in BAM file for downstream analysis
-      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter
+      --bam_retain_unmapped         Retains all unmapped reads in the BAM file (default)
+      --bam_separate_unmapped       Separates mapped and unmapped reads, keep mapped BAM for downstream analysis.
+      --bam_unmapped_to_fastq       Converts unmapped reads in BAM format to fastq.gz format.
+      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice in --bam_unmapped_rm_type
+      --bam_unmapped_rm_type        Defines which unmapped read format to discard, options are "bam" or "fastq.gz".
+      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
     
     DeDuplication
       --dedupper                    Deduplication method to use
@@ -173,10 +176,14 @@ params.circularfilter = false
 params.bwamem = false
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
-params.bam_keep_mapped_only = false
-params.bam_keep_all = true
-params.bam_filter_reads = false
+params.bam_retain_unmapped = true
+params.bam_separate_unmapped = false
+params.bam_discard_unmapped = false
+params.bam_unmapped_to_fastq = false 
+params.bam_unmapped_rm_type = 'bam'
+
 params.bam_mapping_quality_threshold = 0
+
 
 //DamageProfiler settings
 params.damageprofiler_length = 100
@@ -715,22 +722,25 @@ process samtools_filter {
     file "*.unmapped.bam" optional true
     file "*.bai"
 
-    when: "${params.bam_filter_reads}"
-
     script:
     prefix="$bam" - ~/(\.bam)?/
+    rm_type = "${params.bam_unmapped_rm_type}" == 'bam' ? 'bam' : 'fastq.gz'
+    rm_unmapped = "${params.bam_discard_unmapped}" ? "rm *.unmapped.${rm_type}" : ''
+    fq_convert = "${params.bam_unmapped_to_fastq}" ? "samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fq.gz" : ''
+    
 
-    if("${params.bam_keep_mapped_only}"){
-    """
-    samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-    samtools fastq -tn "${prefix}.unmapped.bam" | gzip > "${prefix}.unmapped.fq.gz"
-    samtools index ${prefix}.filtered.bam
-    """
+    if("${params.bam_separate_unmapped}"){
+        """
+        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools index ${prefix}.filtered.bam
+        $fq_convert
+        $rm_unmapped
+        """
     } else {
-    """
-    samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-    samtools index ${prefix}.filtered.bam
-    """
+        """
+        samtools view -h $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools index ${prefix}.filtered.bam
+        """
     }  
 }
 

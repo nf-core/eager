@@ -383,17 +383,25 @@ Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite
 
 Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline. 
 
-### `--bam_keep_mapped_only`
+### `--bam_retain_unmapped`
 
-This can be used to only keep mapped reads for downstream analysis. By default turned off, all reads are kept in the BAM file. Unmapped reads are stored both in BAM and FastQ format e.g. for different downstream processing.
+Specify this to keep also unmapped reads in the BAM file. This is the default setting, only mapping quality filters are applied to all reads. 
 
-### `--bam_keep_all`
+### `--bam_separate_unmapped`
 
-Turned on by default, keeps all reads that were mapped in the dataset. 
+Separates the mapped and unmapepd reads, keeps only mapped reads in the BAM file for downstream analysis.
 
-### `--bam_filter_reads`
+### `--bam_unmapped_to_fastq`
 
-Specify this, if you want to filter reads for downstream analysis. 
+Converted unmapped reads in BAM format to compressed FastQ format. 
+
+### `--bam_discard_unmapped`
+
+Discards unmapped reads in either FastQ or BAM format, depending on the choice of the `--bam_unmapped_rm_type`. 
+
+### `--bam_unmapped_rm_type`
+
+Defines which unmapped read format to discard, options available are `bam` or `fastq.gz`. By default, `fastq.gz` format will be kept and `bam` will be removed.
 
 ### `--bam_mapping_quality_threshold`
 
