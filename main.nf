@@ -76,8 +76,12 @@ def helpMessage() {
       --bwamem                      Turn on BWA Mem instead of CM/BWA aln for mapping
     
     BAM Filtering
-      --bam_retain_unmapped                Keep all reads in BAM file for downstream analysis
-      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter
+      --bam_retain_unmapped         Retains all unmapped reads in the BAM file (default)
+      --bam_separate_unmapped       Separates mapped and unmapped reads, keep mapped BAM for downstream analysis.
+      --bam_unmapped_to_fastq       Converts unmapped reads in BAM format to fastq.gz format.
+      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice in --bam_unmapped_rm_type
+      --bam_unmapped_rm_type        Defines which unmapped read format to discard, options are "bam" or "fastq.gz".
+      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
     
     DeDuplication
       --dedupper                    Deduplication method to use
@@ -175,7 +179,7 @@ params.bwamem = false
 params.bam_retain_unmapped = false
 params.bam_discard_unmapped = false
 params.bam_unmapped_to_fastq = false 
-params.bam_unmapped_keep_type = 'bam'
+params.bam_unmapped_rm_type = 'bam'
 
 params.bam_mapping_quality_threshold = 0
 
@@ -719,7 +723,7 @@ process samtools_filter {
 
     script:
     prefix="$bam" - ~/(\.bam)?/
-    rm_type = "${params.bam_unmapped_keep_type}" == 'bam' ? 'bam' : 'fastq.gz'
+    rm_type = "${params.bam_unmapped_rm_type}" == 'bam' ? 'bam' : 'fastq.gz'
     rm_unmapped = "${params.bam_discard_unmapped}" ? "rm *.unmapped.${rm_type}" : ''
     fq_convert = "${params.bam_unmapped_to_fastq}" ? "samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fq.gz" : ''
     
