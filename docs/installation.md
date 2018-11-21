@@ -112,6 +112,14 @@ This is slower and less reproducible than the above, but is still better than ha
 The pipeline ships with a conda environment file and nextflow has built-in support for this.
 To use it first ensure that you have conda installed (we recommend [miniconda](https://conda.io/miniconda.html)), then follow the same pattern as above and use the flag `-profile standard,conda`
 
+#### 4) Profile configuration
+Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
+
+It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
+
+```bash
+NXF_OPTS='-Xms1g -Xmx4g'
+```
 
 ## Appendices
 
@@ -124,5 +132,4 @@ Note that you will need to specify your UPPMAX project ID when running a pipelin
 
 ```nextflow
 params.project = 'project_ID' // eg. b2017123
->>>>>>> TEMPLATE
 ```
