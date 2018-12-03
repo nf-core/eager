@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#84](https://github.com/nf-core/eager/pull/85) - Fix for [Samtools index issues](https://github.com/nf-core/eager/issues/84)
 
 
+### Other
+* Added Slack button to repository readme
+
 ## [2.0.2] - 2018-11-03
 
 ### `Changed`
