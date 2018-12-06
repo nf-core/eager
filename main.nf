@@ -889,7 +889,7 @@ process markDup{
     script:
     prefix = "${bam.baseName}"
     """
-    picard MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE=${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
+    picard MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
     """
 }
 
