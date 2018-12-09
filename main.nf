@@ -81,7 +81,7 @@ def helpMessage() {
       --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
     
     DeDuplication
-      --dedupper                    Deduplication method to use
+      --dedupper                    Deduplication method to use (options: dedup, markduplicates). Default: dedup
       --dedup_all_merged            Treat all reads as merged reads
     
     Library Complexity Estimation
