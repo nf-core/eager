@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#80](https://github.com/nf-core/eager/pull/80) - BWA Index file handling 
 * [#77](https://github.com/nf-core/eager/pull/77) - Lots of documentation updates by [@jfy133](https://github.com/jfy133)
 * [#81](https://github.com/nf-core/eager/pull/81) - Renaming of certain BAM options
+* [#92](https://github.com/nf-core/eager/issues/92) - Complete restructure of BAM options
 
 ### `Fixed`
 * [#84](https://github.com/nf-core/eager/pull/85) - Fix for [Samtools index issues](https://github.com/nf-core/eager/issues/84)
