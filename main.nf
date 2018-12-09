@@ -76,10 +76,7 @@ def helpMessage() {
       --bwamem                      Turn on BWA Mem instead of CM/BWA aln for mapping
     
     BAM Filtering
-      --bam_retain_unmapped         Retains all unmapped reads in the BAM file (default)
-      --bam_separate_unmapped       Separates mapped and unmapped reads, keep mapped BAM for downstream analysis.
-      --bam_unmapped_to_fastq       Converts unmapped reads in BAM format to fastq.gz format.
-      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice in --bam_unmapped_rm_type
+      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice. 
       --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
       --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
     
@@ -176,10 +173,7 @@ params.circularfilter = false
 params.bwamem = false
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
-params.bam_retain_unmapped = true
-params.bam_separate_unmapped = false
 params.bam_discard_unmapped = false
-params.bam_unmapped_to_fastq = false 
 params.bam_unmapped_type = ''
 
 params.bam_mapping_quality_threshold = 0
