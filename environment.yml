@@ -22,6 +22,7 @@ dependencies:
   - pmdtools=0.60
   - r-rmarkdown=1.10
   - libiconv=1.15
+  - conda-forge::pigz=2.3.4
   - sequencetools=1.2.2
   - preseq=2.0.3
   - fastp=0.19.4
