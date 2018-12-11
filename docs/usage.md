@@ -50,7 +50,7 @@ First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
 
-## Main Arguments
+## Mandatory Arguments
 
 ### `-profile`
 
@@ -115,8 +115,6 @@ A normal glob pattern, enclosed in quotation marks, can then be used for `--read
 --pairedEnd --reads '*.fastq'
 ```
 
-## Reference Genomes
-
 ### `--fasta`
 If you prefer, you can specify the full path to your reference genome when you run the pipeline:
 
@@ -159,6 +157,8 @@ params {
   }
 }
 ```
+
+### Optional Reference Utility Files
 
 ### `--bwa_index`
 
@@ -211,7 +211,7 @@ process.$multiqc.module = []
 
 ### `--max_memory`
 Use to set a top-limit for the default memory requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_memory '8.GB'``
+Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`
 
 ### `--max_time`
 Use to set a top-limit for the default time requirement for each process.
