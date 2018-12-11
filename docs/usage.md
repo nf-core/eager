@@ -8,21 +8,10 @@
 * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
 * [Job Resources](#job-resources)
-* [Automatic resubmission](#automatic-resubmission)
-* [Custom resource requests](#custom-resource-requests)
-* [AWS batch specific parameters](#aws-batch-specific-parameters)
 * [Other command line parameters](#other-command-line-parameters)
 * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
 
-## General Nextflow info
-Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
-
-It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
-
-```bash
-NXF_OPTS='-Xms1g -Xmx4g'
-```
-
+## Preamble
 To access the nextflow help message run: `nextflow run -help`
 
 ## Running the pipeline
@@ -187,22 +176,6 @@ Use this to specify the required FastA index file for the selected reference gen
 
 If you turn this on, the generated indices will be stored in the `./results/reference_genomes` for you. 
 
-## Job Resources
-### Automatic resubmission
-Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
-
-### Custom resource requests
-Wherever process-specific requirements are set in the pipeline, the default value can be changed by creating a custom config file. See the files in [`conf`](../conf) for examples.
-
-## AWS Batch specific parameters
-Running the pipeline on AWS Batch requires a couple of specific parameters to be set according to your AWS Batch configuration. Please use the `-awsbatch` profile and then specify all of the following parameters.
-### `--awsqueue`
-The JobQueue that you intend to use on AWS Batch.
-### `--awsregion`
-The AWS region to run your job in. Default is set to `eu-west-1` but can be adjusted to your needs.
-
-Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
-
 ## Other command line parameters
 
 ### `--outdir`
@@ -251,7 +224,7 @@ Should be a string in the format integer-unit. eg. `--max_cpus 1`
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
 
-### `--multiqc_config`
+### `--multiqc_config`
 Specify a path to a custom MultiQC configuration file.
 
 
@@ -383,17 +356,13 @@ Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite
 
 Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline. 
 
-### `--bam_keep_mapped_only`
+### `--bam_discard_unmapped`
 
-This can be used to only keep mapped reads for downstream analysis. By default turned off, all reads are kept in the BAM file. Unmapped reads are stored both in BAM and FastQ format e.g. for different downstream processing.
+Defines whether unmapped reads should be discarded and stored in FastQ and/or BAM format separately. The behaviour depends on the choice of the `--bam_unmapped_type`.
 
-### `--bam_keep_all`
+### `--bam_unmapped_type`
 
-Turned on by default, keeps all reads that were mapped in the dataset. 
-
-### `--bam_filter_reads`
-
-Specify this, if you want to filter reads for downstream analysis. 
+Defines how to proceed with unmapped reads: "discard" removes all unmapped reads, "bam" keeps unmapped reads as BAM file, "fastq" keeps unmapped reads as FastQ file, "both" keeps both BAM and FastQ files. Only effective when option `--bam_discard_unmapped` is turned on.
 
 ### `--bam_mapping_quality_threshold`
 

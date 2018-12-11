@@ -76,12 +76,12 @@ def helpMessage() {
       --bwamem                      Turn on BWA Mem instead of CM/BWA aln for mapping
     
     BAM Filtering
-      --bam_keep_mapped_only            Only consider mapped reads for downstream analysis. Unmapped reads are extracted to separate output.
-      --bam_filter_reads                Keep all reads in BAM file for downstream analysis
-      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter
+      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice. 
+      --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
+      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
     
     DeDuplication
-      --dedupper                    Deduplication method to use
+      --dedupper                    Deduplication method to use (options: dedup, markduplicates). Default: dedup
       --dedup_all_merged            Treat all reads as merged reads
     
     Library Complexity Estimation
@@ -173,10 +173,11 @@ params.circularfilter = false
 params.bwamem = false
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
-params.bam_keep_mapped_only = false
-params.bam_keep_all = true
-params.bam_filter_reads = false
+params.bam_discard_unmapped = false
+params.bam_unmapped_type = ''
+
 params.bam_mapping_quality_threshold = 0
+
 
 //DamageProfiler settings
 params.damageprofiler_length = 100
@@ -711,26 +712,39 @@ process samtools_filter {
 
     output:
     file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
-    file "*.fq.gz" optional true
+    file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.bai"
 
-    when: "${params.bam_filter_reads}"
-
     script:
     prefix="$bam" - ~/(\.bam)?/
-
-    if("${params.bam_keep_mapped_only}"){
-    """
-    samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-    samtools fastq -tn "${prefix}.unmapped.bam" | gzip > "${prefix}.unmapped.fq.gz"
-    samtools index ${prefix}.filtered.bam
-    """
-    } else {
-    """
-    samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-    samtools index ${prefix}.filtered.bam
-    """
+    
+    if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
+        """
+        samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+        """
+    } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
+        """
+        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools index ${prefix}.filtered.bam
+        """
+    } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "fastq"){
+        """
+        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools index ${prefix}.filtered.bam
+        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz"
+        rm ${prefix}.unmapped.bam
+        """
+    } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
+        """
+        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools index ${prefix}.filtered.bam
+        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz"
+        """
+    } else { //Only apply quality filtering, default
+        """
+        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+        """
     }  
 }
 
@@ -879,7 +893,7 @@ process markDup{
     script:
     prefix = "${bam.baseName}"
     """
-    picard MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE=${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
+    picard MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
     """
 }
 
