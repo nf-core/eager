@@ -51,6 +51,7 @@ Note that the dockerhub organisation name annoyingly can't have a hyphen, so is 
 ### Singularity image
 Many HPC environments are not able to run Docker due to security issues.
 [Singularity](http://singularity.lbl.gov/) is a tool designed to run on such HPC systems which is very similar to Docker.
+>>>>>>> TEMPLATE
 
 To specify singularity usage in your pipeline config file, add the following:
 
@@ -80,4 +81,5 @@ To use conda in your own config file, add the following:
 
 ```nextflow
 process.conda = "$baseDir/environment.yml"
+>>>>>>> TEMPLATE
 ```
