@@ -1,30 +1,29 @@
-name: nf-core-eager-2.0.2
+name: nf-core-eager-2.1.0dev
 channels:
   - defaults
   - bioconda
   - conda-forge
 dependencies:
-  - defaults::openjdk=8.0.152
-  - fastqc=0.11.8
-  - adapterremoval=2.2.2
-  - adapterremovalfixprefix=0.0.4
-  - bwa=0.7.17
-  - picard=2.18.15
-  - samtools=1.9
-  - dedup=0.12.3
-  - angsd=0.923
-  - circularmapper=1.93.4
-  - gatk4=4.0.10.0
-  - qualimap=2.2.2b
-  - vcf2genome=0.91
-  - damageprofiler=0.3.11
-  - multiqc=1.6
-  - pmdtools=0.60
-  - r-rmarkdown=1.10
-  - libiconv=1.15
-  - conda-forge::pigz=2.3.4
-  - sequencetools=1.2.2
-  - preseq=2.0.3
-  - fastp=0.19.4
-  - bamutil=1.0.14
+  - anaconda::openjdk=8.0.152
+  - bioconda::fastqc=0.11.8
+  - bioconda::adapterremoval=2.2.2
+  - bioconda::adapterremovalfixprefix=0.0.4
+  - bioconda::bwa=0.7.17
+  - bioconda::picard=2.18.15
+  - bioconda::samtools=1.9
+  - bioconda::dedup=0.12.3
+  - bioconda::angsd=0.923
+  - bioconda::circularmapper=1.93.4
+  - bioconda::gatk4=4.0.11.0
+  - bioconda::qualimap=2.2.2b
+  - bioconda::vcf2genome=0.91
+  - bioconda::damageprofiler=0.3.11
+  - bioconda::multiqc=1.6
+  - bioconda::pmdtools=0.60
+  - conda-forge::r-rmarkdown=1.10
+  - conda-forge::libiconv=1.15
+  - bioconda::sequencetools=1.2.2
+  - bioconda::preseq=2.0.3
+  - bioconda::fastp=0.19.4
+  - bioconda::bamutil=1.0.14
   #Missing Schmutzi,snpAD

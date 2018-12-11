@@ -26,17 +26,18 @@ def helpMessage() {
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
-      -profile                      Hardware config to use. docker / aws
+      -profile                      Hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentatoin.
+      --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
+      --pairedEnd                   Specifies that the input is paired end reads (required if not singleend)
+      --fasta                       Path to Fasta reference (required if not iGenome reference)
+      --genome                      Name of iGenomes reference (required if not fasta reference)
 
-    Options:
-      --genome                      Name of iGenomes reference
-      --singleEnd                   Specifies that the input is single end reads
+    Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
       --udg                         Specify that your libraries are treated with UDG
       --udg_type                    Specify here if you have UDG half treated libraries, Set to 'Half' in that case
 
     References                      If not specified in the configuration file or you wish to overwrite any of the references.
-      --fasta                       Path to Fasta reference
       --bwa_index                   Path to BWA index
       --bedfile                     Path to BED file for SNPCapture methods
       --seq_dict                    Path to sequence dictionary file
@@ -54,8 +55,8 @@ def helpMessage() {
       --complexity_filter_poly_g_min    Specify poly-g min filter (default: 10) for filtering
     
     Clipping / Merging
-      --clip_forward_adaptor        Specify adapter to be clipped off (forward)
-      --clip_reverse_adaptor        Specify adapter to be clipped off (reverse)
+      --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward)
+      --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse)
       --clip_readlength             Specify read minimum length to be kept for downstream analysis
       --clip_min_read_quality       Specify minimum base quality for not trimming off bases
       --min_adap_overlap            Specify minimum adapter overlap
@@ -107,7 +108,12 @@ def helpMessage() {
     Other options:
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      --plaintext_email             Receive plain text emails rather than HTML
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+      --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'
+      --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'
+      --max_cpus                    Maximum number of CPUs to use for each step of the pipleine. Should be in form e.g. --max_cpus 1
+      
     """.stripIndent()
 }
 /*
@@ -210,8 +216,23 @@ wherearemyfiles = file("$baseDir/assets/where_are_my_files.txt")
 
 // Validate inputs
 Channel.fromPath("${params.fasta}")
-    .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta or --bwa_index"}
+    .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
     .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index;ch_fasta_for_bwamem_mapping}
+
+//Index files provided? Then check whether they are correct and complete
+if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
+    exit 1, "Invalid aligner option. Default is bwa, but specify --circularmapper or --bwamem to use these."
+}
+if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
+    bwa_index = Channel
+        .fromPath("${params.bwa_index}/**.*")
+        .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}" }
+        .into{ch_bwa_index_existing;ch_bwa_index_bwamem_existing}
+} else {
+    //Create empty channels to make sure later mix() does not fail
+    ch_bwa_index_existing = Channel.empty()
+    ch_bwa_index_bwamem_existing = Channel.empty()
+}
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd ){
@@ -271,7 +292,7 @@ if(params.readPaths){
 
 // Header log info
 log.info "========================================="
-log.info " nf-core/eager v${params.pipelineVersion}"
+log.info " nf-core/eager v${workflow.manifest.version}"
 log.info "========================================="
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
@@ -279,6 +300,7 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
 summary['Fasta Ref']    = params.fasta
+if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
@@ -363,7 +385,7 @@ process makeBWAIndex {
             else null
     }
 
-    when: !params.bwa_index && params.fasta && params.aligner == 'bwa'
+    when: !params.bwa_index && params.fasta && (params.aligner == 'bwa' || params.bwamem)
 
     input:
     file fasta from ch_fasta_for_bwa_indexing
@@ -560,7 +582,7 @@ process bwa {
 
     input:
     file(reads) from ch_clipped_reads
-    file "*" from ch_bwa_index
+    file "*" from ch_bwa_index.mix(ch_bwa_index_existing).collect()
     file fasta from ch_fasta_for_bwa_mapping
 
     output:
@@ -637,7 +659,7 @@ process bwamem {
 
     input:
     file(reads) from ch_clipped_reads_bwamem
-    file "*" from ch_bwa_index_bwamem
+    file "*" from ch_bwa_index_bwamem.mix(ch_bwa_index_bwamem_existing).collect()
     file fasta from ch_fasta_for_bwamem_mapping
 
     output:
@@ -867,10 +889,10 @@ process markDup{
 }
 
 //If no deduplication runs, the input is mixed directly from samtools filter, if it runs either markdup or dedup is used thus mixed from these two channels
-ch_dedup_for_pmdtools = Channel.create()
+ch_dedup_for_pmdtools = Channel.empty()
 
 //Bamutils TrimBam Channel
-ch_for_bamutils = Channel.create()
+ch_for_bamutils = Channel.empty()
 
 if(!params.skip_deduplication){
     ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).into {ch_for_pmdtools;ch_for_bamutils}
