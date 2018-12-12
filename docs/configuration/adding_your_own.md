@@ -28,7 +28,6 @@ process {
 }
 ```
 
-
 ## Software Requirements
 To run the pipeline, several software packages are required. How you satisfy these requirements is essentially up to you and depends on your system. If possible, we _highly_ recommend using either Docker or Singularity.
 Please see the [`installation documentation`](../installation.md) for how to run using the below as a one-off. These instructions are about configuring a config file for repeated use.
@@ -81,3 +80,19 @@ To use conda in your own config file, add the following:
 ```nextflow
 process.conda = "$baseDir/environment.yml"
 ```
+
+## Job Resources
+#### Automatic resubmission
+Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
+
+#### Custom resource requests
+Wherever process-specific requirements are set in the pipeline, the default value can be changed by creating a custom config file. See the files in [`conf`](../conf) for examples.
+
+### AWS Batch specific parameters
+Running the pipeline on AWS Batch requires a couple of specific parameters to be set according to your AWS Batch configuration. Please use the `-awsbatch` profile and then specify all of the following parameters.
+#### `--awsqueue`
+The JobQueue that you intend to use on AWS Batch.
+#### `--awsregion`
+The AWS region to run your job in. Default is set to `eu-west-1` but can be adjusted to your needs.
+
+Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.

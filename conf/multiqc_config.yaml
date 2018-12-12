@@ -5,3 +5,15 @@ report_comment: >
 report_section_order:
     nf-core/eager-software-versions:
         order: -1000
+    fastqc:
+        after: 'nf-core/eager-software-versions'
+    adapterRemoval:
+        after: 'fastqc'
+    Samtools:
+        after: 'adapterRemoval'
+    dedup:
+        after: 'Samtools'
+    qualimap:
+        after: 'dedup'
+    preseq:
+        after: 'qualimap'
