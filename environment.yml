@@ -1,4 +1,4 @@
-name: nf-core-eager-2.0.3dev
+name: nf-core-eager-2.0.3
 channels:
   - defaults
   - bioconda
