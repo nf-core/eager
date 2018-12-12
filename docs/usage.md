@@ -8,11 +8,23 @@
 * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
 * [Job Resources](#job-resources)
+* [Other command line parameters](#other-command-line-parameters)
+* [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
 * [Automatic resubmission](#automatic-resubmission)
 * [Custom resource requests](#custom-resource-requests)
 * [AWS batch specific parameters](#aws-batch-specific-parameters)
 * [Other command line parameters](#other-command-line-parameters)
 * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
+
+## General Nextflow info
+Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
+
+It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
+
+```bash
+NXF_OPTS='-Xms1g -Xmx4g'
+```
+
 
 ## Preamble
 To access the nextflow help message run: `nextflow run -help`
@@ -53,7 +65,7 @@ First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
 
-## Main Arguments
+## Mandatory Arguments
 
 ### `-profile`
 
@@ -118,8 +130,6 @@ A normal glob pattern, enclosed in quotation marks, can then be used for `--read
 --pairedEnd --reads '*.fastq'
 ```
 
-## Reference Genomes
-
 ### `--fasta`
 If you prefer, you can specify the full path to your reference genome when you run the pipeline:
 
@@ -163,6 +173,8 @@ params {
 }
 ```
 
+### Optional Reference Utility Files
+
 ### `--bwa_index`
 
 Use this to specify a previously created BWA index. This saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource specific profile that sets paths to pre-computed reference genomes, saving even time when specifying these.
@@ -178,22 +190,6 @@ Use this to specify the required FastA index file for the selected reference gen
 ### `--saveReference` false
 
 If you turn this on, the generated indices will be stored in the `./results/reference_genomes` for you. 
-
-## Job Resources
-### Automatic resubmission
-Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
-
-### Custom resource requests
-Wherever process-specific requirements are set in the pipeline, the default value can be changed by creating a custom config file. See the files in [`conf`](../conf) for examples.
-
-## AWS Batch specific parameters
-Running the pipeline on AWS Batch requires a couple of specific parameters to be set according to your AWS Batch configuration. Please use the `-awsbatch` profile and then specify all of the following parameters.
-### `--awsqueue`
-The JobQueue that you intend to use on AWS Batch.
-### `--awsregion`
-The AWS region to run your job in. Default is set to `eu-west-1` but can be adjusted to your needs.
-
-Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
 
 ## Other command line parameters
 
@@ -230,7 +226,7 @@ process.$multiqc.module = []
 
 ### `--max_memory`
 Use to set a top-limit for the default memory requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_memory '8.GB'``
+Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`
 
 ### `--max_time`
 Use to set a top-limit for the default time requirement for each process.
@@ -243,7 +239,7 @@ Should be a string in the format integer-unit. eg. `--max_cpus 1`
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
 
-### `--multiqc_config`
+### `--multiqc_config`
 Specify a path to a custom MultiQC configuration file.
 
 

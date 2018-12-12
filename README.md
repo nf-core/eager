@@ -75,6 +75,7 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](docs/troubleshooting.md)
 
+
 ## Credits
 
 This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), 
@@ -97,3 +98,4 @@ do so and everyone is welcome to contribute here!
 * **MultiQC** Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. [https://doi.org/10.1093/bioinformatics/btw354](https://doi.org/10.1093/bioinformatics/btw354) Download: [https://multiqc.info/](https://multiqc.info/)
 * **BamUtils** Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. [https://doi.org/10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114) Download: [https://genome.sph.umich.edu/wiki/BamUtil](https://genome.sph.umich.edu/wiki/BamUtil)
 * **FastP** Chen, S., Zhou, Y., Chen, Y., & Gu, J. (2018). fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics , 34(17), i884–i890. [https://doi.org/10.1093/bioinformatics/bty560](https://doi.org/10.1093/bioinformatics/bty560) Download: [https://github.com/OpenGene/fastp](https://github.com/OpenGene/fastp)
+
