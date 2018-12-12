@@ -727,6 +727,7 @@ process samtools_filter {
     if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
         """
         samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+        samtools index ${prefix}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
         """
@@ -749,6 +750,7 @@ process samtools_filter {
     } else { //Only apply quality filtering, default
         """
         samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+        samtools index ${prefix}.filtered.bam
         """
     }  
 }
