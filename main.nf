@@ -108,7 +108,12 @@ def helpMessage() {
     Other options:
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      --plaintext_email             Receive plain text emails rather than HTML
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+      --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'
+      --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'
+      --max_cpus                    Maximum number of CPUs to use for each step of the pipleine. Should be in form e.g. --max_cpus 1
+      
     """.stripIndent()
 }
 /*
