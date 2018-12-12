@@ -69,6 +69,19 @@ Be warned of two important points about this default configuration:
     * See the [nextflow docs](https://www.nextflow.io/docs/latest/executor.html) for information about running with other hardware backends. Most job scheduler systems are natively supported.
 2. Nextflow will expect all software to be installed and available on the `PATH`
 
+The following software is currently required to be installed:
+
+* [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+* [Picard Tools](https://broadinstitute.github.io/picard/)
+* [Samtools](http://www.htslib.org/)
+* [Preseq](http://smithlabresearch.org/software/preseq/)
+* [MultiQC](https://multiqc.info/)
+* [BWA](http://bio-bwa.sourceforge.net/)
+* [Qualimap](http://qualimap.bioinfo.cipf.es/)
+* [GATK](https://software.broadinstitute.org/gatk/)
+* [bamUtil](https://genome.sph.umich.edu/wiki/BamUtil)
+* [fastP](https://github.com/OpenGene/fastp)
+
 #### 3.1) Software deps: Docker
 First, install docker on your system: [Docker Installation Instructions](https://docs.docker.com/engine/installation/)
 
@@ -99,6 +112,14 @@ This is slower and less reproducible than the above, but is still better than ha
 The pipeline ships with a conda environment file and nextflow has built-in support for this.
 To use it first ensure that you have conda installed (we recommend [miniconda](https://conda.io/miniconda.html)), then follow the same pattern as above and use the flag `-profile standard,conda`
 
+#### 4) Profile configuration
+Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
+
+It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
+
+```bash
+NXF_OPTS='-Xms1g -Xmx4g'
+```
 
 ## Appendices
 
@@ -111,5 +132,4 @@ Note that you will need to specify your UPPMAX project ID when running a pipelin
 
 ```nextflow
 params.project = 'project_ID' // eg. b2017123
->>>>>>> TEMPLATE
 ```
