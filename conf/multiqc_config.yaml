@@ -7,6 +7,7 @@ report_section_order:
         order: -1000
 top_modules:
     - fastqc:
+        after: 'nf-core/eager-software-versions'
         name: 'FastQC (raw)'
         path_filters:
             - '*_preAR_fastqc.zip'
@@ -16,4 +17,15 @@ top_modules:
         target: ''
         path_filters:
             - '*_postAR_fastqc.zip'
+    - adapterRemoval:
+        after: 'fastqc'
+    - Samtools:
+        after: 'adapterRemoval'
+    - dedup:
+        after: 'Samtools'
+    - qualimap:
+        after: 'dedup'
+    - preseq:
+        after: 'qualimap'
+
 
