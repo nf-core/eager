@@ -139,8 +139,7 @@ params.bwa_index = false
 params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
-params.udg = false 
-params.udg_type = 'Half'
+params.pmd_udg_type = 'Half'
 
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
@@ -936,7 +935,7 @@ process pmdtools {
 
     script:
     //Check which treatment for the libraries was used
-    def treatment = params.udg ? (params.udg_type =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
+    def treatment = params.pmd_udg_type ?: (params.pmd_udg_type =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
     if(params.snpcapture){
         snpcap = (params.pmdtools_reference_mask != '') ? "--refseq ${params.pmdtools_reference_mask}" : ''
         log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
