@@ -10,13 +10,13 @@ top_modules:
         after: 'nf-core/eager-software-versions'
         name: 'FastQC (raw)'
         path_filters:
-            - '*_preAR_fastqc.zip'
+            - '*_fastqc.zip'
     - fastqc:
         name: 'FastQC (trimmed)'
         info: 'This section of the report shows FastQC results after adapter trimming.'
         target: ''
         path_filters:
-            - '*_postAR_fastqc.zip'
+            - '*combined.prefixed_fastqc.zip'
     - adapterRemoval:
         after: 'fastqc'
     - Samtools:
