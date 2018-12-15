@@ -4,11 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unpublished]
+## [Unpublished / Dev Branch]
 
-### `Added`
-* [#80](https://github.com/nf-core/eager/pull/80) - BWA Index file handling 
-* [#77](https://github.com/nf-core/eager/pull/77) - Lots of documentation updates by [@jfy133](https://github.com/jfy133)
+### `Fixed`
+* [#110](https://github.com/nf-core/eager/pull/110) - Fix for [MultiQC Missing Second FastQC report](https://github.com/nf-core/eager/issues/107)
 
 ## [2.0.3] - 2018-12-09
 
