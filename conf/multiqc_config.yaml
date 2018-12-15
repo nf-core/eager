@@ -6,11 +6,11 @@ top_modules:
     - fastqc:
         name: 'FastQC (raw)'
         path_filters:
-            - '*_preAR_fastqc.html'
+            - '*_preAR_fastqc.zip'
     - fastqc:
         name: 'FastQC (trimmed)'
         info: 'This section of the report shows FastQC results after adapter trimming.'
         target: ''
         path_filters:
-            - '*_postAR_fastqc.html'
+            - '*_postAR_fastqc.zip'
 
