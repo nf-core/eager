@@ -5,27 +5,24 @@ report_comment: >
 report_section_order:
     nf-core/eager-software-versions:
         order: -1000
-top_modules:
-    - fastqc:
+    fastqc:
         after: 'nf-core/eager-software-versions'
         name: 'FastQC (raw)'
         path_filters:
             - '*_fastqc.zip'
-    - fastqc:
+    fastqc:
         name: 'FastQC (trimmed)'
         info: 'This section of the report shows FastQC results after adapter trimming.'
         target: ''
         path_filters:
             - '*combined.prefixed_fastqc.zip'
-    - adapterRemoval:
+    adapterRemoval:
         after: 'fastqc'
-    - Samtools:
+    Samtools:
         after: 'adapterRemoval'
-    - dedup:
+    dedup:
         after: 'Samtools'
-    - qualimap:
+    qualimap:
         after: 'dedup'
-    - preseq:
+    preseq:
         after: 'qualimap'
-
-
