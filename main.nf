@@ -34,8 +34,6 @@ def helpMessage() {
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
-      --udg                         Specify that your libraries are treated with UDG
-      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'Half' in that case
 
     References                      If not specified in the configuration file or you wish to overwrite any of the references.
       --bwa_index                   Path to BWA index
@@ -91,6 +89,7 @@ def helpMessage() {
       --damageprofiler_length       Specify length filter for DamageProfiler
       --damageprofiler_threshold    Specify number of bases to consider for damageProfiler
       --run_pmdtools                Turn on PMDtools
+      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are set to UDG-.
       --pmdtools_range              Specify range of bases for PMDTools
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools
       --pmdtools_reference_mask     Specify a reference mask for PMDTools
