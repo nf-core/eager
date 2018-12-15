@@ -55,7 +55,7 @@ nextflow pull nf-core/eager
 4. Set up your job with default parameters
 
 ```bash
-nextflow run nf-core -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<REFERENCE.fasta'
+nextflow run nf-core -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<REFERENCE>.fasta'
 ```
 
 5. See the overview of the run with under `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
