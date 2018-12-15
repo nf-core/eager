@@ -139,7 +139,7 @@ params.bwa_index = false
 params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
-params.pmd_udg_type = 'Half'
+params.pmd_udg_type = 'half'
 
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
