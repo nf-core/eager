@@ -73,6 +73,9 @@ singularity.enabled = true
 process.container = "/path/to/nf-core-eager.simg"
 ```
 
+By default nextflow will store a singularity image in the working directory of a job. You can alternatively further specify a 'central' singularity cache to keep all singularity contains for a(ll) user(s). This can be
+done by either setting a central environmental variable `NXF_SINGULARITY_CACHEDIR` or specifying the location in a nextflow config file with `singularity.cacheDir`.
+
 ### Conda
 If you're not able to use Docker or Singularity, you can instead use conda to manage the software requirements.
 To use conda in your own config file, add the following:
