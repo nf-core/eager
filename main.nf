@@ -1010,7 +1010,8 @@ process multiqc {
 
     input:
     file multiqc_config
-    file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
+    file ('fastqc_raw/*') from ch_fastqc_results.collect().ifEmpty([])
+    file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
