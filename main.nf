@@ -211,9 +211,10 @@ params.bamutils_softclip = false
 
 
 
-multiqc_config = file(params.multiqc_config)
-output_docs = file("$baseDir/docs/output.md")
-wherearemyfiles = file("$baseDir/assets/where_are_my_files.txt")
+ch_multiqc_config = Channel.fromPath(params.multiqc_config)
+ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
+Channel.fromPath("$baseDir/assets/where_are_my_files.txt")
+       .into{ ch_where_for_bwa_index; ch_where_for_fasta_index; ch_where_for_seqdict}
 
 // Validate inputs
 if("${params.fasta}".endsWith(".gz")){
@@ -418,7 +419,7 @@ process makeBWAIndex {
 
     input:
     file fasta from ch_fasta_for_bwa_indexing
-    file wherearemyfiles
+    file wherearemyfiles from ch_where_for_bwa_index
 
     output:
     file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into (ch_bwa_index,ch_bwa_index_bwamem)
@@ -445,7 +446,7 @@ process makeFastaIndex {
 
     input:
     file fasta from ch_fasta_for_faidx_indexing
-    file wherearemyfiles
+    file wherearemyfiles from ch_where_for_fasta_index
 
     output:
     file "${fasta}.fai" into ch_fasta_faidx_index
@@ -475,7 +476,7 @@ process makeSeqDict {
 
     input:
     file fasta from ch_fasta_for_dict_indexing
-    file wherearemyfiles
+    file wherearemyfiles from ch_where_for_seqdict
 
     output:
     file "*.dict" into ch_seq_dict
@@ -1037,7 +1038,7 @@ process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
-    file multiqc_config
+    file multiqc_config from ch_multiqc_config.collect().ifEmpty([])
     file ('fastqc_raw/*') from ch_fastqc_results.collect().ifEmpty([])
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml.collect().ifEmpty([])
@@ -1073,7 +1074,7 @@ process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
-    file output_docs
+    file output_docs from ch_output_docs
 
     output:
     file "results_description.html"
