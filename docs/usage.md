@@ -271,8 +271,6 @@ Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA da
 
 ### `--pmd_udg_type` \`half`
 
-half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
-
 If you have UDGhalf treated data (Rohland et al 2016), specify `half` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `full` and the DNA damage assesment will use CpG context only. If you don't specify the parameter at all, the library will be treated as UDG-.
 
 ## Step skipping parameters
