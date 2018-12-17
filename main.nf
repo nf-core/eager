@@ -217,9 +217,37 @@ Channel.fromPath("$baseDir/assets/where_are_my_files.txt")
        .into{ ch_where_for_bwa_index; ch_where_for_fasta_index; ch_where_for_seqdict}
 
 // Validate inputs
-Channel.fromPath("${params.fasta}")
+if("${params.fasta}".endsWith(".gz")){
+    //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
+    Channel.fromPath("${params.fasta}")
+            .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
+            .set {ch_unzip_fasta}
+
+    process unzip_reference{
+        tag "$zipfasta"
+
+        input:
+        file zipfasta from ch_unzip_fasta
+
+        output:
+        file "*.fasta" into (ch_fasta_for_bwa_indexing, ch_fasta_for_faidx_indexing, ch_fasta_for_dict_indexing,  ch_fasta_for_bwa_mapping, ch_fasta_for_damageprofiler, ch_fasta_for_qualimap, ch_fasta_for_pmdtools, ch_fasta_for_circularmapper, ch_fasta_for_circularmapper_index,ch_fasta_for_bwamem_mapping)
+
+        script:
+        """
+        pigz -f -d -p ${task.cpus} $zipfasta
+        """
+    }   
+    } else {
+    Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
     .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index;ch_fasta_for_bwamem_mapping}
+}
+    
+
+
+
+
+
 
 //Index files provided? Then check whether they are correct and complete
 if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
