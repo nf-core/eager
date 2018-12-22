@@ -372,35 +372,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 }
 
 
-/*
- * Parse software version numbers
- */
-process get_software_versions {
-
-    output:
-    file 'software_versions_mqc.yaml' into software_versions_yaml
-
-    script:
-    """
-    echo $workflow.manifest.version &> v_pipeline.txt
-    echo $workflow.nextflow.version &> v_nextflow.txt
-    fastqc --version &> v_fastqc.txt 2>&1 || true
-    multiqc --version &> v_multiqc.txt 2>&1 || true
-    bwa &> v_bwa.txt 2>&1 || true
-    samtools --version &> v_samtools.txt 2>&1 || true
-    AdapterRemoval -version  &> v_adapterremoval.txt 2>&1 || true
-    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
-    dedup -v &> v_dedup.txt 2>&1 || true
-    preseq &> v_preseq.txt 2>&1 || true
-    gatk BaseRecalibrator --version 2>&1 | grep Version: > v_gatk.txt 2>&1 || true
-    vcf2genome &> v_vcf2genome.txt 2>&1 || true
-    fastp --version &> v_fastp.txt 2>&1 || true
-    bam --version &> v_bamutil.txt 2>&1 || true
-    qualimap --version &> v_qualimap.txt 2>&1 || true
-    
-    scrape_software_versions.py &> software_versions_mqc.yaml
-    """
-}
 
 /* 
 * Create BWA indices if they are not present
@@ -615,7 +586,7 @@ process bwa {
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
-    file "*.bai" 
+    file "*.bai" into ch_bam_index_for_damageprofiler
     
 
     script:
@@ -868,9 +839,12 @@ process damageprofiler {
     input:
     file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
     file fasta from ch_fasta_for_damageprofiler
+    file bai from ch_bam_index_for_damageprofiler
+    
 
     output:
-    file "*" into ch_damageprofiler_results
+    file "*"
+    file "*/*.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
 
     script:
     """
@@ -1029,6 +1003,63 @@ Downstream VCF tools:
 
 
 
+
+
+
+/*
+ * STEP 3 - Output Description HTML
+ */
+process output_documentation {
+    publishDir "${params.outdir}/Documentation", mode: 'copy'
+
+    input:
+    file output_docs from ch_output_docs
+
+    output:
+    file "results_description.html"
+
+    script:
+    """
+    markdown_to_html.r $output_docs results_description.html
+    """
+}
+
+
+/*
+ * Parse software version numbers
+ */
+process get_software_versions {
+
+    input:
+    file json from ch_damageprofiler_for_software_versions
+
+    output:
+    file 'software_versions_mqc.yaml' into software_versions_yaml
+
+    script:
+    """
+    echo $workflow.manifest.version &> v_pipeline.txt
+    echo $workflow.nextflow.version &> v_nextflow.txt
+    fastqc --version &> v_fastqc.txt 2>&1 || true
+    multiqc --version &> v_multiqc.txt 2>&1 || true
+    bwa &> v_bwa.txt 2>&1 || true
+    samtools --version &> v_samtools.txt 2>&1 || true
+    AdapterRemoval -version  &> v_adapterremoval.txt 2>&1 || true
+    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
+    dedup -v &> v_dedup.txt 2>&1 || true
+    preseq &> v_preseq.txt 2>&1 || true
+    gatk BaseRecalibrator --version 2>&1 | grep Version: > v_gatk.txt 2>&1 || true
+    vcf2genome &> v_vcf2genome.txt 2>&1 || true
+    fastp --version &> v_fastp.txt 2>&1 || true
+    bam --version &> v_bamutil.txt 2>&1 || true
+    qualimap --version &> v_qualimap.txt 2>&1 || true
+    cat $json &> v_damageprofiler.txt 2>&1 || true 
+    
+    scrape_software_versions.py &> software_versions_mqc.yaml
+    """
+}
+
+
 /*
  * STEP 2 - MultiQC
  */
@@ -1060,26 +1091,6 @@ process multiqc {
     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
     """
     multiqc -f $rtitle $rfilename --config $multiqc_config .
-    """
-}
-
-
-
-/*
- * STEP 3 - Output Description HTML
- */
-process output_documentation {
-    publishDir "${params.outdir}/Documentation", mode: 'copy'
-
-    input:
-    file output_docs from ch_output_docs
-
-    output:
-    file "results_description.html"
-
-    script:
-    """
-    markdown_to_html.r $output_docs results_description.html
     """
 }
 
