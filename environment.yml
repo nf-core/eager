@@ -17,8 +17,8 @@ dependencies:
   - bioconda::gatk4=4.0.11.0
   - bioconda::qualimap=2.2.2b
   - bioconda::vcf2genome=0.91
-  - bioconda::damageprofiler=0.3.11
-  - bioconda::multiqc=1.6
+  - bioconda::damageprofiler=0.4.4
+  - bioconda::multiqc=1.7
   - bioconda::pmdtools=0.60
   - conda-forge::r-rmarkdown=1.10
   - conda-forge::libiconv=1.15
