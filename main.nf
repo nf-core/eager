@@ -870,7 +870,7 @@ process damageprofiler {
     file fasta from ch_fasta_for_damageprofiler
 
     output:
-    file "*.yaml" into ch_damageprofiler_results
+    file "*.json" into ch_damageprofiler_results
 
     script:
     """
