@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#111](https://github.com/nf-core/eager/pull/110) - Allow [Zipped FastA reference input](https://github.com/nf-core/eager/issues/91)
 * [#113](https://github.com/nf-core/eager/pull/113) - All files are now staged via channels, which is considered best practice by Nextflow. 
 * [#114](https://github.com/nf-core/eager/pull/113) - Add proper runtime defaults for multiple processes 
+* [#118](https://github.com/nf-core/eager/pull/118) - Add centralized configs handling
 
 ### `Fixed`
 * [#110](https://github.com/nf-core/eager/pull/110) - Fix for [MultiQC Missing Second FastQC report](https://github.com/nf-core/eager/issues/107)
