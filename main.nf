@@ -289,32 +289,11 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
-if(params.readPaths){
-    if(params.singleEnd){
-        Channel
-            .from(params.readPaths)
-            .map { row -> [ row[0], [file(row[1][0])]] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .dump(tag:'input')
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
-            
-    } else {
-        Channel
-            .from(params.readPaths)
-            .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .dump(tag:'input')
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
-            
-    }
-} else {
-    Channel
-        .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .dump(tag:'input')
-        .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
-        
-}
+Channel
+    .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
+    .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
+    .dump(tag:'input')
+    .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
 
 
 
