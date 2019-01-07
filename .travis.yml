@@ -13,7 +13,7 @@ before_install:
   # Pull the docker image first so the test doesn't wait for this
   - docker pull nfcore/eager:dev
   # Fake the tag locally so that the pipeline runs properly
-  - docker tag nfcore/eager:dev nfcore/eager:latest
+  - docker tag nfcore/eager:dev nfcore/eager:2.0.4
 
 install:
   # Install Nextflow
