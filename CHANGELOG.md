@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#110](https://github.com/nf-core/eager/pull/110) - Fix for [MultiQC Missing Second FastQC report](https://github.com/nf-core/eager/issues/107)
 * [#112](https://github.com/nf-core/eager/pull/112) - Remove [redundant UDG options](https://github.com/nf-core/eager/issues/89)
 
-## [2.0.3] - 2018-12-09
+## [2.0.3] - 2018-12-12
 
 ### `Added`
 * [#80](https://github.com/nf-core/eager/pull/80) - BWA Index file handling 
