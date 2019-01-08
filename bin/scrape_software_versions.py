@@ -16,6 +16,7 @@ regexes = {
     'GATK': ['v_gatk.txt', r"Version:([\d\.]+)"],
     'bamUtil' : ['v_bamutil.txt', r"Version: ([\d\.]+)"],
     'fastP': ['v_fastp.txt', r"([\d\.]+)"],
+    'DamageProfiler' : ['v_damageprofiler.txt', r"version\": \"([\d\.]+)"],
 }
 results = OrderedDict()
 results['nf-core/eager'] = '<span style="color:#999999;\">N/A</span>'
@@ -30,6 +31,7 @@ results['Qualimap'] = '<span style="color:#999999;\">N/A</span>'
 results['GATK'] = '<span style="color:#999999;\">N/A</span>'
 results['bamUtil'] = '<span style="color:#999999;\">N/A</span>'
 results['fastP'] = '<span style="color:#999999;\">N/A</span>'
+results['DamageProfiler'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():

@@ -27,7 +27,6 @@ process {
   clusterOptions = '-A myproject'
 }
 ```
-
 ## Software Requirements
 To run the pipeline, several software packages are required. How you satisfy these requirements is essentially up to you and depends on your system. If possible, we _highly_ recommend using either Docker or Singularity.
 Please see the [`installation documentation`](../installation.md) for how to run using the below as a one-off. These instructions are about configuring a config file for repeated use.
@@ -73,12 +72,36 @@ singularity.enabled = true
 process.container = "/path/to/nf-core-eager.simg"
 ```
 
+By default nextflow will store a singularity image in the working directory of a job. You can alternatively further specify a 'central' singularity cache to keep all singularity contains for a(ll) user(s). This can be
+done by either setting a central environmental variable `NXF_SINGULARITY_CACHEDIR` or specifying the location in a nextflow config file with `singularity.cacheDir`.
+
 ### Conda
 If you're not able to use Docker or Singularity, you can instead use conda to manage the software requirements.
 To use conda in your own config file, add the following:
 
 ```nextflow
 process.conda = "$baseDir/environment.yml"
+```
+
+## Software Caches
+
+Each new version of a pipeline downloaded and ran, will pull down a new image (docker/singularity)/collection (conda) of all the software required for the pipeline. By default this will be placed in the `work/` directory of an EAGER run. When running lots of pipeline jobs, this can slow down the pipeline (having to create a download a new environment each time) and take up a lot of hard-disk space (as each run has it's own duplicate of the environment).
+
+You can specify a central location for this using the `cacheDir` parameter [(see nextflow documentation)](https://www.nextflow.io/docs/latest/config.html). This can either be central for all users e.g.
+
+```
+singularity {
+  enabled = TRUE
+  cacheDir = '/<path>/<to/<cache_dir>/'
+}
+```
+
+Or if you give freedom to users as to which version they use
+
+```
+conda {
+  cacheDir = "/<path>/<to>/$USER/<cache_dir>"
+}
 ```
 
 ## Job Resources

@@ -136,7 +136,7 @@ If you prefer, you can specify the full path to your reference genome when you r
 ```bash
 --fasta '[path to Fasta reference]'
 ```
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`.
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you.
 
 ### `--genome` (using iGenomes)
 
@@ -264,14 +264,6 @@ This is by default set to `false`, but can be turned on to calculate on target m
 ### `--bedfile` 
 
 Can be used to set a path to a BED file (3/6 column format) to calculate capture target efficiency on the fly. Will not be used without `--bedfile` set as parameter.
-
-### `--udg` false
-
-Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment. 
-
-### `--udg_type "Half"`
-
-If you have UDGhalf treated data (Rohland et al 2016), specify this parameter additionally to `--udg` to use a different model for DNA damage assessment in PMDTools.
 
 ## Step skipping parameters
 
@@ -411,6 +403,15 @@ Specifies the length of the read start and end to be considered for profile gene
 ### `--run_pmdtools`
 
 Specifies to run PMDTools for damage based read filtering and assessment of DNA damage in sequencing libraries. By default turned off. 
+
+
+### `--udg` false
+
+Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment. 
+
+### `--pmd_udg_type` \`half`
+
+If you have UDGhalf treated data (Rohland et al 2016), specify `half` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `full` and the DNA damage assesment will use CpG context only. If you don't specify the parameter at all, the library will be treated as non UDG treated.
 
 ### `--pmdtools_range`
 

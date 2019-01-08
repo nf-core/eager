@@ -34,8 +34,6 @@ def helpMessage() {
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
-      --udg                         Specify that your libraries are treated with UDG
-      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'Half' in that case
 
     References                      If not specified in the configuration file or you wish to overwrite any of the references.
       --bwa_index                   Path to BWA index
@@ -91,6 +89,7 @@ def helpMessage() {
       --damageprofiler_length       Specify length filter for DamageProfiler
       --damageprofiler_threshold    Specify number of bases to consider for damageProfiler
       --run_pmdtools                Turn on PMDtools
+      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are set to UDG-.
       --pmdtools_range              Specify range of bases for PMDTools
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools
       --pmdtools_reference_mask     Specify a reference mask for PMDTools
@@ -139,8 +138,7 @@ params.bwa_index = false
 params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
-params.udg = false 
-params.udg_type = 'Half'
+params.pmd_udg_type = 'half'
 
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
@@ -211,14 +209,43 @@ params.bamutils_softclip = false
 
 
 
-multiqc_config = file(params.multiqc_config)
-output_docs = file("$baseDir/docs/output.md")
-wherearemyfiles = file("$baseDir/assets/where_are_my_files.txt")
+ch_multiqc_config = Channel.fromPath(params.multiqc_config)
+ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
+Channel.fromPath("$baseDir/assets/where_are_my_files.txt")
+       .into{ ch_where_for_bwa_index; ch_where_for_fasta_index; ch_where_for_seqdict}
 
 // Validate inputs
-Channel.fromPath("${params.fasta}")
+if("${params.fasta}".endsWith(".gz")){
+    //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
+    Channel.fromPath("${params.fasta}")
+            .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
+            .set {ch_unzip_fasta}
+
+    process unzip_reference{
+        tag "$zipfasta"
+
+        input:
+        file zipfasta from ch_unzip_fasta
+
+        output:
+        file "*.fasta" into (ch_fasta_for_bwa_indexing, ch_fasta_for_faidx_indexing, ch_fasta_for_dict_indexing,  ch_fasta_for_bwa_mapping, ch_fasta_for_damageprofiler, ch_fasta_for_qualimap, ch_fasta_for_pmdtools, ch_fasta_for_circularmapper, ch_fasta_for_circularmapper_index,ch_fasta_for_bwamem_mapping)
+
+        script:
+        """
+        pigz -f -d -p ${task.cpus} $zipfasta
+        """
+    }   
+    } else {
+    Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
     .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index;ch_fasta_for_bwamem_mapping}
+}
+    
+
+
+
+
+
 
 //Index files provided? Then check whether they are correct and complete
 if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
@@ -345,35 +372,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 }
 
 
-/*
- * Parse software version numbers
- */
-process get_software_versions {
-
-    output:
-    file 'software_versions_mqc.yaml' into software_versions_yaml
-
-    script:
-    """
-    echo $workflow.manifest.version &> v_pipeline.txt
-    echo $workflow.nextflow.version &> v_nextflow.txt
-    fastqc --version &> v_fastqc.txt 2>&1 || true
-    multiqc --version &> v_multiqc.txt 2>&1 || true
-    bwa &> v_bwa.txt 2>&1 || true
-    samtools --version &> v_samtools.txt 2>&1 || true
-    AdapterRemoval -version  &> v_adapterremoval.txt 2>&1 || true
-    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
-    dedup -v &> v_dedup.txt 2>&1 || true
-    preseq &> v_preseq.txt 2>&1 || true
-    gatk BaseRecalibrator --version 2>&1 | grep Version: > v_gatk.txt 2>&1 || true
-    vcf2genome &> v_vcf2genome.txt 2>&1 || true
-    fastp --version &> v_fastp.txt 2>&1 || true
-    bam --version &> v_bamutil.txt 2>&1 || true
-    qualimap --version &> v_qualimap.txt 2>&1 || true
-    
-    scrape_software_versions.py &> software_versions_mqc.yaml
-    """
-}
 
 /* 
 * Create BWA indices if they are not present
@@ -390,7 +388,7 @@ process makeBWAIndex {
 
     input:
     file fasta from ch_fasta_for_bwa_indexing
-    file wherearemyfiles
+    file wherearemyfiles from ch_where_for_bwa_index
 
     output:
     file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into (ch_bwa_index,ch_bwa_index_bwamem)
@@ -417,7 +415,7 @@ process makeFastaIndex {
 
     input:
     file fasta from ch_fasta_for_faidx_indexing
-    file wherearemyfiles
+    file wherearemyfiles from ch_where_for_fasta_index
 
     output:
     file "${fasta}.fai" into ch_fasta_faidx_index
@@ -447,7 +445,7 @@ process makeSeqDict {
 
     input:
     file fasta from ch_fasta_for_dict_indexing
-    file wherearemyfiles
+    file wherearemyfiles from ch_where_for_seqdict
 
     output:
     file "*.dict" into ch_seq_dict
@@ -588,7 +586,7 @@ process bwa {
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
-    file "*.bai" 
+    file "*.bai" into ch_bam_index_for_damageprofiler
     
 
     script:
@@ -738,14 +736,14 @@ process samtools_filter {
         """
         samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
         samtools index ${prefix}.filtered.bam
-        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz"
+        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         rm ${prefix}.unmapped.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
         """
         samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
         samtools index ${prefix}.filtered.bam
-        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz"
+        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         """
     } else { //Only apply quality filtering, default
         """
@@ -841,9 +839,12 @@ process damageprofiler {
     input:
     file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
     file fasta from ch_fasta_for_damageprofiler
+    file bai from ch_bam_index_for_damageprofiler
+    
 
     output:
-    file "*" into ch_damageprofiler_results
+    file "*"
+    file "*/*.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
 
     script:
     """
@@ -936,7 +937,7 @@ process pmdtools {
 
     script:
     //Check which treatment for the libraries was used
-    def treatment = params.udg ? (params.udg_type =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
+    def treatment = params.pmd_udg_type ? (params.pmd_udg_type =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
     if(params.snpcapture){
         snpcap = (params.pmdtools_reference_mask != '') ? "--refseq ${params.pmdtools_reference_mask}" : ''
         log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
@@ -1002,6 +1003,63 @@ Downstream VCF tools:
 
 
 
+
+
+
+/*
+ * STEP 3 - Output Description HTML
+ */
+process output_documentation {
+    publishDir "${params.outdir}/Documentation", mode: 'copy'
+
+    input:
+    file output_docs from ch_output_docs
+
+    output:
+    file "results_description.html"
+
+    script:
+    """
+    markdown_to_html.r $output_docs results_description.html
+    """
+}
+
+
+/*
+ * Parse software version numbers
+ */
+process get_software_versions {
+
+    input:
+    file json from ch_damageprofiler_for_software_versions
+
+    output:
+    file 'software_versions_mqc.yaml' into software_versions_yaml
+
+    script:
+    """
+    echo $workflow.manifest.version &> v_pipeline.txt
+    echo $workflow.nextflow.version &> v_nextflow.txt
+    fastqc --version &> v_fastqc.txt 2>&1 || true
+    multiqc --version &> v_multiqc.txt 2>&1 || true
+    bwa &> v_bwa.txt 2>&1 || true
+    samtools --version &> v_samtools.txt 2>&1 || true
+    AdapterRemoval -version  &> v_adapterremoval.txt 2>&1 || true
+    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
+    dedup -v &> v_dedup.txt 2>&1 || true
+    preseq &> v_preseq.txt 2>&1 || true
+    gatk BaseRecalibrator --version 2>&1 | grep Version: > v_gatk.txt 2>&1 || true
+    vcf2genome &> v_vcf2genome.txt 2>&1 || true
+    fastp --version &> v_fastp.txt 2>&1 || true
+    bam --version &> v_bamutil.txt 2>&1 || true
+    qualimap --version &> v_qualimap.txt 2>&1 || true
+    cat $json &> v_damageprofiler.txt 2>&1 || true 
+    
+    scrape_software_versions.py &> software_versions_mqc.yaml
+    """
+}
+
+
 /*
  * STEP 2 - MultiQC
  */
@@ -1009,8 +1067,9 @@ process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
-    file multiqc_config
-    file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
+    file multiqc_config from ch_multiqc_config.collect().ifEmpty([])
+    file ('fastqc_raw/*') from ch_fastqc_results.collect().ifEmpty([])
+    file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
@@ -1032,26 +1091,6 @@ process multiqc {
     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
     """
     multiqc -f $rtitle $rfilename --config $multiqc_config .
-    """
-}
-
-
-
-/*
- * STEP 3 - Output Description HTML
- */
-process output_documentation {
-    publishDir "${params.outdir}/Documentation", mode: 'copy'
-
-    input:
-    file output_docs
-
-    output:
-    file "results_description.html"
-
-    script:
-    """
-    markdown_to_html.r $output_docs results_description.html
     """
 }
 

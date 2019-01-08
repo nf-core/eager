@@ -28,6 +28,11 @@ Many HPC environments are not able to run Docker due to security issues. [Singul
 ```bash
 nextflow run nf-core/eager -profile singularity --reads '<path to your reads>' --pairedEnd
 ```
+Note that by default nextflow will store the singularity container in the working directory of the nexflow run. To speed up jobs in the future, you can store your singularity containers in a specific cache directory, which can be specified by setting the environmental variable in your `bash_profile`. For example
+
+```
+NXF_SINGULARITY_CACHEDIR=/home/<user>/singularity
+```
 
 Additionally, it can use create images directly from dockerhub. To use the singularity image for a single run, use `-with-singularity 'docker://nfcore/eager'`. This will download the docker container from dockerhub and create a singularity image for you dynamically.
 

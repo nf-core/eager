@@ -4,7 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unpublished]
+## [Unpublished / Dev Branch]
+
+## [2.0.4] - 2019-01-07
+
+### `Added`
+* [#111](https://github.com/nf-core/eager/pull/110) - Allow [Zipped FastA reference input](https://github.com/nf-core/eager/issues/91)
+* [#113](https://github.com/nf-core/eager/pull/113) - All files are now staged via channels, which is considered best practice by Nextflow 
+* [#114](https://github.com/nf-core/eager/pull/113) - Add proper runtime defaults for multiple processes 
+* [#118](https://github.com/nf-core/eager/pull/118) - Add centralized configs handling by https://github.com/nf-core/configs
+* [#115](https://github.com/nf-core/eager/pull/115) - Add DamageProfiler MultiQC support
+
+### `Fixed`
+* [#110](https://github.com/nf-core/eager/pull/110) - Fix for [MultiQC Missing Second FastQC report](https://github.com/nf-core/eager/issues/107)
+* [#112](https://github.com/nf-core/eager/pull/112) - Remove [redundant UDG options](https://github.com/nf-core/eager/issues/89)
 
 ## [2.0.3] - 2018-12-12
 
