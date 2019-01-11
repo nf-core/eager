@@ -34,6 +34,7 @@ The typical command for running the pipeline is as follows:
 ```bash
 nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
+where the reads are from libraries of the same pairing.
 
 > Note, that you might need to use `-profile standard,singularity` if you installed Singularity and don't want to use Docker. Also make sure, that you specify how much memory is available on your machine by using the `--max_cpus`, `--max_memory` options.
 
@@ -98,11 +99,18 @@ Use this parameter to choose a configuration profile. Profiles can give configur
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
 ### `--reads`
-Use this to specify the location of your input FastQ files. For example:
+Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
 
 ```bash
 --reads 'path/to/data/sample_*_{1,2}.fastq'
 ```
+for a single sample, or
+
+```bash
+--reads 'path/to/data/*/sample_*_{1,2}.fastq'
+```
+
+for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`).
 
 Please note the following requirements:
 
@@ -112,14 +120,23 @@ Please note the following requirements:
 
 If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
+**Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
+
 ### `--singleEnd`
 If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
 
 ```bash
---singleEnd --reads '*.fastq'
+--singleEnd --reads 'path/to/data/*.fastq'
+```
+for a single sample, or
+
+```bash
+--singleEnd --reads 'path/to/data/*/*.fastq'
 ```
 
-It is not possible to run a mixture of single-end and paired-end files in one run.
+for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`)
+
+**Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
 
 ### `--pairedEnd`
 If you have paired-end data, you need to specify `--pairedEnd` on the command line when you launc hthe pipeline. 
