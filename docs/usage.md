@@ -82,7 +82,7 @@ This version number will be logged in reports when you run the pipeline, so that
 
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
 
-#### Basic profilesr 
+**Basic profiles**
 These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your own PC (vs. a HPC cluster).
 
 * `standard`
@@ -105,7 +105,7 @@ These are basic profiles which primarily define where you derive the pipeline's 
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
     
-#### Institution Specific Profiles
+**Institution Specific Profiles**
 These are profiles specific to certain clusters, and are centrally  maintained at [nf-core/configs](`https://github.com/nf-core/configs`). Those listed below are regular users of EAGER2, if you don't see your own insitition here check the [nf-core/configs](`https://github.com/nf-core/configs`) repository.
 
 * `uzh`
@@ -116,11 +116,7 @@ These are profiles specific to certain clusters, and are centrally  maintained a
     * Loads Singularity and defines appropriate resources for running the pipeline
 * `shh`
    * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
-   * Loads Singularity and defines approriate resources for running the pipeline 
-
-
-    
-    
+   * Loads Singularity and defines approriate resources for running the pipeline
 
 ### `--reads`
 Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
