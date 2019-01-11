@@ -19,14 +19,26 @@
 ## General Nextflow info
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
 
+To create a screen session:
+
+```bash
+screen -R eager2
+```
+To disconnect, press `ctrl+a` then `d`.
+
+To reconnect, type 
+
+```bash
+screen -r eager2
+```
+to end the screen session while in it type `exit`.
+
 It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
 
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
-
-
-## Preamble
+## Help Message
 To access the nextflow help message run: `nextflow run -help`
 
 ## Running the pipeline
