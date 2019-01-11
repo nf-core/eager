@@ -275,7 +275,7 @@ Specify a path to a custom MultiQC configuration file. MultiQC produces final pi
 
 # Adjustable parameters for nf-core/eager
 
-This part of the documentation contains a list of user-adjustable parameters in nf-core/eager. You can specify any of these parameters on the command line when calling the pipeline by simply prefixing the respective parameter with a double dash `--
+This part of the documentation contains a list of user-adjustable parameters in nf-core/eager. You can specify any of these parameters on the command line when calling the pipeline by simply prefixing the respective parameter with a double dash `--`
 
 ## Step skipping parameters
 
@@ -297,15 +297,15 @@ Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
 Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No duplicates will be removed on any data in the pipeline.
 
+## Complexity Filtering Options
+
 ### `--complexity_filter`
 
-Performs a poly-G complexity filtering step in the beginning of the pipeline if turne on. This can be useful for especially assembly projects where low-complexity regions might dramatically influence the assembly of contigs.
-
-## Complexity Filtering Options
+Performs a poly-G tail removal step in the beginning of the pipeline, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
 
 ### `--complexity_filter_poly_g_min`
 
-This option can be used to define the minimum value for the poly-G filtering step in low complexity filtering. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.
+This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.
 
 ## Adapter Clipping and Merging Options
 
