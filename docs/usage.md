@@ -11,10 +11,7 @@
 * [Other command line parameters](#other-command-line-parameters)
 * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
 * [Automatic resubmission](#automatic-resubmission)
-* [Custom resource requests](#custom-resource-requests)
-* [AWS batch specific parameters](#aws-batch-specific-parameters)
-* [Other command line parameters](#other-command-line-parameters)
-* [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
+
 
 ## General Nextflow info
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
@@ -233,6 +230,18 @@ If you turn this on, the generated indices will be stored in the `./results/refe
 ### `--outdir`
 The output directory where the results will be saved.
 
+### `--max_memory`
+Use to set a top-limit for the default memory requirement for each process.
+Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`
+
+### `--max_time`
+Use to set a top-limit for the default time requirement for each process.
+Should be a string in the format integer-unit. eg. `--max_time '2.h'`
+
+### `--max_cpus`
+Use to set a top-limit for the default CPU requirement for each process.
+Should be a string in the format integer-unit. eg. `--max_cpus 1`
+
 ### `--email`
 Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to speicfy this on the command line for every run.
 
@@ -251,7 +260,7 @@ You can also supply a run name to resume a specific run: `-resume [run-name]`. U
 **NB:** Single hyphen (core Nextflow option)
 
 ### `-c`
-Specify the path to a specific config file (this is a core NextFlow command).
+Specify the path to a specific nextflow config file (this is a core NextFlow command).
 
 **NB:** Single hyphen (core Nextflow option)
 
@@ -260,47 +269,15 @@ Note - you can use this to override defaults. For example, you can specify a con
 ```nextflow
 process.$multiqc.module = []
 ```
-
-### `--max_memory`
-Use to set a top-limit for the default memory requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`
-
-### `--max_time`
-Use to set a top-limit for the default time requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_time '2.h'`
-
-### `--max_cpus`
-Use to set a top-limit for the default CPU requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_cpus 1`
-
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
 
 ### `--multiqc_config`
-Specify a path to a custom MultiQC configuration file.
-
+Specify a path to a custom MultiQC configuration file. MultiQC produces final pipeline reports.
 
 # Adjustable parameters for nf-core/eager
 
-This part of the readme contains a list of user-adjustable parameters in nf-core/eager. You can specify any of these parameters on the command line when calling the pipeline by simply prefixing the respective parameter with a double dash `--`.
-
-Example:
-```
-nextflow run nf-core/eager -r 2.0 -profile standard,docker --singleEnd [...]
-```
-This would run the pipeline in single end mode, thus assuming that all entered `FastQ` files are sequenced following a single end sequencing protocol.
-
-## General Pipeline Parameters
-
-These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases. 
-
-### `--snpcapture` false
-
-This is by default set to `false`, but can be turned on to calculate on target metrics automatically for you. Note, that this requires setting `--bedfile` with the target SNPs simultaneously. 
-
-### `--bedfile` 
-
-Can be used to set a path to a BED file (3/6 column format) to calculate capture target efficiency on the fly. Will not be used without `--bedfile` set as parameter.
+This part of the documentation contains a list of user-adjustable parameters in nf-core/eager. You can specify any of these parameters on the command line when calling the pipeline by simply prefixing the respective parameter with a double dash `--
 
 ## Step skipping parameters
 
@@ -441,7 +418,6 @@ Specifies the length of the read start and end to be considered for profile gene
 
 Specifies to run PMDTools for damage based read filtering and assessment of DNA damage in sequencing libraries. By default turned off. 
 
-
 ### `--udg` false
 
 Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment. 
@@ -481,3 +457,18 @@ Default set to `1` and clipps off one base of the left or right side of reads. N
 ### `--bamutils_softclip`
 
 By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string.
+
+## Library-Type Parameters
+
+These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases. 
+
+### `--snpcapture` false
+
+This is by default set to `false`, but can be turned on to calculate on target metrics automatically for you. Note, that this requires setting `--bedfile` with the target SNPs simultaneously. 
+
+### `--bedfile` 
+
+Can be used to set a path to a BED file (3/6 column format) to calculate capture target efficiency on the fly. Will not be used without `--bedfile` set as parameter.
+
+## Automatic Resubmission
+By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
