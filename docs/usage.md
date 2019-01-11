@@ -82,31 +82,45 @@ This version number will be logged in reports when you run the pipeline, so that
 
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
 
+#### Basic profilesr 
+These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your own PC (vs. a HPC cluster).
+
 * `standard`
     * The default profile, used if `-profile` is not specified at all.
     * Runs locally and expects all software to be installed and available on the `PATH`.
-* `uzh`
-    * A profile for the University of Zurich Research Cloud
-    * Loads Singularity and defines appropriate resources for running the pipeline.
 * `docker`
     * A generic configuration profile to be used with [Docker](http://docker.com/)
     * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
 * `singularity`
     * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
     * Pulls software from singularity-hub
-* `binac`
-    * A profile for the BinAC cluster at the University of Tuebingen
-    * Loads Singularity and defines appropriate resources for running the pipeline
 * `conda`
     * A generic configuration profile to be used with [conda](https://conda.io/docs/)
     * Pulls most software from [Bioconda](https://bioconda.github.io/)
-* `awsbatch`
+ * `awsbatch`
     * A generic configuration profile to be used with AWS Batch.
 * `test`
     * A profile with a complete configuration for automated testing
     * Includes links to test data so needs no other parameters
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
+    
+#### Institution Specific Profiles
+These are profiles specific to certain clusters, and are centrally  maintained at [nf-core/configs](`https://github.com/nf-core/configs`). Those listed below are regular users of EAGER2, if you don't see your own insitition here check the [nf-core/configs](`https://github.com/nf-core/configs`) repository.
+
+* `uzh`
+    * A profile for the University of Zurich Research Cloud
+    * Loads Singularity and defines appropriate resources for running the pipeline.
+* `binac`
+    * A profile for the BinAC cluster at the University of Tuebingen
+    * Loads Singularity and defines appropriate resources for running the pipeline
+* `shh`
+   * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
+   * Loads Singularity and defines approriate resources for running the pipeline 
+
+
+    
+    
 
 ### `--reads`
 Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
