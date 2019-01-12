@@ -111,7 +111,7 @@ These are profiles specific to certain clusters, and are centrally  maintained a
     * Loads Singularity and defines appropriate resources for running the pipeline
 * `shh`
    * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
-   * Loads Singularity and defines approriate resources for running the pipeline
+   * Loads Singularity and defines appropriate resources for running the pipeline
 
 ### `--reads`
 Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
