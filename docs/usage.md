@@ -63,13 +63,7 @@ When you run the above command, Nextflow automatically pulls the pipeline code f
 ```bash
 nextflow pull nf-core/eager
 ```
-
-### Reproducibility
-It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
-
-First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0`.
-
-This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
+See [below](#other-command-line-parameters) for more details about EAGER2 versioning.
 
 ## Mandatory Arguments
 
@@ -224,6 +218,15 @@ Use this to specify the required FastA index file for the selected reference gen
 If you turn this on, the generated indices will be stored in the `./results/reference_genomes` for you. 
 
 ## Other command line parameters
+
+### `-r`
+By default, EAGER2 will use the latest version of the pipeline that is downloaded on your system. However, it's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
+
+First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0`.
+
+This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
+
+Additionally, EAGER pipeline releases are named after Swabian German Cities. The first release V2.0 is named "Kaufbeuren". Future releases are named after cities named in the [Swabian league of Cities](https://en.wikipedia.org/wiki/Swabian_League_of_Cities).
 
 ### `--outdir`
 The output directory where the results will be saved.
