@@ -228,7 +228,7 @@ if("${params.fasta}".endsWith(".gz")){
         file zipfasta from ch_unzip_fasta
 
         output:
-        file "*.fasta" into (ch_fasta_for_bwa_indexing, ch_fasta_for_faidx_indexing, ch_fasta_for_dict_indexing,  ch_fasta_for_damageprofiler, ch_fasta_for_qualimap, ch_fasta_for_pmdtools, ch_fasta_for_circularmapper, ch_fasta_for_circularmapper_index,ch_fasta_for_bwamem_mapping)
+        file "*.fasta" into (ch_fasta_for_bwa_indexing, ch_fasta_for_faidx_indexing, ch_fasta_for_dict_indexing,  ch_fasta_for_damageprofiler, ch_fasta_for_qualimap, ch_fasta_for_pmdtools, ch_fasta_for_circularmapper, ch_fasta_for_circularmapper_index)
 
         script:
         """
@@ -238,7 +238,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index;ch_fasta_for_bwamem_mapping}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index}
 }
     
 
@@ -657,8 +657,7 @@ process bwamem {
 
     input:
     file(reads) from ch_clipped_reads_bwamem
-    file "*" from ch_bwa_index_bwamem.collect()
-    file fasta from ch_fasta_for_bwamem_mapping
+    file index from ch_bwa_index_bwamem.first()
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler
@@ -667,6 +666,7 @@ process bwamem {
 
     script:
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    fasta = "${index}/*.fasta"
     """
     bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     samtools index -@ ${task.cpus} "${prefix}".sorted.bam
