@@ -495,7 +495,7 @@ process convertBam {
     file("*.fastq.gz") into (ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
 
     script:
-    base = bam - '.bam'
+    base = "${bam.baseName}"
     """
     samtools fastq -tn ${bam} | pigz -p ${task.cpus} > ${base}.fastq.gz
     """ 
