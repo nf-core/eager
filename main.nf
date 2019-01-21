@@ -306,6 +306,7 @@ if( params.readPaths ){
     } else {
         Channel
             .from( params.readPaths )
+            .map { row -> [ file( row )  ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
             .dump()
             .into { ch_bam_to_fastq_convert }
@@ -324,6 +325,7 @@ if( params.readPaths ){
 } else {
      Channel
         .fromPath( params.reads )
+        .map { row -> [  file( row )  ] }
         .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\n" }
         .dump() //For debugging purposes
@@ -490,7 +492,7 @@ process convertBam {
 
     output:
     set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp)
-    file(reads) into (ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
+    file("*.fastq.gz") into (ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
 
     script:
     base = bam - '.bam'
