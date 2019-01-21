@@ -253,14 +253,10 @@ if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
 }
 if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
     bwa_index = Channel
-        .fromPath("${params.bwa_index}/**.*")
-        .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}" }
-        .into{ch_bwa_index_existing;ch_bwa_index_bwamem_existing}
-} else {
-    //Create empty channels to make sure later mix() does not fail
-    ch_bwa_index_existing = Channel.empty()
-    ch_bwa_index_bwamem_existing = Channel.empty()
-}
+        .fromPath("${params.bwa_index}",checkIfExists: true)
+        .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}"}
+        .into{ch_bwa_index;ch_bwa_index_bwamem}
+} 
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd ){
@@ -391,11 +387,14 @@ process makeBWAIndex {
     file wherearemyfiles from ch_where_for_bwa_index
 
     output:
-    file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into (ch_bwa_index,ch_bwa_index_bwamem)
+    file "bwa_index" into (ch_bwa_index,ch_bwa_index_bwamem)
     file "where_are_my_files.txt"
 
     script:
     """
+    mkdir bwa_index
+    cp "${fasta}" bwa_index/
+    cd bwa_index
     bwa index $fasta
     """
 }
@@ -581,7 +580,7 @@ process bwa {
 
     input:
     file(reads) from ch_clipped_reads
-    file "*" from ch_bwa_index.mix(ch_bwa_index_existing).collect()
+    file index from ch_bwa_index.collect()
     file fasta from ch_fasta_for_bwa_mapping
 
     output:
@@ -658,7 +657,7 @@ process bwamem {
 
     input:
     file(reads) from ch_clipped_reads_bwamem
-    file "*" from ch_bwa_index_bwamem.mix(ch_bwa_index_bwamem_existing).collect()
+    file "*" from ch_bwa_index_bwamem.collect()
     file fasta from ch_fasta_for_bwamem_mapping
 
     output:
