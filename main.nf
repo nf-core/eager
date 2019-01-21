@@ -611,12 +611,16 @@ process circulargenerator{
     file fasta from ch_fasta_for_circularmapper_index
 
     output:
-    file "*.fasta*" into ch_circularmapper_indices
+    file "cm_index" into ch_circularmapper_indices
 
     script:
+    prefix = "${fasta.baseName}_${params.circularextension}.fasta"
     """
+    mkdir cm_index
     circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
-    bwa index "${fasta.baseName}_${params.circularextension}.fasta"
+    cp "${fasta.baseName}_${params.circularextension}.fasta" cm_index/
+    cd cm_index
+    bwa index $prefix
     """
 
 }
@@ -630,8 +634,7 @@ process circularmapper{
 
     input:
     file reads from ch_clipped_reads_circularmapper
-    file fasta from ch_fasta_for_circularmapper
-    file "*" from ch_circularmapper_indices
+    file index from ch_circularmapper_indices.first()
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm
@@ -640,9 +643,11 @@ process circularmapper{
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    fasta = "${index}/*_*.fasta"
+
     """ 
-    bwa aln -t ${task.cpus} "${fasta.baseName}_${params.circularextension}.fasta" $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" "${fasta.baseName}_${params.circularextension}.fasta" "${reads.baseName}".sai $reads > tmp.out
+    bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
     samtools index "${prefix}".sorted.bam
