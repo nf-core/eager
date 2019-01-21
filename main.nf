@@ -1076,7 +1076,7 @@ process multiqc {
     file ('damageprofiler/*') from ch_damageprofiler_results.collect().ifEmpty([])
     file ('qualimap/*') from ch_qualimap_results.collect().ifEmpty([])
     file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
-    file ('dedup/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
+    file ('dedup*/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
     file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
 
     file workflow_summary from create_workflow_summary(summary)
