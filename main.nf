@@ -372,6 +372,9 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 /* 
 * Create BWA indices if they are not present
 */ 
+
+if(!params.bwa_index && params.fasta && (params.aligner =='bwa' || params.bwamem)) {
+    
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -397,6 +400,8 @@ process makeBWAIndex {
     cd bwa_index
     bwa index $fasta
     """
+}
+
 }
 
 
