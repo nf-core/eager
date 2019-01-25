@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unpublished / Dev Branch]
 
+### `Added`
+* [#127](https://github.com/nf-core/eager/pull/127) - Added a second testcase for testing the pipeline properly
+
+### `Fixed`
+* [#128](https://github.com/nf-core/eager/issues/128) - Fixed reference genome handling errors
+
 ## [2.0.4] - 2019-01-09
 
 ### `Added`

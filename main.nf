@@ -228,7 +228,7 @@ if("${params.fasta}".endsWith(".gz")){
         file zipfasta from ch_unzip_fasta
 
         output:
-        file "*.fasta" into (ch_fasta_for_bwa_indexing, ch_fasta_for_faidx_indexing, ch_fasta_for_dict_indexing,  ch_fasta_for_bwa_mapping, ch_fasta_for_damageprofiler, ch_fasta_for_qualimap, ch_fasta_for_pmdtools, ch_fasta_for_circularmapper, ch_fasta_for_circularmapper_index,ch_fasta_for_bwamem_mapping)
+        file "*.fasta" into (ch_fasta_for_bwa_indexing, ch_fasta_for_faidx_indexing, ch_fasta_for_dict_indexing,  ch_fasta_for_damageprofiler, ch_fasta_for_qualimap, ch_fasta_for_pmdtools, ch_fasta_for_circularmapper_index)
 
         script:
         """
@@ -238,7 +238,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     Channel.fromPath("${params.fasta}")
     .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_bwa_mapping; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper; ch_fasta_for_circularmapper_index;ch_fasta_for_bwamem_mapping}
+    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper_index}
 }
     
 
@@ -253,14 +253,10 @@ if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
 }
 if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
     bwa_index = Channel
-        .fromPath("${params.bwa_index}/**.*")
-        .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}" }
-        .into{ch_bwa_index_existing;ch_bwa_index_bwamem_existing}
-} else {
-    //Create empty channels to make sure later mix() does not fail
-    ch_bwa_index_existing = Channel.empty()
-    ch_bwa_index_bwamem_existing = Channel.empty()
-}
+        .fromPath("${params.bwa_index}",checkIfExists: true)
+        .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}"}
+        .into{ch_bwa_index;ch_bwa_index_bwamem}
+} 
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd ){
@@ -376,6 +372,9 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 /* 
 * Create BWA indices if they are not present
 */ 
+
+if(!params.bwa_index && params.fasta && (params.aligner =='bwa' || params.bwamem)) {
+    
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -391,13 +390,18 @@ process makeBWAIndex {
     file wherearemyfiles from ch_where_for_bwa_index
 
     output:
-    file "*.{amb,ann,bwt,pac,sa,fasta,fa}" into (ch_bwa_index,ch_bwa_index_bwamem)
+    file "bwa_index" into (ch_bwa_index,ch_bwa_index_bwamem)
     file "where_are_my_files.txt"
 
     script:
     """
+    mkdir bwa_index
+    cp "${fasta}" bwa_index/
+    cd bwa_index
     bwa index $fasta
     """
+}
+
 }
 
 
@@ -581,8 +585,7 @@ process bwa {
 
     input:
     file(reads) from ch_clipped_reads
-    file "*" from ch_bwa_index.mix(ch_bwa_index_existing).collect()
-    file fasta from ch_fasta_for_bwa_mapping
+    file index from ch_bwa_index.first()
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
@@ -591,6 +594,7 @@ process bwa {
 
     script:
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    fasta = "${index}/*.fasta" 
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
@@ -612,12 +616,16 @@ process circulargenerator{
     file fasta from ch_fasta_for_circularmapper_index
 
     output:
-    file "*.fasta*" into ch_circularmapper_indices
+    file "cm_index" into ch_circularmapper_indices
 
     script:
+    prefix = "${fasta.baseName}_${params.circularextension}.fasta"
     """
+    mkdir cm_index
     circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
-    bwa index "${fasta.baseName}_${params.circularextension}.fasta"
+    cp "${fasta.baseName}_${params.circularextension}.fasta" cm_index/
+    cd cm_index
+    bwa index $prefix
     """
 
 }
@@ -631,8 +639,7 @@ process circularmapper{
 
     input:
     file reads from ch_clipped_reads_circularmapper
-    file fasta from ch_fasta_for_circularmapper
-    file "*" from ch_circularmapper_indices
+    file index from ch_circularmapper_indices.first()
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm
@@ -641,9 +648,11 @@ process circularmapper{
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    fasta = "${index}/*_*.fasta"
+
     """ 
-    bwa aln -t ${task.cpus} "${fasta.baseName}_${params.circularextension}.fasta" $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" "${fasta.baseName}_${params.circularextension}.fasta" "${reads.baseName}".sai $reads > tmp.out
+    bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
     samtools index "${prefix}".sorted.bam
@@ -658,8 +667,7 @@ process bwamem {
 
     input:
     file(reads) from ch_clipped_reads_bwamem
-    file "*" from ch_bwa_index_bwamem.mix(ch_bwa_index_bwamem_existing).collect()
-    file fasta from ch_fasta_for_bwamem_mapping
+    file index from ch_bwa_index_bwamem.first()
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler
@@ -668,6 +676,7 @@ process bwamem {
 
     script:
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    fasta = "${index}/*.fasta"
     """
     bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     samtools index -@ ${task.cpus} "${prefix}".sorted.bam
@@ -1077,7 +1086,7 @@ process multiqc {
     file ('damageprofiler/*') from ch_damageprofiler_results.collect().ifEmpty([])
     file ('qualimap/*') from ch_qualimap_results.collect().ifEmpty([])
     file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
-    file ('dedup/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
+    file ('dedup*/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
     file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
 
     file workflow_summary from create_workflow_summary(summary)
