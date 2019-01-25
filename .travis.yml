@@ -50,3 +50,5 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem --bwa_index results/reference_genome/bwa_index/bwa_index/
   # Test with zipped reference input
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://raw.githubusercontent.com/nf-core/test-datasets/eager2/reference/Test.fasta.gz'
+  # Run the basic pipeline with the bam input profile
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile testbam,docker --bam

@@ -29,6 +29,7 @@ def helpMessage() {
       -profile                      Hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentatoin.
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
       --pairedEnd                   Specifies that the input is paired end reads (required if not singleend)
+      --bam                         Specifies that the input is in BAM format
       --fasta                       Path to Fasta reference (required if not iGenome reference)
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
@@ -259,9 +260,9 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
 } 
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
-if( params.singleEnd || params.pairedEnd ){
+if( params.singleEnd || params.pairedEnd || params.bam){
 } else {
-    exit 1, "Please specify either --singleEnd or --pairedEnd to execute the pipeline!"
+    exit 1, "Please specify either --singleEnd, --pairedEnd to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
 }
 
 
@@ -285,34 +286,56 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
-if(params.readPaths){
-    if(params.singleEnd){
+if( params.readPaths ){
+    if( params.singleEnd && !params.bam) {
         Channel
-            .from(params.readPaths)
-            .map { row -> [ row[0], [file(row[1][0])]] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .dump(tag:'input')
+            .from( params.readPaths )
+            .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
+            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
             .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
-            
+            ch_bam_to_fastq_convert = Channel.empty()
+    } else if (!params.bam){
+        Channel
+            .from( params.readPaths )
+            .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
+            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
+            ch_bam_to_fastq_convert = Channel.empty()
     } else {
         Channel
-            .from(params.readPaths)
-            .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .dump(tag:'input')
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
-            
+            .from( params.readPaths )
+            .map { row -> [ file( row )  ] }
+            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .dump()
+            .into { ch_bam_to_fastq_convert }
+
+            //Set up clean channels
+            ch_read_files_fastqc = Channel.empty()
+            ch_read_files_complexity_filtering = Channel.empty()
+            ch_read_files_clip = Channel.empty()
     }
-} else {
-    Channel
+} else if (!params.bam){
+     Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .dump(tag:'input')
+        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs" +
+            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
         .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
-        
+        ch_bam_to_fastq_convert = Channel.empty()
+} else {
+     Channel
+        .fromPath( params.reads )
+        .map { row -> [  file( row )  ] }
+        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
+            "to be enclosed in quotes!\n" }
+        .dump() //For debugging purposes
+        .into { ch_bam_to_fastq_convert }
+
+        //Set up clean channels
+        ch_read_files_fastqc = Channel.empty()
+        ch_read_files_complexity_filtering = Channel.empty()
+        ch_read_files_clip = Channel.empty()
+
 }
-
-
 
 // Header log info
 log.info "========================================="
@@ -461,6 +484,30 @@ process makeSeqDict {
     """
 }
 
+/*
+* Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
+*
+*/ 
+
+process convertBam {
+    tag "$bam"
+    
+    when: params.bam
+
+    input: 
+    file bam from ch_bam_to_fastq_convert
+
+    output:
+    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp)
+    file("*.fastq.gz") into (ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
+
+    script:
+    base = "${bam.baseName}"
+    """
+    samtools fastq -tn ${bam} | pigz -p ${task.cpus} > ${base}.fastq.gz
+    """ 
+}
+
 
 
 /*
@@ -472,7 +519,7 @@ process fastqc {
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     input:
-    set val(name), file(reads) from ch_read_files_fastqc
+    set val(name), file(reads) from ch_read_files_fastqc.mix(ch_read_files_converted_fastqc)
 
     output:
     file "*_fastqc.{zip,html}" into ch_fastqc_results
@@ -496,7 +543,7 @@ process fastp {
     when: params.complexity_filter
 
     input:
-    set val(name), file(reads) from ch_read_files_complexity_filtering
+    set val(name), file(reads) from ch_read_files_complexity_filtering.mix(ch_read_files_converted_fastp)
 
     output:
     set val(name), file("*pG.fq.gz") into ch_clipped_reads_complexity_filtered
@@ -523,6 +570,8 @@ process fastp {
 process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
+
+    when: !params.bam
 
     input:
     set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
@@ -561,6 +610,8 @@ process fastqc_after_clipping {
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
+    when: !params.bam
+
     input:
     file(reads) from ch_clipped_reads_for_fastqc
 
@@ -584,8 +635,9 @@ process bwa {
     when: !params.circularmapper && !params.bwamem
 
     input:
-    file(reads) from ch_clipped_reads
+    file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
     file index from ch_bwa_index.first()
+
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
@@ -638,7 +690,7 @@ process circularmapper{
     when: params.circularmapper
 
     input:
-    file reads from ch_clipped_reads_circularmapper
+    file reads from ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm)
     file index from ch_circularmapper_indices.first()
 
     output:
@@ -666,7 +718,7 @@ process bwamem {
     when: params.bwamem && !params.circularmapper
 
     input:
-    file(reads) from ch_clipped_reads_bwamem
+    file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
     file index from ch_bwa_index_bwamem.first()
 
     output:
