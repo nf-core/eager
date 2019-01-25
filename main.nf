@@ -417,11 +417,12 @@ process makeBWAIndex {
     file "where_are_my_files.txt"
 
     script:
+    base = "${fasta.baseName}"
     """
     mkdir bwa_index
-    cp "${fasta}" bwa_index/
+    mv "${fasta}" "bwa_index/${base}.fasta"
     cd bwa_index
-    bwa index $fasta
+    bwa index "${base}.fasta"
     """
 }
 
@@ -445,13 +446,17 @@ process makeFastaIndex {
     file wherearemyfiles from ch_where_for_fasta_index
 
     output:
-    file "${fasta}.fai" into ch_fasta_faidx_index
-    file "${fasta}"
+    file "faidx/${base}.fasta.fai" into ch_fasta_faidx_index
+    file "faidx/${base}.fasta"
     file "where_are_my_files.txt"
 
     script:
+    base = "${fasta.baseName}"
     """
-    samtools faidx $fasta
+    mkdir faidx
+    mv $fasta "faidx/${base}.fasta"
+    cd faidx
+    samtools faidx "${base}.fasta"
     """
 }
 
@@ -475,12 +480,16 @@ process makeSeqDict {
     file wherearemyfiles from ch_where_for_seqdict
 
     output:
-    file "*.dict" into ch_seq_dict
+    file "seq_dict/*.dict" into ch_seq_dict
     file "where_are_my_files.txt"
 
     script:
+    base = "${fasta.baseName}.fasta"
     """
-    picard CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
+    mkdir -p seq_dict
+    mv $fasta "seq_dict/${base}"
+    cd seq_dict
+    picard CreateSequenceDictionary R=$base O="${fasta.baseName}.dict"
     """
 }
 
