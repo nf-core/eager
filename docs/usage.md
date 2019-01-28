@@ -209,7 +209,7 @@ params {
 
 ### `--bwa_index`
 
-Use this to specify a previously created BWA index. This saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource specific profile that sets paths to pre-computed reference genomes, saving even time when specifying these.
+Use this to specify a _directory_ containing previously created BWA index files. This saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource specific profile that sets paths to pre-computed reference genomes, saving even time when specifying these.
 
 ### `--seq_dict` false
 
