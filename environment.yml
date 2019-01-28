@@ -9,7 +9,7 @@ dependencies:
   - bioconda::adapterremoval=2.2.2
   - bioconda::adapterremovalfixprefix=0.0.4
   - bioconda::bwa=0.7.17
-  - bioconda::picard=2.18.21
+  - bioconda::picard=2.18.23
   - bioconda::samtools=1.9
   - bioconda::dedup=0.12.3
   - bioconda::angsd=0.923
@@ -20,11 +20,11 @@ dependencies:
   - bioconda::damageprofiler=0.4.4
   - bioconda::multiqc=1.7
   - bioconda::pmdtools=0.60
-  - conda-forge::r-rmarkdown=1.10
+  - conda-forge::r-rmarkdown=1.11
   - conda-forge::libiconv=1.15
   - conda-forge::pigz=2.3.4
   - bioconda::sequencetools=1.2.2
   - bioconda::preseq=2.0.3
-  - bioconda::fastp=0.19.5
+  - bioconda::fastp=0.19.6
   - bioconda::bamutil=1.0.14
   #Missing Schmutzi,snpAD
