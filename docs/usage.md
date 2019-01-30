@@ -6,27 +6,35 @@
 * [Running the pipeline](#running-the-pipeline)
 * [Updating the pipeline](#updating-the-pipeline)
 * [Reproducibility](#reproducibility)
-* [Main arguments](#main-arguments)
-* [Job Resources](#job-resources)
+* [Main arguments](#mandatory-arguments)
 * [Other command line parameters](#other-command-line-parameters)
 * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
 * [Automatic resubmission](#automatic-resubmission)
-* [Custom resource requests](#custom-resource-requests)
-* [AWS batch specific parameters](#aws-batch-specific-parameters)
-* [Other command line parameters](#other-command-line-parameters)
-* [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
+
 
 ## General Nextflow info
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
+
+To create a screen session:
+
+```bash
+screen -R eager2
+```
+To disconnect, press `ctrl+a` then `d`.
+
+To reconnect, type :
+
+```bash
+screen -r eager2
+```
+to end the screen session while in it type `exit`.
 
 It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
 
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
-
-
-## Preamble
+## Help Message
 To access the nextflow help message run: `nextflow run -help`
 
 ## Running the pipeline
@@ -34,8 +42,7 @@ The typical command for running the pipeline is as follows:
 ```bash
 nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
-
-> Note, that you might need to use `-profile standard,singularity` if you installed Singularity and don't want to use Docker. Also make sure, that you specify how much memory is available on your machine by using the `--max_cpus`, `--max_memory` options.
+where the reads are from libraries of the same pairing.
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
@@ -64,45 +71,61 @@ First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
-
 ## Mandatory Arguments
 
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
+
+**Basic profiles**
+These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your own PC (vs. a HPC cluster).
 
 * `standard`
     * The default profile, used if `-profile` is not specified at all.
     * Runs locally and expects all software to be installed and available on the `PATH`.
-* `uzh`
-    * A profile for the University of Zurich Research Cloud
-    * Loads Singularity and defines appropriate resources for running the pipeline.
 * `docker`
     * A generic configuration profile to be used with [Docker](http://docker.com/)
     * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
 * `singularity`
     * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
     * Pulls software from singularity-hub
-* `binac`
-    * A profile for the BinAC cluster at the University of Tuebingen
-    * Loads Singularity and defines appropriate resources for running the pipeline
 * `conda`
     * A generic configuration profile to be used with [conda](https://conda.io/docs/)
     * Pulls most software from [Bioconda](https://bioconda.github.io/)
-* `awsbatch`
+ * `awsbatch`
     * A generic configuration profile to be used with AWS Batch.
 * `test`
     * A profile with a complete configuration for automated testing
     * Includes links to test data so needs no other parameters
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
+    
+**Institution Specific Profiles**
+These are profiles specific to certain clusters, and are centrally  maintained at [nf-core/configs](`https://github.com/nf-core/configs`). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](`https://github.com/nf-core/configs`) repository.
+
+* `uzh`
+    * A profile for the University of Zurich Research Cloud
+    * Loads Singularity and defines appropriate resources for running the pipeline.
+* `binac`
+    * A profile for the BinAC cluster at the University of Tuebingen
+    * Loads Singularity and defines appropriate resources for running the pipeline
+* `shh`
+   * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
+   * Loads Singularity and defines appropriate resources for running the pipeline
 
 ### `--reads`
-Use this to specify the location of your input FastQ files. For example:
+Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
 
 ```bash
 --reads 'path/to/data/sample_*_{1,2}.fastq'
 ```
+for a single sample, or
+
+```bash
+--reads 'path/to/data/*/sample_*_{1,2}.fastq'
+```
+
+for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`).
 
 Please note the following requirements:
 
@@ -112,14 +135,23 @@ Please note the following requirements:
 
 If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
+**Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
+
 ### `--singleEnd`
 If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
 
 ```bash
---singleEnd --reads '*.fastq'
+--singleEnd --reads 'path/to/data/*.fastq'
+```
+for a single sample, or
+
+```bash
+--singleEnd --reads 'path/to/data/*/*.fastq'
 ```
 
-It is not possible to run a mixture of single-end and paired-end files in one run.
+for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`)
+
+**Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
 
 ### `--pairedEnd`
 If you have paired-end data, you need to specify `--pairedEnd` on the command line when you launc hthe pipeline. 
@@ -136,7 +168,7 @@ If you prefer, you can specify the full path to your reference genome when you r
 ```bash
 --fasta '[path to Fasta reference]'
 ```
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you.
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you. Note that other file extensions such as `.fna`, `.fa` are also supported but will be renamed to `.fasta` automatically by the pipeline.
 
 ### `--genome` (using iGenomes)
 
@@ -177,7 +209,7 @@ params {
 
 ### `--bwa_index`
 
-Use this to specify a previously created BWA index. This saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource specific profile that sets paths to pre-computed reference genomes, saving even time when specifying these.
+Use this to specify a _directory_ containing previously created BWA index files. This saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource specific profile that sets paths to pre-computed reference genomes, saving even time when specifying these.
 
 ### `--seq_dict` false
 
@@ -196,8 +228,20 @@ If you turn this on, the generated indices will be stored in the `./results/refe
 ### `--outdir`
 The output directory where the results will be saved.
 
+### `--max_memory`
+Use to set a top-limit for the default memory requirement for each process.
+Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`. If not specified, will be taken from the configuration in the `-profile` flag.
+
+### `--max_time`
+Use to set a top-limit for the default time requirement for each process.
+Should be a string in the format integer-unit. eg. `--max_time '2.h'`. If not specified, will be taken from the configuration in the `-profile` flag.
+
+### `--max_cpus`
+Use to set a top-limit for the default CPU requirement for each process.
+Should be a string in the format integer-unit. eg. `--max_cpus 1`. If not specified, will be taken from the configuration in the `-profile` flag.
+
 ### `--email`
-Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to speicfy this on the command line for every run.
+Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.
 
 ### `-name`
 Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -214,7 +258,7 @@ You can also supply a run name to resume a specific run: `-resume [run-name]`. U
 **NB:** Single hyphen (core Nextflow option)
 
 ### `-c`
-Specify the path to a specific config file (this is a core NextFlow command).
+Specify the path to a specific nextflow config file (this is a core NextFlow command).
 
 **NB:** Single hyphen (core Nextflow option)
 
@@ -223,47 +267,15 @@ Note - you can use this to override defaults. For example, you can specify a con
 ```nextflow
 process.$multiqc.module = []
 ```
-
-### `--max_memory`
-Use to set a top-limit for the default memory requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`
-
-### `--max_time`
-Use to set a top-limit for the default time requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_time '2.h'`
-
-### `--max_cpus`
-Use to set a top-limit for the default CPU requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_cpus 1`
-
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
 
 ### `--multiqc_config`
-Specify a path to a custom MultiQC configuration file.
-
+Specify a path to a custom MultiQC configuration file. MultiQC produces final pipeline reports.
 
 # Adjustable parameters for nf-core/eager
 
-This part of the readme contains a list of user-adjustable parameters in nf-core/eager. You can specify any of these parameters on the command line when calling the pipeline by simply prefixing the respective parameter with a double dash `--`.
-
-Example:
-```
-nextflow run nf-core/eager -r 2.0 -profile standard,docker --singleEnd [...]
-```
-This would run the pipeline in single end mode, thus assuming that all entered `FastQ` files are sequenced following a single end sequencing protocol.
-
-## General Pipeline Parameters
-
-These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases. 
-
-### `--snpcapture` false
-
-This is by default set to `false`, but can be turned on to calculate on target metrics automatically for you. Note, that this requires setting `--bedfile` with the target SNPs simultaneously. 
-
-### `--bedfile` 
-
-Can be used to set a path to a BED file (3/6 column format) to calculate capture target efficiency on the fly. Will not be used without `--bedfile` set as parameter.
+This part of the documentation contains a list of user-adjustable parameters in nf-core/eager. You can specify any of these parameters on the command line when calling the pipeline by simply prefixing the respective parameter with a double dash `--`
 
 ## Step skipping parameters
 
@@ -285,15 +297,15 @@ Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
 Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No duplicates will be removed on any data in the pipeline.
 
+## Complexity Filtering Options
+
 ### `--complexity_filter`
 
-Performs a poly-G complexity filtering step in the beginning of the pipeline if turne on. This can be useful for especially assembly projects where low-complexity regions might dramatically influence the assembly of contigs.
-
-## Complexity Filtering Options
+Performs a poly-G tail removal step in the beginning of the pipeline, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
 
 ### `--complexity_filter_poly_g_min`
 
-This option can be used to define the minimum value for the poly-G filtering step in low complexity filtering. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.
+This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.
 
 ## Adapter Clipping and Merging Options
 
@@ -404,7 +416,6 @@ Specifies the length of the read start and end to be considered for profile gene
 
 Specifies to run PMDTools for damage based read filtering and assessment of DNA damage in sequencing libraries. By default turned off. 
 
-
 ### `--udg` false
 
 Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment. 
@@ -444,3 +455,18 @@ Default set to `1` and clipps off one base of the left or right side of reads. N
 ### `--bamutils_softclip`
 
 By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string.
+
+## Library-Type Parameters
+
+These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases. 
+
+### `--snpcapture` false
+
+This is by default set to `false`, but can be turned on to calculate on target metrics automatically for you. Note, that this requires setting `--bedfile` with the target SNPs simultaneously. 
+
+### `--bedfile` 
+
+Can be used to set a path to a BED file (3/6 column format) to calculate capture target efficiency on the fly. Will not be used without `--bedfile` set as parameter.
+
+## Automatic Resubmission
+By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.

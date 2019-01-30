@@ -13,7 +13,7 @@ before_install:
   # Pull the docker image first so the test doesn't wait for this
   - docker pull nfcore/eager:dev
   # Fake the tag locally so that the pipeline runs properly
-  - docker tag nfcore/eager:dev nfcore/eager:2.0.4
+  - docker tag nfcore/eager:dev nfcore/eager:2.0.5
 
 install:
   # Install Nextflow
@@ -39,16 +39,16 @@ script:
   # Run the basic pipeline with the test profile
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --saveReference
   # Run the basic pipeline with single end data (pretending its single end actually)
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd --bwa_index results/reference_genome/bwa_index/
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd --bwa_index results/reference_genome/bwa_index/bwa_index/
   # Run the same pipeline testing optional step: fastp, complexity 
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/bwa_index/
   # Test BAM Trimming
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --trim_bam --bwa_index results/reference_genome/bwa_index/
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --trim_bam --bwa_index results/reference_genome/bwa_index/bwa_index/
   # Test running with CircularMapper
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --circularmapper --circulartarget 'NC_007596.2'
   # Test running with BWA Mem
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem --bwa_index results/reference_genome/bwa_index/
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem --bwa_index results/reference_genome/bwa_index/bwa_index/
   # Test with zipped reference input
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://raw.githubusercontent.com/nf-core/test-datasets/eager2/reference/Test.fasta.gz'
-  # Test basic pipeline with Conda too 
-  - travis_wait 25 nextflow run ${TRAVIS_BUILD_DIR} -profile test,conda --pairedEnd --bwa_index results/reference_genome/bwa_index/
+  # Run the basic pipeline with the bam input profile
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile testbam,docker --bam
