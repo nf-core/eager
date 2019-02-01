@@ -279,7 +279,10 @@ This part of the documentation contains a list of user-adjustable parameters in 
 
 ## Step skipping parameters
 
-Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules. 
+Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules.
+
+### `--skip_adapterremoval`
+Turns off the AdapterRemoval module, thus reads are directly mapped without adapter clipping and read merging being applied. If you just want to perform adapter clipping but do not want to merge reads, use `--clip_no_merging`as parameter instead of this.
 
 ### `--skip_preseq`
 
@@ -328,6 +331,11 @@ Defines the minimum read quality per base that is required for a base to be kept
 
 ### `--clip_min_adap_overlap` 1
 Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.
+
+### `clip_no_merging` false
+Perform only adapter clipping but no read merging. If you want to turn off clipping and merging, please use `--skip_adapterremoval` as a parameter.
+
+
 
 ## Read Mapping Parameters
 
