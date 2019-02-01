@@ -26,9 +26,9 @@ def helpMessage() {
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
-      -profile                      Hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentatoin.
+      -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
-      --pairedEnd                   Specifies that the input is paired end reads (required if not singleend)
+      --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
       --bam                         Specifies that the input is in BAM format
       --fasta                       Path to Fasta reference (required if not iGenome reference)
       --genome                      Name of iGenomes reference (required if not fasta reference)
@@ -36,11 +36,11 @@ def helpMessage() {
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
-    References                      If not specified in the configuration file or you wish to overwrite any of the references.
-      --bwa_index                   Path to BWA index
+    References                      If not specified in the configuration file, or you wish to overwrite any of the references.
+      --bwa_index                   Path to directory containing BWA index files
       --bedfile                     Path to BED file for SNPCapture methods
-      --seq_dict                    Path to sequence dictionary file
-      --fasta_index                 Path to FastA index 
+      --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
+      --fasta_index                 Path to samtools FASTA index (typically ending in '.fai')
       --saveReference               Saves reference genome indices for later reusage
 
     Skipping                        Skip any of the mentioned steps
@@ -50,8 +50,8 @@ def helpMessage() {
       --skip_deduplication
     
     Complexity Filtering 
-      --complexity_filtering            Run complexity filtering on FastQ files
-      --complexity_filter_poly_g_min    Specify poly-g min filter (default: 10) for filtering
+      --complexity_filtering            Run poly-G removal on FASTQ files
+      --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed (default: 10)
     
     Clipping / Merging
       --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward)
@@ -61,23 +61,23 @@ def helpMessage() {
       --min_adap_overlap            Specify minimum adapter overlap
     
     BWA Mapping
-      --bwaalnn                     Specify the -n parameter for BWA aln
+      --bwaalnn                     Specify the -n parameter for BWA aln.
       --bwaalnk                     Specify the -k parameter for BWA aln
       --bwaalnl                     Specify the -l parameter for BWA aln
     
     CircularMapper
       --circularmapper              Turn on CircularMapper (CM)
-      --circularextension           Specify the number of bases to extend
+      --circularextension           Specify the number of bases to extend reference by
       --circulartarget              Specify the target chromosome for CM
       --circularfilter              Specify to filter off-target reads
     
     BWA Mem Mapping
-      --bwamem                      Turn on BWA Mem instead of CM/BWA aln for mapping
+      --bwamem                      Turn on BWA Mem instead of BWA aln for mapping
     
     BAM Filtering
-      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice. 
-      --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
       --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
+      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
+      --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
     
     DeDuplication
       --dedupper                    Deduplication method to use (options: dedup, markduplicates). Default: dedup
@@ -101,10 +101,6 @@ def helpMessage() {
       --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
       --bamutils_softclip           Use softclip instead of hard masking
 
-
-    For a full list and more information of available parameters, consider the documentation.
-
-
     Other options:
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -113,6 +109,9 @@ def helpMessage() {
       --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'
       --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'
       --max_cpus                    Maximum number of CPUs to use for each step of the pipleine. Should be in form e.g. --max_cpus 1
+      
+    For a full list and more information of available parameters, consider the documentation (https://github.com/nf-core/eager/).
+
       
     """.stripIndent()
 }
