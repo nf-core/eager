@@ -44,6 +44,7 @@ def helpMessage() {
       --saveReference               Saves reference genome indices for later reusage
 
     Skipping                        Skip any of the mentioned steps
+      --skip_adapterremoval
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
@@ -580,7 +581,7 @@ process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
-    when: !params.bam
+    when: !params.bam && !params.skip_adapterremoval
 
     input:
     set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
