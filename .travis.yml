@@ -52,3 +52,5 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://raw.githubusercontent.com/nf-core/test-datasets/eager2/reference/Test.fasta.gz'
   # Run the basic pipeline with the bam input profile
   - nextflow run ${TRAVIS_BUILD_DIR} -profile testbam,docker --bam
+  # Run the pipeline without clipping/read merging in PE mode 
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_adapterremoval --bwa_index results/reference_genome/bwa_index/bwa_index/
