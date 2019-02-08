@@ -63,7 +63,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 ### QualiMap
 ### DamageProfiler
 
-DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage at subsequent single-stranded overhangs at the end of molecules.
+DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
 
 Therefore, three main characteristics of ancient DNA are:
   * Short DNA fragments
@@ -71,7 +71,7 @@ Therefore, three main characteristics of ancient DNA are:
   * Increased C and Ts at ends of fragments
   
 #### Misincorporation Plots
-The MultiQC DamageProfiler module misincorporation plots shows the percent frequency of C to T mismatches on 5' read ends and the complementary G to A mismatches on the 3' end, when compared to the reference base at that position. 
+The MultiQC DamageProfiler module misincorporation plots shows the percent frequency of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The mismatches are when compared to the base of the reference genome at that position. 
 
 When looking at the misincorporation plots, keep in mind the following:
   * As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads. 
