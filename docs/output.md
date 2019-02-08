@@ -42,7 +42,7 @@ These are less important directories which are used less often, normally in the 
 
 In this section we will run through the output of each module as reported in a MultiQC output. This can be viewed by opening the HTML file in your `<RUN_OUTPUT_DIRECTORY>/MultiQC/` directory in a web browser. The section will also provide some basic tips on how to interpret the plots and values, although we highly recommend reading the READMEs or original papers of the tools used in the pipeline. A list of references can be seen on the [EAGER2 github repository](https://github.com/nf-core/eager/)
 
-## FastQC
+### FastQC
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C). You get information about adapter contamination and other overrepresented sequences.
 
 For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
@@ -56,15 +56,42 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `zips/sample_fastqc.zip`
   * zip file containing the FastQC report, tab-delimited data file and plot images
 
-## FastP
-## AdapterRemoval
-## BWA 
-## Picard
-## Samtools
-## DeDup
-## QualiMap
-## DamageProfiler
-## PMDTools
-## Preseq
-## BamUtil
+### FastP
+### AdapterRemoval
+### Samtools
+### DeDup
+### QualiMap
+### DamageProfiler
+
+DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage at subsequent single-stranded overhangs at the end of molecules.
+
+Therefore, three main characteristics of ancient DNA are:
+  * Short DNA fragments
+  * Elevated G and As (purines) just before strand breaks
+  * Increased C and Ts at ends of fragments
+  
+#### Misincorporation Plots
+The MultiQC DamageProfiler module misincorporation plots shows the percent frequency of C to T mismatches on 5' read ends and the complementary G to A mismatches on the 3' end, when compared to the reference base at that position. 
+
+When looking at the misincorporation plots, keep in mind the following:
+  * As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads. 
+  * If your library has been **partially-UDG treated**, only the first one or two bases will display the the misincorporation frequency.
+  * If your library has been **UDG treated** you will expect to see extremely-low to no misincorporations at read ends.
+  * If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
+  * We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
+  * The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
+
+> **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplmentation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
+
+#### Length Distribution
+The MultiQC DamageProfiler module length distribution plots show the frequency of read lengths across forward and reverse reads respectively.
+
+When looking at the length distribution plots, keep in mind the following:
+  * Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
+  * You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
+  * You may see large peaks at paired-end turn arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
+  
+### PMDTools
+### Preseq
+### BamUtil
 
