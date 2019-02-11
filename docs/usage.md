@@ -162,6 +162,14 @@ A normal glob pattern, enclosed in quotation marks, can then be used for `--read
 --pairedEnd --reads '*.fastq'
 ```
 
+### `--noCollapse`
+If you have paired-end data, but you don't want to merge them, add the commind line argument `--noCollapse`. 
+
+For example
+```bash
+--pairedEnd --noCollapse '*.fastq'
+```
+
 ### `--fasta`
 If you prefer, you can specify the full path to your reference genome when you run the pipeline:
 
