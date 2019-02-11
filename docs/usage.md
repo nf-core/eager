@@ -163,7 +163,7 @@ A normal glob pattern, enclosed in quotation marks, can then be used for `--read
 ```
 
 ### `--noCollapse`
-If you have paired-end data, but you don't want to merge them, add the commind line argument `--noCollapse`. 
+If you have paired-end data, but you don't want to merge them, add the command line argument `--noCollapse`. 
 
 For example
 ```bash
