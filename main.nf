@@ -28,7 +28,8 @@ def helpMessage() {
       --reads                       Path to input data (must be surrounded with quotes)
       -profile                      Hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentatoin.
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
-      --pairedEnd                   Specifies that the input is paired end reads (required if not singleend)
+      --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
+      --noCollapse                  Specifies to avoid merging Forward and Reverse reads together. (Only for pairedEnd samples)
       --bam                         Specifies that the input is in BAM format
       --fasta                       Path to Fasta reference (required if not iGenome reference)
       --genome                      Name of iGenomes reference (required if not fasta reference)
@@ -131,6 +132,7 @@ if (params.help){
 params.name = false
 params.singleEnd = false
 params.pairedEnd = false
+params.noCollapse = false
 params.genome = "Custom"
 params.snpcapture = false
 params.bedfile = ''
@@ -265,6 +267,11 @@ if( params.singleEnd || params.pairedEnd || params.bam){
     exit 1, "Please specify either --singleEnd, --pairedEnd to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
 }
 
+//Validate that noCollase is only set to True for pairedEnd reads!
+if (params.noCollapse && params.singleEnd){
+    exit 1, "--noCollapse can only be set for pairedEnd samples!"
+}
+
 
 //AWSBatch sanity checking
 if(workflow.profile == 'awsbatch'){
@@ -349,6 +356,7 @@ summary['Reads']        = params.reads
 summary['Fasta Ref']    = params.fasta
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
+summary['Collapse']        = !params.noCollapse ? 'Yes' : 'No'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -508,7 +516,7 @@ process convertBam {
 
     output:
     set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp)
-    file("*.fastq.gz") into (ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
+    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
 
     script:
     base = "${bam.baseName}"
@@ -594,19 +602,25 @@ process adapter_removal {
     //Readprefixing only required for PE data with merging
     fixprefix = (params.singleEnd) ? "" : "AdapterRemovalFixPrefix ${prefix}.combined.fq.gz ${prefix}.combined.prefixed.fq.gz"
     
-    if( !params.singleEnd ){
+    if( !params.singleEnd && !params.noCollapse){
     """
-    AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${prefix} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
+    AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${name} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
     #Combine files
-    zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${prefix}.combined.fq.gz
-    ${fixprefix}
-    rm ${prefix}.combined.fq.gz
+    zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${name}.combined.fq.gz
     """
-    } else {
+    } else if (!params.singleEnd && params.noCollapse) {
     """
-    AdapterRemoval --file1 ${reads[0]} --basename ${prefix} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} 
+    AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${name} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    #Rename files
+    mv ${name}.pair1.truncated.gz ${name}.pair1.combined.fq.gz
+    mv ${name}.pair2.truncated.gz ${name}.pair2.combined.fq.gz
+    """
+    } 
+    else {
+    """
+    AdapterRemoval --file1 ${reads[0]} --basename ${name} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} 
     # Pseudo-Combine
-    mv *.truncated.gz ${prefix}.combined.fq.gz
+    mv *.truncated.gz ${name}.combined.fq.gz
     """
     }
 }
@@ -615,7 +629,7 @@ process adapter_removal {
  * STEP 2.1 - FastQC after clipping/merging (if applied!)
  */
 process fastqc_after_clipping {
-    tag "${reads[0].baseName}"
+    tag "${prefix}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
@@ -628,6 +642,7 @@ process fastqc_after_clipping {
     file "*_fastqc.{zip,html}" optional true into ch_fastqc_after_clipping
 
     script:
+    prefix = reads[0].toString().tokenize('.')[0]
     """
     fastqc -q $reads
     """
@@ -654,13 +669,24 @@ process bwa {
     
 
     script:
+    fasta = "${index}/*.fasta"
+    if (!params.singleEnd && params.noCollapse){
+    prefix = reads[0].toString().tokenize('.')[0]
+    """ 
+    bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
+    bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
+    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r2.sai ${reads[0]} ${reads[1]} | samtools sort -@ ${task.cpus} -O bam - > ${prefix}.sorted.bam
+    samtools index ${prefix}.sorted.bam
+    """
+    } else {
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-    fasta = "${index}/*.fasta" 
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     samtools index "${prefix}".sorted.bam
     """
+    }
+    
 }
 
 process circulargenerator{
@@ -708,9 +734,21 @@ process circularmapper{
     
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
-    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    
     fasta = "${index}/*_*.fasta"
 
+    if (!params.singleEnd && params.noCollapse){
+    prefix = reads[0].toString().tokenize('.')[0]
+    """ 
+    bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
+    bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
+    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r1.sai ${reads[0]} ${reads[0]} > tmp.out
+    realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${prefix}.sorted.bam
+    samtools index ${prefix}.sorted.bam
+    """
+    } else {
+    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads > tmp.out
@@ -718,6 +756,8 @@ process circularmapper{
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
     samtools index "${prefix}".sorted.bam
     """
+    }
+    
 }
 
 process bwamem {
@@ -738,10 +778,18 @@ process bwamem {
     script:
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     fasta = "${index}/*.fasta"
+    if (!params.singleEnd && params.noCollapse){
+    """
+    bwa mem -t ${task.cpus} $fasta ${reads[0]} ${reads[1]} -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
+    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
+    """
+    } else {
     """
     bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     samtools index -@ ${task.cpus} "${prefix}".sorted.bam
     """
+    }
+    
 }
 
 /*
