@@ -678,11 +678,11 @@ process bwa {
     samtools index ${prefix}.sorted.bam
     """
     } else {
-    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    prefix = reads[0].toString().tokenize('.')[0]
     """ 
-    bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
-    samtools index "${prefix}".sorted.bam
+    bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
+    samtools index ${prefix}.sorted.bam
     """
     }
     
@@ -747,13 +747,13 @@ process circularmapper{
     samtools index ${prefix}.sorted.bam
     """
     } else {
-    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    prefix = reads[0].toString().tokenize('.')[0]
     """ 
-    bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads > tmp.out
+    bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
-    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
-    samtools index "${prefix}".sorted.bam
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${prefix}.sorted.bam
+    samtools index ${prefix}.sorted.bam
     """
     }
     
