@@ -162,14 +162,6 @@ A normal glob pattern, enclosed in quotation marks, can then be used for `--read
 --pairedEnd --reads '*.fastq'
 ```
 
-### `--noCollapse`
-If you have paired-end data, but you don't want to merge them, add the command line argument `--noCollapse`. 
-
-For example
-```bash
---pairedEnd --noCollapse  --reads '*.fastq'
-```
-
 ### `--fasta`
 If you prefer, you can specify the full path to your reference genome when you run the pipeline:
 
@@ -287,11 +279,29 @@ This part of the documentation contains a list of user-adjustable parameters in 
 
 ## Step skipping parameters
 
-Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules. 
+Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules.
 
 ### `--skip_preseq`
 
 Turns off the computation of library complexity estimation.  
+
+### `--skip_collapse`
+If you have paired-end data, but you don't want to merge them, add the command line argument `--noCollapse`. 
+
+For example
+```bash
+--pairedEnd --skip_collapse  --reads '*.fastq'
+```
+
+### `--skip_trimming`
+
+Turns off the adaptor and quality trimming
+
+For example
+```bash
+--pairedEnd --skip_trimming  --reads '*.fastq'
+```
+
 
 ### `--skip_damage_calculation`
 
