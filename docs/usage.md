@@ -167,7 +167,7 @@ If you have paired-end data, but you don't want to merge them, add the command l
 
 For example
 ```bash
---pairedEnd --noCollapse '*.fastq'
+--pairedEnd --noCollapse  --reads '*.fastq'
 ```
 
 ### `--fasta`
