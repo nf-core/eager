@@ -43,6 +43,7 @@ These are less important directories which are used less often, normally in the 
 In this section we will run through the output of each module as reported in a MultiQC output. This can be viewed by opening the HTML file in your `<RUN_OUTPUT_DIRECTORY>/MultiQC/` directory in a web browser. The section will also provide some basic tips on how to interpret the plots and values, although we highly recommend reading the READMEs or original papers of the tools used in the pipeline. A list of references can be seen on the [EAGER2 github repository](https://github.com/nf-core/eager/)
 
 ### FastQC
+#### Background
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C). You get information about adapter contamination and other overrepresented sequences.
 
 For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
@@ -58,11 +59,54 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 ### FastP
 ### AdapterRemoval
+#### Background
+AdapterRemoval a tool that does the post-sequencing clean up of your sequencing reads. It performs the following functions
+  - 'Merges' (or 'collapses') forward and reverse reads of Paired End data
+  - Removes remaining library indexing adapters
+  - Trims low quality base tails from ends of reads
+  - Removes too-short reads
+
+In more detail merging is where the same read from the forward and reverse files of a single library (based on the flowcell coordinates), are compared to find a stretch of sequence that are the same. If this overlap reaches certain quality thresholds, the two reads are 'collapsed' into a single read, with the base quality scores are updated accordingly accounting for the increase quality call precision.
+
+Adapter removal involves finding overlaps at the 5' and 3' end of reads for the artificial NGS library adapters (which connect the DNA molecule insert, and the index), and stretches that match each other are then removed from the read itself.  Note, by default AdapterRemoval does _not_ remove 'internal barcodes' (between insert and the adapter), so these statistics are not considered.
+
+Quality trimming (or 'truncating') involves looking at ends of reads for low-confidence bases (i.e. where the FASTQ Phred score is below a certain threshold). These are then removed remove the read.
+
+Length filtering involves removing any read that does not reach the number of bases specified by a particular value. 
+
+#### Retained and Discarded Reads Plot
+
+These stacked bars plots are unfortunately a little confusing, when displayed in MultiQC. However are relatively straight-forward once you understand each category. They can be displayed as counts of reads per AdapterRemoval read-category, or as percentages of the same values. Each forward(/reverse) file combination are displayed once.
+
+The most important value is the **Retained Read Pairs** which gives you the final number of reads output into the file that goes into mapping. Note, however, this section of the stack bar _includes_ the other categories displayed (see below) in the calculation.
+
+Other Categories:
+  * If paired-end, the **Singleton [mate] R1(/R2)** cateogries represent reads which were unable to be collapsed, possibly due to the reads being too long to overlap.
+  * If paired-end, **Full-length collapsed pairs** are reads which were collapsed and did not require low-quality bases at end of reads to be removed.
+  * If paired-end, **Truncated collapsed pairs** are paired-end that were collapsed but did required the removal of low quality bases at the end of reads.
+  * **Discarded [mate] R1/R2** represent reads which were a part of a pair, but one member of the pair did not reach other quality criteria and weas discarded. However the other member of the pair is still retained in the output file as it still reached other quality critea.
+  
+For ancient DNA, assuming a good quality run, you expect to see a the vast majority of your reads overlapping because we have such fragmented molecules. Large numbers of singletons suggest your molecules are too long and may not represent true ancient DNA. 
+
+If you see high numbers of discarded or truncated reads, you should check your FastQC results for low sequencing quality of that particular run.
+
+#### Length Distribution Plot
+
+The length distribution plots show the number of reads at each read-length. You can change the plot to display different cateogories.
+
+  * All represent the overall distribution of reads. In the case of paired-end sequencing You may see a peak at the turn around from forward to reverse cycles.
+  * **Mate 1** and **Mate 2** represents the length of the forward and reverse read respectively prior collapsing
+  * **Singleton** represent those reads that had a one member of a pair discarded
+  * **Collapsed** and **Collapsed Truncated** represent reads that overlapped and able to merge into a single read, with the latter including base-quality trimming off ends of reads. These plots will start with a vertical rise representing where you are above the minimum-read threshold you set.
+  * **Discarded** here represents the number of reads that did not each the read length filter. You will likely see a vertical drop at what your threshold was set to.
+
+With paired-end ancient DNA sequencing runs You expect to see a slight increase in shorter fragments in the reverse (R2) read, as our fragments are so short we often don't reach the maximum number of cycles of that particular sequencing run. 
+
 ### Samtools
 ### DeDup
 ### QualiMap
 ### DamageProfiler
-
+#### Background
 DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
 
 Therefore, three main characteristics of ancient DNA are:
