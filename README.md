@@ -84,6 +84,18 @@ James Fellows Yates, Raphael Eisenhofer and Judith Neukamm. If you want to
 contribute, please open an issue and ask to be added to the project - happy to 
 do so and everyone is welcome to contribute here!
 
+## Contributors
+
+- [James A. Fellows-Yates](https://github.com/jfy133)
+- [Stephen Clayton](https://github.com/sc13-bioinf)
+- [Judith Neukamm](https://github.com/JudithNeukamm)
+- [Raphael Eisenhofer](https://github.com/EisenRa)
+- [Maxime Garcia](https://github.com/MaxUlysse)
+- [Luc Venturini](https://github.com/lucventurini)
+- [Hester van Schalkwyk](https://github.com/hesterjvs)
+
+If you've contributed and you're missing in here, please let me know and I'll add you in.
+
 ## Tool References
 
 * **EAGER v1**, CircularMapper, DeDup* Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. [https://doi.org/10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)  Download: [https://github.com/apeltzer/EAGER-GUI](https://github.com/apeltzer/EAGER-GUI) and [https://github.com/apeltzer/EAGER-CLI](https://github.com/apeltzer/EAGER-CLI)
