@@ -170,6 +170,10 @@ If you prefer, you can specify the full path to your reference genome when you r
 ```
 > If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you. Note that other file extensions such as `.fna`, `.fa` are also supported but will be renamed to `.fasta` automatically by the pipeline.
 
+### `--size`
+
+This parameter is automatically set by the pipeline depending on the size of your chosen reference FastA genome. If this is larger than 3.5GB, the `samtools index` calls in the pipeline automatically generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. Shouldn't be required for smaller genomes, but `>4GB` genomes have been shown to need `CSI` indices. You cannot set this parameter yourselves, but it is nevertheless documented for the sake of completeness in here.
+
 ### `--genome` (using iGenomes)
 
 The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
