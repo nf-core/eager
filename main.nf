@@ -488,7 +488,7 @@ process makeSeqDict {
     mkdir -p seq_dict
     mv $fasta "seq_dict/${base}"
     cd seq_dict
-    picard CreateSequenceDictionary R=$base O="${fasta.baseName}.dict"
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$base O="${fasta.baseName}.dict"
     """
 }
 
@@ -970,7 +970,7 @@ process markDup{
     script:
     prefix = "${bam.baseName}"
     """
-    picard MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
     """
 }
 
