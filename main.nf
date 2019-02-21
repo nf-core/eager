@@ -649,7 +649,7 @@ process bwa {
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
-    file "*.bai" into ch_bam_index_for_damageprofiler
+    file "*.csi" into ch_bam_index_for_damageprofiler
     
 
     script:
@@ -658,7 +658,7 @@ process bwa {
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
-    samtools index "${prefix}".sorted.bam
+    samtools index -c "${prefix}".sorted.bam
     """
 }
 
@@ -703,7 +703,7 @@ process circularmapper{
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm
-    file "*.bai" 
+    file "*.csi" 
     
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
@@ -715,7 +715,7 @@ process circularmapper{
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
-    samtools index "${prefix}".sorted.bam
+    samtools index -c "${prefix}".sorted.bam
     """
 }
 
@@ -731,7 +731,7 @@ process bwamem {
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler
-    file "*.bai" 
+    file "*.csi" 
     
 
     script:
@@ -739,7 +739,7 @@ process bwamem {
     fasta = "${index}/*.fasta"
     """
     bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
-    samtools index -@ ${task.cpus} "${prefix}".sorted.bam
+    samtools index  -c -@ ${task.cpus} "${prefix}".sorted.bam
     """
 }
 
@@ -786,7 +786,7 @@ process samtools_filter {
     file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
-    file "*.bai"
+    file "*.csi"
 
     script:
     prefix="$bam" - ~/(\.bam)?/
@@ -794,30 +794,30 @@ process samtools_filter {
     if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
         """
         samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index ${prefix}.filtered.bam
+        samtools index -c ${prefix}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
         """
         samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-        samtools index ${prefix}.filtered.bam
+        samtools index -c ${prefix}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "fastq"){
         """
         samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-        samtools index ${prefix}.filtered.bam
+        samtools index -c ${prefix}.filtered.bam
         samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         rm ${prefix}.unmapped.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
         """
         samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-        samtools index ${prefix}.filtered.bam
+        samtools index -c ${prefix}.filtered.bam
         samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         """
     } else { //Only apply quality filtering, default
         """
         samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index ${prefix}.filtered.bam
+        samtools index -c ${prefix}.filtered.bam
         """
     }  
 }
@@ -841,7 +841,7 @@ process dedup{
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
     file "${prefix}.sorted.bam" into ch_dedup_bam
-    file "*.bai"
+    file "*.csi"
 
     script:
     prefix="${bam.baseName}"
@@ -852,14 +852,14 @@ process dedup{
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index "$prefix".sorted.bam
+    samtools index -c "$prefix".sorted.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index "$prefix".sorted.bam
+    samtools index -c "$prefix".sorted.bam
     """  
     }
 }
@@ -1037,7 +1037,7 @@ process bam_trim {
 
     output: 
     file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping
-    file "*.bai"
+    file "*.csi"
 
     script:
     prefix="${bam.baseName}"
@@ -1045,7 +1045,7 @@ process bam_trim {
     """
     bam trimBam $bam tmp.bam -L ${params.bamutils_clip_left} -R ${params.bamutils_clip_right} ${softclip}
     samtools sort -@ ${task.cpus} tmp.bam -o ${prefix}.trimmed.bam 
-    samtools index ${prefix}.trimmed.bam
+    samtools index -c ${prefix}.trimmed.bam
     """
 }
 
