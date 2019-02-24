@@ -162,7 +162,7 @@ If you prefer, you can specify the full path to your reference genome when you r
 ```bash
 --fasta '[path to Fasta reference]'
 ```
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you.
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you. Note that other file extensions such as `.fna`, `.fa` are also supported but will be renamed to `.fasta` automatically by the pipeline.
 
 ### `--genome` (using iGenomes)
 
@@ -203,7 +203,7 @@ params {
 
 ### `--bwa_index`
 
-Use this to specify a previously created BWA index. This saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource specific profile that sets paths to pre-computed reference genomes, saving even time when specifying these.
+Use this to specify a _directory_ containing previously created BWA index files. This saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource specific profile that sets paths to pre-computed reference genomes, saving even time when specifying these.
 
 ### `--seq_dict` false
 
@@ -240,7 +240,7 @@ Use to set a top-limit for the default time requirement for each process.
 Should be a string in the format integer-unit. eg. `--max_time '2.h'`. If not specified, will be taken from the configuration in the `-profile` flag.
 
 ### `--max_cpus`
-Use to set a top-limit for the default CPU requirement for each process.
+Use to set a top-limit for the default CPU requirement for each **process**. This is not the maximum number of CPUs that can be used for the whole pipeline, but the maximum number of CPUs each program can use for each program submission (known as a process). Do not set this higher than what is available on your workstation or computing node can provide. If you're unsure, ask your local IT administrator for details on compute node capabilities! 
 Should be a string in the format integer-unit. eg. `--max_cpus 1`. If not specified, will be taken from the configuration in the `-profile` flag.
 
 ### `--email`

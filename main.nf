@@ -26,20 +26,21 @@ def helpMessage() {
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
-      -profile                      Hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentatoin.
+      -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
-      --pairedEnd                   Specifies that the input is paired end reads (required if not singleend)
+      --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
+      --bam                         Specifies that the input is in BAM format
       --fasta                       Path to Fasta reference (required if not iGenome reference)
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
-    References                      If not specified in the configuration file or you wish to overwrite any of the references.
-      --bwa_index                   Path to BWA index
+    References                      If not specified in the configuration file, or you wish to overwrite any of the references.
+      --bwa_index                   Path to directory containing BWA index files
       --bedfile                     Path to BED file for SNPCapture methods
-      --seq_dict                    Path to sequence dictionary file
-      --fasta_index                 Path to FastA index 
+      --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
+      --fasta_index                 Path to samtools FASTA index (typically ending in '.fai')
       --saveReference               Saves reference genome indices for later reusage
 
     Skipping                        Skip any of the mentioned steps
@@ -49,8 +50,8 @@ def helpMessage() {
       --skip_deduplication
     
     Complexity Filtering 
-      --complexity_filtering            Run complexity filtering on FastQ files
-      --complexity_filter_poly_g_min    Specify poly-g min filter (default: 10) for filtering
+      --complexity_filtering            Run poly-G removal on FASTQ files
+      --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed (default: 10)
     
     Clipping / Merging
       --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward)
@@ -60,23 +61,23 @@ def helpMessage() {
       --min_adap_overlap            Specify minimum adapter overlap
     
     BWA Mapping
-      --bwaalnn                     Specify the -n parameter for BWA aln
+      --bwaalnn                     Specify the -n parameter for BWA aln.
       --bwaalnk                     Specify the -k parameter for BWA aln
       --bwaalnl                     Specify the -l parameter for BWA aln
     
     CircularMapper
       --circularmapper              Turn on CircularMapper (CM)
-      --circularextension           Specify the number of bases to extend
+      --circularextension           Specify the number of bases to extend reference by
       --circulartarget              Specify the target chromosome for CM
       --circularfilter              Specify to filter off-target reads
     
     BWA Mem Mapping
-      --bwamem                      Turn on BWA Mem instead of CM/BWA aln for mapping
+      --bwamem                      Turn on BWA Mem instead of BWA aln for mapping
     
     BAM Filtering
-      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice. 
-      --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
       --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
+      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
+      --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
     
     DeDuplication
       --dedupper                    Deduplication method to use (options: dedup, markduplicates). Default: dedup
@@ -100,10 +101,6 @@ def helpMessage() {
       --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
       --bamutils_softclip           Use softclip instead of hard masking
 
-
-    For a full list and more information of available parameters, consider the documentation.
-
-
     Other options:
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -112,6 +109,9 @@ def helpMessage() {
       --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'
       --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'
       --max_cpus                    Maximum number of CPUs to use for each step of the pipleine. Should be in form e.g. --max_cpus 1
+      
+    For a full list and more information of available parameters, consider the documentation (https://github.com/nf-core/eager/).
+
       
     """.stripIndent()
 }
@@ -259,9 +259,9 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
 } 
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
-if( params.singleEnd || params.pairedEnd ){
+if( params.singleEnd || params.pairedEnd || params.bam){
 } else {
-    exit 1, "Please specify either --singleEnd or --pairedEnd to execute the pipeline!"
+    exit 1, "Please specify either --singleEnd, --pairedEnd to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
 }
 
 
@@ -285,34 +285,56 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
-if(params.readPaths){
-    if(params.singleEnd){
+if( params.readPaths ){
+    if( params.singleEnd && !params.bam) {
         Channel
-            .from(params.readPaths)
-            .map { row -> [ row[0], [file(row[1][0])]] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .dump(tag:'input')
+            .from( params.readPaths )
+            .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
+            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
             .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
-            
+            ch_bam_to_fastq_convert = Channel.empty()
+    } else if (!params.bam){
+        Channel
+            .from( params.readPaths )
+            .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
+            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
+            ch_bam_to_fastq_convert = Channel.empty()
     } else {
         Channel
-            .from(params.readPaths)
-            .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .dump(tag:'input')
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
-            
+            .from( params.readPaths )
+            .map { row -> [ file( row )  ] }
+            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .dump()
+            .into { ch_bam_to_fastq_convert }
+
+            //Set up clean channels
+            ch_read_files_fastqc = Channel.empty()
+            ch_read_files_complexity_filtering = Channel.empty()
+            ch_read_files_clip = Channel.empty()
     }
-} else {
-    Channel
+} else if (!params.bam){
+     Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .dump(tag:'input')
+        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs" +
+            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
         .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
-        
+        ch_bam_to_fastq_convert = Channel.empty()
+} else {
+     Channel
+        .fromPath( params.reads )
+        .map { row -> [  file( row )  ] }
+        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
+            "to be enclosed in quotes!\n" }
+        .dump() //For debugging purposes
+        .into { ch_bam_to_fastq_convert }
+
+        //Set up clean channels
+        ch_read_files_fastqc = Channel.empty()
+        ch_read_files_complexity_filtering = Channel.empty()
+        ch_read_files_clip = Channel.empty()
+
 }
-
-
 
 // Header log info
 log.info "========================================="
@@ -394,11 +416,12 @@ process makeBWAIndex {
     file "where_are_my_files.txt"
 
     script:
+    base = "${fasta.baseName}"
     """
     mkdir bwa_index
-    cp "${fasta}" bwa_index/
+    mv "${fasta}" "bwa_index/${base}.fasta"
     cd bwa_index
-    bwa index $fasta
+    bwa index "${base}.fasta"
     """
 }
 
@@ -422,13 +445,17 @@ process makeFastaIndex {
     file wherearemyfiles from ch_where_for_fasta_index
 
     output:
-    file "${fasta}.fai" into ch_fasta_faidx_index
-    file "${fasta}"
+    file "faidx/${base}.fasta.fai" into ch_fasta_faidx_index
+    file "faidx/${base}.fasta"
     file "where_are_my_files.txt"
 
     script:
+    base = "${fasta.baseName}"
     """
-    samtools faidx $fasta
+    mkdir faidx
+    mv $fasta "faidx/${base}.fasta"
+    cd faidx
+    samtools faidx "${base}.fasta"
     """
 }
 
@@ -452,13 +479,41 @@ process makeSeqDict {
     file wherearemyfiles from ch_where_for_seqdict
 
     output:
-    file "*.dict" into ch_seq_dict
+    file "seq_dict/*.dict" into ch_seq_dict
     file "where_are_my_files.txt"
 
     script:
+    base = "${fasta.baseName}.fasta"
     """
-    picard CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
+    mkdir -p seq_dict
+    mv $fasta "seq_dict/${base}"
+    cd seq_dict
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$base O="${fasta.baseName}.dict"
     """
+}
+
+/*
+* Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
+*
+*/ 
+
+process convertBam {
+    tag "$bam"
+    
+    when: params.bam
+
+    input: 
+    file bam from ch_bam_to_fastq_convert
+
+    output:
+    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp)
+    file("*.fastq.gz") into (ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
+
+    script:
+    base = "${bam.baseName}"
+    """
+    samtools fastq -tn ${bam} | pigz -p ${task.cpus} > ${base}.fastq.gz
+    """ 
 }
 
 
@@ -472,7 +527,7 @@ process fastqc {
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     input:
-    set val(name), file(reads) from ch_read_files_fastqc
+    set val(name), file(reads) from ch_read_files_fastqc.mix(ch_read_files_converted_fastqc)
 
     output:
     file "*_fastqc.{zip,html}" into ch_fastqc_results
@@ -496,7 +551,7 @@ process fastp {
     when: params.complexity_filter
 
     input:
-    set val(name), file(reads) from ch_read_files_complexity_filtering
+    set val(name), file(reads) from ch_read_files_complexity_filtering.mix(ch_read_files_converted_fastp)
 
     output:
     set val(name), file("*pG.fq.gz") into ch_clipped_reads_complexity_filtered
@@ -523,6 +578,8 @@ process fastp {
 process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
+
+    when: !params.bam
 
     input:
     set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
@@ -561,6 +618,8 @@ process fastqc_after_clipping {
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
+    when: !params.bam
+
     input:
     file(reads) from ch_clipped_reads_for_fastqc
 
@@ -584,8 +643,9 @@ process bwa {
     when: !params.circularmapper && !params.bwamem
 
     input:
-    file(reads) from ch_clipped_reads
+    file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
     file index from ch_bwa_index.first()
+
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
@@ -638,7 +698,7 @@ process circularmapper{
     when: params.circularmapper
 
     input:
-    file reads from ch_clipped_reads_circularmapper
+    file reads from ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm)
     file index from ch_circularmapper_indices.first()
 
     output:
@@ -666,7 +726,7 @@ process bwamem {
     when: params.bwamem && !params.circularmapper
 
     input:
-    file(reads) from ch_clipped_reads_bwamem
+    file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
     file index from ch_bwa_index_bwamem.first()
 
     output:
@@ -910,7 +970,7 @@ process markDup{
     script:
     prefix = "${bam.baseName}"
     """
-    picard MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
     """
 }
 
