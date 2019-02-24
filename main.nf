@@ -30,7 +30,7 @@ def helpMessage() {
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
       --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
       --bam                         Specifies that the input is in BAM format
-      --fasta                       Path to Fasta reference (required if not iGenome reference)
+      --fasta                       Path to Fasta reference (required if not iGenome reference). Preferably with .fasta file suffix.
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
     Input Data Additional Options:
