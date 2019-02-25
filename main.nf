@@ -241,15 +241,6 @@ if("${params.fasta}".endsWith(".gz")){
     .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper_index}
 }
 
-
-//Check genome size for large reference genomes
-params.size = (file("${params.fasta}").size() > 3500000000) ? "-c" : ""    
-
-
-
-
-
-
 //Index files provided? Then check whether they are correct and complete
 if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
     exit 1, "Invalid aligner option. Default is bwa, but specify --circularmapper or --bwamem to use these."
@@ -349,7 +340,7 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
 summary['Fasta Ref']    = params.fasta
-summary['BAM Index Type'] = (params.size == "") ? 'BAI' : 'CSI'
+summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Memory']   = params.max_memory
@@ -659,10 +650,11 @@ process bwa {
     script:
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     fasta = "${index}/*.fasta" 
+    size = ${params.large_ref} ? '-c' : ''
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
-    samtools index ${params.size} "${prefix}".sorted.bam
+    samtools index $size "${prefix}".sorted.bam
     """
 }
 
@@ -713,13 +705,14 @@ process circularmapper{
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     fasta = "${index}/*_*.fasta"
+    size = ${params.large_ref} ? '-c' : ''
 
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
-    samtools index ${params.size} "${prefix}".sorted.bam
+    samtools index $size "${prefix}".sorted.bam
     """
 }
 
@@ -741,9 +734,10 @@ process bwamem {
     script:
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     fasta = "${index}/*.fasta"
+    size = ${params.large_ref} ? '-c' : ''
     """
     bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
-    samtools index  -c -@ ${task.cpus} "${prefix}".sorted.bam
+    samtools index  $size -@ ${task.cpus} "${prefix}".sorted.bam
     """
 }
 
@@ -794,34 +788,35 @@ process samtools_filter {
 
     script:
     prefix="$bam" - ~/(\.bam)?/
+    size = ${params.large_ref} ? '-c' : ''
     
     if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
         """
         samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index ${params.size} ${prefix}.filtered.bam
+        samtools index $size ${prefix}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
         """
         samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-        samtools index ${params.size} ${prefix}.filtered.bam
+        samtools index $size ${prefix}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "fastq"){
         """
         samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-        samtools index ${params.size} ${prefix}.filtered.bam
+        samtools index $size ${prefix}.filtered.bam
         samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         rm ${prefix}.unmapped.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
         """
         samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-        samtools index ${params.size} ${prefix}.filtered.bam
+        samtools index $size ${prefix}.filtered.bam
         samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         """
     } else { //Only apply quality filtering, default
         """
         samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index ${params.size} ${prefix}.filtered.bam
+        samtools index $size ${prefix}.filtered.bam
         """
     }  
 }
@@ -850,20 +845,21 @@ process dedup{
     script:
     prefix="${bam.baseName}"
     treat_merged="${params.dedup_all_merged}" ? '-m' : ''
+    size = ${params.large_ref} ? '-c' : ''
     
     if(params.singleEnd) {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index ${params.size} "$prefix".sorted.bam
+    samtools index $size "$prefix".sorted.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index ${params.size} "$prefix".sorted.bam
+    samtools index $size "$prefix".sorted.bam
     """  
     }
 }
@@ -1046,10 +1042,11 @@ process bam_trim {
     script:
     prefix="${bam.baseName}"
     softclip = "${params.bamutils_softclip}" ? '-c' : '' 
+    size = ${params.large_ref} ? '-c' : ''
     """
     bam trimBam $bam tmp.bam -L ${params.bamutils_clip_left} -R ${params.bamutils_clip_right} ${softclip}
     samtools sort -@ ${task.cpus} tmp.bam -o ${prefix}.trimmed.bam 
-    samtools index ${params.size} ${prefix}.trimmed.bam
+    samtools index $size ${prefix}.trimmed.bam
     """
 }
 
