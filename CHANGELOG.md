@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 * [#145](https://github.com/nf-core/eager/issues/145) - Added Picard Memory Handling [fix](https://github.com/nf-core/eager/issues/144)
-
+* Clarified `--complexity_filter` flag to be specifically for poly G trimming.
 
 ## [2.0.5] - 2019-01-28
 
