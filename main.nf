@@ -650,7 +650,7 @@ process bwa {
     script:
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     fasta = "${index}/*.fasta" 
-    size = ${params.large_ref} ? '-c' : ''
+    size = "${params.large_ref}" ? '-c' : ''
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta "${reads.baseName}".sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
@@ -705,7 +705,7 @@ process circularmapper{
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     fasta = "${index}/*_*.fasta"
-    size = ${params.large_ref} ? '-c' : ''
+    size = "${params.large_ref}" ? '-c' : ''
 
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f "${reads.baseName}.sai"
@@ -734,7 +734,7 @@ process bwamem {
     script:
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     fasta = "${index}/*.fasta"
-    size = ${params.large_ref} ? '-c' : ''
+    size = "${params.large_ref}" ? '-c' : ''
     """
     bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     samtools index  "${size}" -@ ${task.cpus} "${prefix}".sorted.bam
@@ -788,7 +788,7 @@ process samtools_filter {
 
     script:
     prefix="$bam" - ~/(\.bam)?/
-    size = ${params.large_ref} ? '-c' : ''
+    size = "${params.large_ref}" ? '-c' : ''
     
     if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
         """
@@ -845,7 +845,7 @@ process dedup{
     script:
     prefix="${bam.baseName}"
     treat_merged="${params.dedup_all_merged}" ? '-m' : ''
-    size = ${params.large_ref} ? '-c' : ''
+    size = "${params.large_ref}" ? '-c' : ''
     
     if(params.singleEnd) {
     """
@@ -1042,7 +1042,7 @@ process bam_trim {
     script:
     prefix="${bam.baseName}"
     softclip = "${params.bamutils_softclip}" ? '-c' : '' 
-    size = ${params.large_ref} ? '-c' : ''
+    size = "${params.large_ref}" ? '-c' : ''
     """
     bam trimBam $bam tmp.bam -L ${params.bamutils_clip_left} -R ${params.bamutils_clip_right} ${softclip}
     samtools sort -@ ${task.cpus} tmp.bam -o ${prefix}.trimmed.bam 
