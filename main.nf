@@ -907,7 +907,7 @@ process damageprofiler {
 
     input:
     file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
-    file fasta from ch_fasta_for_damageprofiler
+    file fasta from ch_fasta_for_damageprofiler.first()
     file bai from ch_bam_index_for_damageprofiler
     
 
@@ -934,7 +934,7 @@ process qualimap {
 
     input:
     file bam from ch_bam_filtered_qualimap
-    file fasta from ch_fasta_for_qualimap
+    file fasta from ch_fasta_for_qualimap.first()
 
     output:
     file "*" into ch_qualimap_results

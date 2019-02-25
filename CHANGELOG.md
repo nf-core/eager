@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 * [#128](https://github.com/nf-core/eager/issues/128) - Fixed reference genome handling errors
+* [#140](https://github.com/nf-core/eager/issues/140) - Fixed post-deduplication step errors
 
 ### `Dependencies`
 * Picard Tools 2.18.21 -> 2.18.23
