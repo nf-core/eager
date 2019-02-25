@@ -6,7 +6,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unpublished / Dev Branch]
 
-## [2.0.4] - 2019-01-07
+### `Added`
+
+### `Fixed`
+* [#145](https://github.com/nf-core/eager/issues/145) - Added Picard Memory Handling [fix](https://github.com/nf-core/eager/issues/144)
+
+
+## [2.0.5] - 2019-01-28
+
+### `Added`
+* [#127](https://github.com/nf-core/eager/pull/127) - Added a second testcase for testing the pipeline properly
+* [#129](https://github.com/nf-core/eager/pull/129) - Support BAM files as [input format](https://github.com/nf-core/eager/issues/41)
+* [#131](https://github.com/nf-core/eager/pull/131) - Support different [reference genome file extensions](https://github.com/nf-core/eager/issues/130)
+
+### `Fixed`
+* [#128](https://github.com/nf-core/eager/issues/128) - Fixed reference genome handling errors
+
+### `Dependencies`
+* Picard Tools 2.18.21 -> 2.18.23
+* R-Markdown 1.10 -> 1.11 
+* FastP 0.19.5 -> 0.19.6 
+
+## [2.0.4] - 2019-01-09
 
 ### `Added`
 * [#111](https://github.com/nf-core/eager/pull/110) - Allow [Zipped FastA reference input](https://github.com/nf-core/eager/issues/91)
@@ -14,6 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#114](https://github.com/nf-core/eager/pull/113) - Add proper runtime defaults for multiple processes 
 * [#118](https://github.com/nf-core/eager/pull/118) - Add centralized configs handling by https://github.com/nf-core/configs
 * [#115](https://github.com/nf-core/eager/pull/115) - Add DamageProfiler MultiQC support
+* [#122](https://github.com/nf-core/eager/pull/122) - Add pulling from Dockerhub again
 
 ### `Fixed`
 * [#110](https://github.com/nf-core/eager/pull/110) - Fix for [MultiQC Missing Second FastQC report](https://github.com/nf-core/eager/issues/107)

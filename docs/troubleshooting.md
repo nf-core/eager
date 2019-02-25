@@ -1,5 +1,22 @@
 # nf-core/eager: Troubleshooting
 
+## My pipeline update doesn't seem to do anything!
+
+To download a new version of a pipeline, you can use the following, replacing `<VERSION>` the the corresponding verison.
+
+```bash
+nextflow pull nf-core/eager -r <VERSION>
+```
+However, in very rare cases, minor fixes to a version will be pushed out without a version number bump. This can confuse nextflow slightly, as it thinks you already have the 'broken' version from your original pipeline download.
+
+If when running the pipeline you don't see any changes in the fixed version when running it, you can try removing your nextflow EAGER cache typically stored in your home directory with
+
+```bash
+rm -r ~/.nextflow/assets/nf-core/eager
+```
+
+And re-pull the pipeline with the command above. This will install a fresh version of the version with the fixes.
+
 ## Input files not found
 
 If no file, only one input file, or only read one and not read two is picked up then something is wrong with your input file declaration
@@ -26,3 +43,4 @@ If you still have an issue with running the pipeline then feel free to contact u
 Have a look at the [pipeline website](https://github.com/nf-core/eager) to find out how.
 
 If you have problems that are related to Nextflow and not our pipeline then check out the [Nextflow gitter channel](https://gitter.im/nextflow-io/nextflow) or the [google group](https://groups.google.com/forum/#!forum/nextflow).
+

@@ -45,20 +45,28 @@ Additional functionality contained by the pipeline currently includes:
 ## Quick Start
 
 1. Install [`nextflow`](docs/installation.md)
+
 2. Install one of [`docker`](https://docs.docker.com/engine/installation/), [`singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`conda`](https://conda.io/miniconda.html)
+
 3. Download the EAGER pipeline
 
 ```bash
 nextflow pull nf-core/eager
 ```
 
-4. Set up your job with default parameters
+4. Test the pipeline using the provided test data
 
 ```bash
-nextflow run nf-core -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<REFERENCE>.fasta'
+nextflow run nf-core/eager -profile <docker/singularity/conda>,test --pairedEnd
 ```
 
-5. See the overview of the run with under `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
+5. Start running your own ancient DNA analysis!
+
+```bash
+nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<REFERENCE>.fasta'
+```
+
+NB. You can see an overview of the run in the MultiQC report located at `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
 
 Modifications to the default pipeline are easily made using various options
 as described in the documentation.
