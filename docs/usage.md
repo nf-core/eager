@@ -303,7 +303,7 @@ Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No du
 
 ## Complexity Filtering Options
 
-### `--complexity_filter`
+### `--complexity_filter_poly_g`
 
 Performs a poly-G tail removal step in the beginning of the pipeline, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
 

@@ -50,7 +50,7 @@ def helpMessage() {
       --skip_deduplication
     
     Complexity Filtering 
-      --complexity_filtering            Run poly-G removal on FASTQ files
+      --complexity_filter_poly_g            Run poly-G removal on FASTQ files
       --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed (default: 10)
     
     Clipping / Merging
@@ -151,7 +151,7 @@ params.skip_qualimap = false
 params.skip_deduplication = false
 
 //Complexity filtering reads
-params.complexity_filter = false
+params.complexity_filter_poly_g = false
 params.complexity_filter_poly_g_min = 10
 
 //Read clipping and merging parameters
@@ -285,14 +285,14 @@ if( params.readPaths ){
             .from( params.readPaths )
             .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
+            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g }
             ch_bam_to_fastq_convert = Channel.empty()
     } else if (!params.bam){
         Channel
             .from( params.readPaths )
             .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
+            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g }
             ch_bam_to_fastq_convert = Channel.empty()
     } else {
         Channel
@@ -304,7 +304,7 @@ if( params.readPaths ){
 
             //Set up clean channels
             ch_read_files_fastqc = Channel.empty()
-            ch_read_files_complexity_filtering = Channel.empty()
+            ch_read_files_complexity_filter_poly_g = Channel.empty()
             ch_read_files_clip = Channel.empty()
     }
 } else if (!params.bam){
@@ -312,7 +312,7 @@ if( params.readPaths ){
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filtering }
+        .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g }
         ch_bam_to_fastq_convert = Channel.empty()
 } else {
      Channel
@@ -325,7 +325,7 @@ if( params.readPaths ){
 
         //Set up clean channels
         ch_read_files_fastqc = Channel.empty()
-        ch_read_files_complexity_filtering = Channel.empty()
+        ch_read_files_complexity_filter_poly_g = Channel.empty()
         ch_read_files_clip = Channel.empty()
 
 }
@@ -543,13 +543,13 @@ process fastp {
     tag "$name"
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
-    when: params.complexity_filter
+    when: params.complexity_filter_poly_g
 
     input:
-    set val(name), file(reads) from ch_read_files_complexity_filtering.mix(ch_read_files_converted_fastp)
+    set val(name), file(reads) from ch_read_files_complexity_filter_poly_g.mix(ch_read_files_converted_fastp)
 
     output:
-    set val(name), file("*pG.fq.gz") into ch_clipped_reads_complexity_filtered
+    set val(name), file("*pG.fq.gz") into ch_clipped_reads_complexity_filtered_poly_g
     file("*.json") into ch_fastp_for_multiqc
 
     script:
@@ -577,7 +577,7 @@ process adapter_removal {
     when: !params.bam
 
     input:
-    set val(name), file(reads) from ( params.complexity_filter ? ch_clipped_reads_complexity_filtered : ch_read_files_clip )
+    set val(name), file(reads) from ( params.complexity_filter_poly_g ? ch_clipped_reads_complexity_filtered_poly_g : ch_read_files_clip )
 
     output:
     file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
