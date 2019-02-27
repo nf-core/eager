@@ -6,11 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unpublished / Dev Branch]
 
-### `Added`
-
 ### `Fixed`
-* [#145](https://github.com/nf-core/eager/pull/145) - Added Picard Memory Handling [fix](https://github.com/nf-core/eager/issues/144)
+* [#151](https://github.com/nf-core/eager/pull/151) - Fixed [post-deduplication step errors](https://github.com/nf-core/eager/issues/128
 * [#147](https://github.com/nf-core/eager/pull/147) - Fix Samtools Index for [large references](https://github.com/nf-core/eager/issues/146)
+* [#145](https://github.com/nf-core/eager/pull/145) - Added Picard Memory Handling [fix](https://github.com/nf-core/eager/issues/144)
 
 ## [2.0.5] - 2019-01-28
 
@@ -21,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 * [#128](https://github.com/nf-core/eager/issues/128) - Fixed reference genome handling errors
+)
 
 ### `Dependencies`
 * Picard Tools 2.18.21 -> 2.18.23

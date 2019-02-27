@@ -907,7 +907,7 @@ process damageprofiler {
 
     input:
     file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
-    file fasta from ch_fasta_for_damageprofiler
+    file fasta from ch_fasta_for_damageprofiler.first()
     file bai from ch_bam_index_for_damageprofiler
     
 
@@ -934,7 +934,7 @@ process qualimap {
 
     input:
     file bam from ch_bam_filtered_qualimap
-    file fasta from ch_fasta_for_qualimap
+    file fasta from ch_fasta_for_qualimap.first()
 
     output:
     file "*" into ch_qualimap_results
@@ -1140,12 +1140,12 @@ process multiqc {
     file multiqc_config from ch_multiqc_config.collect().ifEmpty([])
     file ('fastqc_raw/*') from ch_fastqc_results.collect().ifEmpty([])
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
-    file ('software_versions/*') from software_versions_yaml.collect().ifEmpty([])
+    file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
-    file ('damageprofiler/*') from ch_damageprofiler_results.collect().ifEmpty([])
-    file ('qualimap/*') from ch_qualimap_results.collect().ifEmpty([])
+    file ('damageprofiler/dmgprof*/*') from ch_damageprofiler_results.collect().ifEmpty([])
+    file ('qualimap/qualimap*/*') from ch_qualimap_results.collect().ifEmpty([])
     file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
     file ('dedup*/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
     file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
