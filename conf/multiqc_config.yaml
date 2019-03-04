@@ -9,6 +9,7 @@ top_modules:
             - '*_fastqc.zip'
         path_filters_exclude:
              - '*.combined.prefixed_fastqc.zip'
+     - 'fastp'
      - 'adapterRemoval'
      - 'fastqc':
          name: 'FastQC (post-AdapterRemoval)'
