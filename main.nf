@@ -685,9 +685,10 @@ process bwa {
 
     script:
     fasta = "${index}/*.fasta"
+    size = "${params.large_ref}" ? '-c' : ''
+
     if (!params.singleEnd && params.skip_collapse ){
     prefix = reads[0].toString().tokenize('.')[0]
-    size = "${params.large_ref}" ? '-c' : ''
     """ 
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
