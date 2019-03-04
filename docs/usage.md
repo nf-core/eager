@@ -170,6 +170,10 @@ If you prefer, you can specify the full path to your reference genome when you r
 ```
 > If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you. Note that other file extensions such as `.fna`, `.fa` are also supported but will be renamed to `.fasta` automatically by the pipeline.
 
+### `--large_ref`
+
+This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. 
+
 ### `--genome` (using iGenomes)
 
 The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
@@ -317,7 +321,7 @@ Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No du
 
 ## Complexity Filtering Options
 
-### `--complexity_filter`
+### `--complexity_filter_poly_g`
 
 Performs a poly-G tail removal step in the beginning of the pipeline, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
 
