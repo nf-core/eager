@@ -270,13 +270,13 @@ if (params.skip_collapse  && params.singleEnd){
 }
 
 if (params.skip_collapse && params.skip_trim){
-    skip_adapterremoval = true
+    params.skip_adapterremoval = true
 }
 
 if (params.skip_adapterremoval){
-    skip_adapterremoval = true
-    skip_collapse = true
-    skip_trim = true
+    params.skip_adapterremoval = true
+    params.skip_collapse = true
+    params.skip_trim = true
 }
 
 
@@ -591,7 +591,10 @@ process fastp {
 /*
  * STEP 2 - Adapter Clipping / Read Merging
  */
-
+//Initialize empty channel if we skip adapterremoval entirely
+if(params.skip_adapterremoval) {
+    ch_clipped_reads = Channel.empty()
+}
 process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
@@ -602,7 +605,7 @@ process adapter_removal {
     set val(name), file(reads) from ( params.complexity_filter_poly_g ? ch_clipped_reads_complexity_filtered_poly_g : ch_read_files_clip )
 
     output:
-    file "output/*.fq.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
+    set val(base), file "output/*.gz" into (ch_clipped_reads,ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
     file("*.settings") into ch_adapterremoval_logs
 
     script:
@@ -653,7 +656,7 @@ process fastqc_after_clipping {
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
-    when: !params.bam
+    when: !params.bam && !params.skip_adapterremoval
 
     input:
     file(reads) from ch_clipped_reads_for_fastqc
@@ -679,7 +682,8 @@ process bwa {
     when: !params.circularmapper && !params.bwamem
 
     input:
-    file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
+    set val(name), file(reads) from ( params.skip_adapterremoval ? ch_read_files_clip : ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa) )
+    
     file index from ch_bwa_index.first()
 
 
@@ -692,7 +696,8 @@ process bwa {
     fasta = "${index}/*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && skip_collapse ){
+    //PE data without merging, PE data without any AR applied
+    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval)){
     prefix = reads[0].toString().tokenize('.')[0]
     """ 
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -701,6 +706,7 @@ process bwa {
     samtools index "${size}" "${prefix}".sorted.bam
     """
     } else {
+    //PE collapsed, or SE data 
     prefix = reads[0].toString().tokenize('.')[0]
     """ 
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
@@ -747,7 +753,7 @@ process circularmapper{
     when: params.circularmapper
 
     input:
-    file reads from ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm)
+    set val(name), file reads from (params.skip_adapterremoval ? ch_clipped_reads : ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm) )
     file index from ch_circularmapper_indices.first()
 
     output:
@@ -790,7 +796,7 @@ process bwamem {
     when: params.bwamem && !params.circularmapper
 
     input:
-    file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
+    set val(name), file(reads) from (params.skip_adapterremoval ? ch_clipped_reads : ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem) )
     file index from ch_bwa_index_bwamem.first()
 
     output:
