@@ -42,8 +42,10 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd --bwa_index results/reference_genome/bwa_index/bwa_index/
   # Run the basic pipeline with paired end data without collapsing
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse --saveReference
-    # Run the basic pipeline with paired end data without collapsing nor trimming
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse --skip_trim --saveReference
+  # Run the basic pipeline with paired end data without trimming
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_trim --saveReference
+   # Run the basic pipeline with paired end data without adapterRemoval
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_adapterremoval --saveReference
   # Run the same pipeline testing optional step: fastp, complexity 
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/bwa_index/
   # Test BAM Trimming
