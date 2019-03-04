@@ -60,7 +60,7 @@ def helpMessage() {
       --clip_readlength             Specify read minimum length to be kept for downstream analysis
       --clip_min_read_quality       Specify minimum base quality for not trimming off bases
       --min_adap_overlap            Specify minimum adapter overlap
-      --skip_collapse               Skip merging Forward and Reverse reads together. (Only for pairedEnd samples)
+      --skip_collapse               Skip merging Forward and Reverse reads together. (Only for PE samples)
       --skip_trim                   Skip adaptor and quality trimming
     
     BWA Mapping
@@ -266,16 +266,8 @@ if( params.singleEnd || params.pairedEnd || params.bam){
 
 //Validate that skip_collapse is only set to True for pairedEnd reads!
 if (params.skip_collapse  && params.singleEnd){
-    exit 1, "--noCollapse can only be set for pairedEnd samples!"
+    exit 1, "--skip_collapse can only be set for pairedEnd samples!"
 }
-
-
-
-//Skip adapterremoval compatibility with skip_trim and skip_collapse
-
-skip_collapse = params.skip_collapse
-skip_trim = params.skip_trim
-skip_adapterremoval = params.skip_adapterremoval
 
 if (params.skip_collapse && params.skip_trim){
     skip_adapterremoval = true
@@ -372,8 +364,8 @@ summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
-summary['Skip Collapsing'] = skip_collapse ? 'Yes' : 'No'
-summary['Skip Trimming']  = skip_trim  ? 'Yes' : 'No' 
+summary['Skip Collapsing'] = params.skip_collapse ? 'Yes' : 'No'
+summary['Skip Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -604,57 +596,49 @@ process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
-    echo true
-
-    when: !params.bam
+    when: !params.bam && !params.skip_adapterremoval
 
     input:
     set val(name), file(reads) from ( params.complexity_filter_poly_g ? ch_clipped_reads_complexity_filtered_poly_g : ch_read_files_clip )
 
     output:
-    file "*.combined*.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
-    file("*.settings") optional true into ch_adapterremoval_logs
+    file "output/*.fq.gz" into (ch_clipped_reads, ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
+    file("*.settings") into ch_adapterremoval_logs
 
     script:
     base = reads[0].baseName
     
-    if( !params.singleEnd && !skip_collapse && !params.skip_trim && !skip_adapterremoval){
+    //PE, collapse & trim reads
+    if( !params.singleEnd && !params.skip_collapse && !params.skip_trim && !params.skip_adapterremoval){
     """
+    mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
     #Combine files
-    zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${base}.combined.fq.gz
+    zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
     """
-    } else if (!params.singleEnd && skip_collapse && !params.skip_trim && !skip_adapterremoval) {
+    //PE, don't collapse, but trim reads
+    } else if (!params.singleEnd && params.skip_collapse && !params.skip_trim && !params.skip_adapterremoval) {
     """
+    mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
-    #Rename files
-    mv ${base}.pair1.truncated.gz ${base}.pair1.combined.fq.gz
-    mv ${base}.pair2.truncated.gz ${base}.pair2.combined.fq.gz
+    mv ${base}.pair*.truncated.gz output/
     """
-    } else if (!params.singleEnd && !skip_collapse && params.skip_trim && !skip_adapterremoval) {
+    //PE, collapse, but don't trim reads
+    } else if (!params.singleEnd && !params.skip_collapse && params.skip_trim && !params.skip_adapterremoval) {
     bogus_adaptor = "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN"
     """
+    mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --basename ${base} --collapse --adapter1 $bogus_adaptor --adapter2 $bogus_adaptor
-    #Rename files
-    mv ${base}.pair1.truncated.gz ${base}.pair1.combined.fq.gz
-    mv ${base}.pair2.truncated.gz ${base}.pair2.combined.fq.gz
-    """
-    } else if (params.singleEnd && skip_adapterremoval){
-    """
-    mv ${reads[0]} ${base}.combined.fq.gz
-    echo "Skipped trimming and merging by AdapterRemoval"
-    """
-    } else if (params.pairedEnd && skip_adapterremoval){
-    """
-    mv ${reads[0]} ${base}.pair1.combined.fq.gz
-    mv ${reads[1]} ${base}.pair2.combined.fq.gz
-    echo "Skipped trimming and merging by AdapterRemoval"
+    
+    mv ${base}.pair*.truncated.gz output/
     """
     } else {
+    //SE, collapse not possible, trim reads
     """
+    mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --basename ${base} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} 
-    # Pseudo-Combine
-    mv *.truncated.gz ${base}.combined.fq.gz
+    
+    mv *.truncated.gz output/
     """
     }
 }
