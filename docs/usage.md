@@ -289,23 +289,10 @@ Some of the steps in the pipeline can be executed optionally. If you specify spe
 
 Turns off the computation of library complexity estimation.  
 
-### `--skip_collapse`
-If you have paired-end data, but you don't want to merge them, add the command line argument `--noCollapse`. 
+### `--skip_adapterremoval`
 
-For example
-```bash
---pairedEnd --skip_collapse  --reads '*.fastq'
-```
-
-### `--skip_trimming`
-
-Turns off the adaptor and quality trimming
-
-For example
-```bash
---pairedEnd --skip_trimming  --reads '*.fastq'
-```
-
+Turns off adaptor trimming and paired-end read merging.
+Equivalent to setting both `--skip_collapse` and `--skip_trim`
 
 ### `--skip_damage_calculation`
 
@@ -350,6 +337,24 @@ Defines the minimum read quality per base that is required for a base to be kept
 
 ### `--clip_min_adap_overlap` 1
 Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.
+
+### `--skip_collapse`
+
+Turns off the paired-end read merging. 
+
+For example
+```bash
+--pairedEnd --skip_collapse  --reads '*.fastq'
+```
+
+### `--skip_trim`
+
+Turns off the adaptor and quality trimming.
+
+For example
+```bash
+--pairedEnd --skip_trim  --reads '*.fastq'
+```
 
 ## Read Mapping Parameters
 

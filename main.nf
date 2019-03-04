@@ -44,8 +44,7 @@ def helpMessage() {
       --saveReference               Saves reference genome indices for later reusage
 
     Skipping                        Skip any of the mentioned steps
-      --skip_collapse               Skip merging Forward and Reverse reads together. (Only for pairedEnd samples)
-      --skip_trim                   Skip adaptor and quality trimming
+      --skip_adapterremoval         
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
@@ -61,6 +60,8 @@ def helpMessage() {
       --clip_readlength             Specify read minimum length to be kept for downstream analysis
       --clip_min_read_quality       Specify minimum base quality for not trimming off bases
       --min_adap_overlap            Specify minimum adapter overlap
+      --skip_collapse               Skip merging Forward and Reverse reads together. (Only for pairedEnd samples)
+      --skip_trim                   Skip adaptor and quality trimming
     
     BWA Mapping
       --bwaalnn                     Specify the -n parameter for BWA aln.
@@ -147,8 +148,7 @@ params.email = false
 params.plaintext_email = false
 
 // Skipping parts of the pipeline for impatient users
-params.skip_collapse = false
-params.skip_trim = false
+params.skip_adapterremoval = false
 params.skip_preseq = false
 params.skip_damage_calculation = false
 params.skip_qualimap = false
@@ -164,6 +164,8 @@ params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
 params.clip_readlength = 30
 params.clip_min_read_quality = 20
 params.min_adap_overlap = 1
+params.skip_collapse = false
+params.skip_trim = false
 
 //Read mapping parameters (default = BWA aln default)
 params.bwaalnn = 0.04
@@ -267,6 +269,25 @@ if (params.skip_collapse  && params.singleEnd){
     exit 1, "--noCollapse can only be set for pairedEnd samples!"
 }
 
+
+
+//Skip adapterremoval compatibility with skip_trim and skip_collapse
+
+skip_collapse = params.skip_collapse
+skip_trim = params.skip_trim
+skip_adapterremoval = params.skip_adapterremoval
+
+if (params.skip_collapse && params.skip_trim){
+    skip_adapterremoval = true
+}
+
+if (params.skip_adapterremoval){
+    skip_adapterremoval = true
+    skip_collapse = true
+    skip_trim = true
+}
+
+
 //AWSBatch sanity checking
 if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
@@ -351,8 +372,8 @@ summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
-summary['Skip Collapsing'] = params.skip_collapse ? 'Yes' : 'No'
-summary['Skip Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
+summary['Skip Collapsing'] = skip_collapse ? 'Yes' : 'No'
+summary['Skip Trimming']  = skip_trim  ? 'Yes' : 'No' 
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -579,7 +600,6 @@ process fastp {
  * STEP 2 - Adapter Clipping / Read Merging
  */
 
-
 process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
@@ -598,20 +618,20 @@ process adapter_removal {
     script:
     base = reads[0].baseName
     
-    if( !params.singleEnd && !params.skip_collapse && !params.skip_trim){
+    if( !params.singleEnd && !skip_collapse && !params.skip_trim && !skip_adapterremoval){
     """
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
     #Combine files
     zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > ${base}.combined.fq.gz
     """
-    } else if (!params.singleEnd && params.skip_collapse && !params.skip_trim) {
+    } else if (!params.singleEnd && skip_collapse && !params.skip_trim && !skip_adapterremoval) {
     """
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     #Rename files
     mv ${base}.pair1.truncated.gz ${base}.pair1.combined.fq.gz
     mv ${base}.pair2.truncated.gz ${base}.pair2.combined.fq.gz
     """
-    } else if (!params.singleEnd && !params.skip_collapse && params.skip_trim) {
+    } else if (!params.singleEnd && !skip_collapse && params.skip_trim && !skip_adapterremoval) {
     bogus_adaptor = "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN"
     """
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --basename ${base} --collapse --adapter1 $bogus_adaptor --adapter2 $bogus_adaptor
@@ -619,19 +639,18 @@ process adapter_removal {
     mv ${base}.pair1.truncated.gz ${base}.pair1.combined.fq.gz
     mv ${base}.pair2.truncated.gz ${base}.pair2.combined.fq.gz
     """
-    } else if (params.singleEnd && params.skip_collapse && params.skip_trim){
+    } else if (params.singleEnd && skip_adapterremoval){
     """
     mv ${reads[0]} ${base}.combined.fq.gz
     echo "Skipped trimming and merging by AdapterRemoval"
     """
-    } else if (params.pairedEnd && params.skip_collapse && params.skip_trim){
+    } else if (params.pairedEnd && skip_adapterremoval){
     """
     mv ${reads[0]} ${base}.pair1.combined.fq.gz
     mv ${reads[1]} ${base}.pair2.combined.fq.gz
     echo "Skipped trimming and merging by AdapterRemoval"
     """
-    }
-    else {
+    } else {
     """
     AdapterRemoval --file1 ${reads[0]} --basename ${base} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} 
     # Pseudo-Combine
@@ -640,9 +659,11 @@ process adapter_removal {
     }
 }
 
+
+
 /*
- * STEP 2.1 - FastQC after clipping/merging (if applied!)
- */
+* STEP 2.1 - FastQC after clipping/merging (if applied!)
+*/
 process fastqc_after_clipping {
     tag "${prefix}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
@@ -687,7 +708,7 @@ process bwa {
     fasta = "${index}/*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && params.skip_collapse ){
+    if (!params.singleEnd && skip_collapse ){
     prefix = reads[0].toString().tokenize('.')[0]
     """ 
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -755,7 +776,7 @@ process circularmapper{
     fasta = "${index}/*_*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && params.skip_collapse ){
+    if (!params.singleEnd && skip_collapse ){
     prefix = reads[0].toString().tokenize('.')[0]
     """ 
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -798,7 +819,7 @@ process bwamem {
     fasta = "${index}/*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && params.skip_collapse ){
+    if (!params.singleEnd && skip_collapse ){
     """
     bwa mem -t ${task.cpus} $fasta ${reads[0]} ${reads[1]} -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     samtools index "${size}" -@ ${task.cpus} "${prefix}".sorted.bam
