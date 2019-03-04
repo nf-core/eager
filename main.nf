@@ -269,17 +269,6 @@ if (params.skip_collapse  && params.singleEnd){
     exit 1, "--skip_collapse can only be set for pairedEnd samples!"
 }
 
-if (params.skip_collapse && params.skip_trim){
-    params.skip_adapterremoval = true
-}
-
-if (params.skip_adapterremoval){
-    params.skip_adapterremoval = true
-    params.skip_collapse = true
-    params.skip_trim = true
-}
-
-
 //AWSBatch sanity checking
 if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
@@ -593,8 +582,11 @@ process fastp {
  */
 //Initialize empty channel if we skip adapterremoval entirely
 if(params.skip_adapterremoval) {
-    ch_clipped_reads = Channel.empty()
-}
+    //No logs if no AR is run
+    ch_adapterremoval_logs = Channel.empty()
+    //Either coming from complexity filtering, or directly use reads normally directed to clipping first and push them through to the other channels downstream! 
+    ch_clipped_reads_complexity_filtered_poly_g.mix(ch_read_files_clip).into { ch_clipped_reads;ch_clipped_reads_for_fastqc;ch_clipped_reads_circularmapper;ch_clipped_reads_bwamem }
+} else {
 process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
@@ -605,7 +597,7 @@ process adapter_removal {
     set val(name), file(reads) from ( params.complexity_filter_poly_g ? ch_clipped_reads_complexity_filtered_poly_g : ch_read_files_clip )
 
     output:
-    set val(base), file "output/*.gz" into (ch_clipped_reads,ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
+    set val(base), file("output/*.gz") into (ch_clipped_reads,ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
     file("*.settings") into ch_adapterremoval_logs
 
     script:
@@ -645,6 +637,7 @@ process adapter_removal {
     """
     }
 }
+}
 
 
 
@@ -659,7 +652,7 @@ process fastqc_after_clipping {
     when: !params.bam && !params.skip_adapterremoval
 
     input:
-    file(reads) from ch_clipped_reads_for_fastqc
+    set val(name), file(reads) from ch_clipped_reads_for_fastqc
 
     output:
     file "*_fastqc.{zip,html}" optional true into ch_fastqc_after_clipping
@@ -682,7 +675,7 @@ process bwa {
     when: !params.circularmapper && !params.bwamem
 
     input:
-    set val(name), file(reads) from ( params.skip_adapterremoval ? ch_read_files_clip : ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa) )
+    set val(name), file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
     
     file index from ch_bwa_index.first()
 
@@ -753,7 +746,7 @@ process circularmapper{
     when: params.circularmapper
 
     input:
-    set val(name), file reads from (params.skip_adapterremoval ? ch_clipped_reads : ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm) )
+    set val(name), file(reads) from ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm)
     file index from ch_circularmapper_indices.first()
 
     output:
@@ -796,7 +789,7 @@ process bwamem {
     when: params.bwamem && !params.circularmapper
 
     input:
-    set val(name), file(reads) from (params.skip_adapterremoval ? ch_clipped_reads : ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem) )
+    set val(name), file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
     file index from ch_bwa_index_bwamem.first()
 
     output:
