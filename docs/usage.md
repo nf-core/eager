@@ -291,8 +291,7 @@ Turns off the computation of library complexity estimation.
 
 ### `--skip_adapterremoval`
 
-Turns off adaptor trimming and paired-end read merging.
-Equivalent to setting both `--skip_collapse` and `--skip_trim`
+Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
 
 ### `--skip_damage_calculation`
 
@@ -340,7 +339,7 @@ Sets the minimum overlap between two reads when read merging is performed. Defau
 
 ### `--skip_collapse`
 
-Turns off the paired-end read merging. 
+Turns off the paired-end read merging.
 
 For example
 ```bash
@@ -349,9 +348,9 @@ For example
 
 ### `--skip_trim`
 
-Turns off the adaptor and quality trimming.
+Turns off adaptor and quality trimming.
 
-For example
+For example:
 ```bash
 --pairedEnd --skip_trim  --reads '*.fastq'
 ```
