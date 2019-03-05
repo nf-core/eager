@@ -96,6 +96,7 @@ do so and everyone is welcome to contribute here!
 
 - [James A. Fellows-Yates](https://github.com/jfy133)
 - [Stephen Clayton](https://github.com/sc13-bioinf)
+- [Maxime Borry](https://github.com/maxibor)
 - [Judith Neukamm](https://github.com/JudithNeukamm)
 - [Raphael Eisenhofer](https://github.com/EisenRa)
 - [Maxime Garcia](https://github.com/MaxUlysse)
