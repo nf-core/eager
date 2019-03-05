@@ -604,7 +604,7 @@ process adapter_removal {
     base = reads[0].baseName
     
     //PE, collapse & trim reads
-    if( !params.singleEnd && !params.skip_collapse && !params.skip_trim && !params.skip_adapterremoval){
+    if (!params.singleEnd && !params.skip_collapse && !params.skip_trim && !params.skip_adapterremoval){
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
