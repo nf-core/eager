@@ -759,7 +759,7 @@ process circularmapper{
     fasta = "${index}/*_*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && skip_collapse ){
+    if (!params.singleEnd && params.skip_collapse ){
     prefix = reads[0].toString().tokenize('.')[0]
     """ 
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
