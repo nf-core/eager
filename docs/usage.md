@@ -283,11 +283,15 @@ This part of the documentation contains a list of user-adjustable parameters in 
 
 ## Step skipping parameters
 
-Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules. 
+Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules.
 
 ### `--skip_preseq`
 
 Turns off the computation of library complexity estimation.  
+
+### `--skip_adapterremoval`
+
+Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
 
 ### `--skip_damage_calculation`
 
@@ -332,6 +336,24 @@ Defines the minimum read quality per base that is required for a base to be kept
 
 ### `--clip_min_adap_overlap` 1
 Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.
+
+### `--skip_collapse`
+
+Turns off the paired-end read merging.
+
+For example
+```bash
+--pairedEnd --skip_collapse  --reads '*.fastq'
+```
+
+### `--skip_trim`
+
+Turns off adaptor and quality trimming.
+
+For example:
+```bash
+--pairedEnd --skip_trim  --reads '*.fastq'
+```
 
 ## Read Mapping Parameters
 
