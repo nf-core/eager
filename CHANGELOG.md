@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * [#152](https://github.com/nf-core/eager/pull/152) - Clarified `--complexity_filter` flag to be specifically for poly G trimming.
 * [#155](https://github.com/nf-core/eager/pull/155) - Added [Dedup log to output folders](https://github.com/nf-core/eager/issues/154)
+* [#159](https://github.com/nf-core/eager/pull/159) - Added Possibility to skip AdapterRemoval, skip merging, skip trimming fixing [#64](https://github.com/nf-core/eager/issues/64),[#137](https://github.com/nf-core/eager/issues/137) - thanks to @maxibor, @jfy133
 
 ### `Fixed`
 
