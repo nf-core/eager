@@ -601,9 +601,11 @@ process adapter_removal {
 
     script:
     base = reads[0].baseName
+    //This checks whether we skip trimming and defines a variable respectively
+    trim_me = params.skip_trim ? '' : ''
     
     //PE, collapse & trim reads
-    if (!params.singleEnd && !params.skip_collapse && !params.skip_trim && !params.skip_adapterremoval){
+    if (!params.singleEnd && !params.skip_collapse && !params.skip_trim){
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap} --collapse
@@ -611,14 +613,14 @@ process adapter_removal {
     zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
     """
     //PE, don't collapse, but trim reads
-    } else if (!params.singleEnd && params.skip_collapse && !params.skip_trim && !params.skip_adapterremoval) {
+    } else if (!params.singleEnd && params.skip_collapse && !params.skip_trim) {
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     mv ${base}.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
-    } else if (!params.singleEnd && !params.skip_collapse && params.skip_trim && !params.skip_adapterremoval) {
+    } else if (!params.singleEnd && !params.skip_collapse && params.skip_trim) {
     bogus_adaptor = "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN"
     """
     mkdir -p output
