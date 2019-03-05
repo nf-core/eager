@@ -60,7 +60,7 @@ def helpMessage() {
       --clip_readlength             Specify read minimum length to be kept for downstream analysis
       --clip_min_read_quality       Specify minimum base quality for not trimming off bases
       --min_adap_overlap            Specify minimum adapter overlap
-      --skip_collapse               Skip merging Forward and Reverse reads together. (Only for PE samples)
+      --skip_collapse               Skip merging forward and reverse reads together. (Only for PE samples)
       --skip_trim                   Skip adaptor and quality trimming
     
     BWA Mapping
