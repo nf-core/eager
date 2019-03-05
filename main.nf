@@ -802,7 +802,7 @@ process bwamem {
     fasta = "${index}/*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && skip_collapse ){
+    if (!params.singleEnd && params.skip_collapse){
     """
     bwa mem -t ${task.cpus} $fasta ${reads[0]} ${reads[1]} -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     samtools index "${size}" -@ ${task.cpus} "${prefix}".sorted.bam
