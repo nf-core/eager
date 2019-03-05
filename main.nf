@@ -513,8 +513,7 @@ process convertBam {
     file bam from ch_bam_to_fastq_convert
 
     output:
-    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp)
-    file("*.fastq.gz") into (ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
+    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp, ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
 
     script:
     base = "${bam.baseName}"
