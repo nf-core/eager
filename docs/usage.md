@@ -170,6 +170,10 @@ If you prefer, you can specify the full path to your reference genome when you r
 ```
 > If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you. Note that other file extensions such as `.fna`, `.fa` are also supported but will be renamed to `.fasta` automatically by the pipeline.
 
+### `--large_ref`
+
+This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. 
+
 ### `--genome` (using iGenomes)
 
 The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
@@ -237,7 +241,7 @@ Use to set a top-limit for the default time requirement for each process.
 Should be a string in the format integer-unit. eg. `--max_time '2.h'`. If not specified, will be taken from the configuration in the `-profile` flag.
 
 ### `--max_cpus`
-Use to set a top-limit for the default CPU requirement for each process.
+Use to set a top-limit for the default CPU requirement for each **process**. This is not the maximum number of CPUs that can be used for the whole pipeline, but the maximum number of CPUs each program can use for each program submission (known as a process). Do not set this higher than what is available on your workstation or computing node can provide. If you're unsure, ask your local IT administrator for details on compute node capabilities! 
 Should be a string in the format integer-unit. eg. `--max_cpus 1`. If not specified, will be taken from the configuration in the `-profile` flag.
 
 ### `--email`
@@ -279,11 +283,15 @@ This part of the documentation contains a list of user-adjustable parameters in 
 
 ## Step skipping parameters
 
-Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules. 
+Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules.
 
 ### `--skip_preseq`
 
 Turns off the computation of library complexity estimation.  
+
+### `--skip_adapterremoval`
+
+Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
 
 ### `--skip_damage_calculation`
 
@@ -299,7 +307,7 @@ Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No du
 
 ## Complexity Filtering Options
 
-### `--complexity_filter`
+### `--complexity_filter_poly_g`
 
 Performs a poly-G tail removal step in the beginning of the pipeline, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
 
@@ -328,6 +336,24 @@ Defines the minimum read quality per base that is required for a base to be kept
 
 ### `--clip_min_adap_overlap` 1
 Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.
+
+### `--skip_collapse`
+
+Turns off the paired-end read merging.
+
+For example
+```bash
+--pairedEnd --skip_collapse  --reads '*.fastq'
+```
+
+### `--skip_trim`
+
+Turns off adaptor and quality trimming.
+
+For example:
+```bash
+--pairedEnd --skip_trim  --reads '*.fastq'
+```
 
 ## Read Mapping Parameters
 
