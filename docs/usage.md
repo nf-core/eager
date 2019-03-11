@@ -75,7 +75,11 @@ This version number will be logged in reports when you run the pipeline, so that
 
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments (e.g. schedulers, software environments, memory limits etc). Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important! The first entry takes precendence over the others, e.g. if a setting is set by both the first and second profile, the first entry will be used and the second entry ignored. 
+
+> *Important*: If running EAGER2 on a cluster - ask your system administrator what profile to use.
+
+For more details on how to set up your own private profile, please see [installation](../configuration/adding_your_own.md).
 
 **Basic profiles**
 These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your own PC (vs. a HPC cluster).
@@ -99,7 +103,7 @@ These are basic profiles which primarily define where you derive the pipeline's 
     * Includes links to test data so needs no other parameters
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
-    
+ 
 **Institution Specific Profiles**
 These are profiles specific to certain clusters, and are centrally  maintained at [nf-core/configs](`https://github.com/nf-core/configs`). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](`https://github.com/nf-core/configs`) repository.
 
@@ -112,6 +116,8 @@ These are profiles specific to certain clusters, and are centrally  maintained a
 * `shh`
    * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
    * Loads Singularity and defines appropriate resources for running the pipeline
+
+    
 
 ### `--reads`
 Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
