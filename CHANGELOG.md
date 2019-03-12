@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unpublished Version / DEV]
+
+### `Added`
+
+### `Fixed`
+* [#172](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
+
+### `Dependencies`
+
+* Added DeDup v0.12.4 (json support)
+* Added mtnucratio v0.5 (json support)
+
+
 ## [2.0.6] - 2019-03-05
 
 ### `Added`
