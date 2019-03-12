@@ -11,7 +11,7 @@ dependencies:
   - bioconda::bwa=0.7.17
   - bioconda::picard=2.18.27
   - bioconda::samtools=1.9
-  - bioconda::dedup=0.12.4
+  - bioconda::dedup=0.12.5
   - bioconda::angsd=0.923
   - bioconda::circularmapper=1.93.4
   - bioconda::gatk4=4.1.0.0
