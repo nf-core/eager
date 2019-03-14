@@ -29,16 +29,16 @@ screen -r eager2
 ```
 to end the screen session while in it type `exit`.
 
-It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
 
-```bash
-NXF_OPTS='-Xms1g -Xmx4g'
-```
 ## Help Message
 To access the nextflow help message run: `nextflow run -help`
 
 ## Running the pipeline
+
+> Before you start you should change into the output directory you wish your results to go in. When you start the nextflow job, it will place all the 'working' folders in the current directory and NOT necessarily the directory the output files will be in.
+
 The typical command for running the pipeline is as follows:
+
 ```bash
 nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
