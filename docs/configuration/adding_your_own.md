@@ -1,12 +1,20 @@
 # nf-core/eager: Configuration for other clusters
 
-It is entirely possible to run this pipeline on other clusters, though you will need to set up your own config file so that the pipeline knows how to work with your cluster.
+## Introduction
 
-> If you think that there are other people using the pipeline who would benefit from your configuration (eg. other common cluster setups), please let us know. We can add a new configuration and profile which can used by specifying `-profile <name>` when running the pipeline.
+It is entirely possible to run this pipeline on your own clusters, though you will need to set up your own config file so that the pipeline knows how to work with your cluster.
+
+### Personal Profiles
 
 If you are the only person to be running this pipeline, you can create your config file as `~/.nextflow/config` and it will be applied every time you run Nextflow. Alternatively, save the file anywhere and reference it when running the pipeline with `-c path/to/config` (see the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more).
 
 A basic configuration comes with the pipeline, which runs by default (the `standard` config profile - see [`conf/base.config`](../conf/base.config)). This means that you only need to configure the specifics for your system and overwrite any defaults that you want to change.
+
+### Institute Profiles
+
+In contrast, if you think that there are other people using the pipeline who would benefit from your configuration (e.g. other common cluster setups), you can create a config adapted to that cluster and is centrally stored and maintained at [nf-core/configs](https://github.com/nf-core/configs). Then, you can specify `-profile <institute_name>` when running the pipeline without making your own custom config file. Furthermore, the same profile can be used for other nf-core pipelines.
+
+## Creating your own profile
 
 ## Cluster Environment
 By default, pipeline uses the `local` Nextflow executor - in other words, all jobs are run in the login session. If you're using a simple server, this may be fine. If you're using a compute cluster, this is bad as all jobs will run on the head node.
@@ -105,6 +113,7 @@ conda {
 ```
 
 ## Job Resources
+
 #### Automatic resubmission
 Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
 
