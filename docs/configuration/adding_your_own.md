@@ -16,7 +16,7 @@ In contrast, if you think that there are other people using the pipeline who wou
 
 ## Creating your own profile
 
-## Cluster Environment
+### Cluster Environment
 By default, pipeline uses the `local` Nextflow executor - in other words, all jobs are run in the login session. If you're using a simple server, this may be fine. If you're using a compute cluster, this is bad as all jobs will run on the head node.
 
 To specify your cluster environment, add the following line to your config file:
@@ -35,11 +35,11 @@ process {
   clusterOptions = '-A myproject'
 }
 ```
-## Software Requirements
+### Software Requirements
 To run the pipeline, several software packages are required. How you satisfy these requirements is essentially up to you and depends on your system. If possible, we _highly_ recommend using either Docker or Singularity.
 Please see the [`installation documentation`](../installation.md) for how to run using the below as a one-off. These instructions are about configuring a config file for repeated use.
 
-### Docker
+#### Docker
 Docker is a great way to run nf-core/eager, as it manages all software installations and allows the pipeline to be run in an identical software environment across a range of systems.
 
 Nextflow has [excellent integration](https://www.nextflow.io/docs/latest/docker.html) with Docker, and beyond installing the two tools, not much else is required - nextflow will automatically fetch the [nfcore/eager](https://hub.docker.com/r/nfcore/eager/) image that we have created and is hosted at dockerhub at run time.
@@ -54,7 +54,7 @@ process.container = "nfcore/eager"
 Note that the dockerhub organisation name annoyingly can't have a hyphen, so is `nfcore` and not `nf-core`.
 
 
-### Singularity image
+#### Singularity image
 Many HPC environments are not able to run Docker due to security issues.
 [Singularity](http://singularity.lbl.gov/) is a tool designed to run on such HPC systems which is very similar to Docker.
 
@@ -83,7 +83,7 @@ process.container = "/path/to/nf-core-eager.simg"
 By default nextflow will store a singularity image in the working directory of a job. You can alternatively further specify a 'central' singularity cache to keep all singularity contains for a(ll) user(s). This can be
 done by either setting a central environmental variable `NXF_SINGULARITY_CACHEDIR` or specifying the location in a nextflow config file with `singularity.cacheDir`.
 
-### Conda
+#### Conda
 If you're not able to use Docker or Singularity, you can instead use conda to manage the software requirements.
 To use conda in your own config file, add the following:
 
@@ -91,7 +91,7 @@ To use conda in your own config file, add the following:
 process.conda = "$baseDir/environment.yml"
 ```
 
-## Software Caches
+### Software Caches
 
 Each new version of a pipeline downloaded and ran, will pull down a new image (docker/singularity)/collection (conda) of all the software required for the pipeline. By default this will be placed in the `work/` directory of an EAGER run. When running lots of pipeline jobs, this can slow down the pipeline (having to create a download a new environment each time) and take up a lot of hard-disk space (as each run has it's own duplicate of the environment).
 
@@ -112,7 +112,7 @@ conda {
 }
 ```
 
-## Job Resources
+### Job Resources
 
 #### Automatic resubmission
 Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
