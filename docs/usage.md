@@ -105,7 +105,7 @@ These are basic profiles which primarily define where you derive the pipeline's 
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
  
 **Institution Specific Profiles**
-These are profiles specific to certain clusters, and are centrally  maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
+These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
 * `uzh`
     * A profile for the University of Zurich Research Cloud
