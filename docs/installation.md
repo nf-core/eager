@@ -10,8 +10,7 @@ To start using the nf-core/eager pipeline, follow the steps below:
 3. [Pipeline configuration](#3-pipeline-configuration)
     * [Software deps: Docker and Singularity](#31-software-deps-docker-and-singularity)
     * [Software deps: Bioconda](#32-software-deps-bioconda)
-    * [Configuration profiles](#33-configuration-profiles)
-4. [Reference genomes](#4-reference-genomes)
+4. [Terminal configuration](#4-terminal-configuration)
 5. [Appendices](#appendices)
     * [Running on UPPMAX](#running-on-uppmax)
 
@@ -34,10 +33,10 @@ See [nextflow.io](https://www.nextflow.io/) for further instructions on how to i
 
 ## 2) Install the pipeline
 
-#### 2.1) Automatic
+### 2.1) Automatic
 This pipeline itself needs no installation - NextFlow will automatically fetch it from GitHub if `nf-core/eager` is specified as the pipeline name.
 
-#### 2.2) Offline
+### 2.2) Offline
 The above method requires an internet connection so that Nextflow can download the pipeline files. If you're running on a system that has no internet connection, you'll need to download and transfer the pipeline files manually:
 
 ```bash
@@ -54,7 +53,7 @@ To stop nextflow from looking for updates online, you can tell it to run in offl
 export NXF_OFFLINE='TRUE'
 ```
 
-#### 2.3) Development
+### 2.3) Development
 
 If you would like to make changes to the pipeline, it's best to make a fork on GitHub and then clone the files. Once cloned you can run the pipeline directly as above.
 
@@ -81,13 +80,15 @@ The following software is currently required to be installed:
 * [GATK](https://software.broadinstitute.org/gatk/)
 * [bamUtil](https://genome.sph.umich.edu/wiki/BamUtil)
 * [fastP](https://github.com/OpenGene/fastp)
+* [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
 
-#### 3.1) Software deps: Docker
+
+### 3.1) Software deps: Docker
 First, install docker on your system: [Docker Installation Instructions](https://docs.docker.com/engine/installation/)
 
 Then, running the pipeline with the option `-profile standard,docker` tells Nextflow to enable Docker for this run. An image containing all of the software requirements will be automatically fetched and used from dockerhub (https://hub.docker.com/r/nfcore/eager).
 
-#### 3.1) Software deps: Singularity
+### 3.2) Software deps: Singularity
 If you're not able to use Docker then [Singularity](http://sylabs.io) is a great alternative.
 The process is very similar: running the pipeline with the option `-profile standard,singularity` tells Nextflow to enable singularity for this run. An image containing all of the software requirements will be automatically fetched and used from singularity hub.
 
@@ -106,13 +107,13 @@ nextflow run /path/to/nf-core-eager -with-singularity nf-core-eager.simg
 Remember to pull updated versions of the singularity image if you update the pipeline.
 
 
-#### 3.2) Software deps: conda
+### 3.3) Software deps: conda
 If you're not able to use Docker _or_ Singularity, you can instead use conda to manage the software requirements.
 This is slower and less reproducible than the above, but is still better than having to install all requirements yourself!
 The pipeline ships with a conda environment file and nextflow has built-in support for this.
 To use it first ensure that you have conda installed (we recommend [miniconda](https://conda.io/miniconda.html)), then follow the same pattern as above and use the flag `-profile standard,conda`
 
-#### 4) Profile configuration
+## 4) Terminal configuration
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
 
 It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
