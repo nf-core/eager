@@ -14,7 +14,7 @@ top_modules:
      - 'fastqc':
          name: 'FastQC (post-AdapterRemoval)'
          path_filters:
-             - '*.combined.prefixed_fastqc.zip'
+             - '*.combined*_fastqc.zip'
      - 'samtools'
      - 'preseq'
      - 'dedup'
