@@ -10,7 +10,7 @@
 * [Other command line parameters](#other-command-line-parameters)
 * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
 * [Automatic resubmission](#automatic-resubmission)
-
+* [Clean up](#clean-up)
 
 ## General Nextflow info
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
@@ -502,3 +502,24 @@ Can be used to set a path to a BED file (3/6 column format) to calculate capture
 
 ## Automatic Resubmission
 By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
+
+## Clean up
+
+Once completed a run has completed, you will have _lots_ of (some very large) intermediate files in your output directory, within the directory named `work`. 
+
+Once you have verified your run completed correctly and everything in the module output directories are present as you expect and need, you can perform a clean up.
+
+> **Important**: Once clean up is completed, you will _not_ be able to re-rerun the pipline from an earlier step and you'll have to re-run from scratch.
+
+While in your output directory, firstly verify you're only deleting files stored in `work/` with the dry run command:
+
+```bash
+nextflow clean -n
+```
+If you're ready, you can then remove the files with
+
+```bash
+nextflow clean -f
+```
+
+This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!
