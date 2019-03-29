@@ -522,4 +522,4 @@ If you're ready, you can then remove the files with
 nextflow clean -f
 ```
 
-This will make your system administrator very happy, so be sure to do this!
+This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!
