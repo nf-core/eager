@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-* [#176](https://github.com/nf-core/eager/pull/) - Make FastQC skipping [possible]
+* [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible]
 /(https://github.com/nf-core/eager/issues/182)
 ### `Fixed`
 * [#172](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
