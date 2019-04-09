@@ -910,7 +910,6 @@ process dedup{
     publishDir "${params.outdir}/deduplication/dedup", mode: 'copy',
         saveAs: {filename -> "${prefix}/$filename"}
 
-
     when:
     !params.skip_deduplication && params.dedupper == 'dedup'
 
