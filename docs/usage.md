@@ -299,6 +299,10 @@ Turns off the computation of library complexity estimation.
 
 Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
 
+### `--skip_fastqc`
+
+Turns off FastQC in the beginning to speed up the pipeline. 
+
 ### `--skip_damage_calculation`
 
 Turns off the DamageProfiler module to compute DNA damage profiles. 
