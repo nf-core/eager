@@ -13,7 +13,7 @@ before_install:
   # Pull the docker image first so the test doesn't wait for this
   - docker pull nfcore/eager:dev
   # Fake the tag locally so that the pipeline runs properly
-  - docker tag nfcore/eager:dev nfcore/eager:2.0.5
+  - docker tag nfcore/eager:dev nfcore/eager:dev
 
 install:
   # Install Nextflow
@@ -40,6 +40,12 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --saveReference
   # Run the basic pipeline with single end data (pretending its single end actually)
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd --bwa_index results/reference_genome/bwa_index/bwa_index/
+  # Run the basic pipeline with paired end data without collapsing
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse --saveReference
+  # Run the basic pipeline with paired end data without trimming
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_trim --saveReference
+   # Run the basic pipeline with paired end data without adapterRemoval
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_adapterremoval --saveReference
   # Run the same pipeline testing optional step: fastp, complexity 
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/bwa_index/
   # Test BAM Trimming

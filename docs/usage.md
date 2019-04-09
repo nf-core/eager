@@ -10,7 +10,7 @@
 * [Other command line parameters](#other-command-line-parameters)
 * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
 * [Automatic resubmission](#automatic-resubmission)
-
+* [Clean up](#clean-up)
 
 ## General Nextflow info
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
@@ -29,16 +29,16 @@ screen -r eager2
 ```
 to end the screen session while in it type `exit`.
 
-It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
 
-```bash
-NXF_OPTS='-Xms1g -Xmx4g'
-```
 ## Help Message
 To access the nextflow help message run: `nextflow run -help`
 
 ## Running the pipeline
+
+> Before you start you should change into the output directory you wish your results to go in. When you start the nextflow job, it will place all the 'working' folders in the current directory and NOT necessarily the directory the output files will be in.
+
 The typical command for running the pipeline is as follows:
+
 ```bash
 nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
@@ -69,10 +69,14 @@ See [below](#other-command-line-parameters) for more details about EAGER2 versio
 
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments (e.g. schedulers, software environments, memory limits etc). Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important! The first entry takes precendence over the others, e.g. if a setting is set by both the first and second profile, the first entry will be used and the second entry ignored. 
+
+> *Important*: If running EAGER2 on a cluster - ask your system administrator what profile to use.
+
+For more details on how to set up your own private profile, please see [installation](../configuration/adding_your_own.md).
 
 **Basic profiles**
-These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your own PC (vs. a HPC cluster).
+These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
 * `standard`
     * The default profile, used if `-profile` is not specified at all.
@@ -93,9 +97,9 @@ These are basic profiles which primarily define where you derive the pipeline's 
     * Includes links to test data so needs no other parameters
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
-    
+ 
 **Institution Specific Profiles**
-These are profiles specific to certain clusters, and are centrally  maintained at [nf-core/configs](`https://github.com/nf-core/configs`). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](`https://github.com/nf-core/configs`) repository.
+These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
 * `uzh`
     * A profile for the University of Zurich Research Cloud
@@ -106,6 +110,8 @@ These are profiles specific to certain clusters, and are centrally  maintained a
 * `shh`
    * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
    * Loads Singularity and defines appropriate resources for running the pipeline
+
+    
 
 ### `--reads`
 Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
@@ -163,6 +169,10 @@ If you prefer, you can specify the full path to your reference genome when you r
 --fasta '[path to Fasta reference]'
 ```
 > If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you. Note that other file extensions such as `.fna`, `.fa` are also supported but will be renamed to `.fasta` automatically by the pipeline.
+
+### `--large_ref`
+
+This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. 
 
 ### `--genome` (using iGenomes)
 
@@ -282,11 +292,19 @@ This part of the documentation contains a list of user-adjustable parameters in 
 
 ## Step skipping parameters
 
-Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules. 
+Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules.
 
 ### `--skip_preseq`
 
 Turns off the computation of library complexity estimation.  
+
+### `--skip_adapterremoval`
+
+Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
+
+### `--skip_fastqc`
+
+Turns off FastQC in the beginning to speed up the pipeline. 
 
 ### `--skip_damage_calculation`
 
@@ -302,7 +320,7 @@ Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No du
 
 ## Complexity Filtering Options
 
-### `--complexity_filter`
+### `--complexity_filter_poly_g`
 
 Performs a poly-G tail removal step in the beginning of the pipeline, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
 
@@ -331,6 +349,24 @@ Defines the minimum read quality per base that is required for a base to be kept
 
 ### `--clip_min_adap_overlap` 1
 Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.
+
+### `--skip_collapse`
+
+Turns off the paired-end read merging.
+
+For example
+```bash
+--pairedEnd --skip_collapse  --reads '*.fastq'
+```
+
+### `--skip_trim`
+
+Turns off adaptor and quality trimming.
+
+For example:
+```bash
+--pairedEnd --skip_trim  --reads '*.fastq'
+```
 
 ## Read Mapping Parameters
 
@@ -473,3 +509,24 @@ Can be used to set a path to a BED file (3/6 column format) to calculate capture
 
 ## Automatic Resubmission
 By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
+
+## Clean up
+
+Once completed a run has completed, you will have _lots_ of (some very large) intermediate files in your output directory, within the directory named `work`. 
+
+Once you have verified your run completed correctly and everything in the module output directories are present as you expect and need, you can perform a clean up.
+
+> **Important**: Once clean up is completed, you will _not_ be able to re-rerun the pipline from an earlier step and you'll have to re-run from scratch.
+
+While in your output directory, firstly verify you're only deleting files stored in `work/` with the dry run command:
+
+```bash
+nextflow clean -n
+```
+If you're ready, you can then remove the files with
+
+```bash
+nextflow clean -f
+```
+
+This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!

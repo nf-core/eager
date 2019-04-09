@@ -4,13 +4,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unpublished / Dev Branch]
+## [Unpublished Version / DEV]
 
 ### `Added`
 
+* [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible]
+/(https://github.com/nf-core/eager/issues/182)
 ### `Fixed`
-* [#145](https://github.com/nf-core/eager/issues/145) - Added Picard Memory Handling [fix](https://github.com/nf-core/eager/issues/144)
+* [#172](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
 
+### `Dependencies`
+
+* Added DeDup v0.12.4 (json support)
+* Added mtnucratio v0.5 (json support)
+
+
+## [2.0.6] - 2019-03-05
+
+### `Added`
+
+* [#152](https://github.com/nf-core/eager/pull/152) - Clarified `--complexity_filter` flag to be specifically for poly G trimming.
+* [#155](https://github.com/nf-core/eager/pull/155) - Added [Dedup log to output folders](https://github.com/nf-core/eager/issues/154)
+* [#159](https://github.com/nf-core/eager/pull/159) - Added Possibility to skip AdapterRemoval, skip merging, skip trimming fixing [#64](https://github.com/nf-core/eager/issues/64),[#137](https://github.com/nf-core/eager/issues/137) - thanks to @maxibor, @jfy133
+
+### `Fixed`
+
+* [#151](https://github.com/nf-core/eager/pull/151) - Fixed [post-deduplication step errors](https://github.com/nf-core/eager/issues/128
+* [#147](https://github.com/nf-core/eager/pull/147) - Fix Samtools Index for [large references](https://github.com/nf-core/eager/issues/146)
+* [#145](https://github.com/nf-core/eager/pull/145) - Added Picard Memory Handling [fix](https://github.com/nf-core/eager/issues/144)
+
+### `Dependencies`
+* Picard Tools 2.18.23 -> 2.18.27
+* GATK 4.0.12.0 -> 4.1.0.0
+* FastP 0.19.6 -> 0.19.7
 
 ## [2.0.5] - 2019-01-28
 
@@ -24,8 +50,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 * Picard Tools 2.18.21 -> 2.18.23
-* R-Markdown 1.10 -> 1.11 
-* FastP 0.19.5 -> 0.19.6 
+* R-Markdown 1.10 -> 1.11
+* FastP 0.19.5 -> 0.19.6
 
 ## [2.0.4] - 2019-01-09
 
