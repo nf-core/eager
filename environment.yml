@@ -28,4 +28,6 @@ dependencies:
   - bioconda::fastp=0.19.7
   - bioconda::bamutil=1.0.14
   - bioconda::mtnucratio=0.5
+  - pysam=0.15.2
+  - python=3.6
   #Missing Schmutzi,snpAD
