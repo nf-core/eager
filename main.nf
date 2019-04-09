@@ -105,6 +105,7 @@ def helpMessage() {
       --bamutils_softclip           Use softclip instead of hard masking
 
     Other options:
+      --unmap                       Create fastq files from unaligned reads     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       --plaintext_email             Receive plain text emails rather than HTML
@@ -212,6 +213,10 @@ params.bamutils_clip_left = 1
 params.bamutils_clip_right = 1 
 params.bamutils_softclip = false 
 
+//unmap
+
+params.unmap = false
+
 
 
 
@@ -295,14 +300,14 @@ if( params.readPaths ){
             .from( params.readPaths )
             .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g }
+            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g ; ch_read_unmap}
             ch_bam_to_fastq_convert = Channel.empty()
     } else if (!params.bam){
         Channel
             .from( params.readPaths )
             .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g }
+            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g; ch_read_unmap }
             ch_bam_to_fastq_convert = Channel.empty()
     } else {
         Channel
@@ -322,7 +327,7 @@ if( params.readPaths ){
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g }
+        .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g; ch_read_unmap }
         ch_bam_to_fastq_convert = Channel.empty()
 } else {
      Channel
@@ -355,6 +360,7 @@ if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Skip Collapsing'] = params.skip_collapse ? 'Yes' : 'No'
 summary['Skip Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
+summary['Output unmapped reads as fastq'] = params.unmap ? 'Yes' : 'No'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -857,7 +863,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk, ch_bam_unmap
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}"
@@ -895,6 +901,36 @@ process samtools_filter {
         samtools index "${size}" ${prefix}.filtered.bam
         """
     }  
+}
+
+process extract_unmapped_reads {
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/samtools/unmapped_fastq", mode: 'copy'
+
+    when: params.unmap
+
+    input: 
+    file fq from ch_read_unmap
+    file bam from ch_bam_unmap
+
+    output:
+    file "*.fq.gz" into unmapped_fq_ch
+
+
+    script:
+    if (params.pairedEnd) {
+        out_fwd = bam.baseName+'.unmapped.fq.gz'
+        """
+        extract_map_reads.py $bam ${fq[0]} -of $out_fwd
+        """
+    } else {
+        out_fwd = bam.baseName+'.unmapped.r1.fq.gz'
+        out_rev = bam.baseName+'.unmapped.r2.fq.gz'
+        """
+        extract_map_reads.py $bam ${fq[0]} -of $out_fwd -or $out_rev -p
+        """ 
+    }
+    
 }
 
 
