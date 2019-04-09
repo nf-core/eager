@@ -1,4 +1,4 @@
 # nf-core/eager: Changelog
 
-## v1.0dev - <date>
+## v2.0.6 - [date]
 Initial release of nf-core/eager, created with the [nf-core](http://nf-co.re/) template.
