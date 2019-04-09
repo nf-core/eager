@@ -53,6 +53,14 @@ Remove mapped in bam file from fastq files
 
 
 def extract_mapped_chr(chr, bam):
+    """
+    Get mapped reads per chromosome
+    INPUT:
+    - chr(str): chromosome
+    - bam(str): bamfile path
+    OUTPUT:
+    - res(list): list of mapped reads (str) name per chromosome
+    """
     res = []
     bamfile = pysam.AlignmentFile(bam, "rb")
     reads = bamfile.fetch(chr, multiple_iterators=True)
@@ -62,6 +70,13 @@ def extract_mapped_chr(chr, bam):
 
 
 def extract_mapped(bam, processes):
+    """
+    Get mapped reads in parallel
+    INPUT:
+    - bam(str): bamfile path
+    OUTPUT:
+    - result(list) list of mapped reads name (str)
+    """
     try:
         bamfile = pysam.AlignmentFile(bam, "rb")
         chrs = bamfile.references
@@ -77,6 +92,14 @@ def extract_mapped(bam, processes):
 
 
 def parse_fq(fq):
+    """
+    Parse a FASTQ file
+    INPUT:
+    - fq(str): path to fastq file
+    OUTPUT:
+    - fqd(dict): dictionary with read names as keys, seq and quality as values
+        in a list
+    """
 
     def get_fq_reads(allreads):
         fqd = {}
@@ -105,6 +128,16 @@ def parse_fq(fq):
 
 
 def remove_mapped(fq_dict, mapped_reads):
+    """
+    Remove mapped reads from dictionary of fastq reads
+    INPUT:
+    - fq_dict(dict) dictionary with read names as keys, seq and quality as values
+        in a list
+    - mapped_reads(list) list of mapped reads
+    OUTPUT:
+    - ufqd(dict) dictionary with unmapped read names as keys, seq and quality as values
+        in a list
+    """
     ufqd = {}
     unmap = [i for i in list(fq_dict.keys()) if i not in mapped_reads]
     # print(unmap)
@@ -115,6 +148,13 @@ def remove_mapped(fq_dict, mapped_reads):
 
 
 def write_fq(fq_dict, fname):
+    """
+    Write to fastq file
+    INPUT:
+    - fq_dict(dict) dictionary with unmapped read names as keys, seq and quality as values
+        in a list
+    - fname(string) Path to output fastq file
+    """
 
     if fname.endswith('.gz'):
         with gzip.open(fname, 'wb') as f:
