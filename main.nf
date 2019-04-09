@@ -910,7 +910,7 @@ process extract_unmapped_reads {
     when: params.unmap
 
     input: 
-    file fq from ch_read_unmap
+    set val(name), file(fq) from ch_read_unmap
     file bam from ch_bam_unmap
 
     output:
@@ -921,12 +921,14 @@ process extract_unmapped_reads {
     if (params.pairedEnd) {
         out_fwd = bam.baseName+'.unmapped.fq.gz'
         """
+        samtools index $bam
         extract_map_reads.py $bam ${fq[0]} -of $out_fwd
         """
     } else {
         out_fwd = bam.baseName+'.unmapped.r1.fq.gz'
         out_rev = bam.baseName+'.unmapped.r2.fq.gz'
         """
+        samtools index $bam
         extract_map_reads.py $bam ${fq[0]} -of $out_fwd -or $out_rev -p
         """ 
     }
