@@ -149,6 +149,7 @@ params.email = false
 params.plaintext_email = false
 
 // Skipping parts of the pipeline for impatient users
+params.skip_fastqc = false 
 params.skip_adapterremoval = false
 params.skip_preseq = false
 params.skip_damage_calculation = false
@@ -538,6 +539,8 @@ process fastqc {
     publishDir "${params.outdir}/FastQC", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
+    when: !params.skip_fastqc
+
     input:
     set val(name), file(reads) from ch_read_files_fastqc.mix(ch_read_files_converted_fastqc)
 
@@ -656,7 +659,7 @@ process fastqc_after_clipping {
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
-    when: !params.bam && !params.skip_adapterremoval
+    when: !params.bam && !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
     set val(name), file(reads) from ch_clipped_reads_for_fastqc
@@ -943,8 +946,7 @@ Step 6: DeDup / MarkDuplicates
 process dedup{
     tag "${bam.baseName}"
     publishDir "${params.outdir}/deduplication/dedup", mode: 'copy',
-        saveAs: {filename -> (filename.endsWith(".hist") || filename.endsWith(".log")) ? "${prefix}/$filename" : "$filename"}
-
+        saveAs: {filename -> "${prefix}/$filename"}
 
     when:
     !params.skip_deduplication && params.dedupper == 'dedup'

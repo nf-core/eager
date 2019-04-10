@@ -8,10 +8,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+<<<<<<< HEAD
 * [#189](https://github.com/nf-core/eager/pull/189) - Outputing unmapped reads in a fastq files with the --unmap flag
+=======
+* [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible]
+/(https://github.com/nf-core/eager/issues/182)
+>>>>>>> 7769799e088e6a6ed6c0778178667a6d26e5f13e
 
 ### `Fixed`
 * [#172](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
+* [#174](https://github.com/nf-core/eager/pull/190) - Publish DeDup files [properly](https://github.com/nf-core/eager/issues/183) 
 
 ### `Dependencies`
 
