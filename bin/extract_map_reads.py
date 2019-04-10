@@ -34,6 +34,12 @@ Remove mapped in bam file from fastq files
         default=None,
         help="path to forward output fastq file")
     parser.add_argument(
+        '-m',
+        dest='mode',
+        default='strip',
+        help='Read removal mode: remove reads (strip) or replace sequence by N (replace)'
+    )
+    parser.add_argument(
         '-p',
         dest='process',
         default=4,
@@ -47,9 +53,10 @@ Remove mapped in bam file from fastq files
     in_rev = args.rev
     out_fwd = args.out_fwd
     out_rev = args.out_rev
+    mode = args.mode
     proc = int(args.process)
 
-    return(bam, in_fwd, in_rev, out_fwd, out_rev, proc)
+    return(bam, in_fwd, in_rev, out_fwd, out_rev, mode, proc)
 
 
 def extract_mapped_chr(chr, bam):
@@ -127,52 +134,92 @@ def parse_fq(fq):
     return(fqd)
 
 
-def remove_mapped(fq_dict, mapped_reads):
+def sort_mapped(fq_dict, mapped_reads):
     """
-    Remove mapped reads from dictionary of fastq reads
+    Sort mapped reads from dictionary of fastq reads
     INPUT:
     - fq_dict(dict) dictionary with read names as keys, seq and quality as values
         in a list
     - mapped_reads(list) list of mapped reads
     OUTPUT:
-    - ufqd(dict) dictionary with unmapped read names as keys, seq and quality as values
+    - mfqd(dict) dictionary with mapped read names as keys, seq and quality as values
         in a list
+    - fqd(dict) dictionary with unmapped read names as key, unmapped/mapped (u|m), 
+        seq and quality as values in a list
     """
-    ufqd = {}
-    unmap = [i for i in list(fq_dict.keys()) if i not in mapped_reads]
+    fqd = {}
+    unmapped = [i for i in list(fq_dict.keys()) if i not in mapped_reads]
+    mapped = [i for i in list(fq_dict.keys()) if i in mapped_reads]
     # print(unmap)
-    for r in unmap:
-        ufqd[r] = fq_dict[r]
+    for r in unmapped:
+        fqd[r] = ['u']+fq_dict[r]
+    for r in mapped:
+        fqd[r] = ['m']+fq_dict[r]
 
-    return(ufqd)
+    return(fqd)
 
 
-def write_fq(fq_dict, fname):
+def write_fq(fq_dict, fname, mode):
     """
     Write to fastq file
     INPUT:
     - fq_dict(dict) dictionary with unmapped read names as keys, seq and quality as values
         in a list
     - fname(string) Path to output fastq file
+    - mode(string) strip (remove read) or replace (replace read sequence) by Ns
     """
 
     if fname.endswith('.gz'):
         with gzip.open(fname, 'wb') as f:
             for k in list(fq_dict.keys()):
-                f.write(f"{k}\n".encode())
-                for i in fq_dict[k]:
-                    f.write(f"{i}\n".encode())
+                if mode == 'strip':
+                    # if unmapped, write all the read lines
+                    if fq_dict[k][0] == 'u':
+                        f.write(f"@{k}\n".encode())
+                        for i in fq_dict[k][1:]:
+                            f.write(f"{i}\n".encode())
+                    # if mapped, do not write the read lines
+                    elif fq_dict[k][0] == 'm':
+                        continue
+
+                elif mode == 'replace':
+                    # if unmapped, write all the read lines
+                    if fq_dict[k][0] == 'u':
+                        f.write(f"@{k}\n".encode())
+                        for i in fq_dict[k][1:]:
+                            f.write(f"{i}\n".encode())
+                    # if mapped, write all the read lines, but replace sequence
+                    # by N*(len(sequence))
+                    elif fq_dict[k][0] == 'm':
+                        f.write(f"@{k}\n".encode())
+                        f.write(f"{'N'*len(fq_dict[k][1])}\n".encode())
+                        for i in fq_dict[k][2:]:
+                            f.write(f"{i}\n".encode())
 
     else:
         with open(fname, 'w') as f:
             for k in list(fq_dict.keys()):
-                f.write(f"{k}\n")
-                for i in fq_dict[k]:
-                    f.write(f"{i}\n")
+                if mode == 'strip':
+                    if fq_dict[k][0] == 'u':
+                        f.write(f"@{k}\n")
+                        for i in fq_dict[k][1:]:
+                            f.write(f"{i}\n")
+                    elif fq_dict[k][0] == 'm':
+                        continue
+                elif mode == 'replace':
+                    if fq_dict[k][0] == 'u':
+                        f.write(f"@{k}\n")
+                        for i in fq_dict[k][1:]:
+                            f.write(f"{i}\n")
+                    elif fq_dict[k][0] == 'm':
+                        f.write(f"@{k}\n")
+                        f.write(f"{'N'*len(fq_dict[k][1])}\n")
+                        for i in fq_dict[k][2:]:
+                            f.write(f"{i}\n")
 
 
 if __name__ == "__main__":
-    BAM, IN_FWD, IN_REV, OUT_FWD, OUT_REV, PROC = _get_args()
+    BAM, IN_FWD, IN_REV, OUT_FWD, OUT_REV, MODE, PROC = _get_args()
 
     if IN_REV and not OUT_REV:
         print('You specified an input reverse fastq, but no output reverse fastq')
@@ -185,13 +232,13 @@ if __name__ == "__main__":
 
     mapped_reads = extract_mapped(BAM, PROC)
     fwd_dict = parse_fq(IN_FWD)
-    fwd_unmap = remove_mapped(fwd_dict, mapped_reads)
-    write_fq(fwd_unmap, out_fwd)
+    fwd_reads = sort_mapped(fwd_dict, mapped_reads)
+    write_fq(fwd_reads, out_fwd, MODE)
     if IN_REV:
         if OUT_REV == None:
             out_rev = f"{IN_REV.split('/')[-1].split('.')[0]}.r2.fq.gz"
         else:
             out_rev = OUT_REV
         rev_dict = parse_fq(IN_REV)
-        rev_unmap = remove_mapped(rev_dict, mapped_reads)
-        write_fq(rev_unmap, out_rev)
+        rev_reads = sort_mapped(rev_dict, mapped_reads)
+        write_fq(rev_reads, out_rev, MODE)

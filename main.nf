@@ -104,8 +104,11 @@ def helpMessage() {
       --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
       --bamutils_softclip           Use softclip instead of hard masking
 
-    Other options:
-      --unmap                       Create fastq files from unaligned reads     
+    Stripping
+      --strip_input_fastq           Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+      --strip_mode                  Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
+
+    Other options:     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       --plaintext_email             Receive plain text emails rather than HTML
@@ -216,7 +219,8 @@ params.bamutils_softclip = false
 
 //unmap
 
-params.unmap = false
+params.strip_input_fastq = false
+params.strip_mode = 'strip'
 
 
 
@@ -279,6 +283,13 @@ if (params.skip_collapse  && params.singleEnd){
 if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
     if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
+}
+
+//Strip mode sanity checking
+if (params.strip_input_fastq){
+    if (!(['strip','replace'].contains(params.strip_mode))) {
+        exit 1, "--strip_mode can only be set to strip or replace"
+    }
 }
 
 
@@ -361,7 +372,10 @@ if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Skip Collapsing'] = params.skip_collapse ? 'Yes' : 'No'
 summary['Skip Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
-summary['Output unmapped reads as fastq'] = params.unmap ? 'Yes' : 'No'
+summary['Output stripped fastq'] = params.strip_input_fastq ? 'Yes' : 'No'
+if (params.strip_input_fastq){
+    summary['Strip mode'] = params.strip_mode
+}
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -691,7 +705,7 @@ process bwa {
 
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler
+    file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler, ch_bwa_mapped_reads_strip
     file "*.{bai,csi}" into ch_bam_index_for_damageprofiler
     
 
@@ -760,7 +774,7 @@ process circularmapper{
     file index from ch_circularmapper_indices.first()
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm
+    file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
     file "*.{bai,csi}" 
     
     script:
@@ -803,7 +817,7 @@ process bwamem {
     file index from ch_bwa_index_bwamem.first()
 
     output:
-    file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler
+    file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
     file "*.{bai,csi}" 
     
 
@@ -866,7 +880,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk, ch_bam_unmap
+    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}"
@@ -906,33 +920,33 @@ process samtools_filter {
     }  
 }
 
-process extract_unmapped_reads {
+process strip_input_fastq {
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/samtools/unmapped_fastq", mode: 'copy'
+    publishDir "${params.outdir}/samtools/stripped_fastq", mode: 'copy'
 
-    when: params.unmap
+    when: params.strip_input_fastq
 
     input: 
     set val(name), file(fq) from ch_read_unmap
-    file bam from ch_bam_unmap
+    file bam from ch_bwa_mapped_reads_strip.mix(ch_circular_mapped_reads_strip, ch_bwamem_mapped_reads_strip)
 
     output:
     file "*.fq.gz" into unmapped_fq_ch
 
 
     script:
-    if (params.pairedEnd) {
-        out_fwd = bam.baseName+'.unmapped.fq.gz'
+    if (params.singleEnd) {
+        out_fwd = bam.baseName+'.stripped.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${fq[0]} -of $out_fwd
+        extract_map_reads.py $bam ${fq[0]} -of $out_fwd -p ${task.cpus}
         """
     } else {
-        out_fwd = bam.baseName+'.unmapped.r1.fq.gz'
-        out_rev = bam.baseName+'.unmapped.r2.fq.gz'
+        out_fwd = bam.baseName+'.stripped.fwd.fq.gz'
+        out_rev = bam.baseName+'.stripped.rev.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${fq[0]} -of $out_fwd -or $out_rev -p
+        extract_map_reads.py $bam ${fq[0]} -2 ${fq[0]} -of $out_fwd -or $out_rev -p ${task.cpus}
         """ 
     }
     
