@@ -187,3 +187,4 @@ When looking at the length distribution plots, keep in mind the following:
 ### Preseq
 ### BamUtil
 
+For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info)

@@ -8,15 +8,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+* [#189](https://github.com/nf-core/eager/pull/189) - Outputing unmapped reads in a fastq files with the --strip_input_fastq flag
 * [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible]
 /(https://github.com/nf-core/eager/issues/182)
+* Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
+
 ### `Fixed`
+* [#152](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
+* [#176](https://github.com/nf-core/eager/pull/176) - Increase runtime for DamageProfiler on [large reference genomes](https://github.com/nf-core/eager/issues/173)
 * [#172](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
+* [#174](https://github.com/nf-core/eager/pull/190) - Publish DeDup files [properly](https://github.com/nf-core/eager/issues/183) 
 
 ### `Dependencies`
 
-* Added DeDup v0.12.4 (json support)
+* Added DeDup v0.12.5 (json support)
 * Added mtnucratio v0.5 (json support)
+* Updated Picard 2.18.27 -> 2.19.0
+* Updated GATK 4.1.0.0 -> 4.1.1.1
+* Updated damageprofiler 0.4.4 -> 0.4.5 
+* Updated r-rmarkdown 1.11 -> 1.12
 
 
 ## [2.0.6] - 2019-03-05

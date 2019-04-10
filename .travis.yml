@@ -13,6 +13,7 @@ before_install:
   # Pull the docker image first so the test doesn't wait for this
   - docker pull nfcore/eager:dev
   # Fake the tag locally so that the pipeline runs properly
+  # Looks weird when this is :dev to :dev, but makes sense when testing code for a release (:dev to :1.0.1)
   - docker tag nfcore/eager:dev nfcore/eager:dev
 
 install:
@@ -21,6 +22,7 @@ install:
   - wget -qO- get.nextflow.io | bash
   - sudo ln -s /tmp/nextflow/nextflow /usr/local/bin/nextflow
   # Install nf-core/tools
+  - pip install --upgrade pip
   - pip install nf-core
   # Install Conda 
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -28,6 +30,8 @@ install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   # Reset
   - mkdir ${TRAVIS_BUILD_DIR}/tests && cd ${TRAVIS_BUILD_DIR}/tests
+  # Install markdownlint-cli
+  - sudo apt-get install npm && npm install -g markdownlint-cli
 
 env:
   - NXF_VER='0.32.0' # Specify a minimum NF version that should be tested and work
@@ -46,6 +50,8 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_trim --saveReference
    # Run the basic pipeline with paired end data without adapterRemoval
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_adapterremoval --saveReference
+   # Run the basic pipeline with output unmapped reads as fastq
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --strip_input_fastq
   # Run the same pipeline testing optional step: fastp, complexity 
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/bwa_index/
   # Test BAM Trimming
