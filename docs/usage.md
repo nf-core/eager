@@ -2,7 +2,10 @@
 
 ## Table of contents
 
-* [Introduction](#general-nextflow-info)
+<!-- Install Atom plugin markdown-toc-auto for this ToC to auto-update on save -->
+<!-- TOC START min:2 max:3 link:true asterisk:true update:true -->
+* [Table of contents](#table-of-contents)
+* [Introduction](#introduction)
 * [Running the pipeline](#running-the-pipeline)
 * [Updating the pipeline](#updating-the-pipeline)
 * [Reproducibility](#reproducibility)
@@ -10,7 +13,7 @@
 * [Other command line parameters](#other-command-line-parameters)
 * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
 * [Automatic resubmission](#automatic-resubmission)
-
+* [Clean up](#clean-up)
 
 ## General Nextflow info
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
@@ -29,16 +32,16 @@ screen -r eager2
 ```
 to end the screen session while in it type `exit`.
 
-It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
 
-```bash
-NXF_OPTS='-Xms1g -Xmx4g'
-```
 ## Help Message
 To access the nextflow help message run: `nextflow run -help`
 
 ## Running the pipeline
+
+> Before you start you should change into the output directory you wish your results to go in. When you start the nextflow job, it will place all the 'working' folders in the current directory and NOT necessarily the directory the output files will be in.
+
 The typical command for running the pipeline is as follows:
+
 ```bash
 nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
@@ -75,17 +78,23 @@ This version number will be logged in reports when you run the pipeline, so that
 
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments (e.g. schedulers, software environments, memory limits etc). Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important! The first entry takes precendence over the others, e.g. if a setting is set by both the first and second profile, the first entry will be used and the second entry ignored. 
+
+> *Important*: If running EAGER2 on a cluster - ask your system administrator what profile to use.
+
+For more details on how to set up your own private profile, please see [installation](../configuration/adding_your_own.md).
 
 **Basic profiles**
-These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your own PC (vs. a HPC cluster).
+These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
-* `standard`
-    * The default profile, used if `-profile` is not specified at all.
-    * Runs locally and expects all software to be installed and available on the `PATH`.
+* `awsbatch`
+  * A generic configuration profile to be used with AWS Batch.
+* `conda`
+  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `docker`
-    * A generic configuration profile to be used with [Docker](http://docker.com/)
-    * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
+  * A generic configuration profile to be used with [Docker](http://docker.com/)
+  * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
 * `singularity`
     * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
     * Pulls software from singularity-hub
@@ -99,9 +108,9 @@ These are basic profiles which primarily define where you derive the pipeline's 
     * Includes links to test data so needs no other parameters
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
-    
+ 
 **Institution Specific Profiles**
-These are profiles specific to certain clusters, and are centrally  maintained at [nf-core/configs](`https://github.com/nf-core/configs`). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](`https://github.com/nf-core/configs`) repository.
+These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
 * `uzh`
     * A profile for the University of Zurich Research Cloud
@@ -112,6 +121,8 @@ These are profiles specific to certain clusters, and are centrally  maintained a
 * `shh`
    * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
    * Loads Singularity and defines appropriate resources for running the pipeline
+
+    
 
 ### `--reads`
 Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
@@ -266,10 +277,14 @@ Specify the path to a specific nextflow config file (this is a core NextFlow com
 
 **NB:** Single hyphen (core Nextflow option)
 
-Note - you can use this to override defaults. For example, you can specify a config file using `-c` that contains the following:
+Note - you can use this to override pipeline defaults.
 
-```nextflow
-process.$multiqc.module = []
+### `--custom_config_version`
+Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default is set to `master`.
+
+```bash
+## Download and use config file with following git commid id
+--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
 ```
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
@@ -292,6 +307,10 @@ Turns off the computation of library complexity estimation.
 ### `--skip_adapterremoval`
 
 Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
+
+### `--skip_fastqc`
+
+Turns off FastQC in the beginning to speed up the pipeline. 
 
 ### `--skip_damage_calculation`
 
@@ -482,6 +501,18 @@ Default set to `1` and clipps off one base of the left or right side of reads. N
 
 By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string.
 
+## Mapped reads Stripping
+
+These parameters are used for removing mapped reads from orginal fastq files, usually in the context of uploading the original fastq files to a read archive (SRA/ENA)
+
+### `--strip_input_fastq`
+
+Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+
+### `--strip_mode`
+
+Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
+
 ## Library-Type Parameters
 
 These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases. 
@@ -496,3 +527,29 @@ Can be used to set a path to a BED file (3/6 column format) to calculate capture
 
 ## Automatic Resubmission
 By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
+
+## Clean up
+
+Once completed a run has completed, you will have _lots_ of (some very large) intermediate files in your output directory, within the directory named `work`. 
+
+Once you have verified your run completed correctly and everything in the module output directories are present as you expect and need, you can perform a clean up.
+
+> **Important**: Once clean up is completed, you will _not_ be able to re-rerun the pipline from an earlier step and you'll have to re-run from scratch.
+
+While in your output directory, firstly verify you're only deleting files stored in `work/` with the dry run command:
+
+```bash
+nextflow clean -n
+```
+If you're ready, you can then remove the files with
+
+```bash
+nextflow clean -f
+```
+This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!
+
+### `--monochrome_logs`
+Set to disable colourful command line output and live life in monochrome.
+
+### `--multiqc_config`
+Specify a path to a custom MultiQC configuration file.
