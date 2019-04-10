@@ -706,7 +706,7 @@ process bwa {
     input:
     set val(name), file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
     
-    file index from ch_bwa_index.first()
+    file index from ch_bwa_index
 
 
     output:
@@ -776,7 +776,7 @@ process circularmapper{
 
     input:
     set val(name), file(reads) from ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm)
-    file index from ch_circularmapper_indices.first()
+    file index from ch_circularmapper_indices
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
@@ -819,7 +819,7 @@ process bwamem {
 
     input:
     set val(name), file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
-    file index from ch_bwa_index_bwamem.first()
+    file index from ch_bwa_index_bwamem
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
