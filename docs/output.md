@@ -43,6 +43,7 @@ These are less important directories which are used less often, normally in the 
 In this section we will run through the output of each module as reported in a MultiQC output. This can be viewed by opening the HTML file in your `<RUN_OUTPUT_DIRECTORY>/MultiQC/` directory in a web browser. The section will also provide some basic tips on how to interpret the plots and values, although we highly recommend reading the READMEs or original papers of the tools used in the pipeline. A list of references can be seen on the [EAGER2 github repository](https://github.com/nf-core/eager/)
 
 ### FastQC (pre- and post-AdapterRemoval)
+
 #### Background
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your raw reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C) as sequenced. You also get information about adapter contamination and other overrepresented sequences.
 
@@ -68,7 +69,6 @@ Things to watch out for:
   * for paired-end data, if either R1 or R2 is significantly lower quality across the whole read compared to the complementary read.
   
 #### Per Sequence Quality Scores
-
 This is a further summary of the previous plot. This is a histogram of the _overall_ read quality (compared to per-base, above). The x axis is the mean read-quality score (summarising all the bases of the read in a single value), and the y-axis is the number of reads with this Phred score. You should see a peak with the majority of your reads between 27-35.
 
 Things to watch out for:
@@ -76,7 +76,6 @@ Things to watch out for:
   * all peaks being in orange or red sections which suggests an overall bad sequencing run (possibly due to a faulty flow-cell).
   
 #### Per Base Sequencing Content
-
 This is a heatmap which shows the average percentage of C, G, T, and A nucleotides across ~4bp bins across all reads. 
 
 You expect to see whole heatmap to be a relatively equal block of colour (normally black), representing an equal mix of A, C, T, G colors (see legend). 
@@ -87,26 +86,43 @@ Things to watch out for:
 > If you see Poly-G tails, we recommend to turn on FastP poly-G trimming with EAGER. See the 'running' documentation page for details.
 
 #### Per Sequence GC Content
-
 This line graph shows the number percentage reads (y-axis) with an average percent GC content (y-axis). In 'isolate' samples (i.e. majority of the reads should be from the host species of the sample), this should be represented by a sharp peak around the average percent GC content of the reference genome. In metagenomic contexts this should be a wide flat distribution with a mean around 50%, however this can be highly 
 
 Things to watch out for: 
   * If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no flouresence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
 
 #### Per Base N Content
-
 This line graph shows you the average numbers of Ns found across all reads of a sample. Ns can be caused for a variety of reasons such as low-confidence base call, or the base has been masked. The lines should be very low (as close to 0 as possible) and generally be flat across the whole read. Increases in Ns may reflect in HiSeq data issues of the last cycles running out of chemistry.
 
 > **NB:** Publicly downloaded data may have extremely high N contents across all reads. These normally come from 'masked' reads that may have originally be, for example, from a human sample for microbial analysis where the consent for publishing of the host DNA was not given. In these cases you do not need to worry about this plot.
 
 #### Sequence Duplication Levels
+This plot is some-what similar to looking at duplication rate or 'cluster factor' of mapped reads. In this case however FastQC takes the sequences of the first 100 thousand reads of a library, and looks to see how often a read sequence is repeated in the rest of the library.
+
+A good library should have very low rates of duplication (vast majority of reads having a duplication rate of 1) - suggesting 'high complexity' or lots of unique reads and useful data. This is represented as a steep drop in the line plot and possible a very small curve at about a duplication rate of 2 or 3 and then remaining at ~0 for higher duplication rates. 
+
+Note that good libraries may sometimes have small peaks at high duplication levels. This maybe due to free-adapters (with no inserts), or mono-nucleotide reads (e.g. GGGGG in NextSeq/NovaSeq data).
+
+Bad libraries which have extremely low input DNA (so during amplification the same molecules been amplified repeatly), or a good library that has been erroneously over-amplified will show very high duplication levels - so a very slowly decreasing curve. Alternatively, if your library construction failed and many adapters were not ligated to insert molecules, a high duplication rate may be caused by these free-adapters (see 'Overrepresnted sequences' for more information).
+
+> Amplicon librares such as for 16S rRNA analysis may appear here as having high duplication rates and these peaks can be ignored. This can be verified if no contaminants are found in the 'Overrepresented sequences' section.
 
 #### Overrepresented sequences
+After identifying duplicates (see the previous section), a table will be displayed in the 'Overrepresented sequences' section of the report. This is an attempt by FastQC to check to see if the duplicates identified match common contaminants such as free adapters or mono-nucleotide reads. 
+
+You can then use this table help inform you in identification where the problem occured in the construction and sequencing of this library. E.g. if you have high duplication rates but no identified contaminants, this suggests over-amplification of reads rather than left over adapters.
 
 #### Adapter Content
+This plot shows the percentage of reads (y-axis), which has an adapter starting at a particular position along a read (x-axis). There can be muliple lines per sample as each line represents a particular adapter.
+
+It is common in aDNA libraries to see very rapid increases in the proportion of reads with an adapter 'early on' in the read, as by nature aDNA molecules are fragmented and very short. Palaeolithic samples can have reads as short as 25bp, so sequences can already start having adapters 25bp into a read. 
+
+This can already give you an indication on the authenticity of your library - as if you see very low proportions of reads with adapters this suggests long insert molecules that are less likely to derive from a 'true' aDNA library. On the flipside, if you are working with modern DNA - it can give an indication of over-sonication if you have artificially fragmented your reads to lower than your target molecule length.
 
 ### FastP
+
 ### AdapterRemoval
+
 #### Background
 AdapterRemoval a tool that does the post-sequencing clean up of your sequencing reads. It performs the following functions
   - 'Merges' (or 'collapses') forward and reverse reads of Paired End data
@@ -123,7 +139,6 @@ Quality trimming (or 'truncating') involves looking at ends of reads for low-con
 Length filtering involves removing any read that does not reach the number of bases specified by a particular value. 
 
 #### Retained and Discarded Reads Plot
-
 These stacked bars plots are unfortunately a little confusing, when displayed in MultiQC. However are relatively straight-forward once you understand each category. They can be displayed as counts of reads per AdapterRemoval read-category, or as percentages of the same values. Each forward(/reverse) file combination are displayed once.
 
 The most important value is the **Retained Read Pairs** which gives you the final number of reads output into the file that goes into mapping. Note, however, this section of the stack bar _includes_ the other categories displayed (see below) in the calculation.
@@ -139,7 +154,6 @@ For ancient DNA, assuming a good quality run, you expect to see a the vast major
 If you see high numbers of discarded or truncated reads, you should check your FastQC results for low sequencing quality of that particular run.
 
 #### Length Distribution Plot
-
 The length distribution plots show the number of reads at each read-length. You can change the plot to display different cateogories.
 
   * All represent the overall distribution of reads. In the case of paired-end sequencing You may see a peak at the turn around from forward to reverse cycles.
