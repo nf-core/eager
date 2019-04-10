@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Added DeDup v0.12.4 (json support)
 * Added mtnucratio v0.5 (json support)
+* Updated Picard 2.18.27 -> 2.19.0
+* Updated GATK 4.1.0.0 -> 4.1.1.1
+* Updated damageprofiler 0.4.4 -> 0.4.5 
+* Updated r-rmarkdown 1.11 -> 1.12
 
 
 ## [2.0.6] - 2019-03-05
