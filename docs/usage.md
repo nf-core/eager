@@ -36,8 +36,6 @@ to end the screen session while in it type `exit`.
 ## Help Message
 To access the nextflow help message run: `nextflow run -help`
 
-<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
-
 ## Running the pipeline
 
 > Before you start you should change into the output directory you wish your results to go in. When you start the nextflow job, it will place all the 'working' folders in the current directory and NOT necessarily the directory the output files will be in.
@@ -211,8 +209,6 @@ Note that you can use the same configuration setup to save sets of reference fil
 
 The syntax for this reference configuration is as follows:
 
-<!-- TODO nf-core: Update reference genome example according to what is needed -->
-
 ```nextflow
 params {
   genomes {
@@ -243,8 +239,6 @@ Use this to specify the required FastA index file for the selected reference gen
 If you turn this on, the generated indices will be stored in the `./results/reference_genomes` for you. 
 
 ## Other command line parameters
-
-<!-- TODO nf-core: Describe any other command line flags here -->
 
 ### `--outdir`
 The output directory where the results will be saved.
