@@ -1,6 +1,6 @@
 # ![nf-core/eager](docs/images/eager_logo.png)
 
-**A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud support.**.
+**A fully reproducible ancient and modern DNA pipeline in Nextflow and with cloud support.**.
 
 [![Build Status](https://travis-ci.com/nf-core/eager.svg?branch=master)](https://travis-ci.com/nf-core/eager)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
