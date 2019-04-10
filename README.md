@@ -44,7 +44,7 @@ Additional functionality contained by the pipeline currently includes:
 
 ## Quick Start
 
-1. Install [`nextflow`](docs/installation.md)
+1. Install [`nextflow`](https://nf-co.re/usage/installation)
 
 2. Install one of [`docker`](https://docs.docker.com/engine/installation/), [`singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`conda`](https://conda.io/miniconda.html)
 
@@ -73,16 +73,17 @@ as described in the documentation.
 
 ## Documentation
 
-The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory:
+The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory or on the main homepage of the nf-core project:
 
-1. [Installation](https://nf-co.re/usage/installation)
+1. [Nextflow Installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
-    * [Local installation](https://nf-co.re/usage/local_installation)
+    * [Pipeline installation](https://nf-co.re/usage/local_installation)
     * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](docs/troubleshooting.md)
+5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+6. [EAGER Troubleshooting](docs/troubleshooting.md)
 
 
 ## Credits
