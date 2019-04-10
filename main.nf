@@ -232,18 +232,16 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 // Validate inputs
 if("${params.fasta}".endsWith(".gz")){
     //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
-    Channel.fromPath("${params.fasta}")
-            .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
-            .set {ch_unzip_fasta}
+    zipped_fasta = file("${params.fasta}")
 
     process unzip_reference{
         tag "$zipfasta"
 
         input:
-        file zipfasta from ch_unzip_fasta
+        file zipped_fasta
 
         output:
-        file "*.fasta" into (ch_fasta_for_bwa_indexing, ch_fasta_for_faidx_indexing, ch_fasta_for_dict_indexing,  ch_fasta_for_damageprofiler, ch_fasta_for_qualimap, ch_fasta_for_pmdtools, ch_fasta_for_circularmapper_index)
+        file "*.fasta" into fasta_for_indexing
 
         script:
         """
@@ -251,9 +249,7 @@ if("${params.fasta}".endsWith(".gz")){
         """
     }   
     } else {
-    Channel.fromPath("${params.fasta}")
-    .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper_index}
+    fasta_for_indexing = file("${params.fasta}")
 }
 
 //Index files provided? Then check whether they are correct and complete
@@ -445,7 +441,7 @@ process makeBWAIndex {
     when: !params.bwa_index && params.fasta && (params.aligner == 'bwa' || params.bwamem)
 
     input:
-    file fasta from ch_fasta_for_bwa_indexing
+    file fasta from fasta_for_indexing
     file where_are_my_files
 
     output:
@@ -478,7 +474,7 @@ process makeFastaIndex {
     when: !params.fasta_index && params.fasta && params.aligner == 'bwa'
 
     input:
-    file fasta from ch_fasta_for_faidx_indexing
+    file fasta from fasta_for_indexing
     file where_are_my_files
 
     output:
@@ -512,7 +508,7 @@ process makeSeqDict {
     when: !params.seq_dict && params.fasta
 
     input:
-    file fasta from ch_fasta_for_dict_indexing
+    file fasta from fasta_for_indexing
     file where_are_my_files
 
     output:
@@ -754,7 +750,7 @@ process circulargenerator{
     when: params.circularmapper
 
     input:
-    file fasta from ch_fasta_for_circularmapper_index
+    file fasta from fasta_for_indexing
 
     output:
     file "cm_index" into ch_circularmapper_indices
@@ -1048,7 +1044,7 @@ process damageprofiler {
 
     input:
     file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
-    file fasta from ch_fasta_for_damageprofiler.first()
+    file fasta from fasta_for_indexing
     file bai from ch_bam_index_for_damageprofiler
     
 
@@ -1075,7 +1071,7 @@ process qualimap {
 
     input:
     file bam from ch_bam_filtered_qualimap
-    file fasta from ch_fasta_for_qualimap.first()
+    file fasta from fasta_for_indexing
 
     output:
     file "*" into ch_qualimap_results
@@ -1139,7 +1135,7 @@ process pmdtools {
 
     input: 
     file bam from ch_for_pmdtools
-    file fasta from ch_fasta_for_pmdtools
+    file fasta from fasta_for_indexing
 
     output:
     file "*.bam" into ch_bam_after_pmdfiltering
