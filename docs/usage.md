@@ -501,6 +501,18 @@ Default set to `1` and clipps off one base of the left or right side of reads. N
 
 By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string.
 
+## Mapped reads Stripping
+
+These parameters are used for removing mapped reads from orginal fastq files, usually in the context of uploading the original fastq files to a read archive (SRA/ENA)
+
+### `--strip_input_fastq`
+
+Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+
+### `--strip_mode`
+
+Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
+
 ## Library-Type Parameters
 
 These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases. 

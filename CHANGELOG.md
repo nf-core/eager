@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+* [#189](https://github.com/nf-core/eager/pull/189) - Outputing unmapped reads in a fastq files with the --strip_input_fastq flag
 * [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible]
 /(https://github.com/nf-core/eager/issues/182)
 * Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
