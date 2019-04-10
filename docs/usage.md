@@ -2,7 +2,10 @@
 
 ## Table of contents
 
-* [Introduction](#general-nextflow-info)
+<!-- Install Atom plugin markdown-toc-auto for this ToC to auto-update on save -->
+<!-- TOC START min:2 max:3 link:true asterisk:true update:true -->
+* [Table of contents](#table-of-contents)
+* [Introduction](#introduction)
 * [Running the pipeline](#running-the-pipeline)
 * [Updating the pipeline](#updating-the-pipeline)
 * [Reproducibility](#reproducibility)
@@ -78,12 +81,14 @@ For more details on how to set up your own private profile, please see [installa
 **Basic profiles**
 These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
-* `standard`
-    * The default profile, used if `-profile` is not specified at all.
-    * Runs locally and expects all software to be installed and available on the `PATH`.
+* `awsbatch`
+  * A generic configuration profile to be used with AWS Batch.
+* `conda`
+  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `docker`
-    * A generic configuration profile to be used with [Docker](http://docker.com/)
-    * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
+  * A generic configuration profile to be used with [Docker](http://docker.com/)
+  * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
 * `singularity`
     * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
     * Pulls software from singularity-hub
@@ -275,10 +280,14 @@ Specify the path to a specific nextflow config file (this is a core NextFlow com
 
 **NB:** Single hyphen (core Nextflow option)
 
-Note - you can use this to override defaults. For example, you can specify a config file using `-c` that contains the following:
+Note - you can use this to override pipeline defaults.
 
-```nextflow
-process.$multiqc.module = []
+### `--custom_config_version`
+Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default is set to `master`.
+
+```bash
+## Download and use config file with following git commid id
+--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
 ```
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
@@ -495,6 +504,18 @@ Default set to `1` and clipps off one base of the left or right side of reads. N
 
 By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string.
 
+## Mapped reads Stripping
+
+These parameters are used for removing mapped reads from orginal fastq files, usually in the context of uploading the original fastq files to a read archive (SRA/ENA)
+
+### `--strip_input_fastq`
+
+Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+
+### `--strip_mode`
+
+Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
+
 ## Library-Type Parameters
 
 These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases. 
@@ -528,5 +549,10 @@ If you're ready, you can then remove the files with
 ```bash
 nextflow clean -f
 ```
-
 This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!
+
+### `--monochrome_logs`
+Set to disable colourful command line output and live life in monochrome.
+
+### `--multiqc_config`
+Specify a path to a custom MultiQC configuration file.
