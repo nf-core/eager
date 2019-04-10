@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible]
 /(https://github.com/nf-core/eager/issues/182)
+* Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
 
 ### `Fixed`
 * [#172](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)

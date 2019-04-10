@@ -1,13 +1,13 @@
 # ![nf-core/eager](docs/images/eager_logo.png)
 
-[![Build Status](https://travis-ci.org/nf-core/eager.svg?branch=master)](https://travis-ci.org/nf-core/eager)
+**A fully reproducible and modern ancient DNA pipeline in Nextflow and with cloud support.**.
+
+[![Build Status](https://travis-ci.com/nf-core/eager.svg?branch=master)](https://travis-ci.com/nf-core/eager)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
 [![Slack Status](https://nf-core-invite.herokuapp.com/badge.svg)](https://nf-core-invite.herokuapp.com)[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker Container available](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager/)
 ![Singularity Container available](https://img.shields.io/badge/singularity-available-7E4C74.svg)
 [![DOI](https://zenodo.org/badge/135918251.svg)](https://zenodo.org/badge/latestdoi/135918251)
-
-
 
 ## Introduction
 
@@ -75,10 +75,11 @@ as described in the documentation.
 
 The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
-1. [Installation](docs/installation.md)
+1. [Installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
-    * [Local installation](docs/configuration/local.md)
-    * [Adding your own system](docs/configuration/adding_your_own.md)
+    * [Local installation](https://nf-co.re/usage/local_installation)
+    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
+    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](docs/troubleshooting.md)

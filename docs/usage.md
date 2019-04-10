@@ -2,7 +2,10 @@
 
 ## Table of contents
 
-* [Introduction](#general-nextflow-info)
+<!-- Install Atom plugin markdown-toc-auto for this ToC to auto-update on save -->
+<!-- TOC START min:2 max:3 link:true asterisk:true update:true -->
+* [Table of contents](#table-of-contents)
+* [Introduction](#introduction)
 * [Running the pipeline](#running-the-pipeline)
 * [Updating the pipeline](#updating-the-pipeline)
 * [Reproducibility](#reproducibility)
@@ -32,6 +35,8 @@ to end the screen session while in it type `exit`.
 
 ## Help Message
 To access the nextflow help message run: `nextflow run -help`
+
+<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
 
 ## Running the pipeline
 
@@ -84,12 +89,14 @@ For more details on how to set up your own private profile, please see [installa
 **Basic profiles**
 These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
-* `standard`
-    * The default profile, used if `-profile` is not specified at all.
-    * Runs locally and expects all software to be installed and available on the `PATH`.
+* `awsbatch`
+  * A generic configuration profile to be used with AWS Batch.
+* `conda`
+  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `docker`
-    * A generic configuration profile to be used with [Docker](http://docker.com/)
-    * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
+  * A generic configuration profile to be used with [Docker](http://docker.com/)
+  * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
 * `singularity`
     * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
     * Pulls software from singularity-hub
@@ -204,6 +211,8 @@ Note that you can use the same configuration setup to save sets of reference fil
 
 The syntax for this reference configuration is as follows:
 
+<!-- TODO nf-core: Update reference genome example according to what is needed -->
+
 ```nextflow
 params {
   genomes {
@@ -234,6 +243,8 @@ Use this to specify the required FastA index file for the selected reference gen
 If you turn this on, the generated indices will be stored in the `./results/reference_genomes` for you. 
 
 ## Other command line parameters
+
+<!-- TODO nf-core: Describe any other command line flags here -->
 
 ### `--outdir`
 The output directory where the results will be saved.
@@ -272,10 +283,14 @@ Specify the path to a specific nextflow config file (this is a core NextFlow com
 
 **NB:** Single hyphen (core Nextflow option)
 
-Note - you can use this to override defaults. For example, you can specify a config file using `-c` that contains the following:
+Note - you can use this to override pipeline defaults.
 
-```nextflow
-process.$multiqc.module = []
+### `--custom_config_version`
+Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default is set to `master`.
+
+```bash
+## Download and use config file with following git commid id
+--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
 ```
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
@@ -525,5 +540,10 @@ If you're ready, you can then remove the files with
 ```bash
 nextflow clean -f
 ```
-
 This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!
+
+### `--monochrome_logs`
+Set to disable colourful command line output and live life in monochrome.
+
+### `--multiqc_config`
+Specify a path to a custom MultiQC configuration file.
