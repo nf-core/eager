@@ -46,6 +46,7 @@ def helpMessage() {
       --saveReference               Saves reference genome indices for later reusage
 
     Skipping                        Skip any of the mentioned steps
+      --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
       --skip_preseq
       --skip_damage_calculation
@@ -69,6 +70,10 @@ def helpMessage() {
       --bwaalnn                     Specify the -n parameter for BWA aln.
       --bwaalnk                     Specify the -k parameter for BWA aln
       --bwaalnl                     Specify the -l parameter for BWA aln
+ 
+    Stripping
+      --strip_input_fastq           Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+      --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace)
     
     CircularMapper
       --circularmapper              Turn on CircularMapper (CM)
@@ -105,10 +110,6 @@ def helpMessage() {
       --trim_bam                    Turn on BAM trimming for UDG(+ or 1/2) protocols
       --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
       --bamutils_softclip           Use softclip instead of hard masking
-
-    Stripping
-      --strip_input_fastq           Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
-      --strip_mode                  Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
 
     Other options:     
       --outdir                      The output directory where the results will be saved
