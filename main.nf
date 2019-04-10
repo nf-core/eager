@@ -346,9 +346,7 @@ if( params.readPaths ){
 }
 
 // Header log info
-log.info "========================================="
-log.info " nf-core/eager v${workflow.manifest.version}"
-log.info "========================================="
+log.info nfcoreHeader()
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
@@ -379,8 +377,6 @@ if(workflow.profile == 'awsbatch'){
    summary['AWS Queue']     = params.awsqueue
 }
 if(params.email) summary['E-mail Address'] = params.email
-log.info summary.collect { k,v -> "${k.padRight(35)}: $v" }.join("\n")
-log.info "========================================="
 summary['Config Profile'] = workflow.profile
 if(params.config_profile_description) summary['Config Description'] = params.config_profile_description
 if(params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
