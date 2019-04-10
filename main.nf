@@ -10,6 +10,7 @@
  Alexander Peltzer apeltzer <alex.peltzer@gmail.com> - https://github.com/apeltzer>
  James A. Fellows Yates <jfy133@gmail.com> - https://github.com/jfy133
  Stephen Clayton <clayton@shh.mpg.de> - https://github.com/sc13-bioinf
+ Maxime Borry <borry@shh.mpg.de.de> - https://github.com/maxibor
 ========================================================================================
 */
 
