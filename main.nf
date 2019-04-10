@@ -908,8 +908,7 @@ Step 6: DeDup / MarkDuplicates
 process dedup{
     tag "${bam.baseName}"
     publishDir "${params.outdir}/deduplication/dedup", mode: 'copy',
-        saveAs: {filename -> (filename.endsWith(".hist") || filename.endsWith(".log")) ? "${prefix}/$filename" : "$filename"}
-
+        saveAs: {filename -> "${prefix}/$filename"}
 
     when:
     !params.skip_deduplication && params.dedupper == 'dedup'
