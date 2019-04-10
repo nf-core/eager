@@ -226,11 +226,9 @@ params.strip_input_fastq = false
 params.strip_mode = 'strip'
 
 
-ch_multiqc_config = Channel.fromPath(params.multiqc_config)
-ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
-Channel.fromPath("$baseDir/assets/where_are_my_files.txt")
-       .into{ ch_where_for_bwa_index; ch_where_for_fasta_index; ch_where_for_seqdict}
-
+multiqc_config = file(params.multiqc_config)
+output_docs = file("$baseDir/docs/output.md")
+where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 // Validate inputs
 if("${params.fasta}".endsWith(".gz")){
     //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
@@ -311,11 +309,6 @@ if( workflow.profile == 'awsbatch') {
   // Prevent trace files to be stored on S3 since S3 does not support rolling files.
   if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
-
-// Stage config files
-ch_multiqc_config = Channel.fromPath(params.multiqc_config)
-ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
-
 /*
  * Create a channel for input read files
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
@@ -459,7 +452,7 @@ process makeBWAIndex {
 
     input:
     file fasta from ch_fasta_for_bwa_indexing
-    file wherearemyfiles from ch_where_for_bwa_index
+    file where_are_my_files
 
     output:
     file "bwa_index" into (ch_bwa_index,ch_bwa_index_bwamem)
@@ -492,7 +485,7 @@ process makeFastaIndex {
 
     input:
     file fasta from ch_fasta_for_faidx_indexing
-    file wherearemyfiles from ch_where_for_fasta_index
+    file where_are_my_files
 
     output:
     file "faidx/${base}.fasta.fai" into ch_fasta_faidx_index
@@ -526,7 +519,7 @@ process makeSeqDict {
 
     input:
     file fasta from ch_fasta_for_dict_indexing
-    file wherearemyfiles from ch_where_for_seqdict
+    file where_are_my_files
 
     output:
     file "seq_dict/*.dict" into ch_seq_dict
@@ -1237,7 +1230,7 @@ process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
-    file output_docs from ch_output_docs
+    file output_docs
 
     output:
     file "results_description.html"
@@ -1291,7 +1284,7 @@ process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
-    file multiqc_config from ch_multiqc_config.collect().ifEmpty([])
+    file multiqc_config
     file ('fastqc_raw/*') from ch_fastqc_results.collect().ifEmpty([])
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
