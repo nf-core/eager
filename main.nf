@@ -262,9 +262,10 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
     bwa_base = params.bwa_index.substring(lastPath+1)
 
-    bwa_index = Channel
+    Channel
         .fromPath(bwa_dir, checkIfExists: true)
         .ifEmpty { exit 1, "BWA index directory not found: ${bwa_dir}" }
+        .into {bwa_index; bwa_index_bwamem}
 }
 
 
@@ -448,7 +449,7 @@ process makeBWAIndex {
     file where_are_my_files
 
     output:
-    file "BWAIndex" into bwa_index
+    file "BWAIndex" into (bwa_index, bwa_index_bwamem)
     file "where_are_my_files.txt"
 
     script:
@@ -700,7 +701,7 @@ process bwa {
 
     input:
     set val(name), file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
-    file index from bwa_index.first()
+    file index from bwa_index
 
 
     output:
@@ -810,7 +811,7 @@ process bwamem {
 
     input:
     set val(name), file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
-    file index from bwa_index.first()
+    file index from bwa_index_bwamem
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
