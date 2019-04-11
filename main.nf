@@ -250,6 +250,8 @@ if("${params.fasta}".endsWith(".gz")){
     }   
     } else {
     fasta_for_indexing = file("${params.fasta}")
+    lastPath = params.fasta.lastIndexOf(File.separator)
+    bwa_base = params.fasta.substring(lastPath+1)
 }
 
 //Index files provided? Then check whether they are correct and complete
@@ -257,10 +259,13 @@ if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
     exit 1, "Invalid aligner option. Default is bwa, but specify --circularmapper or --bwamem to use these."
 }
 if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
-    bwa_index = Channel
-        .value("${params.bwa_index}",checkIfExists: true)
-        .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}"}
-        .into{ch_bwa_index;ch_bwa_index_bwamem}
+    lastPath = params.bwa_index.lastIndexOf(File.separator)
+    bwa_dir =  params.bwa_index.substring(0,lastPath+1)
+    bwa_base = params.bwa_index.substring(lastPath+1)
+
+     bwa_index = Channel
+        .fromPath(bwa_dir, checkIfExists: true)
+        .ifEmpty { exit 1, "BWA index directory not found: ${bwa_dir}" }
 } 
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
@@ -428,8 +433,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 * Create BWA indices if they are not present
 */ 
 
-if(!params.bwa_index && params.fasta && (params.aligner =='bwa' || params.bwamem)) {
-    
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -445,15 +448,14 @@ process makeBWAIndex {
     file where_are_my_files
 
     output:
-    file "${fasta}.{,amb,ann,bwt,sa,pac}" into (ch_bwa_index,ch_bwa_index_bwamem)
+    file "BWAIndex" into bwa_index_from_indexing
     file "where_are_my_files.txt"
 
     script:
     """
     bwa index $fasta
+    mkdir BWAIndex && mv ${fasta}* BWAIndex
     """
-}
-
 }
 
 
@@ -697,9 +699,7 @@ process bwa {
 
     input:
     set val(name), file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
-    
-    file index from ch_bwa_index
-    file fasta from fasta_for_indexing
+    file index from bwa_index.mix(bwa_index_from_indexing).first()
 
 
     output:
@@ -709,11 +709,12 @@ process bwa {
 
     script:
     size = "${params.large_ref}" ? '-c' : ''
+    fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
     if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval)){
     prefix = reads[0].toString().tokenize('.')[0]
-    """ 
+    """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
     bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r2.sai ${reads[0]} ${reads[1]} | samtools sort -@ ${task.cpus} -O bam - > ${prefix}.sorted.bam
@@ -722,7 +723,7 @@ process bwa {
     } else {
     //PE collapsed, or SE data 
     prefix = reads[0].toString().tokenize('.')[0]
-    """ 
+    """
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     samtools index "${size}" "${prefix}".sorted.bam
@@ -808,8 +809,7 @@ process bwamem {
 
     input:
     set val(name), file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
-    file index from ch_bwa_index_bwamem
-    file fasta from fasta_for_indexing
+    file index from bwa_index.first()
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
@@ -817,6 +817,7 @@ process bwamem {
     
 
     script:
+    fasta = "${index}/${bwa_base}"
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     size = "${params.large_ref}" ? '-c' : ''
 
