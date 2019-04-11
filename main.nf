@@ -258,7 +258,7 @@ if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
 }
 if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
     bwa_index = Channel
-        .fromPath("${params.bwa_index}",checkIfExists: true)
+        .value("${params.bwa_index}",checkIfExists: true)
         .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}"}
         .into{ch_bwa_index;ch_bwa_index_bwamem}
 } 
@@ -445,16 +445,12 @@ process makeBWAIndex {
     file where_are_my_files
 
     output:
-    file "bwa_index" into (ch_bwa_index,ch_bwa_index_bwamem)
+    file "${fasta}.{,amb,ann,bwt,sa,pac}" into (ch_bwa_index,ch_bwa_index_bwamem)
     file "where_are_my_files.txt"
 
     script:
-    base = "${fasta.baseName}"
     """
-    mkdir bwa_index
-    mv "${fasta}" "bwa_index/${base}.fasta"
-    cd bwa_index
-    bwa index "${base}.fasta"
+    bwa index $fasta
     """
 }
 
@@ -478,16 +474,12 @@ process makeFastaIndex {
     file where_are_my_files
 
     output:
-    file "faidx/${base}.fasta.fai" into ch_fasta_faidx_index
-    file "faidx/${base}.fasta"
+    file "${base}.fasta.fai" into ch_fasta_faidx_index
     file "where_are_my_files.txt"
 
     script:
     base = "${fasta.baseName}"
     """
-    mkdir faidx
-    mv $fasta "faidx/${base}.fasta"
-    cd faidx
     samtools faidx "${base}.fasta"
     """
 }
@@ -707,6 +699,7 @@ process bwa {
     set val(name), file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
     
     file index from ch_bwa_index
+    file fasta from fasta_for_indexing
 
 
     output:
@@ -715,7 +708,6 @@ process bwa {
     
 
     script:
-    fasta = "${index}/*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
     //PE data without merging, PE data without any AR applied
@@ -753,15 +745,12 @@ process circulargenerator{
     file fasta from fasta_for_indexing
 
     output:
-    file "cm_index" into ch_circularmapper_indices
+    file "${prefix}.{amb,ann,bwt,sa,pac}" into ch_circularmapper_indices
 
     script:
     prefix = "${fasta.baseName}_${params.circularextension}.fasta"
     """
-    mkdir cm_index
     circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
-    cp "${fasta.baseName}_${params.circularextension}.fasta" cm_index/
-    cd cm_index
     bwa index $prefix
     """
 
@@ -777,6 +766,7 @@ process circularmapper{
     input:
     set val(name), file(reads) from ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm)
     file index from ch_circularmapper_indices
+    file fasta from fasta_for_indexing
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
@@ -785,7 +775,6 @@ process circularmapper{
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
     
-    fasta = "${index}/*_*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.singleEnd && params.skip_collapse ){
@@ -820,6 +809,7 @@ process bwamem {
     input:
     set val(name), file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
     file index from ch_bwa_index_bwamem
+    file fasta from fasta_for_indexing
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
@@ -828,7 +818,6 @@ process bwamem {
 
     script:
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-    fasta = "${index}/*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.singleEnd && params.skip_collapse){
