@@ -144,7 +144,6 @@ params.genome = "Custom"
 params.snpcapture = false
 params.bedfile = ''
 params.fasta = false
-params.bwa_index = false
 params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
@@ -263,10 +262,12 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
     bwa_base = params.bwa_index.substring(lastPath+1)
 
-     bwa_index = Channel
+    bwa_index = Channel
         .fromPath(bwa_dir, checkIfExists: true)
         .ifEmpty { exit 1, "BWA index directory not found: ${bwa_dir}" }
-} 
+}
+
+
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd || params.bam){
@@ -433,6 +434,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 * Create BWA indices if they are not present
 */ 
 
+if(!params.bwa_index && params.fasta && (params.aligner == 'bwa' || params.bwamem)){
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -441,14 +443,12 @@ process makeBWAIndex {
             else null
     }
 
-    when: !params.bwa_index && params.fasta && (params.aligner == 'bwa' || params.bwamem)
-
     input:
     file fasta from fasta_for_indexing
     file where_are_my_files
 
     output:
-    file "BWAIndex" into bwa_index_from_indexing
+    file "BWAIndex" into bwa_index
     file "where_are_my_files.txt"
 
     script:
@@ -456,6 +456,7 @@ process makeBWAIndex {
     bwa index $fasta
     mkdir BWAIndex && mv ${fasta}* BWAIndex
     """
+    }
 }
 
 
@@ -699,7 +700,7 @@ process bwa {
 
     input:
     set val(name), file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
-    file index from bwa_index.mix(bwa_index_from_indexing).first()
+    file index from bwa_index.first()
 
 
     output:
@@ -809,7 +810,7 @@ process bwamem {
 
     input:
     set val(name), file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
-    file index from bwa_index.mix(bwa_index_from_indexing).first()
+    file index from bwa_index.first()
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
