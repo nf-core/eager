@@ -19,10 +19,10 @@ Remove mapped in bam file from fastq files
     parser.add_argument('bam_file', help="path to bam file")
     parser.add_argument('fwd', help='path to forward fastq file')
     parser.add_argument(
-        '-2',
+        '-rev',
         dest="rev",
         default=None,
-        help="path to forward fastq file")
+        help="path to reverse fastq file")
     parser.add_argument(
         '-of',
         dest="out_fwd",
