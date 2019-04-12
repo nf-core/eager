@@ -245,7 +245,7 @@ if("${params.fasta}".endsWith(".gz")){
         file zipped_fasta
 
         output:
-        file $rm_gz into fasta_for_indexing
+        file "${rm_gz}" into fasta_for_indexing
 
         script:
         """
