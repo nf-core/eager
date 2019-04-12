@@ -233,8 +233,12 @@ if("${params.fasta}".endsWith(".gz")){
     //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
     zipped_fasta = file("${params.fasta}")
 
+    rm_gz = params.fasta - '.gz'
+    lastPath = rm_gz.lastIndexOf(File.separator)
+    bwa_base = rm_gz.substring(lastPath+1)
+
     process unzip_reference{
-        tag "$zipfasta"
+        tag "${zipped_fasta}"
 
         input:
         file zipped_fasta
@@ -244,9 +248,10 @@ if("${params.fasta}".endsWith(".gz")){
 
         script:
         """
-        pigz -f -d -p ${task.cpus} $zipfasta
+        pigz -f -d -p ${task.cpus} $zipped_fasta
         """
-    }   
+        }
+       
     } else {
     fasta_for_indexing = file("${params.fasta}")
     lastPath = params.fasta.lastIndexOf(File.separator)
