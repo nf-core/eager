@@ -1052,9 +1052,10 @@ process damageprofiler {
 
     output:
     file "*"
-    file "*/*.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
+    file "${base}/dmgprof.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
 
     script:
+    base = "${bam.baseName}"
     """
     damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . 
     """
