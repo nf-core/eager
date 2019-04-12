@@ -520,7 +520,6 @@ process makeSeqDict {
 
     script:
     """
-    cd seq_dict
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
     """
 }
