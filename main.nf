@@ -486,13 +486,12 @@ process makeFastaIndex {
     file where_are_my_files
 
     output:
-    file "${base}.fasta.fai" into ch_fasta_faidx_index
+    file "*.fai" into ch_fasta_faidx_index
     file "where_are_my_files.txt"
 
     script:
-    base = "${fasta.baseName}"
     """
-    samtools faidx "${base}.fasta"
+    samtools faidx $fasta
     """
 }
 
@@ -516,16 +515,13 @@ process makeSeqDict {
     file where_are_my_files
 
     output:
-    file "seq_dict/*.dict" into ch_seq_dict
+    file "*.dict" into ch_seq_dict
     file "where_are_my_files.txt"
 
     script:
-    base = "${fasta.baseName}.fasta"
     """
-    mkdir -p seq_dict
-    mv $fasta "seq_dict/${base}"
     cd seq_dict
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$base O="${fasta.baseName}.dict"
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
     """
 }
 
@@ -679,7 +675,7 @@ process adapter_removal {
 * STEP 2.1 - FastQC after clipping/merging (if applied!)
 */
 process fastqc_after_clipping {
-    tag "${prefix}"
+    tag "${name}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
@@ -692,7 +688,6 @@ process fastqc_after_clipping {
     file "*_fastqc.{zip,html}" optional true into ch_fastqc_after_clipping
 
     script:
-    prefix = reads[0].toString().tokenize('.')[0]
     """
     fastqc -q $reads
     """
@@ -703,7 +698,6 @@ Step 3: Mapping with BWA, SAM to BAM, Sort BAM
 */
 
 process bwa {
-    tag "$prefix"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
     when: !params.circularmapper && !params.bwamem
@@ -724,7 +718,8 @@ process bwa {
 
     //PE data without merging, PE data without any AR applied
     if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval)){
-    prefix = reads[0].toString().tokenize('.')[0]
+    lastPath = params.fasta.lastIndexOf(File.separator)
+    prefix = params.fasta.substring(lastPath+1)
     """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
@@ -733,7 +728,8 @@ process bwa {
     """
     } else {
     //PE collapsed, or SE data 
-    prefix = reads[0].toString().tokenize('.')[0]
+    lastPath = params.fasta.lastIndexOf(File.separator)
+    prefix = params.fasta.substring(lastPath+1)
     """
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
