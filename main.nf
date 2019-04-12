@@ -337,12 +337,13 @@ if( params.readPaths ){
             .map { row -> [ file( row )  ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
             .dump()
-            .into { ch_bam_to_fastq_convert }
+            .set { ch_bam_to_fastq_convert }
 
             //Set up clean channels
             ch_read_files_fastqc = Channel.empty()
             ch_read_files_complexity_filter_poly_g = Channel.empty()
             ch_read_files_clip = Channel.empty()
+            ch_read_unmap = Channel.empty()
     }
 } else if (!params.bam){
      Channel
@@ -358,12 +359,13 @@ if( params.readPaths ){
         .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\n" }
         .dump() //For debugging purposes
-        .into { ch_bam_to_fastq_convert }
+        .set { ch_bam_to_fastq_convert }
 
         //Set up clean channels
         ch_read_files_fastqc = Channel.empty()
         ch_read_files_complexity_filter_poly_g = Channel.empty()
         ch_read_files_clip = Channel.empty()
+        ch_read_unmap = Channel.empty()
 
 }
 
@@ -540,7 +542,8 @@ process convertBam {
     file bam from ch_bam_to_fastq_convert
 
     output:
-    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp, ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
+    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp, ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem,
+    ch_read_unmap_convertBam)
 
     script:
     base = "${bam.baseName}"
@@ -931,7 +934,7 @@ process strip_input_fastq {
     when: params.strip_input_fastq
 
     input: 
-    set val(name), file(fq) from ch_read_unmap
+    set val(name), file(fq) from ch_read_unmap.mix(ch_read_unmap_convertBam)
     file bam from ch_bwa_mapped_reads_strip.mix(ch_circular_mapped_reads_strip, ch_bwamem_mapped_reads_strip)
 
     output:
