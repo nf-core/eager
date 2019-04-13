@@ -947,14 +947,14 @@ process strip_input_fastq {
         out_fwd = bam.baseName+'.stripped.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${fq[0]} -of $out_fwd -p ${task.cpus}
+        extract_map_reads.py $bam ${fq[0]} -m ${params.strip_mode} -of $out_fwd -p ${task.cpus}
         """
     } else {
         out_fwd = bam.baseName+'.stripped.fwd.fq.gz'
         out_rev = bam.baseName+'.stripped.rev.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${fq[0]} -2 ${fq[0]} -of $out_fwd -or $out_rev -p ${task.cpus}
+        extract_map_reads.py $bam ${fq[0]} -rev ${fq[1]} -m  ${params.strip_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
         """ 
     }
     
