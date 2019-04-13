@@ -163,8 +163,8 @@ def write_fq(fq_dict, fname, mode):
     """
     Write to fastq file
     INPUT:
-    - fq_dict(dict) dictionary with unmapped read names as keys, seq and quality as values
-        in a list
+    - fq_dict(dict) dictionary with unmapped read names as keys, 
+        unmapped/mapped (u|m), seq, and quality as values in a list
     - fname(string) Path to output fastq file
     - mode(string) strip (remove read) or replace (replace read sequence) by Ns
     """
@@ -216,6 +216,11 @@ def write_fq(fq_dict, fname, mode):
                         f.write(f"{'N'*len(fq_dict[k][1])}\n")
                         for i in fq_dict[k][2:]:
                             f.write(f"{i}\n")
+
+
+def check_strip_mode(mode):
+    if mode.lower() not in ['replace', 'strip']:
+        print(f"Mode must be {' or '.join(mode)}")
 
 
 if __name__ == "__main__":
