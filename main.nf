@@ -728,7 +728,7 @@ process bwa {
     """
     } else {
     //PE collapsed, or SE data 
-    prefix = "${reads}.baseName}"
+    prefix = "${reads.baseName}"
     """
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
