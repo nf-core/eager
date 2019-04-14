@@ -718,9 +718,8 @@ process bwa {
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval)){
-    lastPath = "${reads[0]}".lastIndexOf(File.separator)
-    prefix = "${reads[0]}".substring(lastPath+1)
+    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval || params.skip_trim)){
+    prefix = "${reads[0].baseName}"
     """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
@@ -729,8 +728,7 @@ process bwa {
     """
     } else {
     //PE collapsed, or SE data 
-    lastPath = "${reads}".lastIndexOf(File.separator)
-    prefix = "${reads}".substring(lastPath+1)
+    prefix = "${reads}.baseName}"
     """
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
