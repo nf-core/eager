@@ -698,6 +698,7 @@ Step 3: Mapping with BWA, SAM to BAM, Sort BAM
 */
 
 process bwa {
+    tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
     when: !params.circularmapper && !params.bwamem
