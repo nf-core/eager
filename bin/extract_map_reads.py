@@ -13,9 +13,7 @@ def _get_args():
     parser = argparse.ArgumentParser(
         prog='extract_mapped_reads',
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=f'''
-Remove mapped in bam file from fastq files
-        ''')
+        description="Remove mapped in bam file from fastq files")
     parser.add_argument('bam_file', help="path to bam file")
     parser.add_argument('fwd', help='path to forward fastq file')
     parser.add_argument(
@@ -89,6 +87,19 @@ def extract_mapped(bam, processes):
         chrs = bamfile.references
     except ValueError as e:
         print(e)
+
+    # Returns empty list if not reads mapped (because not ref match in bam)
+    if len(chrs) == 0:
+        return([])
+
+    # Checking that nb_process is not > nb_chromosomes
+    elif len(chrs) < processes:
+        print(
+            f"""Requested {processes} processe(s), 
+            but can only be parallelized on {len(chrs)} 
+            processes with these data""")
+        processes = len(chrs)
+
     extract_mapped_chr_partial = partial(extract_mapped_chr, bam=bam)
     p = multiprocessing.Pool(processes)
     res = p.map(extract_mapped_chr_partial, chrs)
@@ -225,10 +236,6 @@ def check_strip_mode(mode):
 
 if __name__ == "__main__":
     BAM, IN_FWD, IN_REV, OUT_FWD, OUT_REV, MODE, PROC = _get_args()
-
-    if IN_REV and not OUT_REV:
-        print('You specified an input reverse fastq, but no output reverse fastq')
-        sys.exit(1)
 
     if OUT_FWD == None:
         out_fwd = f"{IN_FWD.split('/')[-1].split('.')[0]}.r1.fq.gz"
