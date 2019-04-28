@@ -12,6 +12,7 @@ top_modules:
      - 'fastqc':
          name: 'FastQC (post-AdapterRemoval)'
          path_filters:
+             - '*.truncated_fastqc.zip'
              - '*.combined*_fastqc.zip'
      - 'samtools'
      - 'preseq'
