@@ -39,7 +39,7 @@ def helpMessage() {
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
     References                      If not specified in the configuration file, or you wish to overwrite any of the references.
-      --bwa_index                   Path to directory containing BWA index files
+      --bwa_index                   Prefix of the BWA index files including the full path (everything before the endings '.amb' '.ann' '.bwt' most likely the same value supplied with the --fasta option)
       --bedfile                     Path to BED file for SNPCapture methods
       --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
       --fasta_index                 Path to samtools FASTA index (typically ending in '.fai')
@@ -144,7 +144,7 @@ params.pairedEnd = false
 params.genome = "Custom"
 params.snpcapture = false
 params.bedfile = ''
-params.fasta = false
+params.fasta = ''
 params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
@@ -230,7 +230,9 @@ multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 // Validate inputs
-if("${params.fasta}".endsWith(".gz")){
+if ( params.fasta.isEmpty () ){
+    exit 1, "Please specify --fasta with the path to your reference"
+} else if("${params.fasta}".endsWith(".gz")){
     //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
     zipped_fasta = file("${params.fasta}")
 
@@ -444,7 +446,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 * Create BWA indices if they are not present
 */ 
 
-if(!params.bwa_index && params.fasta && (params.aligner == 'bwa' || params.bwamem)){
+if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.bwamem)){
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -480,7 +482,7 @@ process makeFastaIndex {
             else if(!params.saveReference && filename == "where_are_my_files.txt") filename
             else null
     }
-    when: !params.fasta_index && params.fasta && params.aligner == 'bwa'
+    when: !params.fasta_index && !params.fasta.isEmpty() && params.aligner == 'bwa'
 
     input:
     file fasta from fasta_for_indexing
@@ -509,7 +511,7 @@ process makeSeqDict {
             else null
     }
     
-    when: !params.seq_dict && params.fasta
+    when: !params.seq_dict && !params.fasta.isEmpty()
 
     input:
     file fasta from fasta_for_indexing
@@ -570,6 +572,8 @@ process fastqc {
     script:
     """
     fastqc -q $reads
+    rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
+    rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
 }
 
