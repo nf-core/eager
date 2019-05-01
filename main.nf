@@ -37,6 +37,10 @@ def helpMessage() {
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
+      --pop_gen                     Run sex determination and angsd contamination estimation (if male)
+      --pop_gen_genome_build        GRCh37 or GRCh38 (Defaults to genome{0,5} and is required to set the PAR region for contamination estimation when this is not explicitly supplied)
+      --pop_gen_angsd_region        Haploid genomic region used for estimating contamination by angsd (Defaults to non PAR regions on X for GRCh37 or GRCh38)
+      --pop_gen_angsd_poly_sites    Polymorphic sites in the angsd region
 
     References                      If not specified in the configuration file, or you wish to overwrite any of the references.
       --bwa_index                   Prefix of the BWA index files including the full path (everything before the endings '.amb' '.ann' '.bwt' most likely the same value supplied with the --fasta option)
@@ -111,6 +115,9 @@ def helpMessage() {
       --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
       --bamutils_softclip           Use softclip instead of hard masking
 
+    Genotyping
+      --genotyping_haplo_caller     Genotype calling using GATK HaplotypeCaller
+
     Other options:     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -141,9 +148,14 @@ if (params.help){
 params.name = false
 params.singleEnd = false
 params.pairedEnd = false
+params.bam = false
 params.genome = "Custom"
 params.snpcapture = false
 params.bedfile = ''
+params.pop_gen = false
+params.pop_gen_genome_build = ""
+params.pop_gen_angsd_region = ""
+params.pop_gen_angsd_poly_sites = ""
 params.fasta = ''
 params.seq_dict = false
 params.fasta_index = false
@@ -153,6 +165,7 @@ params.pmd_udg_type = 'half'
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
 params.plaintext_email = false
+params.pop_gen_bedfile = "$baseDir/1240K.pos.list_hs37d5.0based.bed"
 
 // Skipping parts of the pipeline for impatient users
 params.skip_fastqc = false 
@@ -220,6 +233,17 @@ params.bamutils_clip_left = 1
 params.bamutils_clip_right = 1 
 params.bamutils_softclip = false 
 
+//Pop Gen settings
+
+angsd_region_grch37 = "X:2699520-154931044"
+angsd_region_grch38 = "X:2781479-155701382"
+
+angsd_polymorphic_grch37 = "$baseDir/assets/angsd_GRCh37_HapMapX.gz"
+angsd_polymorphic_grch38 = "$baseDir/assets/angsd_GRCh38_HapMapX.gz"
+
+// Genotyping settings
+params.genotyping_haplo_caller = false
+
 //unmap
 
 params.strip_input_fastq = false
@@ -274,7 +298,7 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
     Channel
         .fromPath(bwa_dir, checkIfExists: true)
         .ifEmpty { exit 1, "BWA index directory not found: ${bwa_dir}" }
-        .into {bwa_index; bwa_index_bwamem}
+        .into {bwa_index; bwa_index_bwamem; bwa_index_gatk}
 }
 
 
@@ -373,6 +397,40 @@ if( params.readPaths ){
 
 }
 
+// Setup for Pop Gen
+
+
+pop_gen_genome_build = ( params.pop_gen && params.pop_gen_genome_build.isEmpty() && params.genome.length() > 5 ) ? params.genome.substring (0, 6) : params.pop_gen_genome_build
+pop_gen_angsd_region = params.pop_gen_angsd_region
+pop_gen_angsd_poly_sites = params.pop_gen_angsd_poly_sites
+
+if ( params.pop_gen && params.pop_gen_angsd_region.isEmpty() )
+{
+    switch (pop_gen_genome_build) {
+        case "GRCh37":
+            pop_gen_angsd_region = angsd_region_grch37
+            pop_gen_angsd_poly_sites = angsd_polymorphic_grch37
+            break
+        case "GRCh38":
+            pop_gen_angsd_region = angsd_region_grch38
+            pop_gen_angsd_poly_sites = angsd_polymorphic_grch38
+            break
+        default:
+            exit 1, "Failed to recognise pop_gen_genome_build '${pop_gen_genome_build}', try supplying --pop_gen_genome_build [GRCh37,GRCh38]"
+    }
+}
+
+
+if ( params.pop_gen && pop_gen_genome_build.isEmpty() && pop_gen_angsd_region.isEmpty() )
+{
+    exit 1, "Requested --pop_gen but you must supply either --pop_gen_genome_build or --pop_gen_angsd_region"
+}
+
+if ( params.pop_gen && pop_gen_angsd_poly_sites.isEmpty() )
+{
+    exit 1, "Requested --pop_gen but you must supply --pop_gen_angsd_poly_sites"
+}
+
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
@@ -381,6 +439,9 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
 summary['Fasta Ref']    = params.fasta
+if(params.pop_gen) {
+    summary["Pop Gen Genome Build"] = params.pop_gen_genome_build
+}
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
@@ -460,7 +521,7 @@ process makeBWAIndex {
     file where_are_my_files
 
     output:
-    file "BWAIndex" into (bwa_index, bwa_index_bwamem)
+    file "BWAIndex" into (bwa_index, bwa_index_bwamem, bwa_index_gatk)
     file "where_are_my_files.txt"
 
     script:
@@ -887,7 +948,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_popgen, ch_bam_filtered_gatk
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}"
@@ -1120,10 +1181,14 @@ ch_dedup_for_pmdtools = Channel.empty()
 //Bamutils TrimBam Channel
 ch_for_bamutils = Channel.empty()
 
+//Population genetics Channel
+ch_for_pop_gen = Channel.empty()
+
+
 if(!params.skip_deduplication){
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).into {ch_for_pmdtools;ch_for_bamutils}
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).into {ch_for_pmdtools;ch_for_bamutils;ch_for_pop_gen}
 } else {
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).into {ch_for_pmdtools;ch_for_bamutils}
+    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).into {ch_for_pmdtools;ch_for_bamutils;ch_for_pop_gen}
 }
 
 if(!params.run_pmdtools){
@@ -1190,8 +1255,80 @@ process bam_trim {
     """
 }
 
+ch_pop_gen = Channel.create()
+ch_bam_for_pop_gen = Channel.empty()
+
+if(!params.skip_deduplication){
+    ch_bam_for_pop_gen.mix(ch_for_pop_gen,ch_trimmed_bam_for_genotyping).set {ch_pop_gen}
+} else {
+    ch_bam_for_pop_gen.mix(ch_bam_filtered_popgen,ch_for_pop_gen,ch_trimmed_bam_for_genotyping).set {ch_pop_gen}
+}
+
+if(!params.pop_gen){
+    ch_pop_gen.close()
+}
 
 
+process sex_determination {
+
+    when: params.pop_gen
+
+    input:
+    file(bam_file) from ch_pop_gen
+
+    output:
+    set val("cats"), file(bam_file), file("${bam_file}.bai") into ch_pop_gen_angsd
+
+    script:
+    bed_file = params.snpcapture ? "${params.bedfile}" : "${params.pop_gen_bedfile}"
+    """
+    samtools index ${bam_file}
+    echo ${bam_file} >> bamlist.txt
+    samtools depth -aa -q30 -Q30 -b ${bed_file} -f bamlist.txt | Sex.DetERRmine.py -f bamlist.txt > SexDet.txt
+    cat SexDet.txt | sed -e '1d;' | awk 'BEGIN{FS=OFS="\\t";}{sex="unknown";if ( \$9 > 0.2 && \$8 < 0.8 ) { sex="male"; } if ( \$9 < 0.05 && \$8 > 0.05 ) { sex="female";} print sex;}'
+    """
+}
+
+process angsd {
+
+    //ANGSD Xcontamination will exit with status 134 when the number of SNPs is not large enough for estimation.
+    validExitStatus 0,134
+
+    when: params.pop_gen
+
+    input:
+    set val(sex), file(bam_file), file(bai_file) from ch_pop_gen_angsd
+
+    output:
+    set stdout, file(bam_file), file(bai_file) into ch_gatk_haplotype_caller
+
+    script:
+    """
+    angsd -i ${bam_file} -r ${pop_gen_angsd_region} -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${bam_file.baseName}.doCounts
+    contamination -a ${bam_file.baseName}.doCounts.icnts.gz -h ${pop_gen_angsd_poly_sites} 2> ${bam_file.baseName}.X.contamination.out
+    export ANGSD_CONT_ET=\$(cat ${bam_file.baseName}.X.contamination.out | grep "Method2: new_llh" | cut -d ' ' -f 4 | cut -d ':' -f 2)
+    export ANGSD_CONT_SE=\$(cat ${bam_file.baseName}.X.contamination.out | grep "Method2: new_llh" | cut -d ' ' -f 5 | cut -d ':' -f 2)
+    echo -e "${bam_file.baseName}\\t\${ANGSD_CONT_ET}\\t\${ANGSD_CONT_SE}" > ${bam_file.baseName}.X.contamination.out.tsv
+    cat ${bam_file.baseName}.X.contamination.out.tsv | cut -f 2
+    """
+}
+
+process gatk_haplotype_caller {
+
+    when: params.genotyping_haplo_caller
+
+    input:
+    set val(contamination_fraction), file(bam_file), file(bai_file) from ch_gatk_haplotype_caller
+    file(index) from bwa_index_gatk
+
+    script:
+    fasta = "${index}/${bwa_base}"
+    contamination_fraction_value = "${contamination_fraction}".trim()
+    contamination_fraction_param = "${contamination_fraction_value}".isEmpty() ? "" : "--contamination-fraction-to-filter ${contamination_fraction_value}"
+    """
+    gatk HaplotypeCaller -R ${fasta} -I ${bam_file} -O ${bam_file.baseName}.vcf.gz ${contamination_fraction_param} --annotation Coverage
+    """
+}
 
 /*
 Processing missing:
