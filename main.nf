@@ -32,14 +32,14 @@ def helpMessage() {
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
       --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
       --bam                         Specifies that the input is in BAM format
-      --fasta                       Path to Fasta reference (required if not iGenome reference)
+      --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
     References                      If not specified in the configuration file, or you wish to overwrite any of the references.
-      --bwa_index                   Prefix of the BWA index files including the full path (everything before the endings '.amb' '.ann' '.bwt' most likely the same value supplied with the --fasta option)
+      --bwa_index                   Path and name of a a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value supplied with the --fasta option)
       --bedfile                     Path to BED file for SNPCapture methods
       --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
       --fasta_index                 Path to samtools FASTA index (typically ending in '.fai')
@@ -54,7 +54,7 @@ def helpMessage() {
       --skip_deduplication
     
     Complexity Filtering 
-      --complexity_filter_poly_g            Run poly-G removal on FASTQ files
+      --complexity_filter_poly_g        Run poly-G removal on FASTQ files
       --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed (default: 10)
     
     Clipping / Merging
