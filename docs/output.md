@@ -121,6 +121,8 @@ This can already give you an indication on the authenticity of your library - as
 
 ### FastP
 
+TODO
+
 ### AdapterRemoval
 
 #### Background
@@ -165,6 +167,22 @@ The length distribution plots show the number of reads at each read-length. You 
 With paired-end ancient DNA sequencing runs You expect to see a slight increase in shorter fragments in the reverse (R2) read, as our fragments are so short we often don't reach the maximum number of cycles of that particular sequencing run. 
 
 ### Samtools
+
+#### Background
+
+This module provides numbers in raw counts of the mapping of your DNA reads to your reference genome. 
+
+#### Flagstat Plot
+
+This dot plot shows different statistics, and the number of reads (typically as an multiple e.g. million, or thousands), are represented by dots on the X axis. 
+
+In most cases the first two rows, 'Total Reads' and 'Total Passed QC' will be the same as EAGER does not do quality control of reads with samtools. This number should normally be the same the number of (clipped, and if paired-end, merged) retained reads coming out of AdapterRemoval.
+
+The third row 'Mapped' represents the number of reads that found a place that could be aligned on your reference genome. This is the raw number of mapped reads, prior PCR duplication.
+
+The remaining rows will be 0 when running `bwa aln` as these characteristucs of the data are not considered by the algorithm by default.
+
+
 ### DeDup
 ### QualiMap
 ### DamageProfiler
