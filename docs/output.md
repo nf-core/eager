@@ -182,9 +182,36 @@ The third row 'Mapped' represents the number of reads that found a place that co
 
 The remaining rows will be 0 when running `bwa aln` as these characteristucs of the data are not considered by the algorithm by default.
 
-
 ### DeDup
+
+TODO
+
+### Preseq
+
+#### Background
+
+Preseq is a collection of tools that allow assessment of the complexity of the library, where complexity means the number of unique molecules in your library (i.e. not molecules with the exact same length and sequence).
+
+There are two algorithms from the tools we use: `c_curve` and `lc_extrap`. The former gives you the expected number of unique reads if you were to repeated sequencing but with fewer reads than your first sequencing run. The latter tries to extrapolate the decay in the number of unique reads you would get with re-sequencing but with more reads than your initial sequencing run.
+
+Due to endogenous DNA being so low when doing initial screening, the maths behind `lc_extrap` often fails as there is not enough data. Therefore EAGER2 sticks with `c_curve` which gives a similar approximation of the library complexity, but is more robust to smaller datasets.. 
+
+#### Complexity Curve
+
+Using the de-duplication information from DeDup, the calculated curve (a solid line) allows you to estimate: at this sequencing depth (on the X axis), how many unique molecules would you have sequenced (along the Y axs). When you start getting DNA sequences that are the mostly same as ones you've sequenced before, it is often not cost effective to continue sequencing and is a good point to stop. 
+
+The dashed line represents a 'perfect' library containing only unique molecules and no duplicates. You are looking for your library stay as close to this line as possible. Plateauing of your curve shows that at that point you would not be getting any more unique molecules and you shouldn't sequence further than this.
+
+Plateauing can be caused by a number of reasons:
+
+  * You have simply sequenced your library to exhaustion
+  * You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio.
+  * You have a low quality library made up of mappable seuqencing artefacts that were able to pass filtering (e.g. adapters)
+
 ### QualiMap
+
+TODO 
+
 ### DamageProfiler
 #### Background
 DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
@@ -216,7 +243,6 @@ When looking at the length distribution plots, keep in mind the following:
   * You may see large peaks at paired-end turn arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
   
 ### PMDTools
-### Preseq
 ### BamUtil
 
 For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info)
