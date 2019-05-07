@@ -37,10 +37,13 @@ These are less important directories which are used less often, normally in the 
 * `reference_genome` contains either text files describing the location of specified reference genomes, and if not already supplied when running the pipeline, auxilary indexing files. This is often useful when re-running other samples using the same reference genome, but is otherwise often not otherwise important.
 * The `work` directory contains all the `nextflow` processing directories. This is where `nextflow` actually does all the work, but in an efficient programatic procedure that is not intuitive to human-readers. Due to this, the directory is often not important to a user as all the useful output files are linked to the module directories (see above). Otherwise, this directory maybe useful when a bug-reporting.
 
-
 ## Module overview
 
 In this section we will run through the output of each module as reported in a MultiQC output. This can be viewed by opening the HTML file in your `<RUN_OUTPUT_DIRECTORY>/MultiQC/` directory in a web browser. The section will also provide some basic tips on how to interpret the plots and values, although we highly recommend reading the READMEs or original papers of the tools used in the pipeline. A list of references can be seen on the [EAGER2 github repository](https://github.com/nf-core/eager/)
+
+### General Stats Table
+
+TODO
 
 ### FastQC (pre- and post-AdapterRemoval)
 
@@ -184,8 +187,26 @@ The remaining rows will be 0 when running `bwa aln` as these characteristucs of 
 
 ### DeDup
 
-TODO
+#### Background
 
+DeDup is a duplicate removal tool which searchs for PCR duplicates and removes them from your BAM file. We remove these duplicates because otherwise you would be artificially increasing your coverage and subsequently confidence in genotyping, by considering these lab artefacts which are not biologically meaningful. DeDup looks for reads with the same start and end coordinates, and whether they have exactly the same sequence. The main difference of DeDup versus e.g. `samtools markduplicates` is that DeDup considers _both_ ends of a read, not just the start position, so it is more precise in removing actual duplicates without penalising often already low aDNA data.
+
+#### DeDup Plot
+
+This stacked bar plot shows as a whole the total number of reads in the BAM file going into DeDup. The different sections of a given bar represents the following: 
+  * **Not Removed** - the overall number of reads remaining after duplicate removal. These may have had a duplicate (see below).
+  * **Reverse Removed** - the number of reads that found to be a duplicate of another and removed that were un-collapsed reverse reads (from the earlier read merging step).
+  * **Forward Removed** - the number of reads that found to be a duplicate of another and removed that were an un-collapsed forward reads (from the earlier read merging step).
+  * **Merged Removed** - the number of reads that were found to be a duplicate and removed that were a collapsed read (from the earlier read merging step).
+  
+ Exceptions to the above:
+   * If you do not have paired end data, you will not have sections for 'Merged removed' or 'Reverse removed'.
+   * If you use the `--dedup_all_merged` flag, you will not have the 'Forward removed' or 'Reverse removed' sections.
+ 
+ Things to look out for:
+   * The smaller the number of the duplicates removed the better. If you have a smaller number of duplicates, and wish to sequence deeper, you can use the preseq module (see below) to make an estimate on how much deeper to sequence.
+   * If you have a very large number of duplicates that were removed this may suggest you have an over amplified library, or a lot of left-over adapters that were able to map to your genome.
+   
 ### Preseq
 
 #### Background
