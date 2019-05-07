@@ -3,7 +3,8 @@
 ## Table of contents
 * [Introduction](#introduction)
 * [Directory Structure](#directory-structure)
-* [Module Overview](#module-overview)
+* [MultiQC Report](#multiqc-report)
+* [Output Files](#output-files)
 
 ## Introduction
 The output of EAGER2 consists of two main components: output files (e.g. BAM or FASTQ files), and summary statistics of the whole run presented in a [`MultiQC`](https://multiqc.info) report. (Some) intermediate files and module-specific statstics files are also retained.
@@ -37,9 +38,11 @@ These are less important directories which are used less often, normally in the 
 * `reference_genome` contains either text files describing the location of specified reference genomes, and if not already supplied when running the pipeline, auxilary indexing files. This is often useful when re-running other samples using the same reference genome, but is otherwise often not otherwise important.
 * The `work` directory contains all the `nextflow` processing directories. This is where `nextflow` actually does all the work, but in an efficient programatic procedure that is not intuitive to human-readers. Due to this, the directory is often not important to a user as all the useful output files are linked to the module directories (see above). Otherwise, this directory maybe useful when a bug-reporting.
 
-## Module overview
+##  MultiQC Report
 
 In this section we will run through the output of each module as reported in a MultiQC output. This can be viewed by opening the HTML file in your `<RUN_OUTPUT_DIRECTORY>/MultiQC/` directory in a web browser. The section will also provide some basic tips on how to interpret the plots and values, although we highly recommend reading the READMEs or original papers of the tools used in the pipeline. A list of references can be seen on the [EAGER2 github repository](https://github.com/nf-core/eager/)
+
+For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info)
 
 ### General Stats Table
 
@@ -231,8 +234,40 @@ Plateauing can be caused by a number of reasons:
 
 ### QualiMap
 
-TODO 
+#### QualiMap
 
+Qualimap is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the ference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
+
+> NB: Neither fold coverage nor percent coverage on there own is sufficient enough to asssess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or unremoved-adapter-containing reference genomes can artifically inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
+
+Note that many of the statistics from this module are displayed in the General Stats table (see above), as they represent single values that are not plottable.
+
+#### Coverage Histogram
+
+This plot shows on the Y axis the range of fold coverages that the bases of the reference genome are possibly covered by. The Y axis shows the number of bases that were covered at the given fold coverage depth as indicated on the Y axis.
+
+The greater the number of bases covered at as high as possible fold coverage, the better.
+
+Things to watch out for:
+  * You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
+  * If you have stacking of reads i.e. a small region with an abnormally large amount of reads despite the rest of the reference being quite shallowly covered, this will artifically increase your coverage. This would be represented by a small peak that is a much further along the X axis away from the main distribution of reads.
+  
+
+#### Cumulative Genome Coverage
+
+This plot shows how much of the genome in percentage (X axis) is covered by a given fold depth coverage (Y axis). 
+
+An ideal plot for this is to see an increasing curve, representing larger greater fractions of the genome being increasingly covered at higher depth. However, for low-coverage ancient DNA data, it will be more likely to see decreasing curves starting at a large percentage of the genome being covered at 0 fold coverage.
+
+#### GC Content Distribution
+
+This plot shows the distirbution of th frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
+
+Things to watch out for:
+  * This plot should normally show a normal distribution around the average GC content of your reference genome. 
+  * Binomial peaks may represent lab-based artefacts that should be further investigated. 
+  * Skews of the peak to a higher GC content that the refernence in Illumina dual-colour chemistry data (e.g. NextSeq or NovaSeq), may suggest long poly-G tails that are mapping to poly-G stretches of your genome. The EAGER2 trimming option `--complexity_filter_poly_g` can be used to remove these tails by utilising the tool FastP for detection and trimming.
+  
 ### DamageProfiler
 #### Background
 DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
@@ -243,7 +278,7 @@ Therefore, three main characteristics of ancient DNA are:
   * Increased C and Ts at ends of fragments
   
 #### Misincorporation Plots
-The MultiQC DamageProfiler module misincorporation plots shows the percent frequency of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The mismatches are when compared to the base of the reference genome at that position. 
+The MultiQC DamageProfiler module misincorporation plots shows the percent frequency (Y axis) of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The X axis represents base pairs from the end of the molecule from the given prime end, going into the middle of the molecule i.e. 1st base of molecule, 2nd base of molecule etc until the 14th base pair. The mismatches are when compared to the base of the reference genome at that position. The 
 
 When looking at the misincorporation plots, keep in mind the following:
   * As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads. 
@@ -264,6 +299,13 @@ When looking at the length distribution plots, keep in mind the following:
   * You may see large peaks at paired-end turn arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
   
 ### PMDTools
+
+TODO
+
 ### BamUtil
 
-For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info)
+TODO
+
+## Output Files
+
+This section gives a brief summary of where to look for what files for downstream analysis.
