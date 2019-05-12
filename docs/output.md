@@ -309,3 +309,15 @@ TODO
 ## Output Files
 
 This section gives a brief summary of where to look for what files for downstream analysis.
+
+Each module has it's own output directory which sit alongside the `MultiQC/` directory from which you opened the report.
+
+  * `reference_genome/` - this directory contains the indexing files  of your input reference genome (i.e. the various `bwa` indices, a `samtools`' `.fai` file, and a picard `.dict`), if you used the `--saveReference` flag.
+  * `FastQC/` - this contains the original per-FASTQ FastQC reports that are summarised with MultiQC. These occur in both `html` (the report) and `.zip` format (raw data). The `after
+  * `read_merging/`
+  * `mapping/`
+  * `samtools/`
+  * `deduplication/`
+  * `preseq/`
+  * `qualimap/`
+  * `damageprofiler/
