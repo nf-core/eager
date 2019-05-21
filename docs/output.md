@@ -146,7 +146,7 @@ Note that good libraries may sometimes have small peaks at high duplication leve
 
 Bad libraries which have extremely low input DNA (so during amplification the same molecules been amplified repeatly), or a good library that has been erroneously over-amplified will show very high duplication levels - so a very slowly decreasing curve. Alternatively, if your library construction failed and many adapters were not ligated to insert molecules, a high duplication rate may be caused by these free-adapters (see 'Overrepresnted sequences' for more information).
 
-> Amplicon librares such as for 16S rRNA analysis may appear here as having high duplication rates and these peaks can be ignored. This can be verified if no contaminants are found in the 'Overrepresented sequences' section.
+> **NB:** Amplicon librares such as for 16S rRNA analysis may appear here as having high duplication rates and these peaks can be ignored. This can be verified if no contaminants are found in the 'Overrepresented sequences' section.
 
 #### Overrepresented sequences
 After identifying duplicates (see the previous section), a table will be displayed in the 'Overrepresented sequences' section of the report. This is an attempt by FastQC to check to see if the duplicates identified match common contaminants such as free adapters or mono-nucleotide reads. 
@@ -162,7 +162,28 @@ This can already give you an indication on the authenticity of your library - as
 
 ### FastP
 
-TODO
+#### Background
+
+FastP is a general pre-processing toolkit for Illumina sequencing data. In EAGER2 we currently only use the 'poly-G' trimming function. Poly-G tails occur at ends of reads when using two-colour chemistry kits (i.e. in NextSeq and NovaSeq). This occurs as 'no fluorescence' is interpreted by the machine; however if the chemistry runs or the read is shorter than the number of cycles in the kit, you will get at the ends of reads lots of cycles with no nucleotides and these are then recorded as Gs. 
+
+While the machine should detect a reduction in base-calling quality, this is not always the case and you will retain these tails in your FASTQ files. This can cause skews in GC content and false positive SNP calls when the reference genome has long mono-nucleotide stretches (typically in larger eukaryotic genomes).
+
+In the case of dual-indexed paired-end sequencing, it is likely poly-G tails are less of an issue as during your adaperRemoval step, anything passed the adapter will be clipped off anyway. However you can check this under the 'Per Sequence GC Content' plot in FastQC. 
+
+> **NB:** As you are more likely to see this at the end of the run, in paired-end data you should see all 'Read 2' data having a higher GC content distribution than the 'Read 1'
+
+While the MultiQC report has multiple plots for FastP, we will only look at GC content as that's the functionality we use currently.
+
+#### GC Content
+
+This line plot shows the average GC content (Y axis) across each nucleotide of the reads (X-axis). There are two buttons per read (i.e. 2 for single-end, and 4 for paired-end) representing before and after the poly-G tail trimming.
+
+Before filtering, if you have poly-G tails, you should see the lines going up  at the end of the right-hand side of the plot.
+
+After filtering, you should see that the average GC content along the reads is now reduced to around the general trend of the entire read.
+
+Things to look out for:
+  * If you see a distinct GC content increase at the end of the reads, but are not removed after filtering, check to see where along the read the increase seems to start. If it is less than 10 base pairs from the end, consider reducing the overlap parameter `--complexity_filter_poly_g_min`, which tells FastP how far in the read the Gs need to go before removing them.
 
 ### AdapterRemoval
 
