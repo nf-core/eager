@@ -12,12 +12,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible]
 /(https://github.com/nf-core/eager/issues/182)
 * Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
+* A lot more automated tests using Travis CI
+* Don't ignore DamageProfiler errors anymore 
 
 ### `Fixed`
 * [#152](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
 * [#176](https://github.com/nf-core/eager/pull/176) - Increase runtime for DamageProfiler on [large reference genomes](https://github.com/nf-core/eager/issues/173)
 * [#172](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
-* [#174](https://github.com/nf-core/eager/pull/190) - Publish DeDup files [properly](https://github.com/nf-core/eager/issues/183) 
+* [#174](https://github.com/nf-core/eager/pull/190) - Publish DeDup files [properly](https://github.com/nf-core/eager/issues/183)
+* [#196](https://github.com/nf-core/eager/pull/196) - Fix reference [issues](https://github.com/nf-core/eager/issues/150)
+* [#196](https://github.com/nf-core/eager/pull/196) - Fix issues with PE data being mapped incompletely
+* [#200](https://github.com/nf-core/eager/pull/200) - Fix minor issue with some [typos](https://github.com/nf-core/eager/pull/196)
+* [#210](https://github.com/nf-core/eager/pull/210) - Fix PMDTools [encoding issue](https://github.com/pontussk/PMDtools/issues/6) from `samtools calmd` generated files by running through `samtools view` first
+
 
 ### `Dependencies`
 

@@ -42,8 +42,10 @@ script:
   - nf-core lint ${TRAVIS_BUILD_DIR}
   # Run the basic pipeline with the test profile
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --saveReference
+  # Test using PMD tools
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --run_pmdtools --pairedEnd
   # Run the basic pipeline with single end data (pretending its single end actually)
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd --bwa_index results/reference_genome/bwa_index/bwa_index/
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
   # Run the basic pipeline with paired end data without collapsing
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse --saveReference
   # Run the basic pipeline with paired end data without trimming
@@ -53,14 +55,19 @@ script:
    # Run the basic pipeline with output unmapped reads as fastq
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --strip_input_fastq
   # Run the same pipeline testing optional step: fastp, complexity 
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/bwa_index/
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
   # Test BAM Trimming
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --trim_bam --bwa_index results/reference_genome/bwa_index/bwa_index/
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --trim_bam --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
   # Test running with CircularMapper
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --circularmapper --circulartarget 'NC_007596.2'
   # Test running with BWA Mem
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem --bwa_index results/reference_genome/bwa_index/bwa_index/
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
   # Test with zipped reference input
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://raw.githubusercontent.com/nf-core/test-datasets/eager2/reference/Test.fasta.gz'
   # Run the basic pipeline with the bam input profile
   - nextflow run ${TRAVIS_BUILD_DIR} -profile testbam,docker --bam
+  # Run the basic pipeline with FastA reference with `fna` extension
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --saveReference
+  # Test using pre-computed indices from a separate run beforehand
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict 
+

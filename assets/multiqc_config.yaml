@@ -6,18 +6,17 @@ top_modules:
      - 'fastqc':
         name: 'FastQC (pre-AdapterRemoval)'
         path_filters:
-            - '*_fastqc.zip'
-        path_filters_exclude:
-             - '*.combined.prefixed_fastqc.zip'
+            - '*_raw_fastqc.zip'
      - 'fastp'
      - 'adapterRemoval'
      - 'fastqc':
          name: 'FastQC (post-AdapterRemoval)'
          path_filters:
+             - '*.truncated_fastqc.zip'
              - '*.combined*_fastqc.zip'
      - 'samtools'
-     - 'preseq'
      - 'dedup'
+     - 'preseq'
      - 'qualimap'
      - 'damageprofiler'
      - 'gatk'

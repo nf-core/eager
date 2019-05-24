@@ -32,20 +32,21 @@ def helpMessage() {
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
       --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
       --bam                         Specifies that the input is in BAM format
-      --fasta                       Path to Fasta reference (required if not iGenome reference). Preferably with .fasta file suffix.
+      --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
     References                      If not specified in the configuration file, or you wish to overwrite any of the references.
-      --bwa_index                   Path to directory containing BWA index files
+      --bwa_index                   Path and name of a a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value supplied with the --fasta option)
       --bedfile                     Path to BED file for SNPCapture methods
       --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
       --fasta_index                 Path to samtools FASTA index (typically ending in '.fai')
       --saveReference               Saves reference genome indices for later reusage
 
     Skipping                        Skip any of the mentioned steps
+      --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
       --skip_preseq
       --skip_damage_calculation
@@ -53,7 +54,7 @@ def helpMessage() {
       --skip_deduplication
     
     Complexity Filtering 
-      --complexity_filter_poly_g            Run poly-G removal on FASTQ files
+      --complexity_filter_poly_g        Run poly-G removal on FASTQ files
       --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed (default: 10)
     
     Clipping / Merging
@@ -69,6 +70,10 @@ def helpMessage() {
       --bwaalnn                     Specify the -n parameter for BWA aln.
       --bwaalnk                     Specify the -k parameter for BWA aln
       --bwaalnl                     Specify the -l parameter for BWA aln
+ 
+    Stripping
+      --strip_input_fastq           Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+      --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace)
     
     CircularMapper
       --circularmapper              Turn on CircularMapper (CM)
@@ -106,10 +111,6 @@ def helpMessage() {
       --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
       --bamutils_softclip           Use softclip instead of hard masking
 
-    Stripping
-      --strip_input_fastq           Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
-      --strip_mode                  Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
-
     Other options:     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -118,7 +119,7 @@ def helpMessage() {
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
       --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'
       --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'
-      --max_cpus                    Maximum number of CPUs to use for each step of the pipleine. Should be in form e.g. --max_cpus 1
+      --max_cpus                    Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. --max_cpus 1
       
     For a full list and more information of available parameters, consider the documentation (https://github.com/nf-core/eager/).
 
@@ -143,8 +144,7 @@ params.pairedEnd = false
 params.genome = "Custom"
 params.snpcapture = false
 params.bedfile = ''
-params.fasta = false
-params.bwa_index = false
+params.fasta = ''
 params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
@@ -226,36 +226,40 @@ params.strip_input_fastq = false
 params.strip_mode = 'strip'
 
 
-ch_multiqc_config = Channel.fromPath(params.multiqc_config)
-ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
-Channel.fromPath("$baseDir/assets/where_are_my_files.txt")
-       .into{ ch_where_for_bwa_index; ch_where_for_fasta_index; ch_where_for_seqdict}
-
+multiqc_config = file(params.multiqc_config)
+output_docs = file("$baseDir/docs/output.md")
+where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 // Validate inputs
-if("${params.fasta}".endsWith(".gz")){
+if ( params.fasta.isEmpty () ){
+    exit 1, "Please specify --fasta with the path to your reference"
+} else if("${params.fasta}".endsWith(".gz")){
     //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
-    Channel.fromPath("${params.fasta}")
-            .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
-            .set {ch_unzip_fasta}
+    zipped_fasta = file("${params.fasta}")
+
+    rm_gz = params.fasta - '.gz'
+    lastPath = rm_gz.lastIndexOf(File.separator)
+    bwa_base = rm_gz.substring(lastPath+1)
 
     process unzip_reference{
-        tag "$zipfasta"
+        tag "${zipped_fasta}"
 
         input:
-        file zipfasta from ch_unzip_fasta
+        file zipped_fasta
 
         output:
-        file "*.fasta" into (ch_fasta_for_bwa_indexing, ch_fasta_for_faidx_indexing, ch_fasta_for_dict_indexing,  ch_fasta_for_damageprofiler, ch_fasta_for_qualimap, ch_fasta_for_pmdtools, ch_fasta_for_circularmapper_index)
+        file "*.{fa,fn,fna,fasta}" into fasta_for_indexing
 
         script:
+        rm_zip = zipped_fasta - '.gz'
         """
-        pigz -f -d -p ${task.cpus} $zipfasta
+        pigz -f -d -p ${task.cpus} $zipped_fasta
         """
-    }   
+        }
+       
     } else {
-    Channel.fromPath("${params.fasta}")
-    .ifEmpty { exit 1, "No genome specified! Please specify one with --fasta"}
-    .into {ch_fasta_for_bwa_indexing;ch_fasta_for_faidx_indexing;ch_fasta_for_dict_indexing; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_circularmapper_index}
+    fasta_for_indexing = file("${params.fasta}")
+    lastPath = params.fasta.lastIndexOf(File.separator)
+    bwa_base = params.fasta.substring(lastPath+1)
 }
 
 //Index files provided? Then check whether they are correct and complete
@@ -263,11 +267,17 @@ if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
     exit 1, "Invalid aligner option. Default is bwa, but specify --circularmapper or --bwamem to use these."
 }
 if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
-    bwa_index = Channel
-        .fromPath("${params.bwa_index}",checkIfExists: true)
-        .ifEmpty { exit 1, "BWA index not found: ${params.bwa_index}"}
-        .into{ch_bwa_index;ch_bwa_index_bwamem}
-} 
+    lastPath = params.bwa_index.lastIndexOf(File.separator)
+    bwa_dir =  params.bwa_index.substring(0,lastPath+1)
+    bwa_base = params.bwa_index.substring(lastPath+1)
+
+    Channel
+        .fromPath(bwa_dir, checkIfExists: true)
+        .ifEmpty { exit 1, "BWA index directory not found: ${bwa_dir}" }
+        .into {bwa_index; bwa_index_bwamem}
+}
+
+
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd || params.bam){
@@ -278,12 +288,6 @@ if( params.singleEnd || params.pairedEnd || params.bam){
 //Validate that skip_collapse is only set to True for pairedEnd reads!
 if (params.skip_collapse  && params.singleEnd){
     exit 1, "--skip_collapse can only be set for pairedEnd samples!"
-}
-
-//AWSBatch sanity checking
-if(workflow.profile == 'awsbatch'){
-    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-    if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
 }
 
 //Strip mode sanity checking
@@ -311,11 +315,6 @@ if( workflow.profile == 'awsbatch') {
   // Prevent trace files to be stored on S3 since S3 does not support rolling files.
   if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
-
-// Stage config files
-ch_multiqc_config = Channel.fromPath(params.multiqc_config)
-ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
-
 /*
  * Create a channel for input read files
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
@@ -342,12 +341,13 @@ if( params.readPaths ){
             .map { row -> [ file( row )  ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
             .dump()
-            .into { ch_bam_to_fastq_convert }
+            .set { ch_bam_to_fastq_convert }
 
             //Set up clean channels
             ch_read_files_fastqc = Channel.empty()
             ch_read_files_complexity_filter_poly_g = Channel.empty()
             ch_read_files_clip = Channel.empty()
+            ch_read_unmap = Channel.empty()
     }
 } else if (!params.bam){
      Channel
@@ -363,12 +363,13 @@ if( params.readPaths ){
         .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\n" }
         .dump() //For debugging purposes
-        .into { ch_bam_to_fastq_convert }
+        .set { ch_bam_to_fastq_convert }
 
         //Set up clean channels
         ch_read_files_fastqc = Channel.empty()
         ch_read_files_complexity_filter_poly_g = Channel.empty()
         ch_read_files_clip = Channel.empty()
+        ch_read_unmap = Channel.empty()
 
 }
 
@@ -445,8 +446,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 * Create BWA indices if they are not present
 */ 
 
-if(!params.bwa_index && params.fasta && (params.aligner =='bwa' || params.bwamem)) {
-    
+if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.bwamem)){
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -455,26 +455,20 @@ process makeBWAIndex {
             else null
     }
 
-    when: !params.bwa_index && params.fasta && (params.aligner == 'bwa' || params.bwamem)
-
     input:
-    file fasta from ch_fasta_for_bwa_indexing
-    file wherearemyfiles from ch_where_for_bwa_index
+    file fasta from fasta_for_indexing
+    file where_are_my_files
 
     output:
-    file "bwa_index" into (ch_bwa_index,ch_bwa_index_bwamem)
+    file "BWAIndex" into (bwa_index, bwa_index_bwamem)
     file "where_are_my_files.txt"
 
     script:
-    base = "${fasta.baseName}"
     """
-    mkdir bwa_index
-    mv "${fasta}" "bwa_index/${base}.fasta"
-    cd bwa_index
-    bwa index "${base}.fasta"
+    bwa index $fasta
+    mkdir BWAIndex && mv ${fasta}* BWAIndex
     """
-}
-
+    }
 }
 
 
@@ -488,24 +482,19 @@ process makeFastaIndex {
             else if(!params.saveReference && filename == "where_are_my_files.txt") filename
             else null
     }
-    when: !params.fasta_index && params.fasta && params.aligner == 'bwa'
+    when: !params.fasta_index && !params.fasta.isEmpty() && params.aligner == 'bwa'
 
     input:
-    file fasta from ch_fasta_for_faidx_indexing
-    file wherearemyfiles from ch_where_for_fasta_index
+    file fasta from fasta_for_indexing
+    file where_are_my_files
 
     output:
-    file "faidx/${base}.fasta.fai" into ch_fasta_faidx_index
-    file "faidx/${base}.fasta"
+    file "*.fai" into ch_fasta_faidx_index
     file "where_are_my_files.txt"
 
     script:
-    base = "${fasta.baseName}"
     """
-    mkdir faidx
-    mv $fasta "faidx/${base}.fasta"
-    cd faidx
-    samtools faidx "${base}.fasta"
+    samtools faidx $fasta
     """
 }
 
@@ -522,23 +511,19 @@ process makeSeqDict {
             else null
     }
     
-    when: !params.seq_dict && params.fasta
+    when: !params.seq_dict && !params.fasta.isEmpty()
 
     input:
-    file fasta from ch_fasta_for_dict_indexing
-    file wherearemyfiles from ch_where_for_seqdict
+    file fasta from fasta_for_indexing
+    file where_are_my_files
 
     output:
-    file "seq_dict/*.dict" into ch_seq_dict
+    file "*.dict" into ch_seq_dict
     file "where_are_my_files.txt"
 
     script:
-    base = "${fasta.baseName}.fasta"
     """
-    mkdir -p seq_dict
-    mv $fasta "seq_dict/${base}"
-    cd seq_dict
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$base O="${fasta.baseName}.dict"
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
     """
 }
 
@@ -556,7 +541,8 @@ process convertBam {
     file bam from ch_bam_to_fastq_convert
 
     output:
-    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp, ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem)
+    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp, ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem,
+    ch_read_unmap_convertBam)
 
     script:
     base = "${bam.baseName}"
@@ -586,6 +572,8 @@ process fastqc {
     script:
     """
     fastqc -q $reads
+    rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
+    rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
 }
 
@@ -691,7 +679,7 @@ process adapter_removal {
 * STEP 2.1 - FastQC after clipping/merging (if applied!)
 */
 process fastqc_after_clipping {
-    tag "${prefix}"
+    tag "${name}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
@@ -704,7 +692,6 @@ process fastqc_after_clipping {
     file "*_fastqc.{zip,html}" optional true into ch_fastqc_after_clipping
 
     script:
-    prefix = reads[0].toString().tokenize('.')[0]
     """
     fastqc -q $reads
     """
@@ -715,15 +702,14 @@ Step 3: Mapping with BWA, SAM to BAM, Sort BAM
 */
 
 process bwa {
-    tag "$prefix"
+    tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
     when: !params.circularmapper && !params.bwamem
 
     input:
     set val(name), file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
-    
-    file index from ch_bwa_index.first()
+    file index from bwa_index
 
 
     output:
@@ -732,13 +718,13 @@ process bwa {
     
 
     script:
-    fasta = "${index}/*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
+    fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval)){
-    prefix = reads[0].toString().tokenize('.')[0]
-    """ 
+    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval || params.skip_trim)){
+    prefix = "${reads[0].baseName}"
+    """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
     bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r2.sai ${reads[0]} ${reads[1]} | samtools sort -@ ${task.cpus} -O bam - > ${prefix}.sorted.bam
@@ -746,8 +732,8 @@ process bwa {
     """
     } else {
     //PE collapsed, or SE data 
-    prefix = reads[0].toString().tokenize('.')[0]
-    """ 
+    prefix = "${reads.baseName}"
+    """
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
     samtools index "${size}" "${prefix}".sorted.bam
@@ -767,18 +753,15 @@ process circulargenerator{
     when: params.circularmapper
 
     input:
-    file fasta from ch_fasta_for_circularmapper_index
+    file fasta from fasta_for_indexing
 
     output:
-    file "cm_index" into ch_circularmapper_indices
+    file "${prefix}.{amb,ann,bwt,sa,pac}" into ch_circularmapper_indices
 
     script:
     prefix = "${fasta.baseName}_${params.circularextension}.fasta"
     """
-    mkdir cm_index
     circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
-    cp "${fasta.baseName}_${params.circularextension}.fasta" cm_index/
-    cd cm_index
     bwa index $prefix
     """
 
@@ -793,7 +776,8 @@ process circularmapper{
 
     input:
     set val(name), file(reads) from ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm)
-    file index from ch_circularmapper_indices.first()
+    file index from ch_circularmapper_indices
+    file fasta from fasta_for_indexing
 
     output:
     file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
@@ -801,16 +785,17 @@ process circularmapper{
     
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
+    elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
+
     
-    fasta = "${index}/*_*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.singleEnd && params.skip_collapse ){
     prefix = reads[0].toString().tokenize('.')[0]
     """ 
-    bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
-    bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r2.sai ${reads[0]} ${reads[1]} > tmp.out
+    bwa aln -t ${task.cpus} $elongated_root ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
+    bwa aln -t ${task.cpus} $elongated_root ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
+    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $elongated_root ${prefix}.r1.sai ${prefix}.r2.sai ${reads[0]} ${reads[1]} > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${prefix}.sorted.bam
     samtools index "${size}" ${prefix}.sorted.bam
@@ -818,8 +803,8 @@ process circularmapper{
     } else {
     prefix = reads[0].toString().tokenize('.')[0]
     """ 
-    bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads > tmp.out
+    bwa aln -t ${task.cpus} $elongated_root $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $elongated_root ${prefix}.sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
     samtools index "${size}" "${prefix}".sorted.bam
@@ -836,7 +821,7 @@ process bwamem {
 
     input:
     set val(name), file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
-    file index from ch_bwa_index_bwamem.first()
+    file index from bwa_index_bwamem
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
@@ -844,8 +829,8 @@ process bwamem {
     
 
     script:
+    fasta = "${index}/${bwa_base}"
     prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-    fasta = "${index}/*.fasta"
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.singleEnd && params.skip_collapse){
@@ -949,7 +934,7 @@ process strip_input_fastq {
     when: params.strip_input_fastq
 
     input: 
-    set val(name), file(fq) from ch_read_unmap
+    set val(name), file(fq) from ch_read_unmap.mix(ch_read_unmap_convertBam)
     file bam from ch_bwa_mapped_reads_strip.mix(ch_circular_mapped_reads_strip, ch_bwamem_mapped_reads_strip)
 
     output:
@@ -961,14 +946,14 @@ process strip_input_fastq {
         out_fwd = bam.baseName+'.stripped.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${fq[0]} -of $out_fwd -p ${task.cpus}
+        extract_map_reads.py $bam ${fq[0]} -m ${params.strip_mode} -of $out_fwd -p ${task.cpus}
         """
     } else {
         out_fwd = bam.baseName+'.stripped.fwd.fq.gz'
         out_rev = bam.baseName+'.stripped.rev.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${fq[0]} -2 ${fq[0]} -of $out_fwd -or $out_rev -p ${task.cpus}
+        extract_map_reads.py $bam ${fq[0]} -rev ${fq[1]} -m  ${params.strip_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
         """ 
     }
     
@@ -1061,15 +1046,16 @@ process damageprofiler {
 
     input:
     file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
-    file fasta from ch_fasta_for_damageprofiler.first()
+    file fasta from fasta_for_indexing
     file bai from ch_bam_index_for_damageprofiler
     
 
     output:
     file "*"
-    file "*/*.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
+    file "${base}/dmgprof.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
 
     script:
+    base = "${bam.baseName}"
     """
     damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . 
     """
@@ -1088,7 +1074,7 @@ process qualimap {
 
     input:
     file bam from ch_bam_filtered_qualimap
-    file fasta from ch_fasta_for_qualimap.first()
+    file fasta from fasta_for_indexing
 
     output:
     file "*" into ch_qualimap_results
@@ -1152,7 +1138,7 @@ process pmdtools {
 
     input: 
     file bam from ch_for_pmdtools
-    file fasta from ch_fasta_for_pmdtools
+    file fasta from fasta_for_indexing
 
     output:
     file "*.bam" into ch_bam_after_pmdfiltering
@@ -1169,9 +1155,9 @@ process pmdtools {
     }
     """
     #Run Filtering step 
-    samtools fillmd -b $bam $fasta | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
+    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
     #Run Calc Range step
-    #samtools fillmd -b $bam $fasta | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt 
+    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt 
     """
 }
 
@@ -1237,7 +1223,7 @@ process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
-    file output_docs from ch_output_docs
+    file output_docs
 
     output:
     file "results_description.html"
@@ -1291,7 +1277,7 @@ process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
-    file multiqc_config from ch_multiqc_config.collect().ifEmpty([])
+    file multiqc_config
     file ('fastqc_raw/*') from ch_fastqc_results.collect().ifEmpty([])
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
@@ -1307,7 +1293,7 @@ process multiqc {
     file workflow_summary from create_workflow_summary(summary)
 
     output:
-    file "*multiqc_report.html" into ch_multiqc_report
+    file "*multiqc_report.html" into multiqc_report
     file "*_data"
 
     script:
