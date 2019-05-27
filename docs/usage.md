@@ -66,13 +66,7 @@ When you run the above command, Nextflow automatically pulls the pipeline code f
 ```bash
 nextflow pull nf-core/eager
 ```
-
-### Reproducibility
-It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
-
-First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0`.
-
-This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
+See [below](#other-command-line-parameters) for more details about EAGER2 versioning.
 
 ## Mandatory Arguments
 
@@ -274,6 +268,15 @@ For example:
 
 ## Other command line parameters
 
+### `-r`
+By default, EAGER2 will use the latest version of the pipeline that is downloaded on your system. However, it's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
+
+First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0`.
+
+This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
+
+Additionally, EAGER pipeline releases are named after Swabian German Cities. The first release V2.0 is named "Kaufbeuren". Future releases are named after cities named in the [Swabian league of Cities](https://en.wikipedia.org/wiki/Swabian_League_of_Cities).
+
 ### `--outdir`
 The output directory where the results will be saved.
 
@@ -334,17 +337,21 @@ This part of the documentation contains a list of user-adjustable parameters in 
 
 Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules.
 
-### `--skip_preseq`
+### `--skip_fastqc`
 
-Turns off the computation of library complexity estimation.  
+Turns off FastQC pre- and post-Adapter Removal, to speed up the pipeline. Use of this flag is most common when data has been previously pre-processed and the post-Adapter Removal mapped reads are being re-mapped to a new reference genome.
 
 ### `--skip_adapterremoval`
 
 Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
 
-### `--skip_fastqc`
+### `--skip_preseq`
 
-Turns off FastQC in the beginning to speed up the pipeline. 
+Turns off the computation of library complexity estimation.  
+
+### `--skip_deduplication`
+
+Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No duplicates will be removed on any data in the pipeline.
 
 ### `--skip_damage_calculation`
 
@@ -354,9 +361,6 @@ Turns off the DamageProfiler module to compute DNA damage profiles.
 
 Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
-### `--skip_deduplication`
-
-Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No duplicates will be removed on any data in the pipeline.
 
 ## Complexity Filtering Options
 
@@ -450,6 +454,22 @@ If you want to filter out reads that don't map to a circular chromosome, turn th
 
 Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite useful for modern DNA, but is rarely used in projects for ancient DNA.
 
+## Mapped reads Stripping
+
+These parameters are used for removing mapped reads from the original input FASTQ files, usually in the context of uploading the original FASTQ files to a public read archive (NCBI SRA/EBI ENA). 
+
+These flags will produce FASTQ files almost identical to your input files, except that reads with the same read ID as one found in the mapped bam file, are either removed or 'masked' (every base replaced with Ns). 
+
+This functionality allows you to provide other researchers who wish to re-use your data to apply their own adapter removal/read merging procedures, while maintaining anonyminity for sample donors - for example with microbiome research.
+
+### `--strip_input_fastq`
+
+Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+
+### `--strip_mode`
+
+Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
+
 ## Read Filtering and Conversion Parameters
 
 Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline. 
@@ -534,18 +554,6 @@ Default set to `1` and clipps off one base of the left or right side of reads. N
 ### `--bamutils_softclip`
 
 By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string.
-
-## Mapped reads Stripping
-
-These parameters are used for removing mapped reads from orginal fastq files, usually in the context of uploading the original fastq files to a read archive (SRA/ENA)
-
-### `--strip_input_fastq`
-
-Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
-
-### `--strip_mode`
-
-Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
 
 ## Library-Type Parameters
 
