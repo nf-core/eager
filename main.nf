@@ -969,7 +969,7 @@ process samtools_idxstats_after_filter {
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
-    file(bam) from ch_bam_filtered_idxstats)
+    file(bam) from ch_mapped_reads_filtered_idxstats.mix(ch_mapped_reads_filtered_idxstats)
 
     output:
     file "*.stats" into ch_filtered_idxstats_for_multiqc
