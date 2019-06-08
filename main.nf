@@ -887,7 +887,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_idxstats, ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}"
@@ -957,6 +957,28 @@ process strip_input_fastq {
         """ 
     }
     
+}
+
+/*
+* Step 5b: Keep unmapped/remove unmapped reads idxstats
+*/
+
+
+process samtools_idxstats_after_filter {
+    tag "$prefix"
+    publishDir "${params.outdir}/samtools/stats", mode: 'copy'
+
+    input:
+    file(bam) from ch_bam_filtered_idxstats)
+
+    output:
+    file "*.stats" into ch_filtered_idxstats_for_multiqc
+
+    script:
+    prefix = "$bam" - ~/(\.bam)?$/
+    """
+    samtools flagstat $bam > ${prefix}.stats
+    """
 }
 
 
@@ -1283,6 +1305,7 @@ process multiqc {
     file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
+    file ('idxstats_filtered') from ch_filtered_idxstats_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
     file ('damageprofiler/dmgprof*/*') from ch_damageprofiler_results.collect().ifEmpty([])
     file ('qualimap/qualimap*/*') from ch_qualimap_results.collect().ifEmpty([])
