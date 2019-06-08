@@ -10,18 +10,18 @@ top_modules:
      - 'fastp'
      - 'adapterRemoval'
      - 'fastqc':
-         name: 'FastQC (post-AdapterRemoval)'
-         path_filters:
-             - '*.truncated_fastqc.zip'
-             - '*.combined*_fastqc.zip'
+        name: 'FastQC (post-AdapterRemoval)'
+        path_filters:
+            - '*.truncated_fastqc.zip'
+            - '*.combined*_fastqc.zip'
      - 'samtools':
-	 name: 'Samtools Flagstat (pre-samtools filter)'
-	 path_filters: 
-		- '*.sorted.stats'
+    	name: 'Samtools Flagstat (pre-samtools filter)'
+    	path_filters:
+		     - '*.sorted.stats'
      - 'samtools':
-	 name: 'Samtools Flagstat (post-samtools filter)'
-	 path_filters:
-	     - '*.sorted.bam.filtered.stats'
+	    name: 'Samtools Flagstat (post-samtools filter)'
+	    path_filters:
+	         - '*.sorted.bam.filtered.stats'
      - 'dedup'
      - 'preseq'
      - 'qualimap'
@@ -54,7 +54,7 @@ table_columns_visible:
         1_x_pc: True
         5_x_pc: True
         percentage_aligned: False
-    DamageProfiler::
+    DamageProfiler:
         3 Prime1: True
         3 Prime2: True
         5 Prime1: True
@@ -78,7 +78,7 @@ table_columns_placement:
         mapped_passed: 500
     Samtools Flagstat (post-samtools filter):
         mapped_passed: 510
-    DeDup: 
+    DeDup:
         clusterfactor: 600        
         duplication_rate: 610
     QualiMap:
@@ -93,7 +93,7 @@ table_columns_placement:
         mtreads: 800
         mt_cov_avg: 810
         mt_nuc_ratio: 820
-    DamageProfiler::
+    DamageProfiler:
         3 Prime1: 900
         3 Prime2: 910
         5 Prime1: 920
