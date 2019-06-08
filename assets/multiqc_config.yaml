@@ -50,6 +50,10 @@ table_columns_visible:
         percent_duplicates: False
         total_sequences: True
         percent_gc: True
+    Samtools Flagstat (pre-samtools filter):
+        mapped_passed: True
+    Samtools Flagstat (post-samtools filter):
+        mapped_passed: True
     QualiMap:
         1_x_pc: True
         5_x_pc: True
