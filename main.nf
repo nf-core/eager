@@ -972,7 +972,7 @@ process samtools_flagstat_after_filter {
     file(bam) from ch_bam_filtered_flagstat
 
     output:
-    file "*.stats" into ch_filtered_flagstat_for_multiqc
+    file "*.stats" into ch_bam_filtered_flagstat_for_multiqc
 
     script:
     prefix = "$bam" - ~/(\.bam)?$/
@@ -1305,7 +1305,7 @@ process multiqc {
     file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('flagstat/*') from ch_flagstat_for_multiqc.collect().ifEmpty([])
-    file ('flagstat_filtered') from ch_filtered_flagstat_for_multiqc.collect().ifEmpty([])
+    file ('flagstat_filtered/*') from ch_bam_filtered_flagstat_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
     file ('damageprofiler/dmgprof*/*') from ch_damageprofiler_results.collect().ifEmpty([])
     file ('qualimap/qualimap*/*') from ch_qualimap_results.collect().ifEmpty([])
