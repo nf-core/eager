@@ -15,13 +15,13 @@ top_modules:
             - '*.truncated_fastqc.zip'
             - '*.combined*_fastqc.zip'
      - 'samtools':
-    	name: 'Samtools Flagstat (pre-samtools filter)'
-    	path_filters:
-		     - '*.sorted.stats'
+        name: 'Samtools Flagstat (pre-samtools filter)'
+        path_filters:
+             - '*.sorted.stats'
      - 'samtools':
-	    name: 'Samtools Flagstat (post-samtools filter)'
-	    path_filters:
-	         - '*.sorted.bam.filtered.stats'
+        name: 'Samtools Flagstat (post-samtools filter)'
+        path_filters:
+             - '*.sorted.bam.filtered.stats'
      - 'dedup'
      - 'preseq'
      - 'qualimap'
