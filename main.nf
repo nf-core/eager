@@ -713,7 +713,7 @@ process bwa {
 
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler, ch_bwa_mapped_reads_strip
+    file "*.sorted.bam" into ch_mapped_reads_flagstat,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler, ch_bwa_mapped_reads_strip
     file "*.{bai,csi}" into ch_bam_index_for_damageprofiler
     
 
@@ -780,7 +780,7 @@ process circularmapper{
     file fasta from fasta_for_indexing
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
+    file "*.sorted.bam" into ch_mapped_reads_flagstat_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
     file "*.{bai,csi}" 
     
     script:
@@ -824,7 +824,7 @@ process bwamem {
     file index from bwa_index_bwamem
 
     output:
-    file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
+    file "*.sorted.bam" into ch_bwamem_mapped_reads_flagstat,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
     file "*.{bai,csi}" 
     
 
@@ -848,18 +848,18 @@ process bwamem {
 }
 
 /*
-* Step 4 - IDXStats
+* Step 4 - flagstat
 */
 
-process samtools_idxstats {
+process samtools_flagstat {
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
-    file(bam) from ch_mapped_reads_idxstats.mix(ch_mapped_reads_idxstats_cm,ch_bwamem_mapped_reads_idxstats)
+    file(bam) from ch_mapped_reads_flagstat.mix(ch_mapped_reads_flagstat_cm,ch_bwamem_mapped_reads_flagstat)
 
     output:
-    file "*.stats" into ch_idxstats_for_multiqc
+    file "*.stats" into ch_flagstat_for_multiqc
 
     script:
     prefix = "$bam" - ~/(\.bam)?$/
@@ -887,7 +887,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_idxstats, ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_flagstat, ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}"
@@ -960,19 +960,19 @@ process strip_input_fastq {
 }
 
 /*
-* Step 5b: Keep unmapped/remove unmapped reads idxstats
+* Step 5b: Keep unmapped/remove unmapped reads flagstat
 */
 
 
-process samtools_idxstats_after_filter {
+process samtools_flagstat_after_filter {
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
-    file(bam) from ch_bam_filtered_idxstats
+    file(bam) from ch_bam_filtered_flagstat
 
     output:
-    file "*.stats" into ch_filtered_idxstats_for_multiqc
+    file "*.stats" into ch_filtered_flagstat_for_multiqc
 
     script:
     prefix = "$bam" - ~/(\.bam)?$/
@@ -1304,8 +1304,8 @@ process multiqc {
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
-    file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
-    file ('idxstats_filtered') from ch_filtered_idxstats_for_multiqc.collect().ifEmpty([])
+    file ('flagstat/*') from ch_flagstat_for_multiqc.collect().ifEmpty([])
+    file ('flagstat_filtered') from ch_filtered_flagstat_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
     file ('damageprofiler/dmgprof*/*') from ch_damageprofiler_results.collect().ifEmpty([])
     file ('qualimap/qualimap*/*') from ch_qualimap_results.collect().ifEmpty([])

@@ -14,7 +14,14 @@ top_modules:
          path_filters:
              - '*.truncated_fastqc.zip'
              - '*.combined*_fastqc.zip'
-     - 'samtools'
+     - 'samtools':
+	 name: 'Samtools Flagstat (pre-samtools filter)'
+	 path_filters: 
+		- '*.sorted.stats'
+     - 'samtools':
+	 name: 'Samtools Flagstat (post-samtools filter)'
+	 path_filters:
+	     - '*.sorted.bam.filtered.stats'
      - 'dedup'
      - 'preseq'
      - 'qualimap'
@@ -67,8 +74,10 @@ table_columns_placement:
         total_sequences: 400
         avg_sequence_length: 410
         percent_gc: 420
-    Samtools Flagstat:
+    Samtools Flagstat (pre-samtools filter):
         mapped_passed: 500
+    Samtools Flagstat (post-samtools filter):
+        mapped_passed: 510
     DeDup: 
         clusterfactor: 600        
         duplication_rate: 610
