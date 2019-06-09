@@ -776,7 +776,7 @@ process circularmapper{
 
     input:
     set val(name), file(reads) from ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm)
-    file index from ch_circularmapper_indices
+    file index from ch_circularmapper_indices.collect()
     file fasta from fasta_for_indexing
 
     output:
@@ -821,7 +821,7 @@ process bwamem {
 
     input:
     set val(name), file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
-    file index from bwa_index_bwamem
+    file index from bwa_index_bwamem.collect()
 
     output:
     file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
