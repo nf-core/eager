@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unpublished Version / DEV]
+## [2.0.7] - 2019-06-09
 
 ### `Added`
 
@@ -16,7 +16,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * A lot more automated tests using Travis CI
 * Don't ignore DamageProfiler errors anymore 
 * [#220](https://github.com/nf-core/eager/pull/220) - Added post-mapping filtering statistics module and corresponding MultiQC statistics [#217](https://github.com/nf-core/eager/issues/217)
-
 
 ### `Fixed`
 
@@ -34,10 +33,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Added DeDup v0.12.5 (json support)
 * Added mtnucratio v0.5 (json support)
-* Updated Picard 2.18.27 -> 2.19.0
-* Updated GATK 4.1.0.0 -> 4.1.1.1
-* Updated damageprofiler 0.4.4 -> 0.4.5 
+* Updated Picard 2.18.27 -> 2.20.2
+* Updated GATK 4.1.0.0 -> 4.1.2.0
+* Updated damageprofiler 0.4.4 -> 0.4.5
 * Updated r-rmarkdown 1.11 -> 1.12
+* Updated fastp 0.19.7 -> 0.20.0
+* Updated qualimap 2.2.2b -> 2.2.2c
 
 ## [2.0.6] - 2019-03-05
 
