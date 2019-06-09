@@ -443,7 +443,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
 
 /* 
-* Create BWA indices if they are not present
+* PREPROCESSING - Create BWA indices if they are not present
 */ 
 
 if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.bwamem)){
@@ -528,7 +528,7 @@ process makeSeqDict {
 }
 
 /*
-* Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
+* PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
 *
 */ 
 
@@ -554,7 +554,7 @@ process convertBam {
 
 
 /*
- * STEP 1 - FastQC
+ * STEP 1a - FastQC
  */
 process fastqc {
     tag "$name"
@@ -578,7 +578,7 @@ process fastqc {
 }
 
 
-/* STEP 2.0 - FastP
+/* STEP 1b - FastP
 * Optional poly-G complexity filtering step before read merging/adapter clipping etc
 * Note: Clipping, Merging, Quality Trimning are turned off here - we leave this to adapter removal itself!
 */
@@ -676,7 +676,7 @@ process adapter_removal {
 
 
 /*
-* STEP 2.1 - FastQC after clipping/merging (if applied!)
+* STEP 2b - FastQC after clipping/merging (if applied!)
 */
 process fastqc_after_clipping {
     tag "${name}"
@@ -698,7 +698,7 @@ process fastqc_after_clipping {
 }
 
 /*
-Step 3: Mapping with BWA, SAM to BAM, Sort BAM
+Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
 */
 
 process bwa {
@@ -713,7 +713,7 @@ process bwa {
 
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_idxstats,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler, ch_bwa_mapped_reads_strip
+    file "*.sorted.bam" into ch_mapped_reads_flagstat,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler, ch_bwa_mapped_reads_strip
     file "*.{bai,csi}" into ch_bam_index_for_damageprofiler
     
 
@@ -780,7 +780,7 @@ process circularmapper{
     file fasta from fasta_for_indexing
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_idxstats_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
+    file "*.sorted.bam" into ch_mapped_reads_flagstat_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
     file "*.{bai,csi}" 
     
     script:
@@ -824,7 +824,7 @@ process bwamem {
     file index from bwa_index_bwamem.collect()
 
     output:
-    file "*.sorted.bam" into ch_bwamem_mapped_reads_idxstats,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
+    file "*.sorted.bam" into ch_bwamem_mapped_reads_flagstat,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
     file "*.{bai,csi}" 
     
 
@@ -848,18 +848,18 @@ process bwamem {
 }
 
 /*
-* Step 4 - IDXStats
+* Step 3b - flagstat
 */
 
-process samtools_idxstats {
+process samtools_flagstat {
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
-    file(bam) from ch_mapped_reads_idxstats.mix(ch_mapped_reads_idxstats_cm,ch_bwamem_mapped_reads_idxstats)
+    file(bam) from ch_mapped_reads_flagstat.mix(ch_mapped_reads_flagstat_cm,ch_bwamem_mapped_reads_flagstat)
 
     output:
-    file "*.stats" into ch_idxstats_for_multiqc
+    file "*.stats" into ch_flagstat_for_multiqc
 
     script:
     prefix = "$bam" - ~/(\.bam)?$/
@@ -870,7 +870,7 @@ process samtools_idxstats {
 
 
 /*
-* Step 5: Keep unmapped/remove unmapped reads
+* Step 4a - Keep unmapped/remove unmapped reads
 */
 
 process samtools_filter {
@@ -887,7 +887,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_flagstat, ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}"
@@ -959,9 +959,31 @@ process strip_input_fastq {
     
 }
 
+/*
+* Step 4b: Keep unmapped/remove unmapped reads flagstat
+*/
+
+
+process samtools_flagstat_after_filter {
+    tag "$prefix"
+    publishDir "${params.outdir}/samtools/stats", mode: 'copy'
+
+    input:
+    file(bam) from ch_bam_filtered_flagstat
+
+    output:
+    file "*.stats" into ch_bam_filtered_flagstat_for_multiqc
+
+    script:
+    prefix = "$bam" - ~/(\.bam)?$/
+    """
+    samtools flagstat $bam > ${prefix}.stats
+    """
+}
+
 
 /*
-Step 6: DeDup / MarkDuplicates
+Step 5a: DeDup / MarkDuplicates
 */ 
 
 process dedup{
@@ -1004,7 +1026,7 @@ process dedup{
 }
 
 /*
-Step 5.1: Preseq
+Step 6: Preseq
 */
 
 process preseq {
@@ -1034,7 +1056,7 @@ process preseq {
 }
 
 /*
-Step 5.2: DMG Assessment
+Step 7a: DMG Assessment
 */ 
 
 process damageprofiler {
@@ -1062,7 +1084,7 @@ process damageprofiler {
 }
 
 /* 
-Step 5.3: Qualimap
+Step 8: Qualimap
 */
 
 process qualimap {
@@ -1090,7 +1112,7 @@ process qualimap {
 
 
 /*
- Step 6: MarkDuplicates
+ Step 5b: MarkDuplicates
  */
 
 process markDup{
@@ -1130,6 +1152,10 @@ if(!params.run_pmdtools){
     ch_dedup_for_pmdtools.close()
 }
 
+/*
+ Step 9: PMDtools
+ */
+
 process pmdtools {
     tag "${bam.baseName}"
     publishDir "${params.outdir}/pmdtools", mode: 'copy'
@@ -1162,7 +1188,7 @@ process pmdtools {
 }
 
 /*
-* Optional BAM Trimming step using bamUtils 
+* Step 10 - BAM Trimming step using bamUtils 
 * Can be used for UDGhalf protocols to clip off -n bases of each read
 */
 
@@ -1217,7 +1243,7 @@ Downstream VCF tools:
 
 
 /*
- * STEP 3 - Output Description HTML
+ * Step 11a - Output Description HTML
  */
 process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
@@ -1236,7 +1262,7 @@ process output_documentation {
 
 
 /*
- * Parse software version numbers
+ * Step 11b - Parse software version numbers
  */
 process get_software_versions {
 
@@ -1271,7 +1297,7 @@ process get_software_versions {
 
 
 /*
- * STEP 2 - MultiQC
+ * Step 11c - MultiQC
  */
 process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
@@ -1282,7 +1308,8 @@ process multiqc {
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
-    file ('idxstats/*') from ch_idxstats_for_multiqc.collect().ifEmpty([])
+    file ('flagstat/*') from ch_flagstat_for_multiqc.collect().ifEmpty([])
+    file ('flagstat_filtered/*') from ch_bam_filtered_flagstat_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
     file ('damageprofiler/dmgprof*/*') from ch_damageprofiler_results.collect().ifEmpty([])
     file ('qualimap/qualimap*/*') from ch_qualimap_results.collect().ifEmpty([])
@@ -1308,7 +1335,7 @@ process multiqc {
 
 
 /*
- * Completion e-mail notification
+ * Step 11d - Completion e-mail notification
  */
 workflow.onComplete {
 
