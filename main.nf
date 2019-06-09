@@ -709,7 +709,7 @@ process bwa {
 
     input:
     set val(name), file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
-    file index from bwa_index
+    file index from bwa_index.collect()
 
 
     output:
