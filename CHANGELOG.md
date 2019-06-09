@@ -1,4 +1,5 @@
 # nf-core/eager: Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
@@ -13,9 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 /(https://github.com/nf-core/eager/issues/182)
 * Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
 * A lot more automated tests using Travis CI
-* Don't ignore DamageProfiler errors anymore 
+* Don't ignore DamageProfiler errors anymore
 
 ### `Fixed`
+
 * [#152](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
 * [#176](https://github.com/nf-core/eager/pull/176) - Increase runtime for DamageProfiler on [large reference genomes](https://github.com/nf-core/eager/issues/173)
 * [#172](https://github.com/nf-core/eager/pull/152) - DamageProfiler errors [won't crash entire pipeline anymore](https://github.com/nf-core/eager/issues/171)
@@ -23,8 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#196](https://github.com/nf-core/eager/pull/196) - Fix reference [issues](https://github.com/nf-core/eager/issues/150)
 * [#196](https://github.com/nf-core/eager/pull/196) - Fix issues with PE data being mapped incompletely
 * [#200](https://github.com/nf-core/eager/pull/200) - Fix minor issue with some [typos](https://github.com/nf-core/eager/pull/196)
-* [#210](https://github.com/nf-core/eager/pull/210) - Fix PMDTools [encoding issue](https://github.com/pontussk/PMDtools/issues/6) from `samtools calmd` generated files by running through `samtools view` first
-
+* [#210](https://github.com/nf-core/eager/pull/210) - Fix PMDTools [encoding issue](https://github.com/pontussk/PMDtools/issues/6) from `samtools calmd` generated files by running through `sa]mtools view` first
+* [#221](https://github.com/nf-core/eager/pull/221) - Fix BWA Index [not being reused by multiple samples](https://github.com/nf-core/eager/issues/219)
 
 ### `Dependencies`
 
@@ -34,7 +36,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Updated GATK 4.1.0.0 -> 4.1.1.1
 * Updated damageprofiler 0.4.4 -> 0.4.5 
 * Updated r-rmarkdown 1.11 -> 1.12
-
 
 ## [2.0.6] - 2019-03-05
 
@@ -51,6 +52,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#145](https://github.com/nf-core/eager/pull/145) - Added Picard Memory Handling [fix](https://github.com/nf-core/eager/issues/144)
 
 ### `Dependencies`
+
 * Picard Tools 2.18.23 -> 2.18.27
 * GATK 4.0.12.0 -> 4.1.0.0
 * FastP 0.19.6 -> 0.19.7
@@ -58,14 +60,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [2.0.5] - 2019-01-28
 
 ### `Added`
+
 * [#127](https://github.com/nf-core/eager/pull/127) - Added a second testcase for testing the pipeline properly
 * [#129](https://github.com/nf-core/eager/pull/129) - Support BAM files as [input format](https://github.com/nf-core/eager/issues/41)
 * [#131](https://github.com/nf-core/eager/pull/131) - Support different [reference genome file extensions](https://github.com/nf-core/eager/issues/130)
 
 ### `Fixed`
+
 * [#128](https://github.com/nf-core/eager/issues/128) - Fixed reference genome handling errors
 
 ### `Dependencies`
+
 * Picard Tools 2.18.21 -> 2.18.23
 * R-Markdown 1.10 -> 1.11
 * FastP 0.19.5 -> 0.19.6
@@ -73,6 +78,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [2.0.4] - 2019-01-09
 
 ### `Added`
+
 * [#111](https://github.com/nf-core/eager/pull/110) - Allow [Zipped FastA reference input](https://github.com/nf-core/eager/issues/91)
 * [#113](https://github.com/nf-core/eager/pull/113) - All files are now staged via channels, which is considered best practice by Nextflow 
 * [#114](https://github.com/nf-core/eager/pull/113) - Add proper runtime defaults for multiple processes 
@@ -87,27 +93,33 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [2.0.3] - 2018-12-12
 
 ### `Added`
+
 * [#80](https://github.com/nf-core/eager/pull/80) - BWA Index file handling 
 * [#77](https://github.com/nf-core/eager/pull/77) - Lots of documentation updates by [@jfy133](https://github.com/jfy133)
 * [#81](https://github.com/nf-core/eager/pull/81) - Renaming of certain BAM options
 * [#92](https://github.com/nf-core/eager/issues/92) - Complete restructure of BAM options
 
 ### `Fixed`
+
 * [#84](https://github.com/nf-core/eager/pull/85) - Fix for [Samtools index issues](https://github.com/nf-core/eager/issues/84)
 * [#96](https://github.com/nf-core/eager/issues/96) - Fix for [MarkDuplicates issues](https://github.com/nf-core/eager/issues/96) found by [@nilesh-tawari](https://github.com/nilesh-tawari)
 
 ### Other
+
 * Added Slack button to repository readme
 
 ## [2.0.2] - 2018-11-03
 
 ### `Changed`
+
 * [#70](https://github.com/nf-core/eager/issues/70) - Uninitialized `readPaths` warning removed
 
 ### `Added`
+
 * [#73](https://github.com/nf-core/eager/pull/73) - Travis CI Testing of Conda Environment added 
 
 ### `Fixed`
+
 * [#72](https://github.com/nf-core/eager/issues/72) - iconv Issue with R in conda environment
 
 ## [2.0.1] - 2018-11-02
