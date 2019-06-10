@@ -1,4 +1,4 @@
-name: nf-core-eager-2.0.6
+name: nf-core-eager-2.0.7
 channels:
   - defaults
   - bioconda
@@ -9,22 +9,25 @@ dependencies:
   - bioconda::adapterremoval=2.2.2
   - bioconda::adapterremovalfixprefix=0.0.4
   - bioconda::bwa=0.7.17
-  - bioconda::picard=2.18.27
+  - bioconda::picard=2.20.2
   - bioconda::samtools=1.9
-  - bioconda::dedup=0.12.3
+  - bioconda::dedup=0.12.5
   - bioconda::angsd=0.923
   - bioconda::circularmapper=1.93.4
-  - bioconda::gatk4=4.1.0.0
-  - bioconda::qualimap=2.2.2b
+  - bioconda::gatk4=4.1.2.0
+  - bioconda::qualimap=2.2.2c
   - bioconda::vcf2genome=0.91
-  - bioconda::damageprofiler=0.4.4
+  - bioconda::damageprofiler=0.4.6
   - bioconda::multiqc=1.7
   - bioconda::pmdtools=0.60
-  - conda-forge::r-rmarkdown=1.11
+  - conda-forge::r-rmarkdown=1.12
   - conda-forge::libiconv=1.15
   - conda-forge::pigz=2.3.4
   - bioconda::sequencetools=1.2.2
   - bioconda::preseq=2.0.3
-  - bioconda::fastp=0.19.7
+  - bioconda::fastp=0.20.0
   - bioconda::bamutil=1.0.14
+  - bioconda::mtnucratio=0.5
+  - pysam=0.15.2
+  - python=3.6.3
   #Missing Schmutzi,snpAD

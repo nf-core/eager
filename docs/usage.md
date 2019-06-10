@@ -2,6 +2,9 @@
 
 ## Table of contents
 
+<!-- Install Atom plugin markdown-toc-auto for this ToC to auto-update on save -->
+<!-- TOC START min:2 max:3 link:true asterisk:true update:true -->
+* [Table of contents](#table-of-contents)
 * [Introduction](#general-nextflow-info)
 * [Running the pipeline](#running-the-pipeline)
 * [Updating the pipeline](#updating-the-pipeline)
@@ -10,7 +13,7 @@
 * [Other command line parameters](#other-command-line-parameters)
 * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
 * [Automatic resubmission](#automatic-resubmission)
-
+* [Clean up](#clean-up)
 
 ## General Nextflow info
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
@@ -29,16 +32,16 @@ screen -r eager2
 ```
 to end the screen session while in it type `exit`.
 
-It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
 
-```bash
-NXF_OPTS='-Xms1g -Xmx4g'
-```
 ## Help Message
 To access the nextflow help message run: `nextflow run -help`
 
 ## Running the pipeline
+
+> Before you start you should change into the output directory you wish your results to go in. When you start the nextflow job, it will place all the 'working' folders in the current directory and NOT necessarily the directory the output files will be in.
+
 The typical command for running the pipeline is as follows:
+
 ```bash
 nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
@@ -63,29 +66,29 @@ When you run the above command, Nextflow automatically pulls the pipeline code f
 ```bash
 nextflow pull nf-core/eager
 ```
-
-### Reproducibility
-It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
-
-First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0`.
-
-This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
+See [below](#other-command-line-parameters) for more details about EAGER2 versioning.
 
 ## Mandatory Arguments
 
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments (e.g. schedulers, software environments, memory limits etc). Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important! The first entry takes precendence over the others, e.g. if a setting is set by both the first and second profile, the first entry will be used and the second entry ignored. 
+
+> *Important*: If running EAGER2 on a cluster - ask your system administrator what profile to use.
+
+For more details on how to set up your own private profile, please see [installation](../configuration/adding_your_own.md).
 
 **Basic profiles**
-These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your own PC (vs. a HPC cluster).
+These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
-* `standard`
-    * The default profile, used if `-profile` is not specified at all.
-    * Runs locally and expects all software to be installed and available on the `PATH`.
+* `awsbatch`
+  * A generic configuration profile to be used with AWS Batch.
+* `conda`
+  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `docker`
-    * A generic configuration profile to be used with [Docker](http://docker.com/)
-    * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
+  * A generic configuration profile to be used with [Docker](http://docker.com/)
+  * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
 * `singularity`
     * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
     * Pulls software from singularity-hub
@@ -99,9 +102,9 @@ These are basic profiles which primarily define where you derive the pipeline's 
     * Includes links to test data so needs no other parameters
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
-    
+ 
 **Institution Specific Profiles**
-These are profiles specific to certain clusters, and are centrally  maintained at [nf-core/configs](`https://github.com/nf-core/configs`). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](`https://github.com/nf-core/configs`) repository.
+These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
 * `uzh`
     * A profile for the University of Zurich Research Cloud
@@ -112,6 +115,8 @@ These are profiles specific to certain clusters, and are centrally  maintained a
 * `shh`
    * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
    * Loads Singularity and defines appropriate resources for running the pipeline
+
+    
 
 ### `--reads`
 Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
@@ -163,12 +168,14 @@ A normal glob pattern, enclosed in quotation marks, can then be used for `--read
 ```
 
 ### `--fasta`
-If you prefer, you can specify the full path to your reference genome when you run the pipeline:
+You specify the full path to your reference genome here. The FASTA file can have any file suffix, such as `.fasta`, `.fna`, `.fa`, `.FastA` etc. You may also supply a gzipped reference files, which will be unzipped automatically for you. 
+
+For example:
 
 ```bash
---fasta '[path to Fasta reference]'
+--fasta '/<path>/<to>/my_reference.fasta'
 ```
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters, the pipeline will create these indices for you automatically. Note, that saving these for later has to be turned on using `--saveReference`. You may also specify the path to a gzipped (`*.gz` file extension) FastA as reference genome - this will be uncompressed by the pipeline automatically for you. Note that other file extensions such as `.fna`, `.fa` are also supported but will be renamed to `.fasta` automatically by the pipeline.
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--saveReference` flag.
 
 ### `--large_ref`
 
@@ -209,25 +216,66 @@ params {
 }
 ```
 
-### Optional Reference Utility Files
+## Optional Reference Options
 
-### `--bwa_index`
+### Generating Fresh Indices
 
-Use this to specify a _directory_ containing previously created BWA index files. This saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource specific profile that sets paths to pre-computed reference genomes, saving even time when specifying these.
+#### `--saveReference`
 
-### `--seq_dict` false
+Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices EAGER2 generates for you will be stored in the `<your_output_dir>/results/reference_genomes` for you. 
 
-Use this to specify the required sequence dictionary file for the selected reference genome.
+### Premade Indices
 
-### `--fasta_index` false
+Supplying pre-made indices saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource specific profile that sets paths to pre-computed reference genomes, saving even time when specifying these.
 
-Use this to specify the required FastA index file for the selected reference genome.
+#### `--bwa_index`
 
-### `--saveReference` false
+If you want to use pre-existing `bwa index` indices, please supply the path **and file** to the FASTA you also specified in `--fasta` (see above). EAGER2 will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa` index file suffixes.
 
-If you turn this on, the generated indices will be stored in the `./results/reference_genomes` for you. 
+For example:
+
+```
+nextflow run nf-core/eager \
+-profile test_fna,docker \
+--pairedEnd \
+--reads *{R1,R2}*.fq.gz
+--fasta results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta \
+--bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
+```
+
+> `bwa index` does not give you an option to supply alternative suffixes/names for these indices. Thus, the file names generated by this command _must not_ be changed, otherwise EAGER2 will not be able to find them.
+
+#### `--seq_dict`
+
+If you want to use a pre-existing `picard CreateSequenceDictionary` dictionary file, use this to specify the required `.dict` file for the selected reference genome.
+
+For example:
+
+```
+--seq_dict Mammoth_MT_Krause.dict
+```
+
+#### `--fasta_index`
+
+If you want to use a pre-existing `samtools faidx` index, Use this to specify the required FASTA index file for the selected reference genome. This should be generated by `samtools faidx` and has a file suffix of `.fai`
+
+For example:
+
+```
+--fasta_index Mammoth_MT_Krause.fasta.fai
+```
+
 
 ## Other command line parameters
+
+### `-r`
+By default, EAGER2 will use the latest version of the pipeline that is downloaded on your system. However, it's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
+
+First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0`.
+
+This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
+
+Additionally, EAGER pipeline releases are named after Swabian German Cities. The first release V2.0 is named "Kaufbeuren". Future releases are named after cities named in the [Swabian league of Cities](https://en.wikipedia.org/wiki/Swabian_League_of_Cities).
 
 ### `--outdir`
 The output directory where the results will be saved.
@@ -266,10 +314,14 @@ Specify the path to a specific nextflow config file (this is a core NextFlow com
 
 **NB:** Single hyphen (core Nextflow option)
 
-Note - you can use this to override defaults. For example, you can specify a config file using `-c` that contains the following:
+Note - you can use this to override pipeline defaults.
 
-```nextflow
-process.$multiqc.module = []
+### `--custom_config_version`
+Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default is set to `master`.
+
+```bash
+## Download and use config file with following git commid id
+--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
 ```
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
@@ -285,13 +337,21 @@ This part of the documentation contains a list of user-adjustable parameters in 
 
 Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules.
 
-### `--skip_preseq`
+### `--skip_fastqc`
 
-Turns off the computation of library complexity estimation.  
+Turns off FastQC pre- and post-Adapter Removal, to speed up the pipeline. Use of this flag is most common when data has been previously pre-processed and the post-Adapter Removal mapped reads are being re-mapped to a new reference genome.
 
 ### `--skip_adapterremoval`
 
 Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
+
+### `--skip_preseq`
+
+Turns off the computation of library complexity estimation.  
+
+### `--skip_deduplication`
+
+Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No duplicates will be removed on any data in the pipeline.
 
 ### `--skip_damage_calculation`
 
@@ -301,9 +361,6 @@ Turns off the DamageProfiler module to compute DNA damage profiles.
 
 Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
-### `--skip_deduplication`
-
-Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No duplicates will be removed on any data in the pipeline.
 
 ## Complexity Filtering Options
 
@@ -396,6 +453,22 @@ If you want to filter out reads that don't map to a circular chromosome, turn th
 ### `--bwamem`
 
 Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite useful for modern DNA, but is rarely used in projects for ancient DNA.
+
+## Mapped reads Stripping
+
+These parameters are used for removing mapped reads from the original input FASTQ files, usually in the context of uploading the original FASTQ files to a public read archive (NCBI SRA/EBI ENA). 
+
+These flags will produce FASTQ files almost identical to your input files, except that reads with the same read ID as one found in the mapped bam file, are either removed or 'masked' (every base replaced with Ns). 
+
+This functionality allows you to provide other researchers who wish to re-use your data to apply their own adapter removal/read merging procedures, while maintaining anonyminity for sample donors - for example with microbiome research.
+
+### `--strip_input_fastq`
+
+Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+
+### `--strip_mode`
+
+Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
 
 ## Read Filtering and Conversion Parameters
 
@@ -496,3 +569,29 @@ Can be used to set a path to a BED file (3/6 column format) to calculate capture
 
 ## Automatic Resubmission
 By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
+
+## Clean up
+
+Once completed a run has completed, you will have _lots_ of (some very large) intermediate files in your output directory, within the directory named `work`. 
+
+Once you have verified your run completed correctly and everything in the module output directories are present as you expect and need, you can perform a clean up.
+
+> **Important**: Once clean up is completed, you will _not_ be able to re-rerun the pipline from an earlier step and you'll have to re-run from scratch.
+
+While in your output directory, firstly verify you're only deleting files stored in `work/` with the dry run command:
+
+```bash
+nextflow clean -n
+```
+If you're ready, you can then remove the files with
+
+```bash
+nextflow clean -f
+```
+This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!
+
+### `--monochrome_logs`
+Set to disable colourful command line output and live life in monochrome.
+
+### `--multiqc_config`
+Specify a path to a custom MultiQC configuration file.
