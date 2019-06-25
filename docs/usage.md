@@ -280,6 +280,9 @@ Additionally, EAGER pipeline releases are named after Swabian German Cities. The
 ### `--outdir`
 The output directory where the results will be saved.
 
+### `-work-dir`
+The output directory where the intermediate files (stored in `work/`) will be saved. If this flag is _not_ provided, the `work/` directory  will be place wherever you initated the nextflow run. We generally recommend that this directory should the same as in the `--outdir` flag, to ensure multiple nextflow runs are kept separate.
+
 ### `--max_memory`
 Use to set a top-limit for the default memory requirement for each process.
 Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`. If not specified, will be taken from the configuration in the `-profile` flag.
