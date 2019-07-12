@@ -70,7 +70,7 @@ nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.
 
 ```bash
 nextflow clean -k
-``
+```
 
 NB. You can see an overview of the run in the MultiQC report located at `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
 
