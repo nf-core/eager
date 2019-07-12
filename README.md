@@ -66,6 +66,12 @@ nextflow run nf-core/eager -profile <docker/singularity/conda>,test --pairedEnd
 nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<REFERENCE>.fasta'
 ```
 
+6. Once your run has completed successfully, clean up the intermediate files.
+
+```bash
+nextflow clean -k
+```
+
 NB. You can see an overview of the run in the MultiQC report located at `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
 
 Modifications to the default pipeline are easily made using various options

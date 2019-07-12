@@ -280,8 +280,9 @@ Additionally, EAGER pipeline releases are named after Swabian German Cities. The
 ### `--outdir`
 The output directory where the results will be saved.
 
-### `-w`
-The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
+### `-w / -work-dir`
+The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, 
+the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
 
 ### `--max_memory`
 Use to set a top-limit for the default memory requirement for each process.
