@@ -1008,7 +1008,7 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.sorted.bam" into ch_dedup_bam
+    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_for_unifiedgenotyper
     file "*.{bai,csi}"
 
     script:
@@ -1225,6 +1225,32 @@ process bam_trim {
 }
 
 
+/*
+ Step 11a: Genotyping
+ */
+
+ process download_gatk {
+    tag "${prefix}"
+    publishDir "${params.outdir}/genotyping", mode: 'copy'
+
+    when params.genotyping && params.genotyping_tool == 'ug'
+
+    input: file bam from ch_for_unifiedgenotyper
+
+    output:
+    file "*.jar" into ch_unifiedgenotyper_jar
+
+    """
+    wget -O GenomeAnalysisTK-3.8-1-0-gf15c1c3ef_DL.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef'`
+    tar xjf GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2
+    mv GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar .
+    """
+
+ }
+
+
+
+
 
 
 /*
@@ -1247,11 +1273,8 @@ Downstream VCF tools:
 
 
 
-
-
-
 /*
- * Step 11a - Output Description HTML
+ * Step 12a - Output Description HTML
  */
 process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
@@ -1270,7 +1293,7 @@ process output_documentation {
 
 
 /*
- * Step 11b - Parse software version numbers
+ * Step 12b - Parse software version numbers
  */
 process get_software_versions {
 
@@ -1305,7 +1328,7 @@ process get_software_versions {
 
 
 /*
- * Step 11c - MultiQC
+ * Step 12c - MultiQC
  */
 process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
@@ -1343,7 +1366,7 @@ process multiqc {
 
 
 /*
- * Step 11d - Completion e-mail notification
+ * Step 12d - Completion e-mail notification
  */
 workflow.onComplete {
 
