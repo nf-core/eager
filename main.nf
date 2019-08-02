@@ -111,6 +111,10 @@ def helpMessage() {
       --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
       --bamutils_softclip           Use softclip instead of hard masking
 
+    Genotyping
+      --genotyping                  Perform genotyping on deduplicated bams
+      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Options: ug
+
     Other options:     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -224,6 +228,10 @@ params.bamutils_softclip = false
 
 params.strip_input_fastq = false
 params.strip_mode = 'strip'
+
+//Genotyping options
+params.genotyping = false
+params.genotyping_tool = 'ug'
 
 
 multiqc_config = file(params.multiqc_config)
