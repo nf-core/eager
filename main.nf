@@ -1241,7 +1241,7 @@ process bam_trim {
     file "*.jar" into ch_unifiedgenotyper_jar
 
     """
-    wget -O GenomeAnalysisTK-3.8-1-0-gf15c1c3ef_DL.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef'
+    wget -O GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef'
     tar xjf GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2
     mv GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar .
     """
