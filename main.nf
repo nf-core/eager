@@ -113,7 +113,7 @@ def helpMessage() {
 
     Genotyping
       --genotyping                  Perform genotyping on deduplicated BAMs
-      --genotype_input_source		Specify which BAM file to use (note, use correspondng module accordingly). Default: dedup. Options: dedupper, trimmed, pmd
+      --genotyping_input_source		Specify which BAM file to use (note, use correspondng module accordingly). Default: dedupper. Options: dedupper, trimmed, pmd
       --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Options: ug                  
       --ug_genotype_model           GATK UnifiedGenotyper genotyping likelihood model. Default: SNP. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL
       --ug_call_conf = '30'         GATK UnifiedGenotyper phred-scaled confidence threshold. Default: 30
@@ -237,7 +237,7 @@ params.strip_mode = 'strip'
 
 //Genotyping options
 params.genotyping = false
-params.genotype_input_source = 'dedup'
+params.genotyping_input_source = 'dedup'
 params.genotyping_tool = 'ug'
 params.ug_genotype_model = 'SNP'
 params.ug_call_conf = '30'
@@ -1262,10 +1262,9 @@ process bam_trim {
 
  }
 
- `*
-  Step 11b: Genotyping - UG
-
- */
+/*
+ Step 11b: Genotyping - UG
+*/
 
  process genotyping_ug {
   tag "${prefix}"
