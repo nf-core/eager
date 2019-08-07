@@ -1143,7 +1143,7 @@ process markDup{
     !params.skip_deduplication && params.dedupper != 'dedup'
 
     input:
-    file bam from ch_bam_filtered_markdup,
+    file bam from ch_bam_filtered_markdup
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
@@ -1241,6 +1241,7 @@ process bam_trim {
  Step 11a: Genotyping - UnifiedGenotyper Downloading
  */
 
+ch_gatk_download = Channel.value("download")
 
  process download_gatk {
     tag "${prefix}"
@@ -1249,7 +1250,7 @@ process bam_trim {
     when params.genotyping && params.genotyping_tool == 'ug'
 
     input: 
-    file bam from ch_for_ug_download
+    val "download" from ch_gatk_download
 
     output:
     file "*.jar" into ch_unifiedgenotyper_jar
