@@ -1287,23 +1287,23 @@ ch_gatk_download = Channel.value("download")
   script:
   if( params.genotyping_tool == 'ug' && params.genotyping_input_source == 'dedup' )
 	  """
-	  gatk -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedup}.intervals 
-	  gatk -T IndelRealigner -R ${fasta} -I ${bam_dedupped} -targetIntervals ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam
-	  gatk -T UnifiedGenotyper -R ${fasta} -I ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam -o ${bam_dedupped}.intervals -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
+	  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedup}.intervals 
+	  java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam_dedupped} -targetIntervals ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam
+	  java -jar ${jar} UnifiedGenotyper -R ${fasta} -I ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam -o ${bam_dedupped}.intervals -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
 	  pigz -p ${task.cpus} ${bam_dedupped}.vcf
 	  """
   else if( params.genotyping_tool == 'ug' && params.genotyping_input_source == 'pmd' )
 	  """
-	  gatk -T RealignerTargetCreator -R ${fasta} -I ${bam_pmd} -nt ${task.cpus} -o ${bam_pmd}.intervals 
-	  gatk -T IndelRealigner -R ${fasta} -I ${bam_pmd} -targetIntervals ${bam_pmd}.intervals -o ${bam_pmd}.realign.bam
-	  gatk -T UnifiedGenotyper -R ${fasta} -I ${bam_pmd}.intervals -o ${bam_pmd}.realign.bam -o ${bam_pmd}.intervals -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
+	  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_pmd} -nt ${task.cpus} -o ${bam_pmd}.intervals 
+	  java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam_pmd} -targetIntervals ${bam_pmd}.intervals -o ${bam_pmd}.realign.bam
+	  java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam_pmd}.intervals -o ${bam_pmd}.realign.bam -o ${bam_pmd}.intervals -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
 	  pigz -p ${task.cpus} ${bam_depdupped}.vcf
 	  """
   else if( params.genotyping_tool == 'ug' && params.genotyping_input_source == 'trimmed' )
 	  """
-	  gatk -T RealignerTargetCreator -R ${fasta} -I ${bam_trimmed} -nt ${task.cpus} -o ${bam_trimmed}.intervals 
-	  gatk -T IndelRealigner -R ${fasta} -I ${bam_trimmed} -targetIntervals ${bam_trimmed}.intervals -o ${bam_trimmed}.realign.bam
-	  gatk -T UnifiedGenotyper -R ${fasta} -I ${bam_trimmed}.intervals -o ${bam_trimmed}.realign.bam -o ${bam_trimmed}.intervals -o ${bam_trimmed}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
+	  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_trimmed} -nt ${task.cpus} -o ${bam_trimmed}.intervals 
+	  java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam_trimmed} -targetIntervals ${bam_trimmed}.intervals -o ${bam_trimmed}.realign.bam
+	  java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam_trimmed}.intervals -o ${bam_trimmed}.realign.bam -o ${bam_trimmed}.intervals -o ${bam_trimmed}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
 	  pigz -p ${task.cpus} ${bam_trimmed}.vcf
 	  """
  }
