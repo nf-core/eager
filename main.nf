@@ -1020,7 +1020,7 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedupped_bam_for_genotyping
+    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedup_bam_for_genotyping
     file "*.{bai,csi}"
 
     script:
@@ -1147,7 +1147,7 @@ process markDup{
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
-    file "*.markDup.bam" into ch_markdup_bam,ch_dedupped_bam_for_genotyping
+    file "*.markDup.bam" into ch_markdup_bam,ch_markdup_bam_for_genotyping
 
     script:
     prefix = "${bam.baseName}"
@@ -1277,7 +1277,7 @@ ch_gatk_download = Channel.value("download")
   file fasta from fasta_for_indexing
   file jar from ch_unifiedgenotyper_jar
 
-  file bam_dedupped from ch_dedupped_bam_for_genotyping
+  file bam_dedupped from ch_dedup_bam_for_genotyping.mix(ch_markdup_bam_for_genotyping)
   file bam_pmd from ch_pmd_bam_for_genotyping
   file bam_trimmed from ch_trimmed_bam_for_genotyping
 
