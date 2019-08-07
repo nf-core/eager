@@ -1020,7 +1020,7 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_for_ug_download,ch_dedupped_bam_for_genotyping
+    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedupped_bam_for_genotyping
     file "*.{bai,csi}"
 
     script:
@@ -1147,7 +1147,7 @@ process markDup{
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
-    file "*.markDup.bam" into ch_markdup_bam,ch_for_ug_download,ch_dedupped_bam_for_genotyping
+    file "*.markDup.bam" into ch_markdup_bam,ch_dedupped_bam_for_genotyping
 
     script:
     prefix = "${bam.baseName}"
@@ -1187,7 +1187,7 @@ process pmdtools {
     file fasta from fasta_for_indexing
 
     output:
-    file "*.bam" into ch_bam_after_pmdfiltering,ch_for_ug_download,ch_pmd_bam_for_genotyping
+    file "*.bam" into ch_bam_after_pmdfiltering,ch_pmd_bam_for_genotyping
     file "*.cpg.range*.txt"
 
     script:
@@ -1222,7 +1222,7 @@ process bam_trim {
     file bam from ch_for_bamutils  
 
     output: 
-    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping,ch_for_ug_download
+    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping
     file "*.{bai,csi}"
 
     script:
