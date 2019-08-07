@@ -90,7 +90,7 @@ def helpMessage() {
       --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
     
     DeDuplication
-      --dedupper                    Deduplication method to use (options: dedup, markduplicates). Default: dedup
+      --dedupper                    Deduplication method to use (options: dedupper, markduplicates). Default: dedup
       --dedup_all_merged            Treat all reads as merged reads
     
     Library Complexity Estimation
@@ -112,8 +112,14 @@ def helpMessage() {
       --bamutils_softclip           Use softclip instead of hard masking
 
     Genotyping
-      --genotyping                  Perform genotyping on deduplicated bams
-      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Options: ug
+      --genotyping                  Perform genotyping on deduplicated BAMs
+      --genotype_input_source		Specify which BAM file to use (note, use correspondng module accordingly). Default: dedup. Options: dedupper, trimmed, pmd
+      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Options: ug                  
+      --ug_genotype_model           GATK UnifiedGenotyper genotyping likelihood model. Default: SNP. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL
+      --ug_call_conf = '30'         GATK UnifiedGenotyper phred-scaled confidence threshold. Default: 30
+      --ug_ploidy = '2'             GATK UnifiedGenotyper ploidy. Default: 2
+      --ug_downsample = '250'       GATK UnifiedGenotyper fold coverage threshold to downsample to. Default: 250 
+      --ug_out_mode = 'EMIT_VARIANTS_ONLY' GATK UnifiedGenotyper  output mode. Default: EMIT_VARIANTS_ONLY. Options EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -231,7 +237,13 @@ params.strip_mode = 'strip'
 
 //Genotyping options
 params.genotyping = false
+params.genotype_input_source = 'dedup'
 params.genotyping_tool = 'ug'
+params.ug_genotype_model = 'SNP'
+params.ug_call_conf = '30'
+params.ug_ploidy = '2'
+params.ug_downsample = '250'
+params.ug_out_mode = 'EMIT_VARIANTS_ONLY'
 
 
 multiqc_config = file(params.multiqc_config)
@@ -1008,7 +1020,7 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_for_unifiedgenotyper
+    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_for_ug_download,ch_dedupped_bam_for_genotyping
     file "*.{bai,csi}"
 
     script:
@@ -1131,7 +1143,7 @@ process markDup{
     !params.skip_deduplication && params.dedupper != 'dedup'
 
     input:
-    file bam from ch_bam_filtered_markdup
+    file bam from ch_bam_filtered_markdup,ch_for_ug_download,ch_dedupped_bam_for_genotyping
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
@@ -1175,7 +1187,7 @@ process pmdtools {
     file fasta from fasta_for_indexing
 
     output:
-    file "*.bam" into ch_bam_after_pmdfiltering
+    file "*.bam" into ch_bam_after_pmdfiltering,ch_for_ug_download,ch_pmd_bam_for_genotyping
     file "*.cpg.range*.txt"
 
     script:
@@ -1210,7 +1222,7 @@ process bam_trim {
     file bam from ch_for_bamutils  
 
     output: 
-    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping
+    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping,ch_for_ug_download
     file "*.{bai,csi}"
 
     script:
@@ -1226,8 +1238,9 @@ process bam_trim {
 
 
 /*
- Step 11a: Genotyping
+ Step 11a: Genotyping - UnifiedGenotyper Downloading
  */
+
 
  process download_gatk {
     tag "${prefix}"
@@ -1235,7 +1248,8 @@ process bam_trim {
 
     when params.genotyping && params.genotyping_tool == 'ug'
 
-    input: file bam from ch_for_unifiedgenotyper
+    input: 
+    file bam from ch_for_ug_download
 
     output:
     file "*.jar" into ch_unifiedgenotyper_jar
@@ -1248,7 +1262,51 @@ process bam_trim {
 
  }
 
+ `*
+  Step 11b: Genotyping - UG
 
+ */
+
+ process genotyping_ug {
+  tag "${prefix}"
+  publishDir "${params.outdir}/genotyping", mode: 'copy'
+
+  when params.genotyping && params.genotyping_tool == 'ug'
+
+  input:
+  file fasta from fasta_for_indexing
+  file jar from ch_unifiedgenotyper_jar
+
+  file bam_dedupped from ch_dedupped_bam_for_genotyping
+  file bam_pmd from ch_pmd_bam_for_genotyping
+  file bam_trimmed from ch_trimmed_bam_for_genotyping
+
+  output: 
+  file "*vcf.gz" into ch_vcf
+
+  script:
+  if( params.genotyping_tool == 'ug' && params.genotyping_input_source == 'dedup' )
+	  """
+	  gatk -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedup}.intervals 
+	  gatk -T IndelRealigner -R ${fasta} -I ${bam_dedupped} -targetIntervals ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam
+	  gatk -T UnifiedGenotyper -R ${fasta} -I ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam -o ${bam_dedupped}.intervals -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
+	  pigz -p ${task.cpus} ${bam_dedupped}.vcf
+	  """
+  else if( params.genotyping_tool == 'ug' && params.genotyping_input_source == 'pmd' )
+	  """
+	  gatk -T RealignerTargetCreator -R ${fasta} -I ${bam_pmd} -nt ${task.cpus} -o ${bam_pmd}.intervals 
+	  gatk -T IndelRealigner -R ${fasta} -I ${bam_pmd} -targetIntervals ${bam_pmd}.intervals -o ${bam_pmd}.realign.bam
+	  gatk -T UnifiedGenotyper -R ${fasta} -I ${bam_pmd}.intervals -o ${bam_pmd}.realign.bam -o ${bam_pmd}.intervals -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
+	  pigz -p ${task.cpus} ${bam_depdupped}.vcf
+	  """
+  else if( params.genotyping_tool == 'ug' && params.genotyping_input_source == 'trimmed' )
+	  """
+	  gatk -T RealignerTargetCreator -R ${fasta} -I ${bam_trimmed} -nt ${task.cpus} -o ${bam_trimmed}.intervals 
+	  gatk -T IndelRealigner -R ${fasta} -I ${bam_trimmed} -targetIntervals ${bam_trimmed}.intervals -o ${bam_trimmed}.realign.bam
+	  gatk -T UnifiedGenotyper -R ${fasta} -I ${bam_trimmed}.intervals -o ${bam_trimmed}.realign.bam -o ${bam_trimmed}.intervals -o ${bam_trimmed}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
+	  pigz -p ${task.cpus} ${bam_trimmed}.vcf
+	  """
+ }
 
 
 
