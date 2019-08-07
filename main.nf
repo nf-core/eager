@@ -1276,10 +1276,9 @@ ch_gatk_download = Channel.value("download")
   input:
   file fasta from fasta_for_indexing
   file jar from ch_unifiedgenotyper_jar
-
-  file bam_dedupped from ch_dedup_bam_for_genotyping.mix(ch_markdup_bam_for_genotyping)
-  file bam_pmd from ch_pmd_bam_for_genotyping
-  file bam_trimmed from ch_trimmed_bam_for_genotyping
+  file bam_dedupped from ch_dedup_bam_for_genotyping //.mix(ch_markdup_bam_for_genotyping)
+  //file bam_pmd from ch_pmd_bam_for_genotyping
+  //file bam_trimmed from ch_trimmed_bam_for_genotyping
 
   output: 
   file "*vcf.gz" into ch_vcf
