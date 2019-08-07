@@ -1143,11 +1143,11 @@ process markDup{
     !params.skip_deduplication && params.dedupper != 'dedup'
 
     input:
-    file bam from ch_bam_filtered_markdup,ch_for_ug_download,ch_dedupped_bam_for_genotyping
+    file bam from ch_bam_filtered_markdup,
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
-    file "*.markDup.bam" into ch_markdup_bam
+    file "*.markDup.bam" into ch_markdup_bam,ch_for_ug_download,ch_dedupped_bam_for_genotyping
 
     script:
     prefix = "${bam.baseName}"
