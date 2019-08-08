@@ -237,7 +237,7 @@ params.strip_mode = 'strip'
 
 //Genotyping options
 params.genotyping = false
-params.genotyping_input_source = 'dedup'
+params.genotyping_input_source = 'dedupper'
 params.genotyping_tool = 'ug'
 params.ug_genotype_model = 'SNP'
 params.ug_call_conf = '30'
@@ -1276,14 +1276,20 @@ ch_gatk_download = Channel.value("download")
   input:
   file fasta from fasta_for_indexing
   file jar from ch_unifiedgenotyper_jar
-  file bam_dedupped from ch_dedup_bam_for_genotyping //.mix(ch_markdup_bam_for_genotyping)
-  //file bam_pmd from ch_pmd_bam_for_genotyping
-  //file bam_trimmed from ch_trimmed_bam_for_genotyping
+  file bam_dedupped from ch_dedup_bam_for_genotyping
 
   output: 
   file "*vcf.gz" into ch_vcf
 
-  script:
+  // need to add error check that input_source is valid
+
+  """
+  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedup}.intervals 
+  java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam_dedupped} -targetIntervals ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam
+  java -jar ${jar} UnifiedGenotyper -R ${fasta} -I ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam -o ${bam_dedupped}.intervals -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
+  pigz -p ${task.cpus} ${bam_dedupped}.vcf
+  """
+  /*
   if( params.genotyping_tool == 'ug' && params.genotyping_input_source == 'dedupper' )
 	  """
 	  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedup}.intervals 
@@ -1305,6 +1311,7 @@ ch_gatk_download = Channel.value("download")
 	  java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam_trimmed}.intervals -o ${bam_trimmed}.realign.bam -o ${bam_trimmed}.intervals -o ${bam_trimmed}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
 	  pigz -p ${task.cpus} ${bam_trimmed}.vcf
 	  """
+    */
  }
 
 
