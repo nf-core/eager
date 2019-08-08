@@ -1277,6 +1277,8 @@ ch_gatk_download = Channel.value("download")
   file fasta from fasta_for_indexing
   file jar from ch_unifiedgenotyper_jar
   file bam_dedupped from ch_dedup_bam_for_genotyping
+  file fai from ch_fasta_faidx_index
+  file dict from ch_seq_dict
 
   output: 
   file "*vcf.gz" into ch_vcf
