@@ -1021,7 +1021,7 @@ process dedup{
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
     file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedup_bam_for_genotyping
-    file "*.{bai,csi}"
+    file "*.{bai,csi}" into dedup_bam_index_for_genotyping
 
     script:
     prefix="${bam.baseName}"
@@ -1279,6 +1279,7 @@ ch_gatk_download = Channel.value("download")
   file bam_dedupped from ch_dedup_bam_for_genotyping
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
+  file "*.{bai,csi}" from dedup_bam_index_for_genotyping
 
   output: 
   file "*vcf.gz" into ch_vcf
