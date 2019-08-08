@@ -1243,7 +1243,7 @@ process bam_trim {
 
 ch_gatk_download = Channel.value("download")
 
- process download_gatk {
+ process download_gatk_3.8 {
     tag "${prefix}"
     publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1284,7 +1284,7 @@ ch_gatk_download = Channel.value("download")
   // need to add error check that input_source is valid
 
   """
-  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedup}.intervals 
+  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedupped}.intervals 
   java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam_dedupped} -targetIntervals ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam
   java -jar ${jar} UnifiedGenotyper -R ${fasta} -I ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam -o ${bam_dedupped}.intervals -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${genotype_model} -stand_call_conf ${call_conf} --sample_ploidy ${ploidy} -dcov ${downsample} --output_mode ${out_mode}  
   pigz -p ${task.cpus} ${bam_dedupped}.vcf
