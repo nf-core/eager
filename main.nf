@@ -1243,7 +1243,7 @@ process bam_trim {
 
 ch_gatk_download = Channel.value("download")
 
- process download_gatk_3.8 {
+ process download_gatk_v3_8 {
     tag "${prefix}"
     publishDir "${params.outdir}/genotyping", mode: 'copy'
 
