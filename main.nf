@@ -246,7 +246,7 @@ params.gatk_ploidy = '2'
 params.gatk_downsample = '250'
 params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
 params.gatk_dbsnp = ''
-
+params.gatk_hc_emitrefconf = 'GVCF'
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
@@ -1334,15 +1334,13 @@ ch_gatk_download = Channel.value("download")
   script:
   if (params.gatk_dbsnp == '')
     """
-    gatk4 -T UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus}  -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emitRefConfidence ${params.}
-
+    gatk4 -T UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus}  -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emitRefConfidence ${params.gatk_hc_emitrefconf}
     pigz -p ${task.cpus} ${bam}.vcf
     """
 
   else if (params.gatk_dbsnp != '')
     """
-    gatk4 -T UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus} --dbsnp ${params.gatk_dbsnp} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode}  
-
+    gatk4 -T UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus} --dbsnp ${params.gatk_dbsnp} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode}   --emitRefConfidence ${params.gatk_hc_emitrefconf}
     pigz -p ${task.cpus} ${bam}.vcf
     """
  }
