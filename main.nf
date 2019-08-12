@@ -237,7 +237,6 @@ params.strip_mode = 'strip'
 
 //Genotyping options
 params.run_genotyping = false
-params.genotyping_input_source = 'dedupper'
 params.genotyping_tool = 'ug'
 params.gatk_ug_genotype_model = 'SNP'
 params.gatk_call_conf = '30'
