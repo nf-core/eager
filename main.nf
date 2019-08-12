@@ -244,7 +244,7 @@ params.gatk_call_conf = '30'
 params.gatk_ploidy = '2'
 params.gatk_downsample = '250'
 params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
-params.gatk_dbsp = ''
+params.gatk_dbsnp = ''
 
 
 multiqc_config = file(params.multiqc_config)
@@ -1293,7 +1293,7 @@ ch_gatk_download = Channel.value("download")
     pigz -p ${task.cpus} ${bam}.vcf
     """
 
-  else if (params.gatk_db != '')
+  else if (params.gatk_dbsnp != '')
     """
     samtools index ${bam}
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
