@@ -44,6 +44,7 @@ def helpMessage() {
       --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
       --fasta_index                 Path to samtools FASTA index (typically ending in '.fai')
       --saveReference               Saves reference genome indices for later reusage
+      --large_ref                   Turn on .csi bam index files when a large genome causes bam indexing to crash
 
     Skipping                        Skip any of the mentioned steps
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
@@ -90,7 +91,7 @@ def helpMessage() {
       --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
     
     DeDuplication
-      --dedupper                    Deduplication method to use (options: dedupper, markduplicates). Default: dedup
+      --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
       --dedup_all_merged            Treat all reads as merged reads
     
     Library Complexity Estimation
@@ -112,14 +113,14 @@ def helpMessage() {
       --bamutils_softclip           Use softclip instead of hard masking
 
     Genotyping
-      --run_genotyping                  Perform genotyping on deduplicated BAMs
-      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Note 'unifiedgenotyper' uses GATK 3.5 which is deprecated by Broad. Options: ug                  
-      --gatk_genotype_model         Specify GATK genotyping likelihood model. Default: SNP. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL
+      --run_genotyping              Perform genotyping on deduplicated BAMs
+      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Note: UnifiedGenotyper uses now deprecated GATK 3.5. Options: ug, hc
+      --gatk_out_mode               Specify GATK output mode. Default: EMIT_VARIANTS_ONLY. Options: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES
       --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30
-      --gatk_ploidy                 Specify GATK organism ploidy. Default: 2
-      --gatk_downsample             Specify GATK SNP calling fold coverage threshold to downsample to. Default: 250 
-      --gatk_out_mode               Specify GATK output mode. Default: EMIT_VARIANTS_ONLY. Options EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES
-      --gatk_dbsnp                  Specify 
+      --gatk_ploidy                 Specify GATK organism ploidy. Default: 2        
+      --gatk_dbsnp                  Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
+      --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Default: SNP. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL
+      --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: NONE, BP_RESOLUTION, GVCF
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -239,7 +240,7 @@ params.strip_mode = 'strip'
 params.run_genotyping = false
 params.genotyping_input_source = 'dedupper'
 params.genotyping_tool = 'ug'
-params.gatk_genotype_model = 'SNP'
+params.gatk_ug_genotype_model = 'SNP'
 params.gatk_call_conf = '30'
 params.gatk_ploidy = '2'
 params.gatk_downsample = '250'
@@ -1022,7 +1023,7 @@ process dedup{
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
     file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedup_bam_for_genotyping
-    file "*.{bai,csi}" into dedup_bam_index_for_genotyping
+    file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping
 
     script:
     prefix="${bam.baseName}"
@@ -1149,11 +1150,15 @@ process markDup{
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
     file "*.markDup.bam" into ch_markdup_bam,ch_markdup_bam_for_genotyping
+    file "*.{bai,csi}" into ch_markdup_bam_index_for_genotyping
+
 
     script:
     prefix = "${bam.baseName}"
+    size = "${params.large_ref}" ? '-c' : ''
     """
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools index "${size}" ${prefix}.markDup.bam
     """
 }
 
@@ -1190,6 +1195,7 @@ process pmdtools {
     output:
     file "*.bam" into ch_bam_after_pmdfiltering,ch_pmd_bam_for_genotyping
     file "*.cpg.range*.txt"
+    file "*.{bai,csi}" into ch_pmd_bam_index_for_genotyping
 
     script:
     //Check which treatment for the libraries was used
@@ -1200,11 +1206,14 @@ process pmdtools {
     } else {
         snpcap = ''
     }
+    size = "${params.large_ref}" ? '-c' : ''
+
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
     #Run Calc Range step
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt 
+    samtools index "${size}" ${prefix}.pmd.bam
     """
 }
 
@@ -1224,7 +1233,7 @@ process bam_trim {
 
     output: 
     file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping
-    file "*.{bai,csi}"
+    file "*.{bai,csi}" into ch_trimmed_bam_index_for_genotyping
 
     script:
     prefix="${bam.baseName}"
@@ -1275,9 +1284,10 @@ ch_gatk_download = Channel.value("download")
   input:
   file fasta from fasta_for_indexing
   file jar from ch_unifiedgenotyper_jar
-  file bam from ch_dedup_bam_for_genotyping.mix(ch_pmd_bam_for_genotyping,ch_trimmed_bam_for_genotyping)
+  file bam from ch_dedup_bam_for_genotyping.mix(ch_markdup_bam_for_genotyping,ch_pmd_bam_for_genotyping,ch_trimmed_bam_for_genotyping)
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
+  file bai from ch_dedup_bam_index_for_genotyping.mix(ch_dedup_markdup_index_for_genotyping,ch_pmd_bam_index_for_genotyping,ch_trimmed_bam_index_for_genotyping)
 
   output: 
   file "*vcf.gz" into ch_vcf
@@ -1285,26 +1295,63 @@ ch_gatk_download = Channel.value("download")
   script:
   if (params.gatk_dbsnp == '')
     """
-    samtools index ${bam}
+    #samtools index ${bam}
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
-    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
 
     pigz -p ${task.cpus} ${bam}.vcf
     """
 
   else if (params.gatk_dbsnp != '')
     """
-    samtools index ${bam}
+    #samtools index ${bam}
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
-    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
 
     pigz -p ${task.cpus} ${bam}.vcf
     """
  }
 
+  process genotyping_hc {
+  tag "${prefix}"
+  publishDir "${params.outdir}/genotyping", mode: 'copy'
 
+  when params.run_genotyping && params.genotyping_tool == 'hc'
+
+  input:
+  file fasta from fasta_for_indexing
+  file jar from ch_unifiedgenotyper_jar
+  file bam from ch_dedup_bam_for_genotyping.mix(ch_markdup_bam_for_genotyping,ch_pmd_bam_for_genotyping,ch_trimmed_bam_for_genotyping)
+  file fai from ch_fasta_faidx_index
+  file dict from ch_seq_dict
+  file bai from ch_dedup_bam_index_for_genotyping.mix(ch_dedup_markdup_index_for_genotyping,ch_pmd_bam_index_for_genotyping,ch_trimmed_bam_index_for_genotyping)
+
+  output: 
+  file "*vcf.gz" into ch_vcf
+
+  script:
+  if (params.gatk_dbsnp == '')
+    """
+    gatk4 -T UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus}  -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emitRefConfidence ${params.}
+
+    pigz -p ${task.cpus} ${bam}.vcf
+    """
+
+  else if (params.gatk_dbsnp != '')
+    """
+    gatk4 -T UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus} --dbsnp ${params.gatk_dbsnp} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode}  
+
+    pigz -p ${task.cpus} ${bam}.vcf
+    """
+ }
+
+// csi index file channel
+// hc commands
+// error checks: hc requires emirRefConfidence; genotype model typos; output model typos; ug doesn't accept csi
+// tests
+// documentation
 
 
 /*
