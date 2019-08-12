@@ -1288,7 +1288,7 @@ ch_gatk_download = Channel.value("download")
   samtools index ${bam_dedupped}
   java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedupped}.intervals 
   java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam_dedupped} -targetIntervals ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam
-  java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam_dedupped}.intervals -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.ug_genotype_model} -stand_call_conf ${params.ug_call_conf} --sample_ploidy ${params.ug_ploidy} -dcov ${params.ug_downsample} --output_mode ${params.ug_out_mode}  
+  java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam_dedupped}.realign.bam -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.ug_genotype_model} -stand_call_conf ${params.ug_call_conf} --sample_ploidy ${params.ug_ploidy} -dcov ${params.ug_downsample} --output_mode ${params.ug_out_mode}  
   pigz -p ${task.cpus} ${bam_dedupped}.vcf
   """
  }
