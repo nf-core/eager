@@ -1330,13 +1330,13 @@ ch_gatk_download = Channel.value("download")
   script:
   if (params.gatk_dbsnp == '')
     """
-    gatk UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus}  -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emitRefConfidence ${params.gatk_hc_emitrefconf}
+    gatk HaplotypeCaller -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus}  -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emitRefConfidence ${params.gatk_hc_emitrefconf}
     pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
     """
 
   else if (params.gatk_dbsnp != '')
     """
-    gatk UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus} --dbsnp ${params.gatk_dbsnp} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode}   --emitRefConfidence ${params.gatk_hc_emitrefconf}
+    gatk HaplotypeCaller -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus} --dbsnp ${params.gatk_dbsnp} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode}   --emitRefConfidence ${params.gatk_hc_emitrefconf}
     pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
     """
  }
