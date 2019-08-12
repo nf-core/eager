@@ -1298,8 +1298,7 @@ ch_gatk_download = Channel.value("download")
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
-
-    pigz -p ${task.cpus} ${bam}.vcf
+    pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
     """
 
   else if (params.gatk_dbsnp != '')
@@ -1309,7 +1308,7 @@ ch_gatk_download = Channel.value("download")
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
 
-    pigz -p ${task.cpus} ${bam}.vcf
+    pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
     """
  }
 
@@ -1334,19 +1333,18 @@ ch_gatk_download = Channel.value("download")
   if (params.gatk_dbsnp == '')
     """
     gatk4 -T UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus}  -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emitRefConfidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${bam}.vcf
+    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
     """
 
   else if (params.gatk_dbsnp != '')
     """
     gatk4 -T UnifiedGenotyper -R ${fasta} -I ${bam} -o ${bam}.haplotypecaller.vcf -nct ${task.cpus} --dbsnp ${params.gatk_dbsnp} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode}   --emitRefConfidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${bam}.vcf
+    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
     """
  }
 
-// csi index file channel
 // hc commands
-// error checks: hc requires emirRefConfidence; genotype model typos; output model typos; ug doesn't accept csi
+// error checks: hc requires emirRefConfidence; genotype model typos; output model typos
 // tests
 // documentation
 
