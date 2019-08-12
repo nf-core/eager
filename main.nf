@@ -1342,7 +1342,7 @@ process get_software_versions {
 
     input:
     file json from ch_damageprofiler_for_software_versions
-    from jar from ch_unifiedgenotyper_versions_jar
+    file jar from ch_unifiedgenotyper_versions_jar
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
