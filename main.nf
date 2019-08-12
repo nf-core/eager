@@ -1258,7 +1258,6 @@ ch_gatk_download = Channel.value("download")
     """
     wget -O GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4'
     tar xjf GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
-    mv GenomeAnalysisTK-3.5-0-g36282e4/GenomeAnalysisTK.jar .
     """
 
  }
