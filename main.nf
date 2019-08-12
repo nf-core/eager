@@ -1290,7 +1290,7 @@ ch_gatk_download = Channel.value("download")
   file bai from ch_dedup_bam_index_for_genotyping_ug.mix(ch_markdup_bam_index_for_genotyping_ug,ch_pmd_bam_index_for_genotyping_ug,ch_trimmed_bam_index_for_genotyping_ug)
 
   output: 
-  file "*vcf.gz" into ch_vcf
+  file "*vcf.gz" into ch_vcf_ug
 
   script:
   if (params.gatk_dbsnp == '')
@@ -1329,7 +1329,7 @@ ch_gatk_download = Channel.value("download")
   file bai from ch_dedup_bam_index_for_genotyping_hc.mix(ch_markdup_bam_index_for_genotyping_hc,ch_pmd_bam_index_for_genotyping_hc,ch_trimmed_bam_index_for_genotyping_hc)
 
   output: 
-  file "*vcf.gz" into ch_vcf
+  file "*vcf.gz" into ch_vcf_hc
 
   script:
   if (params.gatk_dbsnp == '')
