@@ -113,8 +113,8 @@ def helpMessage() {
 
     Genotyping
       --genotyping                  Perform genotyping on deduplicated BAMs
-      --genotyping_input_source		Specify which BAM file to use (note, use correspondng module accordingly). Default: dedupper. Options: dedupper, trimmed, pmd
-      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Options: ug                  
+      --genotyping_input_source		  Specify which BAM file to use (note, use correspondng module accordingly). Default: dedupper. Options: dedupper, trimmed, pmd
+      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Note 'unifiedgenotyper' uses GATK 3.5 which is deprecated by Broad. Options: ug                  
       --ug_genotype_model           GATK UnifiedGenotyper genotyping likelihood model. Default: SNP. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL
       --ug_call_conf = '30'         GATK UnifiedGenotyper phred-scaled confidence threshold. Default: 30
       --ug_ploidy = '2'             GATK UnifiedGenotyper ploidy. Default: 2
@@ -1243,7 +1243,7 @@ process bam_trim {
 
 ch_gatk_download = Channel.value("download")
 
- process download_gatk_v3_8 {
+ process download_gatk_v3_5 {
     tag "${prefix}"
     publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1256,9 +1256,9 @@ ch_gatk_download = Channel.value("download")
     file "*.jar" into ch_unifiedgenotyper_jar,ch_unifiedgenotyper_versions_jar
 
     """
-    wget -O GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef'
-    tar xjf GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2
-    mv GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar .
+    wget -O GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4'
+    tar xjf GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
+    mv GenomeAnalysisTK-3.5-0-g36282e4/GenomeAnalysisTK.jar .
     """
 
  }
@@ -1289,6 +1289,7 @@ ch_gatk_download = Channel.value("download")
   java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedupped}.intervals 
   java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam_dedupped} -targetIntervals ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam
   java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam_dedupped}.realign.bam -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.ug_genotype_model} -stand_call_conf ${params.ug_call_conf} --sample_ploidy ${params.ug_ploidy} -dcov ${params.ug_downsample} --output_mode ${params.ug_out_mode}  
+
   pigz -p ${task.cpus} ${bam_dedupped}.vcf
   """
  }
@@ -1365,7 +1366,7 @@ process get_software_versions {
     bam --version &> v_bamutil.txt 2>&1 || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
     cat $json &> v_damageprofiler.txt 2>&1 || true 
-    java -jar ${jar} --version &> v_gatk3_8.txt 2>&1 || true 
+    java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
     
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
