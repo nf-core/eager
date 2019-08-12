@@ -113,7 +113,6 @@ def helpMessage() {
 
     Genotyping
       --genotyping                  Perform genotyping on deduplicated BAMs
-      --genotyping_input_source		  Specify which BAM file to use (note, use correspondng module accordingly). Default: dedupper. Options: dedupper, trimmed, pmd
       --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Note 'unifiedgenotyper' uses GATK 3.5 which is deprecated by Broad. Options: ug                  
       --ug_genotype_model           GATK UnifiedGenotyper genotyping likelihood model. Default: SNP. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL
       --ug_call_conf = '30'         GATK UnifiedGenotyper phred-scaled confidence threshold. Default: 30
@@ -1274,7 +1273,7 @@ ch_gatk_download = Channel.value("download")
   input:
   file fasta from fasta_for_indexing
   file jar from ch_unifiedgenotyper_jar
-  file bam_dedupped from ch_dedup_bam_for_genotyping
+  file bam from ch_dedup_bam_for_genotyping.mix(ch_pmd_bam_for_genotyping,ch_trimmed_bam_for_genotyping)
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
 
@@ -1283,12 +1282,12 @@ ch_gatk_download = Channel.value("download")
 
   script:
   """
-  samtools index ${bam_dedupped}
-  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedupped}.intervals 
-  java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam_dedupped} -targetIntervals ${bam_dedupped}.intervals -o ${bam_dedupped}.realign.bam
-  java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam_dedupped}.realign.bam -o ${bam_dedupped}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.ug_genotype_model} -stand_call_conf ${params.ug_call_conf} --sample_ploidy ${params.ug_ploidy} -dcov ${params.ug_downsample} --output_mode ${params.ug_out_mode}  
+  samtools index ${bam}
+  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
+  java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
+  java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.ug_genotype_model} -stand_call_conf ${params.ug_call_conf} --sample_ploidy ${params.ug_ploidy} -dcov ${params.ug_downsample} --output_mode ${params.ug_out_mode}  
 
-  pigz -p ${task.cpus} ${bam_dedupped}.vcf
+  pigz -p ${task.cpus} ${bam}.vcf
   """
  }
 
