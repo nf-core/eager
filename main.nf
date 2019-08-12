@@ -1319,7 +1319,6 @@ ch_gatk_download = Channel.value("download")
 
   input:
   file fasta from fasta_for_indexing
-  file jar from ch_unifiedgenotyper_jar
   file bam from ch_dedup_bam_for_genotyping_hc.mix(ch_markdup_bam_for_genotyping_hc,ch_pmd_bam_for_genotyping_hc,ch_trimmed_bam_for_genotyping_hc)
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
