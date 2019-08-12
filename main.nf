@@ -1287,7 +1287,7 @@ ch_gatk_download = Channel.value("download")
   file bam from ch_dedup_bam_for_genotyping.mix(ch_markdup_bam_for_genotyping,ch_pmd_bam_for_genotyping,ch_trimmed_bam_for_genotyping)
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
-  file bai from ch_dedup_bam_index_for_genotyping.mix(ch_markdup_index_for_genotyping,ch_pmd_bam_index_for_genotyping,ch_trimmed_bam_index_for_genotyping)
+  file bai from ch_dedup_bam_index_for_genotyping.mix(ch_markdup_bam_index_for_genotyping,ch_pmd_bam_index_for_genotyping,ch_trimmed_bam_index_for_genotyping)
 
   output: 
   file "*vcf.gz" into ch_vcf
