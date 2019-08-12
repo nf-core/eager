@@ -1253,7 +1253,7 @@ ch_gatk_download = Channel.value("download")
     val "download" from ch_gatk_download
 
     output:
-    file "*.jar" into ch_unifiedgenotyper_jar
+    file "*.jar" into ch_unifiedgenotyper_jar,ch_unifiedgenotyper_versions_jar
 
     """
     wget -O GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef'
@@ -1279,11 +1279,11 @@ ch_gatk_download = Channel.value("download")
   file bam_dedupped from ch_dedup_bam_for_genotyping
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
-  file csi from dedup_bam_index_for_genotyping
 
   output: 
   file "*vcf.gz" into ch_vcf
 
+  script:
   """
   samtools index ${bam_dedupped}
   java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam_dedupped} -nt ${task.cpus} -o ${bam_dedupped}.intervals 
@@ -1342,6 +1342,7 @@ process get_software_versions {
 
     input:
     file json from ch_damageprofiler_for_software_versions
+    from jar from ch_unifiedgenotyper_versions_jar
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
@@ -1364,6 +1365,7 @@ process get_software_versions {
     bam --version &> v_bamutil.txt 2>&1 || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
     cat $json &> v_damageprofiler.txt 2>&1 || true 
+    java -jar ${jar} --version &> v_gatk3_8.txt 2>&1 || true 
     
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
