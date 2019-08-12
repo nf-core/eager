@@ -112,13 +112,14 @@ def helpMessage() {
       --bamutils_softclip           Use softclip instead of hard masking
 
     Genotyping
-      --genotyping                  Perform genotyping on deduplicated BAMs
+      --run_genotyping                  Perform genotyping on deduplicated BAMs
       --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Note 'unifiedgenotyper' uses GATK 3.5 which is deprecated by Broad. Options: ug                  
-      --ug_genotype_model           GATK UnifiedGenotyper genotyping likelihood model. Default: SNP. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL
-      --ug_call_conf = '30'         GATK UnifiedGenotyper phred-scaled confidence threshold. Default: 30
-      --ug_ploidy = '2'             GATK UnifiedGenotyper ploidy. Default: 2
-      --ug_downsample = '250'       GATK UnifiedGenotyper fold coverage threshold to downsample to. Default: 250 
-      --ug_out_mode = 'EMIT_VARIANTS_ONLY' GATK UnifiedGenotyper  output mode. Default: EMIT_VARIANTS_ONLY. Options EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES
+      --gatk_genotype_model         Specify GATK genotyping likelihood model. Default: SNP. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL
+      --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30
+      --gatk_ploidy                 Specify GATK organism ploidy. Default: 2
+      --gatk_downsample             Specify GATK SNP calling fold coverage threshold to downsample to. Default: 250 
+      --gatk_out_mode               Specify GATK output mode. Default: EMIT_VARIANTS_ONLY. Options EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES
+      --gatk_dbsnp                  Specify 
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -235,14 +236,15 @@ params.strip_input_fastq = false
 params.strip_mode = 'strip'
 
 //Genotyping options
-params.genotyping = false
+params.run_genotyping = false
 params.genotyping_input_source = 'dedupper'
 params.genotyping_tool = 'ug'
-params.ug_genotype_model = 'SNP'
-params.ug_call_conf = '30'
-params.ug_ploidy = '2'
-params.ug_downsample = '250'
-params.ug_out_mode = 'EMIT_VARIANTS_ONLY'
+params.gatk_genotype_model = 'SNP'
+params.gatk_call_conf = '30'
+params.gatk_ploidy = '2'
+params.gatk_downsample = '250'
+params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
+params.gatk_dbsp = ''
 
 
 multiqc_config = file(params.multiqc_config)
@@ -1245,7 +1247,7 @@ ch_gatk_download = Channel.value("download")
  process download_gatk_v3_5 {
     tag "${prefix}"
 
-    when params.genotyping && params.genotyping_tool == 'ug'
+    when params.run_genotyping && params.genotyping_tool == 'ug'
 
     input: 
     val "download" from ch_gatk_download
@@ -1268,7 +1270,7 @@ ch_gatk_download = Channel.value("download")
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
-  when params.genotyping && params.genotyping_tool == 'ug'
+  when params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
   file fasta from fasta_for_indexing
@@ -1281,14 +1283,25 @@ ch_gatk_download = Channel.value("download")
   file "*vcf.gz" into ch_vcf
 
   script:
-  """
-  samtools index ${bam}
-  java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
-  java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
-  java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.ug_genotype_model} -stand_call_conf ${params.ug_call_conf} --sample_ploidy ${params.ug_ploidy} -dcov ${params.ug_downsample} --output_mode ${params.ug_out_mode}  
+  if (params.gatk_dbsnp == '')
+    """
+    samtools index ${bam}
+    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
+    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
 
-  pigz -p ${task.cpus} ${bam}.vcf
-  """
+    pigz -p ${task.cpus} ${bam}.vcf
+    """
+
+  else if (params.gatk_db != '')
+    """
+    samtools index ${bam}
+    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
+    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
+
+    pigz -p ${task.cpus} ${bam}.vcf
+    """
  }
 
 
