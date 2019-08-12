@@ -1245,7 +1245,6 @@ ch_gatk_download = Channel.value("download")
 
  process download_gatk_v3_5 {
     tag "${prefix}"
-    publishDir "${params.outdir}/genotyping", mode: 'copy'
 
     when params.genotyping && params.genotyping_tool == 'ug'
 
