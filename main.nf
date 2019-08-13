@@ -320,7 +320,7 @@ if (params.strip_input_fastq){
 // Genotyping sanity checking
 
 if (params.run_genotyping){
-  if(params.run_genotyping == '' || params.run_genotyping != 'ug' || params.run_genotyping != 'hc'){
+  if(params.run_genotyping == '' || params.genotyping_tool != 'ug' || params.genotyping_tool != 'hc'){
   exit 1, "Please specify a genotyper. Options: ug, hc"
   } else if (params.gatk_out_mode != 'EMIT_VARIANTS_ONLY' || params.gatk_out_mode != 'EMIT_CONFIDENT_SITES' || params.gatk_out_mode != 'EMIT_ALL_SITES') {
   exit 1, "Please check your GATK output mode. Options are: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES"
