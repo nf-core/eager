@@ -328,6 +328,7 @@ if (params.run_genotyping){
     exit 1, "Please check your UnifiedGenotyper genotype model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL"
   } else if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' || params.gatk_hc_emitrefconf != 'GVCF' || params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
     exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION"
+  }
 }
 
 
