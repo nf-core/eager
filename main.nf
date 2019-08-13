@@ -326,7 +326,7 @@ if (params.run_genotyping){
   exit 1, "Please check your GATK output mode. Options are: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES"
   } else if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' || params.gatk_ug_genotype_model != 'INDEL' || params.gatk_ug_genotype_model != 'BOTH' || params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' || params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
     exit 1, "Please check your UnifiedGenotyper genotype model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL"
-  } else if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' || params.gatk_hc_emitrefconf != 'GVCF' || params.gatk_hc_emitrefconf = != 'BP_RESOLUTION')) {
+  } else if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' || params.gatk_hc_emitrefconf != 'GVCF' || params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
     exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION"
 }
 
