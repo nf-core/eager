@@ -1360,8 +1360,6 @@ ch_gatk_download = Channel.value("download")
     """
  }
 
-// error checks: hc requires emirRefConfidence; genotype model typos; output model typos
-// documentation
 
 /*
 Processing missing:
@@ -1369,7 +1367,6 @@ Processing missing:
 
 Genotyping tools:
 - angsd
-- gatk (if even suitable anymore?)
 - snpAD
 - sequenceTools
 
