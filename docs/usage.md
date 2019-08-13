@@ -577,7 +577,7 @@ There are options for different genotypers to be used. We suggest you the docume
 
 ### `--run_genotyping`
 
-Turns on genotyping to run on all post-dedup and downstream BAMs. For example if `--run_pmdtools` and `--trim_bam` are both supplied, the genotyper will be run on all three deduplication, pmd and trim bam BAM files.
+Turns on genotyping to run on all post-dedup and downstream BAMs. For example if `--run_pmdtools` and `--trim_bam` are both supplied, the genotyper will be run on all three BAM files i.e. post-deduplication, post-pmd and post-trimmed BAM files.
 
 ## `--genotyping_tool`
 
