@@ -321,18 +321,19 @@ if (params.strip_input_fastq){
 
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc') {
-  exit 1, "Please specify a genotyper. Options: ug, hc. You selected: ${params.genotyping_tool}"
+  exit 1, "Please specify a genotyper. Options: ug, hc. You gave: ${params.genotyping_tool}"
   }
   
   if (params.gatk_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_out_mode != 'EMIT_ALL_SITES') {
-  exit 1, "Please check your GATK output mode. Options are: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. You selected: ${params.gatk_out_mode}"
+  exit 1, "Please check your GATK output mode. Options are: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. You gave: ${params.gatk_out_mode}"
   }
   
   if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "Please check your UnifiedGenotyper genotype model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. You selected: ${params.gatk_ug_genotype_model}"
+    exit 1, "Please check your UnifiedGenotyper genotype model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. You gave: ${params.gatk_ug_genotype_model}"
   }
+
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION. You selected: ${params.gatk_hc_emitrefconf}"
+    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION. You gave: ${params.gatk_hc_emitrefconf}"
   }
 }
 
