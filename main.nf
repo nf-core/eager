@@ -322,7 +322,7 @@ if (params.strip_input_fastq){
 if (params.run_genotyping){
   if(params.run_genotyping == '' || params.run_genotyping != 'ug' || params.run_genotyping != 'hc'){
   exit 1, "Please specify a genotyper. Options: ug, hc"
-  } else if {
+  } else if (params.gatk_out_mode != 'EMIT_VARIANTS_ONLY' || params.gatk_out_mode != 'EMIT_CONFIDENT_SITES' || params.gatk_out_mode != 'EMIT_ALL_SITES') {
   exit 1, "Please check your GATK output mode. Options are: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES"
   } else if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' || params.gatk_ug_genotype_model != 'INDEL', params.gatk_ug_genotype_model != 'BOTH', params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP', params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
     exit 1, "Please check your UnifiedGenotyper genotype model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL"
