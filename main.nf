@@ -112,14 +112,14 @@ def helpMessage() {
       --bamutils_softclip           Use softclip instead of hard masking
 
     Genotyping
-      --run_genotyping              Perform genotyping on deduplicated BAMs
-      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Note: UnifiedGenotyper uses now deprecated GATK 3.5. Options: ug, hc
-      --gatk_out_mode               Specify GATK output mode. Default: EMIT_VARIANTS_ONLY. Options: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES
-      --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30
-      --gatk_ploidy                 Specify GATK organism ploidy. Default: 2        
+      --run_genotyping              Perform genotyping on deduplicated BAMs.
+      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Note: UnifiedGenotyper uses now deprecated GATK 3.5. Options: ug, hc.
+      --gatk_out_mode               Specify GATK output mode. Options: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. Default: EMIT_VARIANTS_ONLY. 
+      --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30.
+      --gatk_ploidy                 Specify GATK organism ploidy. Default: 2.
       --gatk_dbsnp                  Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
-      --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Default: SNP. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL
-      --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: NONE, BP_RESOLUTION, GVCF
+      --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL.  Default: SNP. 
+      --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: NONE, BP_RESOLUTION, GVCF. Default: GVCF.
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -237,14 +237,14 @@ params.strip_mode = 'strip'
 
 //Genotyping options
 params.run_genotyping = false
-params.genotyping_tool = 'ug'
+params.genotyping_tool = ''
 params.gatk_ug_genotype_model = 'SNP'
+params.gatk_hc_emitrefconf = 'GVCF'
 params.gatk_call_conf = '30'
 params.gatk_ploidy = '2'
 params.gatk_downsample = '250'
 params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
 params.gatk_dbsnp = ''
-params.gatk_hc_emitrefconf = 'GVCF'
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
@@ -317,6 +317,18 @@ if (params.strip_input_fastq){
     }
 }
 
+// Genotyping sanity checking
+
+if (params.run_genotyping){
+  if(params.run_genotyping == '' || params.run_genotyping != 'ug' || params.run_genotyping != 'hc'){
+  exit 1, "Please specify a genotyper. Options: ug, hc"
+  } else if {
+  exit 1, "Please check your GATK output mode. Options are: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES"
+  } else if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' || params.gatk_ug_genotype_model != 'INDEL', params.gatk_ug_genotype_model != 'BOTH', params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP', params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
+    exit 1, "Please check your UnifiedGenotyper genotype model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL"
+  } else if (params.genotyping_tool == 'hc' && (params.gatk_ug_genotype_model != 'SNP' || params.gatk_ug_genotype_model != ')) {
+    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION"
+}
 
 
 // Has the run name been specified by the user?
@@ -1341,11 +1353,8 @@ ch_gatk_download = Channel.value("download")
     """
  }
 
-// hc commands
 // error checks: hc requires emirRefConfidence; genotype model typos; output model typos
-// tests
 // documentation
-
 
 /*
 Processing missing:
