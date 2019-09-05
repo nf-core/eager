@@ -1,0 +1,29 @@
+name: nf-core extra CI
+# This workflow is triggered on pushes and PRs to the repository.
+on: [push, pull_request]  
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        nxf_ver: ['19.04.0', '']
+        endedness: ['--singleEnd', '--pairedEnd']
+        mapper: ['--circularmapper','--bwamem', '']
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Nextflow
+        run: |
+          export NXF_VER=${{ matrix.nxf_ver }}
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Run test Number 1
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }}--saveReference
+      - name: Run test Number 2
+        run: | 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta 
+      - name: Run test Number 3
+        run: | 
+           #Run the basic pipeline with paired end data without collapsing
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --skip_collapse --saveReference
