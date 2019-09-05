@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [dev]
+
+### `Added`
+
+* Added Support for automated tests using [GitHub Actions](https://github.com/features/actions)
+
+### `Fixed`
+
+* Nothing yet
+
+### `Dependencies`
+
+* adapterremoval=2.2.2->2.3.1
+* adapterremovalfixprefix=0.0.4->0.0.5
+* picard=2.20.2->2.20.7
+* angsd=0.923->0.931
+* gatk4=4.1.2.0->4.1.3.0
+* conda-forge::r-rmarkdown=1.12->1.15
+* pysam=0.15.2->0.15.3
+* python=3.6.3->3.7.3
+
 ## [2.0.7] - 2019-06-10
 
 ### `Added`
