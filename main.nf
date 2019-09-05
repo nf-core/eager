@@ -1403,6 +1403,8 @@ process output_documentation {
  * Step 12b - Parse software version numbers
  */
 process get_software_versions {
+	publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
+
 
     input:
     file json from ch_damageprofiler_for_software_versions
