@@ -27,3 +27,4 @@ jobs:
         run: | 
            #Run the basic pipeline with paired end data without collapsing
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --skip_collapse --saveReference
+          # Need to add more stuff from TravisCI, as GitHub Actions is still in Beta
