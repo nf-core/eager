@@ -90,7 +90,7 @@ def helpMessage() {
       --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
     
     DeDuplication
-      --dedupper                    Deduplication method to use (options: dedup, markduplicates). Default: dedup
+      --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
       --dedup_all_merged            Treat all reads as merged reads
     
     Library Complexity Estimation
@@ -110,6 +110,16 @@ def helpMessage() {
       --trim_bam                    Turn on BAM trimming for UDG(+ or 1/2) protocols
       --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
       --bamutils_softclip           Use softclip instead of hard masking
+
+    Genotyping
+      --run_genotyping              Perform genotyping on deduplicated BAMs.
+      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Note: UnifiedGenotyper uses now deprecated GATK 3.5. Options: ug, hc.
+      --gatk_out_mode               Specify GATK output mode. Options: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. Default: EMIT_VARIANTS_ONLY. 
+      --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30.
+      --gatk_ploidy                 Specify GATK organism ploidy. Default: 2.
+      --gatk_dbsnp                  Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
+      --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL.  Default: SNP. 
+      --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: NONE, BP_RESOLUTION, GVCF. Default: GVCF.
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -225,6 +235,16 @@ params.bamutils_softclip = false
 params.strip_input_fastq = false
 params.strip_mode = 'strip'
 
+//Genotyping options
+params.run_genotyping = false
+params.genotyping_tool = ''
+params.gatk_ug_genotype_model = 'SNP'
+params.gatk_hc_emitrefconf = 'GVCF'
+params.gatk_call_conf = '30'
+params.gatk_ploidy = '2'
+params.gatk_downsample = '250'
+params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
+params.gatk_dbsnp = ''
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
@@ -297,6 +317,25 @@ if (params.strip_input_fastq){
     }
 }
 
+// Genotyping sanity checking
+
+if (params.run_genotyping){
+  if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc') {
+  exit 1, "Please specify a genotyper. Options: ug, hc. You gave: ${params.genotyping_tool}"
+  }
+  
+  if (params.gatk_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_out_mode != 'EMIT_ALL_SITES') {
+  exit 1, "Please check your GATK output mode. Options are: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. You gave: ${params.gatk_out_mode}"
+  }
+  
+  if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
+    exit 1, "Please check your UnifiedGenotyper genotype model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. You gave: ${params.gatk_ug_genotype_model}"
+  }
+
+  if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
+    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION. You gave: ${params.gatk_hc_emitrefconf}"
+  }
+}
 
 
 // Has the run name been specified by the user?
@@ -1000,8 +1039,8 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.sorted.bam" into ch_dedup_bam
-    file "*.{bai,csi}"
+    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedup_bam_for_genotyping_ug,ch_dedup_bam_for_genotyping_hc
+    file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping_ug,ch_dedup_bam_index_for_genotyping_hc
 
     script:
     prefix="${bam.baseName}"
@@ -1127,12 +1166,16 @@ process markDup{
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
-    file "*.markDup.bam" into ch_markdup_bam
+    file "*.markDup.bam" into ch_markdup_bam,ch_markdup_bam_for_genotyping_ug,ch_markdup_bam_for_genotyping_hc
+    file "*.{bai,csi}" into ch_markdup_bam_index_for_genotyping_ug,ch_markdup_bam_index_for_genotyping_hc
+
 
     script:
     prefix = "${bam.baseName}"
+    size = "${params.large_ref}" ? '-c' : ''
     """
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools index "${size}" ${prefix}.markDup.bam
     """
 }
 
@@ -1167,8 +1210,9 @@ process pmdtools {
     file fasta from fasta_for_indexing
 
     output:
-    file "*.bam" into ch_bam_after_pmdfiltering
+    file "*.bam" into ch_bam_after_pmdfiltering,ch_pmd_bam_for_genotyping_ug,ch_pmd_bam_for_genotyping_hc
     file "*.cpg.range*.txt"
+    file "*.{bai,csi}" into ch_pmd_bam_index_for_genotyping_ug,ch_pmd_bam_index_for_genotyping_hc
 
     script:
     //Check which treatment for the libraries was used
@@ -1179,11 +1223,14 @@ process pmdtools {
     } else {
         snpcap = ''
     }
+    size = "${params.large_ref}" ? '-c' : ''
+
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
     #Run Calc Range step
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt 
+    samtools index "${size}" ${prefix}.pmd.bam
     """
 }
 
@@ -1202,8 +1249,8 @@ process bam_trim {
     file bam from ch_for_bamutils  
 
     output: 
-    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping
-    file "*.{bai,csi}"
+    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping_ug,ch_trimmed_bam_for_genotyping_hc
+    file "*.{bai,csi}" into ch_trimmed_bam_index_for_genotyping_ug,ch_trimmed_bam_index_for_genotyping_hc
 
     script:
     prefix="${bam.baseName}"
@@ -1217,6 +1264,101 @@ process bam_trim {
 }
 
 
+/*
+ Step 11a: Genotyping - UnifiedGenotyper Downloading
+ */
+
+ch_gatk_download = Channel.value("download")
+
+ process download_gatk_v3_5 {
+    tag "${prefix}"
+
+    when params.run_genotyping && params.genotyping_tool == 'ug'
+
+    input: 
+    val "download" from ch_gatk_download
+
+    output:
+    file "*.jar" into ch_unifiedgenotyper_jar,ch_unifiedgenotyper_versions_jar
+
+    """
+    wget -O GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4'
+    tar xjf GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
+    """
+
+ }
+
+/*
+ Step 11b: Genotyping - UG
+*/
+
+ process genotyping_ug {
+  tag "${prefix}"
+  publishDir "${params.outdir}/genotyping", mode: 'copy'
+
+  when params.run_genotyping && params.genotyping_tool == 'ug'
+
+  input:
+  file fasta from fasta_for_indexing
+  file jar from ch_unifiedgenotyper_jar
+  file bam from ch_dedup_bam_for_genotyping_ug.mix(ch_markdup_bam_for_genotyping_ug,ch_pmd_bam_for_genotyping_ug,ch_trimmed_bam_for_genotyping_ug)
+  file fai from ch_fasta_faidx_index
+  file dict from ch_seq_dict
+  file bai from ch_dedup_bam_index_for_genotyping_ug.mix(ch_markdup_bam_index_for_genotyping_ug,ch_pmd_bam_index_for_genotyping_ug,ch_trimmed_bam_index_for_genotyping_ug)
+
+  output: 
+  file "*vcf.gz" into ch_vcf_ug
+
+  script:
+  if (params.gatk_dbsnp == '')
+    """
+    samtools index ${bam}
+    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
+    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
+    pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
+    """
+
+  else if (params.gatk_dbsnp != '')
+    """
+    samtools index ${bam}
+    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
+    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
+
+    pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
+    """
+ }
+
+  process genotyping_hc {
+  tag "${prefix}"
+  publishDir "${params.outdir}/genotyping", mode: 'copy'
+
+  when params.run_genotyping && params.genotyping_tool == 'hc'
+
+  input:
+  file fasta from fasta_for_indexing
+  file bam from ch_dedup_bam_for_genotyping_hc.mix(ch_markdup_bam_for_genotyping_hc,ch_pmd_bam_for_genotyping_hc,ch_trimmed_bam_for_genotyping_hc)
+  file fai from ch_fasta_faidx_index
+  file dict from ch_seq_dict
+  file bai from ch_dedup_bam_index_for_genotyping_hc.mix(ch_markdup_bam_index_for_genotyping_hc,ch_pmd_bam_index_for_genotyping_hc,ch_trimmed_bam_index_for_genotyping_hc)
+
+  output: 
+  file "*vcf.gz" into ch_vcf_hc
+
+  script:
+  if (params.gatk_dbsnp == '')
+    """
+    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
+    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
+    """
+
+  else if (params.gatk_dbsnp != '')
+    """
+    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
+    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
+    """
+ }
 
 
 /*
@@ -1225,7 +1367,6 @@ Processing missing:
 
 Genotyping tools:
 - angsd
-- gatk (if even suitable anymore?)
 - snpAD
 - sequenceTools
 
@@ -1239,11 +1380,8 @@ Downstream VCF tools:
 
 
 
-
-
-
 /*
- * Step 11a - Output Description HTML
+ * Step 12a - Output Description HTML
  */
 process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
@@ -1262,12 +1400,15 @@ process output_documentation {
 
 
 /*
- * Step 11b - Parse software version numbers
+ * Step 12b - Parse software version numbers
  */
 process get_software_versions {
+	publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
+
 
     input:
     file json from ch_damageprofiler_for_software_versions
+    file jar from ch_unifiedgenotyper_versions_jar
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
@@ -1290,6 +1431,7 @@ process get_software_versions {
     bam --version &> v_bamutil.txt 2>&1 || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
     cat $json &> v_damageprofiler.txt 2>&1 || true 
+    java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
     
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -1297,7 +1439,7 @@ process get_software_versions {
 
 
 /*
- * Step 11c - MultiQC
+ * Step 12c - MultiQC
  */
 process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
@@ -1335,7 +1477,7 @@ process multiqc {
 
 
 /*
- * Step 11d - Completion e-mail notification
+ * Step 12d - Completion e-mail notification
  */
 workflow.onComplete {
 

@@ -70,4 +70,7 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --saveReference
   # Test using pre-computed indices from a separate run beforehand
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict 
-
+  # Test running GATK unified genotyper
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
+  # Test running GATK HaplotypeCaller
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
