@@ -10,11 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Added`
 
 * [#189](https://github.com/nf-core/eager/pull/189) - Outputing unmapped reads in a fastq files with the --strip_input_fastq flag
-* [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible]
-/(https://github.com/nf-core/eager/issues/182)
+* [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible](https://github.com/nf-core/eager/issues/182)
 * Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
 * A lot more automated tests using Travis CI
-* Don't ignore DamageProfiler errors anymore 
+* Don't ignore DamageProfiler errors anymore
 * [#220](https://github.com/nf-core/eager/pull/220) - Added post-mapping filtering statistics module and corresponding MultiQC statistics [#217](https://github.com/nf-core/eager/issues/217)
 
 ### `Fixed`
@@ -50,7 +49,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
-* [#151](https://github.com/nf-core/eager/pull/151) - Fixed [post-deduplication step errors](https://github.com/nf-core/eager/issues/128
+* [#151](https://github.com/nf-core/eager/pull/151) - Fixed [post-deduplication step errors](https://github.com/nf-core/eager/issues/128)
 * [#147](https://github.com/nf-core/eager/pull/147) - Fix Samtools Index for [large references](https://github.com/nf-core/eager/issues/146)
 * [#145](https://github.com/nf-core/eager/pull/145) - Added Picard Memory Handling [fix](https://github.com/nf-core/eager/issues/144)
 
@@ -83,9 +82,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Added`
 
 * [#111](https://github.com/nf-core/eager/pull/110) - Allow [Zipped FastA reference input](https://github.com/nf-core/eager/issues/91)
-* [#113](https://github.com/nf-core/eager/pull/113) - All files are now staged via channels, which is considered best practice by Nextflow 
-* [#114](https://github.com/nf-core/eager/pull/113) - Add proper runtime defaults for multiple processes 
-* [#118](https://github.com/nf-core/eager/pull/118) - Add centralized configs handling by https://github.com/nf-core/configs
+* [#113](https://github.com/nf-core/eager/pull/113) - All files are now staged via channels, which is considered best practice by Nextflow
+* [#114](https://github.com/nf-core/eager/pull/113) - Add proper runtime defaults for multiple processes
+* [#118](https://github.com/nf-core/eager/pull/118) - Add [centralized configs handling](https://github.com/nf-core/configs)
 * [#115](https://github.com/nf-core/eager/pull/115) - Add DamageProfiler MultiQC support
 * [#122](https://github.com/nf-core/eager/pull/122) - Add pulling from Dockerhub again
 
@@ -97,7 +96,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-* [#80](https://github.com/nf-core/eager/pull/80) - BWA Index file handling 
+* [#80](https://github.com/nf-core/eager/pull/80) - BWA Index file handling
 * [#77](https://github.com/nf-core/eager/pull/77) - Lots of documentation updates by [@jfy133](https://github.com/jfy133)
 * [#81](https://github.com/nf-core/eager/pull/81) - Renaming of certain BAM options
 * [#92](https://github.com/nf-core/eager/issues/92) - Complete restructure of BAM options
@@ -119,7 +118,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-* [#73](https://github.com/nf-core/eager/pull/73) - Travis CI Testing of Conda Environment added 
+* [#73](https://github.com/nf-core/eager/pull/73) - Travis CI Testing of Conda Environment added
 
 ### `Fixed`
 
@@ -144,7 +143,7 @@ Initial release of nf-core/eager:
 * Library Complexity Estimation with Preseq
 * Conversion and Filtering of BAM files using Samtools
 * Damage assessment via DamageProfiler, additional filtering using PMDTools
-* Duplication removal via DeDup 
+* Duplication removal via DeDup
 * BAM Clipping with BamUtil for UDGhalf protocols
 * QualiMap BAM quality control analysis
 
