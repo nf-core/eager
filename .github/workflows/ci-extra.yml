@@ -25,6 +25,6 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta 
       - name: Run test Number 3
         run: | 
-           #Run the basic pipeline with paired end data without collapsing
+          #Run the basic pipeline with paired end data without collapsing
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --skip_collapse --saveReference
           # Need to add more stuff from TravisCI, as GitHub Actions is still in Beta
