@@ -1109,10 +1109,8 @@ process damageprofiler {
     !params.skip_damage_calculation
 
     input:
-    file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
-    file fasta from fasta_for_indexing
-    file bai from ch_bam_index_for_damageprofiler
-    
+    file bam from ch_bams_for_damageprofiler
+    file fasta from fasta_for_indexing    
 
     output:
     file "*"
