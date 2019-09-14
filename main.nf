@@ -168,7 +168,7 @@ params.complexity_filter_poly_g_min = 10
 
 //Read clipping and merging parameters
 params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
-params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
+params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"ch_dedup_bam
 params.clip_readlength = 30
 params.clip_min_read_quality = 20
 params.min_adap_overlap = 1
@@ -1000,7 +1000,7 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}_rmdup.sorted.bam" into ch_dedup_bam_for_damageprofiler
+    file "${prefix}_rmdup.sorted.bam" into ch_dedup_bam_for_damageprofiler,ch_dedup_bam_for_pmdtools_bamtrim
     file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping_ug
 
     script:
@@ -1037,7 +1037,7 @@ process markDup{
     !params.skip_deduplication && params.dedupper != 'dedup'
 
     input:
-    file bam from ch_bam_filtered_markdup
+    file bam from ch_bam_filtered_markdup,ch_markdup_bam_for_pmdtools_bamtrim
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
@@ -1085,16 +1085,43 @@ process preseq {
     }
 }
 
+/*
+Switch for sending filtered or rmdup'd BAMs downstream
+*/
+
+//If no deduplication runs, the input is mixed directly from samtools filter, else selects the deduplicated BAMs 
+ch_bams_for_damageprofiler = Channel.empty()
+ch_bams_for_qualimap = Channel.empty()
+ch_bams_for_bamutils = Channel.empty()
+ch_bams_for_pmdtools = Channel.empty()
+
+
 if (!params.skip_deduplication) {
   ch_bam_filtered_damageprofiler
     .mix(ch_dedup_bam_for_damageprofiler,ch_markdup_bam_for_damageprofiler)
     .filter { it =~/.*_rmdup.sorted.bam/ }
-    .set{ch_bams_for_damageprofiler} 
+    .into{ch_bams_for_damageprofiler,ch_bams_for_qualimap,ch_bams_for_bamutils,ch_bams_for_pmdtools} 
 } else {
   ch_bam_filtered_damageprofiler
     .mix(ch_dedup_bam_for_damageprofiler,ch_markdup_bam_for_damageprofiler)
     .filter { it !=~/.*_rmdup.sorted.bam/ }
-    .set{ch_bams_for_damageprofiler} 
+    .set{ch_bams_for_damageprofiler,ch_bams_for_qualimap,ch_bams_for_bamutils,ch_bams_for_pmdtools} 
+}
+
+if(params.skip_damage_calculation){
+  ch_bams_for_damageprofiler.close()
+}
+
+if(params.skip_qualimap){
+  ch_bams_for_qualimap.close()
+}
+
+if(!params.run_pmdtools){
+    ch_bams_for_pmdtools.close()
+}
+
+if(!params.trim_bam){
+    ch_bams_for_bamutils.close()
 }
 
 /*
@@ -1135,7 +1162,7 @@ process qualimap {
     !params.skip_qualimap
 
     input:
-    file bam from ch_bam_filtered_qualimap
+    file bam from ch_bams_for_qualimap
     file fasta from fasta_for_indexing
 
     output:
@@ -1149,22 +1176,6 @@ process qualimap {
     """
 }
 
-//If no deduplication runs, the input is mixed directly from samtools filter, if it runs either markdup or dedup is used thus mixed from these two channels
-ch_dedup_for_pmdtools = Channel.empty()
-
-//Bamutils TrimBam Channel
-ch_for_bamutils = Channel.empty()
-
-if(!params.skip_deduplication){
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).into {ch_for_pmdtools;ch_for_bamutils}
-} else {
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).into {ch_for_pmdtools;ch_for_bamutils}
-}
-
-if(!params.run_pmdtools){
-    ch_dedup_for_pmdtools.close()
-}
-
 /*
  Step 9: PMDtools
  */
@@ -1176,7 +1187,7 @@ process pmdtools {
     when: params.run_pmdtools
 
     input: 
-    file bam from ch_for_pmdtools
+    file bam from ch_bams_for_pmdtools
     file fasta from fasta_for_indexing
 
     output:
@@ -1212,7 +1223,7 @@ process bam_trim {
     when: params.trim_bam
 
     input:
-    file bam from ch_for_bamutils  
+    file bam from ch_bams_for_bamutils  
 
     output: 
     file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping
