@@ -1100,12 +1100,12 @@ if (!params.skip_deduplication) {
   ch_filtered_bam_for_downstream
     .mix(ch_dedup_bam_for_downstream ,ch_markdup_bam_for_downstream)
     .filter { it =~/.*_rmdup.sorted.bam/ }
-    .into{ch_bams_for_damageprofiler;ch_bams_for_qualimap;ch_bams_for_bamutils;ch_bams_for_pmdtools,ch_bams_for_angsd,ch_bams_for_gatk} 
+    .into{ ch_bams_for_damageprofiler; ch_bams_for_qualimap; ch_bams_for_bamutils; ch_bams_for_pmdtools; ch_bams_for_angsd; ch_bams_for_gatk } 
 } else {
   ch_filtered_bam_for_downstream
     .mix(ch_dedup_bam_for_downstream ,ch_markdup_bam_for_downstream)
     .filter { it !=~/.*_rmdup.sorted.bam/ }
-    .into{ch_bams_for_damageprofiler;ch_bams_for_qualimap;ch_bams_for_bamutils;ch_bams_for_pmdtools,ch_bams_for_angsd,ch_bams_for_gatk} 
+    .into{ ch_bams_for_damageprofiler; ch_bams_for_qualimap; ch_bams_for_bamutils; ch_bams_for_pmdtools; ch_bams_for_angsd; ch_bams_for_gatk } 
 }
 
 if(params.skip_damage_calculation){
