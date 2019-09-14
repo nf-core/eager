@@ -1100,12 +1100,12 @@ if (!params.skip_deduplication) {
   ch_bam_filtered_damageprofiler
     .mix(ch_dedup_bam_for_damageprofiler,ch_markdup_bam_for_damageprofiler)
     .filter { it =~/.*_rmdup.sorted.bam/ }
-    .into{ch_bams_for_damageprofiler,ch_bams_for_qualimap,ch_bams_for_bamutils,ch_bams_for_pmdtools} 
+    .into{ch_bams_for_damageprofiler;ch_bams_for_qualimap;ch_bams_for_bamutils;ch_bams_for_pmdtools} 
 } else {
   ch_bam_filtered_damageprofiler
     .mix(ch_dedup_bam_for_damageprofiler,ch_markdup_bam_for_damageprofiler)
     .filter { it !=~/.*_rmdup.sorted.bam/ }
-    .set{ch_bams_for_damageprofiler,ch_bams_for_qualimap,ch_bams_for_bamutils,ch_bams_for_pmdtools} 
+    .into{ch_bams_for_damageprofiler;ch_bams_for_qualimap;ch_bams_for_bamutils;ch_bams_for_pmdtools} 
 }
 
 if(params.skip_damage_calculation){
