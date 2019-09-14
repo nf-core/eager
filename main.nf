@@ -315,7 +315,7 @@ if( workflow.profile == 'awsbatch') {
   // Prevent trace files to be stored on S3 since S3 does not support rolling files.
   if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
-/*
+/*damageprofiler, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
  * Create a channel for input read files
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
@@ -887,7 +887,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_flagstat, ch_bam_filtered_qualimap, ch_bam_filtered_damageprofiler, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_flagstat,ch_filtered_bam_for_downstream 
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}" into ch_bam_index_filtered_qualimap
@@ -1000,7 +1000,7 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}_rmdup.sorted.bam" into ch_dedup_bam_for_damageprofiler,ch_dedup_bam_for_pmdtools_bamtrim
+    file "${prefix}_rmdup.sorted.bam" into ch_dedup_bam_for_downstream
     file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping_ug
 
     script:
@@ -1041,7 +1041,7 @@ process markDup{
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
-    file "*_rmdup.sorted.bam" into ch_markdup_bam,ch_markdup_bam_for_damageprofiler
+    file "*_rmdup.sorted.bam" into ch_markdup_bam,ch_dedup_bam_for_downstream
     file "*.{bai,csi}"
 
 
@@ -1097,15 +1097,15 @@ ch_bams_for_pmdtools = Channel.empty()
 
 
 if (!params.skip_deduplication) {
-  ch_bam_filtered_damageprofiler
-    .mix(ch_dedup_bam_for_damageprofiler,ch_markdup_bam_for_damageprofiler)
+  ch_filtered_bam_for_downstream
+    .mix(ch_dedup_bam_for_downstream ,ch_markdup_bam_for_downstream)
     .filter { it =~/.*_rmdup.sorted.bam/ }
-    .into{ch_bams_for_damageprofiler;ch_bams_for_qualimap;ch_bams_for_bamutils;ch_bams_for_pmdtools} 
+    .into{ch_bams_for_damageprofiler;ch_bams_for_qualimap;ch_bams_for_bamutils;ch_bams_for_pmdtools,ch_bams_for_angsd,ch_bams_for_gatk} 
 } else {
-  ch_bam_filtered_damageprofiler
-    .mix(ch_dedup_bam_for_damageprofiler,ch_markdup_bam_for_damageprofiler)
+  ch_filtered_bam_for_downstream
+    .mix(ch_dedup_bam_for_downstream ,ch_markdup_bam_for_downstream)
     .filter { it !=~/.*_rmdup.sorted.bam/ }
-    .into{ch_bams_for_damageprofiler;ch_bams_for_qualimap;ch_bams_for_bamutils;ch_bams_for_pmdtools} 
+    .into{ch_bams_for_damageprofiler;ch_bams_for_qualimap;ch_bams_for_bamutils;ch_bams_for_pmdtools,ch_bams_for_angsd,ch_bams_for_gatk} 
 }
 
 if(params.skip_damage_calculation){
