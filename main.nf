@@ -349,7 +349,7 @@ if( params.readPaths ){
             ch_read_files_clip = Channel.empty()
             ch_read_unmap = Channel.empty()
     }
-} else if (!params.bam){ch_dedup_bam_for_downstream
+} else if (!params.bam){
      Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs" +
@@ -448,7 +448,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
 if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.bwamem)){
 process makeBWAIndex {
-    tag {fasta}ch_dedup_bam_for_downstream
+    tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
             if (params.saveReference) filename 
             else if(!params.saveReference && filename == "where_are_my_files.txt") filename
