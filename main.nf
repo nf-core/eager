@@ -887,7 +887,7 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_flagstat,ch_filtered_bam_for_downstream 
+    file "*filtered.bam" into ch_bam_filtered_flagstat,ch_bam_filtered_dedup,ch_bam_filtered_markdup,ch_filtered_bam_for_downstream 
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}" into ch_bam_index_filtered_qualimap
@@ -1037,7 +1037,7 @@ process markDup{
     !params.skip_deduplication && params.dedupper != 'dedup'
 
     input:
-    file bam from ch_bam_filtered_markdup,ch_markdup_bam_for_pmdtools_bamtrim
+    file bam from ch_bam_filtered_markdup
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
