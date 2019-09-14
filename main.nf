@@ -168,7 +168,7 @@ params.complexity_filter_poly_g_min = 10
 
 //Read clipping and merging parameters
 params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
-params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"ch_dedup_bam
+params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
 params.clip_readlength = 30
 params.clip_min_read_quality = 20
 params.min_adap_overlap = 1
