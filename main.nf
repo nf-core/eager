@@ -713,8 +713,8 @@ process bwa {
 
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_flagstat,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler, ch_bwa_mapped_reads_strip
-    file "*.{bai,csi}" into ch_bam_index_for_damageprofiler
+    file "*.sorted.bam" into ch_mapped_reads_flagstat,ch_mapped_reads_filter,ch_mapped_reads_preseq,ch_bwa_mapped_reads_strip
+    file "*.{bai,csi}"
     
 
     script:
@@ -780,8 +780,8 @@ process circularmapper{
     file fasta from fasta_for_indexing
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_flagstat_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
-    file "*.{bai,csi}" 
+    file "*.sorted.bam" into ch_mapped_reads_flagstat_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm,ch_circular_mapped_reads_strip
+    file "*.{bai,csi}"
     
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
@@ -824,8 +824,8 @@ process bwamem {
     file index from bwa_index_bwamem.collect()
 
     output:
-    file "*.sorted.bam" into ch_bwamem_mapped_reads_flagstat,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
-    file "*.{bai,csi}" 
+    file "*.sorted.bam" into ch_bwamem_mapped_reads_flagstat,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq,ch_bwamem_mapped_reads_strip
+    file "*.{bai,csi}"
     
 
     script:
@@ -887,10 +887,10 @@ process samtools_filter {
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_flagstat, ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_bam_filtered_flagstat, ch_bam_filtered_qualimap, ch_bam_filtered_damageprofiler, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
-    file "*.{bai,csi}"
+    file "*.{bai,csi}" into ch_bam_index_filtered_qualimap
 
     script:
     prefix="$bam" - ~/(\.bam)?/
@@ -1000,8 +1000,8 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.sorted.bam" into ch_dedup_bam
-    file "*.{bai,csi}"
+    file "${prefix}_rmdup.sorted.bam" into ch_dedup_bam_for_damageprofiler
+    file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping_ug
 
     script:
     prefix="${bam.baseName}"
@@ -1012,17 +1012,47 @@ process dedup{
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index "${size}" "$prefix".sorted.bam
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.sorted.bam
+    samtools index "${size}" "$prefix"_rmdup.sorted.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index "${size}" "$prefix".sorted.bam
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.sorted.bam
+    samtools index "${size}" "$prefix"_rmdup.sorted.bam
     """  
     }
+}
+
+/*
+ Step 5b: MarkDuplicates
+ */
+
+process markDup{
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/deduplication/markdup"
+
+    when:
+    !params.skip_deduplication && params.dedupper != 'dedup'
+
+    input:
+    file bam from ch_bam_filtered_markdup
+
+    output:
+    file "*.metrics" into ch_markdup_results_for_multiqc
+    file "*_rmdup.sorted.bam" into ch_markdup_bam,ch_markdup_bam_for_damageprofiler
+    file "*.{bai,csi}"
+
+
+    script:
+    prefix = "${bam.baseName}"
+    size = "${params.large_ref}" ? '-c' : ''
+    """
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup -o "$prefix"_rmdup.bam.sorted.bam
+    samtools index "${size}" "$prefix"_rmdup.sorted.bam
+    """
 }
 
 /*
@@ -1053,6 +1083,18 @@ process preseq {
     preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B $input
     """
     }
+}
+
+if (!params.skip_deduplication) {
+  ch_bam_filtered_damageprofiler
+    .mix(ch_dedup_bam_for_damageprofiler,ch_markdup_bam_for_damageprofiler)
+    .filter { it =~/.*_rmdup.sorted.bam/ }
+    .set{ch_bams_for_damageprofiler} 
+} else {
+  ch_bam_filtered_damageprofiler
+    .mix(ch_dedup_bam_for_damageprofiler,ch_markdup_bam_for_damageprofiler)
+    .filter { it !=~/.*_rmdup.sorted.bam/ }
+    .set{ch_bams_for_damageprofiler} 
 }
 
 /*
@@ -1106,33 +1148,6 @@ process qualimap {
     if(params.snpcapture) snpcap = "-gff ${params.bedfile}"
     """
     qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
-    """
-}
-
-
-
-/*
- Step 5b: MarkDuplicates
- */
-
-process markDup{
-    tag "${bam.baseName}"
-    publishDir "${params.outdir}/deduplication/markdup"
-
-    when:
-    !params.skip_deduplication && params.dedupper != 'dedup'
-
-    input:
-    file bam from ch_bam_filtered_markdup
-
-    output:
-    file "*.metrics" into ch_markdup_results_for_multiqc
-    file "*.markDup.bam" into ch_markdup_bam
-
-    script:
-    prefix = "${bam.baseName}"
-    """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
     """
 }
 
