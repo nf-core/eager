@@ -321,7 +321,7 @@ if( workflow.profile == 'awsbatch') {
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
-if( params.readPaths ){ = Channel.empty()
+if( params.readPaths ){
     if( params.singleEnd && !params.bam) {
         Channel
             .from( params.readPaths )
