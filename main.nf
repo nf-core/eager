@@ -869,22 +869,6 @@ process samtools_flagstat {
     """
 }
 
-// If BAM filtering not run, directly send mapped reads to channels for DeDuping
-if (!params.run_bam_filtering) {
-
-ch_bam_filtered_dedup = Channel.empty()
-ch_bam_filtered_markdup = Channel.empty()
-ch_filtered_bam_for_downstream = Channel.empty()
-
-  ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
-    .into{ch_bam_filtered_dedup;ch_bam_filtered_markdup;ch_filtered_bam_for_downstream}
-    
- ch_mapped_reads_filter.close()
- ch_mapped_reads_filter_cm.close()
- ch_bwamem_mapped_reads_filter.close()
- 
-}
-
 /*
 * Step 4a - Keep unmapped/remove unmapped reads
 */
@@ -944,6 +928,22 @@ process samtools_filter {
         samtools index "${size}" ${prefix}.filtered.bam
         """
     }  
+}
+
+// If BAM filtering not run, directly send mapped reads to channels for DeDupping
+if (!params.run_bam_filtering) {
+
+ch_bam_filtered_dedup = Channel.empty()
+ch_bam_filtered_markdup = Channel.empty()
+ch_filtered_bam_for_downstream = Channel.empty()
+
+  ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
+    .into{ch_bam_filtered_dedup;ch_bam_filtered_markdup;ch_filtered_bam_for_downstream}
+    
+ ch_mapped_reads_filter.close()
+ ch_mapped_reads_filter_cm.close()
+ ch_bwamem_mapped_reads_filter.close()
+ 
 }
 
 process strip_input_fastq {
