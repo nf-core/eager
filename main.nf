@@ -892,8 +892,7 @@ process samtools_filter {
             else null
     }
     
-    when:
-    params.run_bam_filtering
+    when: params.run_bam_filtering
     
     input: 
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
@@ -970,8 +969,9 @@ process strip_input_fastq {
 process samtools_flagstat_after_filter {
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
+   
+    when: params.run_bam_filtering
     
-    when params.run_bam_filtering
     input:
     file(bam) from ch_bam_filtered_flagstat
     output:
