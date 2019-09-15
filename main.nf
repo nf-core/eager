@@ -523,7 +523,7 @@ process makeSeqDict {
     file "where_are_my_files.txt"
 
     script:
-    """ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
+    """
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
     """
 }
