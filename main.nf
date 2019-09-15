@@ -85,6 +85,7 @@ def helpMessage() {
       --bwamem                      Turn on BWA Mem instead of BWA aln for mapping
     
     BAM Filtering
+      --run_bam_filtering           Turn on mapping quality or unmapped reads filtering using samtools filter.
       --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
       --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
       --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
@@ -190,11 +191,11 @@ params.circularfilter = false
 params.bwamem = false
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
+params.run_bam_filtering = false
 params.bam_discard_unmapped = false
 params.bam_unmapped_type = ''
 
 params.bam_mapping_quality_threshold = 0
-
 
 //DamageProfiler settings
 params.damageprofiler_length = 100
@@ -868,6 +869,11 @@ process samtools_flagstat {
     """
 }
 
+// If BAM filtering not run, directly send mapped reads to channels for DeDuping
+if (!params.run_bam_filtering) {
+  ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
+    .into(ch_bam_filtered_dedup,ch_bam_filtered_markdup,ch_filtered_bam_for_downstream)
+}
 
 /*
 * Step 4a - Keep unmapped/remove unmapped reads
@@ -882,6 +888,8 @@ process samtools_filter {
             else if (filename.indexOf(".filtered.bam")) filename
             else null
     }
+
+    when params.run_bam_filtering
 
     input: 
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
@@ -963,10 +971,11 @@ process strip_input_fastq {
 * Step 4b: Keep unmapped/remove unmapped reads flagstat
 */
 
-
 process samtools_flagstat_after_filter {
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
+    
+    when params.run_bam_filtering
 
     input:
     file(bam) from ch_bam_filtered_flagstat
