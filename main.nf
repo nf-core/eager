@@ -523,7 +523,7 @@ process makeSeqDict {
     file "where_are_my_files.txt"
 
     script:
-    """
+    """ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
     """
 }
@@ -871,6 +871,11 @@ process samtools_flagstat {
 
 // If BAM filtering not run, directly send mapped reads to channels for DeDuping
 if (!params.run_bam_filtering) {
+
+ch_bam_filtered_dedup = Channel.empty()
+ch_bam_filtered_markdup = Channel.empty()
+ch_filtered_bam_for_downstream = Channel.empty()
+
   ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
     .into(ch_bam_filtered_dedup,ch_bam_filtered_markdup,ch_filtered_bam_for_downstream)
 }
