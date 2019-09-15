@@ -321,7 +321,7 @@ if( workflow.profile == 'awsbatch') {
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
-if( params.readPaths ){
+if( params.readPaths ){ = Channel.empty()
     if( params.singleEnd && !params.bam) {
         Channel
             .from( params.readPaths )
@@ -877,7 +877,7 @@ ch_bam_filtered_markdup = Channel.empty()
 ch_filtered_bam_for_downstream = Channel.empty()
 
   ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
-    .into(ch_bam_filtered_dedup,ch_bam_filtered_markdup,ch_filtered_bam_for_downstream)
+    .into{ch_bam_filtered_dedup;ch_bam_filtered_markdup;ch_filtered_bam_for_downstream}
 }
 
 /*
