@@ -873,68 +873,70 @@ process samtools_flagstat {
 * Step 4a - Keep unmapped/remove unmapped reads
 */
 
-process samtools_filter {
-    tag "$prefix"
-    publishDir "${params.outdir}/samtools/filter", mode: 'copy',
-    saveAs: {filename ->
-            if (filename.indexOf(".fq.gz") > 0) "unmapped/$filename"
-            else if (filename.indexOf(".unmapped.bam") > 0) "unmapped/$filename"
-            else if (filename.indexOf(".filtered.bam")) filename
-            else null
-    }
-
-    when:
-    params.run_bam_filtering
-
-    input: 
-    file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
-
-    output:
-    file "*filtered.bam" into ch_bam_filtered_flagstat,ch_bam_filtered_dedup,ch_bam_filtered_markdup,ch_filtered_bam_for_downstream 
-    file "*.fastq.gz" optional true
-    file "*.unmapped.bam" optional true
-    file "*.{bai,csi}" into ch_bam_index_filtered_qualimap
-
-    script:
-    prefix="$bam" - ~/(\.bam)?/
-    size = "${params.large_ref}" ? '-c' : ''
-    
-    if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
-        """
-        samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index "${size}" ${prefix}.filtered.bam
-        """
-    } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
-        """
-        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-        samtools index "${size}" ${prefix}.filtered.bam
-        """
-    } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "fastq"){
-        """
-        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-        samtools index "${size}" ${prefix}.filtered.bam
-        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
-        rm ${prefix}.unmapped.bam
-        """
-    } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
-        """
-        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
-        samtools index "${size}" ${prefix}.filtered.bam
-        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
-        """
-    } else { //Only apply quality filtering, default
-        """
-        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index "${size}" ${prefix}.filtered.bam
-        """
-    }  
-}
-
-// If BAM filtering not run, directly send mapped reads to channels for DeDupping
 if (!params.run_bam_filtering) {
 ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
   .into{ ch_bam_filtered_dedup;ch_bam_filtered_markdup;ch_filtered_bam_for_downstream }
- }
+ } else {
+  process samtools_filter {
+      tag "$prefix"
+      publishDir "${params.outdir}/samtools/filter", mode: 'copy',
+      saveAs: {filename ->
+              if (filename.indexOf(".fq.gz") > 0) "unmapped/$filename"
+              else if (filename.indexOf(".unmapped.bam") > 0) "unmapped/$filename"
+              else if (filename.indexOf(".filtered.bam")) filename
+              else null
+      }
+
+      when:
+      params.run_bam_filtering
+
+      input: 
+      file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
+
+      output:
+      file "*filtered.bam" into ch_bam_filtered_flagstat,ch_bam_filtered_dedup,ch_bam_filtered_markdup,ch_filtered_bam_for_downstream 
+      file "*.fastq.gz" optional true
+      file "*.unmapped.bam" optional true
+      file "*.{bai,csi}" into ch_bam_index_filtered_qualimap
+
+      script:
+      prefix="$bam" - ~/(\.bam)?/
+      size = "${params.large_ref}" ? '-c' : ''
+
+      if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
+          """
+          samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+          samtools index "${size}" ${prefix}.filtered.bam
+          """
+      } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
+          """
+          samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+          samtools index "${size}" ${prefix}.filtered.bam
+          """
+      } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "fastq"){
+          """
+          samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+          samtools index "${size}" ${prefix}.filtered.bam
+          samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
+          rm ${prefix}.unmapped.bam
+          """
+      } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
+          """
+          samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+          samtools index "${size}" ${prefix}.filtered.bam
+          samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
+          """
+      } else { //Only apply quality filtering, default
+          """
+          samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
+          samtools index "${size}" ${prefix}.filtered.bam
+          """
+      }  
+  }
+}
+
+// If BAM filtering not run, directly send mapped reads to channels for DeDupping
+
 
 process strip_input_fastq {
     tag "${bam.baseName}"
