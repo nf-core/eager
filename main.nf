@@ -878,6 +878,11 @@ ch_filtered_bam_for_downstream = Channel.empty()
 
   ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
     .into{ch_bam_filtered_dedup;ch_bam_filtered_markdup;ch_filtered_bam_for_downstream}
+    
+ ch_mapped_reads_filter.close()
+ ch_mapped_reads_filter_cm.close()
+ ch_bwamem_mapped_reads_filter.close()
+ 
 }
 
 /*
