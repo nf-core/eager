@@ -873,10 +873,15 @@ process samtools_flagstat {
 * Step 4a - Keep unmapped/remove unmapped reads
 */
 
+// If BAM filtering not run, directly send mapped reads to channels for DeDupping
+
 if (!params.run_bam_filtering) {
+
 ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
   .into{ ch_bam_filtered_dedup;ch_bam_filtered_markdup;ch_filtered_bam_for_downstream }
+  
  } else {
+ 
   process samtools_filter {
       tag "$prefix"
       publishDir "${params.outdir}/samtools/filter", mode: 'copy',
@@ -933,9 +938,32 @@ ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filt
           """
       }  
   }
-}
+  
+  /*
+  * Step 4b: Keep unmapped/remove unmapped reads flagstat
+  */
 
-// If BAM filtering not run, directly send mapped reads to channels for DeDupping
+  process samtools_flagstat_after_filter {
+      tag "$prefix"
+      publishDir "${params.outdir}/samtools/stats", mode: 'copy'
+
+      when params.run_bam_filtering
+
+      input:
+      file(bam) from ch_bam_filtered_flagstat
+
+      output:
+      file "*.stats" into ch_bam_filtered_flagstat_for_multiqc
+
+      script:
+      prefix = "$bam" - ~/(\.bam)?$/
+      """
+      samtools flagstat $bam > ${prefix}.stats
+      """
+  }
+  
+  
+}
 
 
 process strip_input_fastq {
@@ -970,28 +998,7 @@ process strip_input_fastq {
     
 }
 
-/*
-* Step 4b: Keep unmapped/remove unmapped reads flagstat
-*/
 
-process samtools_flagstat_after_filter {
-    tag "$prefix"
-    publishDir "${params.outdir}/samtools/stats", mode: 'copy'
-    
-    when params.run_bam_filtering
-
-    input:
-    file(bam) from ch_bam_filtered_flagstat
-
-    output:
-    file "*.stats" into ch_bam_filtered_flagstat_for_multiqc
-
-    script:
-    prefix = "$bam" - ~/(\.bam)?$/
-    """
-    samtools flagstat $bam > ${prefix}.stats
-    """
-}
 
 
 /*
