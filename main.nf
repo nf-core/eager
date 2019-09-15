@@ -891,14 +891,19 @@ process samtools_filter {
             else if (filename.indexOf(".filtered.bam")) filename
             else null
     }
-    when params.run_bam_filtering
+    
+    when:
+    params.run_bam_filtering
+    
     input: 
     file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
+    
     output:
     file "*filtered.bam" into ch_bam_filtered_flagstat,ch_bam_filtered_dedup,ch_bam_filtered_markdup,ch_filtered_bam_for_downstream 
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}" into ch_bam_index_filtered_qualimap
+    
     script:
     prefix="$bam" - ~/(\.bam)?/
     size = "${params.large_ref}" ? '-c' : ''
