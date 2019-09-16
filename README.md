@@ -3,6 +3,8 @@
 **A fully reproducible ancient and modern DNA pipeline in Nextflow and with cloud support.**.
 
 [![Build Status](https://travis-ci.com/nf-core/eager.svg?branch=master)](https://travis-ci.com/nf-core/eager)
+[![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/eager/actions)
+[![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/eager/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
 [![Slack Status](https://nf-core-invite.herokuapp.com/badge.svg)](https://nf-core-invite.herokuapp.com)[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker Container available](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager/)
@@ -11,14 +13,9 @@
 
 ## Introduction
 
-**nf-core/eager** is a bioinformatics best-practice analysis pipeline for NGS 
-sequencing based ancient DNA (aDNA) data analysis.
+**nf-core/eager** is a bioinformatics best-practice analysis pipeline for NGS sequencing based ancient DNA (aDNA) data analysis.
 
-The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics 
-workflow tool. It pre-processes raw data from FASTQ inputs, aligns the reads 
-and performs extensive general NGS and aDNA specific quality-control on the 
-results. It comes with docker, singularity or conda containers making 
-installation trivial and results highly reproducible.
+The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FASTQ inputs, aligns the reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
 ## Pipeline steps
 
@@ -50,27 +47,20 @@ Additional functionality contained by the pipeline currently includes:
 
 3. Download the EAGER pipeline
 
-```bash
-nextflow pull nf-core/eager
-```
+        nextflow pull nf-core/eager
 
 4. Test the pipeline using the provided test data
 
-```bash
-nextflow run nf-core/eager -profile <docker/singularity/conda>,test --pairedEnd
-```
+        nextflow run nf-core/eager -profile <docker/singularity/conda>,test --pairedEnd
 
 5. Start running your own ancient DNA analysis!
 
-```bash
-nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<REFERENCE>.fasta'
-```
+        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<REFERENCE>.fasta'
 
 6. Once your run has completed successfully, clean up the intermediate files.
 
-```bash
-nextflow clean -k
-```
+        nextflow clean -k
+
 
 NB. You can see an overview of the run in the MultiQC report located at `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
 
@@ -91,25 +81,20 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 6. [EAGER Troubleshooting](docs/troubleshooting.md)
 
-
 ## Credits
 
-This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), 
-with major contributions from Stephen Clayton, ideas and documentation from 
-James A. Fellows Yates, Raphael Eisenhofer, Maxime Borry and Judith Neukamm. If you want to 
-contribute, please open an issue and ask to be added to the project - happy to 
-do so and everyone is welcome to contribute here!
+This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with major contributions from Stephen Clayton, ideas and documentation from James A. Fellows Yates, Raphael Eisenhofer, Maxime Borry and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
 
 ## Contributors
 
-- [James A. Fellows-Yates](https://github.com/jfy133)
-- [Stephen Clayton](https://github.com/sc13-bioinf)
-- [Maxime Borry](https://github.com/maxibor)
-- [Judith Neukamm](https://github.com/JudithNeukamm)
-- [Raphael Eisenhofer](https://github.com/EisenRa)
-- [Maxime Garcia](https://github.com/MaxUlysse)
-- [Luc Venturini](https://github.com/lucventurini)
-- [Hester van Schalkwyk](https://github.com/hesterjvs)
+* [James A. Fellows-Yates](https://github.com/jfy133)
+* [Stephen Clayton](https://github.com/sc13-bioinf)
+* [Maxime Borry](https://github.com/maxibor)
+* [Judith Neukamm](https://github.com/JudithNeukamm)
+* [Raphael Eisenhofer](https://github.com/EisenRa)
+* [Maxime Garcia](https://github.com/MaxUlysse)
+* [Luc Venturini](https://github.com/lucventurini)
+* [Hester van Schalkwyk](https://github.com/hesterjvs)
 
 If you've contributed and you're missing in here, please let me know and I'll add you in.
 
@@ -127,6 +112,5 @@ If you've contributed and you're missing in here, please let me know and I'll ad
 * **MultiQC** Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. [https://doi.org/10.1093/bioinformatics/btw354](https://doi.org/10.1093/bioinformatics/btw354) Download: [https://multiqc.info/](https://multiqc.info/)
 * **BamUtils** Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. [https://doi.org/10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114) Download: [https://genome.sph.umich.edu/wiki/BamUtil](https://genome.sph.umich.edu/wiki/BamUtil)
 * **FastP** Chen, S., Zhou, Y., Chen, Y., & Gu, J. (2018). fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics , 34(17), i884–i890. [https://doi.org/10.1093/bioinformatics/bty560](https://doi.org/10.1093/bioinformatics/bty560) Download: [https://github.com/OpenGene/fastp](https://github.com/OpenGene/fastp)
-* **GATK 3.8** DePristo, M. A., Banks, E., Poplin, R., Garimella, K. V., Maguire, J. R., Hartl, C., … Daly, M. J. (2011). A framework for variation discovery and genotyping using next-generation DNA sequencing data. Nature Genetics, 43(5), 491–498. https://doi.org/10.1038/ng.806. Download: [https://software.broadinstitute.org/gatk/download/]
-* **GATK 4.X
-
+* **GATK 3.8** DePristo, M. A., Banks, E., Poplin, R., Garimella, K. V., Maguire, J. R., Hartl, C., … Daly, M. J. (2011). A framework for variation discovery and genotyping using next-generation DNA sequencing data. Nature Genetics, 43(5), 491–498. [https://doi.org/10.1038/ng.806](https://doi.org/10.1038/ng.806.) [Download](https://software.broadinstitute.org/gatk/download/)
+* **GATK 4.X** - no citation available yet
