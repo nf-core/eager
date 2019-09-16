@@ -16,6 +16,7 @@
 * [Clean up](#clean-up)
 
 ## General Nextflow info
+
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
 
 To create a screen session:
@@ -23,6 +24,7 @@ To create a screen session:
 ```bash
 screen -R eager2
 ```
+
 To disconnect, press `ctrl+a` then `d`.
 
 To reconnect, type :
@@ -30,10 +32,11 @@ To reconnect, type :
 ```bash
 screen -r eager2
 ```
+
 to end the screen session while in it type `exit`.
 
-
 ## Help Message
+
 To access the nextflow help message run: `nextflow run -help`
 
 ## Running the pipeline
@@ -45,6 +48,7 @@ The typical command for running the pipeline is as follows:
 ```bash
 nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
+
 where the reads are from libraries of the same pairing.
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -61,18 +65,20 @@ results         # Finished results (configurable, see below)
 To see the the EAGER pipeline help message run: `nextflow run nf-core/eager --help`
 
 ### Updating the pipeline
+
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
 nextflow pull nf-core/eager
 ```
+
 See [below](#other-command-line-parameters) for more details about EAGER2 versioning.
 
 ## Mandatory Arguments
 
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments (e.g. schedulers, software environments, memory limits etc). Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important! The first entry takes precendence over the others, e.g. if a setting is set by both the first and second profile, the first entry will be used and the second entry ignored. 
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments (e.g. schedulers, software environments, memory limits etc). Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important! The first entry takes precendence over the others, e.g. if a setting is set by both the first and second profile, the first entry will be used and the second entry ignored.
 
 > *Important*: If running EAGER2 on a cluster - ask your system administrator what profile to use.
 
@@ -90,40 +96,40 @@ These are basic profiles which primarily define where you derive the pipeline's 
   * A generic configuration profile to be used with [Docker](http://docker.com/)
   * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
 * `singularity`
-    * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-    * Pulls software from singularity-hub
+  * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
+  * Pulls software from singularity-hub
 * `conda`
-    * A generic configuration profile to be used with [conda](https://conda.io/docs/)
-    * Pulls most software from [Bioconda](https://bioconda.github.io/)
- * `awsbatch`
-    * A generic configuration profile to be used with AWS Batch.
+  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  * Pulls most software from [Bioconda](https://bioconda.github.io/)
+* `awsbatch`
+  * A generic configuration profile to be used with AWS Batch.
 * `test`
-    * A profile with a complete configuration for automated testing
-    * Includes links to test data so needs no other parameters
+  * A profile with a complete configuration for automated testing
+  * Includes links to test data so needs no other parameters
 * `none`
-    * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
- 
+  * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
+
 **Institution Specific Profiles**
 These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
 * `uzh`
-    * A profile for the University of Zurich Research Cloud
-    * Loads Singularity and defines appropriate resources for running the pipeline.
+  * A profile for the University of Zurich Research Cloud
+  * Loads Singularity and defines appropriate resources for running the pipeline.
 * `binac`
-    * A profile for the BinAC cluster at the University of Tuebingen
-    * Loads Singularity and defines appropriate resources for running the pipeline
+  * A profile for the BinAC cluster at the University of Tuebingen
+  * Loads Singularity and defines appropriate resources for running the pipeline
 * `shh`
-   * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
-   * Loads Singularity and defines appropriate resources for running the pipeline
-
-    
+  * A profiler for the SDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
+  * Loads Singularity and defines appropriate resources for running the pipeline
 
 ### `--reads`
+
 Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
 
 ```bash
 --reads 'path/to/data/sample_*_{1,2}.fastq'
 ```
+
 for a single sample, or
 
 ```bash
@@ -143,11 +149,13 @@ If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 **Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
 
 ### `--singleEnd`
+
 If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
 
 ```bash
 --singleEnd --reads 'path/to/data/*.fastq'
 ```
+
 for a single sample, or
 
 ```bash
@@ -159,7 +167,8 @@ for multiple samples, where each sample's FASTQs are in it's own directory (indi
 **Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
 
 ### `--pairedEnd`
-If you have paired-end data, you need to specify `--pairedEnd` on the command line when you launc hthe pipeline. 
+
+If you have paired-end data, you need to specify `--pairedEnd` on the command line when you launc hthe pipeline.
 
 A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
 
@@ -168,18 +177,20 @@ A normal glob pattern, enclosed in quotation marks, can then be used for `--read
 ```
 
 ### `--fasta`
-You specify the full path to your reference genome here. The FASTA file can have any file suffix, such as `.fasta`, `.fna`, `.fa`, `.FastA` etc. You may also supply a gzipped reference files, which will be unzipped automatically for you. 
+
+You specify the full path to your reference genome here. The FASTA file can have any file suffix, such as `.fasta`, `.fna`, `.fa`, `.FastA` etc. You may also supply a gzipped reference files, which will be unzipped automatically for you.
 
 For example:
 
 ```bash
 --fasta '/<path>/<to>/my_reference.fasta'
 ```
+
 > If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--saveReference` flag.
 
 ### `--large_ref`
 
-This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. 
+This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices.
 
 ### `--genome` (using iGenomes)
 
@@ -222,7 +233,7 @@ params {
 
 #### `--saveReference`
 
-Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices EAGER2 generates for you will be stored in the `<your_output_dir>/results/reference_genomes` for you. 
+Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices EAGER2 generates for you will be stored in the `<your_output_dir>/results/reference_genomes` for you.
 
 ### Premade Indices
 
@@ -234,7 +245,7 @@ If you want to use pre-existing `bwa index` indices, please supply the path **an
 
 For example:
 
-```
+```bash
 nextflow run nf-core/eager \
 -profile test_fna,docker \
 --pairedEnd \
@@ -251,7 +262,7 @@ If you want to use a pre-existing `picard CreateSequenceDictionary` dictionary f
 
 For example:
 
-```
+```bash
 --seq_dict Mammoth_MT_Krause.dict
 ```
 
@@ -261,14 +272,14 @@ If you want to use a pre-existing `samtools faidx` index, Use this to specify th
 
 For example:
 
-```
+```bash
 --fasta_index Mammoth_MT_Krause.fasta.fai
 ```
-
 
 ## Other command line parameters
 
 ### `-r`
+
 By default, EAGER2 will use the latest version of the pipeline that is downloaded on your system. However, it's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
 First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0`.
@@ -278,24 +289,33 @@ This version number will be logged in reports when you run the pipeline, so that
 Additionally, EAGER pipeline releases are named after Swabian German Cities. The first release V2.0 is named "Kaufbeuren". Future releases are named after cities named in the [Swabian league of Cities](https://en.wikipedia.org/wiki/Swabian_League_of_Cities).
 
 ### `--outdir`
+
 The output directory where the results will be saved.
 
+### `-w / -work-dir`
+
+The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
+
 ### `--max_memory`
+
 Use to set a top-limit for the default memory requirement for each process.
 Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`. If not specified, will be taken from the configuration in the `-profile` flag.
 
 ### `--max_time`
+
 Use to set a top-limit for the default time requirement for each process.
 Should be a string in the format integer-unit. eg. `--max_time '2.h'`. If not specified, will be taken from the configuration in the `-profile` flag.
 
 ### `--max_cpus`
-Use to set a top-limit for the default CPU requirement for each **process**. This is not the maximum number of CPUs that can be used for the whole pipeline, but the maximum number of CPUs each program can use for each program submission (known as a process). Do not set this higher than what is available on your workstation or computing node can provide. If you're unsure, ask your local IT administrator for details on compute node capabilities! 
-Should be a string in the format integer-unit. eg. `--max_cpus 1`. If not specified, will be taken from the configuration in the `-profile` flag.
+
+Use to set a top-limit for the default CPU requirement for each **process**. This is not the maximum number of CPUs that can be used for the whole pipeline, but the maximum number of CPUs each program can use for each program submission (known as a process). Do not set this higher than what is available on your workstation or computing node can provide. If you're unsure, ask your local IT administrator for details on compute node capabilities! Should be a string in the format integer-unit. eg. `--max_cpus 1`. If not specified, will be taken from the configuration in the `-profile` flag.
 
 ### `--email`
+
 Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.
 
 ### `-name`
+
 Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
 
 This is used in the MultiQC report (if not default) and in the summary HTML / e-mail (always).
@@ -303,6 +323,7 @@ This is used in the MultiQC report (if not default) and in the summary HTML / e-
 **NB:** Single hyphen (core Nextflow option)
 
 ### `-resume`
+
 Specify this when restarting a pipeline. Nextflow will used cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously.
 
 You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
@@ -310,6 +331,7 @@ You can also supply a run name to resume a specific run: `-resume [run-name]`. U
 **NB:** Single hyphen (core Nextflow option)
 
 ### `-c`
+
 Specify the path to a specific nextflow config file (this is a core NextFlow command).
 
 **NB:** Single hyphen (core Nextflow option)
@@ -317,23 +339,27 @@ Specify the path to a specific nextflow config file (this is a core NextFlow com
 Note - you can use this to override pipeline defaults.
 
 ### `--custom_config_version`
+
 Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default is set to `master`.
 
 ```bash
 ## Download and use config file with following git commid id
 --custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
 ```
+
 ### `--plaintext_email`
+
 Set to receive plain-text e-mails instead of HTML formatted.
 
 ### `--multiqc_config`
+
 Specify a path to a custom MultiQC configuration file. MultiQC produces final pipeline reports.
 
-# Adjustable parameters for nf-core/eager
+## Adjustable parameters for nf-core/eager
 
-This part of the documentation contains a list of user-adjustable parameters in nf-core/eager. You can specify any of these parameters on the command line when calling the pipeline by simply prefixing the respective parameter with a double dash `--`
+This part of the documentation contains a list of user-adjustable parameters in nf-core/eager. You can specify any of these parameters on the command line when calling the pipeline by simply prefixing the respective parameter with a double dash `--`.
 
-## Step skipping parameters
+### Step skipping parameters
 
 Some of the steps in the pipeline can be executed optionally. If you specify specific steps to be skipped, there won't be any output related to these modules.
 
@@ -355,12 +381,11 @@ Turns off duplicate removal methods DeDup and MarkDuplicates respectively. No du
 
 ### `--skip_damage_calculation`
 
-Turns off the DamageProfiler module to compute DNA damage profiles. 
+Turns off the DamageProfiler module to compute DNA damage profiles.
 
 ### `--skip_qualimap`
 
 Turns off QualiMap and thus does not compute coverage and other mapping metrics.
-
 
 ## Complexity Filtering Options
 
@@ -376,7 +401,7 @@ This option can be used to define the minimum length of a poly-G tail to begin l
 
 These options handle various parts of adapter clipping and read merging steps.
 
-### `--clip_forward_adaptor` 
+### `--clip_forward_adaptor`
 
 Defines the adapter sequence to be used for the forward read. By default, this is set to `AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC`.
 
@@ -389,9 +414,11 @@ Defines the adapter sequence to be used for the reverse read in paired end seque
 Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.
 
 ### `--clip_min_read_quality` 20
-Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off. Default is set to `20`. 
+
+Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off. Default is set to `20`.
 
 ### `--clip_min_adap_overlap` 1
+
 Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.
 
 ### `--skip_collapse`
@@ -399,6 +426,7 @@ Sets the minimum overlap between two reads when read merging is performed. Defau
 Turns off the paired-end read merging.
 
 For example
+
 ```bash
 --pairedEnd --skip_collapse  --reads '*.fastq'
 ```
@@ -408,6 +436,7 @@ For example
 Turns off adaptor and quality trimming.
 
 For example:
+
 ```bash
 --pairedEnd --skip_trim  --reads '*.fastq'
 ```
@@ -416,7 +445,7 @@ For example:
 
 ## BWA (default)
 
-These parameters configure mapping algorithm parameters. 
+These parameters configure mapping algorithm parameters.
 
 ### `--bwaalnn`
 
@@ -424,7 +453,7 @@ Configures the `bwa aln -n` parameter, defining how many mismatches are allowed 
 
 ### `--bwaalnk`
 
-Configures the `bwa aln -k` parameter for the seeding phase in the mapping algorithm. Default is set to `2`. 
+Configures the `bwa aln -k` parameter for the seeding phase in the mapping algorithm. Default is set to `2`.
 
 ### `--bwaalnl`
 
@@ -434,7 +463,7 @@ Configures the length of the seed used in `bwa aln -l`. Default is set to BWA de
 
 ### `--circularmapper`
 
-This turns on the CircularMapper application, that enhances the mapping procedure with the BWA algorithm on circular references utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). 
+This turns on the CircularMapper application, that enhances the mapping procedure with the BWA algorithm on circular references utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details).
 
 ### `--circularextension`
 
@@ -442,7 +471,7 @@ The number of bases to extend the reference genome with. By default this is set 
 
 ### `--circulartarget`
 
-The chromosome in your FastA reference that you'd like to be treated as circular. By default this is set to `MT` but can be configured to match any other chromosome. 
+The chromosome in your FastA reference that you'd like to be treated as circular. By default this is set to `MT` but can be configured to match any other chromosome.
 
 ### `--circularfilter`
 
@@ -456,9 +485,9 @@ Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite
 
 ## Mapped reads Stripping
 
-These parameters are used for removing mapped reads from the original input FASTQ files, usually in the context of uploading the original FASTQ files to a public read archive (NCBI SRA/EBI ENA). 
+These parameters are used for removing mapped reads from the original input FASTQ files, usually in the context of uploading the original FASTQ files to a public read archive (NCBI SRA/EBI ENA).
 
-These flags will produce FASTQ files almost identical to your input files, except that reads with the same read ID as one found in the mapped bam file, are either removed or 'masked' (every base replaced with Ns). 
+These flags will produce FASTQ files almost identical to your input files, except that reads with the same read ID as one found in the mapped bam file, are either removed or 'masked' (every base replaced with Ns).
 
 This functionality allows you to provide other researchers who wish to re-use your data to apply their own adapter removal/read merging procedures, while maintaining anonyminity for sample donors - for example with microbiome research.
 
@@ -472,7 +501,7 @@ Read removal mode. Strip mapped reads completely (strip) or just replace mapped 
 
 ## Read Filtering and Conversion Parameters
 
-Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline. 
+Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline.
 
 ### `--bam_discard_unmapped`
 
@@ -486,11 +515,11 @@ Defines how to proceed with unmapped reads: "discard" removes all unmapped reads
 
 Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).
 
-
 ## Read DeDuplication Parameters
 
 ### `--dedupper`
-Sets the duplicate read removal tool. By default uses `dedup` an ancient DNA specific read deduplication tool. Users can also specify `markdup` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not* merged beforehand. In all other cases, it is advised to use `dedup`. 
+
+Sets the duplicate read removal tool. By default uses `dedup` an ancient DNA specific read deduplication tool. Users can also specify `markdup` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not* merged beforehand. In all other cases, it is advised to use `dedup`.
 
 ### `--dedup_all_merged`
 Sets DeDup to treat all reads as merged reads. This is useful if reads are for example not prefixed with `M_` in all cases.
@@ -505,19 +534,19 @@ Can be used to configure the step size of Preseqs `c_curve` method. Can be usefu
 
 ### `--damageprofiler_length`
 
-Specifies the length filter for DamageProfiler. By default set to `100`. 
+Specifies the length filter for DamageProfiler. By default set to `100`.
 
 ### `--damageprofiler_threshold`
 
-Specifies the length of the read start and end to be considered for profile generation in DamageProfiler. By default set to `15` bases. 
+Specifies the length of the read start and end to be considered for profile generation in DamageProfiler. By default set to `15` bases.
 
 ### `--run_pmdtools`
 
-Specifies to run PMDTools for damage based read filtering and assessment of DNA damage in sequencing libraries. By default turned off. 
+Specifies to run PMDTools for damage based read filtering and assessment of DNA damage in sequencing libraries. By default turned off.
 
 ### `--udg` false
 
-Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment. 
+Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment.
 
 ### `--pmd_udg_type` \`half`
 
@@ -525,19 +554,19 @@ If you have UDGhalf treated data (Rohland et al 2016), specify `half` as option 
 
 ### `--pmdtools_range`
 
-Specifies the range in which to consider DNA damage from the ends of reads. By default set to `10`. 
+Specifies the range in which to consider DNA damage from the ends of reads. By default set to `10`.
 
-### `--pmdtools_threshold `
+### `--pmdtools_threshold`
 
-Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user. 
+Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user.
 
 ### `--pmdtools_reference_mask` ''
 
-Can be used to set a reference genome mask for PMDTools. 
+Can be used to set a reference genome mask for PMDTools.
 
 ### `--pmdtools_max_reads`
 
-The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results. 
+The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results.
 
 ## BAM Trimming Parameters
 
@@ -557,22 +586,23 @@ By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with 
 
 ## Library-Type Parameters
 
-These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases. 
+These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases.
 
 ### `--snpcapture` false
 
-This is by default set to `false`, but can be turned on to calculate on target metrics automatically for you. Note, that this requires setting `--bedfile` with the target SNPs simultaneously. 
+This is by default set to `false`, but can be turned on to calculate on target metrics automatically for you. Note, that this requires setting `--bedfile` with the target SNPs simultaneously.
 
-### `--bedfile` 
+### `--bedfile`
 
 Can be used to set a path to a BED file (3/6 column format) to calculate capture target efficiency on the fly. Will not be used without `--bedfile` set as parameter.
 
 ## Automatic Resubmission
+
 By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
 
 ## Clean up
 
-Once completed a run has completed, you will have _lots_ of (some very large) intermediate files in your output directory, within the directory named `work`. 
+Once completed a run has completed, you will have _lots_ of (some very large) intermediate files in your output directory, within the directory named `work`.
 
 Once you have verified your run completed correctly and everything in the module output directories are present as you expect and need, you can perform a clean up.
 
@@ -583,15 +613,19 @@ While in your output directory, firstly verify you're only deleting files stored
 ```bash
 nextflow clean -n
 ```
+
 If you're ready, you can then remove the files with
 
 ```bash
 nextflow clean -f
 ```
+
 This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!
 
 ### `--monochrome_logs`
+
 Set to disable colourful command line output and live life in monochrome.
 
 ### `--multiqc_config`
+
 Specify a path to a custom MultiQC configuration file.
