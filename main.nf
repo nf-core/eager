@@ -1266,7 +1266,7 @@ process bam_trim {
 
 /*
  Step 11a: Genotyping - UnifiedGenotyper Downloading
- NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking downstream tools.
+ NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking downstream tools. Therefore we need it (for now at least until downstream tools can read proper 4.2 VCFs... )
     
  */
 
