@@ -1361,6 +1361,9 @@ ch_gatk_download = Channel.value("download")
     """
  }
 
+ /**
+ *  FreeBayes genotyping, should probably add in some options for users to set 
+ */ 
  process genotyping_freebayes {
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
@@ -1375,20 +1378,12 @@ ch_gatk_download = Channel.value("download")
   file bai from ch_dedup_bam_index_for_genotyping_hc.mix(ch_markdup_bam_index_for_genotyping_hc,ch_pmd_bam_index_for_genotyping_hc,ch_trimmed_bam_index_for_genotyping_hc)
 
   output: 
-  file "*vcf.gz" into ch_vcf_hc
-
+  file "*vcf.gz" into ch_vcf_freebayes
+  
   script:
-  if (params.gatk_dbsnp == '')
-    """
-    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
-    """
-
-  else if (params.gatk_dbsnp != '')
-    """
-    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
-    """
+  """
+    freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} -g {params.freebayes_g} ${bam} > ${bam.baseName}.vcf 
+  """
  }
 
 

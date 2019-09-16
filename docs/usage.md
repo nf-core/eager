@@ -606,7 +606,9 @@ Turns on genotyping to run on all post-dedup and downstream BAMs. For example if
 
 ## `--genotyping_tool`
 
-Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx) HaplotypeCaller, specified by 'ug' and 'hc' respectively. Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you.
+Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify 'freebayes', 'hc' or 'ug' respectively.
+
+> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you. Alternatively, 
 
 ## `--gatk_out_mode`
 
@@ -631,6 +633,18 @@ If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whethe
 ## `--gatk_hc_emitrefconf`
 
 If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: NONE, BP_RESOLUTION, GVCF. Default: GVCF
+
+## `--freebayes_C`
+
+Specify minimum required supporting observations to consider a variant. Default: 1
+
+## `--freebayes_g`
+
+Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Default: 0
+
+## `--freebayes_p`
+
+Specify ploidy of sample in FreeBayes. Default is 2, diploid.
 
 ## Automatic Resubmission
 
