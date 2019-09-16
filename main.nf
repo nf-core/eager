@@ -1039,8 +1039,8 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedup_bam_for_genotyping_ug,ch_dedup_bam_for_genotyping_hc
-    file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping_ug,ch_dedup_bam_index_for_genotyping_hc
+    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedup_bam_for_genotyping_ug,ch_dedup_bam_for_genotyping_hc,ch_dedup_bam_for_freebayes
+    file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping_ug,ch_dedup_bam_index_for_genotyping_hc,ch_dedup_bam_index_for_genotyping_freebayes
 
     script:
     prefix="${bam.baseName}"
@@ -1266,14 +1266,16 @@ process bam_trim {
 
 /*
  Step 11a: Genotyping - UnifiedGenotyper Downloading
+ NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking downstream tools.
+    
  */
 
 ch_gatk_download = Channel.value("download")
 
- process download_gatk_v3_8 {
+ process download_gatk_v3_5 {
     tag "${prefix}"
 
-    when params.run_genotyping && params.genotyping_tool == 'ug'
+    when: params.run_genotyping && params.genotyping_tool == 'ug'
 
     input: 
     val "download" from ch_gatk_download
@@ -1282,8 +1284,8 @@ ch_gatk_download = Channel.value("download")
     file "*.jar" into ch_unifiedgenotyper_jar,ch_unifiedgenotyper_versions_jar
 
     """
-    wget -O GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef'
-    tar xjf GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2
+    wget -O GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4' 
+    tar xjf GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 
     """
 
  }
@@ -1318,7 +1320,6 @@ ch_gatk_download = Channel.value("download")
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
     pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
     """
-
   else if (params.gatk_dbsnp != '')
     """
     samtools index ${bam}
@@ -1335,6 +1336,36 @@ ch_gatk_download = Channel.value("download")
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
   when params.run_genotyping && params.genotyping_tool == 'hc'
+
+  input:
+  file fasta from fasta_for_indexing
+    file bam from ch_dedup_bam_for_genotyping_hc.mix(ch_markdup_bam_for_genotyping_hc,ch_pmd_bam_for_genotyping_hc,ch_trimmed_bam_for_genotyping_hc)
+  file fai from ch_fasta_faidx_index
+  file dict from ch_seq_dict
+  file bai from ch_dedup_bam_index_for_genotyping_hc.mix(ch_markdup_bam_index_for_genotyping_hc,ch_pmd_bam_index_for_genotyping_hc,ch_trimmed_bam_index_for_genotyping_hc)
+
+  output: 
+  file "*vcf.gz" into ch_vcf_hc
+
+  script:
+  if (params.gatk_dbsnp == '')
+    """
+    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
+    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
+    """
+
+  else if (params.gatk_dbsnp != '')
+    """
+    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
+    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
+    """
+ }
+
+ process genotyping_freebayes {
+  tag "${prefix}"
+  publishDir "${params.outdir}/genotyping", mode: 'copy'
+
+  when params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
   file fasta from fasta_for_indexing
