@@ -10,7 +10,7 @@ jobs:
         nxf_ver: ['19.04.0', '']
         endedness: ['--singleEnd', '--pairedEnd']
         mapper: ['--circularmapper','--bwamem', '']
-        genotyper: ['--run_genotyping --genotyping_tool 'ug'', '--run_genotyping --genotyping_tool 'hc', '']
+        genotyper: ['--run_genotyping --genotyping_tool "ug"', '--run_genotyping --genotyping_tool "hc"', '']
         
     steps:
       - uses: actions/checkout@v1
