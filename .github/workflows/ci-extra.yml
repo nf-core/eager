@@ -30,6 +30,12 @@ jobs:
           #Run the basic pipeline with paired end data without collapsing
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --skip_collapse --saveReference
           # Need to add more stuff from TravisCI, as GitHub Actions is still in Beta
-      - name: Run Genotyping Tests
+      - name: Run Genotyping Tests UnifiedGenotyper
         run: | 
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --saveReference ${{ matrix.genotyper }}
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --run_genotyping --genotyping_tool 'ug'
+      - name: Run Genotyping Tests HaplotypeCaller
+        run: | 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --run_genotyping --genotyping_tool 'hc'
+      - name: Run Genotyping Tests FreeBayes
+        run: | 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --run_genotyping --genotyping_tool 'freebayes'
