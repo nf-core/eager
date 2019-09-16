@@ -73,4 +73,4 @@ script:
   # Test running GATK unified genotyper
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
   # Test running GATK HaplotypeCaller
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
