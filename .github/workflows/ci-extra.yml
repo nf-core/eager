@@ -10,8 +10,7 @@ jobs:
         nxf_ver: ['19.04.0', '']
         endedness: ['--singleEnd', '--pairedEnd']
         mapper: ['--circularmapper','--bwamem', '']
-        genotyper: ['--run_genotyping --genotyping_tool "ug"', '--run_genotyping --genotyping_tool "hc"', '--run_genotyping --genotyping_tool "freebayes"', '']
-        
+
     steps:
       - uses: actions/checkout@v1
       - name: Install Nextflow
@@ -30,12 +29,3 @@ jobs:
           #Run the basic pipeline with paired end data without collapsing
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --skip_collapse --saveReference
           # Need to add more stuff from TravisCI, as GitHub Actions is still in Beta
-      - name: Run Genotyping Tests UnifiedGenotyper
-        run: | 
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --run_genotyping --genotyping_tool 'ug'
-      - name: Run Genotyping Tests HaplotypeCaller
-        run: | 
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --run_genotyping --genotyping_tool 'hc'
-      - name: Run Genotyping Tests FreeBayes
-        run: | 
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --run_genotyping --genotyping_tool 'freebayes'

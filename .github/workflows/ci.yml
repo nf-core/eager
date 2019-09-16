@@ -21,4 +21,12 @@ jobs:
       - name: Run very basic test
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --saveReference
-
+      - name: Run Genotyping Tests UnifiedGenotyper
+        run: | 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --run_genotyping --genotyping_tool 'ug'
+      - name: Run Genotyping Tests HaplotypeCaller
+        run: | 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --run_genotyping --genotyping_tool 'hc'
+      - name: Run Genotyping Tests FreeBayes
+        run: | 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --pairedEnd --run_genotyping --genotyping_tool 'freebayes'
