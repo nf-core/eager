@@ -1270,7 +1270,7 @@ process bam_trim {
 
 ch_gatk_download = Channel.value("download")
 
- process download_gatk_v3_5 {
+ process download_gatk_v3_8 {
     tag "${prefix}"
 
     when params.run_genotyping && params.genotyping_tool == 'ug'
@@ -1282,8 +1282,8 @@ ch_gatk_download = Channel.value("download")
     file "*.jar" into ch_unifiedgenotyper_jar,ch_unifiedgenotyper_versions_jar
 
     """
-    wget -O GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4'
-    tar xjf GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
+    wget -O GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef'
+    tar xjf GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2
     """
 
  }
