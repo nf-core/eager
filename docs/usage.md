@@ -616,17 +616,17 @@ If selected a GATK genotyper, what type of VCF to create, i.e. produce calls for
 
 If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: 30
 
-## `--gatk_ploidy`                 
+## `--gatk_ploidy`
 
-If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid orgaisms. . Default: 2        
+If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid orgaisms. . Default: 2
 
-## `--gatk_dbsnp`                  
+## `--gatk_dbsnp`
 
 (Optional)Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
 
 ## `--gatk_ug_genotype_model`
 
-If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. Default: SNP. 
+If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. Default: SNP.
 
 ## `--gatk_hc_emitrefconf`
 
