@@ -18,10 +18,10 @@ jobs:
           export NXF_VER=${{ matrix.nxf_ver }}
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Run test Number 1
+      - name: Basic workflow, PE/SE, bwa aln
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --saveReference
-      - name: Run test Number 2
+      - name: Basic workflow, with supplied indices
         run: | 
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta 
       - name: Run test Number 3
