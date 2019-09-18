@@ -321,7 +321,7 @@ if (params.strip_input_fastq){
 
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
-  exit 1, "Please specify a genotyper. Options: ug, hc. You gave: ${params.genotyping_tool}"
+  exit 1, "Please specify a genotyper. Options: ug, hc, freebayes. You gave: ${params.genotyping_tool}"
   }
   
   if (params.gatk_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_out_mode != 'EMIT_ALL_SITES') {
