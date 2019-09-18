@@ -320,7 +320,7 @@ if (params.strip_input_fastq){
 // Genotyping sanity checking
 
 if (params.run_genotyping){
-  if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc') {
+  if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
   exit 1, "Please specify a genotyper. Options: ug, hc. You gave: ${params.genotyping_tool}"
   }
   
