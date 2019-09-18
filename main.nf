@@ -1039,8 +1039,8 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedup_bam_for_genotyping_ug,ch_dedup_bam_for_genotyping_hc,ch_dedup_bam_for_freebayes
-    file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping_ug,ch_dedup_bam_index_for_genotyping_hc,ch_dedup_bam_index_for_genotyping_freebayes
+    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedup_bam_for_genotyping_ug,ch_dedup_bam_for_genotyping_hc,ch_dedup_bam_for_genotyping_fb
+    file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping_ug,ch_dedup_bam_index_for_genotyping_hc,ch_dedup_bam_index_for_genotyping_fb
 
     script:
     prefix="${bam.baseName}"
@@ -1166,8 +1166,8 @@ process markDup{
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
-    file "*.markDup.bam" into ch_markdup_bam,ch_markdup_bam_for_genotyping_ug,ch_markdup_bam_for_genotyping_hc
-    file "*.{bai,csi}" into ch_markdup_bam_index_for_genotyping_ug,ch_markdup_bam_index_for_genotyping_hc
+    file "*.markDup.bam" into ch_markdup_bam,ch_markdup_bam_for_genotyping_ug,ch_markdup_bam_for_genotyping_hc,ch_markdup_bam_for_genotyping_fb
+    file "*.{bai,csi}" into ch_markdup_bam_index_for_genotyping_ug,ch_markdup_bam_index_for_genotyping_hc,ch_markdup_bam_index_for_genotyping_fb
 
 
     script:
@@ -1210,9 +1210,9 @@ process pmdtools {
     file fasta from fasta_for_indexing
 
     output:
-    file "*.bam" into ch_bam_after_pmdfiltering,ch_pmd_bam_for_genotyping_ug,ch_pmd_bam_for_genotyping_hc
+    file "*.bam" into ch_bam_after_pmdfiltering,ch_pmd_bam_for_genotyping_ug,ch_pmd_bam_for_genotyping_hc,ch_pmd_bam_for_genotyping_fb
     file "*.cpg.range*.txt"
-    file "*.{bai,csi}" into ch_pmd_bam_index_for_genotyping_ug,ch_pmd_bam_index_for_genotyping_hc
+    file "*.{bai,csi}" into ch_pmd_bam_index_for_genotyping_ug,ch_pmd_bam_index_for_genotyping_hc,ch_pmd_bam_index_for_genotyping_fb
 
     script:
     //Check which treatment for the libraries was used
@@ -1249,8 +1249,8 @@ process bam_trim {
     file bam from ch_for_bamutils  
 
     output: 
-    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping_ug,ch_trimmed_bam_for_genotyping_hc
-    file "*.{bai,csi}" into ch_trimmed_bam_index_for_genotyping_ug,ch_trimmed_bam_index_for_genotyping_hc
+    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping_ug,ch_trimmed_bam_for_genotyping_hc,ch_trimmed_bam_for_genotyping_fb
+    file "*.{bai,csi}" into ch_trimmed_bam_index_for_genotyping_ug,ch_trimmed_bam_index_for_genotyping_hc,ch_trimmed_bam_index_for_genotyping_fb
 
     script:
     prefix="${bam.baseName}"
@@ -1372,10 +1372,10 @@ ch_gatk_download = Channel.value("download")
 
   input:
   file fasta from fasta_for_indexing
-  file bam from ch_dedup_bam_for_genotyping_hc.mix(ch_markdup_bam_for_genotyping_hc,ch_pmd_bam_for_genotyping_hc,ch_trimmed_bam_for_genotyping_hc)
+  file bam from ch_dedup_bam_for_genotyping_fb.mix(ch_markdup_bam_for_genotyping_fb,ch_pmd_bam_for_genotyping_fb,ch_trimmed_bam_for_genotyping_fb)
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
-  file bai from ch_dedup_bam_index_for_genotyping_hc.mix(ch_markdup_bam_index_for_genotyping_hc,ch_pmd_bam_index_for_genotyping_hc,ch_trimmed_bam_index_for_genotyping_hc)
+  file bai from ch_dedup_bam_index_for_genotyping_fb.mix(ch_markdup_bam_index_for_genotyping_fb,ch_pmd_bam_index_for_genotyping_fb,ch_trimmed_bam_index_for_genotyping_fb)
 
   output: 
   file "*vcf.gz" into ch_vcf_freebayes
