@@ -1381,8 +1381,9 @@ ch_gatk_download = Channel.value("download")
   file "*vcf.gz" into ch_vcf_freebayes
   
   script:
+  skip_coverage = "${params.freebayes_g} != 0" ? "-g {params.freebayes_g}" : ""
   """
-    freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} -g {params.freebayes_g} ${bam} > ${bam.baseName}.vcf 
+    freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} $skip_coverage ${bam} > ${bam.baseName}.vcf 
   """
  }
 

@@ -640,7 +640,7 @@ Specify minimum required supporting observations to consider a variant. Default:
 
 ## `--freebayes_g`
 
-Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Default: 0
+Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.
 
 ## `--freebayes_p`
 
