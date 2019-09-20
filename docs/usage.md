@@ -596,6 +596,56 @@ This is by default set to `false`, but can be turned on to calculate on target m
 
 Can be used to set a path to a BED file (3/6 column format) to calculate capture target efficiency on the fly. Will not be used without `--bedfile` set as parameter.
 
+## Genotyping Parameters
+
+There are options for different genotypers to be used. We suggest you the documentation of each tool to find the ones that suit your needs.
+
+### `--run_genotyping`
+
+Turns on genotyping to run on all post-dedup and downstream BAMs. For example if `--run_pmdtools` and `--trim_bam` are both supplied, the genotyper will be run on all three BAM files i.e. post-deduplication, post-pmd and post-trimmed BAM files.
+
+## `--genotyping_tool`
+
+Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify 'freebayes', 'hc' or 'ug' respectively.
+
+> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you.
+
+## `--gatk_out_mode`
+
+If selected a GATK genotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. Default: EMIT_VARIANTS_ONLY.
+
+## `--gatk_call_conf`
+
+If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: 30
+
+## `--gatk_ploidy`
+
+If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid orgaisms. . Default: 2
+
+## `--gatk_dbsnp`
+
+(Optional)Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
+
+## `--gatk_ug_genotype_model`
+
+If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. Default: SNP.
+
+## `--gatk_hc_emitrefconf`
+
+If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: NONE, BP_RESOLUTION, GVCF. Default: GVCF
+
+## `--freebayes_C`
+
+Specify minimum required supporting observations to consider a variant. Default: 1
+
+## `--freebayes_g`
+
+Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.
+
+## `--freebayes_p`
+
+Specify ploidy of sample in FreeBayes. Default is 2, diploid.
+
 ## Automatic Resubmission
 
 By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
