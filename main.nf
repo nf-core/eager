@@ -35,6 +35,9 @@ def helpMessage() {
       --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
+    BAM Input:
+    --run_convertbam				Species to convert an input BAM file into FASTQ format before processing.
+
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
@@ -46,7 +49,6 @@ def helpMessage() {
       --saveReference               Saves reference genome indices for later reusage
 
     Skipping                        Skip any of the mentioned steps
-      --skip_convertbam
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
       --skip_mapping				Note: this maybe useful when input is a BAM file
@@ -170,7 +172,6 @@ params.email = false
 params.plaintext_email = false
 
 // Skipping parts of the pipeline for impatient users
-params.skip_convertbam = true
 params.skip_fastqc = false 
 params.skip_adapterremoval = false
 params.skip_mapping = false
@@ -179,6 +180,9 @@ params.skip_preseq = false
 params.skip_damage_calculation = false
 params.skip_qualimap = false
 params.skip_deduplication = false
+
+// If you want to convert a BAM input to FASTQ format for adapterememoval etc.
+params.run_convertbam = false
 
 //Complexity filtering reads
 params.complexity_filter_poly_g = false
@@ -574,7 +578,7 @@ process convertBam {
     tag "$bam"
     
     when: 
-    params.bam && !params.skip_convertbam
+    params.bam && params.run_convertbam
 
     input: 
     file bam from ch_input_for_convertbam 
@@ -594,7 +598,7 @@ process convertBam {
 // if BAM is specified and skipping converting and mapping etc. i.e. wanna skip straight to post-mapping BAM steps
 process indexinputbam {
 	when: 
-	params.bam && params.skip_convertbam
+	params.bam && !params.run_convertbam
 
 	input:
 	file bam from ch_input_for_indexbam
@@ -612,16 +616,16 @@ process indexinputbam {
 }
 
 // convertbam bypass
-if (!params.skip_convertbam) {
+if (params.run_convertbam) {
     ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
         .filter{ it =~/.*converted.fastq.gz/}
+     	.view()
         .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 } else {
     ch_input_for_skipconvertbam
-        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
+    	.view()
+    	.into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 }
-
-
 
 
 
@@ -633,7 +637,8 @@ process fastqc {
     publishDir "${params.outdir}/FastQC", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
-    when: !params.bam && !params.skip_convertbam && !params.skip_fastqc
+    when: 
+    !params.bam && !params.skip_fastqc || params.run_convertbam
 
     input:
     set val(name), file(reads) from ch_convertbam_for_fastqc
@@ -659,7 +664,8 @@ process fastp {
     tag "$name"
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
-    when: params.complexity_filter_poly_g
+    when: 
+    !params.bam && params.complexity_filter_poly_g || params.bam && params.run_convertbam && params.complexity_filter_poly_g
 
     input:
     set val(name), file(reads) from ch_convertbam_for_fastp
@@ -700,14 +706,15 @@ process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
-    when: !params.bam && !params.skip_convertbam && !params.skip_adapterremoval
+    when: 
+    !params.bam && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
 
     input:
     set val(name), file(reads) from ch_fastp_for_adapterremoval
 
     output:
     set val(base), file("output/*.gz") into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
-    file("*.settings") into ch_adapterremoval_logs
+    file("output/*.settings") into ch_adapterremoval_logs
 
     script:
     base = reads[0].baseName
@@ -722,13 +729,14 @@ process adapter_removal {
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me}
     #Combine files
     zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+    mv *.settings output/
     """
     //PE, don't collapse, but trim reads
     } else if (!params.singleEnd && params.skip_collapse && !params.skip_trim) {
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me}
-    mv ${base}.pair*.truncated.gz output/
+    mv *.settings ${base}.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
     } else if (!params.singleEnd && !params.skip_collapse && params.skip_trim) {
@@ -736,7 +744,7 @@ process adapter_removal {
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --basename ${base} ${collapse_me} ${trim_me}
     
-    mv ${base}.pair*.truncated.gz output/
+    mv *.settings ${base}.pair*.truncated.gz output/
     """
     } else {
     //SE, collapse not possible, trim reads
@@ -744,7 +752,7 @@ process adapter_removal {
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --basename ${base} --gzip --threads ${task.cpus} ${trim_me}
     
-    mv *.truncated.gz output/
+    mv *.settings *.truncated.gz output/
     """
     }
 }
@@ -770,7 +778,7 @@ process fastqc_after_clipping {
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
-    when: !params.bam  && !params.skip_convertbam && !params.skip_adapterremoval && !params.skip_fastqc
+    when: !params.bam  && !params.skip_adapterremoval && !params.skip_fastqc || params.bam && params.run_convertbam && !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
     set val(name), file(reads) from ch_adapterremoval_for_fastqc_after_clipping
