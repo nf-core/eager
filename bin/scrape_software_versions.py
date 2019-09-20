@@ -14,6 +14,7 @@ regexes = {
     'BWA': ['v_bwa.txt', r"Version: (\S+)"],
     'Qualimap': ['v_qualimap.txt', r"QualiMap v.(\S+)"],
     'GATK': ['v_gatk.txt', r"Version:([\d\.]+)"],
+    'GATK3_5': ['v_gatk3_5.txt', r"Version:([\d\.]+)"],
     'bamUtil' : ['v_bamutil.txt', r"Version: ([\d\.]+)"],
     'fastP': ['v_fastp.txt', r"([\d\.]+)"],
     'DamageProfiler' : ['v_damageprofiler.txt', r"version\": \"([\d\.]+)"],
@@ -29,6 +30,7 @@ results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
 results['BWA'] = '<span style="color:#999999;\">N/A</span>'
 results['Qualimap'] = '<span style="color:#999999;\">N/A</span>'
 results['GATK'] = '<span style="color:#999999;\">N/A</span>'
+results['GATK3_5'] = '<span style="color:#999999;\">N/A</span>'
 results['bamUtil'] = '<span style="color:#999999;\">N/A</span>'
 results['fastP'] = '<span style="color:#999999;\">N/A</span>'
 results['DamageProfiler'] = '<span style="color:#999999;\">N/A</span>'

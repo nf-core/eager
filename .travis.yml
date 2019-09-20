@@ -14,7 +14,7 @@ before_install:
   - docker pull nfcore/eager:dev
   # Fake the tag locally so that the pipeline runs properly
   # Looks weird when this is :dev to :dev, but makes sense when testing code for a release (:dev to :1.0.1)
-  - docker tag nfcore/eager:dev nfcore/eager:2.0.7
+  - docker tag nfcore/eager:dev nfcore/eager:dev
 
 install:
   # Install Nextflow
@@ -70,4 +70,7 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --saveReference
   # Test using pre-computed indices from a separate run beforehand
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict 
-
+  # Test running GATK unified genotyper
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
+  # Test running GATK HaplotypeCaller
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
