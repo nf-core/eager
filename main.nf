@@ -163,6 +163,7 @@ params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
 params.pmd_udg_type = 'half'
+params.bam = false
 
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
@@ -376,21 +377,21 @@ if( params.readPaths ){
             .from( params.readPaths )
             .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
-            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam }
+            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
     } else if (!params.bam){
         Channel
             .from( params.readPaths )
             .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
-            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam }
+            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
     } else {
         Channel
             .from( params.readPaths )
             .map { row -> [ file( row )  ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
             .dump()
-            .set { ch_input_for_skipconvertbam; ch_input_for_convertbam }
+            .set { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
     }
 } else if (!params.bam){
@@ -398,7 +399,8 @@ if( params.readPaths ){
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .into { ch_input_for_skipconvertbam; ch_input_for_convertbam  }
+        .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam  }
+
 } else {
      Channel
         .fromPath( params.reads )
@@ -406,7 +408,7 @@ if( params.readPaths ){
         .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\n" }
         .dump() //For debugging purposes
-        .set { ch_input_for_skipconvertbam; ch_input_for_convertbam }
+        .set { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
 }
 
@@ -566,7 +568,6 @@ process makeSeqDict {
 
 /*
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
-*
 */ 
 
 process convertBam {
@@ -576,7 +577,7 @@ process convertBam {
     params.bam && !params.skip_convertbam
 
     input: 
-    file bam from ch_bam_to_fastq_convert
+    file bam from ch_input_for_convertbam 
 
     output:
     set val("${base}"), file("*.fastq.gz") into ch_output_from_convertbam
@@ -588,6 +589,28 @@ process convertBam {
     """ 
 }
 
+
+
+// if BAM is specified and skipping converting and mapping etc. i.e. wanna skip straight to post-mapping BAM steps
+process indexinputbam {
+	when: 
+	params.bam && params.skip_convertbam
+
+	input:
+	file bam from ch_input_for_indexbam
+
+	output:
+	file "*.{bai,csi}" into ch_filteringindex_for_skiprmdup
+
+	script:
+    size = "${params.large_ref}" ? '-c' : ''
+    prefix = "${reads[0].baseName}"
+	"""
+    samtools index "${size}" ${bam}
+	"""
+
+}
+
 // convertbam bypass
 if (!params.skip_convertbam) {
     ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
@@ -595,8 +618,11 @@ if (!params.skip_convertbam) {
         .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 } else {
     ch_input_for_skipconvertbam
-        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam__for_fastqc; ch_convertbam_for_stripfastq } 
+        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 }
+
+
+
 
 
 /*
@@ -636,10 +662,10 @@ process fastp {
     when: params.complexity_filter_poly_g
 
     input:
-    set val(name), file(reads) from ch_convertbam_from_fastp
+    set val(name), file(reads) from ch_convertbam_for_fastp
 
     output:
-    set val(name), file("*pG.fq.gz") into ch_output_of_fastp
+    set val(name), file("*pG.fq.gz") into ch_output_from_fastp
     file("*.json") into ch_fastp_for_multiqc
 
     script:
@@ -656,7 +682,7 @@ process fastp {
 
 
 // fastp bypass
-if (params.run_fastp) {
+if (params.complexity_filter_poly_g) {
     ch_convertbam_for_skipfastp.mix(ch_output_from_fastp)
         .filter { it =~/.*pG.fq.gz/ }
         .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
@@ -669,7 +695,6 @@ if (params.run_fastp) {
 /*
  * STEP 2 - Adapter Clipping / Read Merging
  */
-//Initialize empty channel if we skip adapterremoval entirely
 
 process adapter_removal {
     tag "$name"
@@ -681,7 +706,7 @@ process adapter_removal {
     set val(name), file(reads) from ch_fastp_for_adapterremoval
 
     output:
-    set val(base), file("output/*.gz") into ch_output_from_adapterremoval; ch_adapterremoval_for_postfastqc
+    set val(base), file("output/*.gz") into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
     file("*.settings") into ch_adapterremoval_logs
 
     script:
@@ -729,10 +754,10 @@ process adapter_removal {
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
         .filter { it =~/.*combined.fq.gz|.*truncated.fq/ }
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adaptermoval_for_skipmap; ch_adaptermoval_for_bwa; ch_adaptermoval_for_cm; ch_adaptermoval_for_bwamem } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapteremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem } 
 } else {
     ch_fastp_for_skipadapterremoval
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adaptermoval_for_skipmap; ch_adaptermoval_for_bwa; ch_adaptermoval_for_cm; ch_adaptermoval_for_bwamem } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapteremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem } 
 }
 
 
@@ -771,13 +796,13 @@ process bwa {
     when: !params.circularmapper && !params.bwamem
 
     input:
-    set val(name), file(reads) from ch_adaptermoval_for_bwa
+    set val(name), file(reads) from ch_adapteremoval_for_bwa
     file index from bwa_index.collect()
 
 
     output:
     file "*.mapped.bam" into ch_output_from_bwa
-    file "*.{bai,csi}" into ch_outputndex_from_bwa
+    file "*.{bai,csi}" into ch_outputindex_from_bwa
     
 
     script:
@@ -838,7 +863,7 @@ process circularmapper{
     when: params.circularmapper
 
     input:
-    set val(name), file(reads) from ch_adaptermoval_for_cm
+    set val(name), file(reads) from ch_adapteremoval_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from fasta_for_indexing
 
@@ -883,7 +908,7 @@ process bwamem {
     when: params.bwamem && !params.circularmapper
 
     input:
-    set val(name), file(reads) from ch_adaptermoval_for_bwamem
+    set val(name), file(reads) from ch_adapteremoval_for_bwamem
     file index from bwa_index_bwamem.collect()
 
     output:
@@ -921,8 +946,8 @@ if (!params.skip_mapping) {
 	        .into { ch_mappingindex_for_filtering; ch_mappingindex_for_skipfiltering; ch_mapping_for_preseq } 
 
 } else {
-    ch_adaptermoval_for_skipmap
-        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; } 
+    ch_adapterremoval_for_skipmap
+        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering } 
 }
 
 /*
@@ -1025,6 +1050,8 @@ if (params.run_bam_filtering) {
 } else {
     ch_mapping_for_skipfiltering
         .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
+
+
 }
 
 
@@ -1158,17 +1185,20 @@ process markDup{
 }
 
 
-if (!params.skip_deduplication) {
-    ch_mapping_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
-        .filter { it =~/.*rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemodification; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
 
-    ch_mappingindex_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
+
+
+if (!params.skip_deduplication) {
+    ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
+        .filter { it =~/.*rmdup.bam/ }
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
+
+    ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*rmdup.bai|.*_rmdup.csi/ }
-        .into { ch_rmdupindex_for_skipdamagemodification; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
+        .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemodification; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
 }
 
 
@@ -1329,35 +1359,36 @@ process bam_trim {
 
 
 if ( params.run_genotyping && params.run_genotyping_source == "raw" ) {
-    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_omtools,ch_output_from_bamutils)
+    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
-ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_omtools,ch_outputindex_from_bamutils)
+ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.run_genotyping_source == "trimmed" )  {
-    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_omtools,ch_output_from_bamutils)
+    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .filter { it =~/.*trimmed.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
-ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_omtools,ch_outputindex_from_bamutils)
+ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*trimmed.bai|*.trimmed.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.run_genotyping_source == "pmd" )  {
-    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_omtools,ch_output_from_bamutils)
+    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .filter { it =~/.*pmd.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
-ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_omtools,ch_outputindex_from_bamutils)
+ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*pmd.bai|*.pmd.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
-} else if ( !params.run_genotyping )  {
-    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_omtools,ch_output_from_bamutils)
-        .set { ch_damagemanipulation_for_skipgenotyping } 
+} else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
+    ch_rmdup_for_skipdamagemanipulation
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
-
+    ch_rmdupindex_for_skipdamagemanipulation
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
 }
 
 
@@ -1395,7 +1426,8 @@ ch_gatk_download = Channel.value("download")
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
-  when params.run_genotyping && params.genotyping_tool == 'ug'
+  when:
+  params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
   file fasta from fasta_for_indexing
@@ -1432,7 +1464,8 @@ ch_gatk_download = Channel.value("download")
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
-  when params.run_genotyping && params.genotyping_tool == 'hc'
+  when:
+  params.run_genotyping && params.genotyping_tool == 'hc'
 
   input:
   file fasta from fasta_for_indexing
@@ -1465,11 +1498,12 @@ ch_gatk_download = Channel.value("download")
   tag "${bam}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
-  when params.run_genotyping && params.genotyping_tool == 'freebayes'
+  when:
+  params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
   file fasta from fasta_for_indexing
-  file bam from ch_ch_damagemanipulation_for_genotyping_freebayes
+  file bam from ch_damagemanipulation_for_genotyping_freebayes
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
   file bai from ch_damagemanipulationindex_for_genotyping_freebayes
