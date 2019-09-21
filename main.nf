@@ -119,7 +119,7 @@ def helpMessage() {
     Genotyping
       --run_genotyping              Perform genotyping on deduplicated BAMs.
       --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5. Options: 'ug', 'hc', 'freebayes'
-      --genotyping_source       Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'cleaned'
+      --genotyping_source      	    Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
       --gatk_out_mode               Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
       --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30.
       --gatk_ploidy                 Specify GATK organism ploidy. Default: 2.
@@ -1096,7 +1096,6 @@ if (params.run_bam_filtering) {
         .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
 
     ch_mappingindex_for_skipfiltering
-    	.view()
     	.into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
 
 }
@@ -1241,6 +1240,7 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
+        .view()
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
@@ -1249,11 +1249,9 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-         .view()
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
 
 	ch_filteringindex_for_skiprmdup
-	    .view()
 	    .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
 }
 
@@ -1374,7 +1372,7 @@ process pmdtools {
         snpcap = ''
     }
     size = "${params.large_ref}" ? '-c' : ''
-
+    prefix = "${bam.baseName}"
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
@@ -1419,7 +1417,6 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
 	ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
-		.view()
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" )  {
@@ -1428,7 +1425,7 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
 	ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
-        .filter { it =~/.*trimmed.bam.bai|*.trimmed.bam.csi/ }
+        .filter { it =~/.*trimmed.bam.bai|.*.trimmed.bam.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" )  {
@@ -1437,7 +1434,7 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
 	ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
-        .filter { it =~/.*pmd.bam.bai|*.pmd.bam.csi/ }
+        .filter { it =~/.*pmd.bam.bai|.*.pmd.bam.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
