@@ -175,7 +175,6 @@ params.plaintext_email = false
 params.skip_fastqc = false 
 params.skip_adapterremoval = false
 params.skip_mapping = false
-params.skip_bam_filtering = true
 params.skip_preseq = false
 params.skip_damage_calculation = false
 params.skip_qualimap = false
@@ -416,6 +415,11 @@ if( params.readPaths ){
 
 }
 
+
+
+params.dedupper = 'dedup' //default value dedup
+params.dedup_all_merged = false
+
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
@@ -423,29 +427,51 @@ summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
-summary['Fasta Ref']    = params.fasta
+summary['Fasta Fef']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
-summary['Skip Collapsing'] = params.skip_collapse ? 'Yes' : 'No'
-summary['Skip Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
-summary['Output stripped fastq'] = params.strip_input_fastq ? 'Yes' : 'No'
+summary['Skipping FASTQC?'] = params.skip_fastqc ? 'Yes' : 'No'
+summary['Skipping AdapterRemoval?'] = params.skip_adapterremoval ? 'Yes' : 'No'
+if (!params.skip_adapterremoval) {
+	summary['Skip Read Merging'] = params.skip_collapse ? 'Yes' : 'No'
+	summary['Skip Adapter Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
+}
+summary['Running BAM filtering'] = params.run_bam_filtering ? 'Yes' : 'No'
+if (params.run_bam_filtering) {
+	summary['Skip Read Merging'] = params.bam_discard_unmapped ? 'Yes' : 'No'
+	summary['Skip Read Merging'] = params.bam_unmapped_type
+}
+summary['Run Fastq Stripping'] = params.strip_input_fastq ? 'Yes' : 'No'
 if (params.strip_input_fastq){
     summary['Strip mode'] = params.strip_mode
+}
+summary['Skipping Mapping?'] = params.skip_mapping ? 'Yes' : 'No'
+
+summary['Skipping Preseq?'] = params.skip_preseq ? 'Yes' : 'No'
+summary['Skipping Deduplication?'] = params.skip_deduplication ? 'Yes' : 'No'
+summary['Skipping DamageProfiler?'] = params.skip_damage_calculation ? 'Yes' : 'No'
+summary['Skipping Qualimap?'] = params.skip_qualimap ? 'Yes' : 'No'
+summary['Run BAM Trimming?'] = params.run_trim_bam ? 'Yes' : 'No'
+summary['Run PMDtools?'] = params.run_pmdtools ? 'Yes' : 'No'
+summary['Run Genotyping?'] = params.run_genotyping ? 'Yes' : 'No'
+if (params.run_genotyping){
+	summary['Genotyping Tool?'] = params.genotyping_tool
+	summary['Genotyping BAM Input?'] = params.genotyping_source
 }
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
-summary['Output dir']   = params.outdir
-summary['Working dir']  = workflow.workDir
+summary['Output Dir']   = params.outdir
+summary['Working Dir']  = workflow.workDir
 summary['Container Engine'] = workflow.containerEngine
 if(workflow.containerEngine) summary['Container'] = workflow.container
-summary['Current home']   = "$HOME"
-summary['Current user']   = "$USER"
-summary['Current path']   = "$PWD"
-summary['Working dir']    = workflow.workDir
-summary['Output dir']     = params.outdir
-summary['Script dir']     = workflow.projectDir
+summary['Current Home']   = "$HOME"
+summary['Current User']   = "$USER"
+summary['Current Path']   = "$PWD"
+summary['Working Dir']    = workflow.workDir
+summary['Output Dir']     = params.outdir
+summary['Script Dir']     = workflow.projectDir
 summary['Config Profile'] = workflow.profile
 if(workflow.profile == 'awsbatch'){
    summary['AWS Region']    = params.awsregion
@@ -1106,6 +1132,9 @@ process samtools_flagstat_after_filter {
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
+    when:
+    params.run_bam_filtering
+
     input:
     file(bam) from ch_filtering_for_flagstat
 
@@ -1138,7 +1167,7 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.rmdup.bam" into ch_output_from_dedup
+    file "${prefix}_rmdup.bam" into ch_output_from_dedup
     file "*.{bai,csi}" into ch_outputindex_from_dedup
 
     script:
@@ -1150,15 +1179,15 @@ process dedup{
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".rmdup.bam
-    samtools index "${size}" "$prefix".rmdup.bam
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.bam
+    samtools index "${size}" "$prefix"_rmdup.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".rmdup.bam
-    samtools index "${size}" "$prefix".rmdup.bam
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.bam
+    samtools index "${size}" "$prefix"_rmdup.bam
     """  
     }
 }
@@ -1187,8 +1216,8 @@ process markDup{
     prefix = "${bam.baseName}"
     size = "${params.large_ref}" ? '-c' : ''
     """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.rmdup.metrics" VALIDATION_STRINGENCY=SILENT
-    samtools index "${size}" ${prefix}.rmdup.bam
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}._rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools index "${size}" ${prefix}_rmdup.bam
     """
 }
 
@@ -1198,14 +1227,17 @@ process markDup{
 
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
-        .filter { it =~/.*rmdup.bam/ }
+    	.view()
+        .filter { it =~/.*_rmdup.bam/ }
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
-        .filter { it =~/.*rmdup.bai|.*_rmdup.csi/ }
+    	.view()
+        .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
         .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
 } else {
     ch_filtering_for_skiprmdup
+    	.view()
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
 }
 
@@ -1282,7 +1314,7 @@ process qualimap {
     !params.skip_qualimap
 
     input:
-    file bam from ch_rmdupindex_for_qualimap
+    file bam from ch_rmdup_for_qualimap
     file fasta from fasta_for_indexing
 
     output:
