@@ -342,6 +342,10 @@ if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
         exit 1, "--strip_mode can only be set to strip or replace"
     }
+
+    if (params.bam && !params.run_convertbam) {
+        exit 1, "--strip_input_fastq can only be used on FASTQ"
+    }
 }
 
 
@@ -631,9 +635,10 @@ process convertBam {
     """ 
 }
 
+/*
+* PREPROCESSING - Index a input BAM if not being converted to FASTAPQ
+*/
 
-
-// if BAM is specified and skipping converting and mapping etc. i.e. wanna skip straight to post-mapping BAM steps
 process indexinputbam {
 	when: 
 	params.bam && !params.run_convertbam
@@ -646,7 +651,7 @@ process indexinputbam {
 
 	script:
     size = "${params.large_ref}" ? '-c' : ''
-    prefix = "${reads[0].baseName}"
+    prefix = "${bam.baseName}"
 	"""
     samtools index "${size}" ${bam}
 	"""
@@ -674,7 +679,7 @@ process fastqc {
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: 
-    !params.bam && !params.skip_fastqc || params.run_convertbam
+    !params.bam && !params.skip_fastqc || params.bam && !params.run_convertbam
 
     input:
     set val(name), file(reads) from ch_convertbam_for_fastqc
@@ -837,7 +842,7 @@ process bwa {
     tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: !params.circularmapper && !params.bwamem
+    when: !params.circularmapper && !params.bwamem || !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwa
@@ -904,7 +909,7 @@ process circularmapper{
     tag "$prefix"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
 
-    when: params.circularmapper
+    when: params.circularmapper || !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_cm
@@ -949,7 +954,7 @@ process bwamem {
     tag "$prefix"
     publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
 
-    when: params.bwamem && !params.circularmapper
+    when: params.bwamem && !params.circularmapper && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwamem
@@ -992,8 +997,7 @@ if (!params.skip_mapping) {
 
 } else {
     ch_adapterremoval_for_skipmap
-    	.view()
-        .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
+        .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat; ch_mapping_for_preseq }
 
      ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
         .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
