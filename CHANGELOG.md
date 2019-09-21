@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Added`
 
 * Added Support for automated tests using [GitHub Actions](https://github.com/features/actions)
+* Added genotyping capability through GATK UnifiedGenotyper (v3.5), GATK HaplotypeCaller (v4.1) and FreeBayes
 
 ### `Fixed`
 
-* Nothing yet
+* [#227](https://github.com/nf-core/eager/issues/227) - Large re-write of input/output process logic to allow maximum flexibility. Originally to address [#227](https://github.com/nf-core/eager/issues/227), but further expanded
 
 ### `Dependencies`
 
