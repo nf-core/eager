@@ -295,6 +295,10 @@ if ( params.fasta.isEmpty () ){
     bwa_base = params.fasta.substring(lastPath+1)
 }
 
+/*
+* SANITY CHECKING
+*/
+
 //Index files provided? Then check whether they are correct and complete
 if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
     exit 1, "Invalid aligner option. Default is bwa, but specify --circularmapper or --bwamem to use these."
@@ -329,6 +333,14 @@ if (params.strip_input_fastq){
         exit 1, "--strip_mode can only be set to strip or replace"
     }
 }
+
+// BAM input sanity checking
+
+if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
+	  exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
+}
+
+
 
 // Genotyping sanity checking
 
@@ -645,11 +657,9 @@ process indexinputbam {
 if (params.run_convertbam) {
     ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
         .filter{ it =~/.*converted.fastq.gz/}
-     	.view()
         .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 } else {
     ch_input_for_skipconvertbam
-    	.view()
     	.into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 }
 
@@ -1227,17 +1237,14 @@ process markDup{
 
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
-    	.view()
         .filter { it =~/.*_rmdup.bam/ }
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
-    	.view()
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
         .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
 } else {
     ch_filtering_for_skiprmdup
-    	.view()
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
 }
 
