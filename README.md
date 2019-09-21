@@ -78,8 +78,9 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-6. [EAGER Troubleshooting](docs/troubleshooting.md)
+5. [EAGER2 Code Contribution Guidelines](code_contribution.md)
+6. [nf-core/nextflow Troubleshooting](https://nf-co.re/usage/troubleshooting)
+7. [EAGER Troubleshooting](docs/troubleshooting.md)
 
 ## Credits
 
