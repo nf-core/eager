@@ -314,7 +314,17 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
         .into {bwa_index; bwa_index_bwamem}
 }
 
+// Validate not trying to run adapterremoval on a BAM file
 
+if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
+	  exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
+}
+
+
+// Validate that you're not trying to pass FASTQs to BAM only processes
+if (params.run_convertbam && params.skip_mapping) {
+	exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
+}
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd || params.bam){
@@ -334,11 +344,6 @@ if (params.strip_input_fastq){
     }
 }
 
-// BAM input sanity checking
-
-if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
-	  exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
-}
 
 
 
@@ -427,11 +432,6 @@ if( params.readPaths ){
 
 }
 
-
-
-params.dedupper = 'dedup' //default value dedup
-params.dedup_all_merged = false
-
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
@@ -439,7 +439,7 @@ summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
-summary['Fasta Fef']    = params.fasta
+summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
@@ -642,7 +642,7 @@ process indexinputbam {
 	file bam from ch_input_for_indexbam
 
 	output:
-	file "*.{bai,csi}" into ch_filteringindex_for_skiprmdup
+	file "*.{bai,csi}" into ch_mappingindex_for_skiprmdup,ch_filteringindex_for_skiprmdup
 
 	script:
     size = "${params.large_ref}" ? '-c' : ''
@@ -798,10 +798,10 @@ process adapter_removal {
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapteremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem } 
 } else {
     ch_fastp_for_skipadapterremoval
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapteremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem;  } 
 }
 
 
@@ -979,6 +979,7 @@ process bwamem {
     
 }
 
+
 // mapping bypass
 if (!params.skip_mapping) {
     ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm)
@@ -991,7 +992,12 @@ if (!params.skip_mapping) {
 
 } else {
     ch_adapterremoval_for_skipmap
-        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering }
+    	.view()
+        .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
+
+     ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
+        .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
+	    .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
 }
 
 /*
@@ -1107,7 +1113,8 @@ process strip_input_fastq {
     tag "${bam.baseName}"
     publishDir "${params.outdir}/samtools/stripped_fastq", mode: 'copy'
 
-    when: params.strip_input_fastq
+    when: 
+    params.strip_input_fastq
 
     input: 
     set val(name), file(fq) from ch_convertbam_for_stripfastq
