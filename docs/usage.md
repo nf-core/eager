@@ -150,7 +150,7 @@ If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
 ### `--singleEnd`
 
-If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+If you have single-end data or BAM files, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
 
 ```bash
 --singleEnd --reads 'path/to/data/*.fastq'
@@ -371,6 +371,10 @@ Turns off FastQC pre- and post-Adapter Removal, to speed up the pipeline. Use of
 
 Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
 
+### `--skip_mapping`
+
+Allows you to skip mapping step and go straight downstream to BAM processing steps.
+
 ### `--skip_preseq`
 
 Turns off the computation of library complexity estimation.  
@@ -387,11 +391,17 @@ Turns off the DamageProfiler module to compute DNA damage profiles.
 
 Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
+## BAM Conversion Options
+
+### `--run_convertbam`
+
+Allows you to convert BAM input back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
+
 ## Complexity Filtering Options
 
 ### `--complexity_filter_poly_g`
 
-Performs a poly-G tail removal step in the beginning of the pipeline, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
+Performs a poly-G tail removal step in the beginning of the pipeline using `fastp`, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
 
 ### `--complexity_filter_poly_g_min`
 
@@ -483,7 +493,7 @@ If you want to filter out reads that don't map to a circular chromosome, turn th
 
 Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite useful for modern DNA, but is rarely used in projects for ancient DNA.
 
-## Mapped reads Stripping
+## Mapped Reads Stripping
 
 These parameters are used for removing mapped reads from the original input FASTQ files, usually in the context of uploading the original FASTQ files to a public read archive (NCBI SRA/EBI ENA).
 
@@ -502,6 +512,10 @@ Read removal mode. Strip mapped reads completely (strip) or just replace mapped 
 ## Read Filtering and Conversion Parameters
 
 Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline.
+
+### `--run_bam_filtering`
+
+Turns on the bam filtering module for either mapping quality filtering or unmapped read treatment.
 
 ### `--bam_discard_unmapped`
 
@@ -572,7 +586,7 @@ The maximum number of reads used for damage assessment in PMDtools. Can be used 
 
 For some library preparation protocols, users might want to clip off damaged bases before applying genotyping methods. This can be done in nf-core/eager automatically by turning on the `--trim_bam` parameter.
 
-### `--trim_bam`
+### `--run_trim_bam`
 
 Turns on the BAM trimming method. Trims off `[n]` bases from reads in the deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently.
 
@@ -604,45 +618,49 @@ There are options for different genotypers to be used. We suggest you the docume
 
 Turns on genotyping to run on all post-dedup and downstream BAMs. For example if `--run_pmdtools` and `--trim_bam` are both supplied, the genotyper will be run on all three BAM files i.e. post-deduplication, post-pmd and post-trimmed BAM files.
 
-## `--genotyping_tool`
+### `--genotyping_source`
+
+Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' for mapped only, filtered, or DeDup BAMs (with priority right to left); trimmed (for base clipped BAMs); pmd (for pmdtools output). Default is: raw.  
+
+### `--genotyping_tool`
 
 Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify 'freebayes', 'hc' or 'ug' respectively.
 
 > NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you.
 
-## `--gatk_out_mode`
+### `--gatk_out_mode`
 
 If selected a GATK genotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. Default: EMIT_VARIANTS_ONLY.
 
-## `--gatk_call_conf`
+### `--gatk_call_conf`
 
 If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: 30
 
-## `--gatk_ploidy`
+### `--gatk_ploidy`
 
 If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid orgaisms. . Default: 2
 
-## `--gatk_dbsnp`
+### `--gatk_dbsnp`
 
 (Optional)Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
 
-## `--gatk_ug_genotype_model`
+### `--gatk_ug_genotype_model`
 
 If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. Default: SNP.
 
-## `--gatk_hc_emitrefconf`
+### `--gatk_hc_emitrefconf`
 
 If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: NONE, BP_RESOLUTION, GVCF. Default: GVCF
 
-## `--freebayes_C`
+### `--freebayes_C`
 
 Specify minimum required supporting observations to consider a variant. Default: 1
 
-## `--freebayes_g`
+### `--freebayes_g`
 
 Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.
 
-## `--freebayes_p`
+### `--freebayes_p`
 
 Specify ploidy of sample in FreeBayes. Default is 2, diploid.
 
