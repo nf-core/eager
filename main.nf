@@ -406,7 +406,7 @@ if( params.readPaths ){
             .map { row -> [ file( row )  ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
             .dump()
-            .set { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
+            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
     }
 } else if (!params.bam){
@@ -423,7 +423,7 @@ if( params.readPaths ){
         .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\n" }
         .dump() //For debugging purposes
-        .set { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
+        .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
 }
 
@@ -797,7 +797,7 @@ process adapter_removal {
 // Adapterremoval bypass
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
-        .filter { it =~/.*combined.fq.gz|.*truncated.fq/ }
+        .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
         .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapteremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem } 
 } else {
     ch_fastp_for_skipadapterremoval
