@@ -1240,7 +1240,6 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .view()
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
