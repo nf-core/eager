@@ -1,4 +1,4 @@
-# Contributer Guidance
+# Code Contribution Guidelines
 
 To make the EAGER2 code and processing logic more understandable for new contributers, and to ensure quality. We are making an attempt to somewhat-standardise the way the code is written.
 
