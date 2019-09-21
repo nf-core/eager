@@ -986,12 +986,12 @@ if (!params.skip_mapping) {
         .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; ch_mapping_for_samtools_flagstat; ch_mapping_for_preseq } 
 
     ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
-        .filter { it =~/.*mapped.bai|.*mapped.csi/ }
-	        .into { ch_mappingindex_for_filtering; ch_mappingindex_for_skipfiltering; ch_mapping_for_preseq } 
+        .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
+	        .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
 
 } else {
     ch_adapterremoval_for_skipmap
-        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering } 
+        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering }
 }
 
 /*
@@ -1095,6 +1095,8 @@ if (params.run_bam_filtering) {
     ch_mapping_for_skipfiltering
         .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
 
+    ch_mappingindex_for_skipfiltering
+    	.into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
 
 }
 
@@ -1246,6 +1248,9 @@ if (!params.skip_deduplication) {
 } else {
     ch_filtering_for_skiprmdup
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
+
+	 ch_filteringindex_for_skiprmdup
+	        .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
 }
 
 
