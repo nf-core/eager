@@ -29,7 +29,7 @@ The concept is as follows:
 
 * Every 'stage' of the pipeline (i.e. collection of mutually exclusive processes) must always have a if else statement following it.
 * This if else 'bypass' statement collects and standardises all possible input files into single channel(s) for the next stage.
-* Importantly - within the bypass statement, a channel from the previous stage's bypass mixes into these output channels. This additional channel is named `ch_previousstage_for_skipcurrentstage. This contains the output from the previous stage, i.e. not the modified version from the current stage.
+* Importantly - within the bypass statement, a channel from the previous stage's bypass mixes into these output channels. This additional channel is named `ch_previousstage_for_skipcurrentstage`. This contains the output from the previous stage, i.e. not the modified version from the current stage.
 * The bypass statement works as follows:
   * If the current stage is turned on: will mix the previous stage and current stage output and filter for file suffixes unique to the current stage output
   * If the current stage is turned off or skipped: will mix the previous stage and current stage output. However as there there is no files in the output channel from the current stage, no filtering is required and the files in the 'ch_XXX_for_skipXXX' stage will be used.
