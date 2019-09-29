@@ -1736,7 +1736,8 @@ process get_software_versions {
     qualimap --version &> v_qualimap.txt 2>&1 || true
     cat $json &> v_damageprofiler.txt 2>&1 || true 
     java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
-    
+    multivcfanalyzer --help | head -n 1 || true
+
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
