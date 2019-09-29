@@ -287,6 +287,12 @@ params.snp_eff_results = 'NA'
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
+
+
+/*
+* SANITY CHECKING
+*/
+
 // Validate inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "Please specify --fasta with the path to your reference"
@@ -320,9 +326,6 @@ if ( params.fasta.isEmpty () ){
     bwa_base = params.fasta.substring(lastPath+1)
 }
 
-/*
-* SANITY CHECKING
-*/
 
 //Index files provided? Then check whether they are correct and complete
 if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
@@ -510,6 +513,7 @@ if (params.run_genotyping){
 	summary['Genotyping Tool?'] = params.genotyping_tool
 	summary['Genotyping BAM Input?'] = params.genotyping_source
 }
+summary['Run MultiVCFAnalyzer'] = params.run_multivcfanalyzer ? 'Yes' : 'No'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -1623,6 +1627,14 @@ ch_gatk_download = Channel.value("download")
  * Step 12: SNP Table Generation
  */
 
+// Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
+if (params.additional_vcf_files == '') {
+	ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.collect()
+} else {
+	ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files)
+	ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.mix(ch_extravcfs_for_multivcfanalyzer).collect()
+}
+
  process multivcfanalyzer {
  	tag "${vcf}"
  	publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
@@ -1631,57 +1643,30 @@ ch_gatk_download = Channel.value("download")
  	params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
 
  	input:
- 	vcf from ch_ug_for_multivcfanalyzer.collect()
+   	file fasta from fasta_for_indexing
+ 	file vcf from ch_vcfs_for_multivcfanalyzer
 
  	output:
- 	'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
- 	'genotyeFreqMatrix.tsv.gz' into ch_output_multivcfanalyzer_genotypefreqmatrix
- 	'genotyeMatrix.tsv.gz' into ch_output_multivcfanalyzer_genotypematrix
- 	'info.txt.gz' into ch_output_multivcfanalyzer_info
- 	'snpAlignment.fasta.gz' into ch_output_multivcfanalyzer_snpalignment
- 	'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
- 	'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
- 	'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
- 	'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
- 	'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
- 	'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
- 	'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
+ 	file 'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
+ 	file 'info.txt.gz' into ch_output_multivcfanalyzer_info
+ 	file 'snpAlignment.fasta.gz' into ch_output_multivcfanalyzer_snpalignment
+ 	file 'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
+ 	file 'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
+ 	file 'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
+ 	file 'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
+ 	file 'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
+ 	file 'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
+ 	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
  	script:
  	"""
- 	multivcfanalyzer -Xmx ${task.memory} \
- 	${params.snp_eff_results} \
- 	${params.fasta_for_indexing} \
- 	${params.reference_gff_annotations} \
- 	. \
- 	${params.write_allele_frequencies} \
- 	${params.min_genotype_quality} \
- 	${params.min_base_coverage} \
-	${params.min_allele_freq_hom} \
-	${params.min_allele_freq_het} \
-	${params.reference_gff_exclude} \
-	${vcf} \
-	"$(${params.additional_vcf_files} | sed 's/,/ /g')"
-
- 	pigz -p ${task.cpus} *
+ 	gunzip -f *.vcf.gz
+ 	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${params.write_allele_frequencies} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
+ 	pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
+ 	rm *.vcf
  	"""
 
  }
-
-
-params.run_multivcfanalyzer = false
-params.write_allele_frequencies = false
-params.min_genotype_quality = 30
-params.min_base_coverage = 5
-params.min_allele_freq_hom = 0.9
-params.min_allele_freq_het = 0.9
-params.additional_vcf_files = ""
-params.reference_gff_annotations = ""
-params.reference_gff_exclude = ""
-params.snp_eff_results = ""
-
-
-
 
 /*
 Genotyping tools:
