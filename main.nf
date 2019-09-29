@@ -127,6 +127,19 @@ def helpMessage() {
       --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
       --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
 
+    SNP Table Generation
+      --run_multivcfanalyzer		Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
+      --write_allele_frequencies	Specify T(rue) or F(alse) whether to write allele frequencies in the SNP table. Default: 'F'. Options: 'T', 'F'
+      --min_genotype_quality		Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
+      --min_base_coverage 			Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
+      --min_allele_freq_hom			Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
+      --min_allele_freq_het			Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
+      --additional_vcf_files		Specify additional pre-made VCF files to be included in the SNP table generation, separated by commas. (Optional)
+      --reference_gff_annotations 	Specify the reference genome annotations in '.gff' format. (Optional)
+      --reference_gff_exclude		Specify positions to be excluded in '.gff' format. (Optional)
+      --snp_eff_results				Specify the output file from SNP effect analysis in '.txt' format. (Optional)
+
+
     Other options:     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -259,6 +272,18 @@ params.gatk_downsample = '250'
 params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
 params.gatk_dbsnp = ''
 
+//MultiVCFAnalyzer Options
+params.run_multivcfanalyzer = false
+params.write_allele_frequencies = false
+params.min_genotype_quality = 30
+params.min_base_coverage = 5
+params.min_allele_freq_hom = 0.9
+params.min_allele_freq_het = 0.9
+params.additional_vcf_files = ''
+params.reference_gff_annotations = 'NA'
+params.reference_gff_exclude = 'NA'
+params.snp_eff_results = 'NA'
+
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
@@ -349,8 +374,6 @@ if (params.strip_input_fastq){
 }
 
 
-
-
 // Genotyping sanity checking
 
 if (params.run_genotyping){
@@ -369,6 +392,18 @@ if (params.run_genotyping){
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
     exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION. You gave: ${params.gatk_hc_emitrefconf}"
   }
+}
+
+
+// MultiVCFAnalyzer sanity checking
+if (params.run_multivcfanalyzer) {
+	if (params.genotyping_tool != "ug") {
+		exit 1, "MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
+	}
+
+	if (params.gatk_ploidy != '2') {
+		exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
+	}
 }
 
 
@@ -1502,7 +1537,7 @@ ch_gatk_download = Channel.value("download")
   file bai from ch_damagemanipulationindex_for_genotyping_ug
 
   output: 
-  file "*vcf.gz" into ch_vcf_ug
+  file "*vcf.gz" into ch_ug_for_multivcfanalyzer
 
   script:
   if (params.gatk_dbsnp == '')
@@ -1555,8 +1590,8 @@ ch_gatk_download = Channel.value("download")
     """
  }
 
- /**
- *  FreeBayes genotyping, should probably add in some options for users to set 
+ /*
+ *  Step 11c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
   tag "${bam}"
@@ -1582,6 +1617,70 @@ ch_gatk_download = Channel.value("download")
   pigz -p ${task.cpus} ${bam.baseName}.vcf
   """
  }
+
+
+ /*
+ * Step 12: SNP Table Generation
+ */
+
+ process multivcfanalyzer {
+ 	tag "${vcf}"
+ 	publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
+
+ 	when:
+ 	params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
+
+ 	input:
+ 	vcf from ch_ug_for_multivcfanalyzer.collect()
+
+ 	output:
+ 	'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
+ 	'genotyeFreqMatrix.tsv.gz' into ch_output_multivcfanalyzer_genotypefreqmatrix
+ 	'genotyeMatrix.tsv.gz' into ch_output_multivcfanalyzer_genotypematrix
+ 	'info.txt.gz' into ch_output_multivcfanalyzer_info
+ 	'snpAlignment.fasta.gz' into ch_output_multivcfanalyzer_snpalignment
+ 	'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
+ 	'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
+ 	'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
+ 	'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
+ 	'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
+ 	'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
+ 	'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
+
+ 	script:
+ 	"""
+ 	multivcfanalyzer -Xmx ${task.memory} \
+ 	${params.snp_eff_results} \
+ 	${params.fasta_for_indexing} \
+ 	${params.reference_gff_annotations} \
+ 	. \
+ 	${params.write_allele_frequencies} \
+ 	${params.min_genotype_quality} \
+ 	${params.min_base_coverage} \
+	${params.min_allele_freq_hom} \
+	${params.min_allele_freq_het} \
+	${params.reference_gff_exclude} \
+	${vcf} \
+	"$(${params.additional_vcf_files} | sed 's/,/ /g')"
+
+ 	pigz -p ${task.cpus} *
+ 	"""
+
+ }
+
+
+params.run_multivcfanalyzer = false
+params.write_allele_frequencies = false
+params.min_genotype_quality = 30
+params.min_base_coverage = 5
+params.min_allele_freq_hom = 0.9
+params.min_allele_freq_het = 0.9
+params.additional_vcf_files = ""
+params.reference_gff_annotations = ""
+params.reference_gff_exclude = ""
+params.snp_eff_results = ""
+
+
 
 
 /*
