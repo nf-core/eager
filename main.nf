@@ -1707,6 +1707,7 @@ if (params.additional_vcf_files == '') {
          samtools depth -aa -q30 -Q30 -b ${params.sexdeterrmine_bedfile} -f bamlist.txt| sexdeterrmine -f bamlist.txt >SexDet.txt
          """
      }
+ }
 
 /*
 Genotyping tools:
