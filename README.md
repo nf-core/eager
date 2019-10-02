@@ -15,7 +15,7 @@
 
 **nf-core/eager** is a bioinformatics best-practice analysis pipeline for NGS sequencing based ancient DNA (aDNA) data analysis.
 
-The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FASTQ inputs, aligns the reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
+The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs, and can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
 ## Pipeline steps
 
@@ -78,8 +78,9 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-6. [EAGER Troubleshooting](docs/troubleshooting.md)
+5. [EAGER2 Code Contribution Guidelines](code_contribution.md)
+6. [nf-core/nextflow Troubleshooting](https://nf-co.re/usage/troubleshooting)
+7. [EAGER Troubleshooting](docs/troubleshooting.md)
 
 ## Credits
 
