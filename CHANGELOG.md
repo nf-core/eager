@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Added Support for automated tests using [GitHub Actions](https://github.com/features/actions)
 * Added genotyping capability through GATK UnifiedGenotyper (v3.5), GATK HaplotypeCaller (v4.1) and FreeBayes
+* Added MultiVCFAnalyzer module
 * Added human sex determination module.
 
 ### `Fixed`
