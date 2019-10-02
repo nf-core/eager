@@ -686,7 +686,7 @@ The minimal number of reads covering a base for a SNP at that psitoin to be cons
 
 ### `--min_allele_freq_hom`
 
-The minimal frequency of a nucleotide for a 'homozygous' SNP to be called. In other words, e.g. 90% of the reads covering that position must have that SNP to be called. If the threshold is not reached, and the previous two parameters are matched, a reference call is made (displayed as . in the SNP table). If the above two parameters are not met, an 'N' is called. The default allele frequency is 0.9. 
+The minimal frequency of a nucleotide for a 'homozygous' SNP to be called. In other words, e.g. 90% of the reads covering that position must have that SNP to be called. If the threshold is not reached, and the previous two parameters are matched, a reference call is made (displayed as . in the SNP table). If the above two parameters are not met, an 'N' is called. The default allele frequency is 0.9.
 
 ### `--min_allele_freq_het`
 
@@ -694,7 +694,7 @@ The minimum frequency of a nucleotide for a 'hetereozygous' SNP to be called. If
 
 ### `--additional_vcf_files`
 
-If you wish to add to the table previously created VCF files, specify here a path with wildcards (in quotes). These VCF files must be created the same way as your settings for [GATK UnifiedGenotyping](#genotyping-parameters) module above. 
+If you wish to add to the table previously created VCF files, specify here a path with wildcards (in quotes). These VCF files must be created the same way as your settings for [GATK UnifiedGenotyping](#genotyping-parameters) module above.
 
 ### `--reference_gff_annotations`
 
