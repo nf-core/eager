@@ -10,7 +10,7 @@ We are providing a highly configurable pipeline, with many options to turn on an
 
 The EAGER pipeline can currently be broken down into the following 'stages', where a stage is a collection of  non-terminal mututally exclusive processes, which is the output of which is used for another file reporting module (but not reporting!) .
 
-* Input 
+* Input
 * Convert BAM
 * PolyG Clipping
 * AdapterRemoval
@@ -18,7 +18,7 @@ The EAGER pipeline can currently be broken down into the following 'stages', whe
 * BAM Filtering
 * Deduplication (either `dedup` or `markduplicates`
 * BAM Trimming
-* PMDtools 
+* PMDtools
 * Genotyping
 
 Every step can potentially be skipped, therefore the output of a previous stage must be able to be passed to the next stage, if the given stage is not run.
@@ -38,16 +38,16 @@ The concept is as follows:
  This ensures the same channel inputs to the next stage is 'homogenous' - i.e. all comes from the same source (the bypass statement)
   
  An example schematic can be given as follows
- 
- ```
+
+```nextflow
  // PREVIOUS STAGE OUTPUT
 if (params.run_bam_filtering) {
     ch_input_for_skipconvertbam.mix(ch_output_ch_convertbam)
         .filter{ it =~/.*converted.fq/}
-        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp } 
+        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp }
 } else {
     ch_input_for_skipconvertbam
-        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp } 
+        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp }
 }
 
 // SKIPPABLE CURRENT STAGE PROCESS
@@ -74,10 +74,10 @@ process fastp {
 if (params.run_fastp) {
     ch_convertbam_for_skipfastp.mix(ch_output_from_fastp)
         .filter { it =~/.*pG.fq/ }
-        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
+        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval }
 } else {
     ch_convertbam_for_skipfastp
-        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
+        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval }
 }
 
  ```

@@ -124,7 +124,7 @@ These are profiles specific to certain **HPC clusters**, and are centrally maint
 
 ### `--reads`
 
-Use this to specify the location of your input FastQ files. The files maybe either from a single, or multiple samples. For example:
+Use this to specify the location of your input FastQ or BAM file(s). The files maybe either from a single, or multiple samples. For example:
 
 ```bash
 --reads 'path/to/data/sample_*_{1,2}.fastq'
@@ -175,6 +175,10 @@ A normal glob pattern, enclosed in quotation marks, can then be used for `--read
 ```bash
 --pairedEnd --reads '*.fastq'
 ```
+
+### `--bam`
+
+Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `--singleEnd`.
 
 ### `--fasta`
 
