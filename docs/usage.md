@@ -670,7 +670,7 @@ Specify ploidy of sample in FreeBayes. Default is 2, diploid.
 
 ## Sex Determination
 
-An optional process for human DNA. It can be used to calculate the relative coverage of X and Y chromosomes compared to the autosomes (X-/Y-rate). Standard errors for these measurements are also calculated, assuming a binomial distribution of reads across the SNPs. 
+An optional process for human DNA. It can be used to calculate the relative coverage of X and Y chromosomes compared to the autosomes (X-/Y-rate). Standard errors for these measurements are also calculated, assuming a binomial distribution of reads across the SNPs.
 
 ### `--run_sexdeterrmine`
 
