@@ -39,7 +39,7 @@ The concept is as follows:
   
  An example schematic can be given as follows
 
-```
+```nextflow
  // PREVIOUS STAGE OUTPUT
 if (params.run_bam_filtering) {
     ch_input_for_skipconvertbam.mix(ch_output_ch_convertbam)
