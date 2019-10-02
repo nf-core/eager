@@ -127,6 +127,19 @@ def helpMessage() {
       --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
       --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
 
+    SNP Table Generation
+      --run_multivcfanalyzer		Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
+      --write_allele_frequencies	Specify T(rue) or F(alse) whether to write allele frequencies in the SNP table. Default: 'F'. Options: 'T', 'F'
+      --min_genotype_quality		Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
+      --min_base_coverage 			Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
+      --min_allele_freq_hom			Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
+      --min_allele_freq_het			Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
+      --additional_vcf_files		Specify additional pre-made VCF files to be included in the SNP table generation, separated by commas. (Optional)
+      --reference_gff_annotations 	Specify the reference genome annotations in '.gff' format. (Optional)
+      --reference_gff_exclude		Specify positions to be excluded in '.gff' format. (Optional)
+      --snp_eff_results				Specify the output file from SNP effect analysis in '.txt' format. (Optional)
+
+
     Other options:     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -259,9 +272,27 @@ params.gatk_downsample = '250'
 params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
 params.gatk_dbsnp = ''
 
+//MultiVCFAnalyzer Options
+params.run_multivcfanalyzer = false
+params.write_allele_frequencies = false
+params.min_genotype_quality = 30
+params.min_base_coverage = 5
+params.min_allele_freq_hom = 0.9
+params.min_allele_freq_het = 0.9
+params.additional_vcf_files = ''
+params.reference_gff_annotations = 'NA'
+params.reference_gff_exclude = 'NA'
+params.snp_eff_results = 'NA'
+
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
+
+
+/*
+* SANITY CHECKING
+*/
+
 // Validate inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "Please specify --fasta with the path to your reference"
@@ -295,9 +326,6 @@ if ( params.fasta.isEmpty () ){
     bwa_base = params.fasta.substring(lastPath+1)
 }
 
-/*
-* SANITY CHECKING
-*/
 
 //Index files provided? Then check whether they are correct and complete
 if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
@@ -349,8 +377,6 @@ if (params.strip_input_fastq){
 }
 
 
-
-
 // Genotyping sanity checking
 
 if (params.run_genotyping){
@@ -369,6 +395,18 @@ if (params.run_genotyping){
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
     exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION. You gave: ${params.gatk_hc_emitrefconf}"
   }
+}
+
+
+// MultiVCFAnalyzer sanity checking
+if (params.run_multivcfanalyzer) {
+	if (params.genotyping_tool != "ug") {
+		exit 1, "MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
+	}
+
+	if (params.gatk_ploidy != '2') {
+		exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
+	}
 }
 
 
@@ -475,6 +513,7 @@ if (params.run_genotyping){
 	summary['Genotyping Tool?'] = params.genotyping_tool
 	summary['Genotyping BAM Input?'] = params.genotyping_source
 }
+summary['Run MultiVCFAnalyzer'] = params.run_multivcfanalyzer ? 'Yes' : 'No'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -1502,7 +1541,7 @@ ch_gatk_download = Channel.value("download")
   file bai from ch_damagemanipulationindex_for_genotyping_ug
 
   output: 
-  file "*vcf.gz" into ch_vcf_ug
+  file "*vcf.gz" into ch_ug_for_multivcfanalyzer
 
   script:
   if (params.gatk_dbsnp == '')
@@ -1555,8 +1594,8 @@ ch_gatk_download = Channel.value("download")
     """
  }
 
- /**
- *  FreeBayes genotyping, should probably add in some options for users to set 
+ /*
+ *  Step 11c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
   tag "${bam}"
@@ -1583,6 +1622,51 @@ ch_gatk_download = Channel.value("download")
   """
  }
 
+
+ /*
+ * Step 12: SNP Table Generation
+ */
+
+// Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
+if (params.additional_vcf_files == '') {
+	ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.collect()
+} else {
+	ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files)
+	ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.mix(ch_extravcfs_for_multivcfanalyzer).collect()
+}
+
+ process multivcfanalyzer {
+ 	tag "${vcf}"
+ 	publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
+
+ 	when:
+ 	params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
+
+ 	input:
+   	file fasta from fasta_for_indexing
+ 	file vcf from ch_vcfs_for_multivcfanalyzer
+
+ 	output:
+ 	file 'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
+ 	file 'info.txt.gz' into ch_output_multivcfanalyzer_info
+ 	file 'snpAlignment.fasta.gz' into ch_output_multivcfanalyzer_snpalignment
+ 	file 'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
+ 	file 'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
+ 	file 'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
+ 	file 'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
+ 	file 'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
+ 	file 'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
+ 	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
+
+ 	script:
+ 	"""
+ 	gunzip -f *.vcf.gz
+ 	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${params.write_allele_frequencies} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
+ 	pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
+ 	rm *.vcf
+ 	"""
+
+ }
 
 /*
 Genotyping tools:
@@ -1652,7 +1736,8 @@ process get_software_versions {
     qualimap --version &> v_qualimap.txt 2>&1 || true
     cat $json &> v_damageprofiler.txt 2>&1 || true 
     java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
-    
+    multivcfanalyzer --help | head -n 1 || true
+
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
