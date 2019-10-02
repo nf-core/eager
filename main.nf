@@ -687,7 +687,7 @@ process fastqc {
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: 
-    !params.bam && !params.skip_fastqc || params.bam && !params.run_convertbam
+    !params.bam && !params.skip_fastqc || params.bam && params.run_convertbam
 
     input:
     set val(name), file(reads) from ch_convertbam_for_fastqc
