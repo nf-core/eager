@@ -127,6 +127,10 @@ def helpMessage() {
       --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
       --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
 
+      Sex Determination
+        --run_sexdeterrmine         Turn on sex determination.
+        --sexdeterrmine_bedfile     Specify SNP panel in bed format for error bar calculation. (Optional, see documentation)
+
     Other options:     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -258,6 +262,10 @@ params.gatk_ploidy = '2'
 params.gatk_downsample = '250'
 params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
 params.gatk_dbsnp = ''
+
+//Sex.DetERRmine settings
+params.run_sexdeterrmine = false
+params.sexdeterrmine_bedfile = ''
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
@@ -842,7 +850,7 @@ process bwa {
     tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: !params.circularmapper && !params.bwamem || !params.skip_mapping
+    when: !params.circularmapper && params.bwamem && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwa
@@ -1251,7 +1259,7 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
@@ -1259,7 +1267,7 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine } 
 
 	ch_filteringindex_for_skiprmdup
 	    .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
@@ -1583,6 +1591,42 @@ ch_gatk_download = Channel.value("download")
   """
  }
 
+
+ /*
+ Step XX Sex determintion with error bar calculation.
+ */
+ 
+ process sex_deterrmine{
+     publishDir "${params.outdir}/sex_determination", mode:"copy"
+    
+     when:
+     params.run_sexdeterrmine
+    
+     input:
+     val 'Bams' from ch_for_sexdeterrmine.collect()
+    
+     output:
+     file 'SexDet.txt'
+    
+     script:
+     if (params.sexdeterrmine_bedfile == '') {
+         """
+         for i in ${Bams.join(' ')}; do
+             echo \$i >> bamlist.txt
+         done
+        
+         samtools depth -aa -q30 -Q30 -f bamlist.txt| sexdeterrmine -f bamlist.txt >SexDet.txt
+         """
+         } else {
+         """
+         for i in ${Bams.join(' ')}; do
+             echo \$i >> bamlist.txt
+         done
+        
+         samtools depth -aa -q30 -Q30 -b ${params.sexdeterrmine_bedfile} -f bamlist.txt| sexdeterrmine -f bamlist.txt >SexDet.txt
+         """
+     }
+ }
 
 /*
 Genotyping tools:
