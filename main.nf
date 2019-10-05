@@ -35,6 +35,9 @@ def helpMessage() {
       --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
+    BAM Input:
+    --run_convertbam				Species to convert an input BAM file into FASTQ format before processing.
+
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
@@ -48,6 +51,7 @@ def helpMessage() {
     Skipping                        Skip any of the mentioned steps
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
+      --skip_mapping				Note: this maybe useful when input is a BAM file
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
@@ -85,9 +89,10 @@ def helpMessage() {
       --bwamem                      Turn on BWA Mem instead of BWA aln for mapping
     
     BAM Filtering
+      --run_bam_filtering			Turn on samtools filter for mapping quality or unmapped reads of BAM files.
       --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
       --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
-      --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: discard, bam, fastq, both).
+      --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: 'discard', 'bam', 'fastq', 'both').
     
     DeDuplication
       --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
@@ -107,19 +112,33 @@ def helpMessage() {
       --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
     
     BAM Trimming
-      --trim_bam                    Turn on BAM trimming for UDG(+ or 1/2) protocols
+      --run_trim_bam                    Turn on BAM trimming for UDG(+ or 1/2) protocols
       --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
       --bamutils_softclip           Use softclip instead of hard masking
 
     Genotyping
       --run_genotyping              Perform genotyping on deduplicated BAMs.
-      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper. Note: UnifiedGenotyper uses now deprecated GATK 3.5. Options: ug, hc.
-      --gatk_out_mode               Specify GATK output mode. Options: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. Default: EMIT_VARIANTS_ONLY. 
+      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5. Options: 'ug', 'hc', 'freebayes'
+      --genotyping_source      	    Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
+      --gatk_out_mode               Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
       --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30.
       --gatk_ploidy                 Specify GATK organism ploidy. Default: 2.
       --gatk_dbsnp                  Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
-      --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL.  Default: SNP. 
-      --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: NONE, BP_RESOLUTION, GVCF. Default: GVCF.
+      --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
+      --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
+
+    SNP Table Generation
+      --run_multivcfanalyzer		Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
+      --write_allele_frequencies	Specify T(rue) or F(alse) whether to write allele frequencies in the SNP table. Default: 'F'. Options: 'T', 'F'
+      --min_genotype_quality		Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
+      --min_base_coverage 			Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
+      --min_allele_freq_hom			Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
+      --min_allele_freq_het			Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
+      --additional_vcf_files		Specify additional pre-made VCF files to be included in the SNP table generation, separated by commas. (Optional)
+      --reference_gff_annotations 	Specify the reference genome annotations in '.gff' format. (Optional)
+      --reference_gff_exclude		Specify positions to be excluded in '.gff' format. (Optional)
+      --snp_eff_results				Specify the output file from SNP effect analysis in '.txt' format. (Optional)
+
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -159,6 +178,7 @@ params.seq_dict = false
 params.fasta_index = false
 params.saveReference = false
 params.pmd_udg_type = 'half'
+params.bam = false
 
 params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
@@ -167,10 +187,14 @@ params.plaintext_email = false
 // Skipping parts of the pipeline for impatient users
 params.skip_fastqc = false 
 params.skip_adapterremoval = false
+params.skip_mapping = false
 params.skip_preseq = false
 params.skip_damage_calculation = false
 params.skip_qualimap = false
 params.skip_deduplication = false
+
+// If you want to convert a BAM input to FASTQ format for adapterememoval etc.
+params.run_convertbam = false
 
 //Complexity filtering reads
 params.complexity_filter_poly_g = false
@@ -200,6 +224,7 @@ params.circularfilter = false
 params.bwamem = false
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
+params.run_bam_filtering = false
 params.bam_discard_unmapped = false
 params.bam_unmapped_type = ''
 
@@ -225,7 +250,7 @@ params.pmdtools_reference_mask = ''
 params.pmdtools_max_reads = 10000
 
 //bamUtils trimbam settings
-params.trim_bam = false 
+params.run_trim_bam = false 
 params.bamutils_clip_left = 1 
 params.bamutils_clip_right = 1 
 params.bamutils_softclip = false 
@@ -238,6 +263,7 @@ params.strip_mode = 'strip'
 //Genotyping options
 params.run_genotyping = false
 params.genotyping_tool = ''
+params.genotyping_source = "raw"
 params.gatk_ug_genotype_model = 'SNP'
 params.gatk_hc_emitrefconf = 'GVCF'
 params.gatk_call_conf = '30'
@@ -246,9 +272,27 @@ params.gatk_downsample = '250'
 params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
 params.gatk_dbsnp = ''
 
+//MultiVCFAnalyzer Options
+params.run_multivcfanalyzer = false
+params.write_allele_frequencies = false
+params.min_genotype_quality = 30
+params.min_base_coverage = 5
+params.min_allele_freq_hom = 0.9
+params.min_allele_freq_het = 0.9
+params.additional_vcf_files = ''
+params.reference_gff_annotations = 'NA'
+params.reference_gff_exclude = 'NA'
+params.snp_eff_results = 'NA'
+
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
+
+
+/*
+* SANITY CHECKING
+*/
+
 // Validate inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "Please specify --fasta with the path to your reference"
@@ -282,6 +326,7 @@ if ( params.fasta.isEmpty () ){
     bwa_base = params.fasta.substring(lastPath+1)
 }
 
+
 //Index files provided? Then check whether they are correct and complete
 if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
     exit 1, "Invalid aligner option. Default is bwa, but specify --circularmapper or --bwamem to use these."
@@ -297,7 +342,17 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
         .into {bwa_index; bwa_index_bwamem}
 }
 
+// Validate not trying to run adapterremoval on a BAM file
 
+if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
+	  exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
+}
+
+
+// Validate that you're not trying to pass FASTQs to BAM only processes
+if (params.run_convertbam && params.skip_mapping) {
+	exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
+}
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd || params.bam){
@@ -315,7 +370,12 @@ if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
         exit 1, "--strip_mode can only be set to strip or replace"
     }
+
+    if (params.bam && !params.run_convertbam) {
+        exit 1, "--strip_input_fastq can only be used on FASTQ"
+    }
 }
+
 
 // Genotyping sanity checking
 
@@ -338,6 +398,18 @@ if (params.run_genotyping){
 }
 
 
+// MultiVCFAnalyzer sanity checking
+if (params.run_multivcfanalyzer) {
+	if (params.genotyping_tool != "ug") {
+		exit 1, "MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
+	}
+
+	if (params.gatk_ploidy != '2') {
+		exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
+	}
+}
+
+
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
 custom_runName = params.name
@@ -354,6 +426,8 @@ if( workflow.profile == 'awsbatch') {
   // Prevent trace files to be stored on S3 since S3 does not support rolling files.
   if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
+
+
 /*
  * Create a channel for input read files
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
@@ -365,36 +439,30 @@ if( params.readPaths ){
             .from( params.readPaths )
             .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g ; ch_read_unmap}
-            ch_bam_to_fastq_convert = Channel.empty()
+            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
+
     } else if (!params.bam){
         Channel
             .from( params.readPaths )
             .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
-            .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g; ch_read_unmap }
-            ch_bam_to_fastq_convert = Channel.empty()
+            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
     } else {
         Channel
             .from( params.readPaths )
             .map { row -> [ file( row )  ] }
             .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
             .dump()
-            .set { ch_bam_to_fastq_convert }
+            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
-            //Set up clean channels
-            ch_read_files_fastqc = Channel.empty()
-            ch_read_files_complexity_filter_poly_g = Channel.empty()
-            ch_read_files_clip = Channel.empty()
-            ch_read_unmap = Channel.empty()
     }
 } else if (!params.bam){
      Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .into { ch_read_files_clip; ch_read_files_fastqc; ch_read_files_complexity_filter_poly_g; ch_read_unmap }
-        ch_bam_to_fastq_convert = Channel.empty()
+        .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam  }
+
 } else {
      Channel
         .fromPath( params.reads )
@@ -402,13 +470,7 @@ if( params.readPaths ){
         .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
             "to be enclosed in quotes!\n" }
         .dump() //For debugging purposes
-        .set { ch_bam_to_fastq_convert }
-
-        //Set up clean channels
-        ch_read_files_fastqc = Channel.empty()
-        ch_read_files_complexity_filter_poly_g = Channel.empty()
-        ch_read_files_clip = Channel.empty()
-        ch_read_unmap = Channel.empty()
+        .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
 }
 
@@ -423,25 +485,48 @@ summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
-summary['Skip Collapsing'] = params.skip_collapse ? 'Yes' : 'No'
-summary['Skip Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
-summary['Output stripped fastq'] = params.strip_input_fastq ? 'Yes' : 'No'
+summary['Skipping FASTQC?'] = params.skip_fastqc ? 'Yes' : 'No'
+summary['Skipping AdapterRemoval?'] = params.skip_adapterremoval ? 'Yes' : 'No'
+if (!params.skip_adapterremoval) {
+	summary['Skip Read Merging'] = params.skip_collapse ? 'Yes' : 'No'
+	summary['Skip Adapter Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
+}
+summary['Running BAM filtering'] = params.run_bam_filtering ? 'Yes' : 'No'
+if (params.run_bam_filtering) {
+	summary['Skip Read Merging'] = params.bam_discard_unmapped ? 'Yes' : 'No'
+	summary['Skip Read Merging'] = params.bam_unmapped_type
+}
+summary['Run Fastq Stripping'] = params.strip_input_fastq ? 'Yes' : 'No'
 if (params.strip_input_fastq){
     summary['Strip mode'] = params.strip_mode
 }
+summary['Skipping Mapping?'] = params.skip_mapping ? 'Yes' : 'No'
+
+summary['Skipping Preseq?'] = params.skip_preseq ? 'Yes' : 'No'
+summary['Skipping Deduplication?'] = params.skip_deduplication ? 'Yes' : 'No'
+summary['Skipping DamageProfiler?'] = params.skip_damage_calculation ? 'Yes' : 'No'
+summary['Skipping Qualimap?'] = params.skip_qualimap ? 'Yes' : 'No'
+summary['Run BAM Trimming?'] = params.run_trim_bam ? 'Yes' : 'No'
+summary['Run PMDtools?'] = params.run_pmdtools ? 'Yes' : 'No'
+summary['Run Genotyping?'] = params.run_genotyping ? 'Yes' : 'No'
+if (params.run_genotyping){
+	summary['Genotyping Tool?'] = params.genotyping_tool
+	summary['Genotyping BAM Input?'] = params.genotyping_source
+}
+summary['Run MultiVCFAnalyzer'] = params.run_multivcfanalyzer ? 'Yes' : 'No'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
-summary['Output dir']   = params.outdir
-summary['Working dir']  = workflow.workDir
+summary['Output Dir']   = params.outdir
+summary['Working Dir']  = workflow.workDir
 summary['Container Engine'] = workflow.containerEngine
 if(workflow.containerEngine) summary['Container'] = workflow.container
-summary['Current home']   = "$HOME"
-summary['Current user']   = "$USER"
-summary['Current path']   = "$PWD"
-summary['Working dir']    = workflow.workDir
-summary['Output dir']     = params.outdir
-summary['Script dir']     = workflow.projectDir
+summary['Current Home']   = "$HOME"
+summary['Current User']   = "$USER"
+summary['Current Path']   = "$PWD"
+summary['Working Dir']    = workflow.workDir
+summary['Output Dir']     = params.outdir
+summary['Script Dir']     = workflow.projectDir
 summary['Config Profile'] = workflow.profile
 if(workflow.profile == 'awsbatch'){
    summary['AWS Region']    = params.awsregion
@@ -568,26 +653,58 @@ process makeSeqDict {
 
 /*
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
-*
 */ 
 
 process convertBam {
     tag "$bam"
     
-    when: params.bam
+    when: 
+    params.bam && params.run_convertbam
 
     input: 
-    file bam from ch_bam_to_fastq_convert
+    file bam from ch_input_for_convertbam 
 
     output:
-    set val("${base}"), file("*.fastq.gz") into (ch_read_files_converted_fastqc, ch_read_files_converted_fastp, ch_read_files_converted_mapping_bwa, ch_read_files_converted_mapping_cm, ch_read_files_converted_mapping_bwamem,
-    ch_read_unmap_convertBam)
+    set val("${base}"), file("*.fastq.gz") into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
     """
-    samtools fastq -tn ${bam} | pigz -p ${task.cpus} > ${base}.fastq.gz
+    samtools fastq -tn ${bam} | pigz -p ${task.cpus} > ${base}.converted.fastq.gz
     """ 
+}
+
+/*
+* PREPROCESSING - Index a input BAM if not being converted to FASTAPQ
+*/
+
+process indexinputbam {
+	when: 
+	params.bam && !params.run_convertbam
+
+	input:
+	file bam from ch_input_for_indexbam
+
+	output:
+	file "*.{bai,csi}" into ch_mappingindex_for_skiprmdup,ch_filteringindex_for_skiprmdup
+
+	script:
+    size = "${params.large_ref}" ? '-c' : ''
+    prefix = "${bam.baseName}"
+	"""
+    samtools index "${size}" ${bam}
+	"""
+
+}
+
+// convertbam bypass
+if (params.run_convertbam) {
+    ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
+        .filter{ it =~/.*converted.fastq.gz/}
+        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
+} else {
+    ch_input_for_skipconvertbam
+    	.into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 }
 
 
@@ -600,13 +717,14 @@ process fastqc {
     publishDir "${params.outdir}/FastQC", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
-    when: !params.skip_fastqc
+    when: 
+    !params.bam && !params.skip_fastqc || params.bam && !params.run_convertbam
 
     input:
-    set val(name), file(reads) from ch_read_files_fastqc.mix(ch_read_files_converted_fastqc)
+    set val(name), file(reads) from ch_convertbam_for_fastqc
 
     output:
-    file "*_fastqc.{zip,html}" into ch_fastqc_results
+    file "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
 
     script:
     """
@@ -626,13 +744,14 @@ process fastp {
     tag "$name"
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
-    when: params.complexity_filter_poly_g
+    when: 
+    !params.bam && params.complexity_filter_poly_g || params.bam && params.run_convertbam && params.complexity_filter_poly_g
 
     input:
-    set val(name), file(reads) from ch_read_files_complexity_filter_poly_g.mix(ch_read_files_converted_fastp)
+    set val(name), file(reads) from ch_convertbam_for_fastp
 
     output:
-    set val(name), file("*pG.fq.gz") into ch_clipped_reads_complexity_filtered_poly_g
+    set val(name), file("*pG.fq.gz") into ch_output_from_fastp
     file("*.json") into ch_fastp_for_multiqc
 
     script:
@@ -648,28 +767,34 @@ process fastp {
 }
 
 
+// fastp bypass
+if (params.complexity_filter_poly_g) {
+    ch_convertbam_for_skipfastp.mix(ch_output_from_fastp)
+        .filter { it =~/.*pG.fq.gz/ }
+        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
+} else {
+    ch_convertbam_for_skipfastp
+        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
+}
+
+
 /*
  * STEP 2 - Adapter Clipping / Read Merging
  */
-//Initialize empty channel if we skip adapterremoval entirely
-if(params.skip_adapterremoval) {
-    //No logs if no AR is run
-    ch_adapterremoval_logs = Channel.empty()
-    //Either coming from complexity filtering, or directly use reads normally directed to clipping first and push them through to the other channels downstream! 
-    ch_clipped_reads_complexity_filtered_poly_g.mix(ch_read_files_clip).into { ch_clipped_reads;ch_clipped_reads_for_fastqc;ch_clipped_reads_circularmapper;ch_clipped_reads_bwamem }
-} else {
+
 process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
-    when: !params.bam && !params.skip_adapterremoval
+    when: 
+    !params.bam && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
 
     input:
-    set val(name), file(reads) from ( params.complexity_filter_poly_g ? ch_clipped_reads_complexity_filtered_poly_g : ch_read_files_clip )
+    set val(name), file(reads) from ch_fastp_for_adapterremoval
 
     output:
-    set val(base), file("output/*.gz") into (ch_clipped_reads,ch_clipped_reads_for_fastqc,ch_clipped_reads_circularmapper,ch_clipped_reads_bwamem)
-    file("*.settings") into ch_adapterremoval_logs
+    set val(base), file("output/*.gz") into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
+    file("output/*.settings") into ch_adapterremoval_logs
 
     script:
     base = reads[0].baseName
@@ -684,13 +809,14 @@ process adapter_removal {
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me}
     #Combine files
     zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+    mv *.settings output/
     """
     //PE, don't collapse, but trim reads
     } else if (!params.singleEnd && params.skip_collapse && !params.skip_trim) {
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me}
-    mv ${base}.pair*.truncated.gz output/
+    mv *.settings ${base}.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
     } else if (!params.singleEnd && !params.skip_collapse && params.skip_trim) {
@@ -698,7 +824,7 @@ process adapter_removal {
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --basename ${base} ${collapse_me} ${trim_me}
     
-    mv ${base}.pair*.truncated.gz output/
+    mv *.settings ${base}.pair*.truncated.gz output/
     """
     } else {
     //SE, collapse not possible, trim reads
@@ -706,10 +832,20 @@ process adapter_removal {
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --basename ${base} --gzip --threads ${task.cpus} ${trim_me}
     
-    mv *.truncated.gz output/
+    mv *.settings *.truncated.gz output/
     """
     }
 }
+
+
+// Adapterremoval bypass
+if (!params.skip_adapterremoval) {
+    ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
+        .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem } 
+} else {
+    ch_fastp_for_skipadapterremoval
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem;  } 
 }
 
 
@@ -722,10 +858,10 @@ process fastqc_after_clipping {
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
-    when: !params.bam && !params.skip_adapterremoval && !params.skip_fastqc
+    when: !params.bam  && !params.skip_adapterremoval && !params.skip_fastqc || params.bam && params.run_convertbam && !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    set val(name), file(reads) from ch_clipped_reads_for_fastqc
+    set val(name), file(reads) from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
     file "*_fastqc.{zip,html}" optional true into ch_fastqc_after_clipping
@@ -736,6 +872,7 @@ process fastqc_after_clipping {
     """
 }
 
+
 /*
 Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
 */
@@ -744,16 +881,16 @@ process bwa {
     tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: !params.circularmapper && !params.bwamem
+    when: !params.circularmapper && !params.bwamem || !params.skip_mapping
 
     input:
-    set val(name), file(reads) from ch_clipped_reads.mix(ch_read_files_converted_mapping_bwa)
+    set val(name), file(reads) from ch_adapteremoval_for_bwa
     file index from bwa_index.collect()
 
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_flagstat,ch_mapped_reads_filter,ch_mapped_reads_preseq, ch_mapped_reads_damageprofiler, ch_bwa_mapped_reads_strip
-    file "*.{bai,csi}" into ch_bam_index_for_damageprofiler
+    file "*.mapped.bam" into ch_output_from_bwa
+    file "*.{bai,csi}" into ch_outputindex_from_bwa
     
 
     script:
@@ -766,16 +903,16 @@ process bwa {
     """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r2.sai ${reads[0]} ${reads[1]} | samtools sort -@ ${task.cpus} -O bam - > ${prefix}.sorted.bam
-    samtools index "${size}" "${prefix}".sorted.bam
+    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r2.sai ${reads[0]} ${reads[1]} | samtools sort -@ ${task.cpus} -O bam - > ${prefix}.mapped.bam
+    samtools index "${size}" "${prefix}".mapped.bam
     """
     } else {
     //PE collapsed, or SE data 
     prefix = "${reads.baseName}"
     """
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
-    samtools index "${size}" "${prefix}".sorted.bam
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
+    samtools index "${size}" "${prefix}".mapped.bam
     """
     }
     
@@ -811,16 +948,16 @@ process circularmapper{
     tag "$prefix"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
 
-    when: params.circularmapper
+    when: params.circularmapper || !params.skip_mapping
 
     input:
-    set val(name), file(reads) from ch_clipped_reads_circularmapper.mix(ch_read_files_converted_mapping_cm)
+    set val(name), file(reads) from ch_adapteremoval_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from fasta_for_indexing
 
     output:
-    file "*.sorted.bam" into ch_mapped_reads_flagstat_cm,ch_mapped_reads_filter_cm,ch_mapped_reads_preseq_cm, ch_mapped_reads_damageprofiler_cm, ch_circular_mapped_reads_strip
-    file "*.{bai,csi}" 
+    file "*.mapped.bam" into ch_output_from_cm
+    file "*.{bai,csi}" into ch_outputindex_from_cm
     
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
@@ -836,8 +973,8 @@ process circularmapper{
     bwa aln -t ${task.cpus} $elongated_root ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
     bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $elongated_root ${prefix}.r1.sai ${prefix}.r2.sai ${reads[0]} ${reads[1]} > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
-    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${prefix}.sorted.bam
-    samtools index "${size}" ${prefix}.sorted.bam
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${prefix}.mapped.bam
+    samtools index "${size}" ${prefix}.mapped.bam
     """
     } else {
     prefix = reads[0].toString().tokenize('.')[0]
@@ -845,8 +982,8 @@ process circularmapper{
     bwa aln -t ${task.cpus} $elongated_root $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $elongated_root ${prefix}.sai $reads > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
-    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".sorted.bam
-    samtools index "${size}" "${prefix}".sorted.bam
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".mapped.bam
+    samtools index "${size}" "${prefix}".mapped.bam
     """
     }
     
@@ -856,15 +993,15 @@ process bwamem {
     tag "$prefix"
     publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
 
-    when: params.bwamem && !params.circularmapper
+    when: params.bwamem && !params.circularmapper && !params.skip_mapping
 
     input:
-    set val(name), file(reads) from ch_clipped_reads_bwamem.mix(ch_read_files_converted_mapping_bwamem)
+    set val(name), file(reads) from ch_adapteremoval_for_bwamem
     file index from bwa_index_bwamem.collect()
 
     output:
-    file "*.sorted.bam" into ch_bwamem_mapped_reads_flagstat,ch_bwamem_mapped_reads_filter,ch_bwamem_mapped_reads_preseq, ch_bwamem_mapped_reads_damageprofiler, ch_bwamem_mapped_reads_strip
-    file "*.{bai,csi}" 
+    file "*.mapped.bam" into ch_output_from_bwamem
+    file "*.{bai,csi}" into ch_outputindex_from_bwamem
     
 
     script:
@@ -874,16 +1011,36 @@ process bwamem {
 
     if (!params.singleEnd && params.skip_collapse){
     """
-    bwa mem -t ${task.cpus} $fasta ${reads[0]} ${reads[1]} -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
-    samtools index "${size}" -@ ${task.cpus} "${prefix}".sorted.bam
+    bwa mem -t ${task.cpus} $fasta ${reads[0]} ${reads[1]} -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
+    samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
     """
     } else {
     """
-    bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".sorted.bam
-    samtools index "${size}" -@ ${task.cpus} "${prefix}".sorted.bam
+    bwa mem -t ${task.cpus} $fasta $reads -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
+    samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
     """
     }
     
+}
+
+
+// mapping bypass
+if (!params.skip_mapping) {
+    ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm)
+        .filter { it =~/.*mapped.bam/ }
+        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; ch_mapping_for_samtools_flagstat; ch_mapping_for_preseq } 
+
+    ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
+        .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
+	        .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
+
+} else {
+    ch_adapterremoval_for_skipmap
+        .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat; ch_mapping_for_preseq }
+
+     ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
+        .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
+	    .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
 }
 
 /*
@@ -894,8 +1051,11 @@ process samtools_flagstat {
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
+    when:
+    !params.skip_mapping
+
     input:
-    file(bam) from ch_mapped_reads_flagstat.mix(ch_mapped_reads_flagstat_cm,ch_bwamem_mapped_reads_flagstat)
+    file(bam) from ch_mapping_for_samtools_flagstat
 
     output:
     file "*.stats" into ch_flagstat_for_multiqc
@@ -922,14 +1082,17 @@ process samtools_filter {
             else null
     }
 
+    when: 
+    params.run_bam_filtering
+
     input: 
-    file bam from ch_mapped_reads_filter.mix(ch_mapped_reads_filter_cm,ch_bwamem_mapped_reads_filter)
+    file bam from ch_mapping_for_filtering
 
     output:
-    file "*filtered.bam" into ch_bam_filtered_flagstat, ch_bam_filtered_qualimap, ch_bam_filtered_dedup, ch_bam_filtered_markdup, ch_bam_filtered_pmdtools, ch_bam_filtered_angsd, ch_bam_filtered_gatk
+    file "*filtered.bam" into ch_output_from_filtering
     file "*.fastq.gz" optional true
     file "*.unmapped.bam" optional true
-    file "*.{bai,csi}"
+    file "*.{bai,csi}" into ch_outputindex_from_filtering
 
     script:
     prefix="$bam" - ~/(\.bam)?/
@@ -966,18 +1129,42 @@ process samtools_filter {
     }  
 }
 
+
+// samtools_filter bypass 
+if (params.run_bam_filtering) {
+    ch_mapping_for_skipfiltering.mix(ch_output_from_filtering)
+        .filter { it =~/.*filtered.bam/ }
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
+
+	ch_mappingindex_for_skipfiltering.mix(ch_outputindex_from_filtering)
+        .filter { it =~/.*filtered.bam.bai|.*filtered.bam.csi/ }
+        .into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
+
+} else {
+    ch_mapping_for_skipfiltering
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
+
+    ch_mappingindex_for_skipfiltering
+    	.into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
+
+}
+
+
+
+
 process strip_input_fastq {
     tag "${bam.baseName}"
     publishDir "${params.outdir}/samtools/stripped_fastq", mode: 'copy'
 
-    when: params.strip_input_fastq
+    when: 
+    params.strip_input_fastq
 
     input: 
-    set val(name), file(fq) from ch_read_unmap.mix(ch_read_unmap_convertBam)
-    file bam from ch_bwa_mapped_reads_strip.mix(ch_circular_mapped_reads_strip, ch_bwamem_mapped_reads_strip)
+    set val(name), file(fq) from ch_convertbam_for_stripfastq
+    file bam from ch_filtering_for_stripfastq
 
     output:
-    file "*.fq.gz" into unmapped_fq_ch
+    file "*.fq.gz" into ch_output_from_stripfastq
 
 
     script:
@@ -1007,8 +1194,11 @@ process samtools_flagstat_after_filter {
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
+    when:
+    params.run_bam_filtering
+
     input:
-    file(bam) from ch_bam_filtered_flagstat
+    file(bam) from ch_filtering_for_flagstat
 
     output:
     file "*.stats" into ch_bam_filtered_flagstat_for_multiqc
@@ -1022,7 +1212,7 @@ process samtools_flagstat_after_filter {
 
 
 /*
-Step 5a: DeDup / MarkDuplicates
+Step 5a: DeDup
 */ 
 
 process dedup{
@@ -1034,13 +1224,13 @@ process dedup{
     !params.skip_deduplication && params.dedupper == 'dedup'
 
     input:
-    file bam from ch_bam_filtered_dedup
+    file bam from ch_filtering_for_dedup
 
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.log" into ch_dedup_results_for_multiqc
-    file "${prefix}.sorted.bam" into ch_dedup_bam,ch_dedup_bam_for_genotyping_ug,ch_dedup_bam_for_genotyping_hc,ch_dedup_bam_for_genotyping_fb
-    file "*.{bai,csi}" into ch_dedup_bam_index_for_genotyping_ug,ch_dedup_bam_index_for_genotyping_hc,ch_dedup_bam_index_for_genotyping_fb
+    file "${prefix}_rmdup.bam" into ch_output_from_dedup
+    file "*.{bai,csi}" into ch_outputindex_from_dedup
 
     script:
     prefix="${bam.baseName}"
@@ -1051,18 +1241,71 @@ process dedup{
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index "${size}" "$prefix".sorted.bam
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.bam
+    samtools index "${size}" "$prefix"_rmdup.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix".sorted.bam
-    samtools index "${size}" "$prefix".sorted.bam
+    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.bam
+    samtools index "${size}" "$prefix"_rmdup.bam
     """  
     }
 }
+
+/*
+ Step 5b: MarkDuplicates
+ */
+
+process markDup{
+    tag "${bam.baseName}"
+    publishDir "${params.outdir}/deduplication/markdup"
+
+    when:
+    !params.skip_deduplication && params.dedupper != 'dedup'
+
+    input:
+    file bam from ch_filtering_for_markdup
+
+    output:
+    file "*.metrics" into ch_markdup_results_for_multiqc
+    file "*.rmdup.bam" into ch_output_from_markdup
+    file "*.{bai,csi}" into ch_outputindex_from_markdup
+
+
+    script:
+    prefix = "${bam.baseName}"
+    size = "${params.large_ref}" ? '-c' : ''
+    """
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}._rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools index "${size}" ${prefix}_rmdup.bam
+    """
+}
+
+
+
+
+
+if (!params.skip_deduplication) {
+    ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
+        .filter { it =~/.*_rmdup.bam/ }
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
+
+    ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
+        .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
+        .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
+
+} else {
+    ch_filtering_for_skiprmdup
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
+
+	ch_filteringindex_for_skiprmdup
+	    .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
+}
+
+
+
 
 /*
 Step 6: Preseq
@@ -1076,10 +1319,10 @@ process preseq {
     !params.skip_preseq
 
     input:
-    file input from (params.skip_deduplication ? ch_mapped_reads_preseq.mix(ch_mapped_reads_preseq_cm,ch_bwamem_mapped_reads_preseq) : ch_hist_for_preseq )
+    file input from (params.skip_deduplication ? ch_mapping_for_preseq : ch_hist_for_preseq )
 
     output:
-    file "${input.baseName}.ccurve" into ch_preseq_results
+    file "${input.baseName}.ccurve" into ch_preseq_for_multiqc
 
     script:
     if(!params.skip_deduplication){
@@ -1106,9 +1349,9 @@ process damageprofiler {
     !params.skip_damage_calculation
 
     input:
-    file bam from ch_mapped_reads_damageprofiler.mix(ch_mapped_reads_damageprofiler_cm,ch_bwamem_mapped_reads_damageprofiler)
+    file bam from ch_rmdup_for_damageprofiler
     file fasta from fasta_for_indexing
-    file bai from ch_bam_index_for_damageprofiler
+    file bai from ch_rmdupindex_for_damageprofiler
     
 
     output:
@@ -1134,7 +1377,7 @@ process qualimap {
     !params.skip_qualimap
 
     input:
-    file bam from ch_bam_filtered_qualimap
+    file bam from ch_rmdup_for_qualimap
     file fasta from fasta_for_indexing
 
     output:
@@ -1149,52 +1392,6 @@ process qualimap {
 }
 
 
-
-/*
- Step 5b: MarkDuplicates
- */
-
-process markDup{
-    tag "${bam.baseName}"
-    publishDir "${params.outdir}/deduplication/markdup"
-
-    when:
-    !params.skip_deduplication && params.dedupper != 'dedup'
-
-    input:
-    file bam from ch_bam_filtered_markdup
-
-    output:
-    file "*.metrics" into ch_markdup_results_for_multiqc
-    file "*.markDup.bam" into ch_markdup_bam,ch_markdup_bam_for_genotyping_ug,ch_markdup_bam_for_genotyping_hc,ch_markdup_bam_for_genotyping_fb
-    file "*.{bai,csi}" into ch_markdup_bam_index_for_genotyping_ug,ch_markdup_bam_index_for_genotyping_hc,ch_markdup_bam_index_for_genotyping_fb
-
-
-    script:
-    prefix = "${bam.baseName}"
-    size = "${params.large_ref}" ? '-c' : ''
-    """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}.markDup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.markdup.metrics" VALIDATION_STRINGENCY=SILENT
-    samtools index "${size}" ${prefix}.markDup.bam
-    """
-}
-
-//If no deduplication runs, the input is mixed directly from samtools filter, if it runs either markdup or dedup is used thus mixed from these two channels
-ch_dedup_for_pmdtools = Channel.empty()
-
-//Bamutils TrimBam Channel
-ch_for_bamutils = Channel.empty()
-
-if(!params.skip_deduplication){
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam).into {ch_for_pmdtools;ch_for_bamutils}
-} else {
-    ch_dedup_for_pmdtools.mix(ch_markdup_bam,ch_dedup_bam,ch_bam_filtered_pmdtools).into {ch_for_pmdtools;ch_for_bamutils}
-}
-
-if(!params.run_pmdtools){
-    ch_dedup_for_pmdtools.close()
-}
-
 /*
  Step 9: PMDtools
  */
@@ -1206,13 +1403,13 @@ process pmdtools {
     when: params.run_pmdtools
 
     input: 
-    file bam from ch_for_pmdtools
+    file bam from ch_rmdup_for_pmdtools
     file fasta from fasta_for_indexing
 
     output:
-    file "*.bam" into ch_bam_after_pmdfiltering,ch_pmd_bam_for_genotyping_ug,ch_pmd_bam_for_genotyping_hc,ch_pmd_bam_for_genotyping_fb
+    file "*.bam" into ch_output_from_pmdtools
     file "*.cpg.range*.txt"
-    file "*.{bai,csi}" into ch_pmd_bam_index_for_genotyping_ug,ch_pmd_bam_index_for_genotyping_hc,ch_pmd_bam_index_for_genotyping_fb
+    file "*.{bai,csi}" into ch_outputindex_from_pmdtools
 
     script:
     //Check which treatment for the libraries was used
@@ -1224,7 +1421,7 @@ process pmdtools {
         snpcap = ''
     }
     size = "${params.large_ref}" ? '-c' : ''
-
+    prefix = "${bam.baseName}"
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
@@ -1243,14 +1440,14 @@ process bam_trim {
     tag "${prefix}" 
     publishDir "${params.outdir}/trimmed_bam", mode: 'copy'
  
-    when: params.trim_bam
+    when: params.run_trim_bam
 
     input:
-    file bam from ch_for_bamutils  
+    file bam from ch_rmdup_for_bamutils
 
     output: 
-    file "*.trimmed.bam" into ch_trimmed_bam_for_genotyping_ug,ch_trimmed_bam_for_genotyping_hc,ch_trimmed_bam_for_genotyping_fb
-    file "*.{bai,csi}" into ch_trimmed_bam_index_for_genotyping_ug,ch_trimmed_bam_index_for_genotyping_hc,ch_trimmed_bam_index_for_genotyping_fb
+    file "*.trimmed.bam" into ch_output_from_bamutils
+    file "*.{bai,csi}" into ch_outputindex_from_bamutils
 
     script:
     prefix="${bam.baseName}"
@@ -1261,6 +1458,40 @@ process bam_trim {
     samtools sort -@ ${task.cpus} tmp.bam -o ${prefix}.trimmed.bam 
     samtools index "${size}" ${prefix}.trimmed.bam
     """
+}
+
+
+if ( params.run_genotyping && params.genotyping_source == "raw" ) {
+    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+
+	ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+
+} else if ( params.run_genotyping && params.genotyping_source == "trimmed" )  {
+    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
+        .filter { it =~/.*trimmed.bam/ }
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+
+	ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
+        .filter { it =~/.*trimmed.bam.bai|.*.trimmed.bam.csi/ }
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+
+} else if ( params.run_genotyping && params.genotyping_source == "pmd" )  {
+    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
+        .filter { it =~/.*pmd.bam/ }
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+
+	ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
+        .filter { it =~/.*pmd.bam.bai|.*.pmd.bam.csi/ }
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+
+} else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
+    ch_rmdup_for_skipdamagemanipulation
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+
+    ch_rmdupindex_for_skipdamagemanipulation
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
 }
 
 
@@ -1298,18 +1529,19 @@ ch_gatk_download = Channel.value("download")
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
-  when params.run_genotyping && params.genotyping_tool == 'ug'
+  when:
+  params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
   file fasta from fasta_for_indexing
   file jar from ch_unifiedgenotyper_jar
-  file bam from ch_dedup_bam_for_genotyping_ug.mix(ch_markdup_bam_for_genotyping_ug,ch_pmd_bam_for_genotyping_ug,ch_trimmed_bam_for_genotyping_ug)
+  file bam from ch_damagemanipulation_for_genotyping_ug
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
-  file bai from ch_dedup_bam_index_for_genotyping_ug.mix(ch_markdup_bam_index_for_genotyping_ug,ch_pmd_bam_index_for_genotyping_ug,ch_trimmed_bam_index_for_genotyping_ug)
+  file bai from ch_damagemanipulationindex_for_genotyping_ug
 
   output: 
-  file "*vcf.gz" into ch_vcf_ug
+  file "*vcf.gz" into ch_ug_for_multivcfanalyzer
 
   script:
   if (params.gatk_dbsnp == '')
@@ -1335,14 +1567,15 @@ ch_gatk_download = Channel.value("download")
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
-  when params.run_genotyping && params.genotyping_tool == 'hc'
+  when:
+  params.run_genotyping && params.genotyping_tool == 'hc'
 
   input:
   file fasta from fasta_for_indexing
-    file bam from ch_dedup_bam_for_genotyping_hc.mix(ch_markdup_bam_for_genotyping_hc,ch_pmd_bam_for_genotyping_hc,ch_trimmed_bam_for_genotyping_hc)
+  file bam from ch_damagemanipulation_for_genotyping_hc
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
-  file bai from ch_dedup_bam_index_for_genotyping_hc.mix(ch_markdup_bam_index_for_genotyping_hc,ch_pmd_bam_index_for_genotyping_hc,ch_trimmed_bam_index_for_genotyping_hc)
+  file bai from ch_damagemanipulationindex_for_genotyping_hc
 
   output: 
   file "*vcf.gz" into ch_vcf_hc
@@ -1361,21 +1594,22 @@ ch_gatk_download = Channel.value("download")
     """
  }
 
- /**
- *  FreeBayes genotyping, should probably add in some options for users to set 
+ /*
+ *  Step 11c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
   tag "${bam}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
-  when params.run_genotyping && params.genotyping_tool == 'freebayes'
+  when:
+  params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
   file fasta from fasta_for_indexing
-  file bam from ch_dedup_bam_for_genotyping_fb.mix(ch_markdup_bam_for_genotyping_fb,ch_pmd_bam_for_genotyping_fb,ch_trimmed_bam_for_genotyping_fb)
+  file bam from ch_damagemanipulation_for_genotyping_freebayes
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
-  file bai from ch_dedup_bam_index_for_genotyping_fb.mix(ch_markdup_bam_index_for_genotyping_fb,ch_pmd_bam_index_for_genotyping_fb,ch_trimmed_bam_index_for_genotyping_fb)
+  file bai from ch_damagemanipulationindex_for_genotyping_freebayes
 
   output: 
   file "*vcf.gz" into ch_vcf_freebayes
@@ -1389,10 +1623,52 @@ ch_gatk_download = Channel.value("download")
  }
 
 
-/*
-Processing missing:
-- pmdtools
+ /*
+ * Step 12: SNP Table Generation
+ */
 
+// Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
+if (params.additional_vcf_files == '') {
+	ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.collect()
+} else {
+	ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files)
+	ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.mix(ch_extravcfs_for_multivcfanalyzer).collect()
+}
+
+ process multivcfanalyzer {
+ 	tag "${vcf}"
+ 	publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
+
+ 	when:
+ 	params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
+
+ 	input:
+   	file fasta from fasta_for_indexing
+ 	file vcf from ch_vcfs_for_multivcfanalyzer
+
+ 	output:
+ 	file 'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
+ 	file 'info.txt.gz' into ch_output_multivcfanalyzer_info
+ 	file 'snpAlignment.fasta.gz' into ch_output_multivcfanalyzer_snpalignment
+ 	file 'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
+ 	file 'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
+ 	file 'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
+ 	file 'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
+ 	file 'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
+ 	file 'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
+ 	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
+
+ 	script:
+ 	"""
+ 	gunzip -f *.vcf.gz
+ 	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${params.write_allele_frequencies} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
+ 	pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
+ 	rm *.vcf
+ 	"""
+
+ }
+
+/*
 Genotyping tools:
 - angsd
 - snpAD
@@ -1460,7 +1736,8 @@ process get_software_versions {
     qualimap --version &> v_qualimap.txt 2>&1 || true
     cat $json &> v_damageprofiler.txt 2>&1 || true 
     java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
-    
+    multivcfanalyzer --help | head -n 1 || true
+
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
@@ -1474,13 +1751,13 @@ process multiqc {
 
     input:
     file multiqc_config
-    file ('fastqc_raw/*') from ch_fastqc_results.collect().ifEmpty([])
+    file ('fastqc_raw/*') from ch_prefastqc_for_multiqc.collect().ifEmpty([])
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('flagstat/*') from ch_flagstat_for_multiqc.collect().ifEmpty([])
     file ('flagstat_filtered/*') from ch_bam_filtered_flagstat_for_multiqc.collect().ifEmpty([])
-    file ('preseq/*') from ch_preseq_results.collect().ifEmpty([])
+    file ('preseq/*') from ch_preseq_for_multiqc.collect().ifEmpty([])
     file ('damageprofiler/dmgprof*/*') from ch_damageprofiler_results.collect().ifEmpty([])
     file ('qualimap/qualimap*/*') from ch_qualimap_results.collect().ifEmpty([])
     file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
