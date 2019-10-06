@@ -1,0 +1,778 @@
+{
+	"parameters": [
+		{
+            "name": "reads",
+            "label": "Input files",
+            "usage": "Specify the location of your input FASTQ or BAM file(s).",
+            "group": "Main options",
+            "default_value": "'data/*{1,2}.fastq.gz'",
+            "render": "textfield",
+            "pattern": ".*\\*.*",
+            "type": "string"
+        },
+        {
+            "name": "outdir",
+            "label": "Output directory",
+            "usage": "Set where to save the results from the pipeline",
+            "group": "Main options",
+            "default_value": "./results",
+            "render": "textfield",
+            "pattern": ".*",
+            "type": "string"
+        },
+         {
+            "name": "singleEnd",
+            "label": "Single-end sequencing input",
+            "usage": "Use single-end sequencing FASTQ or BAM instead of paired-end.",
+            "group": "Main options",
+            "render": "check-box",
+            "default_value": false,
+            "type": "boolean"
+        },
+         {
+            "name": "pairedEnd",
+            "label": "Paired-end sequencing input",
+            "usage": "Use paired-end sequencing inputs instead of single-end.",
+            "group": "Main options",
+            "render": "check-box",
+            "default_value": false,
+            "type": "boolean"
+        },        
+        {
+            "name": "bam",
+            "label": "BAM file format flag",
+            "usage": "Indicate input files are in BAM format",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "input"
+        },
+		{
+            "name": "fasta",
+            "label": "Input reference FASTA file",
+            "usage": "Specify the location of reference FASTA file. (Cannot be used with --genome)",
+            "group": "Reference",
+            "default_value": "''",
+            "render": "textfield",
+            "type": "string"
+        },
+        {
+            "name": "genome",
+            "label": "Alignment reference iGenomes key ",
+            "usage": "Ref. genome key for iGenomes (Cannot be used with --fasta)",
+            "group": "Reference",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "",
+                    "GRCh37",
+                    "GRCm38",
+                    "TAIR10",
+                    "EB2",
+                    "UMD3.1",
+                    "WBcel235",
+                    "CanFam3.1",
+                    "GRCz10",
+                    "BDGP6",
+                    "EquCab2",
+                    "EB1",
+                    "Galgal4",
+                    "Gm01",
+                    "Mmul_1",
+                    "IRGSP-1.0",
+                    "CHIMP2.1.4",
+                    "Rnor_6.0",
+                    "R64-1-1",
+                    "EF2",
+                    "Sbi1",
+                    "Sscrofa10.2",
+                    "AGPv3"
+            ],
+            "default_value": ""
+        },
+ 		{
+            "name": "bwa_index",
+            "label": "Path to the reference file, if it is already indexed",
+            "usage": "Specify already indexed reference to skip bwa indexing",
+            "group": "Reference",
+            "default_value": "''",
+            "render": "textfield",
+            "type": "string"
+        },
+ 		{
+            "name": "seq_dict",
+            "label": "Path to a picard sequenceing dict (ends in .dict)",
+            "usage": "Specify picard dictionary to skip picard indexing",
+            "group": "Reference",
+            "default_value": "''",
+            "render": "textfield",
+            "type": "string"
+        },
+ 		{
+            "name": "fasta_index",
+            "label": "Path to a samtools index file (ends in .fai)",
+            "usage": "Specify .fai file to skip fasta index",
+            "group": "Reference",
+            "default_value": "''",
+            "render": "textfield",
+            "type": "string"
+        },
+ 		{
+            "name": "saveReference",
+            "label": "Do you want to save the reference and indexing files in output directory?",
+            "usage": "Indicates whether to publish reference files",
+            "group": "Reference",
+            "default_value": false,
+            "render": "check-box",
+            "type": "boolean"
+        },
+ 		{
+            "name": "convertbam",
+            "label": "Convert BAM to FASTQ sending downstream on BAM input",
+            "usage": "Run samtools fastq?",
+            "group": "Main options",
+            "default_value": false,
+            "render": "check-box",
+            "type": "boolean"
+        },
+		{
+            "name": "snpcapture",
+            "label": "Do you want to turn on SNP Capture mode? You must also specify a BED file below",
+            "usage": "Specify the location of SNP Capture BED file.",
+            "group": "Reference",
+            "default_value": "''",
+            "render": "textfield",
+            "type": "string"
+        },
+ 		{
+            "name": "bedfile",
+            "label": "Path to a SNP Capture bed file",
+            "usage": "Specify already indexed reference to skip bwa indexing",
+            "group": "Reference",
+            "default_value": "''",
+            "render": "textfield",
+            "type": "string"
+        },
+        {
+            "name": "skip_fastqc",
+            "label": "Skip FASTQC Module(s)",
+            "usage": "Indicate whether to skip running FASTQC modules",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Skipping"
+        }, 
+        {
+            "name": "skip_adapterremoval",
+            "label": "Skip adapter clipping (and merging)",
+            "usage": "Indicate whether to skip AdapterRemoval module",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Skipping"
+        }, 
+        {
+            "name": "skip_mapping",
+            "label": "Skip mapping (only if BAM input)",
+            "usage": "Skip mapping (only if BAM input)",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Skipping"
+        }, 
+        {
+            "name": "skip_preseq",
+            "label": "Skip deeper sequencing extrapolation calculation",
+            "usage": "Indicate whether to skip PreSeq module",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Skipping"
+        }, 
+        {
+            "name": "skip_damage_calculation",
+            "label": "Skip calculation of damage profiles",
+            "usage": "Indicate whether to skip DamageProfiler module",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Skipping"
+        }, 
+        {
+            "name": "skip_qualimap",
+            "label": "Skip mapping QC",
+            "usage": "Indicate whether to skip qualimap module",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Skipping"
+        }, 
+        {
+            "name": "skip_deduplication",
+            "label": "Skip PCR duplicate removal",
+            "usage": "Indicate whether to skip DeDup or MarkDuplicates module",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Skipping"
+        }, 
+        {
+            "name": "complexity_filter_ploy_g",
+            "label": "Run poly-G removal",
+            "usage": "Indicate whether to remove poly-G tails from Next/NovaSeq data",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Complexity Filtering"
+        }, 
+        {
+            "name": "complexity_filter_ploy_g_min",
+            "label": "Minimum poly-G tail length",
+            "usage": "Indicate minimum length of a poly-G tail to begin trimming",
+            "type": "integer",
+            "render": "textfield",
+            "default_value": 10,
+            "group": "Complexity Filtering"
+        }, 
+        {
+            "name": "clip_forward_adaptor",
+            "label": "Forward adapter sequence",
+            "usage": "Indicate the nucleotide sequence of the forward adapter to remove",
+            "type": "string",
+            "render": "textfield",
+            "default_value": "'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'",
+            "group": "Adapter Clipping and Merging"
+        }, 
+        {
+            "name": "clip_reverse_adaptor",
+            "label": "Reverse adapter sequence",
+            "usage": "Indicate the nucleotide sequence of the reverse adapter to remove",
+            "type": "string",
+            "render": "textfield",
+            "default_value": "'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'",
+            "group": "Adapter Clipping and Merging"
+        }, 
+        {
+            "name": "clip_readlength",
+            "label": "Read length filtering",
+            "usage": "Indicate minimum length of clipped read to be retained",
+            "type": "integer",
+            "render": "textfield",
+            "default_value": 30,
+            "group": "Adapter Clipping and Merging"
+        }, 
+        {
+            "name": "clip_min_read_quality",
+            "label": "Minimum sequencing quality",
+            "usage": "Indicate minimum phred-scaled quality score of read to be retained",
+            "type": "integer",
+            "render": "textfield",
+            "default_value": 20,
+            "group": "Adapter Clipping and Merging"
+        }, 
+        {
+            "name": "min_adap_overlap",
+            "label": "Minimum adapter overlap",
+            "usage": "Indicate minimum number of bases adapter sequence overlaps before clipping",
+            "type": "integer",
+            "render": "textfield",
+            "default_value": 20,
+            "group": "Adapter Clipping and Merging"
+        }, 
+        {
+            "name": "skip_collapse",
+            "label": "Skip read merging",
+            "usage": "Indicate whether to skip merging of paired-end reads",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Adapter Clipping and Merging"
+        }, 
+        {
+            "name": "skip_trim",
+            "label": "Skip adapter trimming",
+            "usage": "Indicate whether to skip clipping of adapters",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Adapter Clipping and Merging"
+        }, 
+        {
+            "name": "bwaalnn",
+            "label": "Maximum edit distance of alignment",
+            "usage": "BWA aln -n parameter",
+            "type": "decimal",
+            "render": "textfield",
+            "default_value": 0.04,
+            "group": "Mapping"
+        }, 
+        {
+            "name": "bwaalnk",
+            "label": "Maximum edit distance of seed",
+            "usage": "BWA aln -k parameter",
+            "type": "integer",
+            "render": "textfield",
+            "default_value": 2,
+            "group": "Mapping"
+        }, 
+        {
+            "name": "bwaalnl",
+            "label": "Length of seeds",
+            "usage": "BWA aln -l parameter",
+            "type": "integer",
+            "render": "textfield",
+            "default_value": 2,
+            "group": "Mapping"
+        }, 
+        {
+            "name": "circularmapper",
+            "label": "Use circularmapper",
+            "usage": "Use circularmapper for mapping",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Mapping"
+        }, 
+        {
+            "name": "circularextension",
+            "label": "How long to extend reference at ends",
+            "usage": "Indicate how long to extend reference end from beginning and vice versa",
+            "type": "integer",
+            "render": "textfield",
+            "default_value": 500,
+            "group": "Mapping"
+        }, 
+        {
+            "name": "circulartarget",
+            "label": "What reference entry (e.g. chromosome) to extend",
+            "usage": "Indicate which reference entry  to extend",
+            "type": "string",
+            "render": "textfield",
+            "default_value": "'MT'",
+            "group": "Mapping"
+        }, 
+        {
+            "name": "circularfilter",
+            "label": "Remove off-target reads",
+            "usage": "Remove off-target reads",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Mapping"
+        }, 
+        {
+            "name": "bwamem",
+            "label": "Specify to use bwa mem for mapping",
+            "usage": "Use bwa mem algorithm",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Mapping"
+        }, 
+        {
+            "name": "bam_mapping_quality_threshold",
+            "label": "Mapping quality filter",
+            "usage": "Minimum mapping quality score",
+            "type": "integer",
+            "render": "textfield",
+            "default_value": 0,
+            "group": "Mapped BAM Filtering"
+        }, 
+        {
+            "name": "bam_discard_unmapped",
+            "label": "Do something to unmapped reads?",
+            "usage": "Turn on BAM filtering",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false,
+            "group": "Mapped BAM Filtering"
+        }, 
+        {
+            "name": "bam_unmapped_type",
+            "label": "How to deal with unmapped reads",
+            "usage": "Minimum mapping quality score",
+            "group": "Mapped BAM Filtering",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "discard",
+                    "bam",
+                    "fastq",
+                    "both"
+            ],
+            "default_value": ""
+        },
+        {
+            "name": "strip_input_fastq",
+            "label": "Produce FASTQ without mapped reads?",
+            "usage": "Used to strip sensitive reads from raw reads",
+            "group": "Mapped BAM Filtering",
+            "type": "boolean",
+            "render": "check-box",
+            "default_value": false
+        },
+        {
+            "name": "strip_mode",
+            "label": "What type of stripping to do?",
+            "usage": "Select type of FASTQ modification",
+            "group": "Mapped BAM Filtering",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "strip",
+                    "replace"
+            ],
+            "default_value": ""
+        },
+        {
+            "name": "dedupper",
+            "label": "Which deduplication tool to use?",
+            "usage": "Which deduplication tool to use?",
+            "group": "Deduplication",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "dedup",
+                    "markduplicates"
+            ],
+            "default_value": "dedup"
+        },
+        {
+            "name": "dedup_all_merged",
+            "label": "Treat all reads as merged for deduplication",
+            "usage": "Treat all reads as merged for deduplication",
+            "group": "Deduplication",
+            "render": "check-box",
+            "type": "boolean",
+            "default_value": false
+        },
+        {
+            "name": "preseq_step_size",
+            "label": "Specify the step size of Preseq",
+            "usage": "Specify the step size of Preseq",
+            "group": "Preseq",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 1000
+        },
+        {
+            "name": "damageprofiler_length",
+            "label": "Specify length filter for DamageProfiler",
+            "usage": "Specify length filter for DamageProfiler",
+            "group": "DamageProfiler",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 100
+        },
+        {
+            "name": "damageprofiler_threshold",
+            "label": "Specify number of bases to consider for damageProfiler",
+            "usage": "Specify number of bases to consider for damageProfiler",
+            "group": "DamageProfiler",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 15
+        },
+        {
+            "name": "run_pmdtools",
+            "label": "Run PMD tools?",
+            "usage": "Run PMD tools?",
+            "group": "PMDTools",
+            "render": "check-box",
+            "type": "boolean",
+            "default_value": false
+        },
+        {
+            "name": "udg_type",
+            "label": "Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are set to UDG-.",
+            "usage": "Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are set to UDG-.",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "half",
+                    "full"
+            ],
+            "default_value": "''"
+        },
+        {
+            "name": "pmdtools_range",
+            "label": "Specify range of bases for PMDTools",
+            "usage": "Specify range of bases for PMDTools",
+            "group": "PMDTools",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 10
+        },
+        {
+            "name": "pmdtools_threshold",
+            "label": "Specify PMDScore threshold for PMDTools",
+            "usage": "Specify PMDScore threshold for PMDTools",
+            "group": "PMDTools",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 3
+        },
+        {
+            "name": "pmdtools_reference_mask",
+            "label": "Specify a reference mask for PMDTools",
+            "usage": "Specify a reference mask for PMDTools",
+            "group": "PMDTools",
+            "render": "textfield",
+            "type": "string",
+            "default_value": "''"
+        },
+        {
+            "name": "pmdtools_max_reads",
+            "label": "Specify the max. number of reads to consider for metrics generation",
+            "usage": "Specify the max. number of reads to consider for metrics generation",
+            "group": "PMDTools",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 10000
+        },
+        {
+            "name": "run_trim_bam",
+            "label": "Trim ends of reads?",
+            "usage": "Run BamUtils",
+            "group": "Trim Bam",
+            "render": "check-box",
+            "type": "boolean",
+            "default_value": false
+        },
+        {
+            "name": "bamutils_clip_left",
+            "label": "Specify the number of bases to trim from left end of read",
+            "usage": "Specify the number of bases to trim from left end of read",
+            "group": "Trim Bam",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 1
+        },
+        {
+            "name": "bamutils_clip_right",
+            "label": "Specify the number of bases to trim from right end of read",
+            "usage": "Specify the number of bases to trim from right end of read",
+            "group": "Trim Bam",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 1
+        },
+        {
+            "name": "bamutils_softclip",
+            "label": "Use softclip instead of hard masking",
+            "usage": "Use softclip instead of hard masking",
+            "group": "Trim Bam",
+            "render": "check-box",
+            "type": "boolean",
+            "default_value": false
+        },
+        {
+            "name": "run_genotyping",
+            "label": "Run genotyping?",
+            "usage": "Run genotyping?",
+            "group": "Genotyping",
+            "render": "check-box",
+            "type": "boolean",
+            "default_value": false
+        },
+        {
+            "name": "genotyping_tool",
+            "label": "Which genotyperr to use?",
+            "usage": "Which genotyperr to use?",
+            "group": "Genotyping",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "ug",
+                    "gc",
+                    "freebayes"
+            ],
+            "default_value": "''"
+        },
+        {
+            "name": "genotyping_source",
+            "label": "Specify which input BAM to use for genotyping",
+            "usage": "Specify which input BAM to use for genotyping",
+            "group": "Genotyping",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "raw",
+                    "trimmed",
+                    "pmd"
+            ],
+            "default_value": "raw"
+        },
+        {
+            "name": "gatk_ug_genotype_model",
+            "label": "UnifiedGenotyper Likelihood Model",
+            "usage": "UnifiedGenotyper Likelihood Model",
+            "group": "Genotyping",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "SNP",
+                    "INDEL",
+                    "BOTH",
+                    "GENERALPLOIDYSNP",
+                    "GENERALPLOIDYINDEL"
+            ],
+            "default_value": "SNP"
+        },
+        {
+            "name": "gatk_out_mode",
+            "label": "Specify GATK output mode.",
+            "usage": "Specify GATK output mode.",
+            "group": "Genotyping",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "EMIT_VARIANTS_ONLY",
+                    "EMIT_ALL_CONFIDENT_SITES",
+                    "EMIT_ALL_SITES"
+            ],
+            "default_value": "EMIT_VARIANTS_ONLY"
+        },
+        {
+            "name": "gatk_call_conf",
+            "label": "Specify GATK phred-scaled confidence threshold.",
+            "usage": "Specify GATK phred-scaled confidence threshold.",
+            "group": "Genotyping",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 30
+        },
+        {
+            "name": "gatk_ploidy",
+            "label": "Specify GATK organism ploidy.",
+            "usage": "Specify GATK organism ploidy.",
+            "group": "Genotyping",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 2
+        },
+        {
+            "name": "gatk_dbsnp",
+            "label": "Specify VCF file for output VCF SNP annotation (Optional)",
+            "usage": "Specify VCF file for output VCF SNP annotation (Optional)",
+            "group": "Genotyping",
+            "render": "textfield",
+            "type": "string",
+            "default_value": "''"
+        },
+        {
+            "name": "gatk_hc_emitrefconf",
+            "label": "Specify HaplotypeCaller mode for emitting reference confidence calls",
+            "usage": "Specify HaplotypeCaller mode for emitting reference confidence calls",
+            "group": "Genotyping",
+            "render": "drop-down",
+            "type": "string",
+            "choices": [
+                    "NONE",
+                    "BP_RESOLUTION",
+                    "GVCF"
+            ],
+            "default_value": "GVCF"
+        },
+        {
+            "name": "gatk_downsample",
+            "label": "Specify genotyping maximum coverage to consider for SNP Calling",
+            "usage": "Specify genotyping maximum coverage to consider for SNP Calling",
+            "group": "Genotyping",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 259
+        },
+        {
+            "name": "run_multivcfanalyzer",
+            "label": "Run MultiVCFAnalyzer (only valid GATK UnifiedGenotyper)?",
+            "usage": "Run MultiVCFAnalyzer (only valid GATK UnifiedGenotyper)?",
+            "group": "SNP Table Generation",
+            "render": "check-box",
+            "type": "boolean",
+            "default_value": false
+        },
+        {
+            "name": "write_allele_frequencies",
+            "label": "Specify T(rue) or F(alse) whether to write allele frequencies in the SNP table",
+            "usage": "Specify T(rue) or F(alse) whether to write allele frequencies in the SNP table",
+            "group": "SNP Table Generation",
+            "render": "textfield",
+            "type": "string",
+            "default_value": "'F'"
+        },
+        {
+            "name": "min_genotype_quality",
+            "label": "Specify the minimum genotyping quality threshold for a SNP to be called.",
+            "usage": "Specify the minimum genotyping quality threshold for a SNP to be called.",
+            "group": "SNP Table Generation",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 30
+        },
+        {
+            "name": "min_base_coverage",
+            "label": "Minimum depth coverage for SNP to be called",
+            "usage": "Specify the minimum number of reads a position needs to be covered to be considered for base calling.",
+            "group": "SNP Table Generation",
+            "render": "textfield",
+            "type": "integer",
+            "default_value": 5
+        },
+        {
+            "name": "min_allele_freq_hom",
+            "label": "Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call",
+            "usage": "Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call",
+            "group": "SNP Table Generation",
+            "render": "textfield",
+            "type": "decimal",
+            "default_value": 0.9
+        },
+        {
+            "name": "min_allele_freq_het",
+            "label": "Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call",
+            "usage": "Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call",
+            "group": "SNP Table Generation",
+            "render": "textfield",
+            "type": "decimal",
+            "default_value": 0.9
+        },
+        {
+            "name": "additional_vcf_files",
+            "label": "Specify additional pre-made VCF files to be included in the SNP table generation, with wildcard (Optional)",
+            "usage": "Specify additional pre-made VCF files to be included in the SNP table generation, with wildcard (Optional)",
+            "group": "SNP Table Generation",
+            "render": "textfield",
+            "type": "string",
+            "default_value": "''"
+        },
+        {
+            "name": "reference_gff_annotations",
+            "label": "Specify the reference genome annotations in '.gff' format. (Optional)",
+            "usage": "Specify the reference genome annotations in '.gff' format. (Optional)",
+            "group": "SNP Table Generation",
+            "render": "textfield",
+            "type": "string",
+            "default_value": "NA"
+        },
+        {
+            "name": "reference_gff_exclude",
+            "label": "Specify positions to be excluded in '.gff' format. (Optional)",
+            "usage": "Specify positions to be excluded in '.gff' format. (Optional)",
+            "group": "SNP Table Generation",
+            "render": "textfield",
+            "type": "sring",
+            "default_value": "NA"
+        },
+        {
+            "name": "snp_eff_results",
+            "label": "Specify the output file from SNP effect analysis in '.txt' format. (Optional)",
+            "usage": "Specify the output file from SNP effect analysis in '.txt' format. (Optional)",
+            "group": "SNP Table Generation",
+            "render": "textfield",
+            "type": "string",
+            "default_value": "NA"
+        },
+
+	]
+}
