@@ -139,6 +139,9 @@ def helpMessage() {
       --reference_gff_exclude		Specify positions to be excluded in '.gff' format. (Optional)
       --snp_eff_results				Specify the output file from SNP effect analysis in '.txt' format. (Optional)
 
+      Sex Determination
+        --run_sexdeterrmine         Turn on sex determination.
+        --sexdeterrmine_bedfile     Specify SNP panel in bed format for error bar calculation. (Optional, see documentation)
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -283,6 +286,10 @@ params.additional_vcf_files = ''
 params.reference_gff_annotations = 'NA'
 params.reference_gff_exclude = 'NA'
 params.snp_eff_results = 'NA'
+
+//Sex.DetERRmine settings
+params.run_sexdeterrmine = false
+params.sexdeterrmine_bedfile = ''
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
@@ -718,7 +725,7 @@ process fastqc {
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: 
-    !params.bam && !params.skip_fastqc || params.bam && !params.run_convertbam
+    !params.bam && !params.skip_fastqc || params.bam && params.run_convertbam
 
     input:
     set val(name), file(reads) from ch_convertbam_for_fastqc
@@ -881,7 +888,7 @@ process bwa {
     tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: !params.circularmapper && !params.bwamem || !params.skip_mapping
+    when: !params.circularmapper && params.bwamem && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwa
@@ -1290,7 +1297,7 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
@@ -1298,7 +1305,7 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine } 
 
 	ch_filteringindex_for_skiprmdup
 	    .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
@@ -1622,8 +1629,7 @@ ch_gatk_download = Channel.value("download")
   """
  }
 
-
- /*
+/*
  * Step 12: SNP Table Generation
  */
 
@@ -1665,7 +1671,42 @@ if (params.additional_vcf_files == '') {
  	pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
  	rm *.vcf
  	"""
+ }
 
+ /*
+  * Step XX Sex determintion with error bar calculation.
+  */
+ 
+ process sex_deterrmine{
+     publishDir "${params.outdir}/sex_determination", mode:"copy"
+    
+     when:
+     params.run_sexdeterrmine
+    
+     input:
+     val 'Bams' from ch_for_sexdeterrmine.collect()
+    
+     output:
+     file 'SexDet.txt'
+    
+     script:
+     if (params.sexdeterrmine_bedfile == '') {
+         """
+         for i in ${Bams.join(' ')}; do
+             echo \$i >> bamlist.txt
+         done
+        
+         samtools depth -aa -q30 -Q30 -f bamlist.txt| sexdeterrmine -f bamlist.txt >SexDet.txt
+         """
+         } else {
+         """
+         for i in ${Bams.join(' ')}; do
+             echo \$i >> bamlist.txt
+         done
+        
+         samtools depth -aa -q30 -Q30 -b ${params.sexdeterrmine_bedfile} -f bamlist.txt| sexdeterrmine -f bamlist.txt >SexDet.txt
+         """
+     }
  }
 
 /*
