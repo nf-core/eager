@@ -1,0 +1,877 @@
+{
+    "parameters": [
+        {
+            "default_value": "'bwa'", 
+            "group": "Other pipeline parameters", 
+            "name": "aligner", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "aligner", 
+            "type": "string"
+        }, 
+        {
+            "default_value": "'./results'", 
+            "group": "Other pipeline parameters", 
+            "name": "outdir", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "outdir", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bwa_index", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bwa_index", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "plaintext_email", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "plaintext_email", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": "'eu-west-1'", 
+            "group": "Other pipeline parameters", 
+            "name": "awsregion", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "awsregion", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "help", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "help", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "monochrome_logs", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "monochrome_logs", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": "'10d'", 
+            "group": "Other pipeline parameters", 
+            "name": "max_time", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "max_time", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "config_profile_url", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "config_profile_url", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": "'https://raw.githubusercontent.com/nf-core/configs/master'", 
+            "group": "Other pipeline parameters", 
+            "name": "custom_config_base", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "custom_config_base", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "complexity_filter", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "complexity_filter", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "igenomesIgnore", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "igenomesIgnore", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "config_profile_description", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "config_profile_description", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "name", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "name", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": "'master'", 
+            "group": "Other pipeline parameters", 
+            "name": "custom_config_version", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "custom_config_version", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "singleEnd", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "singleEnd", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": "'s3://ngi-igenomes/igenomes/'", 
+            "group": "Other pipeline parameters", 
+            "name": "igenomes_base", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "igenomes_base", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "email", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "email", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": 10, 
+            "group": "Other pipeline parameters", 
+            "name": "complexity_filter_poly_g_min", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "complexity_filter_poly_g_min", 
+            "type": "integer"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "skip_trim", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "skip_trim", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": "'./results/pipeline_info'", 
+            "group": "Other pipeline parameters", 
+            "name": "tracedir", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "tracedir", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "freebayes_g", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "freebayes_g", 
+            "type": "integer"
+        }, 
+        {
+            "default_value": 2, 
+            "group": "Other pipeline parameters", 
+            "name": "freebayes_p", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "freebayes_p", 
+            "type": "integer"
+        }, 
+        {
+            "default_value": 1, 
+            "group": "Other pipeline parameters", 
+            "name": "freebayes_C", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "freebayes_C", 
+            "type": "integer"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "large_ref", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "large_ref", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "skip_adapterremoval", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "skip_adapterremoval", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "awsqueue", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "awsqueue", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": 16, 
+            "group": "Other pipeline parameters", 
+            "name": "max_cpus", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "max_cpus", 
+            "type": "integer"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bam", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bam", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "saveReference", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "saveReference", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": "'128 GB'", 
+            "group": "Other pipeline parameters", 
+            "name": "max_memory", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "max_memory", 
+            "type": "string"
+        }, 
+        {
+            "default_value": "[crick:['.thecrick.org'], uppmax:['.uppmax.uu.se']]", 
+            "group": "Other pipeline parameters", 
+            "name": "hostnames", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "hostnames", 
+            "type": "string"
+        }, 
+        {
+            "default_value": "'data/*{1,2}.fastq.gz'", 
+            "group": "Other pipeline parameters", 
+            "name": "reads", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "reads", 
+            "type": "string"
+        }, 
+        {
+            "default_value": true, 
+            "group": "Other pipeline parameters", 
+            "name": "saveTrimmed", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "saveTrimmed", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "saveAlignedIntermediates", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "saveAlignedIntermediates", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": "'/projects1/clusterhomes/fellows/.nextflow/assets/nf-core/eager/assets/multiqc_config.yaml'", 
+            "group": "Other pipeline parameters", 
+            "name": "multiqc_config", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "multiqc_config", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "readPaths", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "readPaths", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "trim_bam", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "trim_bam", 
+            "type": "boolean"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "config_profile_contact", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "config_profile_contact", 
+            "type": "boolean"
+        }, 
+        {
+            "default_value": "'25 MB'", 
+            "group": "Other pipeline parameters", 
+            "name": "maxMultiqcEmailFileSize", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "maxMultiqcEmailFileSize", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "pairedEnd", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "pairedEnd", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "genome", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "genome", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "snpcapture", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "snpcapture", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bedfile", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bedfile", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "fasta", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "fasta", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "seq_dict", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "seq_dict", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "fasta_index", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "fasta_index", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "pmd_udg_type", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "pmd_udg_type", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "skip_fastqc", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "skip_fastqc", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "skip_preseq", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "skip_preseq", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "skip_damage_calculation", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "skip_damage_calculation", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "skip_qualimap", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "skip_qualimap", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "skip_deduplication", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "skip_deduplication", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "complexity_filter_poly_g", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "complexity_filter_poly_g", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "clip_forward_adaptor", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "clip_forward_adaptor", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "clip_reverse_adaptor", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "clip_reverse_adaptor", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "clip_readlength", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "clip_readlength", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "clip_min_read_quality", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "clip_min_read_quality", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "min_adap_overlap", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "min_adap_overlap", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "skip_collapse", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "skip_collapse", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bwaalnn", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bwaalnn", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bwaalnk", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bwaalnk", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bwaalnl", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bwaalnl", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "circularmapper", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "circularmapper", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "circularextension", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "circularextension", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "circulartarget", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "circulartarget", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "circularfilter", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "circularfilter", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bwamem", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bwamem", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bam_discard_unmapped", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bam_discard_unmapped", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bam_unmapped_type", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bam_unmapped_type", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bam_mapping_quality_threshold", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bam_mapping_quality_threshold", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "damageprofiler_length", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "damageprofiler_length", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "damageprofiler_threshold", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "damageprofiler_threshold", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "dedupper", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "dedupper", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "dedup_all_merged", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "dedup_all_merged", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "preseq_step_size", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "preseq_step_size", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "run_pmdtools", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "run_pmdtools", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "pmdtools_range", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "pmdtools_range", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "pmdtools_threshold", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "pmdtools_threshold", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "pmdtools_reference_mask", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "pmdtools_reference_mask", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "pmdtools_max_reads", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "pmdtools_max_reads", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bamutils_clip_left", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bamutils_clip_left", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bamutils_clip_right", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bamutils_clip_right", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "bamutils_softclip", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "bamutils_softclip", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "strip_input_fastq", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "strip_input_fastq", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "strip_mode", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "strip_mode", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "run_genotyping", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "run_genotyping", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "genotyping_tool", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "genotyping_tool", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "gatk_ug_genotype_model", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "gatk_ug_genotype_model", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "gatk_hc_emitrefconf", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "gatk_hc_emitrefconf", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "gatk_call_conf", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "gatk_call_conf", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "gatk_ploidy", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "gatk_ploidy", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "gatk_downsample", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "gatk_downsample", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "gatk_out_mode", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "gatk_out_mode", 
+            "type": "string"
+        }, 
+        {
+            "group": "Other pipeline parameters", 
+            "name": "gatk_dbsnp", 
+            "render": "textfield", 
+            "pattern": ".*", 
+            "required": false, 
+            "label": "gatk_dbsnp", 
+            "type": "string"
+        }
+    ]
+}
