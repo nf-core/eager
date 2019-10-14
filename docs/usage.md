@@ -712,6 +712,18 @@ If you wish to exclude SNP regions from consideration by MultiVCFAnalyzer (such 
 
 If you wish to include results from SNPEff effect analysis, supply the output from SNPEff in txt format.
 
+## Sex Determination
+
+An optional process for human DNA. It can be used to calculate the relative coverage of X and Y chromosomes compared to the autosomes (X-/Y-rate). Standard errors for these measurements are also calculated, assuming a binomial distribution of reads across the SNPs.
+
+### `--run_sexdeterrmine`
+
+Specify to run the optional process of sex determination.
+
+### `--sexdeterrmine_bedfile`
+
+Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate calculation. Running without this parameter will considerably increase runtime, and render the resulting error bars unstrustworthy. Theoretically, any set of SNPs that are distant enough that two SNPs are unlikely to be covered by the same read can be used here. The programme was coded with the 1240K panel in mind.
+
 ## Automatic Resubmission
 
 By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
