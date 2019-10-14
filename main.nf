@@ -135,7 +135,7 @@ def helpMessage() {
 
     SNP Table Generation
       --run_multivcfanalyzer	      Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
-      --write_allele_frequencies	  Specify T(rue) or F(alse) whether to write allele frequencies in the SNP table. Default: 'F'. Options: 'T', 'F'
+      --write_allele_frequencies	  Specify to also write allele frequencies in the SNP table. Default: turned off.
       --min_genotype_quality		    Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
       --min_base_coverage 		      Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
       --min_allele_freq_hom		      Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
@@ -980,7 +980,7 @@ process circularmapper{
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.singleEnd && params.skip_collapse ){
-    prefix = reads[0].toString().tokenize('.')[0]
+    prefix = "${reads[0].baseName}"
     """ 
     bwa aln -t ${task.cpus} $elongated_root ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $elongated_root ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
@@ -1019,7 +1019,7 @@ process bwamem {
 
     script:
     fasta = "${index}/${bwa_base}"
-    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    prefix = "${reads[0].baseName}"
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.singleEnd && params.skip_collapse){
@@ -1671,9 +1671,10 @@ if (params.additional_vcf_files == '') {
  	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
  	script:
+  write_freqs = "${params.write_allele_frequencies}" ? "T" : "F"
  	"""
  	gunzip -f *.vcf.gz
- 	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${params.write_allele_frequencies} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
+ 	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
  	pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
  	rm *.vcf
  	"""
