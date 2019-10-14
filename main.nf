@@ -36,7 +36,7 @@ def helpMessage() {
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
     BAM Input:
-    --run_convertbam				Species to convert an input BAM file into FASTQ format before processing.
+    --run_convertbam		            Species to convert an input BAM file into FASTQ format before processing.
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
@@ -51,7 +51,7 @@ def helpMessage() {
     Skipping                        Skip any of the mentioned steps
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
-      --skip_mapping				Note: this maybe useful when input is a BAM file
+      --skip_mapping		    Note: this maybe useful when input is a BAM file
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
@@ -89,10 +89,10 @@ def helpMessage() {
       --bwamem                      Turn on BWA Mem instead of BWA aln for mapping
     
     BAM Filtering
-      --run_bam_filtering			Turn on samtools filter for mapping quality or unmapped reads of BAM files.
-      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
-      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
-      --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: 'discard', 'bam', 'fastq', 'both').
+      --run_bam_filtering		             Turn on samtools filter for mapping quality or unmapped reads of BAM files.
+      --bam_mapping_quality_threshold    Minimum mapping quality for reads filter, default 0.
+      --bam_discard_unmapped    	       Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
+      --bam_unmapped_type           	   Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: 'discard', 'bam', 'fastq', 'both').
     
     DeDuplication
       --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
@@ -112,8 +112,9 @@ def helpMessage() {
       --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
     
     BAM Trimming
-      --run_trim_bam                    Turn on BAM trimming for UDG(+ or 1/2) protocols
-      --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
+      --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
+      --bamutils_clip_left        	Specify the number of bases to clip off reads from 'left' end of read
+      --bamutils_clip_right         Specify the number of bases to clip off reads from 'right' end of read
       --bamutils_softclip           Use softclip instead of hard masking
 
     Genotyping
@@ -126,22 +127,27 @@ def helpMessage() {
       --gatk_dbsnp                  Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
       --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
       --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
+      --gatk_downsample             Maximum depth coverage allowed for genotyping before downsampling is turned on. Default: 250
+      --freebayes_C                 Specify minimum required supporting observations to consider a variant. Default: 1
+      --freebayes_g                 Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than 
+                                    specified in --freebayes_C. Default: turned off.
+      --freebayes_p                 Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
 
     SNP Table Generation
-      --run_multivcfanalyzer		Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
-      --write_allele_frequencies	Specify T(rue) or F(alse) whether to write allele frequencies in the SNP table. Default: 'F'. Options: 'T', 'F'
-      --min_genotype_quality		Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
-      --min_base_coverage 			Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
-      --min_allele_freq_hom			Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
-      --min_allele_freq_het			Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
-      --additional_vcf_files		Specify additional pre-made VCF files to be included in the SNP table generation, separated by commas. (Optional)
+      --run_multivcfanalyzer	      Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
+      --write_allele_frequencies	  Specify T(rue) or F(alse) whether to write allele frequencies in the SNP table. Default: 'F'. Options: 'T', 'F'
+      --min_genotype_quality		    Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
+      --min_base_coverage 		      Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
+      --min_allele_freq_hom		      Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
+      --min_allele_freq_het		      Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
+      --additional_vcf_files		    Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files. (Optional)
       --reference_gff_annotations 	Specify the reference genome annotations in '.gff' format. (Optional)
-      --reference_gff_exclude		Specify positions to be excluded in '.gff' format. (Optional)
-      --snp_eff_results				Specify the output file from SNP effect analysis in '.txt' format. (Optional)
+      --reference_gff_exclude		    Specify positions to be excluded in '.gff' format. (Optional)
+      --snp_eff_results			        Specify the output file from SNP effect analysis in '.txt' format. (Optional)
 
-      Sex Determination
-        --run_sexdeterrmine         Turn on sex determination.
-        --sexdeterrmine_bedfile     Specify SNP panel in bed format for error bar calculation. (Optional, see documentation)
+    Sex Determination
+      --run_sexdeterrmine           Turn on sex determination.
+      --sexdeterrmine_bedfile       Specify SNP panel in bed format for error bar calculation. (Optional, see documentation)
 
     Other options:     
       --outdir                      The output directory where the results will be saved

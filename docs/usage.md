@@ -622,15 +622,16 @@ There are options for different genotypers to be used. We suggest you the docume
 
 Turns on genotyping to run on all post-dedup and downstream BAMs. For example if `--run_pmdtools` and `--trim_bam` are both supplied, the genotyper will be run on all three BAM files i.e. post-deduplication, post-pmd and post-trimmed BAM files.
 
-### `--genotyping_source`
-
-Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' for mapped only, filtered, or DeDup BAMs (with priority right to left); trimmed (for base clipped BAMs); pmd (for pmdtools output). Default is: raw.  
-
 ### `--genotyping_tool`
 
 Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify 'freebayes', 'hc' or 'ug' respectively.
 
 > NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you.
+
+
+### `--genotyping_source`
+
+Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' for mapped only, filtered, or DeDup BAMs (with priority right to left); trimmed (for base clipped BAMs); pmd (for pmdtools output). Default is: raw.  
 
 ### `--gatk_out_mode`
 
@@ -655,6 +656,10 @@ If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whethe
 ### `--gatk_hc_emitrefconf`
 
 If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: NONE, BP_RESOLUTION, GVCF. Default: GVCF
+
+### `--gatk_downsample`
+
+Maximum depth coverage allowed for genotyping before downsampling is turned on. Any position with a coverage higher than this value will be randomly downsampled to 250 reads. Default: 250
 
 ### `--freebayes_C`
 
