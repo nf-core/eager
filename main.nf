@@ -727,7 +727,7 @@ if (params.run_convertbam) {
  */
 process fastqc {
     tag "$name"
-    publishDir "${params.outdir}/FastQC", mode: 'copy',
+    publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: 
@@ -894,7 +894,7 @@ process bwa {
     tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: !params.circularmapper && params.bwamem && !params.skip_mapping
+    when: !params.circularmapper && !params.bwamem && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwa
@@ -1230,7 +1230,7 @@ Step 5a: DeDup
 
 process dedup{
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/deduplication/dedup", mode: 'copy',
+    publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${prefix}/$filename"}
 
     when:
@@ -1273,7 +1273,7 @@ process dedup{
 
 process markDup{
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/deduplication/markdup"
+    publishDir "${params.outdir}/deduplication/"
 
     when:
     !params.skip_deduplication && params.dedupper != 'dedup'
@@ -1671,8 +1671,9 @@ if (params.additional_vcf_files == '') {
  	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
  	script:
-  write_freqs = "${params.write_allele_frequencies}" ? "T" : "F"
+  write_freqs = ${params.write_allele_frequencies} ? "T" : "F"
  	"""
+  echo ${write_freqs}
  	gunzip -f *.vcf.gz
  	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
  	pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
