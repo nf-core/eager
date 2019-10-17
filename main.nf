@@ -36,7 +36,7 @@ def helpMessage() {
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
     BAM Input:
-    --run_convertbam				Species to convert an input BAM file into FASTQ format before processing.
+    --run_convertbam		            Species to convert an input BAM file into FASTQ format before processing.
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
@@ -51,7 +51,7 @@ def helpMessage() {
     Skipping                        Skip any of the mentioned steps
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
-      --skip_mapping				Note: this maybe useful when input is a BAM file
+      --skip_mapping		    Note: this maybe useful when input is a BAM file
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
@@ -70,29 +70,24 @@ def helpMessage() {
       --skip_collapse               Skip merging forward and reverse reads together. (Only for PE samples)
       --skip_trim                   Skip adaptor and quality trimming
     
-    BWA Mapping
+    Mapping
+      --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'
       --bwaalnn                     Specify the -n parameter for BWA aln.
       --bwaalnk                     Specify the -k parameter for BWA aln
       --bwaalnl                     Specify the -l parameter for BWA aln
+      --circularextension           Specify the number of bases to extend reference by
+      --circulartarget              Specify the target chromosome for CM
+      --circularfilter              Specify to filter off-target reads
  
     Stripping
       --strip_input_fastq           Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
       --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace)
-    
-    CircularMapper
-      --circularmapper              Turn on CircularMapper (CM)
-      --circularextension           Specify the number of bases to extend reference by
-      --circulartarget              Specify the target chromosome for CM
-      --circularfilter              Specify to filter off-target reads
-    
-    BWA Mem Mapping
-      --bwamem                      Turn on BWA Mem instead of BWA aln for mapping
-    
+      
     BAM Filtering
-      --run_bam_filtering			Turn on samtools filter for mapping quality or unmapped reads of BAM files.
-      --bam_mapping_quality_threshold   Minimum mapping quality for reads filter, default 0.
-      --bam_discard_unmapped        Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
-      --bam_unmapped_type           Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: 'discard', 'bam', 'fastq', 'both').
+      --run_bam_filtering		             Turn on samtools filter for mapping quality or unmapped reads of BAM files.
+      --bam_mapping_quality_threshold    Minimum mapping quality for reads filter, default 0.
+      --bam_discard_unmapped    	       Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
+      --bam_unmapped_type           	   Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: 'discard', 'bam', 'fastq', 'both').
     
     DeDuplication
       --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
@@ -112,8 +107,9 @@ def helpMessage() {
       --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
     
     BAM Trimming
-      --run_trim_bam                    Turn on BAM trimming for UDG(+ or 1/2) protocols
-      --bamutils_clip_left / --bamutils_clip_right  Specify the number of bases to clip off reads
+      --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
+      --bamutils_clip_left        	Specify the number of bases to clip off reads from 'left' end of read
+      --bamutils_clip_right         Specify the number of bases to clip off reads from 'right' end of read
       --bamutils_softclip           Use softclip instead of hard masking
 
     Genotyping
@@ -126,22 +122,27 @@ def helpMessage() {
       --gatk_dbsnp                  Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
       --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
       --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
+      --gatk_downsample             Maximum depth coverage allowed for genotyping before downsampling is turned on. Default: 250
+      --freebayes_C                 Specify minimum required supporting observations to consider a variant. Default: 1
+      --freebayes_g                 Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than 
+                                    specified in --freebayes_C. Default: turned off.
+      --freebayes_p                 Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
 
     SNP Table Generation
-      --run_multivcfanalyzer		Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
-      --write_allele_frequencies	Specify T(rue) or F(alse) whether to write allele frequencies in the SNP table. Default: 'F'. Options: 'T', 'F'
-      --min_genotype_quality		Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
-      --min_base_coverage 			Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
-      --min_allele_freq_hom			Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
-      --min_allele_freq_het			Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
-      --additional_vcf_files		Specify additional pre-made VCF files to be included in the SNP table generation, separated by commas. (Optional)
+      --run_multivcfanalyzer	      Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
+      --write_allele_frequencies	  Specify to also write allele frequencies in the SNP table. Default: turned off.
+      --min_genotype_quality		    Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
+      --min_base_coverage 		      Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
+      --min_allele_freq_hom		      Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
+      --min_allele_freq_het		      Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
+      --additional_vcf_files		    Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files. (Optional)
       --reference_gff_annotations 	Specify the reference genome annotations in '.gff' format. (Optional)
-      --reference_gff_exclude		Specify positions to be excluded in '.gff' format. (Optional)
-      --snp_eff_results				Specify the output file from SNP effect analysis in '.txt' format. (Optional)
+      --reference_gff_exclude		    Specify positions to be excluded in '.gff' format. (Optional)
+      --snp_eff_results			        Specify the output file from SNP effect analysis in '.txt' format. (Optional)
 
-      Sex Determination
-        --run_sexdeterrmine         Turn on sex determination.
-        --sexdeterrmine_bedfile     Specify SNP panel in bed format for error bar calculation. (Optional, see documentation)
+    Sex Determination
+      --run_sexdeterrmine           Turn on sex determination.
+      --sexdeterrmine_bedfile       Specify SNP panel in bed format for error bar calculation. (Optional, see documentation)
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -212,19 +213,18 @@ params.min_adap_overlap = 1
 params.skip_collapse = false
 params.skip_trim = false
 
+//Mapping algorithm
+params.mapper = 'bwaaln'
+
 //Read mapping parameters (default = BWA aln default)
 params.bwaalnn = 0.04
 params.bwaalnk = 2
 params.bwaalnl = 32
 
 //Mapper to use, by default BWA aln will be used
-params.circularmapper = false
 params.circularextension = 500
 params.circulartarget = 'MT'
 params.circularfilter = false
-
-//BWAMem Specific Settings 
-params.bwamem = false
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
 params.run_bam_filtering = false
@@ -383,24 +383,28 @@ if (params.strip_input_fastq){
     }
 }
 
+if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "circularmapper") {
+    exit 1, "Please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}."
+}
+
 
 // Genotyping sanity checking
 
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
-  exit 1, "Please specify a genotyper. Options: ug, hc, freebayes. You gave: ${params.genotyping_tool}"
+  exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}."
   }
   
   if (params.gatk_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_out_mode != 'EMIT_ALL_SITES') {
-  exit 1, "Please check your GATK output mode. Options are: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. You gave: ${params.gatk_out_mode}"
+  exit 1, "Please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}."
   }
   
   if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "Please check your UnifiedGenotyper genotype model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. You gave: ${params.gatk_ug_genotype_model}"
+    exit 1, "Please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}"
   }
 
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION. You gave: ${params.gatk_hc_emitrefconf}"
+    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}"
   }
 }
 
@@ -721,7 +725,7 @@ if (params.run_convertbam) {
  */
 process fastqc {
     tag "$name"
-    publishDir "${params.outdir}/FastQC", mode: 'copy',
+    publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: 
@@ -888,7 +892,7 @@ process bwa {
     tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: !params.circularmapper && params.bwamem && !params.skip_mapping
+    when: params.mapper == 'bwaaln' && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwa
@@ -933,7 +937,7 @@ process circulargenerator{
             else null
     }
 
-    when: params.circularmapper
+    when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
     file fasta from fasta_for_indexing
@@ -955,7 +959,7 @@ process circularmapper{
     tag "$prefix"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
 
-    when: params.circularmapper || !params.skip_mapping
+    when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_cm
@@ -974,7 +978,7 @@ process circularmapper{
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.singleEnd && params.skip_collapse ){
-    prefix = reads[0].toString().tokenize('.')[0]
+    prefix = "${reads[0].baseName}"
     """ 
     bwa aln -t ${task.cpus} $elongated_root ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $elongated_root ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
@@ -1000,7 +1004,7 @@ process bwamem {
     tag "$prefix"
     publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
 
-    when: params.bwamem && !params.circularmapper && !params.skip_mapping
+    when: params.mapper == 'bwamem' && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwamem
@@ -1013,7 +1017,7 @@ process bwamem {
 
     script:
     fasta = "${index}/${bwa_base}"
-    prefix = reads[0].toString() - ~/(_R1)?(\.combined\.)?(prefixed)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    prefix = "${reads[0].baseName}"
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.singleEnd && params.skip_collapse){
@@ -1224,7 +1228,7 @@ Step 5a: DeDup
 
 process dedup{
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/deduplication/dedup", mode: 'copy',
+    publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${prefix}/$filename"}
 
     when:
@@ -1267,7 +1271,7 @@ process dedup{
 
 process markDup{
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/deduplication/markdup"
+    publishDir "${params.outdir}/deduplication/"
 
     when:
     !params.skip_deduplication && params.dedupper != 'dedup'
@@ -1665,9 +1669,11 @@ if (params.additional_vcf_files == '') {
  	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
  	script:
+  write_freqs = ${params.write_allele_frequencies} ? "T" : "F"
  	"""
+  echo ${write_freqs}
  	gunzip -f *.vcf.gz
- 	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${params.write_allele_frequencies} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
+ 	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
  	pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
  	rm *.vcf
  	"""
