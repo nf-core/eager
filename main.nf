@@ -70,24 +70,19 @@ def helpMessage() {
       --skip_collapse               Skip merging forward and reverse reads together. (Only for PE samples)
       --skip_trim                   Skip adaptor and quality trimming
     
-    BWA Mapping
+    Mapping
+      --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'
       --bwaalnn                     Specify the -n parameter for BWA aln.
       --bwaalnk                     Specify the -k parameter for BWA aln
       --bwaalnl                     Specify the -l parameter for BWA aln
+      --circularextension           Specify the number of bases to extend reference by
+      --circulartarget              Specify the target chromosome for CM
+      --circularfilter              Specify to filter off-target reads
  
     Stripping
       --strip_input_fastq           Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
       --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace)
-    
-    CircularMapper
-      --circularmapper              Turn on CircularMapper (CM)
-      --circularextension           Specify the number of bases to extend reference by
-      --circulartarget              Specify the target chromosome for CM
-      --circularfilter              Specify to filter off-target reads
-    
-    BWA Mem Mapping
-      --bwamem                      Turn on BWA Mem instead of BWA aln for mapping
-    
+      
     BAM Filtering
       --run_bam_filtering		             Turn on samtools filter for mapping quality or unmapped reads of BAM files.
       --bam_mapping_quality_threshold    Minimum mapping quality for reads filter, default 0.
@@ -218,19 +213,18 @@ params.min_adap_overlap = 1
 params.skip_collapse = false
 params.skip_trim = false
 
+//Mapping algorithm
+params.mapper = 'bwaaln'
+
 //Read mapping parameters (default = BWA aln default)
 params.bwaalnn = 0.04
 params.bwaalnk = 2
 params.bwaalnl = 32
 
 //Mapper to use, by default BWA aln will be used
-params.circularmapper = false
 params.circularextension = 500
 params.circulartarget = 'MT'
 params.circularfilter = false
-
-//BWAMem Specific Settings 
-params.bwamem = false
 
 //BAM Filtering steps (default = keep mapped and unmapped in BAM file)
 params.run_bam_filtering = false
@@ -389,24 +383,28 @@ if (params.strip_input_fastq){
     }
 }
 
+if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "circularmapper") {
+    exit 1, "Please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}."
+}
+
 
 // Genotyping sanity checking
 
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
-  exit 1, "Please specify a genotyper. Options: ug, hc, freebayes. You gave: ${params.genotyping_tool}"
+  exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}."
   }
   
   if (params.gatk_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_out_mode != 'EMIT_ALL_SITES') {
-  exit 1, "Please check your GATK output mode. Options are: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. You gave: ${params.gatk_out_mode}"
+  exit 1, "Please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}."
   }
   
   if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "Please check your UnifiedGenotyper genotype model. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. You gave: ${params.gatk_ug_genotype_model}"
+    exit 1, "Please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}"
   }
 
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: NONE, GVCF, BP_RESOLUTION. You gave: ${params.gatk_hc_emitrefconf}"
+    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}"
   }
 }
 
@@ -894,7 +892,7 @@ process bwa {
     tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: !params.circularmapper && !params.bwamem && !params.skip_mapping
+    when: params.mapper == 'bwaaln' && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwa
@@ -939,7 +937,7 @@ process circulargenerator{
             else null
     }
 
-    when: params.circularmapper
+    when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
     file fasta from fasta_for_indexing
@@ -961,7 +959,7 @@ process circularmapper{
     tag "$prefix"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
 
-    when: params.circularmapper || !params.skip_mapping
+    when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_cm
@@ -1006,7 +1004,7 @@ process bwamem {
     tag "$prefix"
     publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
 
-    when: params.bwamem && !params.circularmapper && !params.skip_mapping
+    when: params.mapper == 'bwamem' && !params.skip_mapping
 
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwamem

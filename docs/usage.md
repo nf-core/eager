@@ -457,6 +457,10 @@ For example:
 
 ## Read Mapping Parameters
 
+## `--mapper`
+
+Specify which mapping tool to use. Options are BWA aln ('bwaaln'), BWA mem ('bwamem'), circularmapper ('circularmapper'). `bwa aln` is the default and best for short read ancient DNA. `bwamem` can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Default is 'bwaaln'
+
 ## BWA (default)
 
 These parameters configure mapping algorithm parameters.
@@ -475,10 +479,6 @@ Configures the length of the seed used in `bwa aln -l`. Default is set to BWA de
 
 ## CircularMapper
 
-### `--circularmapper`
-
-This turns on the CircularMapper application, that enhances the mapping procedure with the BWA algorithm on circular references utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details).
-
 ### `--circularextension`
 
 The number of bases to extend the reference genome with. By default this is set to `500` if not specified otherwise.
@@ -490,12 +490,6 @@ The chromosome in your FastA reference that you'd like to be treated as circular
 ### `--circularfilter`
 
 If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.
-
-## BWA Mem
-
-### `--bwamem`
-
-Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite useful for modern DNA, but is rarely used in projects for ancient DNA.
 
 ## Mapped Reads Stripping
 
