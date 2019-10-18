@@ -1669,7 +1669,7 @@ if (params.additional_vcf_files == '') {
  	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
  	script:
-  write_freqs = ${params.write_allele_frequencies} ? "T" : "F"
+  write_freqs = params.write_allele_frequencies ? "T" : "F"
  	"""
   echo ${write_freqs}
  	gunzip -f *.vcf.gz
