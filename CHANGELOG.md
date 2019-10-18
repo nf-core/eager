@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Fixed`
 
 * [#227](https://github.com/nf-core/eager/issues/227) - Large re-write of input/output process logic to allow maximum flexibility. Originally to address [#227](https://github.com/nf-core/eager/issues/227), but further expanded
+* Changed how mapper tool is selected
+* Fixed travis linting errors
+* Added undocumented parameters (freebayes options, GATK downscale)
 
 ### `Dependencies`
 
