@@ -457,6 +457,10 @@ For example:
 
 ## Read Mapping Parameters
 
+## `--mapper`
+
+Specify which mapping tool to use. Options are BWA aln ('bwaaln'), BWA mem ('bwamem'), circularmapper ('circularmapper'). `bwa aln` is the default and best for short read ancient DNA. `bwamem` can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Default is 'bwaaln'
+
 ## BWA (default)
 
 These parameters configure mapping algorithm parameters.
@@ -475,10 +479,6 @@ Configures the length of the seed used in `bwa aln -l`. Default is set to BWA de
 
 ## CircularMapper
 
-### `--circularmapper`
-
-This turns on the CircularMapper application, that enhances the mapping procedure with the BWA algorithm on circular references utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details).
-
 ### `--circularextension`
 
 The number of bases to extend the reference genome with. By default this is set to `500` if not specified otherwise.
@@ -490,12 +490,6 @@ The chromosome in your FastA reference that you'd like to be treated as circular
 ### `--circularfilter`
 
 If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.
-
-## BWA Mem
-
-### `--bwamem`
-
-Turn this on to utilize BWA Mem instead of `bwa aln` for alignment. Can be quite useful for modern DNA, but is rarely used in projects for ancient DNA.
 
 ## Mapped Reads Stripping
 
@@ -622,15 +616,16 @@ There are options for different genotypers to be used. We suggest you the docume
 
 Turns on genotyping to run on all post-dedup and downstream BAMs. For example if `--run_pmdtools` and `--trim_bam` are both supplied, the genotyper will be run on all three BAM files i.e. post-deduplication, post-pmd and post-trimmed BAM files.
 
-### `--genotyping_source`
-
-Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' for mapped only, filtered, or DeDup BAMs (with priority right to left); trimmed (for base clipped BAMs); pmd (for pmdtools output). Default is: raw.  
-
 ### `--genotyping_tool`
 
 Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify 'freebayes', 'hc' or 'ug' respectively.
 
 > NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you.
+
+
+### `--genotyping_source`
+
+Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' for mapped only, filtered, or DeDup BAMs (with priority right to left); trimmed (for base clipped BAMs); pmd (for pmdtools output). Default is: raw.  
 
 ### `--gatk_out_mode`
 
@@ -655,6 +650,10 @@ If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whethe
 ### `--gatk_hc_emitrefconf`
 
 If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: NONE, BP_RESOLUTION, GVCF. Default: GVCF
+
+### `--gatk_downsample`
+
+Maximum depth coverage allowed for genotyping before downsampling is turned on. Any position with a coverage higher than this value will be randomly downsampled to 250 reads. Default: 250
 
 ### `--freebayes_C`
 
