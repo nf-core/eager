@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Added`
 
 * Added Support for automated tests using [GitHub Actions](https://github.com/features/actions)
-*  [#40](https://github.com/nf-core/eager/issues/40), [#231](https://github.com/nf-core/eager/issues/231) - Added genotyping capability through GATK UnifiedGenotyper (v3.5), GATK HaplotypeCaller (v4.1) and FreeBayes
+* [#40](https://github.com/nf-core/eager/issues/40), [#231](https://github.com/nf-core/eager/issues/231) - Added genotyping capability through GATK UnifiedGenotyper (v3.5), GATK HaplotypeCaller (v4.1) and FreeBayes
 * Added MultiVCFAnalyzer module
 * [#240](https://github.com/nf-core/eager/issues/240) - Added human sex determination module.
 * [#226](https://github.com/nf-core/eager/issues/226) - Added `--preserve5p` function for AdapterRemoval
