@@ -52,6 +52,10 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_trim --saveReference
   # Run the basic pipeline with preserve5p end option
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --preserve5p
+    # Run the basic pipeline with preserve5p end option
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mergedonly
+    # Run the basic pipeline with preserve5p end and merged reads only options
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --preserve5p --mergedonly
    # Run the basic pipeline with paired end data without adapterRemoval
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_adapterremoval --saveReference
    # Run the basic pipeline with output unmapped reads as fastq

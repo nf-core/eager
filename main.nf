@@ -70,6 +70,7 @@ def helpMessage() {
       --skip_collapse               Skip merging forward and reverse reads together. (Only for PE samples)
       --skip_trim                   Skip adaptor and quality trimming
       --preserve5p                  Skip 5p quality base trimming (n, score, window) at 5p end.
+      --mergedonly                  Send downstream only merged reads (unmerged reads and singletons are discarded).
     
     Mapping
       --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'
@@ -214,6 +215,7 @@ params.min_adap_overlap = 1
 params.skip_collapse = false
 params.skip_trim = false
 params.preserve5p = false
+params.mergedonly = false
 
 //Mapping algorithm
 params.mapper = 'bwaaln'
@@ -815,6 +817,7 @@ process adapter_removal {
     trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
     collapse_me = params.skip_collapse ? '' : '--collapse'
     preserve5p = params.preserve5p ? '--preserve5p' : ''
+    mergedonly = params.mergedonly ? "Y" : "N"
     
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
     if (!params.singleEnd && !params.skip_collapse && !params.skip_trim){
@@ -823,8 +826,12 @@ process adapter_removal {
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
-    if [ ${preserve5p}  = "--preserve5p" ]; then 
+    if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
       zcat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+    elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
+      zcat *.collapsed.gz | gzip > output/${base}.combined.fq.gz
+    elif [ ${mergedonly} = "Y" ] ; then
+      zcat *.collapsed.gz *.collapsed.truncated.gz | gzip > output/${base}.combined.fq.gz
     else
       zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
     fi
@@ -844,7 +851,13 @@ process adapter_removal {
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --basename ${base} ${collapse_me} ${trim_me}
     
-    mv *.settings ${base}.pair*.truncated.gz output/
+    if [ ${mergedonly} = "Y" ]; then
+      zcat *.collapsed.gz *.collapsed.truncated.gz | gzip > output/${base}.combined.fq.gz
+    else
+      zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+    fi
+
+    mv *.settings output/
     """
     } else {
     //SE, collapse not possible, trim reads
