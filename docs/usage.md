@@ -455,6 +455,16 @@ For example:
 --pairedEnd --skip_trim  --reads '*.fastq'
 ```
 
+### `--preserve5p`
+
+Turns off quality based trimming at the 5p end of reads when any of the --trimns, --trimqualities, or --trimwindows options are used. Only 3p end of reads will be removed.
+
+> This also entirely disables quality based trimming of collapsed reads, since both ends of these are informative for PCR duplicate filtering. Described [here](https://github.com/MikkelSchubert/adapterremoval/issues/32#issuecomment-504758137).
+
+### `--mergedonly`
+
+This flag means that only merged reads are sent downstream for analysis. Singletons (i.e. reads missing a pair), or unmerged reads (where there wasn't sufficient overlap) are discarded. You may want to use this if you want ensure only the best quality reads for your analysis, but with the penalty of potentially losing still valid data (even if some reads have slightly lower quality).
+
 ## Read Mapping Parameters
 
 ## `--mapper`
