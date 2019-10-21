@@ -106,7 +106,9 @@ This shows a barplot with the overall number of sequences (x axis) in your raw l
 
 A section of the bar will also show an approximate estimation of the fraction of the total number of reads that are duplicates of another. This can derive from over-amplifcation of the library, or lots of single adapters. This can be later checked with the Deduplication check. A good library and sequencing run should have very low amounts of duplicates reads.
 
-<img src="images/output/fastqc/sequence_counts.png" width="75%" height = "75%">
+<p align="center">
+	<img src="images/output/fastqc/sequence_counts.png" width="75%" height = "75%">
+</p>
 
 #### Sequence Quality Histograms
 
