@@ -48,8 +48,8 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
   # Run the basic pipeline with paired end data without collapsing
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse --saveReference
-  # Run the basic pipeline with paired end data without trimming
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_trim --saveReference
+  # Run the basic pipeline with paired end data without trimming CURRENTLY DISABLED UNTIL CORRECT TEST DATA AVALIABLE
+  #- nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_trim --saveReference
   # Run the basic pipeline with preserve5p end option
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --preserve5p
     # Run the basic pipeline with preserve5p end option
