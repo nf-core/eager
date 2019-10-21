@@ -339,10 +339,10 @@ if ( params.fasta.isEmpty () ){
 
 
 //Index files provided? Then check whether they are correct and complete
-if (params.aligner != 'bwa' && !params.circularmapper && !params.mapper = 'bwamem'){
-    exit 1, "Invalid aligner option. Default is bwa, but specify --circularmapper or --bwamem to use these."
+if (params.aligner != 'bwa' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
+    exit 1, "Invalid aligner option. Default is bwa, but specify --mapper 'bwamem' or --mapper 'circularmapper' to use these."
 }
-if( params.bwa_index && (params.aligner == 'bwa' | params.mapper = 'bwamem')){
+if( params.bwa_index && (params.aligner == 'bwa' | params.mapper == 'bwamem')){
     lastPath = params.bwa_index.lastIndexOf(File.separator)
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
     bwa_base = params.bwa_index.substring(lastPath+1)
@@ -585,7 +585,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 * PREPROCESSING - Create BWA indices if they are not present
 */ 
 
-if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.mapper = 'bwamem')){
+if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.mapper == 'bwamem')){
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
