@@ -70,8 +70,10 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mapper 'bwamem' --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
   # Test with zipped reference input
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://raw.githubusercontent.com/nf-core/test-datasets/eager2/reference/Test.fasta.gz'
-  # Run the basic pipeline with the bam input profile
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile testbam,docker --bam
+  # Run the basic pipeline with the bam input profile, skip AdapterRemoval as no --convertBam
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile testbam,docker --bam --skip_adapterremoval
+  # Run the basic pipeline with the bam input profile, convert to FASTQC for adapterremoval test
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile testbam,docker --bam --run_convertbam
   # Run the basic pipeline with FastA reference with `fna` extension
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --saveReference
   # Test using pre-computed indices from a separate run beforehand

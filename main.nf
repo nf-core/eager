@@ -1691,13 +1691,13 @@ if (params.additional_vcf_files == '') {
  	file 'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
  	file 'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
  	file 'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
- 	file 'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
+ 	file 'snpTbaleForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
  	file 'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
  	file 'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
  	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
  	script:
-  write_freqs = ${params.write_allele_frequencies} ? "T" : "F"
+  write_freqs = $params.write_allele_frequencies ? "T" : "F"
  	"""
   echo ${write_freqs}
  	gunzip -f *.vcf.gz
