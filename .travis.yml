@@ -34,7 +34,7 @@ install:
   - sudo apt-get install npm && npm install -g markdownlint-cli
 
 env:
-  - NXF_VER='0.32.0' # Specify a minimum NF version that should be tested and work
+  - NXF_VER='19.04.0' # Specify a minimum NF version that should be tested and work
   - NXF_VER='' # Plus: get the latest NF version and check that it works
 
 script:
@@ -50,6 +50,12 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse --saveReference
   # Run the basic pipeline with paired end data without trimming
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_trim --saveReference
+  # Run the basic pipeline with preserve5p end option
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --preserve5p
+    # Run the basic pipeline with preserve5p end option
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mergedonly
+    # Run the basic pipeline with preserve5p end and merged reads only options
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --preserve5p --mergedonly
    # Run the basic pipeline with paired end data without adapterRemoval
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_adapterremoval --saveReference
    # Run the basic pipeline with output unmapped reads as fastq
