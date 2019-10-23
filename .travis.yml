@@ -49,7 +49,7 @@ script:
   # REFERENCE: Test using pre-computed indices from a separate run beforehand
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict 
   # REFERENCE: Test with zipped reference input
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://raw.githubusercontent.com/nf-core/test-datasets/eager2/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://github.com/nf-core/test-datasets/blob/eager2/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
   # FASTP: Run the same pipeline testing optional step: fastp, complexity 
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta --fasta_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta.fai --seq_dict results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.dict
   # ADAPTERREMOVAL: Run the basic pipeline with paired end data without collapsing
