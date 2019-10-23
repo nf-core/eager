@@ -51,7 +51,7 @@ def helpMessage() {
     Skipping                        Skip any of the mentioned steps
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
-      --skip_mapping		    Note: this maybe useful when input is a BAM file
+      --skip_mapping		            Note: this maybe useful when input is a BAM file
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
@@ -89,7 +89,7 @@ def helpMessage() {
       --run_bam_filtering		             Turn on samtools filter for mapping quality or unmapped reads of BAM files.
       --bam_mapping_quality_threshold    Minimum mapping quality for reads filter, default 0.
       --bam_discard_unmapped    	       Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
-      --bam_unmapped_type           	   Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: 'discard', 'bam', 'fastq', 'both').
+      --bam_unmapped_type           	   Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'.
     
     DeDuplication
       --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
@@ -116,7 +116,7 @@ def helpMessage() {
 
     Genotyping
       --run_genotyping              Perform genotyping on deduplicated BAMs.
-      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5. Options: 'ug', 'hc', 'freebayes'
+      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5 and requires internet access. Options: 'ug', 'hc', 'freebayes'
       --genotyping_source      	    Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
       --gatk_out_mode               Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
       --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30.
@@ -126,21 +126,20 @@ def helpMessage() {
       --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
       --gatk_downsample             Maximum depth coverage allowed for genotyping before downsampling is turned on. Default: 250
       --freebayes_C                 Specify minimum required supporting observations to consider a variant. Default: 1
-      --freebayes_g                 Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than 
-                                    specified in --freebayes_C. Default: turned off.
+      --freebayes_g                 Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: turned off.
       --freebayes_p                 Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
 
     SNP Table Generation
       --run_multivcfanalyzer	      Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
-      --write_allele_frequencies	  Specify to also write allele frequencies in the SNP table. Default: turned off.
-      --min_genotype_quality		    Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
+      --write_allele_frequencies    Specify to also write allele frequencies in the SNP table. Default: turned off.
+      --min_genotype_quality        Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
       --min_base_coverage 		      Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
       --min_allele_freq_hom		      Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
       --min_allele_freq_het		      Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
-      --additional_vcf_files		    Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files. (Optional)
-      --reference_gff_annotations 	Specify the reference genome annotations in '.gff' format. (Optional)
-      --reference_gff_exclude		    Specify positions to be excluded in '.gff' format. (Optional)
-      --snp_eff_results			        Specify the output file from SNP effect analysis in '.txt' format. (Optional)
+      --additional_vcf_files        Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files. (Optional)
+      --reference_gff_annotations   Specify the reference genome annotations in '.gff' format. (Optional)
+      --reference_gff_exclude       Specify positions to be excluded in '.gff' format. (Optional)
+      --snp_eff_results             Specify the output file from SNP effect analysis in '.txt' format. (Optional)
 
     Sex Determination
       --run_sexdeterrmine           Turn on sex determination.
@@ -379,16 +378,21 @@ if (params.skip_collapse  && params.singleEnd){
 //Strip mode sanity checking
 if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
-        exit 1, "--strip_mode can only be set to strip or replace"
+        exit 1, "--strip_mode can only be set to strip or replace!"
     }
 
     if (params.bam && !params.run_convertbam) {
-        exit 1, "--strip_input_fastq can only be used on FASTQ"
+        exit 1, "--strip_input_fastq can only be used on FASTQ, but you gave BAM input and didn't specify --run_convertbam!"
     }
 }
 
+//Mapper sanity checking
 if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "circularmapper") {
-    exit 1, "Please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}."
+    exit 1, "Please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}!"
+}
+
+if (params.bam_discard_unmapped && bam_unmapped_type == '') {
+    exit 1, "Please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
 }
 
 
@@ -396,19 +400,19 @@ if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "c
 
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
-  exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}."
+  exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
   }
   
   if (params.gatk_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_out_mode != 'EMIT_ALL_SITES') {
-  exit 1, "Please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}."
+  exit 1, "Please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
   }
   
   if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "Please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}"
+    exit 1, "Please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}!"
   }
 
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}"
+    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
   }
 }
 
@@ -1691,15 +1695,14 @@ if (params.additional_vcf_files == '') {
  	file 'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
  	file 'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
  	file 'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
- 	file 'snpTbaleForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
+ 	file 'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
  	file 'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
  	file 'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
  	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
  	script:
-  write_freqs = $params.write_allele_frequencies ? "T" : "F"
+  	write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
  	"""
-  echo ${write_freqs}
  	gunzip -f *.vcf.gz
  	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
  	pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
