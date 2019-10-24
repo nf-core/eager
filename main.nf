@@ -36,7 +36,7 @@ def helpMessage() {
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
     BAM Input:
-    --run_convertbam		            Species to convert an input BAM file into FASTQ format before processing.
+    --run_convertbam                Species to convert an input BAM file into FASTQ format before processing.
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
@@ -51,16 +51,16 @@ def helpMessage() {
     Skipping                        Skip any of the mentioned steps
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
-      --skip_mapping		    Note: this maybe useful when input is a BAM file
+      --skip_mapping                Note: this maybe useful when input is a BAM file
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
       --skip_deduplication
-    
+
     Complexity Filtering 
       --complexity_filter_poly_g        Run poly-G removal on FASTQ files
       --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed (default: 10)
-    
+
     Clipping / Merging
       --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward). Default: 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'
       --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse). Default: 'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'
@@ -71,7 +71,7 @@ def helpMessage() {
       --skip_trim                   Skip adaptor and quality trimming
       --preserve5p                  Skip 5p quality base trimming (n, score, window) at 5p end.
       --mergedonly                  Send downstream only merged reads (unmerged reads and singletons are discarded).
-    
+
     Mapping
       --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'
       --bwaalnn                     Specify the -n parameter for BWA aln.
@@ -90,14 +90,14 @@ def helpMessage() {
       --bam_mapping_quality_threshold    Minimum mapping quality for reads filter, default 0.
       --bam_discard_unmapped    	       Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
       --bam_unmapped_type           	   Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format (options: 'discard', 'bam', 'fastq', 'both').
-    
+
     DeDuplication
       --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
       --dedup_all_merged            Treat all reads as merged reads
     
     Library Complexity Estimation
       --preseq_step_size            Specify the step size of Preseq
-    
+
     (aDNA) Damage Analysis
       --damageprofiler_length       Specify length filter for DamageProfiler
       --damageprofiler_threshold    Specify number of bases to consider for damageProfiler
@@ -107,7 +107,7 @@ def helpMessage() {
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools
       --pmdtools_reference_mask     Specify a reference mask for PMDTools
       --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
-    
+
     BAM Trimming
       --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
       --bamutils_clip_left        	Specify the number of bases to clip off reads from 'left' end of read
@@ -145,6 +145,10 @@ def helpMessage() {
     Sex Determination
       --run_sexdeterrmine           Turn on sex determination.
       --sexdeterrmine_bedfile       Specify SNP panel in bed format for error bar calculation. (Optional, see documentation)
+
+    Nuclear Contamination for Human DNA
+      --run_nuclear_contamination   Enable nuclear contamination estimation.
+      --contamination_chrom_name    The name of the chromosome in your bam. 'X' for hs37d5, 'chrX' for HG19. 
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -298,6 +302,10 @@ params.sexdeterrmine_bedfile = ''
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
+
+//Nuclear contamination based on chromosome X heterozygosity.
+params.run_nuclear_contamination = false
+params.contamination_chrom_name = 'X' // Default to using hs37d5 name
 
 
 /*
@@ -1323,18 +1331,18 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
-        .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
+        .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils ; ch_index_for_nuclear_contamination} 
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
 
 	ch_filteringindex_for_skiprmdup
-	    .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
+	    .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils ; ch_index_for_nuclear_contamination} 
 }
 
 
@@ -1737,6 +1745,32 @@ if (params.additional_vcf_files == '') {
      }
  }
 
+ /* 
+  * Step XX Nuclear contamination for Human DNA based on chromosome X heterozygosity.
+  */
+ process nuclear_contamination{
+     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
+     
+     /* ANGSD Xcontamination will exit with status 134 when the number of SNPs is not large enough for estimation. */
+     validExitStatus 0,134
+     
+     when:
+     params.run_nuclear_contamination
+    
+     input:
+     file input from ch_for_nuclear_contamination
+     /* Should note that the ch_bais aren't an explicit input. They need to be staged, so ANGSD can look at the specified chromosome area.*/
+     file inputBai from ch_index_for_nuclear_contamination
+    
+    
+     output:
+     file '*.X.contamination.out'
+    
+     """
+     angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${input.baseName}.doCounts
+     ${params.angsdDir}/misc/contamination -a ${input.baseName}.doCounts.icnts.gz -h ${baseDir}/assets/HapMapChrX.gz 2> ${input.baseName}.X.contamination.out
+     """
+ }
 /*
 Genotyping tools:
 - angsd
