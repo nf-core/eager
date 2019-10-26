@@ -733,7 +733,7 @@ Specify to run the optional process of sex determination.
 
 Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate calculation. Running without this parameter will considerably increase runtime, and render the resulting error bars unstrustworthy. Theoretically, any set of SNPs that are distant enough that two SNPs are unlikely to be covered by the same read can be used here. The programme was coded with the 1240K panel in mind.
 
-## Sex Determination
+## Nuclear Contamintaion for Humans
 
 ### `--run_nuclear_contamination`
 
