@@ -49,7 +49,7 @@ script:
   # REFERENCE: Test using pre-computed indices from a separate run beforehand
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict 
   # REFERENCE: Test with zipped reference input
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://github.com/nf-core/test-datasets/blob/eager2/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://github.com/jfy133/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
   # FASTP: Run the same pipeline testing optional step: fastp, complexity 
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta --fasta_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta.fai --seq_dict results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.dict
   # ADAPTERREMOVAL: Run the basic pipeline with paired end data without collapsing
@@ -79,7 +79,7 @@ script:
   # TRIM_BAM/PMD/GENOTYPING_UG/MULTIVCFANALYZER: Test running PMDTools, TrimBam, GATK UnifiedGenotyper and MultiVCFAnalyzer
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
   # GENOTYPING_UG/PMD/MULTIVCFANALYZER: Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd  --dedupper 'dedup' -run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager2/reference/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd  --dedupper 'dedup' -run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/jfy133/test-datasets/eager/reference/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
   # BAM_INPUT: Run the basic pipeline with the bam input profile, skip AdapterRemoval as no --convertBam
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_bam,docker --bam --skip_adapterremoval
   # BAM_INPUT: Run the basic pipeline with the bam input profile, convert to FASTQ for adapterremoval test
