@@ -733,6 +733,16 @@ Specify to run the optional process of sex determination.
 
 Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate calculation. Running without this parameter will considerably increase runtime, and render the resulting error bars unstrustworthy. Theoretically, any set of SNPs that are distant enough that two SNPs are unlikely to be covered by the same read can be used here. The programme was coded with the 1240K panel in mind.
 
+## Sex Determination
+
+### `--run_nuclear_contamination`
+
+Specify to run the optional processes for nuclear contamination.
+
+### `--contamination_chrom_name`
+
+The name of the chromosome X in your bam. `X` for hs37d5, `chrX` for HG19. Defaults to `X`.
+
 ## Automatic Resubmission
 
 By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
