@@ -9,6 +9,11 @@ Input_files=sys.argv[1:]
 output = open("nuclear_contamination.txt", 'w')
 print ("Individual", "Method1_MOM_estimate", "Method1_MOM_SE", "Method1_ML_estimate", "Method1_ML_SE", "Method2_MOM_estimate", "Method2_MOM_SE", "Method2_ML_estimate", "Method2_ML_SE", sep="\t", file=output)
 for fn in Input_files:
+    ## For each file, reset the values to "N/A" so they don't carry over from last file.
+    mom1, err_mom1= "N/A","N/A"
+    ml1, err_ml1="N/A","N/A"
+    mom2, err_mom2= "N/A","N/A"
+    ml2, err_ml2="N/A","N/A"
     with open(fn, 'r') as f:
         Estimates={}
         Ind=re.sub('\.X.contamination.out$', '', fn)
