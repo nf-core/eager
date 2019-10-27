@@ -96,6 +96,7 @@ This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/ap
 * [Maxime Garcia](https://github.com/MaxUlysse)
 * [Luc Venturini](https://github.com/lucventurini)
 * [Hester van Schalkwyk](https://github.com/hesterjvs)
+* [Thiseas C. Lamnidis](https://github.com/TCLamnidis)
 
 If you've contributed and you're missing in here, please let me know and I'll add you in.
 
@@ -117,4 +118,4 @@ If you've contributed and you're missing in here, please let me know and I'll ad
 * **GATK 4.X** - no citation available yet
 * **MultiVCFAnalyzer** Bos, K.I. et al., (2014). Pre-Columbian mycobacterial genomes reveal seals as a source of New World human tuberculosis. Nature, 514(7523), pp.494–497. Available at: [http://dx.doi.org/10.1038/nature13591](http://dx.doi.org/10.1038/nature13591). Download: [https://github.com/alexherbig/MultiVCFAnalyzer](https://github.com/alexherbig/MultiVCFAnalyzer)
 * **Sex.DetERRmine.py** Lamnidis, T.C. et al., 2018. Ancient Fennoscandian genomes reveal origin and spread of Siberian ancestry in Europe. Nature communications, 9(1), p.5018. Available at: [http://dx.doi.org/10.1038/s41467-018-07483-5](http://dx.doi.org/10.1038/s41467-018-07483-5). Download: [https://github.com/TCLamnidis/Sex.DetERRmine.git](https://github.com/TCLamnidis/Sex.DetERRmine.git).
-
+* **ANGSD** Korneliussen, T.S., Albrechtsen, A. & Nielsen, R., 2014. ANGSD: Analysis of Next Generation Sequencing Data. BMC bioinformatics, 15, p.356. Available at: [http://dx.doi.org/10.1186/s12859-014-0356-4](http://dx.doi.org/10.1186/s12859-014-0356-4). Download: [https://github.com/ANGSD/angsd](https://github.com/ANGSD/angsd).

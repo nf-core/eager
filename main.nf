@@ -36,7 +36,7 @@ def helpMessage() {
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
     BAM Input:
-    --run_convertbam		            Species to convert an input BAM file into FASTQ format before processing.
+    --run_convertbam                Species to convert an input BAM file into FASTQ format before processing.
 
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
@@ -51,16 +51,16 @@ def helpMessage() {
     Skipping                        Skip any of the mentioned steps
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
-      --skip_mapping		            Note: this maybe useful when input is a BAM file
+      --skip_mapping                Note: this maybe useful when input is a BAM file
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
       --skip_deduplication
-    
+
     Complexity Filtering 
       --complexity_filter_poly_g        Run poly-G removal on FASTQ files
       --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed (default: 10)
-    
+
     Clipping / Merging
       --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward). Default: 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'
       --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse). Default: 'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'
@@ -71,7 +71,7 @@ def helpMessage() {
       --skip_trim                   Skip adaptor and quality trimming
       --preserve5p                  Skip 5p quality base trimming (n, score, window) at 5p end.
       --mergedonly                  Send downstream only merged reads (unmerged reads and singletons are discarded).
-    
+
     Mapping
       --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'
       --bwaalnn                     Specify the -n parameter for BWA aln.
@@ -97,7 +97,7 @@ def helpMessage() {
     
     Library Complexity Estimation
       --preseq_step_size            Specify the step size of Preseq
-    
+
     (aDNA) Damage Analysis
       --damageprofiler_length       Specify length filter for DamageProfiler
       --damageprofiler_threshold    Specify number of bases to consider for damageProfiler
@@ -107,7 +107,7 @@ def helpMessage() {
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools
       --pmdtools_reference_mask     Specify a reference mask for PMDTools
       --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
-    
+
     BAM Trimming
       --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
       --bamutils_clip_left        	Specify the number of bases to clip off reads from 'left' end of read
@@ -144,6 +144,10 @@ def helpMessage() {
     Sex Determination
       --run_sexdeterrmine           Turn on sex determination.
       --sexdeterrmine_bedfile       Specify SNP panel in bed format for error bar calculation. (Optional, see documentation)
+
+    Nuclear Contamination for Human DNA
+      --run_nuclear_contamination   Enable nuclear contamination estimation.
+      --contamination_chrom_name    The name of the chromosome in your bam. 'X' for hs37d5, 'chrX' for HG19. 
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -297,6 +301,10 @@ params.sexdeterrmine_bedfile = ''
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
+
+//Nuclear contamination based on chromosome X heterozygosity.
+params.run_nuclear_contamination = false
+params.contamination_chrom_name = 'X' // Default to using hs37d5 name
 
 
 /*
@@ -705,7 +713,7 @@ process indexinputbam {
 	file bam from ch_input_for_indexbam
 
 	output:
-	file "*.{bai,csi}" into ch_mappingindex_for_skiprmdup,ch_filteringindex_for_skiprmdup
+	file "*.{bai,csi}" into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
 
 	script:
     size = "${params.large_ref}" ? '-c' : ''
@@ -1075,9 +1083,8 @@ if (!params.skip_mapping) {
     ch_adapterremoval_for_skipmap
         .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat; ch_mapping_for_preseq }
 
-     ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
-        .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
-	    .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
+     ch_mappingindex_for_skipmapping
+        .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
 }
 
 /*
@@ -1182,7 +1189,7 @@ if (params.run_bam_filtering) {
         .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
 
     ch_mappingindex_for_skipfiltering
-    	.into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
+        .into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
 
 }
 
@@ -1327,7 +1334,7 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
@@ -1335,10 +1342,10 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
 
-	ch_filteringindex_for_skiprmdup
-	    .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
+    ch_filteringindex_for_skiprmdup
+        .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
 }
 
 
@@ -1502,7 +1509,7 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
-	ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
+    ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" )  {
@@ -1510,7 +1517,7 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
         .filter { it =~/.*trimmed.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
-	ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
+    ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*trimmed.bam.bai|.*.trimmed.bam.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
@@ -1519,7 +1526,7 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
         .filter { it =~/.*pmd.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
-	ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
+    ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*pmd.bam.bai|.*.pmd.bam.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
@@ -1671,10 +1678,10 @@ ch_gatk_download = Channel.value("download")
 
 // Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
 if (params.additional_vcf_files == '') {
-	ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.collect()
+    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.collect()
 } else {
-	ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files)
-	ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.mix(ch_extravcfs_for_multivcfanalyzer).collect()
+    ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files)
+    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.mix(ch_extravcfs_for_multivcfanalyzer).collect()
 }
 
  process multivcfanalyzer {
@@ -1701,7 +1708,7 @@ if (params.additional_vcf_files == '') {
  	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
  	script:
-  	write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
+  write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
  	"""
  	gunzip -f *.vcf.gz
  	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
@@ -1741,11 +1748,57 @@ if (params.additional_vcf_files == '') {
              echo \$i >> bamlist.txt
          done
         
-         samtools depth -aa -q30 -Q30 -b ${params.sexdeterrmine_bedfile} -f bamlist.txt| sexdeterrmine -f bamlist.txt >SexDet.txt
+         samtools depth -aa -q30 -Q30 -b ${params.sexdeterrmine_bedfile} -f bamlist.txt | sexdeterrmine -f bamlist.txt >SexDet.txt
          """
      }
  }
 
+ /* 
+  * Step XX Nuclear contamination for Human DNA based on chromosome X heterozygosity.
+  */
+ process nuclear_contamination{
+     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
+     validExitStatus 0,134
+     /* 
+      * ANGSD Xcontamination will exit with status 134 when the number of SNPs 
+      *     is not large enough for estimation.
+      */
+     
+     when:
+     params.run_nuclear_contamination
+    
+     input:
+     file input from ch_for_nuclear_contamination
+    
+    
+     output:
+     file '*.X.contamination.out' into ch_from_nuclear_contamnation
+     
+     script:
+     """
+     samtools index ${input}
+     angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${input.baseName}.doCounts
+     contamination -a ${input.baseName}.doCounts.icnts.gz -h ${baseDir}/assets/angsd_resources/HapMapChrX.gz 2> ${input.baseName}.X.contamination.out
+     """
+ }
+ 
+ process print_nuclear_contamination{
+     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
+     
+     when:
+     params.run_nuclear_contamination
+    
+     input:
+     val 'Contam' from ch_from_nuclear_contamnation.collect()
+    
+     output:
+     file 'nuclear_contamination.txt'
+     
+     script:
+     """
+     print_x_contamination.py ${Contam.join(' ')}
+     """
+ }
 /*
 Genotyping tools:
 - angsd
