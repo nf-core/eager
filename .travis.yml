@@ -51,9 +51,9 @@ script:
   # REFERENCE: Test with zipped reference input
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://github.com/jfy133/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
   # FASTP: Run the same pipeline testing optional step: fastp, complexity 
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --saveReference
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter
   # ADAPTERREMOVAL: Run the basic pipeline with paired end data without collapsing
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta --fasta_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta.fai --seq_dict results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.dict
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse
   # ADAPTERREMOVAL: Run the basic pipeline with paired end data without trimming, but still merge
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_pretrim,docker --pairedEnd --skip_trim 
   # ADAPTERREMOVAL: Run the basic pipeline with paired end data without adapterRemoval
@@ -67,7 +67,7 @@ script:
   # MAPPER_CIRCULARMAPPER: Test running with CircularMapper
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mapper 'circularmapper' --circulartarget 'NC_007596.2'
   # MAPPER_BWAMEM: Test running with BWA Mem
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mapper 'bwamem' --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mapper 'bwamem'
   # STRIP_FASTQ: Run the basic pipeline with output unmapped reads as fastq
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --strip_input_fastq
   # BAM_FILTERING: Run basic mapping pipeline with mapping quality filtering, and unmapped export
