@@ -948,7 +948,7 @@ process bwa {
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval || params.skip_trim)){
+    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval)){
     prefix = "${reads[0].baseName}"
     """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
