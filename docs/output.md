@@ -116,6 +116,11 @@ This line plot represents the Phred scores across each base pair of all the read
 
 You will often see that the first 5 or so bases have slightly lower quality than the rest of the read as this the calibration steps of the machine. The bulk of the read should then stay ~35. Do not worry if you see the last 10-20 bases of reads do often have lower quality base calls that the middle of the read, as the sequencing reagents start to deplete during these cycles (e.g. making nucleotide flourescence weaker). Furthermore, the reverse reads of sequencing data will often be even lower at ends than forward reads for the same reason.
 
+<p align="center">
+  <img src="images/output/fastqc/sequencing_quality_histogram.png" width="75%" height = "75%">
+</p>
+
+
 Things to watch out for:
 
 * all positions having Phred scores less than 27
@@ -125,6 +130,10 @@ Things to watch out for:
 #### Per Sequence Quality Scores
 
 This is a further summary of the previous plot. This is a histogram of the _overall_ read quality (compared to per-base, above). The x axis is the mean read-quality score (summarising all the bases of the read in a single value), and the y-axis is the number of reads with this Phred score. You should see a peak with the majority of your reads between 27-35.
+
+<p align="center">
+  <img src="images/output/fastqc/per_sequencing_quality_score.png" width="75%" height = "75%">
+</p>
 
 Things to watch out for:
 
@@ -137,6 +146,10 @@ This is a heatmap which shows the average percentage of C, G, T, and A nucleotid
 
 You expect to see whole heatmap to be a relatively equal block of colour (normally black), representing an equal mix of A, C, T, G colors (see legend).
 
+<p align="center">
+  <img src="images/output/fastqc/per_base_sequence_content.png" width="75%" height = "75%">
+</p>
+
 Things to watch out for:
 
 * If you see a particular colour becoming more prominent this suggests there is an overrepresenation of those bases at that base-pair range across all reads (e.g. 20-24bp). This could happen if you have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no flouresence can mean both G or 'no-call').
@@ -147,6 +160,10 @@ Things to watch out for:
 
 This line graph shows the number percentage reads (y-axis) with an average percent GC content (y-axis). In 'isolate' samples (i.e. majority of the reads should be from the host species of the sample), this should be represented by a sharp peak around the average percent GC content of the reference genome. In metagenomic contexts this should be a wide flat distribution with a mean around 50%, however this can be highly different for other types of data.
 
+<p align="center">
+  <img src="images/output/fastqc/per_sequence_GC_content.png" width="75%" height = "75%">
+</p>
+
 Things to watch out for:
 
 * If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no flouresence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
@@ -155,11 +172,19 @@ Things to watch out for:
 
 This line graph shows you the average numbers of Ns found across all reads of a sample. Ns can be caused for a variety of reasons such as low-confidence base call, or the base has been masked. The lines should be very low (as close to 0 as possible) and generally be flat across the whole read. Increases in Ns may reflect in HiSeq data issues of the last cycles running out of chemistry.
 
+<p align="center">
+  <img src="images/output/fastqc/per_sequence_n_content.png" width="75%" height = "75%">
+</p>
+
 > **NB:** Publicly downloaded data may have extremely high N contents across all reads. These normally come from 'masked' reads that may have originally be, for example, from a human sample for microbial analysis where the consent for publishing of the host DNA was not given. In these cases you do not need to worry about this plot.
 
 #### Sequence Duplication Levels
 
 This plot is some-what similar to looking at duplication rate or 'cluster factor' of mapped reads. In this case however FastQC takes the sequences of the first 100 thousand reads of a library, and looks to see how often a read sequence is repeated in the rest of the library.
+
+<p align="center">
+  <img src="images/output/fastqc/sequence_duplication_level.png" width="75%" height = "75%">
+</p>
 
 A good library should have very low rates of duplication (vast majority of reads having a duplication rate of 1) - suggesting 'high complexity' or lots of unique reads and useful data. This is represented as a steep drop in the line plot and possible a very small curve at about a duplication rate of 2 or 3 and then remaining at ~0 for higher duplication rates.
 
@@ -239,7 +264,11 @@ Other Categories:
 * If paired-end, the **Singleton [mate] R1(/R2)** cateogries represent reads which were unable to be collapsed, possibly due to the reads being too long to overlap.
 * If paired-end, **Full-length collapsed pairs** are reads which were collapsed and did not require low-quality bases at end of reads to be removed.
 * If paired-end, **Truncated collapsed pairs** are paired-end that were collapsed but did required the removal of low quality bases at the end of reads.
-* **Discarded [mate] R1/R2** represent reads which were a part of a pair, but one member of the pair did not reach other quality criteria and weas discarded. However the other member of the pair is still retained in the output file as it still reached other quality critea.
+* **Discarded [mate] R1/R2** represent reads which were a part of a pair, but one member of the pair did not reach other quality criteria and weas discarded. However the other member of the pair is still retained in the output file as it still reached other quality criteria.
+* 
+<p align="center">
+  <img src="images/output/adapter_removal/adapter_removal_discarded_reads.png" width="75%" height = "75%">
+</p>
   
 For ancient DNA, assuming a good quality run, you expect to see a the vast majority of your reads overlapping because we have such fragmented molecules. Large numbers of singletons suggest your molecules are too long and may not represent true ancient DNA.
 
@@ -254,6 +283,10 @@ The length distribution plots show the number of reads at each read-length. You 
 * **Singleton** represent those reads that had a one member of a pair discarded
 * **Collapsed** and **Collapsed Truncated** represent reads that overlapped and able to merge into a single read, with the latter including base-quality trimming off ends of reads. These plots will start with a vertical rise representing where you are above the minimum-read threshold you set.
 * **Discarded** here represents the number of reads that did not each the read length filter. You will likely see a vertical drop at what your threshold was set to.
+
+<p align="center">
+  <img src="images/output/adapter_removal/adapter_removal_length_distribution.png" width="75%" height = "75%">
+</p>
 
 With paired-end ancient DNA sequencing runs You expect to see a slight increase in shorter fragments in the reverse (R2) read, as our fragments are so short we often don't reach the maximum number of cycles of that particular sequencing run.
 
@@ -272,6 +305,10 @@ In most cases the first two rows, 'Total Reads' and 'Total Passed QC' will be th
 The third row 'Mapped' represents the number of reads that found a place that could be aligned on your reference genome. This is the raw number of mapped reads, prior PCR duplication.
 
 The remaining rows will be 0 when running `bwa aln` as these characteristucs of the data are not considered by the algorithm by default.
+
+<p align="center">
+  <img src="images/output/samtools_flagstat/samtools_flagstat.png" width="75%" height = "75%">
+</p>
 
 > **NB:** The Samtools (pre-samtools filter) plots displayed in the MultiQC report shows mapped reads without mapping quality filtering. This will contain reads that can map to multiple places on your reference genome with equal or slightly less mapping quality score. To see how your reads look after mapping quality, look at the FastQC reports in the Samtools (pre-samtools filter). You should expect after mapping quality filtering, that you will have less reads.
 
@@ -383,6 +420,10 @@ When looking at the misincorporation plots, keep the following in mind:
 * If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
 * We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
 * The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
+
+<p align="center">
+  <img src="images/output/damageprofiler/damageprofiler.png" width="75%" height = "75%">
+</p>
 
 > **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplmentation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
 
