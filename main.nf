@@ -372,6 +372,11 @@ if (params.run_convertbam && params.skip_mapping) {
 	exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
 }
 
+// Validate that you're not trying to pass FASTQs to BAM only processes
+if (params.bam && !params.run_convertbam && !params.skip_mapping) {
+  exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
+}
+
 //Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd || params.bam){
 } else {
