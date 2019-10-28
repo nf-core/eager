@@ -132,7 +132,7 @@ Things to watch out for:
 This is a further summary of the previous plot. This is a histogram of the _overall_ read quality (compared to per-base, above). The x axis is the mean read-quality score (summarising all the bases of the read in a single value), and the y-axis is the number of reads with this Phred score. You should see a peak with the majority of your reads between 27-35.
 
 <p align="center">
-  <img src="images/output/fastqc/per_sequencing_quality_score.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/per_sequence_quality_score.png" width="75%" height = "75%">
 </p>
 
 Things to watch out for:
@@ -173,7 +173,7 @@ Things to watch out for:
 This line graph shows you the average numbers of Ns found across all reads of a sample. Ns can be caused for a variety of reasons such as low-confidence base call, or the base has been masked. The lines should be very low (as close to 0 as possible) and generally be flat across the whole read. Increases in Ns may reflect in HiSeq data issues of the last cycles running out of chemistry.
 
 <p align="center">
-  <img src="images/output/fastqc/per_sequence_n_content.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/per_base_n_content.png" width="75%" height = "75%">
 </p>
 
 > **NB:** Publicly downloaded data may have extremely high N contents across all reads. These normally come from 'masked' reads that may have originally be, for example, from a human sample for microbial analysis where the consent for publishing of the host DNA was not given. In these cases you do not need to worry about this plot.
@@ -265,7 +265,7 @@ Other Categories:
 * If paired-end, **Full-length collapsed pairs** are reads which were collapsed and did not require low-quality bases at end of reads to be removed.
 * If paired-end, **Truncated collapsed pairs** are paired-end that were collapsed but did required the removal of low quality bases at the end of reads.
 * **Discarded [mate] R1/R2** represent reads which were a part of a pair, but one member of the pair did not reach other quality criteria and weas discarded. However the other member of the pair is still retained in the output file as it still reached other quality criteria.
-* 
+
 <p align="center">
   <img src="images/output/adapter_removal/adapter_removal_discarded_reads.png" width="75%" height = "75%">
 </p>
