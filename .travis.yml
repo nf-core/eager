@@ -85,5 +85,5 @@ script:
   # BAM_INPUT: Run the basic pipeline with the bam input profile, convert to FASTQ for adapterremoval test and downstream
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_bam,docker --bam --run_convertbam
   # BAM_INPUT: Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_humanbam,docker --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_sexdeterrmine
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_sexdeterrmine
 

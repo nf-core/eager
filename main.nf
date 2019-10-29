@@ -1078,7 +1078,7 @@ process bwamem {
 if (!params.skip_mapping) {
     ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm)
         .filter { it =~/.*mapped.bam/ }
-        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; ch_mapping_for_samtools_flagstat; ch_mapping_for_preseq } 
+        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; ch_mapping_for_samtools_flagstat } 
 
     ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
         .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
@@ -1086,7 +1086,7 @@ if (!params.skip_mapping) {
 
 } else {
     ch_adapterremoval_for_skipmap
-        .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat; ch_mapping_for_preseq }
+        .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
 
      ch_mappingindex_for_skipmapping
         .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
@@ -1333,13 +1333,10 @@ process markDup{
 }
 
 
-
-
-
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
@@ -1347,13 +1344,11 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
 
     ch_filteringindex_for_skiprmdup
         .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
 }
-
-
 
 
 /*
@@ -1368,7 +1363,7 @@ process preseq {
     !params.skip_preseq
 
     input:
-    file input from (params.skip_deduplication ? ch_mapping_for_preseq : ch_hist_for_preseq )
+    file input from (params.skip_deduplication ? ch_rmdup_for_preseq : ch_hist_for_preseq )
 
     output:
     file "${input.baseName}.ccurve" into ch_preseq_for_multiqc

@@ -584,7 +584,7 @@ Specifies the PMDScore threshold to use in the pipeline when filtering BAM files
 
 ### `--pmdtools_reference_mask`
 
-Can be used to set a reference genome mask for PMDTools. 
+Can be used to set a reference genome mask for PMDTools.
 
 ### `--pmdtools_max_reads`
 
