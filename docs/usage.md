@@ -544,6 +544,7 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream a
 Sets the duplicate read removal tool. By default uses `'dedup'` an ancient DNA specific read deduplication tool. Users can also specify `'markdup'` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not* merged beforehand. In all other cases, it is advised to use `'dedup'`.
 
 ### `--dedup_all_merged`
+
 Sets DeDup to treat all reads as merged reads. This is useful if reads are for example not prefixed with `M_` in all cases.
 
 ## Library Complexity Estimation Parameters
@@ -631,7 +632,6 @@ Turns on genotyping to run on all post-dedup and downstream BAMs. For example if
 Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify `'freebayes'`, `'hc'` or `'ug'` respectively.
 
 > NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you. This option therefore cannot be used when running the pipeline offline.
-
 
 ### `--genotyping_source`
 

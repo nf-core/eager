@@ -61,7 +61,6 @@ Additional functionality contained by the pipeline currently includes:
 
         nextflow clean -k
 
-
 NB. You can see an overview of the run in the MultiQC report located at `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
 
 Modifications to the default pipeline are easily made using various options
