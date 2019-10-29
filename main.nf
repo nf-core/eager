@@ -27,7 +27,7 @@ def helpMessage() {
     nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' -profile docker
 
     Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes)
+      --design                      Path to a TSV file with paths to input data (must be surrounded with quotes)
       -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
       --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
@@ -42,7 +42,7 @@ def helpMessage() {
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
     References                      If not specified in the configuration file, or you wish to overwrite any of the references.
-      --bwa_index                   Path and name of a a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value supplied with the --fasta option)
+      --bwa_index                   Path and name of a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value supplied with the --fasta option)
       --bedfile                     Path to BED file for SNPCapture methods
       --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
       --fasta_index                 Path to samtools FASTA index (typically ending in '.fai')
@@ -68,7 +68,7 @@ def helpMessage() {
       --clip_min_read_quality       Specify minimum base quality for trimming off bases. Default: 20 
       --min_adap_overlap            Specify minimum adapter overlap: 1
       --skip_collapse               Skip merging forward and reverse reads together. (Only for PE samples)
-      --skip_trim                   Skip adaptor and quality trimming
+      --skip_trim                   Skip adapter and quality trimming
       --preserve5p                  Skip 5p quality base trimming (n, score, window) at 5p end.
       --mergedonly                  Send downstream only merged reads (unmerged reads and singletons are discarded).
 
@@ -160,8 +160,6 @@ def helpMessage() {
       --max_cpus                    Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. --max_cpus 1
       
     For a full list and more information of available parameters, consider the documentation (https://github.com/nf-core/eager/).
-
-      
     """.stripIndent()
 }
 /*
