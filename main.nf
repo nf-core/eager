@@ -339,10 +339,10 @@ if ( params.fasta.isEmpty () ){
 
 
 //Index files provided? Then check whether they are correct and complete
-if (params.aligner != 'bwa' && !params.circularmapper && !params.bwamem){
-    exit 1, "Invalid aligner option. Default is bwa, but specify --circularmapper or --bwamem to use these."
+if (params.aligner != 'bwa' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
+    exit 1, "Invalid aligner option. Default is bwa, but specify --mapper 'bwamem' or --mapper 'circularmapper' to use these."
 }
-if( params.bwa_index && (params.aligner == 'bwa' | params.bwamem)){
+if( params.bwa_index && (params.aligner == 'bwa' | params.mapper == 'bwamem')){
     lastPath = params.bwa_index.lastIndexOf(File.separator)
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
     bwa_base = params.bwa_index.substring(lastPath+1)
@@ -585,7 +585,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 * PREPROCESSING - Create BWA indices if they are not present
 */ 
 
-if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.bwamem)){
+if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.mapper == 'bwamem')){
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -1691,13 +1691,13 @@ if (params.additional_vcf_files == '') {
  	file 'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
  	file 'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
  	file 'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
- 	file 'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
+ 	file 'snpTbaleForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
  	file 'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
  	file 'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
  	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
  	script:
-  write_freqs = ${params.write_allele_frequencies} ? "T" : "F"
+  write_freqs = $params.write_allele_frequencies ? "T" : "F"
  	"""
   echo ${write_freqs}
  	gunzip -f *.vcf.gz
