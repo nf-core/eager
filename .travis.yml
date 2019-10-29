@@ -9,12 +9,12 @@ matrix:
 
 before_install:
   # PRs to master are only ok if coming from dev branch
-  - '[ $TRAVIS_PULL_REQUEST = "false" ] || [ $TRAVIS_BRANCH != "master" ] || ([ $TRAVIS_PULL_REQUEST_SLUG = $TRAVIS_REPO_SLUG ] && [ $TRAVIS_PULL_REQUEST_BRANCH = "dev" ])'
+  - '[ $TRAVIS_PULL_REQUEST = "false" ] || [ $TRAVIS_BRANCH != "master" ] || ([ $TRAVIS_PULL_REQUEST_SLUG = $TRAVIS_REPO_SLUG ] && ([ $TRAVIS_PULL_REQUEST_BRANCH = "dev" ] || [ $TRAVIS_PULL_REQUEST_BRANCH = "patch" ]))'
   # Pull the docker image first so the test doesn't wait for this
   - docker pull nfcore/eager:dev
   # Fake the tag locally so that the pipeline runs properly
   # Looks weird when this is :dev to :dev, but makes sense when testing code for a release (:dev to :1.0.1)
-  - docker tag nfcore/eager:dev nfcore/eager:2.0.7
+  - docker tag nfcore/eager:dev nfcore/eager:dev
 
 install:
   # Install Nextflow
@@ -34,7 +34,7 @@ install:
   - sudo apt-get install npm && npm install -g markdownlint-cli
 
 env:
-  - NXF_VER='0.32.0' # Specify a minimum NF version that should be tested and work
+  - NXF_VER='19.04.0' # Specify a minimum NF version that should be tested and work
   - NXF_VER='' # Plus: get the latest NF version and check that it works
 
 script:
@@ -50,6 +50,12 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse --saveReference
   # Run the basic pipeline with paired end data without trimming
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_trim --saveReference
+  # Run the basic pipeline with preserve5p end option
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --preserve5p
+    # Run the basic pipeline with preserve5p end option
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mergedonly
+    # Run the basic pipeline with preserve5p end and merged reads only options
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --preserve5p --mergedonly
    # Run the basic pipeline with paired end data without adapterRemoval
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_adapterremoval --saveReference
    # Run the basic pipeline with output unmapped reads as fastq
@@ -59,9 +65,9 @@ script:
   # Test BAM Trimming
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --trim_bam --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
   # Test running with CircularMapper
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --circularmapper --circulartarget 'NC_007596.2'
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mapper 'circularmapper' --circulartarget 'NC_007596.2'
   # Test running with BWA Mem
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --bwamem --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mapper 'bwamem' --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
   # Test with zipped reference input
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://raw.githubusercontent.com/nf-core/test-datasets/eager2/reference/Test.fasta.gz'
   # Run the basic pipeline with the bam input profile
@@ -70,4 +76,10 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --saveReference
   # Test using pre-computed indices from a separate run beforehand
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict 
-
+  # Test running GATK unified genotyper
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
+  # Test running GATK HaplotypeCaller
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_bam,docker --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw'
+  # Test running GATK UnifiedGenotyper and MultiVCFAnalyzer
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer

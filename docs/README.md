@@ -9,4 +9,5 @@ The nf-core/eager documentation is split into the following files:
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](usage.md)
 4. [Output and how to interpret the results](output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+5. [Code Contribution Guidelines](code_contribution.md)
+6. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
