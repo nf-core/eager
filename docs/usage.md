@@ -253,7 +253,7 @@ For example:
 nextflow run nf-core/eager \
 -profile test,docker \
 --pairedEnd \
---reads *{R1,R2}*.fq.gz
+--reads '*{R1,R2}*.fq.gz'
 --fasta 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' \
 --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta'
 ```
