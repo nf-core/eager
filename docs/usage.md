@@ -124,7 +124,7 @@ These are profiles specific to certain **HPC clusters**, and are centrally maint
 
 ### `--reads`
 
-Use this to specify the location of your input FastQ or BAM file(s). The files maybe either from a single, or multiple samples. For example:
+Use this to specify the location of your input FastQ (optionally gzipped) or BAM file(s). The files maybe either from a single, or multiple samples. For example:
 
 ```bash
 --reads 'path/to/data/sample_*_{1,2}.fastq'
@@ -251,7 +251,7 @@ For example:
 
 ```bash
 nextflow run nf-core/eager \
--profile test_fna,docker \
+-profile test,docker \
 --pairedEnd \
 --reads '*{R1,R2}*.fq.gz'
 --fasta 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' \
@@ -469,7 +469,7 @@ This flag means that only merged reads are sent downstream for analysis. Singlet
 
 ## `--mapper`
 
-Specify which mapping tool to use. Options are BWA aln ('bwaaln'), BWA mem ('bwamem'), circularmapper ('circularmapper'). `bwa aln` is the default and best for short read ancient DNA. `bwamem` can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Default is 'bwaaln'
+Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`). bwa aln is the default and best for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Default is 'bwaaln'
 
 ## BWA (default)
 
@@ -515,7 +515,7 @@ Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e
 
 ### `--strip_mode`
 
-Read removal mode. Strip mapped reads completely (strip) or just replace mapped reads sequence by N (replace)
+Read removal mode. Strip mapped reads completely (`'strip'`) or just replace mapped reads sequence by N (`'replace'`)
 
 ## Read Filtering and Conversion Parameters
 
@@ -531,7 +531,7 @@ Defines whether unmapped reads should be discarded and stored in FastQ and/or BA
 
 ### `--bam_unmapped_type`
 
-Defines how to proceed with unmapped reads: "discard" removes all unmapped reads, "bam" keeps unmapped reads as BAM file, "fastq" keeps unmapped reads as FastQ file, "both" keeps both BAM and FastQ files. Only effective when option `--bam_discard_unmapped` is turned on.
+Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, "both" keeps both BAM and FastQ files. Only effective when option `--bam_discard_unmapped` is turned on.
 
 ### `--bam_mapping_quality_threshold`
 
@@ -541,7 +541,7 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream a
 
 ### `--dedupper`
 
-Sets the duplicate read removal tool. By default uses `dedup` an ancient DNA specific read deduplication tool. Users can also specify `markdup` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not* merged beforehand. In all other cases, it is advised to use `dedup`.
+Sets the duplicate read removal tool. By default uses `'dedup'` an ancient DNA specific read deduplication tool. Users can also specify `'markdup'` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not* merged beforehand. In all other cases, it is advised to use `'dedup'`.
 
 ### `--dedup_all_merged`
 
@@ -583,7 +583,7 @@ Specifies the range in which to consider DNA damage from the ends of reads. By d
 
 Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user.
 
-### `--pmdtools_reference_mask` ''
+### `--pmdtools_reference_mask`
 
 Can be used to set a reference genome mask for PMDTools.
 
@@ -629,17 +629,17 @@ Turns on genotyping to run on all post-dedup and downstream BAMs. For example if
 
 ### `--genotyping_tool`
 
-Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify 'freebayes', 'hc' or 'ug' respectively.
+Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify `'freebayes'`, `'hc'` or `'ug'` respectively.
 
-> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you.
+> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you. This option therefore cannot be used when running the pipeline offline.
 
 ### `--genotyping_source`
 
-Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' for mapped only, filtered, or DeDup BAMs (with priority right to left); trimmed (for base clipped BAMs); pmd (for pmdtools output). Default is: raw.  
+Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: `'raw'` for mapped only, filtered, or DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs); `'pmd'` (for pmdtools output). Default is: `'raw'`.  
 
 ### `--gatk_out_mode`
 
-If selected a GATK genotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: EMIT_VARIANTS_ONLY, EMIT_ALL_CONFIDENT_SITES, EMIT_ALL_SITES. Default: EMIT_VARIANTS_ONLY.
+If selected a GATK genotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`.
 
 ### `--gatk_call_conf`
 
@@ -647,7 +647,7 @@ If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/IN
 
 ### `--gatk_ploidy`
 
-If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid orgaisms. . Default: 2
+If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid orgaisms. Default: 2
 
 ### `--gatk_dbsnp`
 
@@ -655,11 +655,11 @@ If selected a GATK genotyper, what is the ploidy of your reference organism. E.g
 
 ### `--gatk_ug_genotype_model`
 
-If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: SNP, INDEL, BOTH, GENERALPLOIDYSNP, GENERALPLOIDYINDEL. Default: SNP.
+If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`, `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`.
 
 ### `--gatk_hc_emitrefconf`
 
-If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: NONE, BP_RESOLUTION, GVCF. Default: GVCF
+If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`
 
 ### `--gatk_downsample`
 
@@ -711,15 +711,15 @@ If you wish to add to the table previously created VCF files, specify here a pat
 
 ### `--reference_gff_annotations`
 
-If you wish to report in the SNP table annotation information for the regions SNPs fall in. This must be in GFF format.
+If you wish to report in the SNP table annotation information for the regions SNPs fall in. This must be in GFF format and the path must be in quotes.
 
 ### `--reference_gff_exclude`
 
-If you wish to exclude SNP regions from consideration by MultiVCFAnalyzer (such as for problematic regions), provide a file in GFF format.
+If you wish to exclude SNP regions from consideration by MultiVCFAnalyzer (such as for problematic regions), provide a file in GFF format (the path must be in quotes).
 
 ### `--snp_eff_results`
 
-If you wish to include results from SNPEff effect analysis, supply the output from SNPEff in txt format.
+If you wish to include results from SNPEff effect analysis, supply the output from SNPEff in txt format. The path must be in quotes.
 
 ## Sex Determination
 
@@ -731,7 +731,17 @@ Specify to run the optional process of sex determination.
 
 ### `--sexdeterrmine_bedfile`
 
-Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate calculation. Running without this parameter will considerably increase runtime, and render the resulting error bars unstrustworthy. Theoretically, any set of SNPs that are distant enough that two SNPs are unlikely to be covered by the same read can be used here. The programme was coded with the 1240K panel in mind.
+Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate calculation. Running without this parameter will considerably increase runtime, and render the resulting error bars unstrustworthy. Theoretically, any set of SNPs that are distant enough that two SNPs are unlikely to be covered by the same read can be used here. The programme was coded with the 1240K panel in mind. The path must be in quotes.
+
+## Nuclear Contamination for Humans
+
+### `--run_nuclear_contamination`
+
+Specify to run the optional processes for nuclear contamination.
+
+### `--contamination_chrom_name`
+
+The name of the chromosome X in your bam. `'X'` for hs37d5, `'chrX'` for HG19. Defaults to `'X'`.
 
 ## Automatic Resubmission
 
