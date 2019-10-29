@@ -633,7 +633,6 @@ Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyp
 
 > NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you.
 
-
 ### `--genotyping_source`
 
 Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' for mapped only, filtered, or DeDup BAMs (with priority right to left); trimmed (for base clipped BAMs); pmd (for pmdtools output). Default is: raw.  
