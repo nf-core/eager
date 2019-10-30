@@ -1522,7 +1522,7 @@ process bam_trim {
 
 if ( params.run_genotyping && params.genotyping_source == "raw" ) {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
 
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
@@ -1743,7 +1743,8 @@ if (params.additional_vcf_files == '') {
      params.run_sexdeterrmine
     
      input:
-     val 'Bams' from ch_for_sexdeterrmine.collect()
+     //Val 'Bams' from ch_for_sexdeterrmine.collect()
+     file 'Bams' from ch_for_sexdeterrmine.collect()
     
      output:
      file 'SexDet.txt'
@@ -1751,7 +1752,7 @@ if (params.additional_vcf_files == '') {
      script:
      if (params.sexdeterrmine_bedfile == '') {
          """
-         for i in ${Bams.join(' ')}; do
+         for i in *.bam; do
              echo \$i >> bamlist.txt
          done
         
