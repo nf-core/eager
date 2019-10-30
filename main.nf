@@ -86,10 +86,10 @@ def helpMessage() {
       --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace)
       
     BAM Filtering
-      --run_bam_filtering		             Turn on samtools filter for mapping quality or unmapped reads of BAM files.
+      --run_bam_filtering                Turn on samtools filter for mapping quality or unmapped reads of BAM files.
       --bam_mapping_quality_threshold    Minimum mapping quality for reads filter, default 0.
-      --bam_discard_unmapped    	       Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
-      --bam_unmapped_type           	   Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'.
+      --bam_discard_unmapped             Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
+      --bam_unmapped_type                Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'.
     
     DeDuplication
       --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
@@ -110,7 +110,7 @@ def helpMessage() {
 
     BAM Trimming
       --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
-      --bamutils_clip_left        	Specify the number of bases to clip off reads from 'left' end of read
+      --bamutils_clip_left          Specify the number of bases to clip off reads from 'left' end of read
       --bamutils_clip_right         Specify the number of bases to clip off reads from 'right' end of read
       --bamutils_softclip           Use softclip instead of hard masking
 
@@ -130,12 +130,12 @@ def helpMessage() {
       --freebayes_p                 Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
 
     SNP Table Generation
-      --run_multivcfanalyzer	      Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
+      --run_multivcfanalyzer        Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
       --write_allele_frequencies    Specify to also write allele frequencies in the SNP table. Default: turned off.
       --min_genotype_quality        Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
-      --min_base_coverage 		      Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
-      --min_allele_freq_hom		      Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
-      --min_allele_freq_het		      Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
+      --min_base_coverage           Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
+      --min_allele_freq_hom         Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
+      --min_allele_freq_het         Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
       --additional_vcf_files        Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files. (Optional)
       --reference_gff_annotations   Specify the reference genome annotations in '.gff' format. (Optional)
       --reference_gff_exclude       Specify positions to be excluded in '.gff' format. (Optional)
@@ -361,11 +361,14 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.mapper == 'bwamem')){
 }
 
 // Validate not trying to run adapterremoval on a BAM file
-
 if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
-	  exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
+    exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
 }
 
+// Validate BAM is single end only
+if (params.bam && !params.singleEnd){
+    exit 1, "BAM input must be used with --singleEnd "
+}
 
 // Validate that you're not trying to pass FASTQs to BAM only processes
 if (params.run_convertbam && params.skip_mapping) {
@@ -429,7 +432,6 @@ if (params.run_genotyping){
   }
 }
 
-
 // MultiVCFAnalyzer sanity checking
 if (params.run_multivcfanalyzer) {
 	if (params.genotyping_tool != "ug") {
@@ -440,7 +442,6 @@ if (params.run_multivcfanalyzer) {
 		exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
 	}
 }
-
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
@@ -465,25 +466,39 @@ if( workflow.profile == 'awsbatch') {
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
+
+// If read paths
+//    Is single FASTQ
+//    Is paired-end FASTQ
+//    Is single BAM
+// If NOT read paths && FASTQ
+// is NOT read paths && BAM
+
 if( params.readPaths ){
     if( params.singleEnd && !params.bam) {
         Channel
             .from( params.readPaths )
+            .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
+            .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
             .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
-            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
             .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
     } else if (!params.bam){
         Channel
             .from( params.readPaths )
+            .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
+            .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
             .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
-            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
             .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
     } else {
         Channel
             .from( params.readPaths )
+            .filter { it =~/.*.bam/ }
+            .ifEmpty { exit 1, "Your specified BAM read files did not end in: '.bam' " }
             .map { row -> [ file( row )  ] }
-            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
             .dump()
             .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
@@ -491,15 +506,17 @@ if( params.readPaths ){
 } else if (!params.bam){
      Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs" +
-            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
+        .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
+        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs " +
+            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nIf this is single-end data, please specify --singleEnd on the command line." }
         .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam  }
 
 } else {
      Channel
         .fromPath( params.reads )
+        .filter { it =~/.*.bam/ }
         .map { row -> [  file( row )  ] }
-        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
+        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nNB: Path needs " +
             "to be enclosed in quotes!\n" }
         .dump() //For debugging purposes
         .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
