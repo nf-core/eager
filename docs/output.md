@@ -45,6 +45,7 @@ These directories are the ones you will use on a day-to-day basis and are those 
 * A `<MODULE_1>` directory contains the (cleaned-up) output from a particular software module. This is the second most important set of directories. This contains output files such as FASTQ, BAM, statistics, and/or plot files of a specific module (see the [Output Files](#output-files) section for more detail). The latter two are only needed when you need finer detail about that particular module.
 
 ### Secondary Output Directories
+
 These are less important directories which are used less often, normally in the context of bug-reporting.
 
 * `pipeline_info` contains back-end reporting of the pipeline itself such as run times and computational statistics. You rarely need this information other than for curiosity or when bug-reporting.
@@ -70,6 +71,7 @@ This table will report values per-file (or rather per module log-file). It will 
 Each column name is supplied by the module, so you may see similar column names. When unsure, hovering over the column name will allow you see which module it is derived from.
 
 The default columns are as follows:
+
 * **Sample Name** This is the log file name without the file suffix. This will depend on the module outputs.
 * **Seqs** This is from Pre-AdapterRemoval FastQC. Represents the number of raw reads in your untrimmed and (paired end) unmerged FASTQ file. Each row should be approximately equal to the number of reads you requested to be sequenced, divided by the number of FASTQ files you received for that library.
 * **Length** This is from Pre-AdapterRemoval FastQC. This is the average read length in your untrimmed and (paired end) unmerged FASTQ file and should represent the number of cycles of your sequencing chemistry.
