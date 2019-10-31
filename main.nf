@@ -1752,7 +1752,7 @@ if (params.additional_vcf_files == '') {
      script:
      if (params.sexdeterrmine_bedfile == '') {
          """
-         for i in *.bam; do
+         for i in ${Bams.join(' ')}; do
              echo \$i >> bamlist.txt
          done
         
