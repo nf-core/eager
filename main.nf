@@ -432,13 +432,17 @@ if (params.run_genotyping){
 
 // MultiVCFAnalyzer sanity checking
 if (params.run_multivcfanalyzer) {
-	if (params.genotyping_tool != "ug") {
-		exit 1, "MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
-	}
+  if (!params.run_genotyping) {
+    exit 1, "MultiVCFAnalyzer requires genotyping on be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
+  }
 
-	if (params.gatk_ploidy != '2') {
-		exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
-	}
+  if (params.genotyping_tool != "ug") {
+    exit 1, "MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
+  }
+
+  if (params.gatk_ploidy != '2') {
+    exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
+  }
 }
 
 // Has the run name been specified by the user?
