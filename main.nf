@@ -27,8 +27,8 @@ def helpMessage() {
     nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' -profile docker
 
     Mandatory arguments:
-      --design                      Path to a TSV file with paths to input data (must be surrounded with quotes)
-      -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
+      --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs
+      -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
       --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
       --bam                         Specifies that the input is in BAM format
