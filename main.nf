@@ -107,6 +107,10 @@ def helpMessage() {
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools
       --pmdtools_reference_mask     Specify a reference mask for PMDTools
       --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
+      
+    Annotation Statistics
+      --run_bedtools_coverage       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference
+      --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes
 
     BAM Trimming
       --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
@@ -249,6 +253,10 @@ params.dedup_all_merged = false
 
 //Preseq settings
 params.preseq_step_size = 1000
+
+//Bedtools settings
+params.run_bedtools_coverage = false 
+params.anno_file = ''
 
 //PMDTools settings
 params.run_pmdtools = false
@@ -407,6 +415,12 @@ if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "c
 
 if (params.bam_discard_unmapped && bam_unmapped_type == '') {
     exit 1, "Please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
+}
+
+// Bedtools sanity checking
+
+if(params.run_bedtools_coverage && params.anno_file == ''){
+  exit 1, "You have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
 }
 
 
@@ -1355,7 +1369,7 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
@@ -1363,7 +1377,7 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
 
     ch_filteringindex_for_skiprmdup
         .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
@@ -1454,9 +1468,33 @@ process qualimap {
     """
 }
 
+/*
+ Step 9: Bedtools
+*/
+
+process bedtools {
+  tag "${bam.baseName}"
+  publishDir "${params.outdir}/bedtools", mode: 'copy'
+
+  when:
+  params.run_bedtools_coverage
+
+  input:
+  file bam from ch_rmdup_for_bedtools
+
+  output:
+  file "*"
+
+  script:
+  """
+  bedtools coverage -a ${params.anno_file} -b $bam | pigz -p 4 > "${bam.baseName}".breadth.gz 
+  bedtools coverage -a ${params.anno_file} -b $bam -mean | pigz -p 4 > "${bam.baseName}".depth.gz 
+  """
+}
+
 
 /*
- Step 9: PMDtools
+ Step 10: PMDtools
  */
 
 process pmdtools {
@@ -1495,7 +1533,7 @@ process pmdtools {
 }
 
 /*
-* Step 10 - BAM Trimming step using bamUtils 
+* Step 11 - BAM Trimming step using bamUtils 
 * Can be used for UDGhalf protocols to clip off -n bases of each read
 */
 
@@ -1565,7 +1603,7 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
 
 
 /*
- Step 11a: Genotyping - UnifiedGenotyper Downloading
+ Step 12a: Genotyping - UnifiedGenotyper Downloading
  NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking downstream tools. Therefore we need it (for now at least until downstream tools can read proper 4.2 VCFs... )
     
  */
@@ -1591,7 +1629,7 @@ ch_gatk_download = Channel.value("download")
  }
 
 /*
- Step 11b: Genotyping - UG
+ Step 12b: Genotyping - UG
 */
 
  process genotyping_ug {
@@ -1664,7 +1702,7 @@ ch_gatk_download = Channel.value("download")
  }
 
  /*
- *  Step 11c: FreeBayes genotyping, should probably add in some options for users to set 
+ *  Step 12c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
   tag "${bam}"
@@ -1692,7 +1730,7 @@ ch_gatk_download = Channel.value("download")
  }
 
 /*
- * Step 12: SNP Table Generation
+ * Step 13: SNP Table Generation
  */
 
 // Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
@@ -1711,7 +1749,7 @@ if (params.additional_vcf_files == '') {
  	params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
 
  	input:
-   	file fasta from fasta_for_indexing
+  file fasta from fasta_for_indexing
  	file vcf from ch_vcfs_for_multivcfanalyzer
 
  	output:
@@ -1737,7 +1775,7 @@ if (params.additional_vcf_files == '') {
  }
 
  /*
-  * Step XX Sex determintion with error bar calculation.
+  * Step 14 Sex determintion with error bar calculation.
   */
  
  process sex_deterrmine{
@@ -1774,7 +1812,7 @@ if (params.additional_vcf_files == '') {
  }
 
  /* 
-  * Step XX Nuclear contamination for Human DNA based on chromosome X heterozygosity.
+  * Step 15 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
   */
  process nuclear_contamination{
      publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
@@ -1836,7 +1874,7 @@ Downstream VCF tools:
 
 
 /*
- * Step 12a - Output Description HTML
+ * Step 16a - Output Description HTML
  */
 process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
@@ -1855,7 +1893,7 @@ process output_documentation {
 
 
 /*
- * Step 12b - Parse software version numbers
+ * Step 16b - Parse software version numbers
  */
 process get_software_versions {
 	publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
@@ -1895,7 +1933,7 @@ process get_software_versions {
 
 
 /*
- * Step 12c - MultiQC
+ * Step 16c - MultiQC
  */
 process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
@@ -1933,7 +1971,7 @@ process multiqc {
 
 
 /*
- * Step 12d - Completion e-mail notification
+ * Step 16d - Completion e-mail notification
  */
 workflow.onComplete {
 

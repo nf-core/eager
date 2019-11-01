@@ -20,6 +20,7 @@ dependencies:
   - bioconda::damageprofiler=0.4.6
   - bioconda::multiqc=1.7
   - bioconda::pmdtools=0.60
+  - bioconda::bedtools=2.29.0
   - conda-forge::r-rmarkdown=1.15
   - conda-forge::libiconv=1.15
   - conda-forge::pigz=2.3.4
