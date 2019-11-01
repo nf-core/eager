@@ -12,15 +12,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Added Support for automated tests using [GitHub Actions](https://github.com/features/actions)
 * [#40](https://github.com/nf-core/eager/issues/40), [#231](https://github.com/nf-core/eager/issues/231) - Added genotyping capability through GATK UnifiedGenotyper (v3.5), GATK HaplotypeCaller (v4.1) and FreeBayes
 * Added MultiVCFAnalyzer module
-* [#240](https://github.com/nf-core/eager/issues/240) - Added human sex determination module.
+* [#240](https://github.com/nf-core/eager/issues/240) - Added human sex determination module
 * [#226](https://github.com/nf-core/eager/issues/226) - Added `--preserve5p` function for AdapterRemoval
 * [#212](https://github.com/nf-core/eager/issues/212) - Added ability to use only mergedreads downstream from Adapterremoval
+* [#265](https://github.com/nf-core/eager/issues/265) - Adjusted full markdown linting in Travis CI
+* [#247](https://github.com/nf-core/eager/issues/247) - Added nuclear contamination with angsd
 * [#258](https://github.com/nf-core/eager/issues/258) - Added ability to report bedtools stats to features (e.g. depth/breadth of annotated genes)
+
 
 ### `Fixed`
 
 * [#227](https://github.com/nf-core/eager/issues/227) - Large re-write of input/output process logic to allow maximum flexibility. Originally to address [#227](https://github.com/nf-core/eager/issues/227), but further expanded
 * Fixed Travis-Ci.org to Travis-Ci.com migration issues
+* [#266](https://github.com/nf-core/eager/issues/266) - Added sanity checks for input filetypes (i.e. only BAM files can be supplied if `--bam`)
 
 ### `Dependencies`
 
@@ -117,6 +121,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#122](https://github.com/nf-core/eager/pull/122) - Add pulling from Dockerhub again
 
 ### `Fixed`
+
 * [#110](https://github.com/nf-core/eager/pull/110) - Fix for [MultiQC Missing Second FastQC report](https://github.com/nf-core/eager/issues/107)
 * [#112](https://github.com/nf-core/eager/pull/112) - Remove [redundant UDG options](https://github.com/nf-core/eager/issues/89)
 
