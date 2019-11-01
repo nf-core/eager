@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#240](https://github.com/nf-core/eager/issues/240) - Added human sex determination module.
 * [#226](https://github.com/nf-core/eager/issues/226) - Added `--preserve5p` function for AdapterRemoval
 * [#212](https://github.com/nf-core/eager/issues/212) - Added ability to use only mergedreads downstream from Adapterremoval
+* [#258](https://github.com/nf-core/eager/issues/258) - Added ability to report bedtools stats to features (e.g. depth/breadth of annotated genes)
 
 ### `Fixed`
 
