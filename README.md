@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.com/nf-core/eager.svg?branch=master)](https://travis-ci.com/nf-core/eager)
 [![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/eager/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/eager/actions)
-[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.04.0-brightgreen.svg)](https://www.nextflow.io/)
 [![Slack Status](https://nf-core-invite.herokuapp.com/badge.svg)](https://nf-core-invite.herokuapp.com)[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker Container available](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager/)
 ![Singularity Container available](https://img.shields.io/badge/singularity-available-7E4C74.svg)
@@ -61,7 +61,6 @@ Additional functionality contained by the pipeline currently includes:
 
         nextflow clean -k
 
-
 NB. You can see an overview of the run in the MultiQC report located at `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
 
 Modifications to the default pipeline are easily made using various options
@@ -96,6 +95,7 @@ This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/ap
 * [Maxime Garcia](https://github.com/MaxUlysse)
 * [Luc Venturini](https://github.com/lucventurini)
 * [Hester van Schalkwyk](https://github.com/hesterjvs)
+* [Thiseas C. Lamnidis](https://github.com/TCLamnidis)
 
 If you've contributed and you're missing in here, please let me know and I'll add you in.
 
@@ -113,8 +113,8 @@ If you've contributed and you're missing in here, please let me know and I'll ad
 * **MultiQC** Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. [https://doi.org/10.1093/bioinformatics/btw354](https://doi.org/10.1093/bioinformatics/btw354) Download: [https://multiqc.info/](https://multiqc.info/)
 * **BamUtils** Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. [https://doi.org/10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114) Download: [https://genome.sph.umich.edu/wiki/BamUtil](https://genome.sph.umich.edu/wiki/BamUtil)
 * **FastP** Chen, S., Zhou, Y., Chen, Y., & Gu, J. (2018). fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics , 34(17), i884–i890. [https://doi.org/10.1093/bioinformatics/bty560](https://doi.org/10.1093/bioinformatics/bty560) Download: [https://github.com/OpenGene/fastp](https://github.com/OpenGene/fastp)
-* **GATK 3.8** DePristo, M. A., Banks, E., Poplin, R., Garimella, K. V., Maguire, J. R., Hartl, C., … Daly, M. J. (2011). A framework for variation discovery and genotyping using next-generation DNA sequencing data. Nature Genetics, 43(5), 491–498. [https://doi.org/10.1038/ng.806](https://doi.org/10.1038/ng.806.) [Download](https://software.broadinstitute.org/gatk/download/)
+* **GATK 3.5** DePristo, M. A., Banks, E., Poplin, R., Garimella, K. V., Maguire, J. R., Hartl, C., … Daly, M. J. (2011). A framework for variation discovery and genotyping using next-generation DNA sequencing data. Nature Genetics, 43(5), 491–498. [https://doi.org/10.1038/ng.806](https://doi.org/10.1038/ng.806.) [Download](https://software.broadinstitute.org/gatk/download/)
 * **GATK 4.X** - no citation available yet
 * **MultiVCFAnalyzer** Bos, K.I. et al., (2014). Pre-Columbian mycobacterial genomes reveal seals as a source of New World human tuberculosis. Nature, 514(7523), pp.494–497. Available at: [http://dx.doi.org/10.1038/nature13591](http://dx.doi.org/10.1038/nature13591). Download: [https://github.com/alexherbig/MultiVCFAnalyzer](https://github.com/alexherbig/MultiVCFAnalyzer)
 * **Sex.DetERRmine.py** Lamnidis, T.C. et al., 2018. Ancient Fennoscandian genomes reveal origin and spread of Siberian ancestry in Europe. Nature communications, 9(1), p.5018. Available at: [http://dx.doi.org/10.1038/s41467-018-07483-5](http://dx.doi.org/10.1038/s41467-018-07483-5). Download: [https://github.com/TCLamnidis/Sex.DetERRmine.git](https://github.com/TCLamnidis/Sex.DetERRmine.git).
-
+* **ANGSD** Korneliussen, T.S., Albrechtsen, A. & Nielsen, R., 2014. ANGSD: Analysis of Next Generation Sequencing Data. BMC bioinformatics, 15, p.356. Available at: [http://dx.doi.org/10.1186/s12859-014-0356-4](http://dx.doi.org/10.1186/s12859-014-0356-4). Download: [https://github.com/ANGSD/angsd](https://github.com/ANGSD/angsd).
