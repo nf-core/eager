@@ -594,7 +594,7 @@ The maximum number of reads used for damage assessment in PMDtools. Can be used 
 
 ## Feature Annotation
 
-If you're interested in looking at coverage stats for certain features on your reference such as genes, SNPs etc., you can use the following bedtools module for this purpose. 
+If you're interested in looking at coverage stats for certain features on your reference such as genes, SNPs etc., you can use the following bedtools module for this purpose.
 
 ### `--run_bedtools_coverage`
 
