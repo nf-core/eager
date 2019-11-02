@@ -108,10 +108,6 @@ def helpMessage() {
       --pmdtools_reference_mask     Specify a reference mask for PMDTools
       --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
       
-    Annotation Statistics
-      --run_bedtools_coverage       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference
-      --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes
-
     BAM Trimming
       --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
       --bamutils_clip_left          Specify the number of bases to clip off reads from 'left' end of read
@@ -253,10 +249,6 @@ params.dedup_all_merged = false
 
 //Preseq settings
 params.preseq_step_size = 1000
-
-//Bedtools settings
-params.run_bedtools_coverage = false 
-params.anno_file = ''
 
 //PMDTools settings
 params.run_pmdtools = false
@@ -416,13 +408,6 @@ if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "c
 if (params.bam_discard_unmapped && bam_unmapped_type == '') {
     exit 1, "Please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
 }
-
-// Bedtools sanity checking
-
-if(params.run_bedtools_coverage && params.anno_file == ''){
-  exit 1, "You have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
-}
-
 
 // Genotyping sanity checking
 
@@ -1369,7 +1354,7 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
@@ -1377,7 +1362,7 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
 
     ch_filteringindex_for_skiprmdup
         .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
@@ -1466,30 +1451,6 @@ process qualimap {
     """
     qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
     """
-}
-
-/*
- Step 9: Bedtools
-*/
-
-process bedtools {
-  tag "${bam.baseName}"
-  publishDir "${params.outdir}/bedtools", mode: 'copy'
-
-  when:
-  params.run_bedtools_coverage
-
-  input:
-  file bam from ch_rmdup_for_bedtools
-
-  output:
-  file "*"
-
-  script:
-  """
-  bedtools coverage -a ${params.anno_file} -b $bam | pigz -p 4 > "${bam.baseName}".breadth.gz 
-  bedtools coverage -a ${params.anno_file} -b $bam -mean | pigz -p 4 > "${bam.baseName}".depth.gz 
-  """
 }
 
 

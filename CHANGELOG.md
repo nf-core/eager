@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#212](https://github.com/nf-core/eager/issues/212) - Added ability to use only mergedreads downstream from Adapterremoval
 * [#265](https://github.com/nf-core/eager/issues/265) - Adjusted full markdown linting in Travis CI
 * [#247](https://github.com/nf-core/eager/issues/247) - Added nuclear contamination with angsd
-* [#258](https://github.com/nf-core/eager/issues/258) - Added ability to report bedtools stats to features (e.g. depth/breadth of annotated genes)
 
 ### `Fixed`
 
