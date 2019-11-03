@@ -82,6 +82,8 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-pmd_trimbam_unifiedgenotyper_multivcfanalyzer" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
   # GENOTYPING_UG/PMD/MULTIVCFANALYZER: Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
   - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-multivcfanalyzer_additionalvcfs" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/jfy133/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+  # BEDTOOLS: Run basic pipeline but get additional feature coverage stats
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-bedtools" -profile test,docker --pairedEnd --run_bedtools_coverage --anno_file 'https://raw.githubusercontent.com/jfy133/test-datasets/eager/reference/Mammoth/Mammoth_MT_Krause.gff3'
   # BAM_INPUT: Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
   - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-baminput_noConvertBam" -profile test_bam,docker --bam --skip_adapterremoval --run_convertbam
   # BAM_INPUT: Run the basic pipeline with the bam input profile, convert to FASTQ for adapterremoval test and downstream
