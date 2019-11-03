@@ -55,7 +55,7 @@ script:
   # ADAPTERREMOVAL: Run the basic pipeline with paired end data without collapsing
   - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-skip_collapse" -profile test,docker --pairedEnd --skip_collapse
   # ADAPTERREMOVAL: Run the basic pipeline with paired end data without trimming, but still merge
-  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-pretrim" profile test_pretrim,docker --pairedEnd --skip_trim 
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-pretrim" -profile test_pretrim,docker --pairedEnd --skip_trim 
   # ADAPTERREMOVAL: Run the basic pipeline with paired end data without adapterRemoval
   - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-skip_adapterremoval" -profile test,docker --pairedEnd --skip_adapterremoval
   # ADAPTERREMOVAL: Run the basic pipeline with preserve5p end option
