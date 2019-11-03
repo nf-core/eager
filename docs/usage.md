@@ -592,18 +592,6 @@ Can be used to set a reference genome mask for PMDTools.
 
 The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results.
 
-## Feature Annotation
-
-If you're interested in looking at coverage stats for certain features on your reference such as genes, SNPs etc., you can use the following bedtools module for this purpose.
-
-### `--run_bedtools_coverage`
-
-Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.
-
-### `--anno_file`
-
-Specify the path to a GFF/BED containing the feature coordinates (or any acceptable input for [`bedtools coverage`](https://bedtools.readthedocs.io/en/latest/content/tools/coverage.html)). Must be in quotes.
-
 ## BAM Trimming Parameters
 
 For some library preparation protocols, users might want to clip off damaged bases before applying genotyping methods. This can be done in nf-core/eager automatically by turning on the `--trim_bam` parameter.
