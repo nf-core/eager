@@ -83,7 +83,7 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 
 ## Credits
 
-This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with major contributions from Stephen Clayton, ideas and documentation from James A. Fellows Yates, Raphael Eisenhofer, Maxime Borry and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
+This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [James A. Fellows Yates](https://github.com/jfy133), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), and Stephen Clayton. Additional ideas and discussion by Raphael Eisenhofer, and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
 
 ## Contributors
 
