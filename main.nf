@@ -1470,6 +1470,15 @@ process qualimap {
  Step 9: Bedtools
 */
 
+// Set up channels for annotation file
+
+if (!params.run_bedtools_coverage){
+  ch_anno_for_bedtools = Channel.empty()
+} else {
+  Channel
+    ch_anno_for_bedtools = Channel.fromPath(params.anno_file)
+}
+
 process bedtools {
   tag "${bam.baseName}"
   publishDir "${params.outdir}/bedtools", mode: 'copy'
@@ -1479,14 +1488,15 @@ process bedtools {
 
   input:
   file bam from ch_rmdup_for_bedtools
+  file anno_file from ch_anno_for_bedtools
 
   output:
   file "*"
 
   script:
   """
-  bedtools coverage -a ${params.anno_file} -b $bam | pigz -p 4 > "${bam.baseName}".breadth.gz 
-  bedtools coverage -a ${params.anno_file} -b $bam -mean | pigz -p 4 > "${bam.baseName}".depth.gz 
+  bedtools coverage -a ${anno_file} -b $bam | pigz -p 4 > "${bam.baseName}".breadth.gz 
+  bedtools coverage -a ${anno_file} -b $bam -mean | pigz -p 4 > "${bam.baseName}".depth.gz 
   """
 }
 
