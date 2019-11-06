@@ -1792,9 +1792,8 @@ if (params.additional_vcf_files == '') {
      params.run_sexdeterrmine
     
      input:
-     //Val 'Bams' from ch_for_sexdeterrmine.collect()
-     file 'Bams' from ch_for_sexdeterrmine.collect()
-    
+     val 'Bams' from ch_for_sexdeterrmine.collect()
+        
      output:
      file 'SexDet.txt'
     
