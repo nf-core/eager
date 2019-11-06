@@ -33,12 +33,14 @@ install:
   # Install markdownlint-cli
   - sudo apt-get install npm && npm install -g markdownlint-cli
 
-global:
+
+env:
+   global:
   # https://tower.nf/ with email nf-core@mailinator.com
   # Tower login mailbox: https://www.mailinator.com/v3/index.jsp?zone=public&query=nf-core
   - TOWER_ACCESS_TOKEN=1c1f493bc2703472d6f1b9f6fb9e9d117abab7b1
   - JOBNAME="eager-${TRAVIS_PULL_REQUEST_BRANCH}_${TRAVIS_COMMIT:0:6}_${TRAVIS_BUILD_NUMBER}.${TRAVIS_JOB_ID}"
-env:
+  jobs:
   - NXF_VER='19.04.0' # Specify a minimum NF version that should be tested and work
   - NXF_VER='' # Plus: get the latest NF version and check that it works
 
