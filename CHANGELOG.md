@@ -20,7 +20,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#247](https://github.com/nf-core/eager/issues/247) - Added nuclear contamination with angsd
 * [#258](https://github.com/nf-core/eager/issues/258) - Added ability to report bedtools stats to features (e.g. depth/breadth of annotated genes)
 
-
 ### `Fixed`
 
 * [#227](https://github.com/nf-core/eager/issues/227) - Large re-write of input/output process logic to allow maximum flexibility. Originally to address [#227](https://github.com/nf-core/eager/issues/227), but further expanded
