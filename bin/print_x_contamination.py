@@ -31,8 +31,8 @@ for fn in Input_files:
                 err_mom2=fields[4].split(":")[1]
                 ml2=fields[5].split(":")[1]
                 err_ml2=fields[6].split(":")[1]
-        data[Ind]={ "Method1_MOM_estimate" : mom1, "Method1_MOM_SE" : err_mom1, "Method1_ML_estimate" : ml1, "Method1_ML_SE" : err_ml1, "Method2_MOM_estimate" : mom2, "Method2_MOM_SE" : err_mom2, "Method2_ML_estimate" : ml2, "Method2_ML_SE" : err_ml2 }
-        print (Ind, mom1, err_mom1, ml1, err_ml1, mom2, err_mom2, ml2, err_ml2, sep="\t", file=output)
+        data[Ind]={ "Number_of_SNPs" : nSNPs, "Method1_MOM_estimate" : mom1, "Method1_MOM_SE" : err_mom1, "Method1_ML_estimate" : ml1, "Method1_ML_SE" : err_ml1, "Method2_MOM_estimate" : mom2, "Method2_MOM_SE" : err_mom2, "Method2_ML_estimate" : ml2, "Method2_ML_SE" : err_ml2 }
+        print (Ind, nSNPs, mom1, err_mom1, ml1, err_ml1, mom2, err_mom2, ml2, err_ml2, sep="\t", file=output)
 
 with open('nuclear_contamination.json', 'w') as outfile:
     json.dump(data, outfile)
