@@ -1,4 +1,4 @@
-# ![nf-core/eager](docs/images/eager_logo.png)
+# ![nf-core/eager](docs/images/nf-core_eager_logo.png)
 
 **A fully reproducible ancient and modern DNA pipeline in Nextflow and with cloud support.**.
 
