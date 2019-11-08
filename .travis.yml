@@ -40,48 +40,54 @@ env:
 script:
   # Lint the pipeline code
   - nf-core lint ${TRAVIS_BUILD_DIR}
-  # Run the basic pipeline with the test profile
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --saveReference
-  # Test using PMD tools
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --run_pmdtools --pairedEnd
-  # Run the basic pipeline with single end data (pretending its single end actually)
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --singleEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
-  # Run the basic pipeline with paired end data without collapsing
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_collapse --saveReference
-  # Run the basic pipeline with paired end data without trimming CURRENTLY DISABLED UNTIL CORRECT TEST DATA AVALIABLE
-  #- nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_trim --saveReference
-  # Run the basic pipeline with preserve5p end option
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --preserve5p
-    # Run the basic pipeline with preserve5p end option
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mergedonly
-    # Run the basic pipeline with preserve5p end and merged reads only options
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --preserve5p --mergedonly
-   # Run the basic pipeline with paired end data without adapterRemoval
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --skip_adapterremoval --saveReference
-   # Run the basic pipeline with output unmapped reads as fastq
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --strip_input_fastq
-  # Run the same pipeline testing optional step: fastp, complexity 
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --complexity_filter --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
-  # Test BAM Trimming
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --trim_bam --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
-  # Test running with CircularMapper
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mapper 'circularmapper' --circulartarget 'NC_007596.2'
-  # Test running with BWA Mem
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --mapper 'bwamem' --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta
-  # Test with zipped reference input
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker --pairedEnd --fasta 'https://raw.githubusercontent.com/nf-core/test-datasets/eager2/reference/Test.fasta.gz'
-  # Run the basic pipeline with the bam input profile, skip AdapterRemoval as no --convertBam
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile testbam,docker --bam --skip_adapterremoval
-  # Run the basic pipeline with the bam input profile, convert to FASTQC for adapterremoval test
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile testbam,docker --bam --run_convertbam
-  # Run the basic pipeline with FastA reference with `fna` extension
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --saveReference
-  # Test using pre-computed indices from a separate run beforehand
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict 
-  # Test running GATK unified genotyper
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
-  # Test running GATK HaplotypeCaller
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_bam,docker --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw'
-  # Test running GATK UnifiedGenotyper and MultiVCFAnalyzer
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --trim_bam --run_pmdtools --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
+  # REFERENCE: Run the basic pipeline with the test profile
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-basic" -profile test,docker --pairedEnd --saveReference
+  # REFERENCE: Run the basic pipeline with single end data (pretending its single end actually) and all prepared index files
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-singleEnd" -profile test,docker --singleEnd 
+  # REFERENCE: Run the basic pipeline with FastA reference with `fna` extension
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-fna_ref" -profile test_fna,docker --pairedEnd --saveReference
+  # REFERENCE: Test using pre-computed indices from a separate run beforehand
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-preindex_ref" -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict 
+  # REFERENCE: Test with zipped reference input
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-gz_ref" -profile test,docker --pairedEnd --fasta 'https://github.com/jfy133/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
+  # FASTP: Run the same pipeline testing optional step: fastp, complexity 
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-fastp" -profile test,docker --pairedEnd --complexity_filter
+  # ADAPTERREMOVAL: Run the basic pipeline with paired end data without collapsing
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-skip_collapse" -profile test,docker --pairedEnd --skip_collapse
+  # ADAPTERREMOVAL: Run the basic pipeline with paired end data without trimming, but still merge
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-pretrim" -profile test_pretrim,docker --pairedEnd --skip_trim 
+  # ADAPTERREMOVAL: Run the basic pipeline with paired end data without adapterRemoval
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-skip_adapterremoval" -profile test,docker --pairedEnd --skip_adapterremoval
+  # ADAPTERREMOVAL: Run the basic pipeline with preserve5p end option
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-preserve5p" -profile test,docker --pairedEnd --preserve5p
+  # ADAPTERREMOVAL: Run the basic pipeline with merged only option
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-mergedonly" -profile test,docker --pairedEnd --mergedonly
+  # ADAPTERREMOVAL: Run the basic pipeline with preserve5p end and merged reads only options
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-preserve5p_mergedonly" -profile test,docker --pairedEnd --preserve5p --mergedonly
+  # MAPPER_CIRCULARMAPPER: Test running with CircularMapper
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-circularmapper" -profile test,docker --pairedEnd --mapper 'circularmapper' --circulartarget 'NC_007596.2'
+  # MAPPER_BWAMEM: Test running with BWA Mem
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-bwa_mem" -profile test,docker --pairedEnd --mapper 'bwamem'
+  # STRIP_FASTQ: Run the basic pipeline with output unmapped reads as fastq
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-stripfastq" -profile test,docker --pairedEnd --strip_input_fastq
+  # BAM_FILTERING: Run basic mapping pipeline with mapping quality filtering, and unmapped export
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-unmapped_export" -profile test,docker --pairedEnd --run_bam_filtering --bam_mapping_quality_threshold 37 --bam_discard_umapped --bam_unmapped_type 'fastq'
+  # GENOTYPING_HC: Test running GATK HaplotypeCaller
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-haplotypercaller" -profile test_fna,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
+  # GENOTYPING_FB: Test running FreeBayes
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-freebayes" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'freebayes'
+  # SKIPPING: Test checking all skip steps work i.e. input bam, skipping straight to genotyping
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-skipping_logic" -profile test_bam,docker --bam --singleEnd --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
+  # TRIM_BAM/PMD/GENOTYPING_UG/MULTIVCFANALYZER: Test running PMDTools, TrimBam, GATK UnifiedGenotyper and MultiVCFAnalyzer
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-pmd_trimbam_unifiedgenotyper_multivcfanalyzer" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
+  # GENOTYPING_UG/PMD/MULTIVCFANALYZER: Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-multivcfanalyzer_additionalvcfs" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/jfy133/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+  # BAM_INPUT: Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-baminput_noConvertBam" -profile test_bam,docker --bam --skip_adapterremoval --run_convertbam
+  # BAM_INPUT: Run the basic pipeline with the bam input profile, convert to FASTQ for adapterremoval test and downstream
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "eager-baminput_convertbam_basic" -profile test_bam,docker --bam --run_convertbam
+  # [DISABLED UNTIL BED FILE AVAILABLE - 2h RUN TIME WITHOUT] - SEXDETERMINAION: Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
+  #- nextflow run ${TRAVIS_BUILD_DIR} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_sexdeterrmine
+  # [DISABLED UNTIL SMALL HUMAN REFERENCE AVALIABLE - REQUIRES HUMAN FASTA] - NUCLEAR INPUT
+  #- nextflow run ${TRAVIS_BUILD_DIR} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_nuclearcontamination
+
