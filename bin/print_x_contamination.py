@@ -27,7 +27,7 @@ for fn in Input_files:
                 ml1=fields[5].split(":")[1]
                 err_ml1=fields[6].split(":")[1]
                 ## Sometimes angsd fails to run method 2, and the error is printed directly after the SE for ML. When that happens, exclude the first word in the error from the output. (Method 2 data will be shown as NA)
-                if err_ml1.endwith("contamination"):
+                if err_ml1.endswith("contamination"):
                     err_ml1 = err_ml1[:-13]
             elif line.strip()[0:7] == "Method2" and line.strip()[9:16] == 'new_llh':
                 mom2=fields[3].split(":")[1]
