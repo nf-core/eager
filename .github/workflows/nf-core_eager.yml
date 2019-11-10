@@ -8,7 +8,7 @@ jobs:
     env:
       TOWER_ACCESS_TOKEN: 1c1f493bc2703472d6f1b9f6fb9e9d117abab7b1
       NXF_ANSI_LOG: 0
-      RUN_NAME: "eager-$(cat GITHUB_REF)-$(cat GITHUB_SHA)-$(cat GITHUB_ACTION)"
+      RUN_NAME: eager-$GITHUB_REF-$GITHUB_SHA-$GITHUB_ACTION
     strategy:
       matrix:
         endedness: ['--singleEnd', '--pairedEnd']
@@ -37,9 +37,6 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} -with-tower -name "$RUN_NAME-skip_collapse" -profile test,docker --pairedEnd --skip_collapse
       - name: ADAPTERREMOVAL Test pairedEnd collapsing but no trimming
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -with-tower -name "$RUN_NAME-pretrim" -profile test_pretrim,docker --pairedEnd --skip_trim
-      - name: ADAPTERREMOVAL Run the basic pipeline with paired end data without trimming, but still merge
         run: |
           nextflow run ${GITHUB_WORKSPACE} -with-tower -name "$RUN_NAME-pretrim" -profile test_pretrim,docker --pairedEnd --skip_trim
       - name: ADAPTERREMOVAL Run the basic pipeline with paired end data without adapterRemoval
