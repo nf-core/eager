@@ -17,7 +17,7 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Extract branch name
+      - name: Print branch name
         shell: bash
         run: |
           echo "::set-env name=BRANCH_NAME::`echo ${GITHUB_REF}" && echo $BRANCH_NAME
