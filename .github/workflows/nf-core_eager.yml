@@ -19,6 +19,11 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Extract branch name
         shell: bash
+        run: |
+          echo "::set-env name=BRANCH_NAME::`echo ${GITHUB_REF}" && echo $BRANCH_NAME
+        id: print_github_ref
+      - name: Extract branch name
+        shell: bash
         run: echo "::set-env name=RUN_NAME::eager-`echo ${GITHUB_REF//\//@} | rev | cut -f1 -d@ | rev`_${{ github.event_name }}_`echo ${GITHUB_SHA} | cut -c1-6`"
         id: extract_branch
       - name:  BASIC Run the basic pipeline with the test profileBasic workflow, PE/SE, bwa aln
