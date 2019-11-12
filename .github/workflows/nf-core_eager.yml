@@ -20,7 +20,7 @@ jobs:
       - name: Print branch name
         shell: bash
         run: |
-          echo "::set-env name=BRANCH_NAME::`echo ${GITHUB_REF}" && echo $BRANCH_NAME
+          echo "::set-env name=BRANCH_NAME::`echo ${GITHUB_REF}`" && echo $BRANCH_NAME
         id: print_github_ref
       - name: Extract branch name
         shell: bash
