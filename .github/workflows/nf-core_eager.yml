@@ -17,14 +17,9 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Print branch name
-        shell: bash
-        run: |
-          echo ${GITHUB_HEAD_REF}
-        id: print_github_ref
       - name: Extract branch name
         shell: bash
-        run: echo "::set-env name=RUN_NAME::eager-`echo ${GITHUB_HEAD_REF//\//@} | rev | cut -f1 -d@ | rev`_${{ github.event_name }}_`echo ${GITHUB_SHA} | cut -c1-6`"
+        run: echo "::set-env name=RUN_NAME::`echo ${GITHUB_REPOSITORY}//\//_}`-`echo ${GITHUB_HEAD_REF//\//@} | rev | cut -f1 -d@ | rev`_${{ github.event_name }}_`echo ${GITHUB_SHA} | cut -c1-6`"
         id: extract_branch
       - name:  BASIC Run the basic pipeline with the test profileBasic workflow, PE/SE, bwa aln
         run: |
