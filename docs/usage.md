@@ -620,6 +620,18 @@ This is by default set to `false`, but can be turned on to calculate on target m
 
 Can be used to set a path to a BED file (3/6 column format) to calculate capture target efficiency on the fly. Will not be used without `--bedfile` set as parameter.
 
+## Feature Annotation
+
+If you're interested in looking at coverage stats for certain features on your reference such as genes, SNPs etc., you can use the following bedtools module for this purpose.
+
+### `--run_bedtools_coverage`
+
+Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.
+
+### `--anno_file`
+
+Specify the path to a GFF/BED containing the feature coordinates (or any acceptable input for [`bedtools coverage`](https://bedtools.readthedocs.io/en/latest/content/tools/coverage.html)). Must be in quotes.
+
 ## Genotyping Parameters
 
 There are options for different genotypers to be used. We suggest you the documentation of each tool to find the ones that suit your needs.
