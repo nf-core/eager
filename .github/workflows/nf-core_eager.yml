@@ -30,7 +30,7 @@ jobs:
         id: extract_branch
       - name: Determine tower usage
         shell: bash
-        run: echo "::set-env name=TOWER::`[ -z "$TOWER_ACCESS_TOKEN" ] && echo '' || echo '"$TOWER"'`" 
+        run: echo "::set-env name=TOWER::`[ -z "$TOWER_ACCESS_TOKEN" ] && echo '' || echo '-with-tower'`" 
         id: tower_usage
       - name:  BASIC Run the basic pipeline with the test profileBasic workflow, PE/SE, bwa aln
         run: |
