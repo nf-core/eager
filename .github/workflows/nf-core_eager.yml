@@ -13,7 +13,7 @@ jobs:
   github_actions_ci:
     runs-on: ubuntu-latest
     env:
-      TOWER_ACCESS_TOKEN: 1c1f493bc2703472d6f1b9f6fb9e9d117abab7b1
+      TOWER_ACCESS_TOKEN: ${{ secrets.TOWER_ACCESS_TOKEN }}
       NXF_ANSI_LOG: 0
     strategy:
       matrix:
