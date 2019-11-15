@@ -3,6 +3,13 @@ name: nf-core eager CI
 on: [push, pull_request]  
 
 jobs:
+  conda_build:
+    steps:
+      - uses: actions/checkout@v1
+      - name: Try Creating Conda env
+        run: |
+          conda env create --prefix nf-core-eager-2.1.0dev-d95a13feb408cc17e95d38f16a81010d --file environment.yml
+
   github_actions_ci:
     runs-on: ubuntu-latest
     env:
