@@ -8,9 +8,8 @@ However, don't be put off by this template - other more general issues and sugge
 
 > If you need help using or modifying nf-core/eager then the best place to ask is on the pipeline channel on [Slack](https://nf-core-invite.herokuapp.com/).
 
-
-
 ## Contribution workflow
+
 If you'd like to write some code for nf-core/eager, the standard workflow
 is as follows:
 
@@ -24,9 +23,9 @@ is as follows:
 
 If you're not used to this workflow with git, you can start with some [basic docs from GitHub](https://help.github.com/articles/fork-a-repo/) or even their [excellent interactive tutorial](https://try.github.io/).
 
-
 ## Tests
-When you create a pull request with changes, [Travis CI](https://travis-ci.org/) will run automatic tests.
+
+When you create a pull request with changes, [Travis CI](https://travis-ci.com/) will run automatic tests.
 Typically, pull-requests are only fully reviewed when these tests are passing, though of course we can help out before then.
 
 There are typically two types of tests that run:

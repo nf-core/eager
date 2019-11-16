@@ -34,7 +34,6 @@ The concept is as follows:
   * If the current stage is turned on: will mix the previous stage and current stage output and filter for file suffixes unique to the current stage output
   * If the current stage is turned off or skipped: will mix the previous stage and current stage output. However as there there is no files in the output channel from the current stage, no filtering is required and the files in the 'ch_XXX_for_skipXXX' stage will be used.
   
-  
  This ensures the same channel inputs to the next stage is 'homogenous' - i.e. all comes from the same source (the bypass statement)
   
  An example schematic can be given as follows
@@ -89,5 +88,3 @@ Please use the following naming schemes, to make it easy to understand what is g
 * process output: `ch_output_from_<process>`(this should always go into the bypass statement described above).
 * skipped process output: `ch_<previousstage>_for_<skipprocess>`(this goes out of the bypass statement described above)
 * process inputs: `ch_<previousstage>_for_<process>` (this goes into a process)
-
-

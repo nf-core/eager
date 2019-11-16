@@ -27,8 +27,8 @@ def helpMessage() {
     nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' -profile docker
 
     Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes)
-      -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
+      --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs
+      -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation
       --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
       --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
       --bam                         Specifies that the input is in BAM format
@@ -42,7 +42,7 @@ def helpMessage() {
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
     References                      If not specified in the configuration file, or you wish to overwrite any of the references.
-      --bwa_index                   Path and name of a a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value supplied with the --fasta option)
+      --bwa_index                   Path and name of a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value supplied with the --fasta option)
       --bedfile                     Path to BED file for SNPCapture methods
       --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
       --fasta_index                 Path to samtools FASTA index (typically ending in '.fai')
@@ -68,7 +68,7 @@ def helpMessage() {
       --clip_min_read_quality       Specify minimum base quality for trimming off bases. Default: 20 
       --min_adap_overlap            Specify minimum adapter overlap: 1
       --skip_collapse               Skip merging forward and reverse reads together. (Only for PE samples)
-      --skip_trim                   Skip adaptor and quality trimming
+      --skip_trim                   Skip adapter and quality trimming
       --preserve5p                  Skip 5p quality base trimming (n, score, window) at 5p end.
       --mergedonly                  Send downstream only merged reads (unmerged reads and singletons are discarded).
 
@@ -86,10 +86,10 @@ def helpMessage() {
       --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace)
       
     BAM Filtering
-      --run_bam_filtering		             Turn on samtools filter for mapping quality or unmapped reads of BAM files.
+      --run_bam_filtering                Turn on samtools filter for mapping quality or unmapped reads of BAM files.
       --bam_mapping_quality_threshold    Minimum mapping quality for reads filter, default 0.
-      --bam_discard_unmapped    	       Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
-      --bam_unmapped_type           	   Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'.
+      --bam_discard_unmapped             Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
+      --bam_unmapped_type                Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'.
     
     DeDuplication
       --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
@@ -107,10 +107,15 @@ def helpMessage() {
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools
       --pmdtools_reference_mask     Specify a reference mask for PMDTools
       --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
+      
+    Annotation Statistics
+      --run_bedtools_coverage       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference
+      --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes
 
+      
     BAM Trimming
       --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
-      --bamutils_clip_left        	Specify the number of bases to clip off reads from 'left' end of read
+      --bamutils_clip_left          Specify the number of bases to clip off reads from 'left' end of read
       --bamutils_clip_right         Specify the number of bases to clip off reads from 'right' end of read
       --bamutils_softclip           Use softclip instead of hard masking
 
@@ -130,12 +135,12 @@ def helpMessage() {
       --freebayes_p                 Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
 
     SNP Table Generation
-      --run_multivcfanalyzer	      Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
+      --run_multivcfanalyzer        Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
       --write_allele_frequencies    Specify to also write allele frequencies in the SNP table. Default: turned off.
       --min_genotype_quality        Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
-      --min_base_coverage 		      Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
-      --min_allele_freq_hom		      Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
-      --min_allele_freq_het		      Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
+      --min_base_coverage           Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
+      --min_allele_freq_hom         Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
+      --min_allele_freq_het         Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
       --additional_vcf_files        Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files. (Optional)
       --reference_gff_annotations   Specify the reference genome annotations in '.gff' format. (Optional)
       --reference_gff_exclude       Specify positions to be excluded in '.gff' format. (Optional)
@@ -160,8 +165,6 @@ def helpMessage() {
       --max_cpus                    Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. --max_cpus 1
       
     For a full list and more information of available parameters, consider the documentation (https://github.com/nf-core/eager/).
-
-      
     """.stripIndent()
 }
 /*
@@ -252,6 +255,10 @@ params.dedup_all_merged = false
 //Preseq settings
 params.preseq_step_size = 1000
 
+//Bedtools settings
+params.run_bedtools_coverage = false 
+params.anno_file = ''
+
 //PMDTools settings
 params.run_pmdtools = false
 params.pmdtools_range = 10
@@ -266,7 +273,6 @@ params.bamutils_clip_right = 1
 params.bamutils_softclip = false 
 
 //unmap
-
 params.strip_input_fastq = false
 params.strip_mode = 'strip'
 
@@ -361,15 +367,23 @@ if( params.bwa_index && (params.aligner == 'bwa' | params.mapper == 'bwamem')){
 }
 
 // Validate not trying to run adapterremoval on a BAM file
-
 if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
-	  exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
+    exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
 }
 
+// Validate BAM is single end only
+if (params.bam && !params.singleEnd){
+    exit 1, "BAM input must be used with --singleEnd "
+}
 
 // Validate that you're not trying to pass FASTQs to BAM only processes
 if (params.run_convertbam && params.skip_mapping) {
 	exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
+}
+
+// Validate that you're not trying to pass FASTQs to BAM only processes
+if (params.bam && !params.run_convertbam && !params.skip_mapping) {
+  exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
 }
 
 //Validate that either pairedEnd or singleEnd has been specified by the user!
@@ -403,6 +417,10 @@ if (params.bam_discard_unmapped && bam_unmapped_type == '') {
     exit 1, "Please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
 }
 
+// Bedtools sanity checking
+if(params.run_bedtools_coverage && params.anno_file == ''){
+  exit 1, "You have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
+}
 
 // Genotyping sanity checking
 
@@ -424,18 +442,20 @@ if (params.run_genotyping){
   }
 }
 
-
 // MultiVCFAnalyzer sanity checking
 if (params.run_multivcfanalyzer) {
-	if (params.genotyping_tool != "ug") {
-		exit 1, "MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
-	}
+  if (!params.run_genotyping) {
+    exit 1, "MultiVCFAnalyzer requires genotyping on be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
+  }
 
-	if (params.gatk_ploidy != '2') {
-		exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
-	}
+  if (params.genotyping_tool != "ug") {
+    exit 1, "MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
+  }
+
+  if (params.gatk_ploidy != '2') {
+    exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
+  }
 }
-
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
@@ -460,25 +480,39 @@ if( workflow.profile == 'awsbatch') {
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
+
+// If read paths
+//    Is single FASTQ
+//    Is paired-end FASTQ
+//    Is single BAM
+// If NOT read paths && FASTQ
+// is NOT read paths && BAM
+
 if( params.readPaths ){
     if( params.singleEnd && !params.bam) {
         Channel
             .from( params.readPaths )
+            .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
+            .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
             .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
-            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
             .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
     } else if (!params.bam){
         Channel
             .from( params.readPaths )
+            .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
+            .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
             .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
-            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
             .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
     } else {
         Channel
             .from( params.readPaths )
+            .filter { it =~/.*.bam/ }
+            .ifEmpty { exit 1, "Your specified BAM read files did not end in: '.bam' " }
             .map { row -> [ file( row )  ] }
-            .ifEmpty { exit 1, "params.readPaths or params.bams was empty - no input files supplied!" }
+            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
             .dump()
             .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
 
@@ -486,15 +520,17 @@ if( params.readPaths ){
 } else if (!params.bam){
      Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs" +
-            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
+        .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
+        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs " +
+            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nIf this is single-end data, please specify --singleEnd on the command line." }
         .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam  }
 
 } else {
      Channel
         .fromPath( params.reads )
+        .filter { it =~/.*.bam/ }
         .map { row -> [  file( row )  ] }
-        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nNB: Path needs" +
+        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nNB: Path needs " +
             "to be enclosed in quotes!\n" }
         .dump() //For debugging purposes
         .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
@@ -943,7 +979,7 @@ process bwa {
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval || params.skip_trim)){
+    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval)){
     prefix = "${reads[0].baseName}"
     """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -1073,7 +1109,7 @@ process bwamem {
 if (!params.skip_mapping) {
     ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm)
         .filter { it =~/.*mapped.bam/ }
-        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; ch_mapping_for_samtools_flagstat; ch_mapping_for_preseq } 
+        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; ch_mapping_for_samtools_flagstat } 
 
     ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
         .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
@@ -1081,7 +1117,7 @@ if (!params.skip_mapping) {
 
 } else {
     ch_adapterremoval_for_skipmap
-        .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat; ch_mapping_for_preseq }
+        .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
 
      ch_mappingindex_for_skipmapping
         .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
@@ -1328,13 +1364,10 @@ process markDup{
 }
 
 
-
-
-
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
@@ -1342,13 +1375,11 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
 
     ch_filteringindex_for_skiprmdup
         .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
 }
-
-
 
 
 /*
@@ -1363,7 +1394,7 @@ process preseq {
     !params.skip_preseq
 
     input:
-    file input from (params.skip_deduplication ? ch_mapping_for_preseq : ch_hist_for_preseq )
+    file input from (params.skip_deduplication ? ch_rmdup_for_preseq : ch_hist_for_preseq )
 
     output:
     file "${input.baseName}.ccurve" into ch_preseq_for_multiqc
@@ -1435,9 +1466,42 @@ process qualimap {
     """
 }
 
+/*
+ Step 9: Bedtools
+*/
+
+// Set up channels for annotation file
+
+if (!params.run_bedtools_coverage){
+  ch_anno_for_bedtools = Channel.empty()
+} else {
+  Channel
+    ch_anno_for_bedtools = Channel.fromPath(params.anno_file)
+}
+
+process bedtools {
+  tag "${bam.baseName}"
+  publishDir "${params.outdir}/bedtools", mode: 'copy'
+
+  when:
+  params.run_bedtools_coverage
+
+  input:
+  file bam from ch_rmdup_for_bedtools
+  file anno_file from ch_anno_for_bedtools
+
+  output:
+  file "*"
+
+  script:
+  """
+  bedtools coverage -a ${anno_file} -b $bam | pigz -p 4 > "${bam.baseName}".breadth.gz 
+  bedtools coverage -a ${anno_file} -b $bam -mean | pigz -p 4 > "${bam.baseName}".depth.gz 
+  """
+}
 
 /*
- Step 9: PMDtools
+ Step 10: PMDtools
  */
 
 process pmdtools {
@@ -1476,7 +1540,7 @@ process pmdtools {
 }
 
 /*
-* Step 10 - BAM Trimming step using bamUtils 
+* Step 11 - BAM Trimming step using bamUtils 
 * Can be used for UDGhalf protocols to clip off -n bases of each read
 */
 
@@ -1507,7 +1571,7 @@ process bam_trim {
 
 if ( params.run_genotyping && params.genotyping_source == "raw" ) {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
 
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
@@ -1546,7 +1610,7 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
 
 
 /*
- Step 11a: Genotyping - UnifiedGenotyper Downloading
+ Step 12a: Genotyping - UnifiedGenotyper Downloading
  NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking downstream tools. Therefore we need it (for now at least until downstream tools can read proper 4.2 VCFs... )
     
  */
@@ -1572,7 +1636,7 @@ ch_gatk_download = Channel.value("download")
  }
 
 /*
- Step 11b: Genotyping - UG
+ Step 12b: Genotyping - UG
 */
 
  process genotyping_ug {
@@ -1645,7 +1709,7 @@ ch_gatk_download = Channel.value("download")
  }
 
  /*
- *  Step 11c: FreeBayes genotyping, should probably add in some options for users to set 
+ *  Step 12c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
   tag "${bam}"
@@ -1673,7 +1737,7 @@ ch_gatk_download = Channel.value("download")
  }
 
 /*
- * Step 12: SNP Table Generation
+ * Step 13: SNP Table Generation
  */
 
 // Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
@@ -1692,7 +1756,7 @@ if (params.additional_vcf_files == '') {
  	params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
 
  	input:
-   	file fasta from fasta_for_indexing
+  file fasta from fasta_for_indexing
  	file vcf from ch_vcfs_for_multivcfanalyzer
 
  	output:
@@ -1718,7 +1782,7 @@ if (params.additional_vcf_files == '') {
  }
 
  /*
-  * Step XX Sex determintion with error bar calculation.
+  * Step 14 Sex determintion with error bar calculation.
   */
  
  process sex_deterrmine{
@@ -1729,7 +1793,7 @@ if (params.additional_vcf_files == '') {
     
      input:
      val 'Bams' from ch_for_sexdeterrmine.collect()
-    
+        
      output:
      file 'SexDet.txt'
     
@@ -1754,7 +1818,7 @@ if (params.additional_vcf_files == '') {
  }
 
  /* 
-  * Step XX Nuclear contamination for Human DNA based on chromosome X heterozygosity.
+  * Step 15 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
   */
  process nuclear_contamination{
      publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
@@ -1816,7 +1880,7 @@ Downstream VCF tools:
 
 
 /*
- * Step 12a - Output Description HTML
+ * Step 16a - Output Description HTML
  */
 process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
@@ -1835,7 +1899,7 @@ process output_documentation {
 
 
 /*
- * Step 12b - Parse software version numbers
+ * Step 16b - Parse software version numbers
  */
 process get_software_versions {
 	publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
@@ -1868,6 +1932,7 @@ process get_software_versions {
     cat $json &> v_damageprofiler.txt 2>&1 || true 
     java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
     multivcfanalyzer --help | head -n 1 || true
+    bedtools --version || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -1875,7 +1940,7 @@ process get_software_versions {
 
 
 /*
- * Step 12c - MultiQC
+ * Step 16c - MultiQC
  */
 process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
@@ -1913,7 +1978,7 @@ process multiqc {
 
 
 /*
- * Step 12d - Completion e-mail notification
+ * Step 16d - Completion e-mail notification
  */
 workflow.onComplete {
 
