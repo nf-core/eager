@@ -154,6 +154,20 @@ def helpMessage() {
       --run_nuclear_contamination   Enable nuclear contamination estimation.
       --contamination_chrom_name    The name of the chromosome in your bam. 'X' for hs37d5, 'chrX' for HG19. 
 
+    Metagenomic Screening
+      --run_metagenomic_screening   Turn on metagenomic screening module for reference-unmapped reads
+      --metagenomic_tool            Specify which classifier to use. Options: 'malt'. Default: 'malt'
+      --database                    Specify path to classifer database directory
+      --percent_identity            Percent identity value threshold. Default: 85
+      --malt_mode                   Specify which alignment method to use. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: 'BlastN'
+      --malt_alignment_mode         Specify alignment method. Options: 'Local', 'SemiGlobal'. Default: 'SemiGlobal'
+      --malt_top_percent            Specify the percent for LCA algorithm (see MEGAN6 CE manual). Default: 1
+      --malt_min_support_percent    Specify the minimum percentage of reads a taxon of sample total is required to have to be retained. Default: 0.01
+      --malt_max_queries            Specify the maximium number of queries a read can have. Default: 100
+      --malt_memory_mode            Specify the memory load method. Do not use 'map' with GTFS file system. Options: 'load', 'page', 'map'. Default: 'load'
+
+
+
     Other options:     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -311,6 +325,19 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 //Nuclear contamination based on chromosome X heterozygosity.
 params.run_nuclear_contamination = false
 params.contamination_chrom_name = 'X' // Default to using hs37d5 name
+
+
+// taxonomic classifer
+params.run_metagenomic_screening  = false
+params.metagenomic_tool = 'malt'
+params.database  = ''
+params.percent_identity = 85
+params.malt_mode = 'BlastN'
+params.malt_alignment_mode = 'SemiGlobal'
+params.malt_top_percent = 1
+params.malt_min_support_percent = 0.01
+params.malt_max_queries = 100
+params.malt_memory_mode = 'load'
 
 
 /*
@@ -1170,7 +1197,7 @@ process samtools_filter {
 
     output:
     file "*filtered.bam" into ch_output_from_filtering
-    file "*.fastq.gz" optional true
+    file "*.fastq.gz" optional true into ch_bam_filtering_for_malt
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}" into ch_outputindex_from_filtering
 
@@ -1836,7 +1863,7 @@ if (params.additional_vcf_files == '') {
     
     
      output:
-     file '*.X.contamination.out' into ch_from_nuclear_contamnation
+     file '*.X.contamination.out' into ch_from_nuclear_contamination
      
      script:
      """
@@ -1853,7 +1880,7 @@ if (params.additional_vcf_files == '') {
      params.run_nuclear_contamination
     
      input:
-     val 'Contam' from ch_from_nuclear_contamnation.collect()
+     val 'Contam' from ch_from_nuclear_contamination.collect()
     
      output:
      file 'nuclear_contamination.txt'
@@ -1863,6 +1890,52 @@ if (params.additional_vcf_files == '') {
      print_x_contamination.py ${Contam.join(' ')}
      """
  }
+
+/*
+ * Step 16: Metagenomic screening of unmapped reads
+*/
+
+
+//TODO: 
+// Build fake database with malt-build
+// Define default task resource parameters?
+// Test
+// Add sanity checks
+// bump conda recipe for openJDK version >= 8 
+// add sam format option
+
+process malt {
+  publishDir "${params.outdir}/metagenomic_classification", mode:"move"
+
+  when:
+  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq'
+
+  input:
+  file fastqs from ch_bam_filtering_for_malt.collect()
+
+  output:
+  file "*.rma6" into ch_rma_for_maltExtract
+
+  script:
+  """
+  malt-run \
+  -J-Xmx${task.memory}G \
+  -t ${task.cpus} \
+  -v \
+  -o . \
+  -d ${params.database} \
+  -id ${params.percent_identity} \
+  -m ${params.malt_mode} \
+  -at ${params.malt_alignment_mode} \
+  -top ${params.malt_top_percent} \
+  -supp ${params.malt_min_support_percent} \
+  -mq ${params.malt_max_queries} \
+  --memoryLoad ${params.malt_memory_load} \
+  -i ${fastqs.join} |&tee $output/malt.log
+  """
+
+}
+
 /*
 Genotyping tools:
 - angsd
@@ -1875,8 +1948,6 @@ Downstream VCF tools:
 - READ/mcMLKin
 - popGen output? PLINK? 
 */
-
-
 
 
 /*
