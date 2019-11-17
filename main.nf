@@ -440,7 +440,7 @@ if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "c
     exit 1, "Please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}!"
 }
 
-if (params.bam_discard_unmapped && bam_unmapped_type == '') {
+if (params.bam_discard_unmapped && params.bam_unmapped_type == '') {
     exit 1, "Please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
 }
 
@@ -1897,9 +1897,7 @@ if (params.additional_vcf_files == '') {
 
 
 //TODO: 
-// Build fake database with malt-build
 // Define default task resource parameters?
-// Test
 // Add sanity checks
 // bump conda recipe for openJDK version >= 8 
 // add sam format option
@@ -1915,11 +1913,12 @@ process malt {
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
+  file "malt.log"
 
   script:
   """
   malt-run \
-  -J-Xmx${task.memory}G \
+  -J-Xms32G \
   -t ${task.cpus} \
   -v \
   -o . \
@@ -1930,8 +1929,8 @@ process malt {
   -top ${params.malt_top_percent} \
   -supp ${params.malt_min_support_percent} \
   -mq ${params.malt_max_queries} \
-  --memoryLoad ${params.malt_memory_load} \
-  -i ${fastqs.join} |&tee $output/malt.log
+  --memoryMode ${params.malt_memory_mode} \
+  -i ${fastqs.join(' ')} |&tee malt.log
   """
 
 }
