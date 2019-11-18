@@ -756,6 +756,62 @@ Specify to run the optional processes for nuclear contamination.
 
 The name of the chromosome X in your bam. `'X'` for hs37d5, `'chrX'` for HG19. Defaults to `'X'`.
 
+## Metagenomic Screening
+
+An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract. 
+
+Please note the following: 
+
+- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run. 
+  - To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
+- MALT can often require very large computing resources depending on your database - please check the `malt` section of the `base.config` and adjust accordingly 
+
+### -`-run_metagenomic_screening`
+
+Turn on the metagenomic screening module.
+
+### `--metagenomic_tool`
+
+Specify which taxonomic classifier to use. The only option avaliable is currently 'malt'
+
+### `--database`
+
+Specify the path to the _directory_ containing your taxonomic classifer's database.
+
+### `--percent_identity`
+
+Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85 
+
+### `--malt_mode`
+
+Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.
+respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'
+
+### `--malt_alignment_mode`
+
+Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: 'SemiGlobal'
+
+### `--malt_top_percent`
+
+Specify the top percent value of the LCA algorthim. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): "For each
+read, only those matches are used for taxonomic placement whose bit disjointScore is within
+10% of the best disjointScore for that read.". Default: 1.
+
+### `--malt_min_support_percent`
+
+Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. Default 0.01.
+
+### `--malt_max_queries`
+
+Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: 100
+
+### `--malt_memory_mode`
+
+How to load the database into memory. Options are 'load', 'page' or 'map'. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. 'page' and 'map' perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote filesystems such as GPFS. Default is 'load'.
+
+
+
+
 ## Automatic Resubmission
 
 By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.

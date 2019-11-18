@@ -100,7 +100,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-baminput_convertbam_basic" -profile test_bam,docker --bam --run_convertbam
       - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into MALT
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-basic" -profile test,docker --pairedEnd --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --database 'https://raw.githubusercontent.com/jfy133/test-datasets/eager/database/malt/'
+          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-malt" -profile test,docker --pairedEnd --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --database 'https://raw.githubusercontent.com/jfy133/test-datasets/eager/database/malt/'
 
 
       #- name: [DISABLED UNTIL BED FILE AVAILABLE - 2h RUN TIME WITHOUT] - SEXDETERMINAION Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination

@@ -323,7 +323,6 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 params.run_nuclear_contamination = false
 params.contamination_chrom_name = 'X' // Default to using hs37d5 name
 
-
 // taxonomic classifer
 params.run_metagenomic_screening  = false
 params.metagenomic_tool = 'malt'
@@ -1894,11 +1893,12 @@ if (params.additional_vcf_files == '') {
 
 
 //TODO: 
-// add sam format option
 // Add sanity checks
 // bump conda recipe for openJDK version >= 8 
 // test commands
 // Change log/usage/Output/
+// Add min support (read) parameter
+// Add weighted LCA parameter
 
 process malt {
   publishDir "${params.outdir}/metagenomic_classification", mode:"move"
