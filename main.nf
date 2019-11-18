@@ -112,7 +112,6 @@ def helpMessage() {
       --run_bedtools_coverage       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference
       --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes
 
-      
     BAM Trimming
       --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
       --bamutils_clip_left          Specify the number of bases to clip off reads from 'left' end of read
@@ -157,7 +156,7 @@ def helpMessage() {
     Metagenomic Screening
       --run_metagenomic_screening   Turn on metagenomic screening module for reference-unmapped reads
       --metagenomic_tool            Specify which classifier to use. Options: 'malt'. Default: 'malt'
-      --database                    Specify path to classifer database directory
+      --database                    Specify path to classifer database directory.
       --percent_identity            Percent identity value threshold. Default: 85
       --malt_mode                   Specify which alignment method to use. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: 'BlastN'
       --malt_alignment_mode         Specify alignment method. Options: 'Local', 'SemiGlobal'. Default: 'SemiGlobal'
@@ -165,8 +164,6 @@ def helpMessage() {
       --malt_min_support_percent    Specify the minimum percentage of reads a taxon of sample total is required to have to be retained. Default: 0.01
       --malt_max_queries            Specify the maximium number of queries a read can have. Default: 100
       --malt_memory_mode            Specify the memory load method. Do not use 'map' with GTFS file system. Options: 'load', 'page', 'map'. Default: 'load'
-
-
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -1197,7 +1194,7 @@ process samtools_filter {
 
     output:
     file "*filtered.bam" into ch_output_from_filtering
-    file "*.fastq.gz" optional true into ch_bam_filtering_for_malt
+    file "*.unmapped.fastq.gz" optional true into ch_bam_filtering_for_malt
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}" into ch_outputindex_from_filtering
 
@@ -1897,10 +1894,11 @@ if (params.additional_vcf_files == '') {
 
 
 //TODO: 
-// Define default task resource parameters?
+// add sam format option
 // Add sanity checks
 // bump conda recipe for openJDK version >= 8 
-// add sam format option
+// test commands
+// Change log/usage/Output/
 
 process malt {
   publishDir "${params.outdir}/metagenomic_classification", mode:"move"
@@ -1918,7 +1916,7 @@ process malt {
   script:
   """
   malt-run \
-  -J-Xms32G \
+  -J-Xmx${task.memory.toGiga()}g \
   -t ${task.cpus} \
   -v \
   -o . \
@@ -1937,7 +1935,6 @@ process malt {
 
 /*
 Genotyping tools:
-- angsd
 - snpAD
 - sequenceTools
 
@@ -1947,7 +1944,6 @@ Downstream VCF tools:
 - READ/mcMLKin
 - popGen output? PLINK? 
 */
-
 
 /*
  * Step 16a - Output Description HTML
@@ -1966,7 +1962,6 @@ process output_documentation {
     markdown_to_html.r $output_docs results_description.html
     """
 }
-
 
 /*
  * Step 16b - Parse software version numbers
@@ -2000,14 +1995,16 @@ process get_software_versions {
     bam --version &> v_bamutil.txt 2>&1 || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
     cat $json &> v_damageprofiler.txt 2>&1 || true 
+    multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
+    bedtools --version &> v_bedtools.txt 2>&1 || true
+    malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d, &> v_malt.txt 2>&1 || true
+    angsd -h |& head -n 1 | cut -d ' ' -f3-4 &> v_angsd.txt 2>&1 || true 
+
     java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
-    multivcfanalyzer --help | head -n 1 || true
-    bedtools --version || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
-
 
 /*
  * Step 16c - MultiQC
@@ -2043,9 +2040,6 @@ process multiqc {
     multiqc -f $rtitle $rfilename --config $multiqc_config .
     """
 }
-
-
-
 
 /*
  * Step 16d - Completion e-mail notification
