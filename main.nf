@@ -1904,7 +1904,6 @@ if (params.additional_vcf_files == '') {
 //TODO: 
 // Add sanity checks
 // bump conda recipe for openJDK version >= 8 
-// Change log/usage/Output/
 
 process malt {
   publishDir "${params.outdir}/metagenomic_classification", mode:"move"

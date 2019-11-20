@@ -764,9 +764,9 @@ Please note the following:
 
 * MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
   * To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
-* MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed. 
+* MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
-**RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK**
+> RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK
 
 ### -`-run_metagenomic_screening`
 
@@ -807,7 +807,7 @@ Specify whether to use a percentage, or raw number of reads as the value used to
 
 Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.
 
-### `--malt_min_support_percent`
+### `--malt_min_support_reads`
 
 Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
 
