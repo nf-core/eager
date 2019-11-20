@@ -161,9 +161,16 @@ def helpMessage() {
       --malt_mode                   Specify which alignment method to use. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: 'BlastN'
       --malt_alignment_mode         Specify alignment method. Options: 'Local', 'SemiGlobal'. Default: 'SemiGlobal'
       --malt_top_percent            Specify the percent for LCA algorithm (see MEGAN6 CE manual). Default: 1
+      --malt_min_support_mode       Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained. Options: 'percent', 'reads'. Default: 'percent'
       --malt_min_support_percent    Specify the minimum percentage of reads a taxon of sample total is required to have to be retained. Default: 0.01
+      --malt_min_support_reads      Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: 1
       --malt_max_queries            Specify the maximium number of queries a read can have. Default: 100
       --malt_memory_mode            Specify the memory load method. Do not use 'map' with GTFS file system. Options: 'load', 'page', 'map'. Default: 'load'
+      --malt_weighted_lca           Turn on the weighted LCA algorithm. Default: off
+
+
+      // Add min support (read) parameter
+// Add weighted LCA parameter
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -331,10 +338,12 @@ params.percent_identity = 85
 params.malt_mode = 'BlastN'
 params.malt_alignment_mode = 'SemiGlobal'
 params.malt_top_percent = 1
+params.malt_min_support_mode = 'percent'
 params.malt_min_support_percent = 0.01
+params.malt_min_support_reads = 1
 params.malt_max_queries = 100
 params.malt_memory_mode = 'load'
-
+params.malt_weighted_lca = false
 
 /*
 * SANITY CHECKING
@@ -1895,10 +1904,7 @@ if (params.additional_vcf_files == '') {
 //TODO: 
 // Add sanity checks
 // bump conda recipe for openJDK version >= 8 
-// test commands
 // Change log/usage/Output/
-// Add min support (read) parameter
-// Add weighted LCA parameter
 
 process malt {
   publishDir "${params.outdir}/metagenomic_classification", mode:"move"
@@ -1914,6 +1920,7 @@ process malt {
   file "malt.log"
 
   script:
+  if ("${params.malt_min_support_mode}" == "percent") {
   """
   malt-run \
   -J-Xmx${task.memory.toGiga()}g \
@@ -1930,6 +1937,24 @@ process malt {
   --memoryMode ${params.malt_memory_mode} \
   -i ${fastqs.join(' ')} |&tee malt.log
   """
+  } else if ("${params.malt_min_support_mode}" == "reads") {
+  """
+  malt-run \
+  -J-Xmx${task.memory.toGiga()}g \
+  -t ${task.cpus} \
+  -v \
+  -o . \
+  -d ${params.database} \
+  -id ${params.percent_identity} \
+  -m ${params.malt_mode} \
+  -at ${params.malt_alignment_mode} \
+  -top ${params.malt_top_percent} \
+  -sup ${params.malt_min_support_reads} \
+  -mq ${params.malt_max_queries} \
+  --memoryMode ${params.malt_memory_mode} \
+  -i ${fastqs.join(' ')} |&tee malt.log
+  """
+  }
 
 }
 
