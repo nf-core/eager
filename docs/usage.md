@@ -764,7 +764,9 @@ Please note the following:
 
 * MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
   * To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
-* MALT can often require very large computing resources depending on your database - please check the `malt` section of the `base.config` and adjust accordingly
+* MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed. 
+
+**RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK**
 
 ### -`-run_metagenomic_screening`
 
@@ -797,9 +799,17 @@ Specify the top percent value of the LCA algorthim. From the [MALT manual](http:
 read, only those matches are used for taxonomic placement whose bit disjointScore is within
 10% of the best disjointScore for that read.". Default: 1.
 
+### `--malt_min_support_mode`
+
+Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.
+
 ### `--malt_min_support_percent`
 
-Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. Default 0.01.
+Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.
+
+### `--malt_min_support_percent`
+
+Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
 
 ### `--malt_max_queries`
 
