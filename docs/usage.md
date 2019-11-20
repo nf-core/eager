@@ -758,13 +758,13 @@ The name of the chromosome X in your bam. `'X'` for hs37d5, `'chrX'` for HG19. D
 
 ## Metagenomic Screening
 
-An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract. 
+An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract.
 
-Please note the following: 
+Please note the following:
 
-- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run. 
-  - To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
-- MALT can often require very large computing resources depending on your database - please check the `malt` section of the `base.config` and adjust accordingly 
+* MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
+  * To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
+* MALT can often require very large computing resources depending on your database - please check the `malt` section of the `base.config` and adjust accordingly
 
 ### -`-run_metagenomic_screening`
 
@@ -780,7 +780,7 @@ Specify the path to the _directory_ containing your taxonomic classifer's databa
 
 ### `--percent_identity`
 
-Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85 
+Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85
 
 ### `--malt_mode`
 
@@ -808,9 +808,6 @@ Specify the maximum number of alignments a read can have. All further alignments
 ### `--malt_memory_mode`
 
 How to load the database into memory. Options are 'load', 'page' or 'map'. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. 'page' and 'map' perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote filesystems such as GPFS. Default is 'load'.
-
-
-
 
 ## Automatic Resubmission
 
