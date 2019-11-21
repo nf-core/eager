@@ -166,11 +166,6 @@ def helpMessage() {
       --malt_min_support_reads      Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: 1
       --malt_max_queries            Specify the maximium number of queries a read can have. Default: 100
       --malt_memory_mode            Specify the memory load method. Do not use 'map' with GTFS file system. Options: 'load', 'page', 'map'. Default: 'load'
-      --malt_weighted_lca           Turn on the weighted LCA algorithm. Default: off
-
-
-      // Add min support (read) parameter
-// Add weighted LCA parameter
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -454,6 +449,16 @@ if(params.run_bedtools_coverage && params.anno_file == ''){
   exit 1, "You have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
 }
 
+// BAM filtering sanity checking - FIRST ONE CURRENTLY DOES NOT WORK!
+
+if (params.bam_discard_unmapped && !params.run_bam_filtering) {
+  "Please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering"
+}
+
+if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == '') {
+  "Please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'"
+}
+
 // Genotyping sanity checking
 
 if (params.run_genotyping){
@@ -488,6 +493,45 @@ if (params.run_multivcfanalyzer) {
     exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
   }
 }
+
+// MALT sanity checking
+
+if (params.run_metagenomic_screening && !params.bam_discard_unmapped ) {
+  exit 1, "Metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
+}
+
+if (params.run_metagenomic_screening && params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
+  exit 1, "Metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
+}
+
+if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' ) {
+  exit 1, "Metagenomic classification can currently only be run with 'malt'. Please check your classifer. You gave '${params.metagenomic_tool}'!"
+}
+
+if (params.run_metagenomic_screening && params.database == '' ) {
+  exit 1, "Metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
+}
+
+if (params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
+  exit 1, "Unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
+}
+
+if (params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
+  exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
+}
+
+if (params.malt_min_support_mode == 'percent' && params.malt_min_support_reads != 1) {
+  exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --malt_min_support_reads!"
+}
+
+if (params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
+  exit 1, "Incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
+}
+
+if (params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
+  exit 1, "Unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
+}
+
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
@@ -1902,7 +1946,6 @@ if (params.additional_vcf_files == '') {
 
 
 //TODO: 
-// Add sanity checks
 // bump conda recipe for openJDK version >= 8 
 
 process malt {
