@@ -1944,10 +1944,6 @@ if (params.additional_vcf_files == '') {
  * Step 16: Metagenomic screening of unmapped reads
 */
 
-
-//TODO: 
-// bump conda recipe for openJDK version >= 8 
-
 process malt {
   publishDir "${params.outdir}/metagenomic_classification", mode:"move"
 
