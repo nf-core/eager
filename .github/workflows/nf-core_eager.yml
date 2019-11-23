@@ -43,7 +43,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-fna_ref" -profile test_fna,docker --pairedEnd
       - name: REFERENCE Test with zipped reference input
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-gz_ref" -profile test,docker --pairedEnd --fasta 'https://github.com/jfy133/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
+          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-gz_ref" -profile test,docker --pairedEnd --fasta 'https://github.com/nf-core/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
       - name: FASTP Test fastp complexity filtering
         run: |
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-fastp" -profile test,docker --pairedEnd --complexity_filter
@@ -102,7 +102,7 @@ jobs:
         run: |
           mkdir -p databases/malt
           readlink -f databases/malt/
-          for i in index0.idx ref.db ref.idx ref.inf table0.db table0.idx taxonomy.idx taxonomy.map taxonomy.tre; do wget https://github.com/jfy133/test-datasets/raw/eager/databases/malt/"$i" -P databases/malt/; done
+          for i in index0.idx ref.db ref.idx ref.inf table0.db table0.idx taxonomy.idx taxonomy.map taxonomy.tre; do wget https://github.com/nf-core/test-datasets/raw/eager/databases/malt/"$i" -P databases/malt/; done
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-malt" -profile test,docker --pairedEnd --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --database "/home/runner/work/eager/eager/databases/malt"
       #- name: [DISABLED UNTIL BED FILE AVAILABLE - 2h RUN TIME WITHOUT] - SEXDETERMINAION Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
          #nextflow run ${GITHUB_WORKSPACE} "$TOWER" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_sexdeterrmine
