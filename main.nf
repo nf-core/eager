@@ -167,6 +167,21 @@ def helpMessage() {
       --malt_max_queries            Specify the maximium number of queries a read can have. Default: 100
       --malt_memory_mode            Specify the memory load method. Do not use 'map' with GTFS file system. Options: 'load', 'page', 'map'. Default: 'load'
 
+    Metagenomic Authentication
+      --run_maltextract                  Turn on MaltExtract for MALT aDNA characteristics authentication
+      --maltextract_taxon_list           Path to a txt file with taxa of interest (one taxon per row, NCBI taxonomy name format)
+      --maltextract_ncbifiles            Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; avaliable: https://github.com/rhuebler/HOPS/)
+      --maltextract_filter               Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc' 
+      --maltextract_toppercent           Specify percent of top alignments to use. Default: 0.01
+      --maltextract_destackingoff        Turn off destacking.
+      --maltextract_downsamplingoff      Turn off downsampling.
+      --maltextract_duplicateremovaloff  Turn off duplicate removal.
+      --maltextract_matches              Export alignments of hits in BLAST format. Default: off
+      --maltextract_megansummary         Export MEGAN summary files. Default: off
+      --maltextract_percentidentity      Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter. Default: 85.0
+      --maltextract_topalignment         Use top alignments per read after filtering. Default: off
+      --maltextract_singlestranded       Switch damage patterns to single-stranded mode. Default: off
+
     Other options:     
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -256,7 +271,6 @@ params.bam_unmapped_type = ''
 
 params.bam_mapping_quality_threshold = 0
 
-
 //DamageProfiler settings
 params.damageprofiler_length = 100
 params.damageprofiler_threshold = 15
@@ -339,6 +353,22 @@ params.malt_min_support_reads = 1
 params.malt_max_queries = 100
 params.malt_memory_mode = 'load'
 params.malt_weighted_lca = false
+
+// maltextract - only including number 
+// parameters if default documented or duplicate of MALT
+params.run_maltextract = false
+params.maltextract_taxon_list = ''
+params.maltextract_ncbifiles = ''
+params.maltextract_filter = "def_anc"
+params.maltextract_toppercent = 0.01
+params.maltextract_destackingoff = false
+params.maltextract_downsamplingoff = false
+params.maltextract_duplicateremovaloff = false
+params.maltextract_matches = false
+params.maltextract_megansummary = false
+params.maltextract_percentidentity = 85.0
+params.maltextract_topalignment =  false
+params.maltextract_singlestranded = false
 
 /*
 * SANITY CHECKING
@@ -1995,6 +2025,48 @@ process malt {
   }
 
 }
+
+
+process maltextract {
+  publishDir "${params.outdir}/MaltExtract/", mode:"move"
+
+  when: 
+  params.run_maltextract
+
+  input:
+  rma6 from ch_rma_for_maltExtract.collect()
+  
+  output:
+  path(dir) "MaltExtract/"
+
+  script:
+  destack = params.maltextract_destackingoff ? "--destackingOff" : ""
+  downsam = params.maltextract_downsamplingoff ? "--downSampOff" : ""
+  dupremo = params.maltextract_duplicateremovaloff ? "--dupRemOff" : ""
+  matches = params.maltextract_matches ? "--matches" : ""
+  megsum = params.maltextract_megansummary ? "--meganSummary" : ""
+  topaln = params.maltextract_topalignment ?  "--useTopAlignment" : ""
+  ss = params.maltextract_singlestranded ? "--singleStranded" : ""
+  """
+  MaltExtract \
+  -t ${params.maltextract_taxon_list} \
+  -i ${rma6.join(' ')} \
+  -o MaltExtract/ \
+  -r ${params.maltextract_ncbifiles} \
+  -p ${task.cpus} \
+  -f ${params.maltextract_filter} \
+  -a ${params.maltextract_toppercent} \
+  --minPI ${maltextract_percentidentity} \
+  ${destack} \
+  ${downsam} \
+  ${dupremo} \
+  ${matches} \
+  ${megsum} \
+  ${topaln} \
+  ${ss}
+  """
+}
+
 
 /*
 Genotyping tools:
