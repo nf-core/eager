@@ -107,7 +107,7 @@ jobs:
       - name: MALTEXTRACT Download ncbi map/tree additional_vcf_files and run test
         run: |
           for i in ncbi.tre ncbi.map; do wget https://github.com/rhuebler/HOPS/tree/external/Resources/"$i" -P databases/maltextract/; done
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-malt" -profile test,docker --pairedEnd --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles '/home/runner/work/eager/eager/databases/maltextract' --maltextract_taxon_list 'https://github.com/jfy133/test-datasets/raw/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
+          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-maltextract" -profile test,docker --pairedEnd --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles '/home/runner/work/eager/eager/databases/maltextract' --maltextract_taxon_list 'https://github.com/jfy133/test-datasets/raw/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
       #- name: [DISABLED UNTIL BED FILE AVAILABLE - 2h RUN TIME WITHOUT] - SEXDETERMINAION Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
          #nextflow run ${GITHUB_WORKSPACE} "$TOWER" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_sexdeterrmine
       #- name: [DISABLED UNTIL SMALL HUMAN REFERENCE AVALIABLE - REQUIRES HUMAN FASTA] - NUCLEAR INPUT
