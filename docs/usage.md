@@ -477,9 +477,10 @@ This flag means that only merged reads are sent downstream for analysis. Singlet
 Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`). bwa aln is the default and best for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Default is 'bwaaln'
 
 More documentation can be seen for each tool under:
- * [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
- * [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
- * [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
+
+* [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+* [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+* [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
 
 ## BWA (default)
 
@@ -566,8 +567,9 @@ Can be used to configure the step size of Preseqs `c_curve` method. Can be usefu
 ## DNA Damage Assessment Parameters
 
 More documentation can be seen in the follow links for:
- * [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
- * [PMDTools documentation](https://github.com/pontussk/PMDtools)
+
+* [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
+* [PMDTools documentation](https://github.com/pontussk/PMDtools)
 
 ### `--damageprofiler_length`
 
@@ -654,9 +656,10 @@ Specify the path to a GFF/BED containing the feature coordinates (or any accepta
 There are options for different genotypers to be used. We suggest you the documentation of each tool to find the ones that suit your needs.
 
 Documentation for each tool:
-  * [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
-  * [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
-  * [FreeBayes](https://github.com/ekg/freebayes)
+
+* [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
+* [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
+* [FreeBayes](https://github.com/ekg/freebayes)
 
 ### `--run_genotyping`
 
