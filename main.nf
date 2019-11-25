@@ -1975,7 +1975,7 @@ if (params.additional_vcf_files == '') {
 */
 
 process malt {
-  publishDir "${params.outdir}/metagenomic_classification", mode:"move"
+  publishDir "${params.outdir}/metagenomic_classification", mode:"copy"
 
   when:
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq'
@@ -2026,18 +2026,17 @@ process malt {
 
 }
 
-
 process maltextract {
-  publishDir "${params.outdir}/MaltExtract/", mode:"move"
+  publishDir "${params.outdir}/MaltExtract/", mode:"copy"
 
   when: 
   params.run_maltextract
 
   input:
-  rma6 from ch_rma_for_maltExtract.collect()
+  file rma6 from ch_rma_for_maltExtract.collect()
   
   output:
-  path(dir) "MaltExtract/"
+  path "results/" type('dir')
 
   script:
   destack = params.maltextract_destackingoff ? "--destackingOff" : ""
@@ -2051,12 +2050,12 @@ process maltextract {
   MaltExtract \
   -t ${params.maltextract_taxon_list} \
   -i ${rma6.join(' ')} \
-  -o MaltExtract/ \
+  -o results/ \
   -r ${params.maltextract_ncbifiles} \
   -p ${task.cpus} \
   -f ${params.maltextract_filter} \
   -a ${params.maltextract_toppercent} \
-  --minPI ${maltextract_percentidentity} \
+  --minPI ${params.maltextract_percentidentity} \
   ${destack} \
   ${downsam} \
   ${dupremo} \
