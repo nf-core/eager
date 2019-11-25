@@ -4,7 +4,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - anaconda::openjdk=8.0.152
+  - conda-forge::openjdk=8.0.144
   - bioconda::fastqc=0.11.8
   - bioconda::adapterremoval=2.3.1
   - bioconda::adapterremovalfixprefix=0.0.5
@@ -18,8 +18,9 @@ dependencies:
   - bioconda::qualimap=2.2.2c
   - bioconda::vcf2genome=0.91
   - bioconda::damageprofiler=0.4.6
-  - bioconda::multiqc=1.7
+  - bioconda::multiqc=1.8
   - bioconda::pmdtools=0.60
+  - bioconda::bedtools=2.29.0
   - conda-forge::r-rmarkdown=1.15
   - conda-forge::libiconv=1.15
   - conda-forge::pigz=2.3.4
@@ -33,4 +34,5 @@ dependencies:
   - freebayes=1.3.1
   - sexdeterrmine=1.0
   - bioconda::multivcfanalyzer=0.85.1
+  - bioconda::hops=0.33
   #Missing Schmutzi,snpAD
