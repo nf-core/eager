@@ -564,11 +564,11 @@ if (params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && pa
 
 // MaltExtract Sanity checking
 
-if (params.run_metagenomic_screening && !params.metagenomic_tool != 'malt' && params.run_maltextract) {
+if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' && params.run_maltextract) {
   exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
 }
 
-if (params.run_metagenomic_screening && !params.metagenomic_tool != 'malt' && params.run_maltextract) {
+if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' && params.run_maltextract) {
   exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
 }
 
