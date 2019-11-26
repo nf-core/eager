@@ -2047,6 +2047,13 @@ process malt {
 
 }
 
+// Create input channel for MaltExtract taxon list, to allow downloading of taxon list
+if (params.maltextract_taxon_list== '') {
+    ch_taxonlist_for_maltextract = Channel.empty()
+} else {
+    ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list)
+}
+
 process maltextract {
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
 
@@ -2055,6 +2062,7 @@ process maltextract {
 
   input:
   file rma6 from ch_rma_for_maltExtract.collect()
+  file taxon_list from ch_taxonlist_for_maltextract
   
   output:
   path "results/" type('dir')
@@ -2070,7 +2078,7 @@ process maltextract {
   """
   MaltExtract \
   -Xmx${task.memory.toGiga()}g \
-  -t ${params.maltextract_taxon_list} \
+  -t ${taxon_list} \
   -i ${rma6.join(' ')} \
   -o results/ \
   -r ${params.maltextract_ncbifiles} \
