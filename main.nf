@@ -576,10 +576,6 @@ if (params.run_maltextract && params.maltextract_taxon_list == '') {
   exit 1, "MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list!"
 }
 
-if (params.run_maltextract && params.maltextract_ncbifiles == '') {
-  exit 1, "MaltExtract requires additional auxiliary files for NCBI Taxonomy information. These files can be downloaded from https://github.com/rhuebler/HOPS/tree/external/Resources. Specify the path to this directory with --params.maltextract_ncbifiles!"
-}
-
 if (params.run_maltextract && params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
   exit 1, "Unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: ${params.maltextract_filter}!"
 }
@@ -2068,6 +2064,7 @@ process maltextract {
   path "results/" type('dir')
 
   script:
+  ncbifiles = params.maltextract_ncbifiles == '' ? "" : "-r ${params.maltextract_ncbifiles}"
   destack = params.maltextract_destackingoff ? "--destackingOff" : ""
   downsam = params.maltextract_downsamplingoff ? "--downSampOff" : ""
   dupremo = params.maltextract_duplicateremovaloff ? "--dupRemOff" : ""
@@ -2081,7 +2078,7 @@ process maltextract {
   -t ${taxon_list} \
   -i ${rma6.join(' ')} \
   -o results/ \
-  -r ${params.maltextract_ncbifiles} \
+  ${ncbifiles} \
   -p ${task.cpus} \
   -f ${params.maltextract_filter} \
   -a ${params.maltextract_toppercent} \
