@@ -1741,8 +1741,6 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
 ch_gatk_download = Channel.value("download")
 
  process download_gatk_v3_5 {
-    tag "${prefix}"
-
     when: params.run_genotyping && params.genotyping_tool == 'ug'
 
     input: 
@@ -1872,7 +1870,6 @@ if (params.additional_vcf_files == '') {
 }
 
  process multivcfanalyzer {
- 	tag "${vcf}"
  	publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
 
  	when:
