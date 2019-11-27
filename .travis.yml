@@ -90,7 +90,7 @@ script:
   - mkdir -p ${TRAVIS_BUILD_DIR}/databases/malt && for i in index0.idx ref.db ref.idx ref.inf table0.db table0.idx taxonomy.idx taxonomy.map taxonomy.tre; do wget https://github.com/nf-core/test-datasets/raw/eager/databases/malt/"$i" -P "${TRAVIS_BUILD_DIR}/databases/malt/"; done
   # - nextflow run ${TRAVIS_BUILD_DIR} "$TOWER" -name "$RUN_NAME-malt" -profile test,docker --pairedEnd --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --database "${TRAVIS_BUILD_DIR}/databases/malt/"
   # MALTEXTRACT Download NCBI db, ncbi map/tree, additional files and run test
-  - mkdir -p ${TRAVIS_BUILD_DIR}/databases/maltextract && for i in ncbi.tre ncbi.map; do wget https://github.com/rhuebler/HOPS/tree/external/Resources/"$i" -P ${TRAVIS_BUILD_DIR}/databases/maltextract/; done
+  - mkdir -p ${TRAVIS_BUILD_DIR}/databases/maltextract && for i in ncbi.tre ncbi.map; do wget https://github.com/rhuebler/HOPS/raw/external/Resources/"$i" -P ${TRAVIS_BUILD_DIR}/databases/maltextract/; done
   - readlink -f  ${TRAVIS_BUILD_DIR}/databases/malt/*
   - readlink -f  ${TRAVIS_BUILD_DIR}/databases/maltextract/*
   - head $(readlink -f databases/maltextract/*)
