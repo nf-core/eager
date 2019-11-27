@@ -10,7 +10,7 @@ Default values should go in `nextflow.config` under the `params` scope.
 
 ## Default resource processes
 
-Defining recommended 'minimum' resource requiements (CPUs/Memory) for a process should be defined in `conf/base.config`. This can be utilised within the process using `${task.cpu}` or `${task.memory}` variables in the `script:`` block.
+Defining recommended 'minimum' resource requiements (CPUs/Memory) for a process should be defined in `conf/base.config`. This can be utilised within the process using `${task.cpu}` or `${task.memory}` variables in the `script:` block.
 
 ## Process Concept
 
