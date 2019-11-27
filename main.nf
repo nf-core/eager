@@ -112,7 +112,6 @@ def helpMessage() {
       --run_bedtools_coverage       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference
       --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes
 
-      
     BAM Trimming
       --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
       --bamutils_clip_left          Specify the number of bases to clip off reads from 'left' end of read
@@ -153,6 +152,35 @@ def helpMessage() {
     Nuclear Contamination for Human DNA
       --run_nuclear_contamination   Enable nuclear contamination estimation.
       --contamination_chrom_name    The name of the chromosome in your bam. 'X' for hs37d5, 'chrX' for HG19. 
+
+    Metagenomic Screening
+      --run_metagenomic_screening   Turn on metagenomic screening module for reference-unmapped reads
+      --metagenomic_tool            Specify which classifier to use. Options: 'malt'. Default: 'malt'
+      --database                    Specify path to classifer database directory.
+      --percent_identity            Percent identity value threshold. Default: 85
+      --malt_mode                   Specify which alignment method to use. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: 'BlastN'
+      --malt_alignment_mode         Specify alignment method. Options: 'Local', 'SemiGlobal'. Default: 'SemiGlobal'
+      --malt_top_percent            Specify the percent for LCA algorithm (see MEGAN6 CE manual). Default: 1
+      --malt_min_support_mode       Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained. Options: 'percent', 'reads'. Default: 'percent'
+      --malt_min_support_percent    Specify the minimum percentage of reads a taxon of sample total is required to have to be retained. Default: 0.01
+      --malt_min_support_reads      Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: 1
+      --malt_max_queries            Specify the maximium number of queries a read can have. Default: 100
+      --malt_memory_mode            Specify the memory load method. Do not use 'map' with GTFS file system. Options: 'load', 'page', 'map'. Default: 'load'
+
+    Metagenomic Authentication
+      --run_maltextract                  Turn on MaltExtract for MALT aDNA characteristics authentication
+      --maltextract_taxon_list           Path to a txt file with taxa of interest (one taxon per row, NCBI taxonomy name format)
+      --maltextract_ncbifiles            Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; avaliable: https://github.com/rhuebler/HOPS/)
+      --maltextract_filter               Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc' 
+      --maltextract_toppercent           Specify percent of top alignments to use. Default: 0.01
+      --maltextract_destackingoff        Turn off destacking.
+      --maltextract_downsamplingoff      Turn off downsampling.
+      --maltextract_duplicateremovaloff  Turn off duplicate removal.
+      --maltextract_matches              Export alignments of hits in BLAST format. Default: off
+      --maltextract_megansummary         Export MEGAN summary files. Default: off
+      --maltextract_percentidentity      Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter. Default: 85.0
+      --maltextract_topalignment         Use top alignments per read after filtering. Default: off
+      --maltextract_singlestranded       Switch damage patterns to single-stranded mode. Default: off
 
     Other options:     
       --outdir                      The output directory where the results will be saved
@@ -243,7 +271,6 @@ params.bam_unmapped_type = ''
 
 params.bam_mapping_quality_threshold = 0
 
-
 //DamageProfiler settings
 params.damageprofiler_length = 100
 params.damageprofiler_threshold = 15
@@ -312,6 +339,36 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 params.run_nuclear_contamination = false
 params.contamination_chrom_name = 'X' // Default to using hs37d5 name
 
+// taxonomic classifer
+params.run_metagenomic_screening  = false
+params.metagenomic_tool = 'malt'
+params.database  = ''
+params.percent_identity = 85
+params.malt_mode = 'BlastN'
+params.malt_alignment_mode = 'SemiGlobal'
+params.malt_top_percent = 1
+params.malt_min_support_mode = 'percent'
+params.malt_min_support_percent = 0.01
+params.malt_min_support_reads = 1
+params.malt_max_queries = 100
+params.malt_memory_mode = 'load'
+params.malt_weighted_lca = false
+
+// maltextract - only including number 
+// parameters if default documented or duplicate of MALT
+params.run_maltextract = false
+params.maltextract_taxon_list = ''
+params.maltextract_ncbifiles = ''
+params.maltextract_filter = "def_anc"
+params.maltextract_toppercent = 0.01
+params.maltextract_destackingoff = false
+params.maltextract_downsamplingoff = false
+params.maltextract_duplicateremovaloff = false
+params.maltextract_matches = false
+params.maltextract_megansummary = false
+params.maltextract_percentidentity = 85.0
+params.maltextract_topalignment =  false
+params.maltextract_singlestranded = false
 
 /*
 * SANITY CHECKING
@@ -413,13 +470,23 @@ if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "c
     exit 1, "Please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}!"
 }
 
-if (params.bam_discard_unmapped && bam_unmapped_type == '') {
+if (params.bam_discard_unmapped && params.bam_unmapped_type == '') {
     exit 1, "Please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
 }
 
 // Bedtools sanity checking
 if(params.run_bedtools_coverage && params.anno_file == ''){
   exit 1, "You have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
+}
+
+// BAM filtering sanity checking - FIRST ONE CURRENTLY DOES NOT WORK!
+
+if (params.bam_discard_unmapped && !params.run_bam_filtering) {
+  "Please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering"
+}
+
+if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == '') {
+  "Please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'"
 }
 
 // Genotyping sanity checking
@@ -455,6 +522,62 @@ if (params.run_multivcfanalyzer) {
   if (params.gatk_ploidy != '2') {
     exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
   }
+}
+
+// MALT sanity checking
+
+if (params.run_metagenomic_screening && !params.bam_discard_unmapped ) {
+  exit 1, "Metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
+}
+
+if (params.run_metagenomic_screening && params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
+  exit 1, "Metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
+}
+
+if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' ) {
+  exit 1, "Metagenomic classification can currently only be run with 'malt'. Please check your classifer. You gave '${params.metagenomic_tool}'!"
+}
+
+if (params.run_metagenomic_screening && params.database == '' ) {
+  exit 1, "Metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
+}
+
+if (params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
+  exit 1, "Unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
+}
+
+if (params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
+  exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
+}
+
+if (params.malt_min_support_mode == 'percent' && params.malt_min_support_reads != 1) {
+  exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --malt_min_support_reads!"
+}
+
+if (params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
+  exit 1, "Incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
+}
+
+if (params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
+  exit 1, "Unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
+}
+
+// MaltExtract Sanity checking
+
+if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' && params.run_maltextract) {
+  exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+}
+
+if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' && params.run_maltextract) {
+  exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+}
+
+if (params.run_maltextract && params.maltextract_taxon_list == '') {
+  exit 1, "MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list!"
+}
+
+if (params.run_maltextract && params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
+  exit 1, "Unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: ${params.maltextract_filter}!"
 }
 
 // Has the run name been specified by the user?
@@ -1170,7 +1293,7 @@ process samtools_filter {
 
     output:
     file "*filtered.bam" into ch_output_from_filtering
-    file "*.fastq.gz" optional true
+    file "*.unmapped.fastq.gz" optional true into ch_bam_filtering_for_malt
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}" into ch_outputindex_from_filtering
 
@@ -1618,8 +1741,6 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
 ch_gatk_download = Channel.value("download")
 
  process download_gatk_v3_5 {
-    tag "${prefix}"
-
     when: params.run_genotyping && params.genotyping_tool == 'ug'
 
     input: 
@@ -1749,7 +1870,6 @@ if (params.additional_vcf_files == '') {
 }
 
  process multivcfanalyzer {
- 	tag "${vcf}"
  	publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
 
  	when:
@@ -1836,7 +1956,7 @@ if (params.additional_vcf_files == '') {
     
     
      output:
-     file '*.X.contamination.out' into ch_from_nuclear_contamnation
+     file '*.X.contamination.out' into ch_from_nuclear_contamination
      
      script:
      """
@@ -1853,7 +1973,7 @@ if (params.additional_vcf_files == '') {
      params.run_nuclear_contamination
     
      input:
-     val 'Contam' from ch_from_nuclear_contamnation.collect()
+     val 'Contam' from ch_from_nuclear_contamination.collect()
     
      output:
      file 'nuclear_contamination.txt'
@@ -1863,9 +1983,116 @@ if (params.additional_vcf_files == '') {
      print_x_contamination.py ${Contam.join(' ')}
      """
  }
+
+/*
+ * Step 16: Metagenomic screening of unmapped reads
+*/
+
+process malt {
+  publishDir "${params.outdir}/metagenomic_classification", mode:"copy"
+
+  when:
+  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq'
+
+  input:
+  file fastqs from ch_bam_filtering_for_malt.collect()
+
+  output:
+  file "*.rma6" into ch_rma_for_maltExtract
+  file "malt.log"
+
+  script:
+  if ("${params.malt_min_support_mode}" == "percent") {
+  """
+  malt-run \
+  -J-Xmx${task.memory.toGiga()}g \
+  -t ${task.cpus} \
+  -v \
+  -o . \
+  -d ${params.database} \
+  -id ${params.percent_identity} \
+  -m ${params.malt_mode} \
+  -at ${params.malt_alignment_mode} \
+  -top ${params.malt_top_percent} \
+  -supp ${params.malt_min_support_percent} \
+  -mq ${params.malt_max_queries} \
+  --memoryMode ${params.malt_memory_mode} \
+  -i ${fastqs.join(' ')} |&tee malt.log
+  """
+  } else if ("${params.malt_min_support_mode}" == "reads") {
+  """
+  malt-run \
+  -J-Xmx${task.memory.toGiga()}g \
+  -t ${task.cpus} \
+  -v \
+  -o . \
+  -d ${params.database} \
+  -id ${params.percent_identity} \
+  -m ${params.malt_mode} \
+  -at ${params.malt_alignment_mode} \
+  -top ${params.malt_top_percent} \
+  -sup ${params.malt_min_support_reads} \
+  -mq ${params.malt_max_queries} \
+  --memoryMode ${params.malt_memory_mode} \
+  -i ${fastqs.join(' ')} |&tee malt.log
+  """
+  }
+
+}
+
+// Create input channel for MaltExtract taxon list, to allow downloading of taxon list
+if (params.maltextract_taxon_list== '') {
+    ch_taxonlist_for_maltextract = Channel.empty()
+} else {
+    ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list)
+}
+
+process maltextract {
+  publishDir "${params.outdir}/MaltExtract/", mode:"copy"
+
+  when: 
+  params.run_maltextract
+
+  input:
+  file rma6 from ch_rma_for_maltExtract.collect()
+  file taxon_list from ch_taxonlist_for_maltextract
+  
+  output:
+  path "results/" type('dir')
+
+  script:
+  ncbifiles = params.maltextract_ncbifiles == '' ? "" : "-r ${params.maltextract_ncbifiles}"
+  destack = params.maltextract_destackingoff ? "--destackingOff" : ""
+  downsam = params.maltextract_downsamplingoff ? "--downSampOff" : ""
+  dupremo = params.maltextract_duplicateremovaloff ? "--dupRemOff" : ""
+  matches = params.maltextract_matches ? "--matches" : ""
+  megsum = params.maltextract_megansummary ? "--meganSummary" : ""
+  topaln = params.maltextract_topalignment ?  "--useTopAlignment" : ""
+  ss = params.maltextract_singlestranded ? "--singleStranded" : ""
+  """
+  MaltExtract \
+  -Xmx${task.memory.toGiga()}g \
+  -t ${taxon_list} \
+  -i ${rma6.join(' ')} \
+  -o results/ \
+  ${ncbifiles} \
+  -p ${task.cpus} \
+  -f ${params.maltextract_filter} \
+  -a ${params.maltextract_toppercent} \
+  --minPI ${params.maltextract_percentidentity} \
+  ${destack} \
+  ${downsam} \
+  ${dupremo} \
+  ${matches} \
+  ${megsum} \
+  ${topaln} \
+  ${ss}
+  """
+}
+
+
 /*
 Genotyping tools:
-- angsd
 - snpAD
 - sequenceTools
 
@@ -1875,9 +2102,6 @@ Downstream VCF tools:
 - READ/mcMLKin
 - popGen output? PLINK? 
 */
-
-
-
 
 /*
  * Step 16a - Output Description HTML
@@ -1896,7 +2120,6 @@ process output_documentation {
     markdown_to_html.r $output_docs results_description.html
     """
 }
-
 
 /*
  * Step 16b - Parse software version numbers
@@ -1930,14 +2153,16 @@ process get_software_versions {
     bam --version &> v_bamutil.txt 2>&1 || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
     cat $json &> v_damageprofiler.txt 2>&1 || true 
+    multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
+    bedtools --version &> v_bedtools.txt 2>&1 || true
+    malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d, &> v_malt.txt 2>&1 || true
+    angsd -h |& head -n 1 | cut -d ' ' -f3-4 &> v_angsd.txt 2>&1 || true 
+
     java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
-    multivcfanalyzer --help | head -n 1 || true
-    bedtools --version || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
-
 
 /*
  * Step 16c - MultiQC
@@ -1973,9 +2198,6 @@ process multiqc {
     multiqc -f $rtitle $rfilename --config $multiqc_config .
     """
 }
-
-
-
 
 /*
  * Step 16d - Completion e-mail notification
@@ -2071,17 +2293,17 @@ workflow.onComplete {
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
 
-    if (workflow.stats.ignoredCountFmt > 0 && workflow.success) {
+    if (workflow.stats.ignoredCount > 0 && workflow.success) {
       log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
-      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCountFmt} ${c_reset}"
-      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCountFmt} ${c_reset}"
+      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}"
+      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}"
     }
 
-    if(workflow.success){
-        log.info "${c_purple}[nf-core/eager]${c_green} Pipeline completed successfully${c_reset}"
+    if (workflow.success) {
+        log.info "${c_purple}nf-core/eager${c_green} Pipeline completed successfully${c_reset}"
     } else {
         checkHostname()
-        log.info "${c_purple}[nf-core/eager]${c_red} Pipeline completed with errors${c_reset}"
+        log.info "${c_purple}nf-core/eager${c_red} Pipeline completed with errors${c_reset}"
     }
 
 }
