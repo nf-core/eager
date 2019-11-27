@@ -112,6 +112,7 @@ jobs:
             for i in ncbi.tre ncbi.map; do wget https://github.com/rhuebler/HOPS/tree/external/Resources/"$i" -P databases/maltextract/; done
             readlink -f databases/malt/*
             readlink -f databases/maltextract/*
+            head $(readlink -f databases/maltextract/*)
       - name: MALTEXTRACT Download NCBI db, ncbi map/tree, additional files and run test
         run: |
           readlink -f databases/malt/*
