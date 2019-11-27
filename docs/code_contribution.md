@@ -4,6 +4,14 @@ To make the EAGER2 code and processing logic more understandable for new contrib
 
 If you wish to contribute a new module, please use the following coding standards.
 
+## Default Values
+
+Default values should go in `nextflow.config` under the `params` scope.
+
+## Default resource processes
+
+Defining recommended 'minimum' resource requiements (CPUs/Memory) for a process should be defined in `conf/base.config`. This can be utilised within the process using `${task.cpu}` or `${task.memory}` variables in the `script:`` block.
+
 ## Process Concept
 
 We are providing a highly configurable pipeline, with many options to turn on and off different processes in different combinations. This can make a very complex graph structure that can cause a large amount of duplicated channels coming out of every process to account for each possible combination.
