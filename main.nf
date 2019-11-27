@@ -2303,7 +2303,7 @@ workflow.onComplete {
         log.info "${c_purple}nf-core/eager${c_green} Pipeline completed successfully${c_reset}"
     } else {
         checkHostname()
-        log.info "${c_purple}[{{ cookiecutter.name }}]${c_red} Pipeline completed with errors${c_reset}"
+        log.info "${c_purple}nf-core/eager${c_red} Pipeline completed with errors${c_reset}"
     }
 
 }
