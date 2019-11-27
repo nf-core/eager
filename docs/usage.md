@@ -805,6 +805,8 @@ Specify which taxonomic classifier to use. The only option avaliable is currentl
 
 More can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
 
+:warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
+
 ### `--database`
 
 Specify the path to the _directory_ containing your taxonomic classifer's database.
