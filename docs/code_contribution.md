@@ -96,3 +96,9 @@ Please use the following naming schemes, to make it easy to understand what is g
 * process output: `ch_output_from_<process>`(this should always go into the bypass statement described above).
 * skipped process output: `ch_<previousstage>_for_<skipprocess>`(this goes out of the bypass statement described above)
 * process inputs: `ch_<previousstage>_for_<process>` (this goes into a process)
+
+## Nextflow Version Bumping
+
+If you have agreement from reviewers, you may bump the 'default' minimum version of nextflow (e.g. for testing).
+
+For this, you need to update the in the `manifest{}` scope of `nextflow.config`, and also in `.travis.yml` and `.github/workflows/nf-core_eager.yml` 
