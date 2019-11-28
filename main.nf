@@ -74,9 +74,9 @@ def helpMessage() {
 
     Mapping
       --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'
-      --bwaalnn                     Specify the -n parameter for BWA aln.
-      --bwaalnk                     Specify the -k parameter for BWA aln
-      --bwaalnl                     Specify the -l parameter for BWA aln
+      --bwaalnn                     Specify the -n parameter for BWA aln. Default: 0.3
+      --bwaalnk                     Specify the -k parameter for BWA aln. Default: 2
+      --bwaalnl                     Specify the -l parameter for BWA aln. Default: 32
       --circularextension           Specify the number of bases to extend reference by
       --circulartarget              Specify the target chromosome for CM
       --circularfilter              Specify to filter off-target reads
@@ -252,10 +252,10 @@ if ( params.fasta.isEmpty () ){
 
 
 //Index files provided? Then check whether they are correct and complete
-if (params.aligner != 'bwa' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
-    exit 1, "Invalid aligner option. Default is bwa, but specify --mapper 'bwamem' or --mapper 'circularmapper' to use these."
+if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
+    exit 1, "Invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave ${params.mapper}!"
 }
-if( params.bwa_index && (params.aligner == 'bwa' | params.mapper == 'bwamem')){
+if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
     lastPath = params.bwa_index.lastIndexOf(File.separator)
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
     bwa_base = params.bwa_index.substring(lastPath+1)
@@ -599,7 +599,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 * PREPROCESSING - Create BWA indices if they are not present
 */ 
 
-if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.mapper == 'bwamem')){
+if(!params.bwa_index && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem')){
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -635,7 +635,7 @@ process makeFastaIndex {
             else if(!params.saveReference && filename == "where_are_my_files.txt") filename
             else null
     }
-    when: !params.fasta_index && !params.fasta.isEmpty() && params.aligner == 'bwa'
+    when: !params.fasta_index && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' )
 
     input:
     file fasta from fasta_for_indexing
@@ -1396,8 +1396,10 @@ process damageprofiler {
     
 
     output:
-    file "*"
     file "${base}/dmgprof.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
+    file "${base}/*.txt"
+    file "${base}/*.log"
+    file "${base}/*.pdf"
 
     script:
     base = "${bam.baseName}"
