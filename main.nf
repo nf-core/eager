@@ -74,9 +74,9 @@ def helpMessage() {
 
     Mapping
       --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'
-      --bwaalnn                     Specify the -n parameter for BWA aln.
-      --bwaalnk                     Specify the -k parameter for BWA aln
-      --bwaalnl                     Specify the -l parameter for BWA aln
+      --bwaalnn                     Specify the -n parameter for BWA aln. Default: 0.3
+      --bwaalnk                     Specify the -k parameter for BWA aln. Default: 2
+      --bwaalnl                     Specify the -l parameter for BWA aln. Default: 32
       --circularextension           Specify the number of bases to extend reference by
       --circulartarget              Specify the target chromosome for CM
       --circularfilter              Specify to filter off-target reads
@@ -207,168 +207,11 @@ if (params.help){
 }
 
 // Configurable variables
-params.name = false
-params.singleEnd = false
-params.pairedEnd = false
-params.genome = "Custom"
-params.snpcapture = false
-params.bedfile = ''
-params.fasta = ''
-params.seq_dict = false
-params.fasta_index = false
-params.saveReference = false
-params.pmd_udg_type = 'half'
-params.bam = false
 
-params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
-params.email = false
-params.plaintext_email = false
-
-// Skipping parts of the pipeline for impatient users
-params.skip_fastqc = false 
-params.skip_adapterremoval = false
-params.skip_mapping = false
-params.skip_preseq = false
-params.skip_damage_calculation = false
-params.skip_qualimap = false
-params.skip_deduplication = false
-
-// If you want to convert a BAM input to FASTQ format for adapterememoval etc.
-params.run_convertbam = false
-
-//Complexity filtering reads
-params.complexity_filter_poly_g = false
-params.complexity_filter_poly_g_min = 10
-
-//Read clipping and merging parameters
-params.clip_forward_adaptor = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
-params.clip_reverse_adaptor = "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
-params.clip_readlength = 30
-params.clip_min_read_quality = 20
-params.min_adap_overlap = 1
-params.skip_collapse = false
-params.skip_trim = false
-params.preserve5p = false
-params.mergedonly = false
-
-//Mapping algorithm
-params.mapper = 'bwaaln'
-
-//Read mapping parameters (default = BWA aln default)
-params.bwaalnn = 0.04
-params.bwaalnk = 2
-params.bwaalnl = 32
-
-//Mapper to use, by default BWA aln will be used
-params.circularextension = 500
-params.circulartarget = 'MT'
-params.circularfilter = false
-
-//BAM Filtering steps (default = keep mapped and unmapped in BAM file)
-params.run_bam_filtering = false
-params.bam_discard_unmapped = false
-params.bam_unmapped_type = ''
-
-params.bam_mapping_quality_threshold = 0
-
-//DamageProfiler settings
-params.damageprofiler_length = 100
-params.damageprofiler_threshold = 15
-
-//DeDuplication settings
-params.dedupper = 'dedup' //default value dedup
-params.dedup_all_merged = false
-
-//Preseq settings
-params.preseq_step_size = 1000
-
-//Bedtools settings
-params.run_bedtools_coverage = false 
-params.anno_file = ''
-
-//PMDTools settings
-params.run_pmdtools = false
-params.pmdtools_range = 10
-params.pmdtools_threshold = 3
-params.pmdtools_reference_mask = ''
-params.pmdtools_max_reads = 10000
-
-//bamUtils trimbam settings
-params.run_trim_bam = false 
-params.bamutils_clip_left = 1 
-params.bamutils_clip_right = 1 
-params.bamutils_softclip = false 
-
-//unmap
-params.strip_input_fastq = false
-params.strip_mode = 'strip'
-
-//Genotyping options
-params.run_genotyping = false
-params.genotyping_tool = ''
-params.genotyping_source = "raw"
-params.gatk_ug_genotype_model = 'SNP'
-params.gatk_hc_emitrefconf = 'GVCF'
-params.gatk_call_conf = '30'
-params.gatk_ploidy = '2'
-params.gatk_downsample = '250'
-params.gatk_out_mode = 'EMIT_VARIANTS_ONLY'
-params.gatk_dbsnp = ''
-
-//MultiVCFAnalyzer Options
-params.run_multivcfanalyzer = false
-params.write_allele_frequencies = false
-params.min_genotype_quality = 30
-params.min_base_coverage = 5
-params.min_allele_freq_hom = 0.9
-params.min_allele_freq_het = 0.9
-params.additional_vcf_files = ''
-params.reference_gff_annotations = 'NA'
-params.reference_gff_exclude = 'NA'
-params.snp_eff_results = 'NA'
-
-//Sex.DetERRmine settings
-params.run_sexdeterrmine = false
-params.sexdeterrmine_bedfile = ''
 
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
-
-//Nuclear contamination based on chromosome X heterozygosity.
-params.run_nuclear_contamination = false
-params.contamination_chrom_name = 'X' // Default to using hs37d5 name
-
-// taxonomic classifer
-params.run_metagenomic_screening  = false
-params.metagenomic_tool = 'malt'
-params.database  = ''
-params.percent_identity = 85
-params.malt_mode = 'BlastN'
-params.malt_alignment_mode = 'SemiGlobal'
-params.malt_top_percent = 1
-params.malt_min_support_mode = 'percent'
-params.malt_min_support_percent = 0.01
-params.malt_min_support_reads = 1
-params.malt_max_queries = 100
-params.malt_memory_mode = 'load'
-params.malt_weighted_lca = false
-
-// maltextract - only including number 
-// parameters if default documented or duplicate of MALT
-params.run_maltextract = false
-params.maltextract_taxon_list = ''
-params.maltextract_ncbifiles = ''
-params.maltextract_filter = "def_anc"
-params.maltextract_toppercent = 0.01
-params.maltextract_destackingoff = false
-params.maltextract_downsamplingoff = false
-params.maltextract_duplicateremovaloff = false
-params.maltextract_matches = false
-params.maltextract_megansummary = false
-params.maltextract_percentidentity = 85.0
-params.maltextract_topalignment =  false
-params.maltextract_singlestranded = false
 
 /*
 * SANITY CHECKING
@@ -409,10 +252,10 @@ if ( params.fasta.isEmpty () ){
 
 
 //Index files provided? Then check whether they are correct and complete
-if (params.aligner != 'bwa' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
-    exit 1, "Invalid aligner option. Default is bwa, but specify --mapper 'bwamem' or --mapper 'circularmapper' to use these."
+if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
+    exit 1, "Invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave ${params.mapper}!"
 }
-if( params.bwa_index && (params.aligner == 'bwa' | params.mapper == 'bwamem')){
+if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
     lastPath = params.bwa_index.lastIndexOf(File.separator)
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
     bwa_base = params.bwa_index.substring(lastPath+1)
@@ -756,7 +599,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 * PREPROCESSING - Create BWA indices if they are not present
 */ 
 
-if(!params.bwa_index && !params.fasta.isEmpty() && (params.aligner == 'bwa' || params.mapper == 'bwamem')){
+if(!params.bwa_index && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
 process makeBWAIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -792,7 +635,7 @@ process makeFastaIndex {
             else if(!params.saveReference && filename == "where_are_my_files.txt") filename
             else null
     }
-    when: !params.fasta_index && !params.fasta.isEmpty() && params.aligner == 'bwa'
+    when: !params.fasta_index && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
 
     input:
     file fasta from fasta_for_indexing
@@ -1090,7 +933,6 @@ process bwa {
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwa
     file index from bwa_index.collect()
-
 
     output:
     file "*.mapped.bam" into ch_output_from_bwa
@@ -1553,8 +1395,10 @@ process damageprofiler {
     
 
     output:
-    file "*"
     file "${base}/dmgprof.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
+    file "${base}/*.txt"
+    file "${base}/*.log"
+    file "${base}/*.pdf"
 
     script:
     base = "${bam.baseName}"

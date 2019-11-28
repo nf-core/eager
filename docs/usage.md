@@ -488,7 +488,7 @@ These parameters configure mapping algorithm parameters.
 
 ### `--bwaalnn`
 
-Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.04`, if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
+Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.03`, if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
 
 ### `--bwaalnk`
 
