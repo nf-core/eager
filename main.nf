@@ -635,7 +635,7 @@ process makeFastaIndex {
             else if(!params.saveReference && filename == "where_are_my_files.txt") filename
             else null
     }
-    when: !params.fasta_index && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' )
+    when: !params.fasta_index && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
 
     input:
     file fasta from fasta_for_indexing
@@ -933,7 +933,6 @@ process bwa {
     input:
     set val(name), file(reads) from ch_adapteremoval_for_bwa
     file index from bwa_index.collect()
-
 
     output:
     file "*.mapped.bam" into ch_output_from_bwa
