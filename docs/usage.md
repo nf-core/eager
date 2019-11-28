@@ -382,7 +382,7 @@ Allows you to skip mapping step and go straight downstream to BAM processing ste
 
 ### `--skip_preseq`
 
-Turns off the computation of library complexity estimation.  
+Turns off the computation of library complexity estimation.
 
 ### `--skip_deduplication`
 
@@ -404,6 +404,8 @@ Allows you to convert BAM input back to FASTQ for downstream processing. Note th
 
 ## Complexity Filtering Options
 
+More details on can be seen in the [fastp documentation](https://github.com/OpenGene/fastp)
+
 ### `--complexity_filter_poly_g`
 
 Performs a poly-G tail removal step in the beginning of the pipeline using `fastp`, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
@@ -415,6 +417,8 @@ This option can be used to define the minimum length of a poly-G tail to begin l
 ## Adapter Clipping and Merging Options
 
 These options handle various parts of adapter clipping and read merging steps.
+
+More details can be seen in the [AdapterRemoval documentation](https://adapterremoval.readthedocs.io/en/latest/)
 
 ### `--clip_forward_adaptor`
 
@@ -472,13 +476,19 @@ This flag means that only merged reads are sent downstream for analysis. Singlet
 
 Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`). bwa aln is the default and best for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Default is 'bwaaln'
 
+More documentation can be seen for each tool under:
+
+* [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+* [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+* [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
+
 ## BWA (default)
 
 These parameters configure mapping algorithm parameters.
 
 ### `--bwaalnn`
 
-Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.04`, if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
+Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.03`, if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
 
 ### `--bwaalnk`
 
@@ -556,6 +566,11 @@ Can be used to configure the step size of Preseqs `c_curve` method. Can be usefu
 
 ## DNA Damage Assessment Parameters
 
+More documentation can be seen in the follow links for:
+
+* [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
+* [PMDTools documentation](https://github.com/pontussk/PMDtools)
+
 ### `--damageprofiler_length`
 
 Specifies the length filter for DamageProfiler. By default set to `100`.
@@ -596,6 +611,8 @@ The maximum number of reads used for damage assessment in PMDtools. Can be used 
 
 For some library preparation protocols, users might want to clip off damaged bases before applying genotyping methods. This can be done in nf-core/eager automatically by turning on the `--trim_bam` parameter.
 
+More documentation can be seen in the [bamUtil documentation](https://genome.sph.umich.edu/wiki/BamUtil:_trimBam)
+
 ### `--run_trim_bam`
 
 Turns on the BAM trimming method. Trims off `[n]` bases from reads in the deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently.
@@ -624,6 +641,8 @@ Can be used to set a path to a BED file (3/6 column format) to calculate capture
 
 If you're interested in looking at coverage stats for certain features on your reference such as genes, SNPs etc., you can use the following bedtools module for this purpose.
 
+More documentation on bedtools can be seen in the [bedtools documentation](https://bedtools.readthedocs.io/en/latest/)
+
 ### `--run_bedtools_coverage`
 
 Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.
@@ -635,6 +654,12 @@ Specify the path to a GFF/BED containing the feature coordinates (or any accepta
 ## Genotyping Parameters
 
 There are options for different genotypers to be used. We suggest you the documentation of each tool to find the ones that suit your needs.
+
+Documentation for each tool:
+
+* [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
+* [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
+* [FreeBayes](https://github.com/ekg/freebayes)
 
 ### `--run_genotyping`
 
@@ -648,7 +673,7 @@ Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyp
 
 ### `--genotyping_source`
 
-Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: `'raw'` for mapped only, filtered, or DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs); `'pmd'` (for pmdtools output). Default is: `'raw'`.  
+Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: `'raw'` for mapped only, filtered, or DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs); `'pmd'` (for pmdtools output). Default is: `'raw'`.
 
 ### `--gatk_out_mode`
 
@@ -693,6 +718,8 @@ Specify ploidy of sample in FreeBayes. Default is 2, diploid.
 ## SNP Table Generation
 
 SNP Table Generation here is performed by MultiVCFAnalyzer. The current version of MultiVCFAnalyzer version only accepts GATK UnifiedGenotyper 3.5 VCF files, and when the ploidy was set to 2 (this allows MultiVCFAnalyzer to look for report frequencies of polymorphic positions). A description of how the tool works can be seen in the Supplementary Information of [Bos et al. (2014)](https://doi.org/10.1038/nature13591) under "SNP Calling and Phylogenetic Analysis".
+
+More can be seen in the [MultiVCFAnalyzer documentation](https://github.com/alexherbig/MultiVCFAnalyzer)
 
 ### `--run_multivcfanalyzer`
 
@@ -755,6 +782,127 @@ Specify to run the optional processes for nuclear contamination.
 ### `--contamination_chrom_name`
 
 The name of the chromosome X in your bam. `'X'` for hs37d5, `'chrX'` for HG19. Defaults to `'X'`.
+
+## Metagenomic Screening
+
+An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract.
+
+Please note the following:
+
+* MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
+  * To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
+* MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
+
+> RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK
+
+### -`-run_metagenomic_screening`
+
+Turn on the metagenomic screening module.
+
+### `--metagenomic_tool`
+
+Specify which taxonomic classifier to use. The only option avaliable is currently 'malt'.
+
+More can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
+
+:warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
+
+### `--database`
+
+Specify the path to the _directory_ containing your taxonomic classifer's database.
+
+### `--percent_identity`
+
+Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85
+
+### `--malt_mode`
+
+Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.
+respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'
+
+### `--malt_alignment_mode`
+
+Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: 'SemiGlobal'
+
+### `--malt_top_percent`
+
+Specify the top percent value of the LCA algorthim. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): "For each
+read, only those matches are used for taxonomic placement whose bit disjointScore is within
+10% of the best disjointScore for that read.". Default: 1.
+
+### `--malt_min_support_mode`
+
+Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.
+
+### `--malt_min_support_percent`
+
+Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.
+
+### `--malt_min_support_reads`
+
+Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
+
+### `--malt_max_queries`
+
+Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: 100
+
+### `--malt_memory_mode`
+
+How to load the database into memory. Options are 'load', 'page' or 'map'. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. 'page' and 'map' perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote filesystems such as GPFS. Default is 'load'.
+
+### `--run_maltextract`
+
+Turn on MaltExtract for MALT aDNA characteristics authentication of metagenomic output from MALT.
+
+More can be seen in the [MaltExtract documentation](https://github.com/rhuebler/)
+
+### `maltextract_taxon_list`
+
+Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format.
+
+### `maltextract_ncbifiles`
+
+Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; avaliable at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).
+
+### `maltextract_filter`
+
+Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc'.
+
+### `maltextract_toppercent`
+
+Specify percent of top alignments for each read to be considered for each node. Default: 0.01.
+
+### `maltextract_destackingoff`
+
+Turn off destacking. If left on, a read that overlap with another read will be removed (leaving a depth coverage of 1).
+
+### `maltextract_downsamplingoff`
+
+Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.
+
+### `maltextract_duplicateremovaloff`
+
+Turn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.
+
+### `maltextract_matches`
+
+Export alignments of hits for each node in BLAST format. By default turned off.
+
+### `maltextract_megansummary`
+
+Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.
+
+### `maltextract_percentidentity`
+
+Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: 85.0.
+
+### `maltextract_topalignment`
+
+Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.
+
+### `maltextract_singlestranded`
+
+Switch damage patterns to single-stranded mode. Default: off.
 
 ## Automatic Resubmission
 
