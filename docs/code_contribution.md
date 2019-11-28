@@ -101,4 +101,4 @@ Please use the following naming schemes, to make it easy to understand what is g
 
 If you have agreement from reviewers, you may bump the 'default' minimum version of nextflow (e.g. for testing).
 
-For this, you need to update the in the `manifest{}` scope of `nextflow.config`, and also in `.travis.yml` and `.github/workflows/nf-core_eager.yml` 
+For this, you need to update the in the `manifest{}` scope of `nextflow.config`, and also in `.travis.yml` and `.github/workflows/nf-core_eager.yml`
