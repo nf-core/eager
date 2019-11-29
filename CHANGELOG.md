@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-* Added Support for automated tests using [GitHub Actions](https://github.com/features/actions)
+* Added Support for automated tests using [GitHub Actions](https://github.com/features/actions), replacing travis
 * [#40](https://github.com/nf-core/eager/issues/40), [#231](https://github.com/nf-core/eager/issues/231) - Added genotyping capability through GATK UnifiedGenotyper (v3.5), GATK HaplotypeCaller (v4.1) and FreeBayes
 * Added MultiVCFAnalyzer module
 * [#240](https://github.com/nf-core/eager/issues/240) - Added human sex determination module
@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#265](https://github.com/nf-core/eager/issues/265) - Adjusted full markdown linting in Travis CI
 * [#247](https://github.com/nf-core/eager/issues/247) - Added nuclear contamination with angsd
 * [#258](https://github.com/nf-core/eager/issues/258) - Added ability to report bedtools stats to features (e.g. depth/breadth of annotated genes)
+* [#249](https://github.com/nf-core/eager/issues/249) - Added metagenomic classification of unmapped reads with MALT and aDNA authentication with MaltExtract
 * Fancy new logo from [ZandraFagernas](https://github.com/ZandraFagernas)
 
 ### `Fixed`
