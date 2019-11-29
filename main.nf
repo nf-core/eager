@@ -2018,7 +2018,7 @@ process multiqc {
     file multiqc_config
     file ('fastqc_raw/*') from ch_prefastqc_for_multiqc.collect().ifEmpty([])
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
-    file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
+    file software_versions_mqc from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('flagstat/*') from ch_flagstat_for_multiqc.collect().ifEmpty([])
     file ('flagstat_filtered/*') from ch_bam_filtered_flagstat_for_multiqc.collect().ifEmpty([])
