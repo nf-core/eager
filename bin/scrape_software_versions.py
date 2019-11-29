@@ -76,7 +76,7 @@ id: 'software_versions'
 section_name: 'nf-core/eager Software Versions'
 section_href: 'https://github.com/nf-core/eager'
 plot_type: 'html'
-description: 'are collected at run time from all software contained in EAGER2. This may include software not used in your run!'
+description: 'are collected at run time from all software contained in nf-core/eager. This may include software not used in your run!'
 data: |
     <dl class="dl-horizontal">
 ''')
