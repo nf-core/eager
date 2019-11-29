@@ -1748,7 +1748,15 @@ if (params.additional_vcf_files == '') {
  /*
   * Step 14 Sex determintion with error bar calculation.
   */
- 
+
+if (params.sexdeterrmine_bedfile == '') {
+  ch_bed_for_sexdeterrmine = Channel.empty()
+} else {
+  ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
+}
+
+
+
  process sex_deterrmine{
      publishDir "${params.outdir}/sex_determination", mode:"copy"
     
@@ -1756,15 +1764,17 @@ if (params.additional_vcf_files == '') {
      params.run_sexdeterrmine
     
      input:
-     val 'Bams' from ch_for_sexdeterrmine.collect()
+     file bam from ch_for_sexdeterrmine.collect()
+     file bed from ch_bed_for_sexdeterrmine
         
      output:
      file 'SexDet.txt'
-    
+     file 'sexdetermine.json' into ch_sexdet_for_multiqc
+     
      script:
      if (params.sexdeterrmine_bedfile == '') {
          """
-         for i in ${Bams.join(' ')}; do
+         for i in *.bam; do
              echo \$i >> bamlist.txt
          done
         
@@ -1772,11 +1782,11 @@ if (params.additional_vcf_files == '') {
          """
          } else {
          """
-         for i in ${Bams.join(' ')}; do
+         for i in *.bam; do
              echo \$i >> bamlist.txt
          done
         
-         samtools depth -aa -q30 -Q30 -b ${params.sexdeterrmine_bedfile} -f bamlist.txt | sexdeterrmine -f bamlist.txt >SexDet.txt
+         samtools depth -aa -q30 -Q30 -b ${bed} -f bamlist.txt | sexdeterrmine -f bamlist.txt >SexDet.txt
          """
      }
  }
@@ -2028,6 +2038,7 @@ process multiqc {
     file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
     file ('dedup*/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
     file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
+    file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
 
     file workflow_summary from create_workflow_summary(summary)
 

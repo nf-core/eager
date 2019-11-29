@@ -92,8 +92,8 @@ script:
   # MALTEXTRACT Download NCBI db, ncbi map/tree, additional files and run test
   - mkdir -p ${TRAVIS_BUILD_DIR}/databases/maltextract && for i in ncbi.tre ncbi.map; do wget https://github.com/rhuebler/HOPS/raw/external/Resources/"$i" -P ${TRAVIS_BUILD_DIR}/databases/maltextract/; done
   - nextflow run ${TRAVIS_BUILD_DIR} "$TOWER" -name "$RUN_NAME-maltextract" -profile test,docker --pairedEnd --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "${TRAVIS_BUILD_DIR}/databases/malt/" --run_maltextract --maltextract_ncbifiles "${TRAVIS_BUILD_DIR}/databases/maltextract/" --maltextract_taxon_list 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
-  # [DISABLED UNTIL BED FILE AVAILABLE - 2h RUN TIME WITHOUT] - SEXDETERMINAION: Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
-  #- nextflow run ${TRAVIS_BUILD_DIR} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_sexdeterrmine
+  # SEXDETERMINAION: Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
+    nextflow run ${TRAVIS_BUILD_DIR} "$TOWER" -name "$RUN_NAME-sexdeterrmine" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_sexdeterrmine
   # [DISABLED UNTIL SMALL HUMAN REFERENCE AVALIABLE - REQUIRES HUMAN FASTA] - NUCLEAR INPUT
   #- nextflow run ${TRAVIS_BUILD_DIR} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_nuclearcontamination
 
