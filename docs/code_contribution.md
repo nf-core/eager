@@ -119,7 +119,7 @@ or
 <YOUR_TOOL> --help | head -n 1 &> v_<YOUR_TOOL>.txt 2>&1 || true
 ```
 
-You then need to edit the script `bin/scrape_software_versions.txt` to
+You then need to edit the script `bin/scrape_software_versions.py` to
 
 1. add a (python) regex for your tools --version output (as in stored in the `v_<YOUR_TOOL>.txt` file), to ensure the version is reported as a `v` and the version number e.g. `v2.1.1`
 2. add a HTML block entry to the `OrderedDict` for formatting in MultiQC.
