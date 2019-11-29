@@ -1395,10 +1395,10 @@ process damageprofiler {
     
 
     output:
-    file "${base}/dmgprof.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
     file "${base}/*.txt"
     file "${base}/*.log"
     file "${base}/*.pdf"
+    file "${base}/*.json" into ch_damageprofiler_results
 
     script:
     base = "${bam.baseName}"
@@ -1766,7 +1766,7 @@ if (params.sexdeterrmine_bedfile == '') {
      input:
      file bam from ch_for_sexdeterrmine.collect()
      file bed from ch_bed_for_sexdeterrmine
-        
+
      output:
      file 'SexDet.txt'
      file 'sexdetermine.json' into ch_sexdet_for_multiqc
@@ -1981,11 +1981,6 @@ process output_documentation {
 process get_software_versions {
 	publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
 
-
-    input:
-    file json from ch_damageprofiler_for_software_versions
-    file jar from ch_unifiedgenotyper_versions_jar
-
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
 
@@ -1994,25 +1989,30 @@ process get_software_versions {
     echo $workflow.manifest.version &> v_pipeline.txt
     echo $workflow.nextflow.version &> v_nextflow.txt
     fastqc --version &> v_fastqc.txt 2>&1 || true
-    multiqc --version &> v_multiqc.txt 2>&1 || true
-    bwa &> v_bwa.txt 2>&1 || true
-    samtools --version &> v_samtools.txt 2>&1 || true
-    AdapterRemoval -version  &> v_adapterremoval.txt 2>&1 || true
-    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
-    dedup -v &> v_dedup.txt 2>&1 || true
-    preseq &> v_preseq.txt 2>&1 || true
-    gatk BaseRecalibrator --version 2>&1 | grep Version: > v_gatk.txt 2>&1 || true
-    vcf2genome &> v_vcf2genome.txt 2>&1 || true
+    AdapterRemoval --version  &> v_adapterremoval.txt 2>&1 || true
     fastp --version &> v_fastp.txt 2>&1 || true
-    bam --version &> v_bamutil.txt 2>&1 || true
+    bwa &> v_bwa.txt 2>&1 || true
+    circulargenerator --help | head -n 1 &> v_circulargenerator.txt 2>&1 || true
+    samtools --version &> v_samtools.txt 2>&1 || true
+    dedup -v &> v_dedup.txt 2>&1 || true
+    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
-    cat $json &> v_damageprofiler.txt 2>&1 || true 
-    multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
+    preseq &> v_preseq.txt 2>&1 || true
+    gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
+    freebayes --version &> v_freebayes.txt 2>&1 || true
     bedtools --version &> v_bedtools.txt 2>&1 || true
-    malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d, &> v_malt.txt 2>&1 || true
+    damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
+    bam --version &> v_bamutil.txt 2>&1 || true
+    pmdtools --version &> v_pmdtools.txt 2>&1 || true
     angsd -h |& head -n 1 | cut -d ' ' -f3-4 &> v_angsd.txt 2>&1 || true 
+    multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
+    malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d ',' &> v_malt.txt 2>&1 || true
+    MaltExtract --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
+    multiqc --version &> v_multiqc.txt 2>&1 || true
 
-    java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
+    ## Hardcoded as no --version flag or equivalent
+    echo "v1.1" > v_sexdeterrmine.txt
+    echo 'version 3.5-0-g36282e4' > v_gatk3_5.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -2028,7 +2028,7 @@ process multiqc {
     file multiqc_config
     file ('fastqc_raw/*') from ch_prefastqc_for_multiqc.collect().ifEmpty([])
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
-    file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
+    file software_versions_mqc from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('flagstat/*') from ch_flagstat_for_multiqc.collect().ifEmpty([])
     file ('flagstat_filtered/*') from ch_bam_filtered_flagstat_for_multiqc.collect().ifEmpty([])
