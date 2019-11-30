@@ -102,3 +102,26 @@ Please use the following naming schemes, to make it easy to understand what is g
 If you have agreement from reviewers, you may bump the 'default' minimum version of nextflow (e.g. for testing).
 
 For this, you need to update the in the `manifest{}` scope of `nextflow.config`, and also in `.travis.yml` and `.github/workflows/nf-core_eager.yml`
+
+## Software Version Reporting
+
+If you add a new tool to the pipeline, please ensure you add the information of the tool to the `get_software_version` process.
+
+Add to the script block of the process, something like the following:
+
+```bash
+<YOUR_TOOL> --version &> v_<YOUR_TOOL>.txt 2>&1 || true
+```
+
+or
+
+```bash
+<YOUR_TOOL> --help | head -n 1 &> v_<YOUR_TOOL>.txt 2>&1 || true
+```
+
+You then need to edit the script `bin/scrape_software_versions.py` to
+
+1. add a (python) regex for your tools --version output (as in stored in the `v_<YOUR_TOOL>.txt` file), to ensure the version is reported as a `v` and the version number e.g. `v2.1.1`
+2. add a HTML block entry to the `OrderedDict` for formatting in MultiQC.
+
+> If a tool does not unfortunately offer any printing of version data, you may add this 'manually' e.g. with `echo "v1.1" > v_<YOUR_TOOL>.txt`

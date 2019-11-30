@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#227](https://github.com/nf-core/eager/issues/227) - Large re-write of input/output process logic to allow maximum flexibility. Originally to address [#227](https://github.com/nf-core/eager/issues/227), but further expanded
 * Fixed Travis-Ci.org to Travis-Ci.com migration issues
 * [#266](https://github.com/nf-core/eager/issues/266) - Added sanity checks for input filetypes (i.e. only BAM files can be supplied if `--bam`)
+* [#237](https://github.com/nf-core/eager/issues/237) - Fixed and Updated script scrape_software_versions
 
 ### `Dependencies`
 
