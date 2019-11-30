@@ -32,12 +32,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * adapterremoval=2.2.2->2.3.1
 * adapterremovalfixprefix=0.0.4->0.0.5
-* picard=2.20.2->2.20.7
+* damageprofiler=0.4.3->0.4.9
+* picard=2.20.2->2.21.4
 * angsd=0.923->0.931
-* gatk4=4.1.2.0->4.1.3.0
-* conda-forge::r-rmarkdown=1.12->1.15
+* gatk4=4.1.2.0->4.1.4.1
+* conda-forge::r-rmarkdown=1.12->1.18
 * pysam=0.15.2->0.15.3
-* python=3.6.3->3.7.3
+* python=3.6.3->3.7.1
 
 ## [2.0.7] - 2019-06-10
 
