@@ -117,4 +117,5 @@ jobs:
         run: |
          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-sexdeterrmine" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_sexdeterrmine
       - name: NUCLEAR CONTAMINATION Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nuclear contamination estimation
+	run: |
          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_nuclear_contamination
