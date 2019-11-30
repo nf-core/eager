@@ -1774,7 +1774,7 @@ if (params.sexdeterrmine_bedfile == '') {
 
      output:
      file 'SexDet.txt'
-     file 'sexdetermine.json' into ch_sexdet_for_multiqc
+     file '*.json' into ch_sexdet_for_multiqc
      
      script:
      if (params.sexdeterrmine_bedfile == '') {
