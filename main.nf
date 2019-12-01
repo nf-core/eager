@@ -652,15 +652,15 @@ process makeSeqDict {
 /*
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
 */ 
-
+// TODO Stopped here!
 process convertBam {
     tag "$bam"
     
     when: 
-    params.bam && params.run_convertbam
+    params.run_convertbam
 
     input: 
-    file bam from ch_input_for_convertbam 
+    file bam from bam_channel 
 
     output:
     set val("${base}"), file("*.fastq.gz") into ch_output_from_convertbam
@@ -2186,7 +2186,7 @@ def extractData(tsvFile) {
             def samplename  = row[0]
             def libraryid     = row[1]
             def lane     = row[2]
-            def seqtype   = row[3]
+            def seqtype   = if (row[3] != ('SE' || 'PE')) exit 1, "SeqType for row[3] is neither SE nor PE!"
             def organism      = row[4]
             def strandedness = row[5]
             def udg = row[6]
