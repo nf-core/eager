@@ -464,12 +464,12 @@ inputSample.branch{
 
 //Removing BAM/BAI in case of a FASTQ input
 fastq_channel = result.fastq.map {
-  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
+  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
     [sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
 }
 //Removing R1/R2 in case of BAM input
 bam_channel = result.bam.map {
-  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
+  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
     [sname, lid, lane, seqtype, organism, strandedness, udg, bam, bai, group, pop, age]
 }
 
@@ -652,18 +652,21 @@ process makeSeqDict {
 /*
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
 */ 
-// TODO Stopped here!
+
+// TODO separate BAM channel should handle this, if params.bamconvert is set, all BAMs are converted to FASTQ and then mixed with the channel that provides the FASTQ files already
+// TODO STOPPED HERE. If that param is not provided, we can simply mix channels after mapping, to provide the same type of data. Need to find out whether we merge before DeDup or after DeDup. Different lanes, same library ID = merge together, then DeDup. Different lanes, different library ID = DeDup first, then merge together (PCR is done on library, not lanes!)
+
 process convertBam {
-    tag "$bam"
+    tag "${base}"
     
     when: 
     params.run_convertbam
 
     input: 
-    file bam from bam_channel 
+    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from bam_channel 
 
     output:
-    set val("${base}"), file("*.fastq.gz") into ch_output_from_convertbam
+    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -687,10 +690,10 @@ process indexinputbam {
 	file "*.{bai,csi}" into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
 
 	script:
-    size = "${params.large_ref}" ? '-c' : ''
-    prefix = "${bam.baseName}"
+  size = "${params.large_ref}" ? '-c' : ''
+  prefix = "${bam.baseName}"
 	"""
-    samtools index "${size}" ${bam}
+  samtools index "${size}" ${bam}
 	"""
 
 }
@@ -887,7 +890,6 @@ process fastqc_after_clipping {
     fastqc -q $reads
     """
 }
-
 
 /*
 Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
@@ -2197,7 +2199,6 @@ def extractData(tsvFile) {
                 file2 = returnFile(row[8])
             if (!hasExtension(file2, "fastq.gz") && !hasExtension(file2, "fq.gz") && !hasExtension(file2, "fastq") && !hasExtension(file2, "fq")) exit 1, "File: ${file2} has the wrong extension. See --help for more information"
             def bam = row[9]
-            def bai = row[10]
             def group = row[11]
             def population = row[12]
             def age = row[13]
