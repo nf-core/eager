@@ -675,10 +675,6 @@ Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyp
 
 Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: `'raw'` for mapped only, filtered, or DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs); `'pmd'` (for pmdtools output). Default is: `'raw'`.
 
-### `--gatk_out_mode`
-
-If selected a GATK genotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`.
-
 ### `--gatk_call_conf`
 
 If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: 30
@@ -690,6 +686,14 @@ If selected a GATK genotyper, what is the ploidy of your reference organism. E.g
 ### `--gatk_dbsnp`
 
 (Optional)Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
+
+### `--gatk_ug_out_mode`
+
+If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`.
+
+### `--gatk_hc_out_mode`
+
+If selected the GATK genotyper HaplotypeCaller, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`.
 
 ### `--gatk_ug_genotype_model`
 
