@@ -17,11 +17,11 @@ top_modules:
      - 'samtools':
         name: 'Samtools Flagstat (pre-samtools filter)'
         path_filters:
-             - '*.sorted.stats'
+             - '*_flagstat.stats'
      - 'samtools':
         name: 'Samtools Flagstat (post-samtools filter)'
         path_filters:
-             - '*.sorted.bam.filtered.stats'
+             - '*_postfilterflagstat.stats'
      - 'dedup'
      - 'preseq'
      - 'qualimap'

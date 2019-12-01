@@ -1113,7 +1113,7 @@ process samtools_flagstat {
     script:
     prefix = "$bam" - ~/(\.bam)?$/
     """
-    samtools flagstat $bam > ${prefix}.stats
+    samtools flagstat $bam > ${prefix}_flagstat.stats
     """
 }
 
@@ -1256,7 +1256,7 @@ process samtools_flagstat_after_filter {
     script:
     prefix = "$bam" - ~/(\.bam)?$/
     """
-    samtools flagstat $bam > ${prefix}.stats
+    samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
     """
 }
 
