@@ -272,12 +272,6 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
         .into {bwa_index; bwa_index_bwamem}
 }
 
-// Validate not trying to run adapterremoval on a BAM file
-//TODO probably unnecessary with TSV input now
-if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
-    exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
-}
-
 // Validate that you're not trying to pass FASTQs to BAM only processes
 if (params.run_convertbam && params.skip_mapping) {
 	exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
@@ -447,7 +441,6 @@ if( workflow.profile == 'awsbatch') {
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
-
 // If read paths
 //    Is single FASTQ
 //    Is paired-end FASTQ
@@ -455,53 +448,29 @@ if( workflow.profile == 'awsbatch') {
 // If NOT read paths && FASTQ
 // is NOT read paths && BAM
 
-if( params.readPaths ){
-    if( params.singleEnd && !params.bam) {
-        Channel
-            .from( params.readPaths )
-            .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-            .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
-            .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
-            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
+//We now separate between FASTQ or BAM input per line automatically based on returnFile and checking the extension
+//TSV header is always: Sample_Name 	Library_ID 	Lane 	SeqType 	Organism 	Strandedness 	UDG_Treatment 	R1 	R2 	BAM 	BAM_Index	Group 	Populations	Age
 
-    } else if (!params.bam){
-        Channel
-            .from( params.readPaths )
-            .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-            .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
-            .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
-            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
-    } else {
-        Channel
-            .from( params.readPaths )
-            .filter { it =~/.*.bam/ }
-            .ifEmpty { exit 1, "Your specified BAM read files did not end in: '.bam' " }
-            .map { row -> [ file( row )  ] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
-            .dump()
-            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
+fastq_channel = Channel.create()
+bam_channel = Channel.create()
 
-    }
-} else if (!params.bam){
-     Channel
-        .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-        .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs " +
-            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam  }
+// Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
+inputSample.branch{
+    fastq: returnFile(it[7]) != 'NA' //These are all fastqs
+    bam: returnFile(it[9]) != 'NA' //These are all BAMs
+}
+.dump(tag: 'input')
+.set { result }
 
-} else {
-     Channel
-        .fromPath( params.reads )
-        .filter { it =~/.*.bam/ }
-        .map { row -> [  file( row )  ] }
-        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nNB: Path needs " +
-            "to be enclosed in quotes!\n" }
-        .dump() //For debugging purposes
-        .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
-
+//Removing BAM/BAI in case of a FASTQ input
+fastq_channel = result.fastq.map {
+  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
+    [sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
+}
+//Removing R1/R2 in case of BAM input
+bam_channel = result.bam.map {
+  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
+    [sname, lid, lane, seqtype, organism, strandedness, udg, bam, bai, group, pop, age]
 }
 
 // Header log info
@@ -510,11 +479,10 @@ def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
-summary['Reads']        = params.reads
+summary['Input']        = params.input
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
-summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Skipping FASTQC?'] = params.skip_fastqc ? 'Yes' : 'No'
 summary['Skipping AdapterRemoval?'] = params.skip_adapterremoval ? 'Yes' : 'No'
 if (!params.skip_adapterremoval) {
@@ -705,7 +673,7 @@ process convertBam {
 }
 
 /*
-* PREPROCESSING - Index a input BAM if not being converted to FASTAPQ
+* PREPROCESSING - Index a input BAM if not being converted to FASTQ
 */
 
 process indexinputbam {
