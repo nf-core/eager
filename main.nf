@@ -27,11 +27,8 @@ def helpMessage() {
     nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' -profile docker
 
     Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs
+      --input                       Path to input design file.
       -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation
-      --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
-      --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
-      --bam                         Specifies that the input is in BAM format
       --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
@@ -208,17 +205,25 @@ if (params.help){
 }
 
 // Configurable variables
-
-
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
+// Read in files properly from TSV file
+tsvPath = null
+if (params.input && (hasExtension(params.input, "tsv")) tsvPath = params.input
+
+inputSample = Channel.empty()
+if (tsvPath) {
+    tsvFile = file(tsvPath)
+    inputSample = extractData(tsvFile)
+} else exit 1, 'No samples were properly defined, see --help and documentation for details.'
+
 /*
-* SANITY CHECKING
+* SANITY CHECKING reference inputs
 */
 
-// Validate inputs
+// Validate reference inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "Please specify --fasta with the path to your reference"
 } else if("${params.fasta}".endsWith(".gz")){
@@ -268,13 +273,9 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
 }
 
 // Validate not trying to run adapterremoval on a BAM file
+//TODO probably unnecessary with TSV input now
 if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
     exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
-}
-
-// Validate BAM is single end only
-if (params.bam && !params.singleEnd){
-    exit 1, "BAM input must be used with --singleEnd "
 }
 
 // Validate that you're not trying to pass FASTQs to BAM only processes
@@ -287,13 +288,8 @@ if (params.bam && !params.run_convertbam && !params.skip_mapping) {
   exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
 }
 
-//Validate that either pairedEnd or singleEnd has been specified by the user!
-if( params.singleEnd || params.pairedEnd || params.bam){
-} else {
-    exit 1, "Please specify either --singleEnd, --pairedEnd to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
-}
-
 //Validate that skip_collapse is only set to True for pairedEnd reads!
+// This needs to be done in the TSV handling phase and/or in AdapterRemoval itself!
 if (params.skip_collapse  && params.singleEnd){
     exit 1, "--skip_collapse can only be set for pairedEnd samples!"
 }
@@ -334,7 +330,7 @@ if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapp
 }
 
 // Genotyping sanity checking
-
+// TODO this can be done in proper functions like sarek does it 
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
   exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
@@ -360,7 +356,7 @@ if (params.run_genotyping){
 // MultiVCFAnalyzer sanity checking
 if (params.run_multivcfanalyzer) {
   if (!params.run_genotyping) {
-    exit 1, "MultiVCFAnalyzer requires genotyping on be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
+    exit 1, "MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
   }
 
   if (params.genotyping_tool != "ug") {
@@ -442,7 +438,7 @@ if( workflow.profile == 'awsbatch') {
   // related: https://github.com/nextflow-io/nextflow/issues/813
   if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
   // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-  if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+  if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
 
@@ -2210,5 +2206,47 @@ def checkHostname(){
                 }
             }
         }
+    }
+}
+
+// Channeling the TSV file containing FASTQ or BAM
+// Format is: "Sample_Name 	Library_ID 	Lane 	SeqType 	Organism 	Strandedness 	UDG_Treatment 	R1 	R2 	BAM 	BAM_Index	Group 	Populations	Age"
+def extractData(tsvFile) {
+    Channel.from(tsvFile)
+        .splitCsv(sep: '\t')
+        .map { row ->
+            def samplename  = row[0]
+            def libraryid     = row[1]
+            def lane     = row[2]
+            def seqtype   = row[3]
+            def organism      = row[4]
+            def strandedness = row[5]
+            def udg = row[6]
+            def file1 = returnFile(row[7])
+            def file2      = "null"
+            if (hasExtension(file1, "fastq.gz") || hasExtension(file1, "fq.gz" || hasExtension(file1, "fastq") || hasExtension(file1, "fq"))) {
+                checkNumberOfItems(row, 14)
+                file2 = returnFile(row[8])
+            if (!hasExtension(file2, "fastq.gz") && !hasExtension(file2, "fq.gz") && !hasExtension(file2, "fastq") && !hasExtension(file2, "fq")) exit 1, "File: ${file2} has the wrong extension. See --help for more information"
+            def bam = row[9]
+            def bai = row[10]
+            def group = row[11]
+            def population = row[12]
+            def age = row[13]
+        }
+        else if (hasExtension(bam, "bam"))
+        else "No recognizable extension for input file: ${file1}"
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, file1, file2, bam, bai, group, population, age ]
+    }
+}
+
+// Return file if it exists, if NA is found this gets treated as a String information
+static def returnFile(it) {
+    if(it == 'NA') {
+        return 'NA'
+    } else { 
+    if (!file(it).exists()) exit 1, "Warning: Missing file in TSV file: ${it}, see --help for more information"
+        return file(it)
     }
 }
