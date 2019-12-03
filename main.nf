@@ -634,6 +634,15 @@ process makeBWAIndex {
  * PREPROCESSING - Index Fasta file if not specified on CLI 
  */
 
+if (params.fasta_index != '') {
+  Channel
+    .fromPath( params.fasta_index )
+    .set { ch_fai_for_skipfastaindexing }
+} else {
+  Channel
+    .empty()
+    .set { ch_fai_for_skipfastaindexing }
+}
 
 process makeFastaIndex {
     tag {fasta}
@@ -659,13 +668,8 @@ process makeFastaIndex {
     """
 }
 
-// gather either pre-made or newly created FAI downstream
-
-if (params.fasta_index == '') {
-  ch_fasta_faidx_index.into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes }
-} else {
-  Channel.fromPath( params.fasta_index ).into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes }
-}
+ch_fai_for_skipfastaindexing.mix(ch_fasta_faidx_index) 
+  .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes }
 
 
 /*
@@ -673,10 +677,15 @@ if (params.fasta_index == '') {
  */
 
 // Stage dict index file if supplied, else load it into the channel
- if ( params.seq_dict != '') {
-  ch_dict_for_skipdict = Channel.fromPath( params.seq_dict )
+
+if (params.seq_dict != '') {
+  Channel
+    .fromPath( params.seq_dict )
+    .set { ch_dict_for_skipdict }
 } else {
-  ch_dict_for_skipdict = Channel.empty()
+  Channel
+    .empty()
+    .set { ch_dict_for_skipdict }
 }
 
 
@@ -704,12 +713,8 @@ process makeSeqDict {
     """
 }
 
-// gather either pre-made or newly created dict downstream
-
-ch_dict_for_skipdict.mix(ch_fasta_faidx_index)
-  .view()
+ch_dict_for_skipdict.mix(ch_seq_dict)
   .into { ch_dict_for_ug; ch_dict_for_hc; ch_dict_for_freebayes }
-
 
 /*
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
@@ -1653,6 +1658,7 @@ ch_gatk_download = Channel.value("download")
   file "*vcf.gz" into ch_ug_for_multivcfanalyzer
 
   script:
+  prefix="${bam.baseName}"
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
@@ -1690,6 +1696,7 @@ ch_gatk_download = Channel.value("download")
   file "*vcf.gz" into ch_vcf_hc
 
   script:
+  prefix="${bam.baseName}"
   if (params.gatk_dbsnp == '')
     """
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
@@ -1724,6 +1731,7 @@ ch_gatk_download = Channel.value("download")
   file "*vcf.gz" into ch_vcf_freebayes
   
   script:
+  prefix="${bam.baseName}"
   skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
   """
   freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${bam.baseName}.vcf 
