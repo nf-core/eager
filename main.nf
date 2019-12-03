@@ -122,10 +122,11 @@ def helpMessage() {
       --run_genotyping              Perform genotyping on deduplicated BAMs.
       --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5 and requires internet access. Options: 'ug', 'hc', 'freebayes'
       --genotyping_source      	    Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
-      --gatk_out_mode               Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
       --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30.
       --gatk_ploidy                 Specify GATK organism ploidy. Default: 2.
       --gatk_dbsnp                  Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
+      --gatk_ug_out_mode            Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
+      --gatk_hc_out_mode            Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', E'MIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
       --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
       --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
       --gatk_downsample             Maximum depth coverage allowed for genotyping before downsampling is turned on. Default: 250
@@ -339,7 +340,11 @@ if (params.run_genotyping){
   exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
   }
   
-  if (params.gatk_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_out_mode != 'EMIT_ALL_SITES') {
+  if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
+  exit 1, "Please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
+  }
+
+  if (params.gatk_hc_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_hc_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_hc_out_mode != 'EMIT_ALL_ACTIVE_SITES') {
   exit 1, "Please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
   }
   
@@ -1108,7 +1113,7 @@ process samtools_flagstat {
     script:
     prefix = "$bam" - ~/(\.bam)?$/
     """
-    samtools flagstat $bam > ${prefix}.stats
+    samtools flagstat $bam > ${prefix}_flagstat.stats
     """
 }
 
@@ -1251,7 +1256,7 @@ process samtools_flagstat_after_filter {
     script:
     prefix = "$bam" - ~/(\.bam)?$/
     """
-    samtools flagstat $bam > ${prefix}.stats
+    samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
     """
 }
 
@@ -1395,10 +1400,10 @@ process damageprofiler {
     
 
     output:
-    file "${base}/dmgprof.json" into ch_damageprofiler_results, ch_damageprofiler_for_software_versions
     file "${base}/*.txt"
     file "${base}/*.log"
     file "${base}/*.pdf"
+    file "${base}/*.json" into ch_damageprofiler_results
 
     script:
     base = "${bam.baseName}"
@@ -1536,12 +1541,12 @@ process bam_trim {
 }
 
 
-if ( params.run_genotyping && params.genotyping_source == "raw" ) {
+if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
 
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
@@ -1550,7 +1555,7 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
 
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*trimmed.bam.bai|.*.trimmed.bam.csi/ }
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
@@ -1559,20 +1564,20 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
 
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*pmd.bam.bai|.*.pmd.bam.csi/ }
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
     ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
     ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
 }
 
 
@@ -1617,7 +1622,6 @@ ch_gatk_download = Channel.value("download")
   file bam from ch_damagemanipulation_for_genotyping_ug
   file fai from ch_fasta_faidx_index
   file dict from ch_seq_dict
-  file bai from ch_damagemanipulationindex_for_genotyping_ug
 
   output: 
   file "*vcf.gz" into ch_ug_for_multivcfanalyzer
@@ -1625,10 +1629,10 @@ ch_gatk_download = Channel.value("download")
   script:
   if (params.gatk_dbsnp == '')
     """
-    samtools index ${bam}
+    samtools index -b ${bam}
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
-    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode}  
     pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
     """
   else if (params.gatk_dbsnp != '')
@@ -1636,7 +1640,7 @@ ch_gatk_download = Channel.value("download")
     samtools index ${bam}
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
-    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_out_mode}  
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode}  
 
     pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
     """
@@ -1662,13 +1666,13 @@ ch_gatk_download = Channel.value("download")
   script:
   if (params.gatk_dbsnp == '')
     """
-    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
+    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
     pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
     """
 
   else if (params.gatk_dbsnp != '')
     """
-    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
+    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
     pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
     """
  }
@@ -1748,7 +1752,15 @@ if (params.additional_vcf_files == '') {
  /*
   * Step 14 Sex determintion with error bar calculation.
   */
- 
+
+if (params.sexdeterrmine_bedfile == '') {
+  ch_bed_for_sexdeterrmine = Channel.empty()
+} else {
+  ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
+}
+
+
+
  process sex_deterrmine{
      publishDir "${params.outdir}/sex_determination", mode:"copy"
     
@@ -1756,15 +1768,17 @@ if (params.additional_vcf_files == '') {
      params.run_sexdeterrmine
     
      input:
-     val 'Bams' from ch_for_sexdeterrmine.collect()
-        
+     file bam from ch_for_sexdeterrmine.collect()
+     file bed from ch_bed_for_sexdeterrmine
+
      output:
      file 'SexDet.txt'
-    
+     file '*.json' into ch_sexdet_for_multiqc
+     
      script:
      if (params.sexdeterrmine_bedfile == '') {
          """
-         for i in ${Bams.join(' ')}; do
+         for i in *.bam; do
              echo \$i >> bamlist.txt
          done
         
@@ -1772,11 +1786,11 @@ if (params.additional_vcf_files == '') {
          """
          } else {
          """
-         for i in ${Bams.join(' ')}; do
+         for i in *.bam; do
              echo \$i >> bamlist.txt
          done
         
-         samtools depth -aa -q30 -Q30 -b ${params.sexdeterrmine_bedfile} -f bamlist.txt | sexdeterrmine -f bamlist.txt >SexDet.txt
+         samtools depth -aa -q30 -Q30 -b ${bed} -f bamlist.txt | sexdeterrmine -f bamlist.txt >SexDet.txt
          """
      }
  }
@@ -1971,11 +1985,6 @@ process output_documentation {
 process get_software_versions {
 	publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
 
-
-    input:
-    file json from ch_damageprofiler_for_software_versions
-    file jar from ch_unifiedgenotyper_versions_jar
-
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
 
@@ -1984,25 +1993,30 @@ process get_software_versions {
     echo $workflow.manifest.version &> v_pipeline.txt
     echo $workflow.nextflow.version &> v_nextflow.txt
     fastqc --version &> v_fastqc.txt 2>&1 || true
-    multiqc --version &> v_multiqc.txt 2>&1 || true
-    bwa &> v_bwa.txt 2>&1 || true
-    samtools --version &> v_samtools.txt 2>&1 || true
-    AdapterRemoval -version  &> v_adapterremoval.txt 2>&1 || true
-    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
-    dedup -v &> v_dedup.txt 2>&1 || true
-    preseq &> v_preseq.txt 2>&1 || true
-    gatk BaseRecalibrator --version 2>&1 | grep Version: > v_gatk.txt 2>&1 || true
-    vcf2genome &> v_vcf2genome.txt 2>&1 || true
+    AdapterRemoval --version  &> v_adapterremoval.txt 2>&1 || true
     fastp --version &> v_fastp.txt 2>&1 || true
-    bam --version &> v_bamutil.txt 2>&1 || true
+    bwa &> v_bwa.txt 2>&1 || true
+    circulargenerator --help | head -n 1 &> v_circulargenerator.txt 2>&1 || true
+    samtools --version &> v_samtools.txt 2>&1 || true
+    dedup -v &> v_dedup.txt 2>&1 || true
+    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
-    cat $json &> v_damageprofiler.txt 2>&1 || true 
-    multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
+    preseq &> v_preseq.txt 2>&1 || true
+    gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
+    freebayes --version &> v_freebayes.txt 2>&1 || true
     bedtools --version &> v_bedtools.txt 2>&1 || true
-    malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d, &> v_malt.txt 2>&1 || true
+    damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
+    bam --version &> v_bamutil.txt 2>&1 || true
+    pmdtools --version &> v_pmdtools.txt 2>&1 || true
     angsd -h |& head -n 1 | cut -d ' ' -f3-4 &> v_angsd.txt 2>&1 || true 
+    multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
+    malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d ',' &> v_malt.txt 2>&1 || true
+    MaltExtract --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
+    multiqc --version &> v_multiqc.txt 2>&1 || true
 
-    java -jar ${jar} --version &> v_gatk3_5.txt 2>&1 || true 
+    ## Hardcoded as no --version flag or equivalent
+    echo "v1.1" > v_sexdeterrmine.txt
+    echo 'version 3.5-0-g36282e4' > v_gatk3_5.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -2018,7 +2032,7 @@ process multiqc {
     file multiqc_config
     file ('fastqc_raw/*') from ch_prefastqc_for_multiqc.collect().ifEmpty([])
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
-    file ('software_versions/software_versions_mqc*') from software_versions_yaml.collect().ifEmpty([])
+    file software_versions_mqc from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('flagstat/*') from ch_flagstat_for_multiqc.collect().ifEmpty([])
     file ('flagstat_filtered/*') from ch_bam_filtered_flagstat_for_multiqc.collect().ifEmpty([])
@@ -2028,6 +2042,7 @@ process multiqc {
     file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
     file ('dedup*/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
     file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
+    file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
 
     file workflow_summary from create_workflow_summary(summary)
 
