@@ -47,7 +47,8 @@ script:
   # REFERENCE: Run the basic pipeline with FastA reference with `fna` extension
   - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-fna_ref" -profile test_fna,docker --pairedEnd --saveReference
   # REFERENCE: Test using pre-computed indices from a separate run beforehand
-  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-preindex_ref" -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-preindex_ref" -profile test_fna,docker --pairedEnd --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fna --fasta_index 
+results/reference_genome/fasta_index/Mammoth_MT_Krause.fna.fai --seq_dict results/reference_genome/seq_dict/Mammoth_MT_Krause.dict
   # REFERENCE: Test with zipped reference input
   - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-gz_ref" -profile test,docker --pairedEnd --fasta 'https://github.com/jfy133/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
   # FASTP: Run the same pipeline testing optional steps of fastp, complexity 

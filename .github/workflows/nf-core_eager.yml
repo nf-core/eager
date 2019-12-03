@@ -37,7 +37,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-basic" -profile test,docker ${{ matrix.endedness }} --saveReference
       - name: REFERENCE Basic workflow, with supplied indices
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-preindex_ref" -profile test,docker ${{ matrix.endedness }} --bwa_index results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta 
+          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-preindex_ref" -profile test,docker ${{ matrix.endedness }} --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
       - name: REFERENCE Run the basic pipeline with FastA reference with `fna` extension
         run: |
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-fna_ref" -profile test_fna,docker --pairedEnd
