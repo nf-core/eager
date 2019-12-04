@@ -97,6 +97,7 @@ This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/ap
 * [Hester van Schalkwyk](https://github.com/hesterjvs)
 * [Thiseas C. Lamnidis](https://github.com/TCLamnidis)
 * [Aida Andrades Valtueña](https://github.com/aidaanva)
+* [Zandra Fagernäs](https://github.com/ZandraFagernas)
 
 If you've contributed and you're missing in here, please let me know and I'll add you in.
 
