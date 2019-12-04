@@ -719,6 +719,16 @@ Specify to skip over regions of high depth by discarding alignments overlapping 
 
 Specify ploidy of sample in FreeBayes. Default is 2, diploid.
 
+## Mitochondrial to Nuclear Ratio
+
+### `--run_mtnucratio`
+
+Turn on the module to estimate the ratio of mitochondrial to nuclear reads.
+
+### `--mtnucratio_header`
+
+Specify the FASTA entry in the reference file specified as `--fasta`, which acts as the mitochondrial 'chormosome' to base the ratio calculation from. The tool only accepts the first section of the header before the first space. The default chromosome name is based on hs37d5/GrCH37 human reference genome. Default: 'MT'
+
 ## SNP Table Generation
 
 SNP Table Generation here is performed by MultiVCFAnalyzer. The current version of MultiVCFAnalyzer version only accepts GATK UnifiedGenotyper 3.5 VCF files, and when the ploidy was set to 2 (this allows MultiVCFAnalyzer to look for report frequencies of polymorphic positions). A description of how the tool works can be seen in the Supplementary Information of [Bos et al. (2014)](https://doi.org/10.1038/nature13591) under "SNP Calling and Phylogenetic Analysis".

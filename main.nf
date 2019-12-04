@@ -94,7 +94,7 @@ def helpMessage() {
     DeDuplication
       --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
       --dedup_all_merged            Treat all reads as merged reads
-    
+
     Library Complexity Estimation
       --preseq_step_size            Specify the step size of Preseq
 
@@ -145,6 +145,10 @@ def helpMessage() {
       --reference_gff_annotations   Specify the reference genome annotations in '.gff' format. (Optional)
       --reference_gff_exclude       Specify positions to be excluded in '.gff' format. (Optional)
       --snp_eff_results             Specify the output file from SNP effect analysis in '.txt' format. (Optional)
+
+    Mitochondrial to Nuclear Ratio
+      --run_mtnucratio              Turn on mitochondrial to nuclear ratio calculation
+      --mtnucratio_header           Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space). Default: 'MT'
 
     Sex Determination
       --run_sexdeterrmine           Turn on sex determination.
@@ -1368,7 +1372,7 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
@@ -1376,7 +1380,7 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
     ch_filteringindex_for_skiprmdup
         .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
@@ -1714,7 +1718,7 @@ ch_gatk_download = Channel.value("download")
  *  Step 12c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
-  tag "${bam}"
+  tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
   when:
@@ -1784,7 +1788,32 @@ if (params.additional_vcf_files == '') {
  }
 
  /*
-  * Step 14 Sex determintion with error bar calculation.
+  * Step 14 Mitochondrial to Nuclear Ratio
+ */
+
+ process mtnucratio {
+  tag "${prefix}"
+  publishDir "${params.outdir}/mtnucratio", mode: "copy"
+
+  when: 
+  params.run_mtnucratio
+
+  input:
+  file bam from ch_rmdup_formtnucratio
+
+  output:
+  file '*.mtnucratio'
+  file '*.json' into ch_mtnucratio_for_multiqc
+
+  script:
+  prefix="${bam.baseName}"
+  """
+  mtnucratio ${bam} . "${params.mtnucratio_header}"
+  """
+ }
+
+ /*
+  * Step 15 Sex determintion with error bar calculation.
   */
 
 if (params.sexdeterrmine_bedfile == '') {
@@ -1795,7 +1824,7 @@ if (params.sexdeterrmine_bedfile == '') {
 
 
 
- process sex_deterrmine{
+ process sex_deterrmine {
      publishDir "${params.outdir}/sex_determination", mode:"copy"
     
      when:
@@ -1830,7 +1859,7 @@ if (params.sexdeterrmine_bedfile == '') {
  }
 
  /* 
-  * Step 15 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
+  * Step 16 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
   */
  process nuclear_contamination{
      publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
@@ -1877,7 +1906,7 @@ if (params.sexdeterrmine_bedfile == '') {
  }
 
 /*
- * Step 16: Metagenomic screening of unmapped reads
+ * Step 17: Metagenomic screening of unmapped reads
 */
 
 process malt {
@@ -1996,7 +2025,7 @@ Downstream VCF tools:
 */
 
 /*
- * Step 16a - Output Description HTML
+ * Step 18a - Output Description HTML
  */
 process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
@@ -2014,7 +2043,7 @@ process output_documentation {
 }
 
 /*
- * Step 16b - Parse software version numbers
+ * Step 18b - Parse software version numbers
  */
 process get_software_versions {
   publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
@@ -2057,7 +2086,7 @@ process get_software_versions {
 }
 
 /*
- * Step 16c - MultiQC
+ * Step 18c - MultiQC
  */
 process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
@@ -2077,6 +2106,7 @@ process multiqc {
     file ('dedup*/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
     file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
+    file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
 
     file workflow_summary from create_workflow_summary(summary)
 
@@ -2093,7 +2123,7 @@ process multiqc {
 }
 
 /*
- * Step 16d - Completion e-mail notification
+ * Step 18d - Completion e-mail notification
  */
 workflow.onComplete {
 
