@@ -725,23 +725,23 @@ Specify ploidy of sample in FreeBayes. Default is 2, diploid.
 
 Turn on concensus sequence genome creation via VCF2Genome. Only accepts GATK UnifiedGenotyper VCF files with the `--gatk_ug_out_mode 'EMIT_ALL_SITES'` and `--gatk_ug_genotype_model 'SNP` flags. Typically useful for small genomes such as mitochondria.
 
-###`--vcf2genome_outfile`
+### `--vcf2genome_outfile`
 
-The name of your requested output FASTA file. Do not include `.fasta` suffix. 
+The name of your requested output FASTA file. Do not include `.fasta` suffix.
 
-###`--vcf2genome_header`
+### `--vcf2genome_header`
 
 The name of the FASTA entry you would like in your FASTA file.
 
-###`--vcf2genome_minc`
+### `--vcf2genome_minc`
 
 Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: 5
 
-###`--vcf2genome_minq`
+### `--vcf2genome_minq`
 
 Minimum genotyping quality of a call to be called. Else N will be called. Default: 30
 
-###`--vcf2genome_minfreq`
+### `--vcf2genome_minfreq`
 
 In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: 0.8
 
