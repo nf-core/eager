@@ -19,7 +19,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#247](https://github.com/nf-core/eager/issues/247) - Added nuclear contamination with angsd
 * [#258](https://github.com/nf-core/eager/issues/258) - Added ability to report bedtools stats to features (e.g. depth/breadth of annotated genes)
 * [#249](https://github.com/nf-core/eager/issues/249) - Added metagenomic classification of unmapped reads with MALT and aDNA authentication with MaltExtract
+* [#302](https://github.com/nf-core/eager/issues/302) - Added mitochondrial to nuclear ratio calculation
 * Fancy new logo from [ZandraFagernas](https://github.com/ZandraFagernas)
+
 
 ### `Fixed`
 
