@@ -38,7 +38,7 @@ def helpMessage() {
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
 
-    References                      If not specified in the configuration file, or you wish to overwrite any of the references.
+    References                      Optional additional pre-made indicies, or you wish to overwrite any of the references.
       --bwa_index                   Path and name of a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value supplied with the --fasta option)
       --bedfile                     Path to BED file for SNPCapture methods
       --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
@@ -91,7 +91,7 @@ def helpMessage() {
     DeDuplication
       --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
       --dedup_all_merged            Treat all reads as merged reads
-    
+
     Library Complexity Estimation
       --preseq_step_size            Specify the step size of Preseq
 
@@ -118,7 +118,7 @@ def helpMessage() {
     Genotyping
       --run_genotyping              Perform genotyping on deduplicated BAMs.
       --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5 and requires internet access. Options: 'ug', 'hc', 'freebayes'
-      --genotyping_source      	    Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
+      --genotyping_source           Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
       --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30.
       --gatk_ploidy                 Specify GATK organism ploidy. Default: 2.
       --gatk_dbsnp                  Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
@@ -142,6 +142,10 @@ def helpMessage() {
       --reference_gff_annotations   Specify the reference genome annotations in '.gff' format. (Optional)
       --reference_gff_exclude       Specify positions to be excluded in '.gff' format. (Optional)
       --snp_eff_results             Specify the output file from SNP effect analysis in '.txt' format. (Optional)
+
+    Mitochondrial to Nuclear Ratio
+      --run_mtnucratio              Turn on mitochondrial to nuclear ratio calculation
+      --mtnucratio_header           Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space). Default: 'MT'
 
     Sex Determination
       --run_sexdeterrmine           Turn on sex determination.
@@ -274,7 +278,7 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
 
 // Validate that you're not trying to pass FASTQs to BAM only processes
 if (params.run_convertbam && params.skip_mapping) {
-	exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
+  exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
 }
 
 // Validate that you're not trying to pass FASTQs to BAM only processes
@@ -486,13 +490,13 @@ if(params.bwa_index) summary['BWA Index'] = params.bwa_index
 summary['Skipping FASTQC?'] = params.skip_fastqc ? 'Yes' : 'No'
 summary['Skipping AdapterRemoval?'] = params.skip_adapterremoval ? 'Yes' : 'No'
 if (!params.skip_adapterremoval) {
-	summary['Skip Read Merging'] = params.skip_collapse ? 'Yes' : 'No'
-	summary['Skip Adapter Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
+  summary['Skip Read Merging'] = params.skip_collapse ? 'Yes' : 'No'
+  summary['Skip Adapter Trimming']  = params.skip_trim  ? 'Yes' : 'No' 
 }
 summary['Running BAM filtering'] = params.run_bam_filtering ? 'Yes' : 'No'
 if (params.run_bam_filtering) {
-	summary['Skip Read Merging'] = params.bam_discard_unmapped ? 'Yes' : 'No'
-	summary['Skip Read Merging'] = params.bam_unmapped_type
+  summary['Skip Read Merging'] = params.bam_discard_unmapped ? 'Yes' : 'No'
+  summary['Skip Read Merging'] = params.bam_unmapped_type
 }
 summary['Run Fastq Stripping'] = params.strip_input_fastq ? 'Yes' : 'No'
 if (params.strip_input_fastq){
@@ -508,8 +512,8 @@ summary['Run BAM Trimming?'] = params.run_trim_bam ? 'Yes' : 'No'
 summary['Run PMDtools?'] = params.run_pmdtools ? 'Yes' : 'No'
 summary['Run Genotyping?'] = params.run_genotyping ? 'Yes' : 'No'
 if (params.run_genotyping){
-	summary['Genotyping Tool?'] = params.genotyping_tool
-	summary['Genotyping BAM Input?'] = params.genotyping_source
+  summary['Genotyping Tool?'] = params.genotyping_tool
+  summary['Genotyping BAM Input?'] = params.genotyping_source
 }
 summary['Run MultiVCFAnalyzer'] = params.run_multivcfanalyzer ? 'Yes' : 'No'
 summary['Max Memory']   = params.max_memory
@@ -597,6 +601,17 @@ process makeBWAIndex {
 /*
  * PREPROCESSING - Index Fasta file if not specified on CLI 
  */
+
+if (params.fasta_index != '') {
+  Channel
+    .fromPath( params.fasta_index )
+    .set { ch_fai_for_skipfastaindexing }
+} else {
+  Channel
+    .empty()
+    .set { ch_fai_for_skipfastaindexing }
+}
+
 process makeFastaIndex {
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/fasta_index", mode: 'copy', saveAs: { filename -> 
@@ -604,7 +619,8 @@ process makeFastaIndex {
             else if(!params.saveReference && filename == "where_are_my_files.txt") filename
             else null
     }
-    when: !params.fasta_index && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
+    
+    when: params.fasta_index == '' && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
 
     input:
     file fasta from fasta_for_indexing
@@ -620,10 +636,26 @@ process makeFastaIndex {
     """
 }
 
+ch_fai_for_skipfastaindexing.mix(ch_fasta_faidx_index) 
+  .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes }
+
 
 /*
  * PREPROCESSING - Create Sequence Dictionary for FastA if not specified on CLI 
  */
+
+// Stage dict index file if supplied, else load it into the channel
+
+if (params.seq_dict != '') {
+  Channel
+    .fromPath( params.seq_dict )
+    .set { ch_dict_for_skipdict }
+} else {
+  Channel
+    .empty()
+    .set { ch_dict_for_skipdict }
+}
+
 
 process makeSeqDict {
     tag {fasta}
@@ -633,7 +665,7 @@ process makeSeqDict {
             else null
     }
     
-    when: !params.seq_dict && !params.fasta.isEmpty()
+    when: params.seq_dict == '' && !params.fasta.isEmpty()
 
     input:
     file fasta from fasta_for_indexing
@@ -648,6 +680,9 @@ process makeSeqDict {
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
     """
 }
+
+ch_dict_for_skipdict.mix(ch_seq_dict)
+  .into { ch_dict_for_ug; ch_dict_for_hc; ch_dict_for_freebayes }
 
 /*
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
@@ -680,21 +715,21 @@ process convertBam {
 */
 
 process indexinputbam {
-	when: 
-	params.bam && !params.run_convertbam
+  when: 
+  params.bam && !params.run_convertbam
 
-	input:
-	file bam from ch_input_for_indexbam
+  input:
+  file bam from ch_input_for_indexbam
 
-	output:
-	file "*.{bai,csi}" into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
+  output:
+  file "*.{bai,csi}" into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
 
-	script:
-  size = "${params.large_ref}" ? '-c' : ''
-  prefix = "${bam.baseName}"
-	"""
-  samtools index "${size}" ${bam}
-	"""
+  script:
+    size = "${params.large_ref}" ? '-c' : ''
+    prefix = "${bam.baseName}"
+  """
+    samtools index "${size}" ${bam}
+  """
 
 }
 
@@ -705,7 +740,7 @@ if (params.run_convertbam) {
         .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 } else {
     ch_input_for_skipconvertbam
-    	.into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
+      .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 }
 
 
@@ -1049,7 +1084,7 @@ if (!params.skip_mapping) {
 
     ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
         .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
-	        .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
+          .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
 
 } else {
     ch_adapterremoval_for_skipmap
@@ -1152,7 +1187,7 @@ if (params.run_bam_filtering) {
         .filter { it =~/.*filtered.bam/ }
         .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
 
-	ch_mappingindex_for_skipfiltering.mix(ch_outputindex_from_filtering)
+  ch_mappingindex_for_skipfiltering.mix(ch_outputindex_from_filtering)
         .filter { it =~/.*filtered.bam.bai|.*filtered.bam.csi/ }
         .into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
 
@@ -1303,7 +1338,7 @@ process markDup{
 if (!params.skip_deduplication) {
     ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
     ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
         .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
@@ -1311,7 +1346,7 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_filtering_for_skiprmdup
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
     ch_filteringindex_for_skiprmdup
         .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
@@ -1507,12 +1542,12 @@ process bam_trim {
 }
 
 
-if ( params.run_genotyping && params.genotyping_source == "raw" ) {
+if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
 
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
@@ -1521,7 +1556,7 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
 
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*trimmed.bam.bai|.*.trimmed.bam.csi/ }
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
@@ -1530,20 +1565,20 @@ if ( params.run_genotyping && params.genotyping_source == "raw" ) {
 
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*pmd.bam.bai|.*.pmd.bam.csi/ }
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
     ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
     ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_ug; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
 }
 
 
@@ -1586,17 +1621,17 @@ ch_gatk_download = Channel.value("download")
   file fasta from fasta_for_indexing
   file jar from ch_unifiedgenotyper_jar
   file bam from ch_damagemanipulation_for_genotyping_ug
-  file fai from ch_fasta_faidx_index
-  file dict from ch_seq_dict
-  file bai from ch_damagemanipulationindex_for_genotyping_ug
+  file fai from ch_fai_for_ug
+  file dict from ch_dict_for_ug
 
   output: 
   file "*vcf.gz" into ch_ug_for_multivcfanalyzer
 
   script:
+  prefix="${bam.baseName}"
   if (params.gatk_dbsnp == '')
     """
-    samtools index ${bam}
+    samtools index -b ${bam}
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode}  
@@ -1623,14 +1658,15 @@ ch_gatk_download = Channel.value("download")
   input:
   file fasta from fasta_for_indexing
   file bam from ch_damagemanipulation_for_genotyping_hc
-  file fai from ch_fasta_faidx_index
-  file dict from ch_seq_dict
+  file fai from ch_fai_for_hc
+  file dict from ch_dict_for_hc
   file bai from ch_damagemanipulationindex_for_genotyping_hc
 
   output: 
   file "*vcf.gz" into ch_vcf_hc
 
   script:
+  prefix="${bam.baseName}"
   if (params.gatk_dbsnp == '')
     """
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
@@ -1648,7 +1684,7 @@ ch_gatk_download = Channel.value("download")
  *  Step 12c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
-  tag "${bam}"
+  tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
   when:
@@ -1657,14 +1693,15 @@ ch_gatk_download = Channel.value("download")
   input:
   file fasta from fasta_for_indexing
   file bam from ch_damagemanipulation_for_genotyping_freebayes
-  file fai from ch_fasta_faidx_index
-  file dict from ch_seq_dict
+  file fai from ch_fai_for_freebayes
+  file dict from ch_dict_for_freebayes
   file bai from ch_damagemanipulationindex_for_genotyping_freebayes
 
   output: 
   file "*vcf.gz" into ch_vcf_freebayes
   
   script:
+  prefix="${bam.baseName}"
   skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
   """
   freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${bam.baseName}.vcf 
@@ -1685,39 +1722,64 @@ if (params.additional_vcf_files == '') {
 }
 
  process multivcfanalyzer {
- 	publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
+  publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
 
- 	when:
- 	params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
+  when:
+  params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
 
- 	input:
+  input:
   file fasta from fasta_for_indexing
- 	file vcf from ch_vcfs_for_multivcfanalyzer
+  file vcf from ch_vcfs_for_multivcfanalyzer
 
- 	output:
- 	file 'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
- 	file 'info.txt.gz' into ch_output_multivcfanalyzer_info
- 	file 'snpAlignment.fasta.gz' into ch_output_multivcfanalyzer_snpalignment
- 	file 'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
- 	file 'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
- 	file 'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
- 	file 'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
- 	file 'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
- 	file 'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
- 	file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
+  output:
+  file 'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
+  file 'info.txt.gz' into ch_output_multivcfanalyzer_info
+  file 'snpAlignment.fasta.gz' into ch_output_multivcfanalyzer_snpalignment
+  file 'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
+  file 'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
+  file 'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
+  file 'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
+  file 'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
+  file 'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
+  file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
 
- 	script:
+  script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
- 	"""
- 	gunzip -f *.vcf.gz
- 	multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
- 	pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
- 	rm *.vcf
- 	"""
+  """
+  gunzip -f *.vcf.gz
+  multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
+  pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
+  rm *.vcf
+  """
  }
 
  /*
-  * Step 14 Sex determintion with error bar calculation.
+  * Step 14 Mitochondrial to Nuclear Ratio
+ */
+
+ process mtnucratio {
+  tag "${prefix}"
+  publishDir "${params.outdir}/mtnucratio", mode: "copy"
+
+  when: 
+  params.run_mtnucratio
+
+  input:
+  file bam from ch_rmdup_formtnucratio
+
+  output:
+  file '*.mtnucratio'
+  file '*.json' into ch_mtnucratio_for_multiqc
+
+  script:
+  prefix="${bam.baseName}"
+  """
+  mtnucratio ${bam} . "${params.mtnucratio_header}"
+  """
+ }
+
+ /*
+  * Step 15 Sex determintion with error bar calculation.
   */
 
 if (params.sexdeterrmine_bedfile == '') {
@@ -1728,7 +1790,7 @@ if (params.sexdeterrmine_bedfile == '') {
 
 
 
- process sex_deterrmine{
+ process sex_deterrmine {
      publishDir "${params.outdir}/sex_determination", mode:"copy"
     
      when:
@@ -1763,7 +1825,7 @@ if (params.sexdeterrmine_bedfile == '') {
  }
 
  /* 
-  * Step 15 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
+  * Step 16 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
   */
  process nuclear_contamination{
      publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
@@ -1810,7 +1872,7 @@ if (params.sexdeterrmine_bedfile == '') {
  }
 
 /*
- * Step 16: Metagenomic screening of unmapped reads
+ * Step 17: Metagenomic screening of unmapped reads
 */
 
 process malt {
@@ -1929,7 +1991,7 @@ Downstream VCF tools:
 */
 
 /*
- * Step 16a - Output Description HTML
+ * Step 18a - Output Description HTML
  */
 process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
@@ -1947,10 +2009,10 @@ process output_documentation {
 }
 
 /*
- * Step 16b - Parse software version numbers
+ * Step 18b - Parse software version numbers
  */
 process get_software_versions {
-	publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
+  publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
@@ -1990,7 +2052,7 @@ process get_software_versions {
 }
 
 /*
- * Step 16c - MultiQC
+ * Step 18c - MultiQC
  */
 process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
@@ -2010,6 +2072,7 @@ process multiqc {
     file ('dedup*/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
     file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
+    file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
 
     file workflow_summary from create_workflow_summary(summary)
 
@@ -2026,7 +2089,7 @@ process multiqc {
 }
 
 /*
- * Step 16d - Completion e-mail notification
+ * Step 18d - Completion e-mail notification
  */
 workflow.onComplete {
 

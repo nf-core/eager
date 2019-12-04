@@ -86,6 +86,7 @@ The default columns are as follows:
 * **Coverage** This is from Qualimap. This is the median number of times a base on your reference genome was covered by a read (i.e. depth coverage).. This average includes bases with 0 reads covering that position.
 * **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
 * **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your refernece genome.
+* **% MTNUC** This is actually a ratio of the number of mitochondrial reads to the number of reads hitting autosomal chromosomes.
 * **X Prime Y>Z N base** These columns are from DamageProfiler. The prime numbers represent which end of the reads the damage is referring to. The Y>Z is the type of substitution (C>T is the true damage, G>A is the complementary). You should see for no- and half- UDG treatment a decrease in frequency from the 1st to 2nd base.
 * **Mean Read Length** This is from DamageProfiler. This is the mean length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
 * **Median Read Length** This is from DamageProfiler. This is the median length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
