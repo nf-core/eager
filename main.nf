@@ -135,14 +135,12 @@ def helpMessage() {
       --freebayes_p                 Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
 
     Concensus Sequence Generation
-      --run_vcf2genome              Turns on ability to create a concensus sequence FASTA file based on a VCF file and the original reference (only considers SNPs).
-      --vcf2genome_outfile          Specify name of the output FASTA file containing the concensus sequence. Default: '<input_vcf>'
+      --run_vcf2genome              Turns on ability to create a concensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
+      --vcf2genome_outfile          Specify name of the output FASTA file containing the concensus sequence. Do not inclvcf2 Default: '<input_vcf>'
       --vcf2genome_header           Specify the header name of the concensus sequence entry within the FASTA file. Default: '<input_vcf>'
       --vcf2genome_minc             Minimum depth coverage required for a call to be included (else N will be called). Default: 5
       --vcf2genome_minq             Minimum genotyping quality of a call to be called. Else N will be called. Default: 30
       --vcf2genome_minfreq          Minimum fraction of reads supporting a call to be included. Else N will be called. Default: 0.8
-      --vcf2genome_refmod           Turn on generation of a concensus file but with IUPAC ambiguity codes instead of Ns.
-      --vcf2genome_uncertain        Turn on generation of a special '1234' format of the consensus for downstream tools.
 
     SNP Table Generation
       --run_multivcfanalyzer        Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
@@ -373,8 +371,15 @@ if (params.run_genotyping){
 
 // Consensus sequence generation sanity checking
 
-if (params.run_vcf2genome && !params.run_genotyping) {
-    exit 1, "Consensus sequence generation requires genotyping on be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
+if (params.run_vcf2genome) {
+    if (!params.run_genotyping) {
+      exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
+    }
+
+    if (params.genotyping_tool != 'ug') {
+      exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
+    }
+
 }
 
 // MultiVCFAnalyzer sanity checking
@@ -1675,7 +1680,7 @@ ch_gatk_download = Channel.value("download")
   file dict from ch_dict_for_ug
 
   output: 
-  file "*vcf.gz" into ch_ug_for_multivcfanalyzer, ch_vcf_ug
+  file "*vcf.gz" into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
 
   script:
   prefix="${bam.baseName}"
@@ -1759,14 +1764,11 @@ ch_gatk_download = Channel.value("download")
   """
  }
 
- // Gather for downstream
-
-ch_vcf_ug.mix(ch_vcf_hc, ch_vcf_freebayes)
-  .set {ch_vcfs_for_vcf2genome}
 
 /*
  * Step 13: VCF2Genome
 */
+
 
 process vcf2genome {
   tag "${prefix}"
@@ -1776,21 +1778,21 @@ process vcf2genome {
   params.run_vcf2genome
 
   input:
-  file vcf from ch_vcfs_for_vcf2genome
+  file vcf from ch_ug_for_vcf2genome
   file fasta from fasta_for_indexing
 
   output:
-  file "*"
+  file "*.fasta.gz"
 
   script:
   prefix = "${vcf.baseName}"
-  out = ${params.vcf2genome_outfile} == '' ? "${prefix}.fasta" : "${params.vcf2genome_outfile}"
-  fasta_head = ${params.vcf2genome_header} == '' ? "${prefix}" : "${params.vcf2genome_header}"
-  refmod = ${params.vcf2genome_refmod} ? "-refMod ${prefix}.refMod" : ''
-  uncertain = ${params.vcf2genome_uncertain} ? "-uncertain ${prefix}_1234.fasta" : '' 
+  out = "${params.vcf2genome_outfile}" == '' ? "${prefix}.fasta" : "${params.vcf2genome_outfile}"
+  fasta_head = "${params.vcf2genome_header}" == '' ? "${prefix}" : "${params.vcf2genome_header}"
   """
-  vcf2genome -draft ${out} -draftname "${fasta_head}" -in ${vcf} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} ${refmod} ${uncertain}  
-  pigz -p ${task.cpus} * 
+  pigz -f -d -p ${task.cpus} *.vcf.gz
+  vcf2genome -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
+  pigz -p ${task.cpus} *.fasta 
+  pigz -p ${task.cpus} *.vcf
   """
 }
 
