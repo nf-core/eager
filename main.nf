@@ -264,7 +264,7 @@ if ( params.fasta.isEmpty () ){
 }
 
 
-//Index files provided? Then check whether they are correct and complete
+// Index files provided? Then check whether they are correct and complete
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
     exit 1, "Invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave ${params.mapper}!"
 }
@@ -299,18 +299,18 @@ if (params.bam && !params.run_convertbam && !params.skip_mapping) {
   exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
 }
 
-//Validate that either pairedEnd or singleEnd has been specified by the user!
+// Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd || params.bam){
 } else {
     exit 1, "Please specify either --singleEnd, --pairedEnd to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
 }
 
-//Validate that skip_collapse is only set to True for pairedEnd reads!
+// Validate that skip_collapse is only set to True for pairedEnd reads!
 if (params.skip_collapse  && params.singleEnd){
     exit 1, "--skip_collapse can only be set for pairedEnd samples!"
 }
 
-//Strip mode sanity checking
+// Strip mode sanity checking
 if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
         exit 1, "--strip_mode can only be set to strip or replace!"
@@ -321,7 +321,7 @@ if (params.strip_input_fastq){
     }
 }
 
-//Mapper sanity checking
+// Mapper sanity checking
 if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "circularmapper") {
     exit 1, "Please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}!"
 }
@@ -336,7 +336,6 @@ if(params.run_bedtools_coverage && params.anno_file == ''){
 }
 
 // BAM filtering sanity checking - FIRST ONE CURRENTLY DOES NOT WORK!
-
 if (params.bam_discard_unmapped && !params.run_bam_filtering) {
   "Please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering"
 }
@@ -346,7 +345,6 @@ if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapp
 }
 
 // Genotyping sanity checking
-
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
   exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
@@ -370,7 +368,6 @@ if (params.run_genotyping){
 }
 
 // Consensus sequence generation sanity checking
-
 if (params.run_vcf2genome) {
     if (!params.run_genotyping) {
       exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
@@ -398,7 +395,6 @@ if (params.run_multivcfanalyzer) {
 }
 
 // MALT sanity checking
-
 if (params.run_metagenomic_screening) {
   if ( !params.bam_discard_unmapped ) {
   exit 1, "Metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
@@ -436,10 +432,7 @@ if (params.run_metagenomic_screening) {
   }
 }
 
-
-
 // MaltExtract Sanity checking
-
 if (params.run_maltextract) {
 
   if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
