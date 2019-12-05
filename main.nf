@@ -399,59 +399,67 @@ if (params.run_multivcfanalyzer) {
 
 // MALT sanity checking
 
-if (params.run_metagenomic_screening && !params.bam_discard_unmapped ) {
+if (params.run_metagenomic_screening) {
+  if ( !params.bam_discard_unmapped ) {
   exit 1, "Metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
-}
 
-if (params.run_metagenomic_screening && params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
+  if (params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
   exit 1, "Metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
+  }
+
+  if (params.metagenomic_tool != 'malt' ) {
+    exit 1, "Metagenomic classification can currently only be run with 'malt'. Please check your classifer. You gave '${params.metagenomic_tool}'!"
+  }
+
+  if (params.database == '' ) {
+    exit 1, "Metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
+  }
+
+  if (params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
+    exit 1, "Unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
+  }
+
+  if (params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
+    exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
+  }
+
+  if (params.malt_min_support_mode == 'percent' && params.malt_min_support_reads != 1) {
+    exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --malt_min_support_reads!"
+  }
+
+  if (params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
+    exit 1, "Incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
+  }
+
+  if (params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
+    exit 1, "Unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
+  }
 }
 
-if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' ) {
-  exit 1, "Metagenomic classification can currently only be run with 'malt'. Please check your classifer. You gave '${params.metagenomic_tool}'!"
-}
 
-if (params.run_metagenomic_screening && params.database == '' ) {
-  exit 1, "Metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
-}
-
-if (params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
-  exit 1, "Unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
-}
-
-if (params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
-  exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
-}
-
-if (params.malt_min_support_mode == 'percent' && params.malt_min_support_reads != 1) {
-  exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --malt_min_support_reads!"
-}
-
-if (params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
-  exit 1, "Incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
-}
-
-if (params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
-  exit 1, "Unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
-}
 
 // MaltExtract Sanity checking
 
-if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' && params.run_maltextract) {
-  exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+if (params.run_maltextract) {
+
+  if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
+    exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+  }
+
+  if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
+    exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+  }
+
+  if (params.maltextract_taxon_list == '') {
+    exit 1, "MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list!"
+  }
+
+  if (params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
+    exit 1, "Unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: ${params.maltextract_filter}!"
+  }
+
 }
 
-if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' && params.run_maltextract) {
-  exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
-}
-
-if (params.run_maltextract && params.maltextract_taxon_list == '') {
-  exit 1, "MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list!"
-}
-
-if (params.run_maltextract && params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
-  exit 1, "Unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: ${params.maltextract_filter}!"
-}
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
