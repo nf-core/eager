@@ -18,7 +18,7 @@ regexes = {
     'GATK UnifiedGenotyper': ['v_gatk3_5.txt', r"version (\S+)"],
     'bamUtil' : ['v_bamutil.txt', r"Version: (\S+);"],
     'fastP': ['v_fastp.txt', r"([\d\.]+)"],
-    'DamageProfiler' : ['v_damageprofiler.txt', r"version\": \"([\d\.]+)"],
+    'DamageProfiler' : ['v_damageprofiler.txt', r"DamageProfiler v(\S+)"],
     'angsd':['v_angsd.txt',r"version: (\S+)"],
     'bedtools':['v_bedtools.txt',r"bedtools v(\S+)"],
     'circulargenerator':['v_circulargenerator.txt',r"CircularGeneratorv(\S+)"],
@@ -28,8 +28,11 @@ regexes = {
     'malt':['v_malt.txt',r"version (\S+)"],
     'multivcfanalyzer':['v_multivcfanalyzer.txt', r"MultiVCFAnalyzer - (\S+)"],
     'pmdtools':['v_pmdtools.txt',r"pmdtools v(\S+)"],
-    'sexdeterrmine':['v_sexdeterrmine.txt',r"v(\S+)"]
+    'sexdeterrmine':['v_sexdeterrmine.txt',r"v(\S+)"],
+    'MTNucRatioCalculator':['v_mtnucratiocalculator.txt',r"v(\S+)"],
+    'vcf2genome':['v_vcf2genome.txt', r"VCF2Genome \(v. ([0-9].[0-9]+) "],
 }
+
 results = OrderedDict()
 results['nf-core/eager'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
@@ -46,6 +49,8 @@ results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
 results['GATK HaplotypeCaller'] = '<span style="color:#999999;\">N/A</span>'
 results['GATK UnifiedGenotyper'] = '<span style="color:#999999;\">N/A</span>'
 results['freebayes'] = '<span style="color:#999999;\">N/A</span>'
+results['vcf2genome'] = '<span style="color:#999999;\">N/A</span>'
+results['MTNucRatioCalculator'] = '<span style="color:#999999;\">N/A</span>'
 results['bedtools'] = '<span style="color:#999999;\">N/A</span>'
 results['DamageProfiler'] = '<span style="color:#999999;\">N/A</span>'
 results['bamUtil'] = '<span style="color:#999999;\">N/A</span>'

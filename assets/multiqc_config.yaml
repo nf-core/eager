@@ -25,6 +25,7 @@ top_modules:
      - 'dedup'
      - 'preseq'
      - 'qualimap'
+     - 'mtnucratio'
      - 'damageprofiler'
      - 'gatk'
 qualimap_config:
@@ -58,6 +59,8 @@ table_columns_visible:
         1_x_pc: True
         5_x_pc: True
         percentage_aligned: False
+    mtnucratio: 
+        mt_nuc_ratio: True
     DamageProfiler:
         3 Prime1: True
         3 Prime2: True
