@@ -560,7 +560,6 @@ if (params.strip_input_fastq){
     summary['Strip mode'] = params.strip_mode
 }
 summary['Skipping Mapping?'] = params.skip_mapping ? 'Yes' : 'No'
-
 summary['Skipping Preseq?'] = params.skip_preseq ? 'Yes' : 'No'
 summary['Skipping Deduplication?'] = params.skip_deduplication ? 'Yes' : 'No'
 summary['Skipping DamageProfiler?'] = params.skip_damage_calculation ? 'Yes' : 'No'
@@ -573,6 +572,15 @@ if (params.run_genotyping){
   summary['Genotyping BAM Input?'] = params.genotyping_source
 }
 summary['Run MultiVCFAnalyzer'] = params.run_multivcfanalyzer ? 'Yes' : 'No'
+summary['Run VCF2Genome'] = params.run_vcf2genome ? 'Yes' : 'No'
+summary['Run SexDetErrMine'] = params.run_sexdeterrmine ? 'Yes' : 'No'
+summary['Run Nuclear Contamination Estimation'] = params.run_nuclear_contamination ? 'Yes' : 'No'
+summary['Run Bedtools Coverage'] = params.run_bedtools_coverage ? 'Yes' : 'No'
+summary['Run Metagenomic Binning'] = params.run_metagenomic_screening ? 'Yes' : 'No'
+if (params.run_metagenomic_screening) {
+  summary['Metagenomic Tool'] = params.metagenomic_tool
+  summary['Run MaltExtract'] = params.run_maltextract ? 'Yes' : 'No'
+}
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -1334,7 +1342,7 @@ process dedup{
 
     output:
     file "*.hist" into ch_hist_for_preseq
-    file "*.log" into ch_dedup_results_for_multiqc
+    file "*.json" into ch_dedup_results_for_multiqc
     file "${prefix}_rmdup.bam" into ch_output_from_dedup
     file "*.{bai,csi}" into ch_outputindex_from_dedup
 
@@ -1862,7 +1870,7 @@ if (params.additional_vcf_files == '') {
   script:
   prefix="${bam.baseName}"
   """
-  mtnucratio ${bam} . "${params.mtnucratio_header}"
+  mtnucratio ${bam} "${params.mtnucratio_header}"
   """
  }
 
