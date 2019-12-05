@@ -753,7 +753,7 @@ Turn on the module to estimate the ratio of mitochondrial to nuclear reads.
 
 ### `--mtnucratio_header`
 
-Specify the FASTA entry in the reference file specified as `--fasta`, which acts as the mitochondrial 'chormosome' to base the ratio calculation from. The tool only accepts the first section of the header before the first space. The default chromosome name is based on hs37d5/GrCH37 human reference genome. Default: 'MT'
+Specify the FASTA entry in the reference file specified as `--fasta`, which acts as the mitochondrial 'chromosome' to base the ratio calculation from. The tool only accepts the first section of the header before the first space. The default chromosome name is based on hs37d5/GrCH37 human reference genome. Default: 'MT'
 
 ## SNP Table Generation
 
