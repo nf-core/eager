@@ -134,6 +134,14 @@ def helpMessage() {
       --freebayes_g                 Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: turned off.
       --freebayes_p                 Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
 
+    Concensus Sequence Generation
+      --run_vcf2genome              Turns on ability to create a concensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
+      --vcf2genome_outfile          Specify name of the output FASTA file containing the concensus sequence. Do not inclvcf2 Default: '<input_vcf>'
+      --vcf2genome_header           Specify the header name of the concensus sequence entry within the FASTA file. Default: '<input_vcf>'
+      --vcf2genome_minc             Minimum depth coverage required for a call to be included (else N will be called). Default: 5
+      --vcf2genome_minq             Minimum genotyping quality of a call to be called. Else N will be called. Default: 30
+      --vcf2genome_minfreq          Minimum fraction of reads supporting a call to be included. Else N will be called. Default: 0.8
+
     SNP Table Generation
       --run_multivcfanalyzer        Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
       --write_allele_frequencies    Specify to also write allele frequencies in the SNP table. Default: turned off.
@@ -147,7 +155,7 @@ def helpMessage() {
       --snp_eff_results             Specify the output file from SNP effect analysis in '.txt' format. (Optional)
 
     Mitochondrial to Nuclear Ratio
-      --run_mtnucratio              Turn on mitochondrial to nuclear ratio calculation
+      --run_mtnucratio              Turn on mitochondrial to nuclear ratio calculation.
       --mtnucratio_header           Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space). Default: 'MT'
 
     Sex Determination
@@ -359,6 +367,19 @@ if (params.run_genotyping){
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
     exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
   }
+}
+
+// Consensus sequence generation sanity checking
+
+if (params.run_vcf2genome) {
+    if (!params.run_genotyping) {
+      exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
+    }
+
+    if (params.genotyping_tool != 'ug') {
+      exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
+    }
+
 }
 
 // MultiVCFAnalyzer sanity checking
@@ -1659,7 +1680,7 @@ ch_gatk_download = Channel.value("download")
   file dict from ch_dict_for_ug
 
   output: 
-  file "*vcf.gz" into ch_ug_for_multivcfanalyzer
+  file "*vcf.gz" into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
 
   script:
   prefix="${bam.baseName}"
@@ -1742,6 +1763,39 @@ ch_gatk_download = Channel.value("download")
   pigz -p ${task.cpus} ${bam.baseName}.vcf
   """
  }
+
+
+/*
+ * Step 13: VCF2Genome
+*/
+
+
+process vcf2genome {
+  tag "${prefix}"
+  publishDir "${params.outdir}/consensus_sequence", mode: 'copy'
+
+  when: 
+  params.run_vcf2genome
+
+  input:
+  file vcf from ch_ug_for_vcf2genome
+  file fasta from fasta_for_indexing
+
+  output:
+  file "*.fasta.gz"
+
+  script:
+  prefix = "${vcf.baseName}"
+  out = "${params.vcf2genome_outfile}" == '' ? "${prefix}.fasta" : "${params.vcf2genome_outfile}"
+  fasta_head = "${params.vcf2genome_header}" == '' ? "${prefix}" : "${params.vcf2genome_header}"
+  """
+  pigz -f -d -p ${task.cpus} *.vcf.gz
+  vcf2genome -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
+  pigz -p ${task.cpus} *.fasta 
+  pigz -p ${task.cpus} *.vcf
+  """
+}
+
 
 /*
  * Step 13: SNP Table Generation
@@ -2076,10 +2130,12 @@ process get_software_versions {
     malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d ',' &> v_malt.txt 2>&1 || true
     MaltExtract --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
     multiqc --version &> v_multiqc.txt 2>&1 || true
+    vcf2genome -h |& head -n 1 &> v_vcf2genome.txt || true
 
     ## Hardcoded as no --version flag or equivalent
     echo "v1.1" > v_sexdeterrmine.txt
     echo 'version 3.5-0-g36282e4' > v_gatk3_5.txt
+    echo 'v0.5' > v_mtnucratiocalculator.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
