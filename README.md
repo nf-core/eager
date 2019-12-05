@@ -34,29 +34,28 @@ By default the pipeline currently performs the following:
 
 Additional functionality contained by the pipeline currently includes:
 
-**Preprocessing**
+#### Preprocessing
 
 * Illumina two-coloured sequencer poly-G tail removal (`fastp`)
 * Automatic conversion of unmapped reads to FASTQ (`samtools`)
 * Host DNA (mapped reads) stripping from input FASTQ files (for sensitive samples)
 
-
-**aDNA Damage manipulation**
+#### aDNA Damage manipulation
 
 * Damage removal/clipping for UDG+/UDG-half treatment protocols (`BamUtil`)
 * Damage reads extraction and assessment (`PMDTools`)
 
-**Genotyping**
+#### Genotyping
 
 * Creation of VCF genotyping files (`GATK UnifiedGenotyper`, `GATK HaplotypeCaller` and `FreeBayes`)
 * Consensus sequence FASTA creation (`VCF2Genome`)
 * SNP Table generation (`MultiVCFAnalyzer`)
 
-**Biological Information**
+#### Biological Information
 * Mitochondrial to Nuclear read ratio calculation (`MtNucRatioCalculator`)
-* Statistical sex determination of human individuals (`SexDetErrmine`) 
+* Statistical sex determination of human individuals (`SexDetErrmine`)
 
-**Metagenomic Screening**
+#### Metagenomic Screening
 
 * Taxonomic binner with alignment (`MALT`)
 * aDNA characteristic screening of taxonomically binned data (`MaltExtract`)
