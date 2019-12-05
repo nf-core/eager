@@ -1862,7 +1862,7 @@ if (params.additional_vcf_files == '') {
   script:
   prefix="${bam.baseName}"
   """
-  mtnucratio ${bam} . "${params.mtnucratio_header}"
+  mtnucratio ${bam} "${params.mtnucratio_header}"
   """
  }
 
