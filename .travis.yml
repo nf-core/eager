@@ -98,6 +98,6 @@ script:
   # NUCLEAR CONTAMINATION ESTIMATION Premapped BAM run skipping most steps but run nuclear contamination with ANGSD
   - nextflow run ${TRAVIS_BUILD_DIR} "$TOWER" -name "$RUN_NAME-nuclearcontamination" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --skip_preseq --skip_damage_calculation --run_nuclear_contamination
   # MTNUCRATIO Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nmtnucratio
-  - nextflow run ${TRAVIS_BUILD_DIR} "$TOWER" -name "$RUN_NAME-nuclearcontamination" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --skip_preseq --skip_damage_calculation --run_mtnucratio
+  - nextflow run ${TRAVIS_BUILD_DIR} "$TOWER" -name "$RUN_NAME-mtnucratio" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --skip_preseq --skip_damage_calculation --run_mtnucratio
 
 
