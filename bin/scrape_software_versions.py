@@ -29,8 +29,8 @@ regexes = {
     'multivcfanalyzer':['v_multivcfanalyzer.txt', r"MultiVCFAnalyzer - (\S+)"],
     'pmdtools':['v_pmdtools.txt',r"pmdtools v(\S+)"],
     'sexdeterrmine':['v_sexdeterrmine.txt',r"v(\S+)"],
-    'MTNucRatioCalculator':['v_mtnucratiocalculator.txt',r"v(\S+)"],
-    'vcf2genome':['v_vcf2genome.txt', r"VCF2Genome \(v. ([0-9].[0-9]+) "],
+    'MTNucRatioCalculator':['v_mtnucratiocalculator.txt',r"Version: (\S+)"],
+    'VCF2genome':['v_vcf2genome.txt', r"VCF2Genome \(v. ([0-9].[0-9]+) "],
 }
 
 results = OrderedDict()
@@ -49,7 +49,7 @@ results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
 results['GATK HaplotypeCaller'] = '<span style="color:#999999;\">N/A</span>'
 results['GATK UnifiedGenotyper'] = '<span style="color:#999999;\">N/A</span>'
 results['freebayes'] = '<span style="color:#999999;\">N/A</span>'
-results['vcf2genome'] = '<span style="color:#999999;\">N/A</span>'
+results['VCF2genome'] = '<span style="color:#999999;\">N/A</span>'
 results['MTNucRatioCalculator'] = '<span style="color:#999999;\">N/A</span>'
 results['bedtools'] = '<span style="color:#999999;\">N/A</span>'
 results['DamageProfiler'] = '<span style="color:#999999;\">N/A</span>'

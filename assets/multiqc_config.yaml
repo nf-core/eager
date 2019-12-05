@@ -56,6 +56,7 @@ table_columns_visible:
     Samtools Flagstat (post-samtools filter):
         mapped_passed: True
     QualiMap:
+        mean_coverage: True
         1_x_pc: True
         5_x_pc: True
         percentage_aligned: False
@@ -89,13 +90,14 @@ table_columns_placement:
         clusterfactor: 600        
         duplication_rate: 610
     QualiMap:
-        median_coverage: 700
-        1_x_pc: 710
-        2_x_pc: 720
-        3_x_pc: 730
-        4_x_pc: 740
-        5_x_pc: 750
-        avg_gc: 760
+        mean_coverage: 700
+        median_coverage: 710
+        1_x_pc: 720
+        2_x_pc: 730
+        3_x_pc: 740
+        4_x_pc: 750
+        5_x_pc: 760
+        avg_gc: 770
     mtnucratio:
         mtreads: 800
         mt_cov_avg: 810
