@@ -38,7 +38,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * angsd=0.923->0.931
 * gatk4=4.1.2.0->4.1.4.1
 * conda-forge::r-rmarkdown=1.12->1.18
-* mtnucratio=0.5->0.6
 * pysam=0.15.2->0.15.3
 * python=3.6.3->3.7.1
 
