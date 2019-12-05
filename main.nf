@@ -376,7 +376,6 @@ if (params.run_vcf2genome) {
     if (params.genotyping_tool != 'ug') {
       exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
     }
-
 }
 
 // MultiVCFAnalyzer sanity checking
@@ -398,6 +397,7 @@ if (params.run_multivcfanalyzer) {
 if (params.run_metagenomic_screening) {
   if ( !params.bam_discard_unmapped ) {
   exit 1, "Metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
+  }
 
   if (params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
   exit 1, "Metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
