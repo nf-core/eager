@@ -28,7 +28,7 @@ regexes = {
     'malt':['v_malt.txt',r"version (\S+)"],
     'multivcfanalyzer':['v_multivcfanalyzer.txt', r"MultiVCFAnalyzer - (\S+)"],
     'pmdtools':['v_pmdtools.txt',r"pmdtools v(\S+)"],
-    'sexdeterrmine':['v_sexdeterrmine.txt',r"v(\S+)"],
+    'sexdeterrmine':['v_sexdeterrmine.txt',r"(\S+)"],
     'MTNucRatioCalculator':['v_mtnucratiocalculator.txt',r"Version: (\S+)"],
     'VCF2genome':['v_vcf2genome.txt', r"VCF2Genome \(v. ([0-9].[0-9]+) "],
 }

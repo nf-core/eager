@@ -2131,11 +2131,11 @@ process get_software_versions {
     MaltExtract --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
     multiqc --version &> v_multiqc.txt 2>&1 || true
     vcf2genome -h |& head -n 1 &> v_vcf2genome.txt || true
+    mtnucratio --help &> v_mtnucratiocalculator.txt || true
+    sexdeterrmine --version &> v_sexdeterrmine.txt || true
 
     ## Hardcoded as no --version flag or equivalent
-    echo "v1.1" > v_sexdeterrmine.txt
     echo 'version 3.5-0-g36282e4' > v_gatk3_5.txt
-    echo 'v0.5' > v_mtnucratiocalculator.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
