@@ -264,7 +264,7 @@ if ( params.fasta.isEmpty () ){
 }
 
 
-//Index files provided? Then check whether they are correct and complete
+// Index files provided? Then check whether they are correct and complete
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
     exit 1, "Invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave ${params.mapper}!"
 }
@@ -299,18 +299,18 @@ if (params.bam && !params.run_convertbam && !params.skip_mapping) {
   exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
 }
 
-//Validate that either pairedEnd or singleEnd has been specified by the user!
+// Validate that either pairedEnd or singleEnd has been specified by the user!
 if( params.singleEnd || params.pairedEnd || params.bam){
 } else {
     exit 1, "Please specify either --singleEnd, --pairedEnd to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
 }
 
-//Validate that skip_collapse is only set to True for pairedEnd reads!
+// Validate that skip_collapse is only set to True for pairedEnd reads!
 if (params.skip_collapse  && params.singleEnd){
     exit 1, "--skip_collapse can only be set for pairedEnd samples!"
 }
 
-//Strip mode sanity checking
+// Strip mode sanity checking
 if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
         exit 1, "--strip_mode can only be set to strip or replace!"
@@ -321,7 +321,7 @@ if (params.strip_input_fastq){
     }
 }
 
-//Mapper sanity checking
+// Mapper sanity checking
 if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "circularmapper") {
     exit 1, "Please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}!"
 }
@@ -336,7 +336,6 @@ if(params.run_bedtools_coverage && params.anno_file == ''){
 }
 
 // BAM filtering sanity checking - FIRST ONE CURRENTLY DOES NOT WORK!
-
 if (params.bam_discard_unmapped && !params.run_bam_filtering) {
   "Please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering"
 }
@@ -346,7 +345,6 @@ if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapp
 }
 
 // Genotyping sanity checking
-
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
   exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
@@ -370,7 +368,6 @@ if (params.run_genotyping){
 }
 
 // Consensus sequence generation sanity checking
-
 if (params.run_vcf2genome) {
     if (!params.run_genotyping) {
       exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
@@ -379,7 +376,6 @@ if (params.run_vcf2genome) {
     if (params.genotyping_tool != 'ug') {
       exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
     }
-
 }
 
 // MultiVCFAnalyzer sanity checking
@@ -398,60 +394,65 @@ if (params.run_multivcfanalyzer) {
 }
 
 // MALT sanity checking
-
-if (params.run_metagenomic_screening && !params.bam_discard_unmapped ) {
+if (params.run_metagenomic_screening) {
+  if ( !params.bam_discard_unmapped ) {
   exit 1, "Metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
-}
+  }
 
-if (params.run_metagenomic_screening && params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
+  if (params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
   exit 1, "Metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
-}
+  }
 
-if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' ) {
-  exit 1, "Metagenomic classification can currently only be run with 'malt'. Please check your classifer. You gave '${params.metagenomic_tool}'!"
-}
+  if (params.metagenomic_tool != 'malt' ) {
+    exit 1, "Metagenomic classification can currently only be run with 'malt'. Please check your classifer. You gave '${params.metagenomic_tool}'!"
+  }
 
-if (params.run_metagenomic_screening && params.database == '' ) {
-  exit 1, "Metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
-}
+  if (params.database == '' ) {
+    exit 1, "Metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
+  }
 
-if (params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
-  exit 1, "Unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
-}
+  if (params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
+    exit 1, "Unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
+  }
 
-if (params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
-  exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
-}
+  if (params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
+    exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
+  }
 
-if (params.malt_min_support_mode == 'percent' && params.malt_min_support_reads != 1) {
-  exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --malt_min_support_reads!"
-}
+  if (params.malt_min_support_mode == 'percent' && params.malt_min_support_reads != 1) {
+    exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --malt_min_support_reads!"
+  }
 
-if (params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
-  exit 1, "Incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
-}
+  if (params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
+    exit 1, "Incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
+  }
 
-if (params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
-  exit 1, "Unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
+  if (params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
+    exit 1, "Unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
+  }
 }
 
 // MaltExtract Sanity checking
+if (params.run_maltextract) {
 
-if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' && params.run_maltextract) {
-  exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+  if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
+    exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+  }
+
+  if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
+    exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+  }
+
+  if (params.maltextract_taxon_list == '') {
+    exit 1, "MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list!"
+  }
+
+  if (params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
+    exit 1, "Unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: ${params.maltextract_filter}!"
+  }
+
 }
 
-if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt' && params.run_maltextract) {
-  exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
-}
-
-if (params.run_maltextract && params.maltextract_taxon_list == '') {
-  exit 1, "MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list!"
-}
-
-if (params.run_maltextract && params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
-  exit 1, "Unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: ${params.maltextract_filter}!"
-}
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
@@ -560,7 +561,6 @@ if (params.strip_input_fastq){
     summary['Strip mode'] = params.strip_mode
 }
 summary['Skipping Mapping?'] = params.skip_mapping ? 'Yes' : 'No'
-
 summary['Skipping Preseq?'] = params.skip_preseq ? 'Yes' : 'No'
 summary['Skipping Deduplication?'] = params.skip_deduplication ? 'Yes' : 'No'
 summary['Skipping DamageProfiler?'] = params.skip_damage_calculation ? 'Yes' : 'No'
@@ -573,6 +573,15 @@ if (params.run_genotyping){
   summary['Genotyping BAM Input?'] = params.genotyping_source
 }
 summary['Run MultiVCFAnalyzer'] = params.run_multivcfanalyzer ? 'Yes' : 'No'
+summary['Run VCF2Genome'] = params.run_vcf2genome ? 'Yes' : 'No'
+summary['Run SexDetErrMine'] = params.run_sexdeterrmine ? 'Yes' : 'No'
+summary['Run Nuclear Contamination Estimation'] = params.run_nuclear_contamination ? 'Yes' : 'No'
+summary['Run Bedtools Coverage'] = params.run_bedtools_coverage ? 'Yes' : 'No'
+summary['Run Metagenomic Binning'] = params.run_metagenomic_screening ? 'Yes' : 'No'
+if (params.run_metagenomic_screening) {
+  summary['Metagenomic Tool'] = params.metagenomic_tool
+  summary['Run MaltExtract'] = params.run_maltextract ? 'Yes' : 'No'
+}
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -1334,7 +1343,7 @@ process dedup{
 
     output:
     file "*.hist" into ch_hist_for_preseq
-    file "*.log" into ch_dedup_results_for_multiqc
+    file "*.json" into ch_dedup_results_for_multiqc
     file "${prefix}_rmdup.bam" into ch_output_from_dedup
     file "*.{bai,csi}" into ch_outputindex_from_dedup
 
@@ -1862,7 +1871,7 @@ if (params.additional_vcf_files == '') {
   script:
   prefix="${bam.baseName}"
   """
-  mtnucratio ${bam} . "${params.mtnucratio_header}"
+  mtnucratio ${bam} "${params.mtnucratio_header}"
   """
  }
 
@@ -2131,11 +2140,11 @@ process get_software_versions {
     MaltExtract --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
     multiqc --version &> v_multiqc.txt 2>&1 || true
     vcf2genome -h |& head -n 1 &> v_vcf2genome.txt || true
+    mtnucratio --help &> v_mtnucratiocalculator.txt || true
+    sexdeterrmine --version &> v_sexdeterrmine.txt || true
 
     ## Hardcoded as no --version flag or equivalent
-    echo "v1.1" > v_sexdeterrmine.txt
     echo 'version 3.5-0-g36282e4' > v_gatk3_5.txt
-    echo 'v0.5' > v_mtnucratiocalculator.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """

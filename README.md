@@ -15,9 +15,11 @@
 
 **nf-core/eager** is a bioinformatics best-practice analysis pipeline for NGS sequencing based ancient DNA (aDNA) data analysis.
 
-The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs, and can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
+The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
 ## Pipeline steps
+
+### Default Steps
 
 By default the pipeline currently performs the following:
 
@@ -32,12 +34,36 @@ By default the pipeline currently performs the following:
 * Library Complexity Estimation (`preseq`)
 * Overall pipeline statistics summaries (`MultiQC`)
 
+### Additional Steps
+
 Additional functionality contained by the pipeline currently includes:
+
+#### Preprocessing
 
 * Illumina two-coloured sequencer poly-G tail removal (`fastp`)
 * Automatic conversion of unmapped reads to FASTQ (`samtools`)
+* Host DNA (mapped reads) stripping from input FASTQ files (for sensitive samples)
+
+#### aDNA Damage manipulation
+
 * Damage removal/clipping for UDG+/UDG-half treatment protocols (`BamUtil`)
 * Damage reads extraction and assessment (`PMDTools`)
+
+#### Genotyping
+
+* Creation of VCF genotyping files (`GATK UnifiedGenotyper`, `GATK HaplotypeCaller` and `FreeBayes`)
+* Consensus sequence FASTA creation (`VCF2Genome`)
+* SNP Table generation (`MultiVCFAnalyzer`)
+
+#### Biological Information
+
+* Mitochondrial to Nuclear read ratio calculation (`MtNucRatioCalculator`)
+* Statistical sex determination of human individuals (`SexDetErrmine`)
+
+#### Metagenomic Screening
+
+* Taxonomic binner with alignment (`MALT`)
+* aDNA characteristic screening of taxonomically binned data (`MaltExtract`)
 
 ## Quick Start
 
@@ -55,13 +81,13 @@ Additional functionality contained by the pipeline currently includes:
 
 5. Start running your own ancient DNA analysis!
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<REFERENCE>.fasta'
+        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
 6. Once your run has completed successfully, clean up the intermediate files.
 
         nextflow clean -k
 
-NB. You can see an overview of the run in the MultiQC report located at `<OUTPUT_DIR>/MultiQC/multiqc_report.html`
+NB. You can see an overview of the run in the MultiQC report located at `<your_output_dir>/MultiQC/multiqc_report.html`
 
 Modifications to the default pipeline are easily made using various options
 as described in the documentation.
@@ -83,7 +109,7 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 
 ## Credits
 
-This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [James A. Fellows Yates](https://github.com/jfy133), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), and Stephen Clayton. Additional ideas and discussion by Raphael Eisenhofer, and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
+This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [James A. Fellows Yates](https://github.com/jfy133),  [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas) and [Aida Andrades Valtueña](https://github.com/aidaanva). Additional ideas and discussion by Raphael Eisenhofer, and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
 
 ## Contributors
 
@@ -117,12 +143,12 @@ If you've contributed and you're missing in here, please let me know and I'll ad
 * **FastP** Chen, S., Zhou, Y., Chen, Y., & Gu, J. (2018). fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics , 34(17), i884–i890. [https://doi.org/10.1093/bioinformatics/bty560](https://doi.org/10.1093/bioinformatics/bty560) Download: [https://github.com/OpenGene/fastp](https://github.com/OpenGene/fastp)
 * **GATK 3.5** DePristo, M. A., Banks, E., Poplin, R., Garimella, K. V., Maguire, J. R., Hartl, C., … Daly, M. J. (2011). A framework for variation discovery and genotyping using next-generation DNA sequencing data. Nature Genetics, 43(5), 491–498. [https://doi.org/10.1038/ng.806](https://doi.org/10.1038/ng.806.) [Download](https://software.broadinstitute.org/gatk/download/)
 * **GATK 4.X** - no citation available yet
-* **MTNucRatioCalculator** Alex Peltzer (Unpublished). Download: [https://github.com/apeltzer/MTNucRatioCalculator](https://github.com/apeltzer/MTNucRatioCalculator)
-* **MultiVCFAnalyzer** Bos, K.I. et al., (2014). Pre-Columbian mycobacterial genomes reveal seals as a source of New World human tuberculosis. Nature, 514(7523), pp.494–497. Available at: [http://dx.doi.org/10.1038/nature13591](http://dx.doi.org/10.1038/nature13591). Download: [https://github.com/alexherbig/MultiVCFAnalyzer](https://github.com/alexherbig/MultiVCFAnalyzer)
+* **VCF2Genome** - Alexander Herbig and Alex Peltzer (unpublished). Download: [https://github.com/apeltzer/VCF2Genome](https://github.com/apeltzer/VCF2Genome)
+* **MultiVCFAnalyzer** Bos, K.I. et al., 2014. Pre-Columbian mycobacterial genomes reveal seals as a source of New World human tuberculosis. Nature, 514(7523), pp.494–497. Available at: [http://dx.doi.org/10.1038/nature13591](http://dx.doi.org/10.1038/nature13591). Download: [https://github.com/alexherbig/MultiVCFAnalyzer](https://github.com/alexherbig/MultiVCFAnalyzer)
+* **MTNucRatioCalculator** Alex Peltzter (Unpublished). Download: [https://github.com/apeltzer/MTNucRatioCalculator](https://github.com/apeltzer/MTNucRatioCalculator)
 * **Sex.DetERRmine.py** Lamnidis, T.C. et al., 2018. Ancient Fennoscandian genomes reveal origin and spread of Siberian ancestry in Europe. Nature communications, 9(1), p.5018. Available at: [http://dx.doi.org/10.1038/s41467-018-07483-5](http://dx.doi.org/10.1038/s41467-018-07483-5). Download: [https://github.com/TCLamnidis/Sex.DetERRmine.git](https://github.com/TCLamnidis/Sex.DetERRmine.git)
 * **ANGSD** Korneliussen, T.S., Albrechtsen, A. & Nielsen, R., 2014. ANGSD: Analysis of Next Generation Sequencing Data. BMC bioinformatics, 15, p.356. Available at: [http://dx.doi.org/10.1186/s12859-014-0356-4](http://dx.doi.org/10.1186/s12859-014-0356-4). Download: [https://github.com/ANGSD/angsd](https://github.com/ANGSD/angsd)
 * **bedtools** Quinlan, A.R. & Hall, I.M., 2010. BEDTools: a flexible suite of utilities for comparing genomic features. Bioinformatics , 26(6), pp.841–842. Available at: [http://dx.doi.org/10.1093/bioinformatics/btq033](http://dx.doi.org/10.1093/bioinformatics/btq033). Download: [https://github.com/arq5x/bedtools2/releases](https://github.com/arq5x/bedtools2/)
-* **MultiVCFAnalyzer** Bos, K.I. et al., 2014. Pre-Columbian mycobacterial genomes reveal seals as a source of New World human tuberculosis. Nature, 514(7523), pp.494–497. Available at: [http://dx.doi.org/10.1038/nature13591](http://dx.doi.org/10.1038/nature13591). Download: [https://github.com/alexherbig/MultiVCFAnalyzer](https://github.com/alexherbig/MultiVCFAnalyzer)
 * **MALT** Download: [https://software-ab.informatik.uni-tuebingen.de/download/malt/welcome.html](https://software-ab.informatik.uni-tuebingen.de/download/malt/welcome.html)
   * Vågene, Å.J. et al., 2018. Salmonella enterica genomes from victims of a major sixteenth-century epidemic in Mexico. Nature ecology & evolution, 2(3), pp.520–528. Available at: [http://dx.doi.org/10.1038/s41559-017-0446-6](http://dx.doi.org/10.1038/s41559-017-0446-6).
   * Herbig, A. et al., 2016. MALT: Fast alignment and analysis of metagenomic DNA sequence data applied to the Tyrolean Iceman. bioRxiv, p.050559. Available at: [http://biorxiv.org/content/early/2016/04/27/050559](http://biorxiv.org/content/early/2016/04/27/050559).
