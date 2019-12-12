@@ -9,31 +9,46 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-* Added Support for automated tests using [GitHub Actions](https://github.com/features/actions)
-* Added genotyping capability through GATK UnifiedGenotyper (v3.5), GATK HaplotypeCaller (v4.1) and FreeBayes
+* Added Support for automated tests using [GitHub Actions](https://github.com/features/actions), replacing travis
+* [#40](https://github.com/nf-core/eager/issues/40), [#231](https://github.com/nf-core/eager/issues/231) - Added genotyping capability through GATK UnifiedGenotyper (v3.5), GATK HaplotypeCaller (v4.1) and FreeBayes
 * Added MultiVCFAnalyzer module
-* Added human sex determination module.
+* [#240](https://github.com/nf-core/eager/issues/240) - Added human sex determination module
+* [#226](https://github.com/nf-core/eager/issues/226) - Added `--preserve5p` function for AdapterRemoval
+* [#212](https://github.com/nf-core/eager/issues/212) - Added ability to use only mergedreads downstream from Adapterremoval
+* [#265](https://github.com/nf-core/eager/issues/265) - Adjusted full markdown linting in Travis CI
+* [#247](https://github.com/nf-core/eager/issues/247) - Added nuclear contamination with angsd
+* [#258](https://github.com/nf-core/eager/issues/258) - Added ability to report bedtools stats to features (e.g. depth/breadth of annotated genes)
+* [#249](https://github.com/nf-core/eager/issues/249) - Added metagenomic classification of unmapped reads with MALT and aDNA authentication with MaltExtract
+* [#302](https://github.com/nf-core/eager/issues/302) - Added mitochondrial to nuclear ratio calculation
+* [#302](https://github.com/nf-core/eager/issues/302) - Added VCF2Genome for concensus sequence generation
+* Fancy new logo from [ZandraFagernas](https://github.com/ZandraFagernas)
+* [#286](https://github.com/nf-core/eager/issues/286) Adds pipeline-specific profiles (loaded from nf-core configs)
 
 ### `Fixed`
 
 * [#227](https://github.com/nf-core/eager/issues/227) - Large re-write of input/output process logic to allow maximum flexibility. Originally to address [#227](https://github.com/nf-core/eager/issues/227), but further expanded
+* Fixed Travis-Ci.org to Travis-Ci.com migration issues
+* [#266](https://github.com/nf-core/eager/issues/266) - Added sanity checks for input filetypes (i.e. only BAM files can be supplied if `--bam`)
+* [#237](https://github.com/nf-core/eager/issues/237) - Fixed and Updated script scrape_software_versions
 
 ### `Dependencies`
 
 * adapterremoval=2.2.2->2.3.1
 * adapterremovalfixprefix=0.0.4->0.0.5
-* picard=2.20.2->2.20.7
+* damageprofiler=0.4.3->0.4.9
+* picard=2.20.2->2.21.4
 * angsd=0.923->0.931
-* gatk4=4.1.2.0->4.1.3.0
-* conda-forge::r-rmarkdown=1.12->1.15
+* gatk4=4.1.2.0->4.1.4.1
+* conda-forge::r-rmarkdown=1.12->1.18
+* mtnucratio=0.5->0.6
 * pysam=0.15.2->0.15.3
-* python=3.6.3->3.7.3
+* python=3.6.3->3.7.1
 
 ## [2.0.7] - 2019-06-10
 
 ### `Added`
 
-* [#189](https://github.com/nf-core/eager/pull/189) - Outputing unmapped reads in a fastq files with the --strip_input_fastq flag
+* [#189](https://github.com/nf-core/eager/pull/189) - Outputting unmapped reads in a fastq files with the --strip_input_fastq flag
 * [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible](https://github.com/nf-core/eager/issues/182)
 * Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
 * A lot more automated tests using Travis CI
@@ -113,6 +128,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#122](https://github.com/nf-core/eager/pull/122) - Add pulling from Dockerhub again
 
 ### `Fixed`
+
 * [#110](https://github.com/nf-core/eager/pull/110) - Fix for [MultiQC Missing Second FastQC report](https://github.com/nf-core/eager/issues/107)
 * [#112](https://github.com/nf-core/eager/pull/112) - Remove [redundant UDG options](https://github.com/nf-core/eager/issues/89)
 
