@@ -208,6 +208,10 @@ It is common in aDNA libraries to see very rapid increases in the proportion of 
 
 This can already give you an indication on the authenticity of your library - as if you see very low proportions of reads with adapters this suggests long insert molecules that are less likely to derive from a 'true' aDNA library. On the flipside, if you are working with modern DNA - it can give an indication of over-sonication if you have artificially fragmented your reads to lower than your target molecule length.
 
+<p align="center">
+  <img src="images/output/fastqc/adapter_content.png" width="75%" height = "75%">
+</p>
+
 ### FastP
 
 #### Background
