@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#302](https://github.com/nf-core/eager/issues/302) - Added mitochondrial to nuclear ratio calculation
 * [#302](https://github.com/nf-core/eager/issues/302) - Added VCF2Genome for concensus sequence generation
 * Fancy new logo from [ZandraFagernas](https://github.com/ZandraFagernas)
+* [#286](https://github.com/nf-core/eager/issues/286) Adds pipeline-specific profiles (loaded from nf-core configs)
 
 ### `Fixed`
 
