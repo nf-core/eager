@@ -347,8 +347,6 @@ Things to look out for:
 * The smaller the number of the duplicates removed the better. If you have a smaller number of duplicates, and wish to sequence deeper, you can use the preseq module (see below) to make an estimate on how much deeper to sequence.
 * If you have a very large number of duplicates that were removed this may suggest you have an over amplified library, or a lot of left-over adapters that were able to map to your genome.
 
-
-
 ### Preseq
 
 #### Background
@@ -364,7 +362,6 @@ Due to endogenous DNA being so low when doing initial screening, the maths behin
 Using the de-duplication information from DeDup, the calculated curve (a solid line) allows you to estimate: at this sequencing depth (on the X axis), how many unique molecules would you have sequenced (along the Y axs). When you start getting DNA sequences that are the mostly same as ones you've sequenced before, it is often not cost effective to continue sequencing and is a good point to stop.
 
 The dashed line represents a 'perfect' library containing only unique molecules and no duplicates. You are looking for your library stay as close to this line as possible. Plateauing of your curve shows that at that point you would not be getting any more unique molecules and you shouldn't sequence further than this.
-
 
 <p align="center">
   <img src="images/output/preseq/complexity_curve.png" width="75%" height = "75%">
@@ -396,7 +393,6 @@ The greater the number of bases covered at as high as possible fold coverage, th
   <img src="images/output/qualimap/coverage_histogram.png" width="75%" height = "75%">
 </p>
 
-
 Things to watch out for:
 
 * You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
@@ -411,7 +407,6 @@ An ideal plot for this is to see an increasing curve, representing larger greate
 <p align="center">
   <img src="images/output/qualimap/cumulative_genome_coverage.png" width="75%" height = "75%">
 </p>
-
 
 #### GC Content Distribution
 
