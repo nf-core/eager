@@ -689,15 +689,15 @@ If selected a GATK genotyper, what is the ploidy of your reference organism. E.g
 
 ### `--gatk_ug_out_mode`
 
-If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`.
+If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`
 
 ### `--gatk_hc_out_mode`
 
-If selected the GATK genotyper HaplotypeCaller, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`.
+If selected the GATK genotyper HaplotypeCaller, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`
 
 ### `--gatk_ug_genotype_model`
 
-If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`, `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`.
+If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`, `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`
 
 ### `--gatk_hc_emitrefconf`
 
@@ -706,6 +706,10 @@ If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. 
 ### `--gatk_downsample`
 
 Maximum depth coverage allowed for genotyping before downsampling is turned on. Any position with a coverage higher than this value will be randomly downsampled to 250 reads. Default: 250
+
+### `--gatk_ug_gatk_ug_defaultbasequalities`
+
+Specify a value to set base quality scores, if reads are missing this information. Maybe useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to -1  which is do not set any default quality (turned off). Default: -1
 
 ### `--freebayes_C`
 
@@ -717,7 +721,7 @@ Specify to skip over regions of high depth by discarding alignments overlapping 
 
 ### `--freebayes_p`
 
-Specify ploidy of sample in FreeBayes. Default is 2, diploid.
+Specify ploidy of sample in FreeBayes. Default is diploid. Default: 2
 
 ## Consensus Sequence Generation
 
