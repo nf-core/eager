@@ -114,7 +114,7 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 For more details on how to set up your own private profile, please see [installation](../configuration/adding_your_own.md).
 
 **Basic profiles**
-These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC*- (vs. a HPC cluster - see below).
+These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
 - `awsbatch`
   - A generic configuration profile to be used with AWS Batch.
@@ -274,7 +274,7 @@ The output directory where the results will be saved.
 
 #### `-w / -work-dir`
 
-The output directory where _intermediate_ files will be saved. It is **highly recommended*- that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
+The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
 
 ### Optional Reference Options
 
@@ -292,7 +292,7 @@ Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtool
 
 #### `--bwa_index`
 
-If you want to use pre-existing `bwa index` indices, please supply the path **and file*- to the FASTA you also specified in `--fasta` (see above). EAGER2 will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa` index file suffixes.
+If you want to use pre-existing `bwa index` indices, please supply the path **and file** to the FASTA you also specified in `--fasta` (see above). EAGER2 will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa` index file suffixes.
 
 For example:
 
@@ -365,7 +365,7 @@ Name for the pipeline run. If not specified, Nextflow will automatically generat
 
 This is used in the MultiQC report (if not default) and in the summary HTML / e-mail (always).
 
-**NB:*- Single hyphen (core Nextflow option)
+**NB:** Single hyphen (core Nextflow option)
 
 #### `-resume`
 
@@ -373,13 +373,13 @@ Specify this when restarting a pipeline. Nextflow will used cached results from 
 
 You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
 
-**NB:*- Single hyphen (core Nextflow option)
+**NB:** Single hyphen (core Nextflow option)
 
 #### `-c`
 
 Specify the path to a specific nextflow config file (this is a core NextFlow command).
 
-**NB:*- Single hyphen (core Nextflow option)
+**NB:** Single hyphen (core Nextflow option)
 
 Note - you can use this to override pipeline defaults.
 
@@ -877,7 +877,7 @@ An increasingly common line of analysis in high-throughput aDNA analysis today i
 
 Please note the following:
 
-- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior*- the EAGER run.
+- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
   - To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
 - MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
@@ -893,7 +893,7 @@ Specify which taxonomic classifier to use. The only option avaliable is currentl
 
 More can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
 
-:warning: **Important*- It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
+:warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
 
 #### `--database`
 
