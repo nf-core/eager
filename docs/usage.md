@@ -143,8 +143,17 @@ These are profiles specific to certain **HPC clusters**, and are centrally maint
   - A profile for the BinAC cluster at the University of Tuebingen
   - Loads Singularity and defines appropriate resources for running the pipeline
 - `shh`
-  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
+  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
   - Loads Singularity and defines appropriate resources for running the pipeline
+
+**Pipeline Specific Institution Profiles**
+There are also pipeline-specific institution profiles. I.e., we can also offer a profile which sets special resource settings to specific steps of the pipeline, which may not apply to all pipelines. This can be seen at [nf-core/configs](https://github.com/nf-core/configs) under [conf/pipelines/eager/](https://github.com/nf-core/configs/tree/master/conf/pipeline/eager).
+
+We currently offer a EAGER specific profile for
+
+- `shh`
+  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
+  - In addition to the nf-core wide profile, this also sets the MALT resources to match our commonly used databases
 
 #### `--reads`
 
