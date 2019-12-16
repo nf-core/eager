@@ -225,7 +225,6 @@ For example:
 ```
 
 > If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--saveReference` flag.
-
 > You must select either a `--fasta` or `--genome`
 
 #### `--genome` (using iGenomes)
