@@ -247,7 +247,7 @@ You can find the keys to specify the genomes in the [iGenomes config file](../co
 - _S. cerevisiae_ *
   - `--genome 'R64-1-1'`
 
-> \- Not bundled with nf-core eager by default.
+> \* Not bundled with nf-core eager by default.
 
 Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
 
