@@ -35,6 +35,10 @@ def helpMessage() {
       --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
+    Output options:     
+      --outdir                      The output directory where the results will be saved
+      -w                            The directory where intermediate files will be stored. Recommended: '<outdir>/work/'
+
     BAM Input:
     --run_convertbam                Species to convert an input BAM file into FASTQ format before processing.
 
@@ -119,20 +123,21 @@ def helpMessage() {
       --bamutils_softclip           Use softclip instead of hard masking
 
     Genotyping
-      --run_genotyping              Perform genotyping on deduplicated BAMs.
-      --genotyping_tool             Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5 and requires internet access. Options: 'ug', 'hc', 'freebayes'
-      --genotyping_source           Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
-      --gatk_call_conf              Specify GATK phred-scaled confidence threshold. Default: 30.
-      --gatk_ploidy                 Specify GATK organism ploidy. Default: 2.
-      --gatk_dbsnp                  Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
-      --gatk_ug_out_mode            Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
-      --gatk_hc_out_mode            Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', E'MIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
-      --gatk_ug_genotype_model      Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
-      --gatk_hc_emitrefconf         Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
-      --gatk_downsample             Maximum depth coverage allowed for genotyping before downsampling is turned on. Default: 250
-      --freebayes_C                 Specify minimum required supporting observations to consider a variant. Default: 1
-      --freebayes_g                 Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: turned off.
-      --freebayes_p                 Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
+      --run_genotyping                Perform genotyping on deduplicated BAMs.
+      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5 and requires internet access. Options: 'ug', 'hc', 'freebayes'
+      --genotyping_source             Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
+      --gatk_call_conf                Specify GATK phred-scaled confidence threshold. Default: 30.
+      --gatk_ploidy                   Specify GATK organism ploidy. Default: 2.
+      --gatk_dbsnp                    Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
+      --gatk_ug_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
+      --gatk_hc_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', E'MIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
+      --gatk_ug_genotype_model        Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
+      --gatk_hc_emitrefconf           Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
+      --gatk_downsample               Maximum depth coverage allowed for genotyping before downsampling is turned on. Default: 250
+      --gatk_ug_defaultbasequalities  Supply a default base quality if a read is missing a base quality score. Default: -1 (turned off)
+      --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: 1
+      --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: turned off.
+      --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
 
     Concensus Sequence Generation
       --run_vcf2genome              Turns on ability to create a concensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
@@ -196,14 +201,13 @@ def helpMessage() {
       --maltextract_singlestranded       Switch damage patterns to single-stranded mode. Default: off
 
     Other options:     
-      --outdir                      The output directory where the results will be saved
-      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      --plaintext_email             Receive plain text emails rather than HTML
-      --maxMultiqcEmailFileSize     Threshold size for MultiQC report to be attached in notification email. If file generated by pipeline exceeds the threshold, it will not be attached (Default: 25MB)
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
       --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'
       --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'
       --max_cpus                    Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. --max_cpus 1
+      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      --plaintext_email             Receive plain text emails rather than HTML
+      --maxMultiqcEmailFileSize     Threshold size for MultiQC report to be attached in notification email. If file generated by pipeline exceeds the threshold, it will not be attached (Default: 25MB)
       
     For a full list and more information of available parameters, consider the documentation (https://github.com/nf-core/eager/).
     """.stripIndent()
@@ -1697,12 +1701,13 @@ ch_gatk_download = Channel.value("download")
 
   script:
   prefix="${bam.baseName}"
+  defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
-    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode}  
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
     """
   else if (params.gatk_dbsnp != '')
@@ -1710,7 +1715,7 @@ ch_gatk_download = Channel.value("download")
     samtools index ${bam}
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
-    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode}  
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
 
     pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
     """
@@ -1884,7 +1889,7 @@ if (params.additional_vcf_files == '') {
   */
 
 if (params.sexdeterrmine_bedfile == '') {
-  ch_bed_for_sexdeterrmine = Channel.empty()
+  ch_bed_for_sexdeterrmine = file('NO_FILE')
 } else {
   ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
 }
