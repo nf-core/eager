@@ -114,37 +114,37 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 For more details on how to set up your own private profile, please see [installation](../configuration/adding_your_own.md).
 
 **Basic profiles**
-These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
+These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC*- (vs. a HPC cluster - see below).
 
-* `awsbatch`
-  * A generic configuration profile to be used with AWS Batch.
-* `conda`
-  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
-  * Pulls most software from [Bioconda](https://bioconda.github.io/)
-* `docker`
-  * A generic configuration profile to be used with [Docker](http://docker.com/)
-  * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
-* `singularity`
-  * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-  * Pulls software from singularity-hub
-* `test`
-  * A profile with a complete configuration for automated testing
-  * Includes links to test data so needs no other parameters
-* `none`
-  * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
+- `awsbatch`
+  - A generic configuration profile to be used with AWS Batch.
+- `conda`
+  - A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  - Pulls most software from [Bioconda](https://bioconda.github.io/)
+- `docker`
+  - A generic configuration profile to be used with [Docker](http://docker.com/)
+  - Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
+- `singularity`
+  - A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
+  - Pulls software from singularity-hub
+- `test`
+  - A profile with a complete configuration for automated testing
+  - Includes links to test data so needs no other parameters
+- `none`
+  - No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
 **Institution Specific Profiles**
 These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
-* `uzh`
-  * A profile for the University of Zurich Research Cloud
-  * Loads Singularity and defines appropriate resources for running the pipeline.
-* `binac`
-  * A profile for the BinAC cluster at the University of Tuebingen
-  * Loads Singularity and defines appropriate resources for running the pipeline
-* `shh`
-  * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
-  * Loads Singularity and defines appropriate resources for running the pipeline
+- `uzh`
+  - A profile for the University of Zurich Research Cloud
+  - Loads Singularity and defines appropriate resources for running the pipeline.
+- `binac`
+  - A profile for the BinAC cluster at the University of Tuebingen
+  - Loads Singularity and defines appropriate resources for running the pipeline
+- `shh`
+  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max-Planck-Institute for the Science of Human History
+  - Loads Singularity and defines appropriate resources for running the pipeline
 
 #### `--reads`
 
@@ -216,7 +216,7 @@ For example:
 ```
 
 > If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--saveReference` flag.
-> 
+
 > You must select either a `--fasta` or `--genome`
 
 #### `--genome` (using iGenomes)
@@ -227,17 +227,17 @@ There are 31 different species supported in the iGenomes references. To run the 
 
 You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
 
-* Human
-  * `--genome GRCh37`
-  * `--genome GRCh38`
-* Mouse *
-  * `--genome GRCm38`
-* _Drosophila_ *
-  * `--genome BDGP6`
-* _S. cerevisiae_ *
-  * `--genome 'R64-1-1'`
+- Human
+  - `--genome GRCh37`
+  - `--genome GRCh38`
+- Mouse *
+  - `--genome GRCm38`
+- _Drosophila_ *
+  - `--genome BDGP6`
+- _S. cerevisiae_ *
+  - `--genome 'R64-1-1'`
 
-> * Not bundled with nf-core eager by default.
+> \- Not bundled with nf-core eager by default.
 
 Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
 
@@ -264,7 +264,7 @@ The output directory where the results will be saved.
 
 #### `-w / -work-dir`
 
-The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
+The output directory where _intermediate_ files will be saved. It is **highly recommended*- that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
 
 ### Optional Reference Options
 
@@ -282,7 +282,7 @@ Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtool
 
 #### `--bwa_index`
 
-If you want to use pre-existing `bwa index` indices, please supply the path **and file** to the FASTA you also specified in `--fasta` (see above). EAGER2 will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa` index file suffixes.
+If you want to use pre-existing `bwa index` indices, please supply the path **and file*- to the FASTA you also specified in `--fasta` (see above). EAGER2 will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa` index file suffixes.
 
 For example:
 
@@ -341,7 +341,7 @@ Should be a string in the format integer-unit. eg. `--max_time '2.h'`. If not sp
 
 #### `--max_cpus`
 
-When _not_ using a instutite specific `-profile`, you can use this parameter to set a top-limit for the default CPU requirement for each **process**. This is not the maximum number of CPUs that can be used for the whole pipeline, but the maximum number of CPUs each program can use for each program submission (known as a process). 
+When _not_ using a instutite specific `-profile`, you can use this parameter to set a top-limit for the default CPU requirement for each **process**. This is not the maximum number of CPUs that can be used for the whole pipeline, but the maximum number of CPUs each program can use for each program submission (known as a process).
 
 Do not set this higher than what is available on your workstation or computing node can provide. If you're unsure, ask your local IT administrator for details on compute node capabilities! Should be a string in the format integer-unit. eg. `--max_cpus 1`. If not specified, will be taken from the configuration in the `-profile` flag.
 
@@ -355,7 +355,7 @@ Name for the pipeline run. If not specified, Nextflow will automatically generat
 
 This is used in the MultiQC report (if not default) and in the summary HTML / e-mail (always).
 
-**NB:** Single hyphen (core Nextflow option)
+**NB:*- Single hyphen (core Nextflow option)
 
 #### `-resume`
 
@@ -363,13 +363,13 @@ Specify this when restarting a pipeline. Nextflow will used cached results from 
 
 You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
 
-**NB:** Single hyphen (core Nextflow option)
+**NB:*- Single hyphen (core Nextflow option)
 
 #### `-c`
 
 Specify the path to a specific nextflow config file (this is a core NextFlow command).
 
-**NB:** Single hyphen (core Nextflow option)
+**NB:*- Single hyphen (core Nextflow option)
 
 Note - you can use this to override pipeline defaults.
 
@@ -393,10 +393,6 @@ Provide git commit id for custom Institutional configs hosted at `nf-core/config
 #### `--plaintext_email`
 
 Set to receive plain-text e-mails instead of HTML formatted.
-
-#### `--multiqc_config`
-
-Specify a path to a custom MultiQC configuration file. MultiQC produces final pipeline reports.
 
 ## Adjustable parameters for nf-core/eager
 
@@ -516,9 +512,9 @@ Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'
 
 More documentation can be seen for each tool under:
 
-* [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
-* [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
-* [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
+- [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+- [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
 
 #### BWA (default)
 
@@ -590,7 +586,7 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream a
 
 #### `--dedupper`
 
-Sets the duplicate read removal tool. By default uses `'dedup'` an ancient DNA specific read deduplication tool. Users can also specify `'markdup'` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not* merged beforehand. In all other cases, it is advised to use `'dedup'`.
+Sets the duplicate read removal tool. By default uses `'dedup'` an ancient DNA specific read deduplication tool. Users can also specify `'markdup'` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not- merged beforehand. In all other cases, it is advised to use `'dedup'`.
 
 #### `--dedup_all_merged`
 
@@ -606,8 +602,8 @@ Can be used to configure the step size of Preseqs `c_curve` method. Can be usefu
 
 More documentation can be seen in the follow links for:
 
-* [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
-* [PMDTools documentation](https://github.com/pontussk/PMDtools)
+- [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
+- [PMDTools documentation](https://github.com/pontussk/PMDtools)
 
 #### `--damageprofiler_length`
 
@@ -695,9 +691,9 @@ There are options for different genotypers to be used. We suggest you the docume
 
 Documentation for each tool:
 
-* [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
-* [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
-* [FreeBayes](https://github.com/ekg/freebayes)
+- [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
+- [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
+- [FreeBayes](https://github.com/ekg/freebayes)
 
 #### `--run_genotyping`
 
@@ -871,9 +867,9 @@ An increasingly common line of analysis in high-throughput aDNA analysis today i
 
 Please note the following:
 
-* MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
-  * To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
-* MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
+- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior*- the EAGER run.
+  - To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
+- MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
 > RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK
 
@@ -887,7 +883,7 @@ Specify which taxonomic classifier to use. The only option avaliable is currentl
 
 More can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
 
-:warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
+:warning: **Important*- It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
 
 #### `--database`
 
