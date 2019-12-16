@@ -210,6 +210,10 @@ It is common in aDNA libraries to see very rapid increases in the proportion of 
 
 This can already give you an indication on the authenticity of your library - as if you see very low proportions of reads with adapters this suggests long insert molecules that are less likely to derive from a 'true' aDNA library. On the flipside, if you are working with modern DNA - it can give an indication of over-sonication if you have artificially fragmented your reads to lower than your target molecule length.
 
+<p align="center">
+  <img src="images/output/fastqc/adapter_content.png" width="75%" height = "75%">
+</p>
+
 ### FastP
 
 #### Background
@@ -334,6 +338,10 @@ Exceptions to the above:
 * If you do not have paired end data, you will not have sections for 'Merged removed' or 'Reverse removed'.
 * If you use the `--dedup_all_merged` flag, you will not have the 'Forward removed' or 'Reverse removed' sections.
 
+<p align="center">
+  <img src="images/output/dedup/deduplicated_reads.png" width="75%" height = "75%">
+</p>
+
 Things to look out for:
 
 * The smaller the number of the duplicates removed the better. If you have a smaller number of duplicates, and wish to sequence deeper, you can use the preseq module (see below) to make an estimate on how much deeper to sequence.
@@ -355,10 +363,14 @@ Using the de-duplication information from DeDup, the calculated curve (a solid l
 
 The dashed line represents a 'perfect' library containing only unique molecules and no duplicates. You are looking for your library stay as close to this line as possible. Plateauing of your curve shows that at that point you would not be getting any more unique molecules and you shouldn't sequence further than this.
 
+<p align="center">
+  <img src="images/output/preseq/complexity_curve.png" width="75%" height = "75%">
+</p>
+
 Plateauing can be caused by a number of reasons:
 
 * You have simply sequenced your library to exhaustion
-* You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio.
+* You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio
 * You have a low quality library made up of mappable seuqencing artefacts that were able to pass filtering (e.g. adapters)
 
 ### QualiMap
@@ -377,6 +389,10 @@ This plot shows on the Y axis the range of fold coverages that the bases of the 
 
 The greater the number of bases covered at as high as possible fold coverage, the better.
 
+<p align="center">
+  <img src="images/output/qualimap/coverage_histogram.png" width="75%" height = "75%">
+</p>
+
 Things to watch out for:
 
 * You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
@@ -388,9 +404,17 @@ This plot shows how much of the genome in percentage (X axis) is covered by a gi
 
 An ideal plot for this is to see an increasing curve, representing larger greater fractions of the genome being increasingly covered at higher depth. However, for low-coverage ancient DNA data, it will be more likely to see decreasing curves starting at a large percentage of the genome being covered at 0 fold coverage.
 
+<p align="center">
+  <img src="images/output/qualimap/cumulative_genome_coverage.png" width="75%" height = "75%">
+</p>
+
 #### GC Content Distribution
 
 This plot shows the distirbution of th frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
+
+<p align="center">
+  <img src="images/output/qualimap/gc_content_distribution.png" width="75%" height = "75%">
+</p>
 
 Things to watch out for:
 
