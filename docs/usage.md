@@ -155,6 +155,8 @@ We currently offer a EAGER specific profile for
   - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
   - In addition to the nf-core wide profile, this also sets the MALT resources to match our commonly used databases
 
+Further institutions can be added at [nf-core/configs](https://github.com/nf-core/configs). Please ask the eager developers to add your institution to the list above, if you add one!
+
 #### `--reads`
 
 Use this to specify the location of your input FastQ (optionally gzipped) or BAM file(s). The files maybe either from a single, or multiple samples. For example:
