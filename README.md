@@ -13,7 +13,7 @@
 [![Docker Container available](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager/)
 ![Singularity Container available](https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
-[![Joins us on Slack](https://img.shields.io/badge/slack-nfcore/eager-blue.svg)](https://nfcore.slack.com/channels/sarek)
+[![Joins us on Slack](https://img.shields.io/badge/slack-nfcore/eager-blue.svg)](https://nfcore.slack.com/channels/eager)
 
 ## Introduction
 
