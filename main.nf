@@ -1711,7 +1711,7 @@ ch_gatk_download = Channel.value("download")
 */
 
  process genotyping_ug {
-  'mc_small'
+  'mc_medium'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1751,7 +1751,7 @@ ch_gatk_download = Channel.value("download")
  }
 
   process genotyping_hc {
-  label  'mc_small'
+  label  'mc_medium'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1787,6 +1787,7 @@ ch_gatk_download = Channel.value("download")
  *  Step 12c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
+  label 'mc_medium'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
