@@ -1720,11 +1720,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
-  file fasta from fasta_for_indexing
-  file jar from ch_unifiedgenotyper_jar
+  val fasta from fasta_for_indexing
+  val jar from ch_unifiedgenotyper_jar
   file bam from ch_damagemanipulation_for_genotyping_ug
-  file fai from ch_fai_for_ug
-  file dict from ch_dict_for_ug
+  val fai from ch_fai_for_ug
+  val dict from ch_dict_for_ug
 
   output: 
   file "*vcf.gz" into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
@@ -1759,11 +1759,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'hc'
 
   input:
-  file fasta from fasta_for_indexing
+  val fasta from fasta_for_indexing
   file bam from ch_damagemanipulation_for_genotyping_hc
-  file fai from ch_fai_for_hc
-  file dict from ch_dict_for_hc
-  file bai from ch_damagemanipulationindex_for_genotyping_hc
+  val fai from ch_fai_for_hc
+  val dict from ch_dict_for_hc
+  val bai from ch_damagemanipulationindex_for_genotyping_hc
 
   output: 
   file "*vcf.gz" into ch_vcf_hc
@@ -1795,11 +1795,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
-  file fasta from fasta_for_indexing
+  val fasta from fasta_for_indexing
   file bam from ch_damagemanipulation_for_genotyping_freebayes
-  file fai from ch_fai_for_freebayes
-  file dict from ch_dict_for_freebayes
-  file bai from ch_damagemanipulationindex_for_genotyping_freebayes
+  val fai from ch_fai_for_freebayes
+  val dict from ch_dict_for_freebayes
+  val bai from ch_damagemanipulationindex_for_genotyping_freebayes
 
   output: 
   file "*vcf.gz" into ch_vcf_freebayes
@@ -1829,7 +1829,7 @@ process vcf2genome {
 
   input:
   file vcf from ch_ug_for_vcf2genome
-  file fasta from fasta_for_indexing
+  val fasta from fasta_for_indexing
 
   output:
   file "*.fasta.gz"
