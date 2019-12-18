@@ -12,7 +12,7 @@ dependencies:
   - bioconda::picard=2.21.4
   - bioconda::samtools=1.9
   - bioconda::dedup=0.12.5
-  - bioconda::angsd=0.931
+  - bioconda::angsd=0.921
   - bioconda::circularmapper=1.93.4
   - bioconda::gatk4=4.1.4.1
   - bioconda::qualimap=2.2.2d

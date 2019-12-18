@@ -114,7 +114,7 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 For more details on how to set up your own private profile, please see [installation](../configuration/adding_your_own.md).
 
 **Basic profiles**
-These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC*- (vs. a HPC cluster - see below).
+These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
 - `awsbatch`
   - A generic configuration profile to be used with AWS Batch.
@@ -274,7 +274,7 @@ The output directory where the results will be saved.
 
 #### `-w / -work-dir`
 
-The output directory where _intermediate_ files will be saved. It is **highly recommended*- that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
+The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
 
 ### Optional Reference Options
 

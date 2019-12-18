@@ -648,6 +648,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
 if(!params.bwa_index && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
 process makeBWAIndex {
+    label 'sc_medium'
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
             if (params.saveReference) filename 
@@ -687,6 +688,7 @@ if (params.fasta_index != '') {
 }
 
 process makeFastaIndex {
+    label 'sc_small'
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/fasta_index", mode: 'copy', saveAs: { filename -> 
             if (params.saveReference) filename 
@@ -732,6 +734,7 @@ if (params.seq_dict != '') {
 
 
 process makeSeqDict {
+    label 'sc_medium'
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/seq_dict", mode: 'copy', saveAs: { filename -> 
             if (params.saveReference) filename 
@@ -763,6 +766,7 @@ ch_dict_for_skipdict.mix(ch_seq_dict)
 */ 
 
 process convertBam {
+    label 'mc_small'
     tag "$bam"
     
     when: 
@@ -782,10 +786,13 @@ process convertBam {
 }
 
 /*
-* PREPROCESSING - Index a input BAM if not being converted to FASTAPQ
+* PREPROCESSING - Index a input BAM if not being converted to FASTQ
 */
 
 process indexinputbam {
+  label 'sc_small'
+  tag "$prefix"
+
   when: 
   params.bam && !params.run_convertbam
 
@@ -796,12 +803,11 @@ process indexinputbam {
   file "*.{bai,csi}" into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
 
   script:
-    size = "${params.large_ref}" ? '-c' : ''
-    prefix = "${bam.baseName}"
+  size = "${params.large_ref}" ? '-c' : ''
+  prefix = "${bam.baseName}"
   """
-    samtools index "${size}" ${bam}
+  samtools index "${size}" ${bam}
   """
-
 }
 
 // convertbam bypass
@@ -814,12 +820,11 @@ if (params.run_convertbam) {
       .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 }
 
-
-
 /*
  * STEP 1a - FastQC
  */
 process fastqc {
+    label 'sc_tiny'
     tag "$name"
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -848,6 +853,7 @@ process fastqc {
 */
 
 process fastp {
+    label 'mc_small'
     tag "$name"
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
@@ -890,6 +896,7 @@ if (params.complexity_filter_poly_g) {
  */
 
 process adapter_removal {
+    label 'mc_small'
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
@@ -979,6 +986,7 @@ if (!params.skip_adapterremoval) {
 * STEP 2b - FastQC after clipping/merging (if applied!)
 */
 process fastqc_after_clipping {
+    label 'sc_tiny'
     tag "${name}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -1003,6 +1011,7 @@ Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
 */
 
 process bwa {
+    label 'mc_medium'
     tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
@@ -1043,6 +1052,7 @@ process bwa {
 }
 
 process circulargenerator{
+    label 'sc_tiny'
     tag "$prefix"
     publishDir "${params.outdir}/reference_genome/circularmapper_index", mode: 'copy', saveAs: { filename -> 
             if (params.saveReference) filename 
@@ -1069,6 +1079,7 @@ process circulargenerator{
 
 
 process circularmapper{
+    label 'mc_medium'
     tag "$prefix"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
 
@@ -1114,6 +1125,7 @@ process circularmapper{
 }
 
 process bwamem {
+    label 'mc_medium'
     tag "$prefix"
     publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
 
@@ -1171,6 +1183,7 @@ if (!params.skip_mapping) {
 */
 
 process samtools_flagstat {
+    label 'sc_tiny'
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
@@ -1196,6 +1209,7 @@ process samtools_flagstat {
 */
 
 process samtools_filter {
+    label 'mc_medium'
     tag "$prefix"
     publishDir "${params.outdir}/samtools/filter", mode: 'copy',
     saveAs: {filename ->
@@ -1276,6 +1290,7 @@ if (params.run_bam_filtering) {
 
 
 process strip_input_fastq {
+    label 'mc_medium'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/samtools/stripped_fastq", mode: 'copy'
 
@@ -1314,6 +1329,7 @@ process strip_input_fastq {
 
 
 process samtools_flagstat_after_filter {
+    label 'sc_tiny'
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
@@ -1339,6 +1355,7 @@ Step 5a: DeDup
 */ 
 
 process dedup{
+    label 'mc_small'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${prefix}/$filename"}
@@ -1382,6 +1399,7 @@ process dedup{
  */
 
 process markDup{
+    label 'mc_small'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/deduplication/"
 
@@ -1430,6 +1448,7 @@ Step 6: Preseq
 */
 
 process preseq {
+    label 'sc_tiny'
     tag "${input.baseName}"
     publishDir "${params.outdir}/preseq", mode: 'copy'
 
@@ -1460,6 +1479,7 @@ Step 7a: DMG Assessment
 */ 
 
 process damageprofiler {
+    label 'sc_tiny'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
@@ -1490,6 +1510,7 @@ Step 8: Qualimap
 */
 
 process qualimap {
+    label 'mc_small'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/qualimap", mode: 'copy'
 
@@ -1525,6 +1546,7 @@ if (!params.run_bedtools_coverage){
 }
 
 process bedtools {
+  label 'mc_small'
   tag "${bam.baseName}"
   publishDir "${params.outdir}/bedtools", mode: 'copy'
 
@@ -1540,8 +1562,8 @@ process bedtools {
 
   script:
   """
-  bedtools coverage -a ${anno_file} -b $bam | pigz -p 4 > "${bam.baseName}".breadth.gz 
-  bedtools coverage -a ${anno_file} -b $bam -mean | pigz -p 4 > "${bam.baseName}".depth.gz 
+  bedtools coverage -a ${anno_file} -b $bam | pigz -p ${task.cpus} > "${bam.baseName}".breadth.gz
+  bedtools coverage -a ${anno_file} -b $bam -mean | pigz -p ${task.cpus} > "${bam.baseName}".depth.gz
   """
 }
 
@@ -1550,6 +1572,7 @@ process bedtools {
  */
 
 process pmdtools {
+    label 'mc_small'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/pmdtools", mode: 'copy'
 
@@ -1590,6 +1613,7 @@ process pmdtools {
 */
 
 process bam_trim {
+    label 'mc_small'
     tag "${prefix}" 
     publishDir "${params.outdir}/trimmed_bam", mode: 'copy'
  
@@ -1663,6 +1687,7 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
 ch_gatk_download = Channel.value("download")
 
  process download_gatk_v3_5 {
+    label 'sc_tiny'
     when: params.run_genotyping && params.genotyping_tool == 'ug'
 
     input: 
@@ -1683,6 +1708,7 @@ ch_gatk_download = Channel.value("download")
 */
 
  process genotyping_ug {
+  'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1722,6 +1748,7 @@ ch_gatk_download = Channel.value("download")
  }
 
   process genotyping_hc {
+  label  'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1789,6 +1816,7 @@ ch_gatk_download = Channel.value("download")
 
 
 process vcf2genome {
+  label  'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/consensus_sequence", mode: 'copy'
 
@@ -1828,6 +1856,7 @@ if (params.additional_vcf_files == '') {
 }
 
  process multivcfanalyzer {
+  label  'mc_small'
   publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
 
   when:
@@ -1897,7 +1926,8 @@ if (params.sexdeterrmine_bedfile == '') {
 
 
  process sex_deterrmine {
-     publishDir "${params.outdir}/sex_determination", mode:"copy"
+    label 'sc_small'
+    publishDir "${params.outdir}/sex_determination", mode:"copy"
     
      when:
      params.run_sexdeterrmine
@@ -1934,47 +1964,48 @@ if (params.sexdeterrmine_bedfile == '') {
   * Step 16 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
   */
  process nuclear_contamination{
-     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
-     validExitStatus 0,134
-     /* 
-      * ANGSD Xcontamination will exit with status 134 when the number of SNPs 
-      *     is not large enough for estimation.
-      */
-     
-     when:
-     params.run_nuclear_contamination
-    
-     input:
-     file input from ch_for_nuclear_contamination
-    
-    
-     output:
-     file '*.X.contamination.out' into ch_from_nuclear_contamination
-     
-     script:
-     """
-     samtools index ${input}
-     angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${input.baseName}.doCounts
-     contamination -a ${input.baseName}.doCounts.icnts.gz -h ${baseDir}/assets/angsd_resources/HapMapChrX.gz 2> ${input.baseName}.X.contamination.out
-     """
+    label 'sc_small'
+    publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
+    validExitStatus 0,134
+    /*
+     * ANGSD Xcontamination will exit with status 134 when the number of SNPs
+     *     is not large enough for estimation.
+     */
+
+    when:
+    params.run_nuclear_contamination
+
+    input:
+    file input from ch_for_nuclear_contamination
+
+    output:
+    file '*.X.contamination.out' into ch_from_nuclear_contamination
+
+    script:
+    """
+    samtools index ${input}
+    angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${input.baseName}.doCounts
+    contamination -a ${input.baseName}.doCounts.icnts.gz -h ${baseDir}/assets/angsd_resources/HapMapChrX.gz 2> ${input.baseName}.X.contamination.out
+    """
  }
  
- process print_nuclear_contamination{
-     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
-     
-     when:
-     params.run_nuclear_contamination
-    
-     input:
-     val 'Contam' from ch_from_nuclear_contamination.collect()
-    
-     output:
-     file 'nuclear_contamination.txt'
-     
-     script:
-     """
-     print_x_contamination.py ${Contam.join(' ')}
-     """
+process print_nuclear_contamination{
+    label 'sc_tiny'
+    publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
+
+    when:
+    params.run_nuclear_contamination
+
+    input:
+    val 'Contam' from ch_from_nuclear_contamination.collect()
+
+    output:
+    file 'nuclear_contamination.txt'
+
+    script:
+    """
+    print_x_contamination.py ${Contam.join(' ')}
+    """
  }
 
 /*
@@ -1982,6 +2013,7 @@ if (params.sexdeterrmine_bedfile == '') {
 */
 
 process malt {
+  label 'mc_huge'
   publishDir "${params.outdir}/metagenomic_classification", mode:"copy"
 
   when:
@@ -2041,6 +2073,7 @@ if (params.maltextract_taxon_list== '') {
 }
 
 process maltextract {
+  label 'mc_large'
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
 
   when: 
@@ -2090,9 +2123,8 @@ Genotyping tools:
 - sequenceTools
 
 Downstream VCF tools:
-- vcf2genome
-- gencons
-- READ/mcMLKin
+- gencons?
+- READ/mcMLKin?
 - popGen output? PLINK? 
 */
 
@@ -2100,6 +2132,7 @@ Downstream VCF tools:
  * Step 18a - Output Description HTML
  */
 process output_documentation {
+    label 'sc_tiny'
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
@@ -2118,6 +2151,7 @@ process output_documentation {
  * Step 18b - Parse software version numbers
  */
 process get_software_versions {
+  label 'sc_tiny'
   publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
 
     output:
@@ -2163,6 +2197,8 @@ process get_software_versions {
  * Step 18c - MultiQC
  */
 process multiqc {
+    label 'sc_tiny'
+
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
