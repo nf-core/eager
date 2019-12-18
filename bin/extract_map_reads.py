@@ -179,54 +179,25 @@ def write_fq(fq_dict, fname, mode):
     - fname(string) Path to output fastq file
     - mode(string) strip (remove read) or replace (replace read sequence) by Ns
     """
-
-    if fname.endswith('.gz'):
-        with gzip.open(fname, 'wb') as f:
-            for k in list(fq_dict.keys()):
-                if mode == 'strip':
-                    # if unmapped, write all the read lines
-                    if fq_dict[k][0] == 'u':
-                        f.write(f"@{k}\n".encode())
-                        for i in fq_dict[k][1:]:
-                            f.write(f"{i}\n".encode())
-                    # if mapped, do not write the read lines
-                    elif fq_dict[k][0] == 'm':
-                        continue
-
-                elif mode == 'replace':
-                    # if unmapped, write all the read lines
-                    if fq_dict[k][0] == 'u':
-                        f.write(f"@{k}\n".encode())
-                        for i in fq_dict[k][1:]:
-                            f.write(f"{i}\n".encode())
-                    # if mapped, write all the read lines, but replace sequence
-                    # by N*(len(sequence))
-                    elif fq_dict[k][0] == 'm':
-                        f.write(f"@{k}\n".encode())
-                        f.write(f"{'N'*len(fq_dict[k][1])}\n".encode())
-                        for i in fq_dict[k][2:]:
-                            f.write(f"{i}\n".encode())
-
-    else:
-        with open(fname, 'w') as f:
-            for k in list(fq_dict.keys()):
-                if mode == 'strip':
-                    if fq_dict[k][0] == 'u':
-                        f.write(f"@{k}\n")
-                        for i in fq_dict[k][1:]:
-                            f.write(f"{i}\n")
-                    elif fq_dict[k][0] == 'm':
-                        continue
-                elif mode == 'replace':
-                    if fq_dict[k][0] == 'u':
-                        f.write(f"@{k}\n")
-                        for i in fq_dict[k][1:]:
-                            f.write(f"{i}\n")
-                    elif fq_dict[k][0] == 'm':
-                        f.write(f"@{k}\n")
-                        f.write(f"{'N'*len(fq_dict[k][1])}\n")
-                        for i in fq_dict[k][2:]:
-                            f.write(f"{i}\n")
+    with open(fname, 'w') as f:
+        for k in list(fq_dict.keys()):
+            if mode == 'strip':
+                if fq_dict[k][0] == 'u':
+                    f.write(f"@{k}\n")
+                    for i in fq_dict[k][1:]:
+                        f.write(f"{i}\n")
+                elif fq_dict[k][0] == 'm':
+                    continue
+            elif mode == 'replace':
+                if fq_dict[k][0] == 'u':
+                    f.write(f"@{k}\n")
+                    for i in fq_dict[k][1:]:
+                        f.write(f"{i}\n")
+                elif fq_dict[k][0] == 'm':
+                    f.write(f"@{k}\n")
+                    f.write(f"{'N'*len(fq_dict[k][1])}\n")
+                    for i in fq_dict[k][2:]:
+                        f.write(f"{i}\n")
 
 
 def check_strip_mode(mode):
@@ -238,7 +209,7 @@ if __name__ == "__main__":
     BAM, IN_FWD, IN_REV, OUT_FWD, OUT_REV, MODE, PROC = _get_args()
 
     if OUT_FWD == None:
-        out_fwd = f"{IN_FWD.split('/')[-1].split('.')[0]}.r1.fq.gz"
+        out_fwd = f"{IN_FWD.split('/')[-1].split('.')[0]}.r1.fq"
     else:
         out_fwd = OUT_FWD
 
@@ -248,7 +219,7 @@ if __name__ == "__main__":
     write_fq(fwd_reads, out_fwd, MODE)
     if IN_REV:
         if OUT_REV == None:
-            out_rev = f"{IN_REV.split('/')[-1].split('.')[0]}.r2.fq.gz"
+            out_rev = f"{IN_REV.split('/')[-1].split('.')[0]}.r2.fq"
         else:
             out_rev = OUT_REV
         rev_dict = parse_fq(IN_REV)
