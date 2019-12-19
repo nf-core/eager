@@ -252,7 +252,7 @@ if ( params.fasta.isEmpty () ){
         file zipped_fasta
 
         output:
-        file "*.{fa,fn,fna,fasta}" into fasta_for_indexing
+        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer
 
         script:
         rm_zip = zipped_fasta - '.gz'
@@ -262,7 +262,10 @@ if ( params.fasta.isEmpty () ){
         }
        
     } else {
-    fasta_for_indexing = file("${params.fasta}")
+    fasta_for_indexing = Channel
+    .fromPath("${params.fasta}", checkIfExists: true)
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer }
+    
     lastPath = params.fasta.lastIndexOf(File.separator)
     bwa_base = params.fasta.substring(lastPath+1)
 }
@@ -657,7 +660,7 @@ process makeBWAIndex {
     }
 
     input:
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_bwaindex
     file where_are_my_files
 
     output:
@@ -699,7 +702,7 @@ process makeFastaIndex {
     when: params.fasta_index == '' && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
 
     input:
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_faidx
     file where_are_my_files
 
     output:
@@ -745,7 +748,7 @@ process makeSeqDict {
     when: params.seq_dict == '' && !params.fasta.isEmpty()
 
     input:
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_seqdict
     file where_are_my_files
 
     output:
@@ -1063,7 +1066,7 @@ process circulargenerator{
     when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_circulargenerator
 
     output:
     file "${prefix}.{amb,ann,bwt,sa,pac}" into ch_circularmapper_indices
@@ -1088,7 +1091,7 @@ process circularmapper{
     input:
     set val(name), file(reads) from ch_adapteremoval_for_cm
     file index from ch_circularmapper_indices.collect()
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_circularmapper.collect()
 
     output:
     file "*.mapped.bam" into ch_output_from_cm
@@ -1491,7 +1494,7 @@ process damageprofiler {
 
     input:
     file bam from ch_rmdup_for_damageprofiler
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_damageprofiler.collect()
     file bai from ch_rmdupindex_for_damageprofiler
     
 
@@ -1522,7 +1525,7 @@ process qualimap {
 
     input:
     file bam from ch_rmdup_for_qualimap
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_qualimap.collect()
 
     output:
     file "*" into ch_qualimap_results
@@ -1558,7 +1561,7 @@ process bedtools {
 
   input:
   file bam from ch_rmdup_for_bedtools
-  file anno_file from ch_anno_for_bedtools
+  file anno_file from ch_anno_for_bedtools.collect()
 
   output:
   file "*"
@@ -1583,7 +1586,7 @@ process pmdtools {
 
     input: 
     file bam from ch_rmdup_for_pmdtools
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_pmdtools.collect()
 
     output:
     file "*.bam" into ch_output_from_pmdtools
@@ -1643,7 +1646,6 @@ process bam_trim {
 
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
-        .view { it -> "BAM is: $it" }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
 
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
@@ -1712,7 +1714,7 @@ ch_gatk_download = Channel.value("download")
 */
 
  process genotyping_ug {
-  'mc_large'
+  label 'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1720,11 +1722,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
-  val fasta from fasta_for_indexing.collect()
-  val jar from ch_unifiedgenotyper_jar.collect()
+  file fasta from ch_fasta_for_genotyping_ug.collect()
+  file jar from ch_unifiedgenotyper_jar.collect()
   file bam from ch_damagemanipulation_for_genotyping_ug
-  val fai from ch_fai_for_ug.collect()
-  val dict from ch_dict_for_ug.collect()
+  file fai from ch_fai_for_ug.collect()
+  file dict from ch_dict_for_ug.collect()
 
   output: 
   file "*vcf.gz" into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
@@ -1751,7 +1753,7 @@ ch_gatk_download = Channel.value("download")
  }
 
   process genotyping_hc {
-  label  'mc_large'
+  label 'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1759,11 +1761,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'hc'
 
   input:
-  val fasta from fasta_for_indexing
+  file fasta from ch_fasta_for_genotyping_hc.collect()
   file bam from ch_damagemanipulation_for_genotyping_hc
-  val fai from ch_fai_for_hc
-  val dict from ch_dict_for_hc
-  val bai from ch_damagemanipulationindex_for_genotyping_hc
+  file fai from ch_fai_for_hc.collect()
+  file dict from ch_dict_for_hc.collect()
+  file bai from ch_damagemanipulationindex_for_genotyping_hc.collect()
 
   output: 
   file "*vcf.gz" into ch_vcf_hc
@@ -1787,7 +1789,7 @@ ch_gatk_download = Channel.value("download")
  *  Step 12c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
-  label 'mc_medium'
+  label 'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1795,11 +1797,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
-  val fasta from fasta_for_indexing
+  file fasta from ch_fasta_for_genotyping_freebayes.collect()
   file bam from ch_damagemanipulation_for_genotyping_freebayes
-  val fai from ch_fai_for_freebayes
-  val dict from ch_dict_for_freebayes
-  val bai from ch_damagemanipulationindex_for_genotyping_freebayes
+  file fai from ch_fai_for_freebayes.collect()
+  file dict from ch_dict_for_freebayes.collect()
+  file bai from ch_damagemanipulationindex_for_genotyping_freebayes.collect()
 
   output: 
   file "*vcf.gz" into ch_vcf_freebayes
@@ -1813,11 +1815,9 @@ ch_gatk_download = Channel.value("download")
   """
  }
 
-
 /*
  * Step 13: VCF2Genome
 */
-
 
 process vcf2genome {
   label  'mc_small'
@@ -1829,7 +1829,7 @@ process vcf2genome {
 
   input:
   file vcf from ch_ug_for_vcf2genome
-  val fasta from fasta_for_indexing
+  file fasta from ch_fasta_for_vcf2genome.collect()
 
   output:
   file "*.fasta.gz"
@@ -1867,8 +1867,8 @@ if (params.additional_vcf_files == '') {
   params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
 
   input:
-  file fasta from fasta_for_indexing
-  file vcf from ch_vcfs_for_multivcfanalyzer
+  file fasta from ch_fasta_for_multivcfanalyzer.collect()
+  file vcf from ch_vcfs_for_multivcfanalyzer.collect()
 
   output:
   file 'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
