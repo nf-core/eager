@@ -1720,11 +1720,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
-  val fasta from fasta_for_indexing
-  val jar from ch_unifiedgenotyper_jar
+  val fasta from fasta_for_indexing.collect()
+  val jar from ch_unifiedgenotyper_jar.collect()
   file bam from ch_damagemanipulation_for_genotyping_ug
-  val fai from ch_fai_for_ug
-  val dict from ch_dict_for_ug
+  val fai from ch_fai_for_ug.collect()
+  val dict from ch_dict_for_ug.collect()
 
   output: 
   file "*vcf.gz" into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
