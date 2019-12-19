@@ -210,6 +210,10 @@ It is common in aDNA libraries to see very rapid increases in the proportion of 
 
 This can already give you an indication on the authenticity of your library - as if you see very low proportions of reads with adapters this suggests long insert molecules that are less likely to derive from a 'true' aDNA library. On the flipside, if you are working with modern DNA - it can give an indication of over-sonication if you have artificially fragmented your reads to lower than your target molecule length.
 
+<p align="center">
+  <img src="images/output/fastqc/adapter_content.png" width="75%" height = "75%">
+</p>
+
 ### FastP
 
 #### Background
@@ -334,6 +338,10 @@ Exceptions to the above:
 * If you do not have paired end data, you will not have sections for 'Merged removed' or 'Reverse removed'.
 * If you use the `--dedup_all_merged` flag, you will not have the 'Forward removed' or 'Reverse removed' sections.
 
+<p align="center">
+  <img src="images/output/dedup/deduplicated_reads.png" width="75%" height = "75%">
+</p>
+
 Things to look out for:
 
 * The smaller the number of the duplicates removed the better. If you have a smaller number of duplicates, and wish to sequence deeper, you can use the preseq module (see below) to make an estimate on how much deeper to sequence.
@@ -355,10 +363,14 @@ Using the de-duplication information from DeDup, the calculated curve (a solid l
 
 The dashed line represents a 'perfect' library containing only unique molecules and no duplicates. You are looking for your library stay as close to this line as possible. Plateauing of your curve shows that at that point you would not be getting any more unique molecules and you shouldn't sequence further than this.
 
+<p align="center">
+  <img src="images/output/preseq/complexity_curve.png" width="75%" height = "75%">
+</p>
+
 Plateauing can be caused by a number of reasons:
 
 * You have simply sequenced your library to exhaustion
-* You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio.
+* You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio
 * You have a low quality library made up of mappable seuqencing artefacts that were able to pass filtering (e.g. adapters)
 
 ### QualiMap
@@ -377,6 +389,10 @@ This plot shows on the Y axis the range of fold coverages that the bases of the 
 
 The greater the number of bases covered at as high as possible fold coverage, the better.
 
+<p align="center">
+  <img src="images/output/qualimap/coverage_histogram.png" width="75%" height = "75%">
+</p>
+
 Things to watch out for:
 
 * You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
@@ -388,9 +404,17 @@ This plot shows how much of the genome in percentage (X axis) is covered by a gi
 
 An ideal plot for this is to see an increasing curve, representing larger greater fractions of the genome being increasingly covered at higher depth. However, for low-coverage ancient DNA data, it will be more likely to see decreasing curves starting at a large percentage of the genome being covered at 0 fold coverage.
 
+<p align="center">
+  <img src="images/output/qualimap/cumulative_genome_coverage.png" width="75%" height = "75%">
+</p>
+
 #### GC Content Distribution
 
 This plot shows the distirbution of th frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
+
+<p align="center">
+  <img src="images/output/qualimap/gc_content_distribution.png" width="75%" height = "75%">
+</p>
 
 Things to watch out for:
 
@@ -463,3 +487,4 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 * `bedtools/` this contains two files as the output from bedtools coverage. One file contains the 'breadth' coverage (`*.breadth.gz`). This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature. The second file (`*.depth.gz`), contains the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
 * `metagenomic_classification/` This contains the output for a given metagenomic classifer (currently only for MALT). Malt will contain RMA6 files that can be loaded into MEGAN6 or MaltExtract for phylogenetic visualisation of read taxonomic assignments and aDNA characteristics respectively. Additional a `malt.log` file is provided which gives additional information such as run-time, memory usage and per-sample statistics of numbers of alignments with taxonmic assignment etc.
 * `MaltExtract/` this will contain a `results` directory in which contains the output from MaltExtract - typically one folder for each filter type, an error and a log file. The characteristics of each node (e.g. damage, read lengths, edit distances - each in different txt formats) can be seen in each sub-folder of the filter folders. Output can be visualised either with the [HOPS postprocessing script](https://github.com/rhuebler/HOPS) or [MEx-IPA](https://github.com/jfy133/MEx-IPA)
+* `consensus_sequence` this contains three FASTA files from VCF2Genome, of a consensus sequence based on the reference FASTA with each sample's unique modifications. The main FASTA is a standard file with bases not passing the specified thresholds as Ns. The two other FASTAS (`_refmod.fasta.gz`) and (`_uncertainity.fasta.gz`) are IUPAC uncertainty codes (rather than Ns) and a special number-based uncertainity system used for other downstream tools, respectively.

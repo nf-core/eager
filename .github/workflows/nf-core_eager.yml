@@ -92,6 +92,9 @@ jobs:
       - name: GENOTYPING_UG/PMD/MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
         run: |
          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-MVA_additionalvcfs" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+      - name: VCF2Genome Run basic pipeline with GATK unifiedgenotyper and run VCF2Genome
+        run: |
+         nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-vcf2genome" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_vcf2genome
       - name: BAM_INPUT Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
         run: |
          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-baminput_noConvertBam" -profile test_bam,docker --bam --skip_adapterremoval --run_convertbam
@@ -118,7 +121,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-sexdeterrmine" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_sexdeterrmine
       - name: NUCLEAR CONTAMINATION Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nuclear contamination estimation
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_nuclear_contamination
+          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-nuclear_contamination" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --run_nuclear_contamination
       - name: MTNUCRATIO Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nmtnucratio
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --skip_preseq --skip_damage_calculation --run_mtnucratio
+          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-mtnucratio" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --skip_preseq --skip_damage_calculation --run_mtnucratio
