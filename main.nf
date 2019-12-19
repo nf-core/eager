@@ -252,7 +252,7 @@ if ( params.fasta.isEmpty () ){
         file zipped_fasta
 
         output:
-        file "*.{fa,fn,fna,fasta}" into fasta_for_indexing
+        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer
 
         script:
         rm_zip = zipped_fasta - '.gz'
@@ -262,7 +262,10 @@ if ( params.fasta.isEmpty () ){
         }
        
     } else {
-    fasta_for_indexing = file("${params.fasta}")
+    fasta_for_indexing = Channel
+    .fromPath("${params.fasta}", checkIfExists: true)
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer }
+    
     lastPath = params.fasta.lastIndexOf(File.separator)
     bwa_base = params.fasta.substring(lastPath+1)
 }
@@ -648,6 +651,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
 if(!params.bwa_index && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
 process makeBWAIndex {
+    label 'sc_medium'
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
             if (params.saveReference) filename 
@@ -656,7 +660,7 @@ process makeBWAIndex {
     }
 
     input:
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_bwaindex
     file where_are_my_files
 
     output:
@@ -687,6 +691,7 @@ if (params.fasta_index != '') {
 }
 
 process makeFastaIndex {
+    label 'sc_small'
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/fasta_index", mode: 'copy', saveAs: { filename -> 
             if (params.saveReference) filename 
@@ -697,7 +702,7 @@ process makeFastaIndex {
     when: params.fasta_index == '' && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
 
     input:
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_faidx
     file where_are_my_files
 
     output:
@@ -732,6 +737,7 @@ if (params.seq_dict != '') {
 
 
 process makeSeqDict {
+    label 'sc_medium'
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/seq_dict", mode: 'copy', saveAs: { filename -> 
             if (params.saveReference) filename 
@@ -742,7 +748,7 @@ process makeSeqDict {
     when: params.seq_dict == '' && !params.fasta.isEmpty()
 
     input:
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_seqdict
     file where_are_my_files
 
     output:
@@ -763,6 +769,7 @@ ch_dict_for_skipdict.mix(ch_seq_dict)
 */ 
 
 process convertBam {
+    label 'mc_small'
     tag "$bam"
     
     when: 
@@ -782,10 +789,13 @@ process convertBam {
 }
 
 /*
-* PREPROCESSING - Index a input BAM if not being converted to FASTAPQ
+* PREPROCESSING - Index a input BAM if not being converted to FASTQ
 */
 
 process indexinputbam {
+  label 'sc_small'
+  tag "$prefix"
+
   when: 
   params.bam && !params.run_convertbam
 
@@ -796,12 +806,11 @@ process indexinputbam {
   file "*.{bai,csi}" into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
 
   script:
-    size = "${params.large_ref}" ? '-c' : ''
-    prefix = "${bam.baseName}"
+  size = "${params.large_ref}" ? '-c' : ''
+  prefix = "${bam.baseName}"
   """
-    samtools index "${size}" ${bam}
+  samtools index "${size}" ${bam}
   """
-
 }
 
 // convertbam bypass
@@ -814,12 +823,11 @@ if (params.run_convertbam) {
       .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 }
 
-
-
 /*
  * STEP 1a - FastQC
  */
 process fastqc {
+    label 'sc_tiny'
     tag "$name"
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -848,6 +856,7 @@ process fastqc {
 */
 
 process fastp {
+    label 'mc_small'
     tag "$name"
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
@@ -890,6 +899,7 @@ if (params.complexity_filter_poly_g) {
  */
 
 process adapter_removal {
+    label 'mc_small'
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
@@ -979,6 +989,7 @@ if (!params.skip_adapterremoval) {
 * STEP 2b - FastQC after clipping/merging (if applied!)
 */
 process fastqc_after_clipping {
+    label 'sc_tiny'
     tag "${name}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -1003,6 +1014,7 @@ Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
 */
 
 process bwa {
+    label 'mc_medium'
     tag "${name}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
@@ -1043,6 +1055,7 @@ process bwa {
 }
 
 process circulargenerator{
+    label 'sc_tiny'
     tag "$prefix"
     publishDir "${params.outdir}/reference_genome/circularmapper_index", mode: 'copy', saveAs: { filename -> 
             if (params.saveReference) filename 
@@ -1053,7 +1066,7 @@ process circulargenerator{
     when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_circulargenerator
 
     output:
     file "${prefix}.{amb,ann,bwt,sa,pac}" into ch_circularmapper_indices
@@ -1069,6 +1082,7 @@ process circulargenerator{
 
 
 process circularmapper{
+    label 'mc_medium'
     tag "$prefix"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
 
@@ -1077,7 +1091,7 @@ process circularmapper{
     input:
     set val(name), file(reads) from ch_adapteremoval_for_cm
     file index from ch_circularmapper_indices.collect()
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_circularmapper.collect()
 
     output:
     file "*.mapped.bam" into ch_output_from_cm
@@ -1114,6 +1128,7 @@ process circularmapper{
 }
 
 process bwamem {
+    label 'mc_medium'
     tag "$prefix"
     publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
 
@@ -1171,6 +1186,7 @@ if (!params.skip_mapping) {
 */
 
 process samtools_flagstat {
+    label 'sc_tiny'
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
@@ -1196,6 +1212,7 @@ process samtools_flagstat {
 */
 
 process samtools_filter {
+    label 'mc_medium'
     tag "$prefix"
     publishDir "${params.outdir}/samtools/filter", mode: 'copy',
     saveAs: {filename ->
@@ -1228,19 +1245,22 @@ process samtools_filter {
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
         """
-        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
         samtools index "${size}" ${prefix}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "fastq"){
         """
-        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
         samtools index "${size}" ${prefix}.filtered.bam
         samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         rm ${prefix}.unmapped.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
         """
-        samtools view -h $bam | tee >(samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam) >(samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam)
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
         samtools index "${size}" ${prefix}.filtered.bam
         samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         """
@@ -1276,6 +1296,7 @@ if (params.run_bam_filtering) {
 
 
 process strip_input_fastq {
+    label 'mc_medium'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/samtools/stripped_fastq", mode: 'copy'
 
@@ -1314,6 +1335,7 @@ process strip_input_fastq {
 
 
 process samtools_flagstat_after_filter {
+    label 'sc_tiny'
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
@@ -1339,6 +1361,7 @@ Step 5a: DeDup
 */ 
 
 process dedup{
+    label 'mc_small'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${prefix}/$filename"}
@@ -1382,6 +1405,7 @@ process dedup{
  */
 
 process markDup{
+    label 'mc_small'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/deduplication/"
 
@@ -1430,6 +1454,7 @@ Step 6: Preseq
 */
 
 process preseq {
+    label 'sc_tiny'
     tag "${input.baseName}"
     publishDir "${params.outdir}/preseq", mode: 'copy'
 
@@ -1460,6 +1485,7 @@ Step 7a: DMG Assessment
 */ 
 
 process damageprofiler {
+    label 'sc_tiny'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
@@ -1468,7 +1494,7 @@ process damageprofiler {
 
     input:
     file bam from ch_rmdup_for_damageprofiler
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_damageprofiler.collect()
     file bai from ch_rmdupindex_for_damageprofiler
     
 
@@ -1490,6 +1516,7 @@ Step 8: Qualimap
 */
 
 process qualimap {
+    label 'mc_small'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/qualimap", mode: 'copy'
 
@@ -1498,7 +1525,7 @@ process qualimap {
 
     input:
     file bam from ch_rmdup_for_qualimap
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_qualimap.collect()
 
     output:
     file "*" into ch_qualimap_results
@@ -1525,6 +1552,7 @@ if (!params.run_bedtools_coverage){
 }
 
 process bedtools {
+  label 'mc_small'
   tag "${bam.baseName}"
   publishDir "${params.outdir}/bedtools", mode: 'copy'
 
@@ -1533,15 +1561,15 @@ process bedtools {
 
   input:
   file bam from ch_rmdup_for_bedtools
-  file anno_file from ch_anno_for_bedtools
+  file anno_file from ch_anno_for_bedtools.collect()
 
   output:
   file "*"
 
   script:
   """
-  bedtools coverage -a ${anno_file} -b $bam | pigz -p 4 > "${bam.baseName}".breadth.gz 
-  bedtools coverage -a ${anno_file} -b $bam -mean | pigz -p 4 > "${bam.baseName}".depth.gz 
+  bedtools coverage -a ${anno_file} -b $bam | pigz -p ${task.cpus} > "${bam.baseName}".breadth.gz
+  bedtools coverage -a ${anno_file} -b $bam -mean | pigz -p ${task.cpus} > "${bam.baseName}".depth.gz
   """
 }
 
@@ -1550,6 +1578,7 @@ process bedtools {
  */
 
 process pmdtools {
+    label 'mc_small'
     tag "${bam.baseName}"
     publishDir "${params.outdir}/pmdtools", mode: 'copy'
 
@@ -1557,7 +1586,7 @@ process pmdtools {
 
     input: 
     file bam from ch_rmdup_for_pmdtools
-    file fasta from fasta_for_indexing
+    file fasta from ch_fasta_for_pmdtools.collect()
 
     output:
     file "*.bam" into ch_output_from_pmdtools
@@ -1590,6 +1619,7 @@ process pmdtools {
 */
 
 process bam_trim {
+    label 'mc_small'
     tag "${prefix}" 
     publishDir "${params.outdir}/trimmed_bam", mode: 'copy'
  
@@ -1663,6 +1693,7 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
 ch_gatk_download = Channel.value("download")
 
  process download_gatk_v3_5 {
+    label 'sc_tiny'
     when: params.run_genotyping && params.genotyping_tool == 'ug'
 
     input: 
@@ -1683,6 +1714,7 @@ ch_gatk_download = Channel.value("download")
 */
 
  process genotyping_ug {
+  label 'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1690,11 +1722,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
-  file fasta from fasta_for_indexing
-  file jar from ch_unifiedgenotyper_jar
+  file fasta from ch_fasta_for_genotyping_ug.collect()
+  file jar from ch_unifiedgenotyper_jar.collect()
   file bam from ch_damagemanipulation_for_genotyping_ug
-  file fai from ch_fai_for_ug
-  file dict from ch_dict_for_ug
+  file fai from ch_fai_for_ug.collect()
+  file dict from ch_dict_for_ug.collect()
 
   output: 
   file "*vcf.gz" into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
@@ -1705,23 +1737,23 @@ ch_gatk_download = Channel.value("download")
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
-    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
-    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
-    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals ${defaultbasequalities}
+    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam ${defaultbasequalities}
+    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
     """
   else if (params.gatk_dbsnp != '')
     """
     samtools index ${bam}
-    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals 
-    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam
+    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals ${defaultbasequalities}
+    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam ${defaultbasequalities}
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
-
     pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
     """
  }
 
   process genotyping_hc {
+  label 'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1729,11 +1761,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'hc'
 
   input:
-  file fasta from fasta_for_indexing
+  file fasta from ch_fasta_for_genotyping_hc.collect()
   file bam from ch_damagemanipulation_for_genotyping_hc
-  file fai from ch_fai_for_hc
-  file dict from ch_dict_for_hc
-  file bai from ch_damagemanipulationindex_for_genotyping_hc
+  file fai from ch_fai_for_hc.collect()
+  file dict from ch_dict_for_hc.collect()
+  file bai from ch_damagemanipulationindex_for_genotyping_hc.collect()
 
   output: 
   file "*vcf.gz" into ch_vcf_hc
@@ -1757,6 +1789,7 @@ ch_gatk_download = Channel.value("download")
  *  Step 12c: FreeBayes genotyping, should probably add in some options for users to set 
  */ 
  process genotyping_freebayes {
+  label 'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
@@ -1764,11 +1797,11 @@ ch_gatk_download = Channel.value("download")
   params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
-  file fasta from fasta_for_indexing
+  file fasta from ch_fasta_for_genotyping_freebayes.collect()
   file bam from ch_damagemanipulation_for_genotyping_freebayes
-  file fai from ch_fai_for_freebayes
-  file dict from ch_dict_for_freebayes
-  file bai from ch_damagemanipulationindex_for_genotyping_freebayes
+  file fai from ch_fai_for_freebayes.collect()
+  file dict from ch_dict_for_freebayes.collect()
+  file bai from ch_damagemanipulationindex_for_genotyping_freebayes.collect()
 
   output: 
   file "*vcf.gz" into ch_vcf_freebayes
@@ -1782,13 +1815,12 @@ ch_gatk_download = Channel.value("download")
   """
  }
 
-
 /*
  * Step 13: VCF2Genome
 */
 
-
 process vcf2genome {
+  label  'mc_small'
   tag "${prefix}"
   publishDir "${params.outdir}/consensus_sequence", mode: 'copy'
 
@@ -1797,7 +1829,7 @@ process vcf2genome {
 
   input:
   file vcf from ch_ug_for_vcf2genome
-  file fasta from fasta_for_indexing
+  file fasta from ch_fasta_for_vcf2genome.collect()
 
   output:
   file "*.fasta.gz"
@@ -1828,14 +1860,15 @@ if (params.additional_vcf_files == '') {
 }
 
  process multivcfanalyzer {
+  label  'mc_small'
   publishDir "${params.outdir}/MultiVCFAnalyzer", mode: 'copy'
 
   when:
   params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
 
   input:
-  file fasta from fasta_for_indexing
-  file vcf from ch_vcfs_for_multivcfanalyzer
+  file fasta from ch_fasta_for_multivcfanalyzer.collect()
+  file vcf from ch_vcfs_for_multivcfanalyzer.collect()
 
   output:
   file 'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
@@ -1897,7 +1930,8 @@ if (params.sexdeterrmine_bedfile == '') {
 
 
  process sex_deterrmine {
-     publishDir "${params.outdir}/sex_determination", mode:"copy"
+    label 'sc_small'
+    publishDir "${params.outdir}/sex_determination", mode:"copy"
     
      when:
      params.run_sexdeterrmine
@@ -1934,47 +1968,48 @@ if (params.sexdeterrmine_bedfile == '') {
   * Step 16 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
   */
  process nuclear_contamination{
-     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
-     validExitStatus 0,134
-     /* 
-      * ANGSD Xcontamination will exit with status 134 when the number of SNPs 
-      *     is not large enough for estimation.
-      */
-     
-     when:
-     params.run_nuclear_contamination
-    
-     input:
-     file input from ch_for_nuclear_contamination
-    
-    
-     output:
-     file '*.X.contamination.out' into ch_from_nuclear_contamination
-     
-     script:
-     """
-     samtools index ${input}
-     angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${input.baseName}.doCounts
-     contamination -a ${input.baseName}.doCounts.icnts.gz -h ${baseDir}/assets/angsd_resources/HapMapChrX.gz 2> ${input.baseName}.X.contamination.out
-     """
+    label 'sc_small'
+    publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
+    validExitStatus 0,134
+    /*
+     * ANGSD Xcontamination will exit with status 134 when the number of SNPs
+     *     is not large enough for estimation.
+     */
+
+    when:
+    params.run_nuclear_contamination
+
+    input:
+    file input from ch_for_nuclear_contamination
+
+    output:
+    file '*.X.contamination.out' into ch_from_nuclear_contamination
+
+    script:
+    """
+    samtools index ${input}
+    angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${input.baseName}.doCounts
+    contamination -a ${input.baseName}.doCounts.icnts.gz -h ${baseDir}/assets/angsd_resources/HapMapChrX.gz 2> ${input.baseName}.X.contamination.out
+    """
  }
  
- process print_nuclear_contamination{
-     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
-     
-     when:
-     params.run_nuclear_contamination
-    
-     input:
-     val 'Contam' from ch_from_nuclear_contamination.collect()
-    
-     output:
-     file 'nuclear_contamination.txt'
-     
-     script:
-     """
-     print_x_contamination.py ${Contam.join(' ')}
-     """
+process print_nuclear_contamination{
+    label 'sc_tiny'
+    publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
+
+    when:
+    params.run_nuclear_contamination
+
+    input:
+    val 'Contam' from ch_from_nuclear_contamination.collect()
+
+    output:
+    file 'nuclear_contamination.txt'
+
+    script:
+    """
+    print_x_contamination.py ${Contam.join(' ')}
+    """
  }
 
 /*
@@ -1982,6 +2017,7 @@ if (params.sexdeterrmine_bedfile == '') {
 */
 
 process malt {
+  label 'mc_huge'
   publishDir "${params.outdir}/metagenomic_classification", mode:"copy"
 
   when:
@@ -2041,6 +2077,7 @@ if (params.maltextract_taxon_list== '') {
 }
 
 process maltextract {
+  label 'mc_large'
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
 
   when: 
@@ -2090,9 +2127,8 @@ Genotyping tools:
 - sequenceTools
 
 Downstream VCF tools:
-- vcf2genome
-- gencons
-- READ/mcMLKin
+- gencons?
+- READ/mcMLKin?
 - popGen output? PLINK? 
 */
 
@@ -2100,6 +2136,7 @@ Downstream VCF tools:
  * Step 18a - Output Description HTML
  */
 process output_documentation {
+    label 'sc_tiny'
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
@@ -2118,6 +2155,7 @@ process output_documentation {
  * Step 18b - Parse software version numbers
  */
 process get_software_versions {
+  label 'sc_tiny'
   publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
 
     output:
@@ -2163,6 +2201,8 @@ process get_software_versions {
  * Step 18c - MultiQC
  */
 process multiqc {
+    label 'sc_tiny'
+
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
