@@ -179,94 +179,63 @@ def get_mapped_reads(fq_dict, mapped_reads):
     return(fqd)
 
 
-def prepare_fq(fq_dict_key, fq_dict, write_mode, strip_mode):
-    """Prepare fastq for writing
-
-    Args:
-        fq_dict_key(str): dictionary key of fq_dict
-        fq_dict(dict): fq_dict with unmapped read names as keys,
-            unmapped/mapped (u|m), seq, and quality as values in a list
-        write_mode (str): 'rb' or 'r'
-        strip_mode (str): strip (remove read) or replace (replace read sequence) by Ns
-    """
-    wstring = ""
-    if strip_mode == 'strip':
-        # print("strip")
-        # if unmapped, write all the read lines
-        # print(fq_dict_key)
-        print(fq_dict[fq_dict_key])
-        if fq_dict[fq_dict_key][0] == 'u':
-            wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
-            for i in fq_dict[fq_dict_key][2:]:
-                wstring += f"{i}\n"
-        # if mapped, do not write the read lines
-            print(wstring)
-        else:
-            return("")
-
-    else:
-        # if unmapped, write all the read lines
-        if fq_dict[fq_dict_key][0] == 'u':
-            wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
-            for i in fq_dict[fq_dict_key][2:]:
-                wstring += f"{i}\n"
-        # if mapped, write all the read lines, but replace sequence
-        # by N*(len(sequence))
-        elif fq_dict[fq_dict_key][0] == 'm':
-            wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
-            wstring += f"{'N'*len(fq_dict[fq_dict_key][2])}\n"
-            for i in fq_dict[fq_dict_key][3:]:
-                wstring += f"{i}\n"
-
-    if write_mode == 'wb':
-        return(wstring.encode())
-    else:
-        return(wstring)
-
-
-def prepare_fq_multi(fq_dict, write_mode, strip_mode, proc):
-    """Multiprocess of prepare fastq for writing
-
-    Args:
-        fq_dict(dict): fq_dict with unmapped read names as keys,
-            unmapped/mapped (u|m), seq, and quality as values in a list
-        write_mode (str): [description]
-        write_mode (str): 'wb' or 'r'
-        strip_mode (str): strip (remove read) or replace (replace read sequence) by Ns
-        proc(int): number of processes
-    Returns:
-        res(list): list of fastq entries
-    """
-    fq_dict_keys = list(fq_dict.keys())
-    prep_fq = partial(prepare_fq, fq_dict=fq_dict,
-                      write_mode=write_mode, strip_mode=strip_mode)
-    with multiprocessing.Pool(proc) as p:
-        res = p.map(prep_fq, fq_dict_keys)
-    return(res)
-
-
-def write_fq(write_list, fname, write_mode, proc):
+def write_fq(fq_dict, fname, write_mode, strip_mode, proc):
     """Write to fastq file
     Args:
-        write_list(list): list of fastq entries
+        fq_dict(dict): fq_dict with unmapped read names as keys,
+            unmapped/mapped (u|m), seq, and quality as values in a list
         fname(string) Path to output fastq file
         write_mode (str): 'rb' or 'r'
+        strip_mode (str): strip (remove read) or replace (replace read sequence) by Ns
         proc(int) number of processes
     """
+    fq_dict_keys = list(fq_dict.keys())
     if write_mode == 'wb':
         with xopen(fname, mode='wb', threads=proc) as fw:
-            for entry in write_list:
-                if len(entry) == 0:
-                    continue
-                else:
-                    fw.write(entry)
+            for fq_dict_key in fq_dict_keys:
+                wstring = ""
+                if strip_mode == 'strip':
+                    if fq_dict[fq_dict_key][0] == 'u':
+                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
+                        for i in fq_dict[fq_dict_key][2:]:
+                            wstring += f"{i}\n"
+                elif strip_mode == 'replace':
+                    # if unmapped, write all the read lines
+                    if fq_dict[fq_dict_key][0] == 'u':
+                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
+                        for i in fq_dict[fq_dict_key][2:]:
+                            wstring += f"{i}\n"
+                    # if mapped, write all the read lines, but replace sequence
+                    # by N*(len(sequence))
+                    elif fq_dict[fq_dict_key][0] == 'm':
+                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
+                        wstring += f"{'N'*len(fq_dict[fq_dict_key][2])}\n"
+                        for i in fq_dict[fq_dict_key][3:]:
+                            wstring += f"{i}\n"
+                fw.write(wstring.encode())
     else:
         with open(fname, 'w') as fw:
-            for entry in write_list:
-                if len(entry) == 0:
-                    continue
-                else:
-                    fw.write(entry)
+            for fq_dict_key in fq_dict_keys:
+                wstring = ""
+                if strip_mode == 'strip':
+                    if fq_dict[fq_dict_key][0] == 'u':
+                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
+                        for i in fq_dict[fq_dict_key][2:]:
+                            wstring += f"{i}\n"
+                elif strip_mode == 'replace':
+                    # if unmapped, write all the read lines
+                    if fq_dict[fq_dict_key][0] == 'u':
+                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
+                        for i in fq_dict[fq_dict_key][2:]:
+                            wstring += f"{i}\n"
+                    # if mapped, write all the read lines, but replace sequence
+                    # by N*(len(sequence))
+                    elif fq_dict[fq_dict_key][0] == 'm':
+                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
+                        wstring += f"{'N'*len(fq_dict[fq_dict_key][2])}\n"
+                        for i in fq_dict[fq_dict_key][3:]:
+                            wstring += f"{i}\n"
+                fw.write(wstring)
 
 
 def check_strip_mode(mode):
@@ -291,7 +260,7 @@ if __name__ == "__main__":
     strip_mode = check_strip_mode(MODE)
     BAMFILE = pysam.AlignmentFile(BAM, 'r')
 
-    # FORWARD OR SE FILE
+   # FORWARD OR SE FILE
     print(f"- Extracting mapped reads from {BAM}")
     mapped_reads = extract_mapped(proc=PROC)
     print(f"- Parsing forward fq file {IN_FWD}")
@@ -299,12 +268,9 @@ if __name__ == "__main__":
     print("- Cross referencing mapped reads in forward fq")
     fq_dict_fwd = get_mapped_reads(fqd_fwd, mapped_reads)
     # print(fq_dict_fwd)
-    print("- Preparing to write forward fq")
-    fq_write_fwd = prepare_fq_multi(
-        fq_dict_fwd, write_mode=write_mode, strip_mode=strip_mode, proc=PROC)
     print(f"- Writing forward fq to {out_fwd}")
-    write_fq(write_list=fq_write_fwd, fname=out_fwd,
-             write_mode=write_mode, proc=PROC)
+    write_fq(fq_dict=fq_dict_fwd, fname=out_fwd,
+             write_mode=write_mode, strip_mode=strip_mode, proc=PROC)
 
     # REVERSE FILE
     if IN_REV:
@@ -316,9 +282,6 @@ if __name__ == "__main__":
         fqd_rev = parse_fq(IN_REV)
         print("- Cross referencing mapped reads in reverse fq")
         fq_dict_rev = get_mapped_reads(fqd_rev, mapped_reads)
-        print("- Preparing to write reverse fq")
-        fq_write_rev = prepare_fq_multi(
-            fq_dict_rev, write_mode=write_mode, strip_mode=strip_mode, proc=PROC)
         print(f"- Writing reverse fq to {out_rev}")
-        write_fq(write_list=fq_write_rev, fname=out_rev,
-                 write_mode=write_mode, proc=PROC)
+        write_fq(fq_dict=fq_dict_rev, fname=out_rev,
+                 write_mode=write_mode, strip_mode=strip_mode, proc=PROC)
