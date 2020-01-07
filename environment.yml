@@ -35,4 +35,6 @@ dependencies:
   - bioconda::sexdeterrmine=1.1.1
   - bioconda::multivcfanalyzer=0.85.1
   - bioconda::hops=0.33
+  - conda-forge::biopython=1.75
+  - conda-forge::xopen=0.8.4
   #Missing Schmutzi,snpAD
