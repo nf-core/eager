@@ -1298,7 +1298,7 @@ if (params.run_bam_filtering) {
 process strip_input_fastq {
     label 'mc_medium'
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/samtools/stripped_fastq", mode: 'copy'
+    publishDir "${params.outdir}/stripped_fastq", mode: 'copy'
 
     when: 
     params.strip_input_fastq
@@ -1313,20 +1313,17 @@ process strip_input_fastq {
 
     script:
     if (params.singleEnd) {
-        out_fwd = bam.baseName+'.stripped.fq'
+        out_fwd = bam.baseName+'.stripped.fq.gz'
         """
         samtools index $bam
         extract_map_reads.py $bam ${fq[0]} -m ${params.strip_mode} -of $out_fwd -p ${task.cpus}
-        pigz -p ${task.cpus} $out_fwd
         """
     } else {
-        out_fwd = bam.baseName+'.stripped.fwd.fq'
-        out_rev = bam.baseName+'.stripped.rev.fq'
+        out_fwd = bam.baseName+'.stripped.fwd.fq.gz'
+        out_rev = bam.baseName+'.stripped.rev.fq.gz'
         """
         samtools index $bam
         extract_map_reads.py $bam ${fq[0]} -rev ${fq[1]} -m  ${params.strip_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
-        pigz -p ${task.cpus} $out_fwd
-        pigz -p ${task.cpus} $out_rev
         """ 
     }
     
