@@ -1298,7 +1298,7 @@ if (params.run_bam_filtering) {
 process strip_input_fastq {
     label 'mc_medium'
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/samtools/stripped_fastq", mode: 'copy'
+    publishDir "${params.outdir}/stripped_fastq", mode: 'copy'
 
     when: 
     params.strip_input_fastq
