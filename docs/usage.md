@@ -723,6 +723,8 @@ Indicates which BAM file to use for genotyping, depending on what BAM processing
 
 Specify a path to a local copy of a GATK 3.5 `.jar` file, preferably version '3.5-0-g36282e4'. The download location of this may be avaliable from the GATK forums of the Broad Institute.
 
+> You must manually report your version of GATK 3.5 in publications/MultiQC as it is not included in our container.
+
 #### `--gatk_call_conf`
 
 If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: 30

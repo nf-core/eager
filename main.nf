@@ -363,7 +363,7 @@ if (params.run_genotyping){
   }
 
   if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
-  exit 1, "Please specify path to a GATK 3.5 .jar file."
+  exit 1, "Please specify path to a GATK 3.5 .jar file with --gatk_ug_jar."
   }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
@@ -1695,8 +1695,8 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
  */
 
 Channel
-  .value(params.gatk_ug_jar)
-  .into{ ch_unifiedgenotyper_jar; ch_unifiedgenotyper_versions_jar }
+  .fromPath( params.gatk_ug_jar )
+  .set{ ch_unifiedgenotyper_jar }
 
  process genotyping_ug {
   label 'mc_small'
@@ -2174,9 +2174,6 @@ process get_software_versions {
     vcf2genome -h |& head -n 1 &> v_vcf2genome.txt || true
     mtnucratio --help &> v_mtnucratiocalculator.txt || true
     sexdeterrmine --version &> v_sexdeterrmine.txt || true
-
-    ## Hardcoded as no --version flag or equivalent
-    echo 'version 3.5-0-g36282e4' > v_gatk3_5.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
