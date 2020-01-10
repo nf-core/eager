@@ -2155,32 +2155,32 @@ process get_software_versions {
 
     script:
     """
-    echo $workflow.manifest.version &> v_pipeline.txt
-    echo $workflow.nextflow.version &> v_nextflow.txt
-    fastqc --version &> v_fastqc.txt 2>&1 || true
-    AdapterRemoval --version  &> v_adapterremoval.txt 2>&1 || true
-    fastp --version &> v_fastp.txt 2>&1 || true
-    bwa &> v_bwa.txt 2>&1 || true
-    circulargenerator --help | head -n 1 &> v_circulargenerator.txt 2>&1 || true
-    samtools --version &> v_samtools.txt 2>&1 || true
-    dedup -v &> v_dedup.txt 2>&1 || true
-    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
-    qualimap --version &> v_qualimap.txt 2>&1 || true
-    preseq &> v_preseq.txt 2>&1 || true
-    gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
-    freebayes --version &> v_freebayes.txt 2>&1 || true
-    bedtools --version &> v_bedtools.txt 2>&1 || true
-    damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
-    bam --version &> v_bamutil.txt 2>&1 || true
-    pmdtools --version &> v_pmdtools.txt 2>&1 || true
-    angsd -h |& head -n 1 | cut -d ' ' -f3-4 &> v_angsd.txt 2>&1 || true 
-    multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
-    malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d ',' &> v_malt.txt 2>&1 || true
-    MaltExtract --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
-    multiqc --version &> v_multiqc.txt 2>&1 || true
-    vcf2genome -h |& head -n 1 &> v_vcf2genome.txt || true
-    mtnucratio --help &> v_mtnucratiocalculator.txt || true
-    sexdeterrmine --version &> v_sexdeterrmine.txt || true
+    echo "eager" && echo $workflow.manifest.version &> v_pipeline.txt
+    echo "nf" && echo $workflow.nextflow.version &> v_nextflow.txt
+    echo "fqc" && fastqc --version &> v_fastqc.txt 2>&1 || true
+    echo "ar" && AdapterRemoval --version  &> v_adapterremoval.txt 2>&1 || true
+    echo "fp" && fastp --version &> v_fastp.txt 2>&1 || true
+    echo "bwa" && bwa &> v_bwa.txt 2>&1 || true
+    echo "cg" && circulargenerator --help | head -n 1 &> v_circulargenerator.txt 2>&1 || true
+    echo "st" && samtools --version &> v_samtools.txt 2>&1 || true
+    echo "dd" && dedup -v &> v_dedup.txt 2>&1 || true
+    echo "pc" && picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
+    echo "qm" && qualimap --version &> v_qualimap.txt 2>&1 || true
+    echo "pr" && preseq &> v_preseq.txt 2>&1 || true
+    echo "gk" && gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
+    echo "fb" && freebayes --version &> v_freebayes.txt 2>&1 || true
+    echo "bt" && bedtools --version &> v_bedtools.txt 2>&1 || true
+    echo "dp" && damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
+    echo "bu" && bam --version &> v_bamutil.txt 2>&1 || true
+    echo "pd" && pmdtools --version &> v_pmdtools.txt 2>&1 || true
+    echo "ad" && angsd -h |& head -n 1 | cut -d ' ' -f3-4 &> v_angsd.txt 2>&1 || true 
+    echo "ma" && multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
+    echo "mt" && malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d ',' &> v_malt.txt 2>&1 || true
+    echo "me" && MaltExtract --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
+    echo "mq" && multiqc --version &> v_multiqc.txt 2>&1 || true
+    echo "vg" && vcf2genome -h |& head -n 1 &> v_vcf2genome.txt || true
+    echo "mn" && mtnucratio --help &> v_mtnucratiocalculator.txt || true
+    echo "sd" && sexdeterrmine --version &> v_sexdeterrmine.txt || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
