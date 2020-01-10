@@ -124,8 +124,9 @@ def helpMessage() {
 
     Genotyping
       --run_genotyping                Perform genotyping on deduplicated BAMs.
-      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5 and requires internet access. Options: 'ug', 'hc', 'freebayes'
+      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes'
       --genotyping_source             Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
+      --gatk_ug_jar                   When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.
       --gatk_call_conf                Specify GATK phred-scaled confidence threshold. Default: 30.
       --gatk_ploidy                   Specify GATK organism ploidy. Default: 2.
       --gatk_dbsnp                    Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
@@ -359,6 +360,10 @@ if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapp
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
   exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
+  }
+
+  if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
+  exit 1, "Please specify path to a GATK 3.5 .jar file."
   }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
@@ -1685,33 +1690,13 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
 
 
 /*
- Step 12a: Genotyping - UnifiedGenotyper Downloading
- NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking downstream tools. Therefore we need it (for now at least until downstream tools can read proper 4.2 VCFs... )
-    
+ Step 12b: Genotyping - UG
+ NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking MVA. Therefore we need it (for now at least until downstream tools can read proper 4.2 VCFs... )
  */
 
-ch_gatk_download = Channel.value("download")
-
- process download_gatk_v3_5 {
-    label 'sc_tiny'
-    when: params.run_genotyping && params.genotyping_tool == 'ug'
-
-    input: 
-    val "download" from ch_gatk_download
-
-    output:
-    file "*.jar" into ch_unifiedgenotyper_jar,ch_unifiedgenotyper_versions_jar
-
-    """
-    wget -O GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4' 
-    tar xjf GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 
-    """
-
- }
-
-/*
- Step 12b: Genotyping - UG
-*/
+Channel
+  .value(params.gatk_ug_jar)
+  .into{ ch_unifiedgenotyper_jar; ch_unifiedgenotyper_versions_jar }
 
  process genotyping_ug {
   label 'mc_small'
