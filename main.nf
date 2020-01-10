@@ -1694,9 +1694,16 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
  NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking MVA. Therefore we need it (for now at least until downstream tools can read proper 4.2 VCFs... )
  */
 
-Channel
-  .fromPath( params.gatk_ug_jar )
-  .set{ ch_unifiedgenotyper_jar }
+if ( params.gatk_ug_jar != '' ) {
+  Channel
+    .fromPath( params.gatk_ug_jar )
+    .set{ ch_unifiedgenotyper_jar }
+} else {
+  Channel
+    .empty()
+    .set{ ch_unifiedgenotyper_jar }
+}
+
 
  process genotyping_ug {
   label 'mc_small'
