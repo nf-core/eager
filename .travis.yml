@@ -77,6 +77,12 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-freebayes" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'freebayes'
   # SKIPPING: Test checking all skip steps work i.e. input bam, skipping straight to genotyping
   - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-skipping_logic" -profile test_bam,docker --bam --singleEnd --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
+  # TRIM_BAM/PMD/GENOTYPING_UG/MULTIVCFANALYZER: Test running PMDTools, TrimBam, GATK UnifiedGenotyper and MultiVCFAnalyzer
+  #- nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-pmd_trimbam_unifiedgenotyper_multivcfanalyzer" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
+  # GENOTYPING_UG/PMD/MULTIVCFANALYZER: Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
+  #- nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-multivcfanalyzer_additionalvcfs" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/jfy133/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+  # VCF2GENOME: Test running GATK UnifiedGenotyper and run VCF2GENOME
+  #- nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-vcf2genome" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_vcf2genome
   # BAM_INPUT: Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
   - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-baminput_noConvertBam" -profile test_bam,docker --bam --skip_adapterremoval --run_convertbam
   # BAM_INPUT: Run the basic pipeline with the bam input profile, convert to FASTQ for adapterremoval test and downstream
@@ -93,11 +99,5 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} "$TOWER" -name "$RUN_NAME-nuclearcontamination" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --skip_preseq --skip_damage_calculation --run_nuclear_contamination
   # MTNUCRATIO Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nmtnucratio
   - nextflow run ${TRAVIS_BUILD_DIR} "$TOWER" -name "$RUN_NAME-mtnucratio" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --skip_preseq --skip_damage_calculation --run_mtnucratio
-  # Download GATK 3.5 JAR
-  - mkdir -p ${TRAVIS_BUILD_DIR}/jars wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -p ${TRAVIS_BUILD_DIR}/jars && tar xjf ${TRAVIS_BUILD_DIR}/jars/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
-  # TRIM_BAM/PMD/GENOTYPING_UG/MULTIVCFANALYZER: Test running PMDTools, TrimBam, GATK UnifiedGenotyper and MultiVCFAnalyzer
-  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-pmd_trimbam_unifiedgenotyper_multivcfanalyzer" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_ug_jar '${TRAVIS_BUILD_DIR}/jars/GenomeAnalysisTK.jar' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
-  # GENOTYPING_UG/PMD/MULTIVCFANALYZER: Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
-  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-multivcfanalyzer_additionalvcfs" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_ug_jar '${TRAVIS_BUILD_DIR}/jars/GenomeAnalysisTK.jar' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/jfy133/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
-  # VCF2GENOME: Test running GATK UnifiedGenotyper and run VCF2GENOME
-  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-vcf2genome" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_ug_jar '${TRAVIS_BUILD_DIR}/jars/GenomeAnalysisTK.jar' --genotyping_source 'raw' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_vcf2genome
+
+
