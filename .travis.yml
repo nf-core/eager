@@ -94,7 +94,7 @@ script:
   # MTNUCRATIO Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nmtnucratio
   - nextflow run ${TRAVIS_BUILD_DIR} "$TOWER" -name "$RUN_NAME-mtnucratio" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --skip_preseq --skip_damage_calculation --run_mtnucratio
   # Download GATK 3.5 JAR
-  - mkdir -p ${TRAVIS_BUILD_DIR}/jars && wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -P ${TRAVIS_BUILD_DIR}/jars && tar xjf ${TRAVIS_BUILD_DIR}/jars/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
+  - mkdir -p ${TRAVIS_BUILD_DIR}/jars wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -p ${TRAVIS_BUILD_DIR}/jars && tar xjf ${TRAVIS_BUILD_DIR}/jars/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
   # TRIM_BAM/PMD/GENOTYPING_UG/MULTIVCFANALYZER: Test running PMDTools, TrimBam, GATK UnifiedGenotyper and MultiVCFAnalyzer
   - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-pmd_trimbam_unifiedgenotyper_multivcfanalyzer" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_ug_jar '${TRAVIS_BUILD_DIR}/jars/GenomeAnalysisTK.jar' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
   # GENOTYPING_UG/PMD/MULTIVCFANALYZER: Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
