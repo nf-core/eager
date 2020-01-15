@@ -118,7 +118,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-mtnucratio" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --singleEnd --skip_preseq --skip_damage_calculation --run_mtnucratio
       - name: GENOTYPING_UG Download GATK UG 3.5 jar
         run : |
-          mkdir -p jars && wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -P jars/ && tar xjf jars/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
+          mkdir -p jars && wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -P jars/ && tar xjf jars/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 && && readlink -f jars/GenomeAnalysisTK.jar
       - name: TRIM_BAM/PMD/GENOTYPING_UG/MULTIVCFANALYZER Test running PMDTools, TrimBam, GATK UnifiedGenotyper and MultiVCFAnalyzer
         run: |
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-pmd_trimbam_gatkUG_MVA" -profile test,docker --pairedEnd  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_ug_jar '/home/runner/work/eager/eager/jars/GenomeAnalysisTK.jar' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
