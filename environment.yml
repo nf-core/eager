@@ -4,7 +4,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - conda-forge::rename=1.601
+  - bioconda::rename=1.601
   - conda-forge::openjdk=8.0.144
   - bioconda::fastqc=0.11.8
   - bioconda::adapterremoval=2.3.1
