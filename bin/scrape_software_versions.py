@@ -15,7 +15,7 @@ regexes = {
     'BWA': ['v_bwa.txt', r"Version: (\S+)"],
     'Qualimap': ['v_qualimap.txt', r"QualiMap v.(\S+)"],
     'GATK HaplotypeCaller': ['v_gatk.txt', r" v(\S+)"],
-    'GATK UnifiedGenotyper': ['v_gatk3_5.txt', r"version (\S+)"],
+    #'GATK UnifiedGenotyper': ['v_gatk3_5.txt', r"version (\S+)"],
     'bamUtil' : ['v_bamutil.txt', r"Version: (\S+);"],
     'fastP': ['v_fastp.txt', r"([\d\.]+)"],
     'DamageProfiler' : ['v_damageprofiler.txt', r"DamageProfiler v(\S+)"],
@@ -47,7 +47,7 @@ results['Picard MarkDuplicates'] = '<span style="color:#999999;\">N/A</span>'
 results['Qualimap'] = '<span style="color:#999999;\">N/A</span>'
 results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
 results['GATK HaplotypeCaller'] = '<span style="color:#999999;\">N/A</span>'
-results['GATK UnifiedGenotyper'] = '<span style="color:#999999;\">N/A</span>'
+#results['GATK UnifiedGenotyper'] = '<span style="color:#999999;\">N/A</span>'
 results['freebayes'] = '<span style="color:#999999;\">N/A</span>'
 results['VCF2genome'] = '<span style="color:#999999;\">N/A</span>'
 results['MTNucRatioCalculator'] = '<span style="color:#999999;\">N/A</span>'
