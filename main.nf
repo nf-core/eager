@@ -1648,46 +1648,41 @@ process bam_trim {
     """
 }
 
-
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
-
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
-
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .filter { it =~/.*trimmed.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*trimmed.bam.bai|.*.trimmed.bam.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
-
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .filter { it =~/.*pmd.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*pmd.bam.bai|.*.pmd.bam.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
-
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-
     ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-
     ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+} else if ( !params.run_genotyping && params.run_trim_bam && !params.run_pmdtools )  {
+    ch_rmdup_for_skipdamagemanipulation
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+    ch_rmdupindex_for_skipdamagemanipulation
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 }
-
 
 /*
  Step 12b: Genotyping - UG
