@@ -644,7 +644,7 @@ process adapter_removal {
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me}
     #Combine files
-    zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+    cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.combined.fq.gz
     """
     //PE, don't collapse, but trim reads
     } else if (!params.singleEnd && params.skip_collapse && !params.skip_trim) {
