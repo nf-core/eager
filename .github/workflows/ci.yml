@@ -27,7 +27,7 @@ jobs:
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
       - name: Pull image
-          run: |
+        run: |
           docker pull nfcore/eager:dev && docker tag nfcore/eager:dev nfcore/eager:dev
       - name: Extract branch name
         shell: bash
