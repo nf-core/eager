@@ -81,7 +81,7 @@ Additional functionality contained by the pipeline currently includes:
 
 4. Test the pipeline using the provided test data
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda>,test --pairedEnd
+        nextflow run nf-core/eager -profile <docker/singularity/conda>,test --paired_end
 
 5. Start running your own ancient DNA analysis!
 
