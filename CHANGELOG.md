@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fancy new logo from [ZandraFagernas](https://github.com/ZandraFagernas)
 * [#286](https://github.com/nf-core/eager/issues/286) - Adds pipeline-specific profiles (loaded from nf-core configs)
 * [#310](https://github.com/nf-core/eager/issues/310) - Generalises base.config
-* [#326](https://github.com/nf-core/eager/pull/326) - Add Biopython and [xopen](https://github.com/marcelm/xopen/) dependancies  
+* [#326](https://github.com/nf-core/eager/pull/326) - Add Biopython and [xopen](https://github.com/marcelm/xopen/) dependencies  
 
 ### `Fixed`
 
@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#237](https://github.com/nf-core/eager/issues/237) - Fixed and Updated script scrape_software_versions
 * [#322](https://github.com/nf-core/eager/pull/322) - Move extract map reads fastq compression to pigz
 * [#327](https://github.com/nf-core/eager/pull/327) - Speed up strip_input_fastq process and make it more robust
+* Updated to match nf-core tools 1.8 linting guidelines
 
 ### `Dependencies`
 
