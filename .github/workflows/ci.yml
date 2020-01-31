@@ -29,7 +29,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Download image
         run: |
-          docker pull nfcore/eager:dev && docker tag nfcore/eager:dev
+          docker pull nfcore/eager:dev && docker tag nfcore/eager:dev nfcore/eager:dev
       - name: Extract branch name
         shell: bash
         run: echo "::set-env name=RUN_NAME::`echo ${GITHUB_REPOSITORY//\//_}`-`echo ${GITHUB_HEAD_REF//\//@} | rev | cut -f1 -d@ | rev`-${{ github.event_name }}-`echo ${GITHUB_SHA} | cut -c1-6`"
