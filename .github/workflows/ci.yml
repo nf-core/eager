@@ -24,11 +24,12 @@ jobs:
       - uses: actions/checkout@v1
       - name: Install Nextflow
         run: |
+          export NXF_VER=${{ matrix.nxf_ver }}
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Pull image
+      - name: Download image
         run: |
-          docker pull nfcore/eager:dev && docker tag nfcore/eager:dev nfcore/eager:dev
+          docker pull nfcore/eager:dev && docker tag nfcore/eager:dev
       - name: Extract branch name
         shell: bash
         run: echo "::set-env name=RUN_NAME::`echo ${GITHUB_REPOSITORY//\//_}`-`echo ${GITHUB_HEAD_REF//\//@} | rev | cut -f1 -d@ | rev`-${{ github.event_name }}-`echo ${GITHUB_SHA} | cut -c1-6`"
