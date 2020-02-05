@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#322](https://github.com/nf-core/eager/pull/322) - Move extract map reads fastq compression to pigz
 * [#327](https://github.com/nf-core/eager/pull/327) - Speed up strip_input_fastq process and make it more robust
 * [#342](https://github.com/nf-core/eager/pull/342) - Updated to match nf-core tools 1.8 linting guidelines
+* [#339](https://github.com/nf-core/eager/issues/339) - Converted unnecessary zcat + gzip to just cat for a performance boost
 
 ### `Dependencies`
 
