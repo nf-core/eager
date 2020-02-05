@@ -895,15 +895,19 @@ Turn on the metagenomic screening module.
 
 #### `--metagenomic_tool`
 
-Specify which taxonomic classifier to use. The only option avaliable is currently 'malt'.
-
-More can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
-
+Specify which taxonomic classifier to use. There are two options avaliable:
+- malt: more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
 :warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
+- [Kraken2](https://ccb.jhu.edu/software/kraken2) 
+
+#### `--metagenomic_min_support_reads`
+
+Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'. 
+For malt, this only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
 
 #### `--database`
 
-Specify the path to the _directory_ containing your taxonomic classifer's database.
+Specify the path to the _directory_ containing your taxonomic classifer's database (malt or kraken).
 
 #### `--percent_identity`
 
@@ -931,10 +935,6 @@ Specify whether to use a percentage, or raw number of reads as the value used to
 #### `--malt_min_support_percent`
 
 Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.
-
-#### `--malt_min_support_reads`
-
-Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
 
 #### `--malt_max_queries`
 
