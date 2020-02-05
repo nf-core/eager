@@ -934,13 +934,13 @@ process adapter_removal {
     
     #Combine files
     if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
-      zcat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.combined.fq.gz
     elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
-      zcat *.collapsed.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz > output/${base}.combined.fq.gz
     elif [ ${mergedonly} = "Y" ] ; then
-      zcat *.collapsed.gz *.collapsed.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.combined.fq.gz
     else
-      zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.combined.fq.gz
     fi
    
     mv *.settings output/
@@ -959,9 +959,9 @@ process adapter_removal {
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --basename ${base} ${collapse_me} ${trim_me}
     
     if [ ${mergedonly} = "Y" ]; then
-      zcat *.collapsed.gz *.collapsed.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.combined.fq.gz
     else
-      zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.combined.fq.gz
     fi
 
     mv *.settings output/
