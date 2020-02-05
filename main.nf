@@ -27,11 +27,8 @@ def helpMessage() {
     nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' -profile docker
 
     Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs
+      --input                       Path to input design file.
       -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation
-      --single_end                   Specifies that the input is single end reads (required if not paired_end)
-      --paired_end                   Specifies that the input is paired end reads (required if not single_end)
-      --bam                         Specifies that the input is in BAM format
       --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference)
 
@@ -225,17 +222,25 @@ if (params.help){
 }
 
 // Configurable variables
-
-
 multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
+// Read in files properly from TSV file
+tsvPath = null
+if (params.input && (hasExtension(params.input, "tsv")) tsvPath = params.input
+
+inputSample = Channel.empty()
+if (tsvPath) {
+    tsvFile = file(tsvPath)
+    inputSample = extractData(tsvFile)
+} else exit 1, 'No samples were properly defined, see --help and documentation for details.'
+
 /*
-* SANITY CHECKING
+* SANITY CHECKING reference inputs
 */
 
-// Validate inputs
+// Validate reference inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "Please specify --fasta with the path to your reference"
 } else if("${params.fasta}".endsWith(".gz")){
@@ -289,16 +294,6 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
         .fromPath(bwa_dir, checkIfExists: true)
         .ifEmpty { exit 1, "BWA index directory not found: ${bwa_dir}" }
         .into {bwa_index; bwa_index_bwamem}
-}
-
-// Validate not trying to run adapterremoval on a BAM file
-if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
-    exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
-}
-
-// Validate BAM is single end only
-if (params.bam && !params.single_end){
-    exit 1, "BAM input must be used with --single_end "
 }
 
 // Validate that you're not trying to pass FASTQs to BAM only processes
@@ -397,7 +392,7 @@ if (params.run_vcf2genome) {
 // MultiVCFAnalyzer sanity checking
 if (params.run_multivcfanalyzer) {
   if (!params.run_genotyping) {
-    exit 1, "MultiVCFAnalyzer requires genotyping on be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
+    exit 1, "MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
   }
 
   if (params.genotyping_tool != "ug") {
@@ -484,7 +479,7 @@ if( workflow.profile == 'awsbatch') {
   // related: https://github.com/nextflow-io/nextflow/issues/813
   if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
   // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-  if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+  if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
 
@@ -493,7 +488,6 @@ if( workflow.profile == 'awsbatch') {
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
-
 // If read paths
 //    Is single FASTQ
 //    Is paired-end FASTQ
@@ -501,53 +495,23 @@ if( workflow.profile == 'awsbatch') {
 // If NOT read paths && FASTQ
 // is NOT read paths && BAM
 
-if( params.readPaths ){
-    if( params.single_end && !params.bam) {
-        Channel
-            .from( params.readPaths )
-            .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-            .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
-            .map { row -> [ row[0], [ file( row[1][0] ) ] ] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
-            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
+// Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
+inputSample.branch{
+    fastq: returnFile(it[7]) != 'NA' //These are all fastqs
+    bam: returnFile(it[9]) != 'NA' //These are all BAMs
+}
+.dump(tag: 'input')
+.set { result }
 
-    } else if (!params.bam){
-        Channel
-            .from( params.readPaths )
-            .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-            .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
-            .map { row -> [ row[0], [ file( row[1][0] ), file( row[1][1] ) ] ] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
-            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
-    } else {
-        Channel
-            .from( params.readPaths )
-            .filter { it =~/.*.bam/ }
-            .ifEmpty { exit 1, "Your specified BAM read files did not end in: '.bam' " }
-            .map { row -> [ file( row )  ] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied!" }
-            .dump()
-            .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
-
-    }
-} else if (!params.bam){
-     Channel
-        .fromFilePairs( params.reads, size: params.single_end ? 1 : 2 )
-        .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs " +
-            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nIf this is single-end data, please specify --single_end on the command line." }
-        .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam  }
-
-} else {
-     Channel
-        .fromPath( params.reads )
-        .filter { it =~/.*.bam/ }
-        .map { row -> [  file( row )  ] }
-        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nNB: Path needs " +
-            "to be enclosed in quotes!\n" }
-        .dump() //For debugging purposes
-        .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
-
+//Removing BAM/BAI in case of a FASTQ input
+fastq_channel = result.fastq.map {
+  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
+    [sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
+}
+//Removing R1/R2 in case of BAM input
+bam_channel = result.bam.map {
+  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
+    [sname, lid, lane, seqtype, organism, strandedness, udg, bam, bai, group, pop, age]
 }
 
 // Header log info
@@ -556,11 +520,10 @@ def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
-summary['Reads']        = params.reads
+summary['Input']        = params.input
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
-summary['Data Type']    = params.single_end ? 'Single-End' : 'Paired-End'
 summary['Skipping FASTQC?'] = params.skip_fastqc ? 'Yes' : 'No'
 summary['Skipping AdapterRemoval?'] = params.skip_adapterremoval ? 'Yes' : 'No'
 if (!params.skip_adapterremoval) {
@@ -773,18 +736,21 @@ ch_dict_for_skipdict.mix(ch_seq_dict)
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
 */ 
 
+// TODO separate BAM channel should handle this, if params.bamconvert is set, all BAMs are converted to FASTQ and then mixed with the channel that provides the FASTQ files already
+// TODO STOPPED HERE. If that param is not provided, we can simply mix channels after mapping, to provide the same type of data. Need to find out whether we merge before DeDup or after DeDup. Different lanes, same library ID = merge together, then DeDup. Different lanes, different library ID = DeDup first, then merge together (PCR is done on library, not lanes!)
+
 process convertBam {
     label 'mc_small'
     tag "$bam"
     
     when: 
-    params.bam && params.run_convertbam
+    params.run_convertbam
 
     input: 
-    file bam from ch_input_for_convertbam 
+    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from bam_channel 
 
     output:
-    set val("${base}"), file("*.fastq.gz") into ch_output_from_convertbam
+    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -1012,7 +978,6 @@ process fastqc_after_clipping {
     fastqc -q $reads
     """
 }
-
 
 /*
 Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
@@ -2371,5 +2336,46 @@ def checkHostname(){
                 }
             }
         }
+    }
+}
+
+// Channeling the TSV file containing FASTQ or BAM
+// Format is: "Sample_Name 	Library_ID 	Lane 	SeqType 	Organism 	Strandedness 	UDG_Treatment 	R1 	R2 	BAM 	BAM_Index	Group 	Populations	Age"
+def extractData(tsvFile) {
+    Channel.from(tsvFile)
+        .splitCsv(sep: '\t')
+        .map { row ->
+            def samplename  = row[0]
+            def libraryid     = row[1]
+            def lane     = row[2]
+            def seqtype   = if (row[3] != ('SE' || 'PE')) exit 1, "SeqType for row[3] is neither SE nor PE!"
+            def organism      = row[4]
+            def strandedness = row[5]
+            def udg = row[6]
+            def file1 = returnFile(row[7])
+            def file2      = "null"
+            if (hasExtension(file1, "fastq.gz") || hasExtension(file1, "fq.gz" || hasExtension(file1, "fastq") || hasExtension(file1, "fq"))) {
+                checkNumberOfItems(row, 14)
+                file2 = returnFile(row[8])
+            if (!hasExtension(file2, "fastq.gz") && !hasExtension(file2, "fq.gz") && !hasExtension(file2, "fastq") && !hasExtension(file2, "fq")) exit 1, "File: ${file2} has the wrong extension. See --help for more information"
+            def bam = row[9]
+            def group = row[11]
+            def population = row[12]
+            def age = row[13]
+        }
+        else if (hasExtension(bam, "bam"))
+        else "No recognizable extension for input file: ${file1}"
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, file1, file2, bam, bai, group, population, age ]
+    }
+}
+
+// Return file if it exists, if NA is found this gets treated as a String information
+static def returnFile(it) {
+    if(it == 'NA') {
+        return 'NA'
+    } else { 
+    if (!file(it).exists()) exit 1, "Warning: Missing file in TSV file: ${it}, see --help for more information"
+        return file(it)
     }
 }
