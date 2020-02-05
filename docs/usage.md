@@ -184,37 +184,37 @@ If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
 **Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
 
-#### `--singleEnd`
+#### `--single_end`
 
-If you have single-end data or BAM files, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
 
 ```bash
---singleEnd --reads 'path/to/data/*.fastq'
+--single_end --reads 'path/to/data/*.fastq'
 ```
 
 for a single sample, or
 
 ```bash
---singleEnd --reads 'path/to/data/*/*.fastq'
+--single_end --reads 'path/to/data/*/*.fastq'
 ```
 
 for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`)
 
 **Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
 
-#### `--pairedEnd`
+#### `--paired_end`
 
-If you have paired-end data, you need to specify `--pairedEnd` on the command line when you launc hthe pipeline.
+If you have paired-end data, you need to specify `--paired_end` on the command line when you launc hthe pipeline.
 
 A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
 
 ```bash
---pairedEnd --reads '*.fastq'
+--paired_end --reads '*.fastq'
 ```
 
 #### `--bam`
 
-Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `--singleEnd`.
+Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `--single_end`.
 
 #### `--fasta`
 
@@ -299,7 +299,7 @@ For example:
 ```bash
 nextflow run nf-core/eager \
 -profile test,docker \
---pairedEnd \
+--paired_end \
 --reads '*{R1,R2}*.fq.gz'
 --fasta 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' \
 --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta'
@@ -491,7 +491,7 @@ Turns off the paired-end read merging.
 For example
 
 ```bash
---pairedEnd --skip_collapse  --reads '*.fastq'
+--paired_end --skip_collapse  --reads '*.fastq'
 ```
 
 #### `--skip_trim`
@@ -501,7 +501,7 @@ Turns off adaptor and quality trimming.
 For example:
 
 ```bash
---pairedEnd --skip_trim  --reads '*.fastq'
+--paired_end --skip_trim  --reads '*.fastq'
 ```
 
 #### `--preserve5p`
@@ -713,11 +713,17 @@ Turns on genotyping to run on all post-dedup and downstream BAMs. For example if
 
 Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify `'freebayes'`, `'hc'` or `'ug'` respectively.
 
-> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore specifying 'ug' will download the GATK 3.5 `-jar` for you. This option therefore cannot be used when running the pipeline offline.
+> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deperecated by the Broad Institute and is only accessible by an archived version not properly avaliable on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file.
 
 #### `--genotyping_source`
 
 Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: `'raw'` for mapped only, filtered, or DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs); `'pmd'` (for pmdtools output). Default is: `'raw'`.
+
+#### `--gatk_ug_jar`
+
+Specify a path to a local copy of a GATK 3.5 `.jar` file, preferably version '3.5-0-g36282e4'. The download location of this may be avaliable from the GATK forums of the Broad Institute.
+
+> You must manually report your version of GATK 3.5 in publications/MultiQC as it is not included in our container.
 
 #### `--gatk_call_conf`
 

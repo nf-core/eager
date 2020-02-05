@@ -121,8 +121,9 @@ def helpMessage() {
 
     Genotyping
       --run_genotyping                Perform genotyping on deduplicated BAMs.
-      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper uses now deprecated GATK 3.5 and requires internet access. Options: 'ug', 'hc', 'freebayes'
+      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes'
       --genotyping_source             Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
+      --gatk_ug_jar                   When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.
       --gatk_call_conf                Specify GATK phred-scaled confidence threshold. Default: 30.
       --gatk_ploidy                   Specify GATK organism ploidy. Default: 2.
       --gatk_dbsnp                    Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
@@ -305,15 +306,15 @@ if (params.bam && !params.run_convertbam && !params.skip_mapping) {
   exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
 }
 
-// Validate that either pairedEnd or singleEnd has been specified by the user!
-if( params.singleEnd || params.pairedEnd || params.bam){
+// Validate that either paired_end or single_end has been specified by the user!
+if( params.single_end || params.paired_end || params.bam){
 } else {
-    exit 1, "Please specify either --singleEnd, --pairedEnd to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
+    exit 1, "Please specify either --single_end, --paired_end to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
 }
 
-// Validate that skip_collapse is only set to True for pairedEnd reads!
-if (params.skip_collapse  && params.singleEnd){
-    exit 1, "--skip_collapse can only be set for pairedEnd samples!"
+// Validate that skip_collapse is only set to True for paired_end reads!
+if (params.skip_collapse  && params.single_end){
+    exit 1, "--skip_collapse can only be set for paired_end samples!"
 }
 
 // Strip mode sanity checking
@@ -354,6 +355,10 @@ if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapp
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
   exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
+  }
+
+  if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
+  exit 1, "Please specify path to a GATK 3.5 .jar file with --gatk_ug_jar."
   }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
@@ -489,12 +494,6 @@ if( workflow.profile == 'awsbatch') {
 //    Is single BAM
 // If NOT read paths && FASTQ
 // is NOT read paths && BAM
-
-//We now separate between FASTQ or BAM input per line automatically based on returnFile and checking the extension
-//TSV header is always: Sample_Name 	Library_ID 	Lane 	SeqType 	Organism 	Strandedness 	UDG_Treatment 	R1 	R2 	BAM 	BAM_Index	Group 	Populations	Age
-
-fastq_channel = Channel.create()
-bam_channel = Channel.create()
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
 inputSample.branch{
@@ -843,7 +842,7 @@ process fastp {
     file("*.json") into ch_fastp_for_multiqc
 
     script:
-    if(params.singleEnd){
+    if(params.single_end){
     """
     fastp --in1 ${reads[0]} --out1 "${reads[0].baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${reads[0].baseName}"_fastp.json 
     """
@@ -894,41 +893,41 @@ process adapter_removal {
     mergedonly = params.mergedonly ? "Y" : "N"
     
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
-    if (!params.singleEnd && !params.skip_collapse && !params.skip_trim){
+    if (!params.single_end && !params.skip_collapse && !params.skip_trim){
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
     if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
-      zcat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.combined.fq.gz
     elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
-      zcat *.collapsed.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz > output/${base}.combined.fq.gz
     elif [ ${mergedonly} = "Y" ] ; then
-      zcat *.collapsed.gz *.collapsed.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.combined.fq.gz
     else
-      zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.combined.fq.gz
     fi
    
     mv *.settings output/
     """
     //PE, don't collapse, but trim reads
-    } else if (!params.singleEnd && params.skip_collapse && !params.skip_trim) {
+    } else if (!params.single_end && params.skip_collapse && !params.skip_trim) {
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
     mv *.settings ${base}.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
-    } else if (!params.singleEnd && !params.skip_collapse && params.skip_trim) {
+    } else if (!params.single_end && !params.skip_collapse && params.skip_trim) {
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --basename ${base} ${collapse_me} ${trim_me}
     
     if [ ${mergedonly} = "Y" ]; then
-      zcat *.collapsed.gz *.collapsed.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.combined.fq.gz
     else
-      zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.combined.fq.gz
     fi
 
     mv *.settings output/
@@ -1005,7 +1004,7 @@ process bwa {
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval)){
+    if (!params.single_end && (params.skip_collapse || params.skip_adapterremoval)){
     prefix = "${reads[0].baseName}"
     """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -1075,7 +1074,7 @@ process circularmapper{
     
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && params.skip_collapse ){
+    if (!params.single_end && params.skip_collapse ){
     prefix = "${reads[0].baseName}"
     """ 
     bwa aln -t ${task.cpus} $elongated_root ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -1119,7 +1118,7 @@ process bwamem {
     prefix = "${reads[0].baseName}"
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && params.skip_collapse){
+    if (!params.single_end && params.skip_collapse){
     """
     bwa mem -t ${task.cpus} $fasta ${reads[0]} ${reads[1]} -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
     samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
@@ -1269,7 +1268,7 @@ if (params.run_bam_filtering) {
 process strip_input_fastq {
     label 'mc_medium'
     tag "${bam.baseName}"
-    publishDir "${params.outdir}/samtools/stripped_fastq", mode: 'copy'
+    publishDir "${params.outdir}/stripped_fastq", mode: 'copy'
 
     when: 
     params.strip_input_fastq
@@ -1283,7 +1282,7 @@ process strip_input_fastq {
 
 
     script:
-    if (params.singleEnd) {
+    if (params.single_end) {
         out_fwd = bam.baseName+'.stripped.fq.gz'
         """
         samtools index $bam
@@ -1354,7 +1353,7 @@ process dedup{
     treat_merged="${params.dedup_all_merged}" ? '-m' : ''
     size = "${params.large_ref}" ? '-c' : ''
     
-    if(params.singleEnd) {
+    if(params.single_end) {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
@@ -1614,75 +1613,57 @@ process bam_trim {
     """
 }
 
-
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
-
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
-
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .filter { it =~/.*trimmed.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*trimmed.bam.bai|.*.trimmed.bam.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
-
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .filter { it =~/.*pmd.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-
     ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
         .filter { it =~/.*pmd.bam.bai|.*.pmd.bam.csi/ }
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
-
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-
     ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-
     ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes } 
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+} else if ( !params.run_genotyping && params.run_trim_bam && !params.run_pmdtools )  {
+    ch_rmdup_for_skipdamagemanipulation
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+    ch_rmdupindex_for_skipdamagemanipulation
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 }
-
-
-/*
- Step 12a: Genotyping - UnifiedGenotyper Downloading
- NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking downstream tools. Therefore we need it (for now at least until downstream tools can read proper 4.2 VCFs... )
-    
- */
-
-ch_gatk_download = Channel.value("download")
-
- process download_gatk_v3_5 {
-    label 'sc_tiny'
-    when: params.run_genotyping && params.genotyping_tool == 'ug'
-
-    input: 
-    val "download" from ch_gatk_download
-
-    output:
-    file "*.jar" into ch_unifiedgenotyper_jar,ch_unifiedgenotyper_versions_jar
-
-    """
-    wget -O GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 --referer https://software.broadinstitute.org/ 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4' 
-    tar xjf GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 
-    """
-
- }
 
 /*
  Step 12b: Genotyping - UG
-*/
+ NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking MVA. Therefore we need it (for now at least until downstream tools can read proper 4.2 VCFs... )
+ */
+
+if ( params.gatk_ug_jar != '' ) {
+  Channel
+    .fromPath( params.gatk_ug_jar )
+    .set{ ch_unifiedgenotyper_jar }
+} else {
+  Channel
+    .empty()
+    .set{ ch_unifiedgenotyper_jar }
+}
+
 
  process genotyping_ug {
   label 'mc_small'
@@ -2160,9 +2141,6 @@ process get_software_versions {
     vcf2genome -h |& head -n 1 &> v_vcf2genome.txt || true
     mtnucratio --help &> v_mtnucratiocalculator.txt || true
     sexdeterrmine --version &> v_sexdeterrmine.txt || true
-
-    ## Hardcoded as no --version flag or equivalent
-    echo 'version 3.5-0-g36282e4' > v_gatk3_5.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
