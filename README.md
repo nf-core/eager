@@ -71,7 +71,7 @@ Additional functionality contained by the pipeline currently includes:
 
 ## Quick Start
 
-1. Install [`nextflow`](https://nf-co.re/usage/installation)
+1. Install [`nextflow`](https://nf-co.re/usage/installation) (>= v19.10.0)
 
 2. Install one of [`docker`](https://docs.docker.com/engine/installation/), [`singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`conda`](https://conda.io/miniconda.html)
 
@@ -81,7 +81,7 @@ Additional functionality contained by the pipeline currently includes:
 
 4. Test the pipeline using the provided test data
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda>,test --pairedEnd
+        nextflow run nf-core/eager -profile <docker/singularity/conda>,test --paired_end
 
 5. Start running your own ancient DNA analysis!
 

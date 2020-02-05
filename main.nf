@@ -29,8 +29,8 @@ def helpMessage() {
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs
       -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation
-      --singleEnd                   Specifies that the input is single end reads (required if not pairedEnd)
-      --pairedEnd                   Specifies that the input is paired end reads (required if not singleEnd)
+      --single_end                   Specifies that the input is single end reads (required if not paired_end)
+      --paired_end                   Specifies that the input is paired end reads (required if not single_end)
       --bam                         Specifies that the input is in BAM format
       --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference)
@@ -297,8 +297,8 @@ if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
 }
 
 // Validate BAM is single end only
-if (params.bam && !params.singleEnd){
-    exit 1, "BAM input must be used with --singleEnd "
+if (params.bam && !params.single_end){
+    exit 1, "BAM input must be used with --single_end "
 }
 
 // Validate that you're not trying to pass FASTQs to BAM only processes
@@ -311,15 +311,15 @@ if (params.bam && !params.run_convertbam && !params.skip_mapping) {
   exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
 }
 
-// Validate that either pairedEnd or singleEnd has been specified by the user!
-if( params.singleEnd || params.pairedEnd || params.bam){
+// Validate that either paired_end or single_end has been specified by the user!
+if( params.single_end || params.paired_end || params.bam){
 } else {
-    exit 1, "Please specify either --singleEnd, --pairedEnd to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
+    exit 1, "Please specify either --single_end, --paired_end to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
 }
 
-// Validate that skip_collapse is only set to True for pairedEnd reads!
-if (params.skip_collapse  && params.singleEnd){
-    exit 1, "--skip_collapse can only be set for pairedEnd samples!"
+// Validate that skip_collapse is only set to True for paired_end reads!
+if (params.skip_collapse  && params.single_end){
+    exit 1, "--skip_collapse can only be set for paired_end samples!"
 }
 
 // Strip mode sanity checking
@@ -502,7 +502,7 @@ if( workflow.profile == 'awsbatch') {
 // is NOT read paths && BAM
 
 if( params.readPaths ){
-    if( params.singleEnd && !params.bam) {
+    if( params.single_end && !params.bam) {
         Channel
             .from( params.readPaths )
             .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
@@ -532,10 +532,10 @@ if( params.readPaths ){
     }
 } else if (!params.bam){
      Channel
-        .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
+        .fromFilePairs( params.reads, size: params.single_end ? 1 : 2 )
         .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs " +
-            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nIf this is single-end data, please specify --singleEnd on the command line." }
+            "to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nIf this is single-end data, please specify --single_end on the command line." }
         .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam  }
 
 } else {
@@ -560,7 +560,7 @@ summary['Reads']        = params.reads
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
-summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
+summary['Data Type']    = params.single_end ? 'Single-End' : 'Paired-End'
 summary['Skipping FASTQC?'] = params.skip_fastqc ? 'Yes' : 'No'
 summary['Skipping AdapterRemoval?'] = params.skip_adapterremoval ? 'Yes' : 'No'
 if (!params.skip_adapterremoval) {
@@ -876,7 +876,7 @@ process fastp {
     file("*.json") into ch_fastp_for_multiqc
 
     script:
-    if(params.singleEnd){
+    if(params.single_end){
     """
     fastp --in1 ${reads[0]} --out1 "${reads[0].baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${reads[0].baseName}"_fastp.json 
     """
@@ -927,41 +927,41 @@ process adapter_removal {
     mergedonly = params.mergedonly ? "Y" : "N"
     
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
-    if (!params.singleEnd && !params.skip_collapse && !params.skip_trim){
+    if (!params.single_end && !params.skip_collapse && !params.skip_trim){
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
     if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
-      zcat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.combined.fq.gz
     elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
-      zcat *.collapsed.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz > output/${base}.combined.fq.gz
     elif [ ${mergedonly} = "Y" ] ; then
-      zcat *.collapsed.gz *.collapsed.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.combined.fq.gz
     else
-      zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.combined.fq.gz
     fi
    
     mv *.settings output/
     """
     //PE, don't collapse, but trim reads
-    } else if (!params.singleEnd && params.skip_collapse && !params.skip_trim) {
+    } else if (!params.single_end && params.skip_collapse && !params.skip_trim) {
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
     mv *.settings ${base}.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
-    } else if (!params.singleEnd && !params.skip_collapse && params.skip_trim) {
+    } else if (!params.single_end && !params.skip_collapse && params.skip_trim) {
     """
     mkdir -p output
     AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --basename ${base} ${collapse_me} ${trim_me}
     
     if [ ${mergedonly} = "Y" ]; then
-      zcat *.collapsed.gz *.collapsed.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.combined.fq.gz
     else
-      zcat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz | gzip > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.combined.fq.gz
     fi
 
     mv *.settings output/
@@ -1039,7 +1039,7 @@ process bwa {
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if (!params.singleEnd && (params.skip_collapse || params.skip_adapterremoval)){
+    if (!params.single_end && (params.skip_collapse || params.skip_adapterremoval)){
     prefix = "${reads[0].baseName}"
     """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -1109,7 +1109,7 @@ process circularmapper{
     
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && params.skip_collapse ){
+    if (!params.single_end && params.skip_collapse ){
     prefix = "${reads[0].baseName}"
     """ 
     bwa aln -t ${task.cpus} $elongated_root ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -1153,7 +1153,7 @@ process bwamem {
     prefix = "${reads[0].baseName}"
     size = "${params.large_ref}" ? '-c' : ''
 
-    if (!params.singleEnd && params.skip_collapse){
+    if (!params.single_end && params.skip_collapse){
     """
     bwa mem -t ${task.cpus} $fasta ${reads[0]} ${reads[1]} -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
     samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
@@ -1317,7 +1317,7 @@ process strip_input_fastq {
 
 
     script:
-    if (params.singleEnd) {
+    if (params.single_end) {
         out_fwd = bam.baseName+'.stripped.fq.gz'
         """
         samtools index $bam
@@ -1388,7 +1388,7 @@ process dedup{
     treat_merged="${params.dedup_all_merged}" ? '-m' : ''
     size = "${params.large_ref}" ? '-c' : ''
     
-    if(params.singleEnd) {
+    if(params.single_end) {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
