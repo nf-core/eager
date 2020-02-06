@@ -419,8 +419,8 @@ if (params.run_metagenomic_screening) {
   exit 1, "Metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
   }
 
-  if (params.metagenomic_tool != 'malt' ) {
-    exit 1, "Metagenomic classification can currently only be run with 'malt'. Please check your classifer. You gave '${params.metagenomic_tool}'!"
+  if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
+    exit 1, "Metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave '${params.metagenomic_tool}'!"
   }
 
   if (params.database == '' ) {
