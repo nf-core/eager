@@ -216,7 +216,7 @@ For example:
 --paired_end --reads '*_R{1,2}_*.fastq.gz'
 ```
 
-**Important**: You must always supply a read-grouping with the `{1,2}` system for each sample when using the `--paired_end` flag. 
+**Important**: You must always supply a read-grouping with the `{1,2}` system for each sample when using the `--paired_end` flag.
 
 #### `--bam`
 
