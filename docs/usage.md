@@ -186,7 +186,7 @@ If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
 #### `--single_end`
 
-If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. 
+If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
 
 For example:
 
