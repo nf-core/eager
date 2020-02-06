@@ -235,7 +235,7 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 * SANITY CHECKING
 */
 
-// NF version check! Will replace with manifest system once allwoed by nf-core/tools
+// NF version check! Will replace with manifest system once allowed by nf-core/tools
 
 if( !nextflow.version.matches('>=19.10.0') ) {
     println "This workflow requires Nextflow version 19.10.0 or greater -- You are running version $nextflow.version"
