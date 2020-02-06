@@ -208,7 +208,7 @@ for multiple samples, where each sample's FASTQs are in it's own directory (indi
 
 If you have paired-end data, you need to specify `--paired_end` on the command line when you launch the pipeline.
 
-A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. 
+A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
 
 For example:
 
