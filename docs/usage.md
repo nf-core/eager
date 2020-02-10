@@ -186,31 +186,37 @@ If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
 #### `--single_end`
 
-If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
+
+For example:
 
 ```bash
---single_end --reads 'path/to/data/*.fastq'
+--single_end --reads 'path/to/data/*.fastq.gz'
 ```
 
 for a single sample, or
 
 ```bash
---single_end --reads 'path/to/data/*/*.fastq'
+--single_end --reads 'path/to/data/*/*.fastq.gz'
 ```
 
 for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`)
 
-**Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
+**Note**: It is currently not possible to run a mixture of single-end and paired-end files in one run.
 
 #### `--paired_end`
 
-If you have paired-end data, you need to specify `--paired_end` on the command line when you launc hthe pipeline.
+If you have paired-end data, you need to specify `--paired_end` on the command line when you launch the pipeline.
 
-A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
+
+For example:
 
 ```bash
---paired_end --reads '*.fastq'
+--paired_end --reads '*_R{1,2}_*.fastq.gz'
 ```
+
+**Important**: You must always supply a read-grouping with the `{1,2}` system for each sample when using the `--paired_end` flag.
 
 #### `--bam`
 
