@@ -106,12 +106,14 @@ def helpMessage() {
       --damageprofiler_length       Specify length filter for DamageProfiler
       --damageprofiler_threshold    Specify number of bases to consider for damageProfiler
       --run_pmdtools                Turn on PMDtools
-      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are set to UDG-.
+      --pmdtools_udg_type                    Specify here if you have UDG-half or UDG-full treated libraries. Set to 'half' or 'full' respectively. If not set, libraries are set to no-UDG treatment.
       --pmdtools_range              Specify range of bases for PMDTools
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools
       --pmdtools_reference_mask     Specify a reference mask for PMDTools
       --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
-      
+      --pmdtools_first              Specify to output the deamination rate at the first position only, but with a standard error. Default: Off
+      --pmdtools_platypus           Specify to analyse CpG di-nucleotides separately as not affected by UDG treatment. Default: Off
+
     Annotation Statistics
       --run_bedtools_coverage       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference
       --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes
@@ -140,10 +142,10 @@ def helpMessage() {
       --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: turned off.
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
 
-    Concensus Sequence Generation
-      --run_vcf2genome              Turns on ability to create a concensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
-      --vcf2genome_outfile          Specify name of the output FASTA file containing the concensus sequence. Do not inclvcf2 Default: '<input_vcf>'
-      --vcf2genome_header           Specify the header name of the concensus sequence entry within the FASTA file. Default: '<input_vcf>'
+    Consensus Sequence Generation
+      --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
+      --vcf2genome_outfile          Specify name of the output FASTA file containing the consensus sequence. Default: '<input_vcf>.fasta'
+      --vcf2genome_header           Specify the header name of the consensus sequence entry within the FASTA file. Default: '<input_vcf>'
       --vcf2genome_minc             Minimum depth coverage required for a call to be included (else N will be called). Default: 5
       --vcf2genome_minq             Minimum genotyping quality of a call to be called. Else N will be called. Default: 30
       --vcf2genome_minfreq          Minimum fraction of reads supporting a call to be included. Else N will be called. Default: 0.8
@@ -1607,7 +1609,7 @@ process pmdtools {
 
     script:
     //Check which treatment for the libraries was used
-    def treatment = params.pmd_udg_type ? (params.pmd_udg_type =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
+    def treatment = params.pmdtools_udg_type ? (params.pmdtools_udg_type =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
     if(params.snpcapture){
         snpcap = (params.pmdtools_reference_mask != '') ? "--refseq ${params.pmdtools_reference_mask}" : ''
         log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
@@ -1616,11 +1618,13 @@ process pmdtools {
     }
     size = "${params.large_ref}" ? '-c' : ''
     prefix = "${bam.baseName}"
+    first = "${params.pmdtools_first}" ? '--first' : ''
+    platypus = "${params.pmdtools_platypus}" ? '--platypus' : ''
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
     #Run Calc Range step
-    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt 
+    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt "${first}" "${platypus}"
     samtools index "${size}" ${prefix}.pmd.bam
     """
 }

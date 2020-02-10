@@ -635,11 +635,11 @@ Specifies to run PMDTools for damage based read filtering and assessment of DNA 
 
 #### `--udg` false
 
-Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment.
+Defines whether any form of Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment.
 
-#### `--pmd_udg_type` \`half`
+#### `--pmdtools_udg_type`
 
-If you have UDGhalf treated data (Rohland et al 2016), specify `'half'` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the DNA damage assesment will use CpG context only. If you don't specify the parameter at all, the library will be treated as non UDG treated.
+If you have UDGhalf treated data (Rohland et al 2016), specify `'half'` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the DNA damage assessment will use CpG context only. If you don't specify the parameter at all, the library will be treated as non UDG treated.
 
 #### `--pmdtools_range`
 
@@ -651,11 +651,19 @@ Specifies the PMDScore threshold to use in the pipeline when filtering BAM files
 
 #### `--pmdtools_reference_mask`
 
-Can be used to set a reference genome mask for PMDTools.
+Can be used to set a reference genome mask for PMDTools. Default: none
 
 #### `--pmdtools_max_reads`
 
-The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results.
+The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results. Default: 10000
+
+#### `--pmdtools_first`
+
+Outputs the deamination rate at the first position only, but with a standard error. Default: off
+
+#### `--pmdtools_platypus`
+
+Specifies to analyse CpG dinucleotides separately. This can be useful for analysing UDG-treated mammalian nuclear DNA, as CpG-context cytosines are almost always methylated and ot affect by UDG treatment, and can allow you to visualise damage patterns on UDG treated data. Default: off
 
 ### BAM Trimming Parameters
 
