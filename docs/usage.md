@@ -631,7 +631,7 @@ Specifies the length of the read start and end to be considered for profile gene
 
 #### `--damageprofiler_yaxis`
 
-Specifies what the maximum misincorporation frequency should be displayed in the damage plot. This is set to `0.30` (i.e. 30%) by default as this matches the popular mapDamage2.0 program. However, the default behaviour of DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any _possible_ damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behaviour can be turned on by specifying the number to `0`. Default: `0.30`.
+Specifies what the maximum misincorporation frequency should be displayed as, in the DamageProfiler damage plot. This is set to `0.30` (i.e. 30%) by default as this matches the popular [mapDamage2.0](https://ginolhac.github.io/mapDamage) program. However, the default behaviour of DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any _possible_ damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behaviour can be turned on by specifying the number to `0`. Default: `0.30`.
 
 #### `--run_pmdtools`
 
