@@ -28,7 +28,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#349](https://github.com/nf-core/eager/issues/349) - Adds two extra pmdtools parameters --first and --platypus to the damage analysis
 * [#352](https://github.com/nf-core/eager/pull/352) - Add social preview image
 
-
 ### `Fixed`
 
 * [#227](https://github.com/nf-core/eager/issues/227) - Large re-write of input/output process logic to allow maximum flexibility. Originally to address [#227](https://github.com/nf-core/eager/issues/227), but further expanded
