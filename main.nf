@@ -1520,7 +1520,7 @@ process damageprofiler {
     script:
     base = "${bam.baseName}"
     """
-    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . -yaxis ${params.damageprofiler_yaxis}
+    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . -yaxis_damageplot ${params.damageprofiler_yaxis}
     """
 }
 
