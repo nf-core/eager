@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#310](https://github.com/nf-core/eager/issues/310) - Generalises base.config
 * [#326](https://github.com/nf-core/eager/pull/326) - Add Biopython and [xopen](https://github.com/marcelm/xopen/) dependencies
 * [#349](https://github.com/nf-core/eager/issues/349) - Adds two extra pmdtools parameters --first and --platypus to the damage analysis
+* [#352](https://github.com/nf-core/eager/pull/352) - Add social preview image
 
 ### `Fixed`
 
@@ -58,7 +59,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * [#189](https://github.com/nf-core/eager/pull/189) - Outputting unmapped reads in a fastq files with the --strip_input_fastq flag
 * [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible](https://github.com/nf-core/eager/issues/182)
-* Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
+* Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes
 * A lot more automated tests using Travis CI
 * Don't ignore DamageProfiler errors anymore
 * [#220](https://github.com/nf-core/eager/pull/220) - Added post-mapping filtering statistics module and corresponding MultiQC statistics [#217](https://github.com/nf-core/eager/issues/217)
