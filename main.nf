@@ -1693,7 +1693,13 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
     ch_rmdupindex_for_skipdamagemanipulation
         .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+} else if ( !params.run_genotyping && params.run_trim_bam && params.run_pmdtools )  {
+    ch_rmdup_for_skipdamagemanipulation
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+    ch_rmdupindex_for_skipdamagemanipulation
+        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 }
+
 
 /*
  Step 12b: Genotyping - UG
