@@ -497,6 +497,13 @@ bam_channel = branched_input.bam.map {
     [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai, group, pop, age]
 }
 
+// Prepare starting channels, here we go
+
+ch_input_for_convertbam = Channel.empty()
+
+bam_channel
+  .into { ch_input_for_convertbam; ch_input_for_indexbam; ch_input_for_skipconvertbam }
+
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
