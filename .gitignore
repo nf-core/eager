@@ -5,3 +5,4 @@ results/
 .DS_Store
 tests/test_data
 *.pyc
+main_playground.nf
