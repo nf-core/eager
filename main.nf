@@ -301,16 +301,6 @@ if (params.run_convertbam && params.skip_mapping) {
   exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
 }
 
-// Validate that you're not trying to pass FASTQs to BAM only processes
-if (params.bam && !params.run_convertbam && !params.skip_mapping) {
-  exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
-}
-
-// Validate that either paired_end or single_end has been specified by the user!
-if( params.single_end || params.paired_end || params.bam){
-} else {
-    exit 1, "Please specify either --single_end, --paired_end to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
-}
 
 // Validate that skip_collapse is only set to True for paired_end reads!
 if (params.skip_collapse  && params.single_end){
@@ -323,9 +313,6 @@ if (params.strip_input_fastq){
         exit 1, "--strip_mode can only be set to strip or replace!"
     }
 
-    if (params.bam && !params.run_convertbam) {
-        exit 1, "--strip_input_fastq can only be used on FASTQ, but you gave BAM input and didn't specify --run_convertbam!"
-    }
 }
 
 // Mapper sanity checking
@@ -504,13 +491,13 @@ inputSample.branch{
 
 //Removing BAM/BAI in case of a FASTQ input
 fastq_channel = result.fastq.map {
-  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
-    [sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
+  samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
+    [samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
 }
 //Removing R1/R2 in case of BAM input
 bam_channel = result.bam.map {
-  sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
-    [sname, lid, lane, seqtype, organism, strandedness, udg, bam, bai, group, pop, age]
+  samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
+    [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai, group, pop, age]
 }
 
 // Header log info
@@ -2338,8 +2325,8 @@ def checkHostname(){
     }
 }
 
-// Channeling the TSV file containing FASTQ or BAM
-// Format is: "Sample_Name  Library_ID  Lane  SeqType   Organism  Strandedness  UDG_Treatment   R1  R2  BAM   BAM_Index Group   Populations Age"
+// Channelling the TSV file containing FASTQ or BAM
+// Header Format is: "Sample_Name  Library_ID  Lane  SeqType  Organism  Strandedness  UDG_Treatment  R1  R2  BAM  BAM_Index Group  Populations  Age"
 def extractData(tsvFile) {
     Channel.from(tsvFile)
         .splitCsv(header: true, sep: '\t')
@@ -2351,29 +2338,30 @@ def extractData(tsvFile) {
             def organism = row.Organism
             def strandedness = row.Strandedness
             def udg = row.UDG_Treatment
-            def file1 = row.R1
-            def file2 = "null"
+            def r1 = returnFile(row.R1)
+            def r2 = "null"
             def bam = returnFile(row.BAM)
             def bai = returnFile(row.BAM_Index)
             def group = row.Group
-            def population = row.Populations
+            def pop = row.Populations
             def age = row.Age
            
             //  Ensure that we do not accept incompatible chemiistry setup
             if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "SeqType for one or more rows is neither SE nor PE!. You have: ${seqtype}"
-             
+            
              // Only look for a R2 to load if FASTQ and PE input because BAMs could still be paired end data
-            if ( !file1.matches('NA') && seqtype.matches('PE') ) {
-                file2 = returnFile(file2)
+            if (seqtype.matches('PE') &&  !r1.matches('NA') ) {
+                println ''
+                r2 = returnFile(row.R2)
             }
            
            // So we don't accept existing files that are wrong format: e.g. fasta or sam
-            if ( !file1.matches('NA') && !hasExtension(file1, "fastq.gz") && !hasExtension(file1, "fq.gz" && !hasExtension(file1, "fastq") && !hasExtension(file1, "fq"))) exit 1, "The following R1 file either has a non-recognizable extension  or is not NA: ${file1}"
-            if ( !file2.matches('NA') && !hasExtension(file2, "fastq.gz") && !hasExtension(file2, "fq.gz" && !hasExtension(file2, "fastq") && !hasExtension(file2, "fq"))) exit 1, "The following R2 file either has a non-recognizable extension  or is not NA: ${file1}"
-            if ( !bam.matches('NA') && !hasExtension(bam, "bam")) exit 1, "The following BAM file either has a non-recognizable extension  or is not NA: ${bam}"
-            if ( !bam.matches('NA') && !hasExtension(bam, "bai")) exit 1, "The following BAM file either has a non-recognizable extension  or is not NA: ${bai}"
+            if ( !r1.matches('NA') && !hasExtension(r1, "fastq.gz") && !hasExtension(r1, "fq.gz") && !hasExtension(r1, "fastq") && !hasExtension(r1, "fq")) exit 1, "The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
+            if ( !r2.matches('null') && !r2.matches('NA') && !hasExtension(r2, "fastq.gz") && !hasExtension(r2, "fq.gz") && !hasExtension(r2, "fastq") && !hasExtension(r2, "fq")) exit 1, "The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
+            if ( !bam.matches('NA') && !hasExtension(bam, "bam")) exit 1, "The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
+            if ( !bai.matches('NA') && !hasExtension(bai, "bai")) exit 1, "The following BAI file either has a non-recognizable extension or is not NA: ${bai}"
              
-            [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, file1, file2, bam, bai, group, population, age ]
+            [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ]
 
          }
 
