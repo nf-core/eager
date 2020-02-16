@@ -301,7 +301,6 @@ if (params.run_convertbam && params.skip_mapping) {
   exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
 }
 
-
 // Validate that skip_collapse is only set to True for paired_end reads!
 if (params.skip_collapse  && params.single_end){
     exit 1, "--skip_collapse can only be set for paired_end samples!"
@@ -312,7 +311,6 @@ if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
         exit 1, "--strip_mode can only be set to strip or replace!"
     }
-
 }
 
 // Mapper sanity checking
@@ -483,19 +481,18 @@ if( workflow.profile == 'awsbatch') {
 // is NOT read paths && BAM
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
-inputSample.branch{
+branched_input = inputSample.branch{
     fastq: returnFile(it[7]) != 'NA' //These are all fastqs
     bam: returnFile(it[9]) != 'NA' //These are all BAMs
 }
-.set { result }
 
 //Removing BAM/BAI in case of a FASTQ input
-fastq_channel = result.fastq.map {
+fastq_channel = branched_input.fastq.map {
   samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
     [samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
 }
 //Removing R1/R2 in case of BAM input
-bam_channel = result.bam.map {
+bam_channel = branched_input.bam.map {
   samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
     [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai, group, pop, age]
 }
