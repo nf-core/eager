@@ -2148,7 +2148,7 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
             """
     }
 } else if (! params.database.endsWith(".tar.gz")) {
-    ch_krakendb = file(params.krakendb)
+    ch_krakendb = file(params.database)
 }
 
 
