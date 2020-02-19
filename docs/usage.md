@@ -186,31 +186,37 @@ If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
 #### `--single_end`
 
-If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
+
+For example:
 
 ```bash
---single_end --reads 'path/to/data/*.fastq'
+--single_end --reads 'path/to/data/*.fastq.gz'
 ```
 
 for a single sample, or
 
 ```bash
---single_end --reads 'path/to/data/*/*.fastq'
+--single_end --reads 'path/to/data/*/*.fastq.gz'
 ```
 
 for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`)
 
-**Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
+**Note**: It is currently not possible to run a mixture of single-end and paired-end files in one run.
 
 #### `--paired_end`
 
-If you have paired-end data, you need to specify `--paired_end` on the command line when you launc hthe pipeline.
+If you have paired-end data, you need to specify `--paired_end` on the command line when you launch the pipeline.
 
-A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
+
+For example:
 
 ```bash
---paired_end --reads '*.fastq'
+--paired_end --reads '*_R{1,2}_*.fastq.gz'
 ```
+
+**Important**: You must always supply a read-grouping with the `{1,2}` system for each sample when using the `--paired_end` flag.
 
 #### `--bam`
 
@@ -622,6 +628,10 @@ Specifies the length filter for DamageProfiler. By default set to `100`.
 #### `--damageprofiler_threshold`
 
 Specifies the length of the read start and end to be considered for profile generation in DamageProfiler. By default set to `15` bases.
+
+#### `--damageprofiler_yaxis`
+
+Specifies what the maximum misincorporation frequency should be displayed as, in the DamageProfiler damage plot. This is set to `0.30` (i.e. 30%) by default as this matches the popular [mapDamage2.0](https://ginolhac.github.io/mapDamage) program. However, the default behaviour of DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any _possible_ damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behaviour can be turned on by specifying the number to `0`. Default: `0.30`.
 
 #### `--run_pmdtools`
 

@@ -24,7 +24,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fancy new logo from [ZandraFagernas](https://github.com/ZandraFagernas)
 * [#286](https://github.com/nf-core/eager/issues/286) - Adds pipeline-specific profiles (loaded from nf-core configs)
 * [#310](https://github.com/nf-core/eager/issues/310) - Generalises base.config
-* [#326](https://github.com/nf-core/eager/pull/326) - Add Biopython and [xopen](https://github.com/marcelm/xopen/) dependencies  
+* [#326](https://github.com/nf-core/eager/pull/326) - Add Biopython and [xopen](https://github.com/marcelm/xopen/) dependencies
+* [#336](https://github.com/nf-core/eager/issues/336) - Change default Y-axis maximum value of DamageProfiler to 30% to match popular (but slower) mapDamage, and allow user to set their own value.
+* [#352](https://github.com/nf-core/eager/pull/352) - Add social preview image
 
 ### `Fixed`
 
@@ -36,6 +38,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#327](https://github.com/nf-core/eager/pull/327) - Speed up strip_input_fastq process and make it more robust
 * [#342](https://github.com/nf-core/eager/pull/342) - Updated to match nf-core tools 1.8 linting guidelines
 * [#339](https://github.com/nf-core/eager/issues/339) - Converted unnecessary zcat + gzip to just cat for a performance boost
+* [#344](https://github.com/nf-core/eager/issues/344) - Fixed pipeline still trying to run when using old nextflow version
 
 ### `Dependencies`
 
@@ -56,7 +59,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * [#189](https://github.com/nf-core/eager/pull/189) - Outputting unmapped reads in a fastq files with the --strip_input_fastq flag
 * [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible](https://github.com/nf-core/eager/issues/182)
-* Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
+* Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes
 * A lot more automated tests using Travis CI
 * Don't ignore DamageProfiler errors anymore
 * [#220](https://github.com/nf-core/eager/pull/220) - Added post-mapping filtering statistics module and corresponding MultiQC statistics [#217](https://github.com/nf-core/eager/issues/217)

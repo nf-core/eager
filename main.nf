@@ -104,7 +104,8 @@ def helpMessage() {
 
     (aDNA) Damage Analysis
       --damageprofiler_length       Specify length filter for DamageProfiler
-      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler
+      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler (e.g. on damage plot). Default: 15
+      --damageprofiler_yaxis        Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: 0.30 
       --run_pmdtools                Turn on PMDtools
       --udg_type                    Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are set to UDG-.
       --pmdtools_range              Specify range of bases for PMDTools
@@ -234,6 +235,13 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 /*
 * SANITY CHECKING
 */
+
+// NF version check! Will replace with manifest system once allowed by nf-core/tools
+
+if( !nextflow.version.matches('>=19.10.0') ) {
+    println "This workflow requires Nextflow version 19.10.0 or greater -- You are running version $nextflow.version"
+    exit 1
+}
 
 // Validate inputs
 if ( params.fasta.isEmpty () ){
@@ -1512,7 +1520,7 @@ process damageprofiler {
     script:
     base = "${bam.baseName}"
     """
-    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . 
+    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . -yaxis_damageplot ${params.damageprofiler_yaxis}
     """
 }
 
