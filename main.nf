@@ -2147,7 +2147,7 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
             tar xvzf $ckdb
             """
     }
-} else if (! params.database.endsWith(".tar.gz")) {
+} else if (! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening params.metagenomic_tool == 'kraken') {
     ch_krakendb = file(params.database)
 }
 
