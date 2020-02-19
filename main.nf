@@ -2134,21 +2134,26 @@ process maltextract {
 */
 
 if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && params.metagenomic_tool == 'kraken'){
-    comp_kraken = file(params.database)
+  comp_kraken = file(params.database)
 
-    process decomp_kraken {
-        input:
-            file(ckdb) from comp_kraken
-        output:
-            file(dbname) into ch_krakendb
-        script:
-            dbname = params.database.tokenize("/")[-1].tokenize(".")[0]
-            """
-            tar xvzf $ckdb
-            """
-    }
+  process decomp_kraken {
+    input:
+    file(ckdb) from comp_kraken
+    
+    output:
+    file(dbname) into ch_krakendb
+    
+    script:
+    dbname = params.database.tokenize("/")[-1].tokenize(".")[0]
+    """
+    tar xvzf $ckdb
+    """
+  }
+
 } else if (! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening && params.metagenomic_tool == 'kraken') {
     ch_krakendb = file(params.database)
+} else {
+    ch_krakendb = Channel.empty()
 }
 
 
@@ -2180,36 +2185,36 @@ process kraken {
 }
 
 process kraken_parse {
-    tag "$name"
-    errorStrategy 'ignore'
+  tag "$name"
+  errorStrategy 'ignore'
 
-    input:
-        set val(name), file(kraken_r) from ch_kraken_report
+  input:
+  set val(name), file(kraken_r) from ch_kraken_report
 
-    output:
-        set val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
+  output:
+  set val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
 
-    script:
-        out = name+".kraken_parsed.csv"
-        """
-        kraken_parse.py -c ${params.metagenomic_min_support_reads} -o $out $kraken_r
-        """    
+  script:
+  out = name+".kraken_parsed.csv"
+  """
+  kraken_parse.py -c ${params.metagenomic_min_support_reads} -o $out $kraken_r
+  """    
 }
 
 process kraken_merge {
-    publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
+  publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
-    input:
-        file(csv_count) from ch_kraken_parsed.collect()
+  input:
+  file(csv_count) from ch_kraken_parsed.collect()
 
-    output:
-        file('kraken_otu_table.csv') into kraken_merged
+  output:
+  file('kraken_otu_table.csv') into kraken_merged
 
-    script:
-        out = "kraken_otu_table.csv"
-        """
-        merge_kraken_res.py -o $out
-        """    
+  script:
+  out = "kraken_otu_table.csv"
+  """
+  merge_kraken_res.py -o $out
+  """    
 }
 
 
