@@ -2011,6 +2011,20 @@ process print_nuclear_contamination{
  * Step 17-A: Metagenomic screening of unmapped reads: MALT
 */
 
+if (params.metagenomic_tool == 'malt') {
+  ch_bam_filtering_for_metagenomic
+  .set {ch_bam_filtering_for_metagenomic_malt}
+
+  ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
+} else if (params.metagenomic_tool == 'kraken') {
+  ch_bam_filtering_for_metagenomic
+  .set {ch_bam_filtering_for_metagenomic_kraken}
+
+  ch_bam_filtering_for_metagenomic_malt = Channel.empty()
+}
+
+// params.metagenomic_tool == 'malt' ? ch_bam_filtering_for_metagenomic.set {ch_bam_filtering_for_metagenomic_malt} : ch_bam_filtering_for_metagenomic.set {ch_bam_filtering_for_metagenomic_kraken}
+
 process malt {
   label 'mc_huge'
   publishDir "${params.outdir}/metagenomic_classification/malt", mode:"copy"
@@ -2019,7 +2033,7 @@ process malt {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
 
   input:
-  file fastqs from ch_bam_filtering_for_metagenomic.collect()
+  file fastqs from ch_bam_filtering_for_metagenomic_malt.collect()
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
@@ -2126,8 +2140,9 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
         input:
             file(ckdb) from comp_kraken
         output:
-            file("kraken") into ch_krakendb
+            file(dbname) into ch_krakendb
         script:
+            dbname = params.database.tokenize("/")[-1].tokenize(".")[0]
             """
             tar xvzf $ckdb
             """
@@ -2146,7 +2161,7 @@ process kraken {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
-  file fastq from ch_bam_filtering_for_metagenomic
+  file fastq from ch_bam_filtering_for_metagenomic_kraken
   file(krakendb) from ch_krakendb
 
   output:
@@ -2155,7 +2170,7 @@ process kraken {
   
   
   script:
-  prefix = fastq.tokenize('.')[0]
+  prefix = fastq.toString().tokenize('.')[0]
   out = prefix+".kraken.out"
   kreport = prefix+".kreport"
 
