@@ -889,7 +889,7 @@ The name of the chromosome X in your bam. `'X'` for hs37d5, `'chrX'` for HG19. D
 
 ### Metagenomic Screening
 
-An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract.
+An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract, or Kraken2.
 
 Please note the following:
 
@@ -899,7 +899,7 @@ Please note the following:
 
 > RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK
 
-#### -`-run_metagenomic_screening`
+#### `--run_metagenomic_screening`
 
 Turn on the metagenomic screening module.
 
@@ -907,11 +907,10 @@ Turn on the metagenomic screening module.
 
 Specify which taxonomic classifier to use. There are two options avaliable:
 
+- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
 - `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
   
 :warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
-
-- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
 
 #### `--metagenomic_min_support_reads`
 
@@ -928,12 +927,14 @@ For Kraken2, it can be either the path to the _directory_ or the path to the `.t
 
 Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85
 
+Only used when `--metagenomic_tool malt` is also supplied
+
 #### `--malt_mode`
 
 Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.
 respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'  
 
-Only when `--metagenomic_tool malt` is also supplied is also supplied
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_alignment_mode`
 
