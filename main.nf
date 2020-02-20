@@ -2208,10 +2208,10 @@ process kraken_merge {
   file(csv_count) from ch_kraken_parsed.collect()
 
   output:
-  file('kraken_otu_table.csv') into kraken_merged
+  file('kraken_count_table.csv') into kraken_merged
 
   script:
-  out = "kraken_otu_table.csv"
+  out = "kraken_count_table.csv"
   """
   merge_kraken_res.py -o $out
   """    

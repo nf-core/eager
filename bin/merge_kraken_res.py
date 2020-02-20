@@ -15,8 +15,8 @@ def _get_args():
     parser.add_argument(
         '-o',
         dest="output",
-        default=None,
-        help="Output file. Default = sources.csv")
+        default="kraken_count_table.csv",
+        help="Output file. Default = kraken_count_table.csv")
 
     args = parser.parse_args()
 
@@ -55,5 +55,5 @@ if __name__ == "__main__":
     OUTFILE = _get_args()
     all_csv = get_csv()
     resdf = merge_csv(all_csv)
-    write_csv(resdf, "kraken_otu_table.csv")
+    write_csv(resdf, OUTFILE)
     print(resdf)

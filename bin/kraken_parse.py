@@ -44,7 +44,7 @@ def parse_kraken(infile, countlim):
     '''
     INPUT:
         infile (str): path to kraken report file
-        countlim (int): lower count threshold to report hit
+        countlim (int): lowest count threshold to report hit
     OUTPUT:
         resdict (dict): key=taxid, value=readCount
 

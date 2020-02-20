@@ -68,7 +68,7 @@ Additional functionality contained by the pipeline currently includes:
 
 * Taxonomic binner with alignment (`MALT`)
 * Taxonomic binner without alignment (`Kraken2`)
-* aDNA characteristic screening of taxonomically binned data (`MaltExtract`)
+* aDNA characteristic screening of taxonomically binned data from MALT (`MaltExtract`)
 
 ## Quick Start
 
