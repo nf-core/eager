@@ -906,13 +906,16 @@ Turn on the metagenomic screening module.
 #### `--metagenomic_tool`
 
 Specify which taxonomic classifier to use. There are two options avaliable:
+
 - `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
+  
 :warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
-- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2) 
+
+- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
 
 #### `--metagenomic_min_support_reads`
 
-Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'. 
+Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.  
 For malt, this only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
 
 #### `--database`
@@ -938,7 +941,6 @@ Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Lo
 
 Only when `--metagenomic_tool malt` is also supplied
 
-
 #### `--malt_top_percent`
 
 Specify the top percent value of the LCA algorthim. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): "For each
@@ -947,13 +949,11 @@ read, only those matches are used for taxonomic placement whose bit disjointScor
 
 Only when `--metagenomic_tool malt` is also supplied
 
-
 #### `--malt_min_support_mode`
 
 Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.
 
 Only when `--metagenomic_tool malt` is also supplied
-
 
 #### `--malt_min_support_percent`
 
