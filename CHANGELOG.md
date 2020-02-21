@@ -19,24 +19,40 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#247](https://github.com/nf-core/eager/issues/247) - Added nuclear contamination with angsd
 * [#258](https://github.com/nf-core/eager/issues/258) - Added ability to report bedtools stats to features (e.g. depth/breadth of annotated genes)
 * [#249](https://github.com/nf-core/eager/issues/249) - Added metagenomic classification of unmapped reads with MALT and aDNA authentication with MaltExtract
+* [#302](https://github.com/nf-core/eager/issues/302) - Added mitochondrial to nuclear ratio calculation
+* [#302](https://github.com/nf-core/eager/issues/302) - Added VCF2Genome for concensus sequence generation
 * Fancy new logo from [ZandraFagernas](https://github.com/ZandraFagernas)
+* [#286](https://github.com/nf-core/eager/issues/286) - Adds pipeline-specific profiles (loaded from nf-core configs)
+* [#310](https://github.com/nf-core/eager/issues/310) - Generalises base.config
+* [#326](https://github.com/nf-core/eager/pull/326) - Add Biopython and [xopen](https://github.com/marcelm/xopen/) dependencies
+* [#336](https://github.com/nf-core/eager/issues/336) - Change default Y-axis maximum value of DamageProfiler to 30% to match popular (but slower) mapDamage, and allow user to set their own value.
+* [#352](https://github.com/nf-core/eager/pull/352) - Add social preview image
+* [#355](https://github.com/nf-core/eager/pull/355) - Add Kraken2 metagenomics classifier
 
 ### `Fixed`
 
 * [#227](https://github.com/nf-core/eager/issues/227) - Large re-write of input/output process logic to allow maximum flexibility. Originally to address [#227](https://github.com/nf-core/eager/issues/227), but further expanded
 * Fixed Travis-Ci.org to Travis-Ci.com migration issues
 * [#266](https://github.com/nf-core/eager/issues/266) - Added sanity checks for input filetypes (i.e. only BAM files can be supplied if `--bam`)
+* [#237](https://github.com/nf-core/eager/issues/237) - Fixed and Updated script scrape_software_versions
+* [#322](https://github.com/nf-core/eager/pull/322) - Move extract map reads fastq compression to pigz
+* [#327](https://github.com/nf-core/eager/pull/327) - Speed up strip_input_fastq process and make it more robust
+* [#342](https://github.com/nf-core/eager/pull/342) - Updated to match nf-core tools 1.8 linting guidelines
+* [#339](https://github.com/nf-core/eager/issues/339) - Converted unnecessary zcat + gzip to just cat for a performance boost
+* [#344](https://github.com/nf-core/eager/issues/344) - Fixed pipeline still trying to run when using old nextflow version
 
 ### `Dependencies`
 
 * adapterremoval=2.2.2->2.3.1
 * adapterremovalfixprefix=0.0.4->0.0.5
-* picard=2.20.2->2.20.7
+* damageprofiler=0.4.3->0.4.9
+* picard=2.20.2->2.21.4
 * angsd=0.923->0.931
-* gatk4=4.1.2.0->4.1.3.0
-* conda-forge::r-rmarkdown=1.12->1.15
+* gatk4=4.1.2.0->4.1.4.1
+* conda-forge::r-rmarkdown=1.12->1.18
+* mtnucratio=0.5->0.6
 * pysam=0.15.2->0.15.3
-* python=3.6.3->3.7.3
+* python=3.6.3->3.7.1
 
 ## [2.0.7] - 2019-06-10
 
@@ -44,7 +60,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * [#189](https://github.com/nf-core/eager/pull/189) - Outputting unmapped reads in a fastq files with the --strip_input_fastq flag
 * [#186](https://github.com/nf-core/eager/pull/186) - Make FastQC skipping [possible](https://github.com/nf-core/eager/issues/182)
-* Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes  
+* Merged in [nf-core/tools](https://github.com/nf-core/tools) release V1.6 template changes
 * A lot more automated tests using Travis CI
 * Don't ignore DamageProfiler errors anymore
 * [#220](https://github.com/nf-core/eager/pull/220) - Added post-mapping filtering statistics module and corresponding MultiQC statistics [#217](https://github.com/nf-core/eager/issues/217)
