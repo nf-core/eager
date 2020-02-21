@@ -91,6 +91,9 @@ table_columns_placement:
         percent_gc: 420
     Samtools Flagstat:
         mapped_passed: 500
+    custom_content:
+        endogenous_dna: 580
+        endogenous_dna_post: 590
     DeDup:
         clusterfactor: 600
     QualiMap:
