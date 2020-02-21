@@ -183,7 +183,7 @@ def helpMessage() {
       --malt_top_percent            Specify the percent for LCA algorithm (see MEGAN6 CE manual). Default: 1
       --malt_min_support_mode       Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained. Options: 'percent', 'reads'. Default: 'percent'
       --malt_min_support_percent    Specify the minimum percentage of reads a taxon of sample total is required to have to be retained. Default: 0.01
-      --malt_min_support_reads      Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: 1
+      --metagenomic_min_support_reads      Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: 1
       --malt_max_queries            Specify the maximium number of queries a read can have. Default: 100
       --malt_memory_mode            Specify the memory load method. Do not use 'map' with GTFS file system. Options: 'load', 'page', 'map'. Default: 'load'
 
@@ -427,8 +427,8 @@ if (params.run_metagenomic_screening) {
   exit 1, "Metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
   }
 
-  if (params.metagenomic_tool != 'malt' ) {
-    exit 1, "Metagenomic classification can currently only be run with 'malt'. Please check your classifer. You gave '${params.metagenomic_tool}'!"
+  if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
+    exit 1, "Metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave '${params.metagenomic_tool}'!"
   }
 
   if (params.database == '' ) {
@@ -443,8 +443,8 @@ if (params.run_metagenomic_screening) {
     exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
   }
 
-  if (params.malt_min_support_mode == 'percent' && params.malt_min_support_reads != 1) {
-    exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --malt_min_support_reads!"
+  if (params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
+    exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --metagenomic_min_support_reads!"
   }
 
   if (params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
@@ -1243,7 +1243,7 @@ process samtools_filter {
 
     output:
     file "*filtered.bam" into ch_output_from_filtering
-    file "*.unmapped.fastq.gz" optional true into ch_bam_filtering_for_malt
+    file "*.unmapped.fastq.gz" optional true into ch_bam_filtering_for_metagenomic
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}" into ch_outputindex_from_filtering
 
@@ -2008,18 +2008,32 @@ process print_nuclear_contamination{
  }
 
 /*
- * Step 17: Metagenomic screening of unmapped reads
+ * Step 17-A: Metagenomic screening of unmapped reads: MALT
 */
+
+if (params.metagenomic_tool == 'malt') {
+  ch_bam_filtering_for_metagenomic
+  .set {ch_bam_filtering_for_metagenomic_malt}
+
+  ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
+} else if (params.metagenomic_tool == 'kraken') {
+  ch_bam_filtering_for_metagenomic
+  .set {ch_bam_filtering_for_metagenomic_kraken}
+
+  ch_bam_filtering_for_metagenomic_malt = Channel.empty()
+}
+
+// params.metagenomic_tool == 'malt' ? ch_bam_filtering_for_metagenomic.set {ch_bam_filtering_for_metagenomic_malt} : ch_bam_filtering_for_metagenomic.set {ch_bam_filtering_for_metagenomic_kraken}
 
 process malt {
   label 'mc_huge'
-  publishDir "${params.outdir}/metagenomic_classification", mode:"copy"
+  publishDir "${params.outdir}/metagenomic_classification/malt", mode:"copy"
 
   when:
-  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq'
+  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
 
   input:
-  file fastqs from ch_bam_filtering_for_malt.collect()
+  file fastqs from ch_bam_filtering_for_metagenomic_malt.collect()
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
@@ -2055,7 +2069,7 @@ process malt {
   -m ${params.malt_mode} \
   -at ${params.malt_alignment_mode} \
   -top ${params.malt_top_percent} \
-  -sup ${params.malt_min_support_reads} \
+  -sup ${params.metagenomic_min_support_reads} \
   -mq ${params.malt_max_queries} \
   --memoryMode ${params.malt_memory_mode} \
   -i ${fastqs.join(' ')} |&tee malt.log
@@ -2076,7 +2090,7 @@ process maltextract {
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
 
   when: 
-  params.run_maltextract
+  params.run_maltextract && params.metagenomic_tool == 'malt'
 
   input:
   file rma6 from ch_rma_for_maltExtract.collect()
@@ -2113,6 +2127,94 @@ process maltextract {
   ${topaln} \
   ${ss}
   """
+}
+
+/*
+ * Step 17-B: Metagenomic screening of unmapped reads: Kraken2
+*/
+
+if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && params.metagenomic_tool == 'kraken'){
+  comp_kraken = file(params.database)
+
+  process decomp_kraken {
+    input:
+    file(ckdb) from comp_kraken
+    
+    output:
+    file(dbname) into ch_krakendb
+    
+    script:
+    dbname = params.database.tokenize("/")[-1].tokenize(".")[0]
+    """
+    tar xvzf $ckdb
+    """
+  }
+
+} else if (! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening && params.metagenomic_tool == 'kraken') {
+    ch_krakendb = file(params.database)
+} else {
+    ch_krakendb = Channel.empty()
+}
+
+
+process kraken {
+  tag "$prefix"
+  label 'mc_huge'
+  publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
+
+  when:
+  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
+
+  input:
+  file fastq from ch_bam_filtering_for_metagenomic_kraken
+  file(krakendb) from ch_krakendb
+
+  output:
+  file "*.kraken.out" into ch_kraken_out
+  set val(prefix), file("*.kreport") into ch_kraken_report
+  
+  
+  script:
+  prefix = fastq.toString().tokenize('.')[0]
+  out = prefix+".kraken.out"
+  kreport = prefix+".kreport"
+
+  """
+  kraken2 --db ${krakendb} --threads ${task.cpus} --output $out --report $kreport $fastq
+  """
+}
+
+process kraken_parse {
+  tag "$name"
+  errorStrategy 'ignore'
+
+  input:
+  set val(name), file(kraken_r) from ch_kraken_report
+
+  output:
+  set val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
+
+  script:
+  out = name+".kraken_parsed.csv"
+  """
+  kraken_parse.py -c ${params.metagenomic_min_support_reads} -o $out $kraken_r
+  """    
+}
+
+process kraken_merge {
+  publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
+
+  input:
+  file(csv_count) from ch_kraken_parsed.collect()
+
+  output:
+  file('kraken_count_table.csv') into kraken_merged
+
+  script:
+  out = "kraken_count_table.csv"
+  """
+  merge_kraken_res.py -o $out
+  """    
 }
 
 

@@ -889,7 +889,7 @@ The name of the chromosome X in your bam. `'X'` for hs37d5, `'chrX'` for HG19. D
 
 ### Metagenomic Screening
 
-An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract.
+An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract, or Kraken2.
 
 Please note the following:
 
@@ -899,34 +899,48 @@ Please note the following:
 
 > RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK
 
-#### -`-run_metagenomic_screening`
+#### `--run_metagenomic_screening`
 
 Turn on the metagenomic screening module.
 
 #### `--metagenomic_tool`
 
-Specify which taxonomic classifier to use. The only option avaliable is currently 'malt'.
+Specify which taxonomic classifier to use. There are two options avaliable:
 
-More can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
-
+- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
+- `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
+  
 :warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
+
+#### `--metagenomic_min_support_reads`
+
+Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.  
+For malt, this only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
 
 #### `--database`
 
-Specify the path to the _directory_ containing your taxonomic classifer's database.
+Specify the path to the _directory_ containing your taxonomic classifer's database (malt or kraken).
+
+For Kraken2, it can be either the path to the _directory_ or the path to the `.tar.gz` compressed directory of the Kraken2 database.
 
 #### `--percent_identity`
 
 Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85
 
+Only used when `--metagenomic_tool malt` is also supplied
+
 #### `--malt_mode`
 
 Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.
-respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'
+respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'  
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_alignment_mode`
 
 Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: 'SemiGlobal'
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_top_percent`
 
@@ -934,25 +948,31 @@ Specify the top percent value of the LCA algorthim. From the [MALT manual](http:
 read, only those matches are used for taxonomic placement whose bit disjointScore is within
 10% of the best disjointScore for that read.". Default: 1.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `--malt_min_support_mode`
 
 Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_min_support_percent`
 
 Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.
 
-#### `--malt_min_support_reads`
-
-Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_max_queries`
 
 Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: 100
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `--malt_memory_mode`
 
 How to load the database into memory. Options are 'load', 'page' or 'map'. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. 'page' and 'map' perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote filesystems such as GPFS. Default is 'load'.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--run_maltextract`
 
@@ -960,53 +980,79 @@ Turn on MaltExtract for MALT aDNA characteristics authentication of metagenomic 
 
 More can be seen in the [MaltExtract documentation](https://github.com/rhuebler/)
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_taxon_list`
 
 Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_ncbifiles`
 
 Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; avaliable at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_filter`
 
 Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc'.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_toppercent`
 
 Specify percent of top alignments for each read to be considered for each node. Default: 0.01.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_destackingoff`
 
 Turn off destacking. If left on, a read that overlap with another read will be removed (leaving a depth coverage of 1).
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_downsamplingoff`
 
 Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_duplicateremovaloff`
 
 Turn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_matches`
 
 Export alignments of hits for each node in BLAST format. By default turned off.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_megansummary`
 
 Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_percentidentity`
 
 Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: 85.0.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_topalignment`
 
 Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_singlestranded`
 
 Switch damage patterns to single-stranded mode. Default: off.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 ## Clean up
 
