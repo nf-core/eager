@@ -10,27 +10,27 @@ import json
 import argparse
 import textwrap
 
-parser = argparse.ArgumentParser(prog='endorS.py', 
+parser = argparse.ArgumentParser(prog='endorS.py',
    usage='python %(prog)s [-h] [--version] <samplesfile>.stats [<samplesfile>.stats]',
    formatter_class=argparse.RawDescriptionHelpFormatter,
    description=textwrap.dedent('''\
-   author: 
+   author:
      Aida Andrades Valtueña (aida.andrades[at]gmail.com)
-   
+
    description:
      %(prog)s calculates endogenous DNA from samtools flagstat files and print to screen
      Use --output flag to write results to a file
-   '''))   
+   '''))
 parser.add_argument('samtoolsfiles', metavar='<samplefile>.stats', type=str, nargs='+',
                     help='output of samtools flagstat in a txt file (at least one required). If two files are supplied, the mapped reads of the second file is divided by the total reads in the first, since it assumes that the <samplefile.stats> are related to the same sample. Useful after BAM filtering')
-parser.add_argument('-v','--version', action='version', version='%(prog)s 0.1')
+parser.add_argument('-v','--version', action='version', version='%(prog)s 0.2')
 parser.add_argument('--output', '-o', nargs='?', help='specify a file format for an output file. Options: <json> for a MultiQC json output. Default: none')
 parser.add_argument('--name', '-n', nargs='?', help='specify name for the output file. Default: extracted from the first samtools flagstat file provided')
 args = parser.parse_args()
 
 #Open the samtools flag stats pre-quality filtering:
 try:
-    with open(sys.argv[1], 'r') as pre:
+    with open(args.samtoolsfiles[0], 'r') as pre:
         contentsPre = pre.read()
     #Extract number of total reads
     totalReads = float((re.findall(r'^([0-9]+) \+ [0-9]+ in total',contentsPre))[0])
@@ -44,7 +44,7 @@ except:
 #Check if the samtools stats post-quality filtering have been provided:
 try:
     #Open the samtools flag stats post-quality filtering:
-    with open(sys.argv[2], 'r') as post:
+    with open(args.samtoolsfiles[1], 'r') as post:
         contentsPost = post.read()
     #Extract number of mapped reads post-quality filtering:
     mappedPost = float((re.findall(r'([0-9]+) \+ [0-9]+ mapped',contentsPost))[0])
@@ -61,7 +61,7 @@ if args.name is not None:
     name = args.name
 else:
     #Set up the name based on the first samtools flagstats:
-    name= str(((sys.argv[1].rsplit(".",1)[0]).rsplit("/"))[-1])
+    name= str(((args.samtoolsfiles[0].rsplit(".",1)[0]).rsplit("/"))[-1])
 #print(name)
 
 
@@ -102,5 +102,4 @@ else:
       print("Endogenous DNA (%):",endogenousPre)
    else:
       print("Endogenous DNA raw (%):",endogenousPre)
-      print("Endogenous DNA modified (%):",endogenousPost)      
-
+      print("Endogenous DNA modified (%):",endogenousPost)
