@@ -2353,7 +2353,7 @@ process multiqc {
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
 
-    file workflow_summary from create_workflow_summary(summary)
+    file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
     output:
     file "*multiqc_report.html" into multiqc_report
