@@ -44,16 +44,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
-* adapterremoval=2.2.2->2.3.1
-* adapterremovalfixprefix=0.0.4->0.0.5
-* damageprofiler=0.4.3->0.4.9
-* picard=2.20.2->2.21.4
-* angsd=0.923->0.931
-* gatk4=4.1.2.0->4.1.4.1
-* conda-forge::r-rmarkdown=1.12->1.18
-* mtnucratio=0.5->0.6
-* pysam=0.15.2->0.15.3
-* python=3.6.3->3.7.1
+* adapterremoval=2.2.2 upgraded to 2.3.1
+* adapterremovalfixprefix=0.0.4 upgraded to 0.0.5
+* damageprofiler=0.4.3 upgraded to 0.4.9
+* angsd=0.923 upgraded to 0.931
+* gatk4=4.1.2.0 upgraded to 4.1.4.1
+* mtnucratio=0.5 upgraded to 0.6
+* conda-forge::markdown=3.1.1 upgraded to 3.2.1
+* bioconda::fastqc=0.11.8 upgraded to 0.11.9
+* bioconda::picard=2.21.4 upgraded to 2.22.0
+* bioconda::samtools=1.9 upgraded to 1.10
+* bioconda::bedtools=2.29.0 upgraded to 2.29.2
+* pysam=0.15.3 upgraded to 0.15.4
+* python=3.7.1 upgraded to 3.8.2
+* conda-forge::pandas=1.0.0 upgraded to 1.0.1
+* bioconda::freebayes=1.3.1 upgraded to 1.3.2
+* conda-forge::biopython=1.75 upgraded to 1.76
 
 ## [2.0.7] - 2019-06-10
 
