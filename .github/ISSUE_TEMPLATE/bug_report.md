@@ -1,27 +1,42 @@
----
-name: Bug report
-about: Create a report to help us improve
+# nf-core/eager bug report
 
----
+Hi there!
 
-**Describe the bug**
-A clear and concise description of what the bug is. What does not work and what did you do to produce a problem?
+Thanks for telling us about a problem with the pipeline.
+Please delete this text and anything that's not relevant from the template below:
 
-**To Reproduce**
-Steps to make me able to reproduce the behavior:
-1. Run the pipeline with parameters X
-2. Describe your input data: What did you provide as input? Ideally, you could send me a parameter file + your input data or at least tell me what the latter looks like.
+## Describe the bug
 
-**Expected behavior**
+A clear and concise description of what the bug is.
+
+## Steps to reproduce
+
+Steps to reproduce the behaviour:
+
+1. Command line: `nextflow run ...`
+2. See error: _Please provide your error message_
+
+## Expected behaviour
+
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## System
 
-**Operating System:**
- - OS: [e.g. which Linux did you use?]
+- Hardware: <!-- [e.g. HPC, Desktop, Cloud...] -->
+- Executor: <!-- [e.g. slurm, local, awsbatch...] -->
+- OS: <!-- [e.g. CentOS Linux, macOS, Linux Mint...] -->
+- Version <!-- [e.g. 7, 10.13.6, 18.3...] -->
 
-**Additional context**
-Please provide me with the following files:
-- `.nextflow.log`
-- `results/pipeline_info/...`
+## Nextflow Installation
+
+- Version: <!-- [e.g. 19.10.0] -->
+
+## Container engine
+
+- Engine: <!-- [e.g. Conda, Docker or Singularity] -->
+- version: <!-- [e.g. 1.0.0] -->
+- Image tag: <!-- [e.g. nfcore/eager:1.0.0] -->
+
+## Additional context
+
+Add any other context about the problem here.

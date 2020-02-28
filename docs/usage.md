@@ -2,41 +2,182 @@
 
 ## Table of contents
 
-- [nf-core/eager: Usage](#nf-coreeager-usage)
-  - [Table of contents](#table-of-contents)
-  - [General Nextflow info](#general-nextflow-info)
-    - [Help Message](#help-message)
-  - [Running the pipeline](#running-the-pipeline)
-    - [Updating the pipeline](#updating-the-pipeline)
-    - [Mandatory Arguments](#mandatory-arguments)
-    - [Output Directories](#output-directories)
-    - [Optional Reference Options](#optional-reference-options)
-    - [Generating Fresh Indices](#generating-fresh-indices)
-    - [Premade Indices](#premade-indices)
-    - [Other run specific parameters](#other-run-specific-parameters)
-  - [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
-    - [Step skipping parameters](#step-skipping-parameters)
-    - [BAM Conversion Options](#bam-conversion-options)
-    - [Complexity Filtering Options](#complexity-filtering-options)
-    - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
-    - [Read Mapping Parameters](#read-mapping-parameters)
-    - [Mapped Reads Stripping](#mapped-reads-stripping)
-    - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
-    - [Read DeDuplication Parameters](#read-deduplication-parameters)
-    - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
-    - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
-    - [BAM Trimming Parameters](#bam-trimming-parameters)
-    - [Captured Library Parameters](#captured-library-parameters)
-    - [Feature Annotation Statistics](#feature-annotation-statistics)
-    - [Genotyping Parameters](#genotyping-parameters)
-    - [Consensus Sequence Generation](#consensus-sequence-generation)
-    - [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
-    - [SNP Table Generation](#snp-table-generation)
-    - [Human Sex Determination](#human-sex-determination)
-    - [Human Nuclear Contamination](#human-nuclear-contamination)
-    - [Metagenomic Screening](#metagenomic-screening)
-    - [Automatic Resubmission](#automatic-resubmission)
-    - [Clean up](#clean-up)
+* [nf-core/eager: Usage](#nf-coreeager-usage)
+  * [Table of contents](#table-of-contents)
+  * [General Nextflow info](#general-nextflow-info)
+    * [Automatic Resubmission](#automatic-resubmission)
+    * [Help Message](#help-message)
+  * [Running the pipeline](#running-the-pipeline)
+    * [Updating the pipeline](#updating-the-pipeline)
+    * [Mandatory Arguments](#mandatory-arguments)
+      * [`-profile`](#-profile)
+      * [`--reads`](#--reads)
+      * [`--single_end`](#--single_end)
+      * [`--paired_end`](#--paired_end)
+      * [`--bam`](#--bam)
+      * [`--fasta`](#--fasta)
+      * [`--genome` (using iGenomes)](#--genome-using-igenomes)
+    * [Output Directories](#output-directories)
+      * [`--outdir`](#--outdir)
+      * [`-w / -work-dir`](#-w---work-dir)
+    * [Optional Reference Options](#optional-reference-options)
+      * [`--large_ref`](#--large_ref)
+      * [`--saveReference`](#--savereference)
+      * [`--bwa_index`](#--bwa_index)
+      * [`--seq_dict`](#--seq_dict)
+      * [`--fasta_index`](#--fasta_index)
+    * [Other run specific parameters](#other-run-specific-parameters)
+      * [`-r`](#-r)
+      * [`--max_memory`](#--max_memory)
+      * [`--max_time`](#--max_time)
+      * [`--max_cpus`](#--max_cpus)
+      * [`--email`](#--email)
+      * [`-name`](#-name)
+      * [`-resume`](#-resume)
+      * [`-c`](#-c)
+      * [`--monochrome_logs`](#--monochrome_logs)
+      * [`--multiqc_config`](#--multiqc_config)
+      * [`--custom_config_version`](#--custom_config_version)
+      * [`--plaintext_email`](#--plaintext_email)
+  * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
+    * [Step skipping parameters](#step-skipping-parameters)
+      * [`--skip_fastqc`](#--skip_fastqc)
+      * [`--skip_adapterremoval`](#--skip_adapterremoval)
+      * [`--skip_mapping`](#--skip_mapping)
+      * [`--skip_preseq`](#--skip_preseq)
+      * [`--skip_deduplication`](#--skip_deduplication)
+      * [`--skip_damage_calculation`](#--skip_damage_calculation)
+      * [`--skip_qualimap`](#--skip_qualimap)
+    * [BAM Conversion Options](#bam-conversion-options)
+      * [`--run_convertbam`](#--run_convertbam)
+    * [Complexity Filtering Options](#complexity-filtering-options)
+      * [`--complexity_filter_poly_g`](#--complexity_filter_poly_g)
+      * [`--complexity_filter_poly_g_min`](#--complexity_filter_poly_g_min)
+    * [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
+      * [`--clip_forward_adaptor`](#--clip_forward_adaptor)
+      * [`--clip_reverse_adaptor`](#--clip_reverse_adaptor)
+      * [`--clip_readlength` 30](#--clip_readlength-30)
+      * [`--clip_min_read_quality` 20](#--clip_min_read_quality-20)
+      * [`--clip_min_adap_overlap` 1](#--clip_min_adap_overlap-1)
+      * [`--skip_collapse`](#--skip_collapse)
+      * [`--skip_trim`](#--skip_trim)
+      * [`--preserve5p`](#--preserve5p)
+      * [`--mergedonly`](#--mergedonly)
+    * [Read Mapping Parameters](#read-mapping-parameters)
+      * [`--mapper`](#--mapper)
+      * [BWA (default)](#bwa-default)
+        * [`--bwaalnn`](#--bwaalnn)
+        * [`--bwaalnk`](#--bwaalnk)
+        * [`--bwaalnl`](#--bwaalnl)
+      * [CircularMapper](#circularmapper)
+        * [`--circularextension`](#--circularextension)
+        * [`--circulartarget`](#--circulartarget)
+        * [`--circularfilter`](#--circularfilter)
+    * [Mapped Reads Stripping](#mapped-reads-stripping)
+      * [`--strip_input_fastq`](#--strip_input_fastq)
+      * [`--strip_mode`](#--strip_mode)
+    * [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
+      * [`--run_bam_filtering`](#--run_bam_filtering)
+      * [`--bam_discard_unmapped`](#--bam_discard_unmapped)
+      * [`--bam_unmapped_type`](#--bam_unmapped_type)
+      * [`--bam_mapping_quality_threshold`](#--bam_mapping_quality_threshold)
+    * [Read DeDuplication Parameters](#read-deduplication-parameters)
+      * [`--dedupper`](#--dedupper)
+      * [`--dedup_all_merged`](#--dedup_all_merged)
+    * [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
+      * [`--preseq_step_size`](#--preseq_step_size)
+    * [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
+      * [`--damageprofiler_length`](#--damageprofiler_length)
+      * [`--damageprofiler_threshold`](#--damageprofiler_threshold)
+      * [`--damageprofiler_yaxis`](#--damageprofiler_yaxis)
+      * [`--run_pmdtools`](#--run_pmdtools)
+      * [`--udg` false](#--udg-false)
+      * [`--pmd_udg_type` \`half`](#--pmd_udg_type-half)
+      * [`--pmdtools_range`](#--pmdtools_range)
+      * [`--pmdtools_threshold`](#--pmdtools_threshold)
+      * [`--pmdtools_reference_mask`](#--pmdtools_reference_mask)
+      * [`--pmdtools_max_reads`](#--pmdtools_max_reads)
+    * [BAM Trimming Parameters](#bam-trimming-parameters)
+      * [`--run_trim_bam`](#--run_trim_bam)
+      * [`--bamutils_clip_left` / `--bamutils_clip_right`](#--bamutils_clip_left----bamutils_clip_right)
+      * [`--bamutils_softclip`](#--bamutils_softclip)
+    * [Captured Library Parameters](#captured-library-parameters)
+      * [`--snpcapture` false](#--snpcapture-false)
+      * [`--bedfile`](#--bedfile)
+    * [Feature Annotation Statistics](#feature-annotation-statistics)
+      * [`--run_bedtools_coverage`](#--run_bedtools_coverage)
+      * [`--anno_file`](#--anno_file)
+    * [Genotyping Parameters](#genotyping-parameters)
+      * [`--run_genotyping`](#--run_genotyping)
+      * [`--genotyping_tool`](#--genotyping_tool)
+      * [`--genotyping_source`](#--genotyping_source)
+      * [`--gatk_ug_jar`](#--gatk_ug_jar)
+      * [`--gatk_call_conf`](#--gatk_call_conf)
+      * [`--gatk_ploidy`](#--gatk_ploidy)
+      * [`--gatk_dbsnp`](#--gatk_dbsnp)
+      * [`--gatk_ug_out_mode`](#--gatk_ug_out_mode)
+      * [`--gatk_hc_out_mode`](#--gatk_hc_out_mode)
+      * [`--gatk_ug_genotype_model`](#--gatk_ug_genotype_model)
+      * [`--gatk_hc_emitrefconf`](#--gatk_hc_emitrefconf)
+      * [`--gatk_downsample`](#--gatk_downsample)
+      * [`--gatk_ug_gatk_ug_defaultbasequalities`](#--gatk_ug_gatk_ug_defaultbasequalities)
+      * [`--freebayes_C`](#--freebayes_c)
+      * [`--freebayes_g`](#--freebayes_g)
+      * [`--freebayes_p`](#--freebayes_p)
+    * [Consensus Sequence Generation](#consensus-sequence-generation)
+      * [`--run_vcf2genome`](#--run_vcf2genome)
+      * [`--vcf2genome_outfile`](#--vcf2genome_outfile)
+      * [`--vcf2genome_header`](#--vcf2genome_header)
+      * [`--vcf2genome_minc`](#--vcf2genome_minc)
+      * [`--vcf2genome_minq`](#--vcf2genome_minq)
+      * [`--vcf2genome_minfreq`](#--vcf2genome_minfreq)
+    * [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
+      * [`--run_mtnucratio`](#--run_mtnucratio)
+      * [`--mtnucratio_header`](#--mtnucratio_header)
+    * [SNP Table Generation](#snp-table-generation)
+      * [`--run_multivcfanalyzer`](#--run_multivcfanalyzer)
+      * [`--write_allele_frequencies`](#--write_allele_frequencies)
+      * [`--min_genotype_quality`](#--min_genotype_quality)
+      * [`--min_base_coverage`](#--min_base_coverage)
+      * [`--min_allele_freq_hom`](#--min_allele_freq_hom)
+      * [`--min_allele_freq_het`](#--min_allele_freq_het)
+      * [`--additional_vcf_files`](#--additional_vcf_files)
+      * [`--reference_gff_annotations`](#--reference_gff_annotations)
+      * [`--reference_gff_exclude`](#--reference_gff_exclude)
+      * [`--snp_eff_results`](#--snp_eff_results)
+    * [Human Sex Determination](#human-sex-determination)
+      * [`--run_sexdeterrmine`](#--run_sexdeterrmine)
+      * [`--sexdeterrmine_bedfile`](#--sexdeterrmine_bedfile)
+    * [Human Nuclear Contamination](#human-nuclear-contamination)
+      * [`--run_nuclear_contamination`](#--run_nuclear_contamination)
+      * [`--contamination_chrom_name`](#--contamination_chrom_name)
+    * [Metagenomic Screening](#metagenomic-screening)
+      * [`--run_metagenomic_screening`](#--run_metagenomic_screening)
+      * [`--metagenomic_tool`](#--metagenomic_tool)
+      * [`--metagenomic_min_support_reads`](#--metagenomic_min_support_reads)
+      * [`--database`](#--database)
+      * [`--percent_identity`](#--percent_identity)
+      * [`--malt_mode`](#--malt_mode)
+      * [`--malt_alignment_mode`](#--malt_alignment_mode)
+      * [`--malt_top_percent`](#--malt_top_percent)
+      * [`--malt_min_support_mode`](#--malt_min_support_mode)
+      * [`--malt_min_support_percent`](#--malt_min_support_percent)
+      * [`--malt_max_queries`](#--malt_max_queries)
+      * [`--malt_memory_mode`](#--malt_memory_mode)
+      * [`--run_maltextract`](#--run_maltextract)
+      * [`maltextract_taxon_list`](#maltextract_taxon_list)
+      * [`maltextract_ncbifiles`](#maltextract_ncbifiles)
+      * [`maltextract_filter`](#maltextract_filter)
+      * [`maltextract_toppercent`](#maltextract_toppercent)
+      * [`maltextract_destackingoff`](#maltextract_destackingoff)
+      * [`maltextract_downsamplingoff`](#maltextract_downsamplingoff)
+      * [`maltextract_duplicateremovaloff`](#maltextract_duplicateremovaloff)
+      * [`maltextract_matches`](#maltextract_matches)
+      * [`maltextract_megansummary`](#maltextract_megansummary)
+      * [`maltextract_percentidentity`](#maltextract_percentidentity)
+      * [`maltextract_topalignment`](#maltextract_topalignment)
+      * [`maltextract_singlestranded`](#maltextract_singlestranded)
+  * [Clean up](#clean-up)
 
 ## General Nextflow info
 
@@ -116,44 +257,45 @@ For more details on how to set up your own private profile, please see [installa
 **Basic profiles**
 These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
-- `awsbatch`
-  - A generic configuration profile to be used with AWS Batch.
-- `conda`
-  - A generic configuration profile to be used with [conda](https://conda.io/docs/)
-  - Pulls most software from [Bioconda](https://bioconda.github.io/)
-- `docker`
-  - A generic configuration profile to be used with [Docker](http://docker.com/)
-  - Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
-- `singularity`
-  - A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-  - Pulls software from singularity-hub
-- `test`
-  - A profile with a complete configuration for automated testing
-  - Includes links to test data so needs no other parameters
-- `none`
-  - No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
+* `awsbatch`
+  * A generic configuration profile to be used with AWS Batch.
+* `conda`
+  * * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
+  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  * Pulls most software from [Bioconda](https://bioconda.github.io/)
+* `docker`
+  * A generic configuration profile to be used with [Docker](http://docker.com/)
+  * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
+* `singularity`
+  * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
+  * Pulls software from singularity-hub
+* `test`
+  * A profile with a complete configuration for automated testing
+  * Includes links to test data so needs no other parameters
+* `none`
+  * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
 **Institution Specific Profiles**
 These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
-- `uzh`
-  - A profile for the University of Zurich Research Cloud
-  - Loads Singularity and defines appropriate resources for running the pipeline.
-- `binac`
-  - A profile for the BinAC cluster at the University of Tuebingen
-  - Loads Singularity and defines appropriate resources for running the pipeline
-- `shh`
-  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
-  - Loads Singularity and defines appropriate resources for running the pipeline
+* `uzh`
+  * A profile for the University of Zurich Research Cloud
+  * Loads Singularity and defines appropriate resources for running the pipeline.
+* `binac`
+  * A profile for the BinAC cluster at the University of Tuebingen
+  * Loads Singularity and defines appropriate resources for running the pipeline
+* `shh`
+  * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
+  * Loads Singularity and defines appropriate resources for running the pipeline
 
 **Pipeline Specific Institution Profiles**
 There are also pipeline-specific institution profiles. I.e., we can also offer a profile which sets special resource settings to specific steps of the pipeline, which may not apply to all pipelines. This can be seen at [nf-core/configs](https://github.com/nf-core/configs) under [conf/pipelines/eager/](https://github.com/nf-core/configs/tree/master/conf/pipeline/eager).
 
 We currently offer a EAGER specific profile for
 
-- `shh`
-  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
-  - In addition to the nf-core wide profile, this also sets the MALT resources to match our commonly used databases
+* `shh`
+  * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
+  * In addition to the nf-core wide profile, this also sets the MALT resources to match our commonly used databases
 
 Further institutions can be added at [nf-core/configs](https://github.com/nf-core/configs). Please ask the eager developers to add your institution to the list above, if you add one!
 
@@ -243,15 +385,15 @@ There are 31 different species supported in the iGenomes references. To run the 
 
 You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
 
-- Human
-  - `--genome GRCh37`
-  - `--genome GRCh38`
-- Mouse *
-  - `--genome GRCm38`
-- _Drosophila_ *
-  - `--genome BDGP6`
-- _S. cerevisiae_ *
-  - `--genome 'R64-1-1'`
+* Human
+  * `--genome GRCh37`
+  * `--genome GRCh38`
+* Mouse *
+  * `--genome GRCm38`
+* _Drosophila_ *
+  * `--genome BDGP6`
+* _S. cerevisiae_ *
+  * `--genome 'R64-1-1'`
 
 > \* Not bundled with nf-core eager by default.
 
@@ -528,9 +670,9 @@ Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'
 
 More documentation can be seen for each tool under:
 
-- [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
-- [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
-- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
+* [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+* [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+* [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
 
 #### BWA (default)
 
@@ -618,8 +760,8 @@ Can be used to configure the step size of Preseqs `c_curve` method. Can be usefu
 
 More documentation can be seen in the follow links for:
 
-- [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
-- [PMDTools documentation](https://github.com/pontussk/PMDtools)
+* [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
+* [PMDTools documentation](https://github.com/pontussk/PMDtools)
 
 #### `--damageprofiler_length`
 
@@ -893,9 +1035,9 @@ An increasingly common line of analysis in high-throughput aDNA analysis today i
 
 Please note the following:
 
-- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
-  - To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
-- MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
+* MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
+  * To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
+* MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
 > RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK
 
@@ -907,8 +1049,8 @@ Turn on the metagenomic screening module.
 
 Specify which taxonomic classifier to use. There are two options avaliable:
 
-- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
-- `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
+* `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
+* `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
   
 :warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
 

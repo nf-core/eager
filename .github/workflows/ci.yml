@@ -11,29 +11,26 @@ jobs:
         run: |
           conda env create --prefix nf-core-eager-2.1.0dev-d95a13feb408cc17e95d38f16a81010d --file environment.yml
   test:
-    runs-on: ubuntu-18.04
     env:
+      NXF_VER: ${{ matrix.nxf_ver }}
       TOWER_ACCESS_TOKEN: ${{ secrets.TOWER_ACCESS_TOKEN }}
-      NXF_ANSI_LOG: 0
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['19.10.0', '']
         endedness: ['--single_end', '--paired_end']
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Install Nextflow
         run: |
-          export NXF_VER=${{ matrix.nxf_ver }}
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Download image
+      - name: Pull docker image
         run: |
-          docker pull nfcore/eager:dev && docker tag nfcore/eager:dev nfcore/eager:dev
-      - name: Extract branch name
-        shell: bash
-        run: echo "::set-env name=RUN_NAME::`echo ${GITHUB_REPOSITORY//\//_}`-${{ github.event_name }}-`echo ${GITHUB_SHA} | cut -c1-6`"
-        id: extract_branch
+          docker pull nfcore/eager:dev
+          docker tag nfcore/eager:dev nfcore/eager:dev
       - name: Determine tower usage
         shell: bash
         run: echo "::set-env name=TOWER::`[ -z "$TOWER_ACCESS_TOKEN" ] && echo '' || echo '-with-tower'`" 

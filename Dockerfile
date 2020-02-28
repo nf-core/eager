@@ -1,4 +1,6 @@
-FROM nfcore/base:1.8
+FROM nfcore/base:1.9
+LABEL authors="Alexander Peltzer, Stephen Clayton, James A. Fellows Yates, Maxime Borry, Thiseas C. Lamnidis, Zandra Fagernäs" \
+      description="Docker image containing all software requirements for the nf-core/eager pipeline"
 
 LABEL description="Docker image containing all requirements for nf-core/eager pipeline"
 COPY environment.yml /
