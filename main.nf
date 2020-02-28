@@ -1404,7 +1404,7 @@ process endorSpy {
     script:
     prefix = "${name}"
     """
-    endorS.py ${stats} ${poststats} -o json -n ${name}
+    endorS.py -o json -n ${name} ${stats} ${poststats}
     """
 }
 
