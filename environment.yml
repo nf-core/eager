@@ -14,7 +14,7 @@ dependencies:
   - bioconda::adapterremovalfixprefix=0.0.5
   - bioconda::bwa=0.7.17
   - bioconda::picard=2.22.0
-  - bioconda::samtools=1.10
+  - bioconda::samtools=1.9
   - bioconda::dedup=0.12.5
   - bioconda::angsd=0.931
   - bioconda::circularmapper=1.93.4
@@ -33,7 +33,7 @@ dependencies:
   - bioconda::bamutil=1.0.14
   - bioconda::mtnucratio=0.7
   - pysam=0.15.4
-  - python=3.8.2
+  - python=3.7.1
   - bioconda::kraken2=2.0.8_beta
   - conda-forge::pandas=1.0.1
   - bioconda::freebayes=1.3.2

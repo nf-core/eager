@@ -53,10 +53,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * conda-forge::markdown=3.1.1 upgraded to 3.2.1
 * bioconda::fastqc=0.11.8 upgraded to 0.11.9
 * bioconda::picard=2.21.4 upgraded to 2.22.0
-* bioconda::samtools=1.9 upgraded to 1.10
 * bioconda::bedtools=2.29.0 upgraded to 2.29.2
 * pysam=0.15.3 upgraded to 0.15.4
-* python=3.7.1 upgraded to 3.8.2
 * conda-forge::pandas=1.0.0 upgraded to 1.0.1
 * bioconda::freebayes=1.3.1 upgraded to 1.3.2
 * conda-forge::biopython=1.75 upgraded to 1.76
