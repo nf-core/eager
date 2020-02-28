@@ -260,7 +260,7 @@ These are basic profiles which primarily define where you derive the pipeline's 
 * `awsbatch`
   * A generic configuration profile to be used with AWS Batch.
 * `conda`
-  * * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
+  * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
   * A generic configuration profile to be used with [conda](https://conda.io/docs/)
   * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `docker`
@@ -853,9 +853,9 @@ There are options for different genotypers to be used. We suggest you the docume
 
 Documentation for each tool:
 
-- [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
-- [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
-- [FreeBayes](https://github.com/ekg/freebayes)
+* [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
+* [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
+* [FreeBayes](https://github.com/ekg/freebayes)
 
 #### `--run_genotyping`
 
