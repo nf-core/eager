@@ -26,7 +26,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#310](https://github.com/nf-core/eager/issues/310) - Generalises base.config
 * [#326](https://github.com/nf-core/eager/pull/326) - Add Biopython and [xopen](https://github.com/marcelm/xopen/) dependencies
 * [#349](https://github.com/nf-core/eager/issues/349) - Adds two extra pmdtools parameters --first and --platypus to the damage analysis
+* [#336](https://github.com/nf-core/eager/issues/336) - Change default Y-axis maximum value of DamageProfiler to 30% to match popular (but slower) mapDamage, and allow user to set their own value.
 * [#352](https://github.com/nf-core/eager/pull/352) - Add social preview image
+* [#355](https://github.com/nf-core/eager/pull/355) - Add Kraken2 metagenomics classifier
+* [#90](https://github.com/nf-core/eager/issues/90) - Added endogenous DNA calculator (original repository: [https://github.com/aidaanva/endorS.py/](https://github.com/aidaanva/endorS.py/))
 
 ### `Fixed`
 

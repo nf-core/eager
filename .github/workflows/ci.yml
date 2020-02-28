@@ -125,6 +125,9 @@ jobs:
       - name: MALTEXTRACT Basic with MALT plus MaltExtract
         run: |
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-maltextract" -profile test,docker --paired_end --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles "/home/runner/work/eager/eager/databases/maltextract/" --maltextract_taxon_list 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
+      - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into Kraken
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-kraken" -profile test_kraken,docker ${{ matrix.endedness }} --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq'
       - name: SEXDETERMINATION Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
         run: |
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-sexdeterrmine" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --run_sexdeterrmine
