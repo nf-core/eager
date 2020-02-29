@@ -229,13 +229,6 @@ if (params.help){
 * SANITY CHECKING
 */
 
-// NF version check! Will replace with manifest system once allowed by nf-core/tools
-
-if( !nextflow.version.matches('>=19.10.0') ) {
-    println "This workflow requires Nextflow version 19.10.0 or greater -- You are running version $nextflow.version"
-    exit 1
-}
-
 // Validate inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "Please specify --fasta with the path to your reference"
