@@ -7,7 +7,7 @@ dependencies:
   - bioconda::rename=1.601
   - conda-forge::pymdown-extensions=6.0
   - conda-forge::pygments=2.5.2
-  - conda-forge::markdown=3.2.1
+  - conda-forge::markdown=3.1.1 #Dont upgrade anymore ‚
   - conda-forge::openjdk=8.0.144
   - bioconda::fastqc=0.11.9
   - bioconda::adapterremoval=2.3.1
