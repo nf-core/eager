@@ -1,5 +1,5 @@
 FROM nfcore/base:1.9
-LABEL authors="James A. Fellows Yates, Thiseas C. Lamnidis, Maxime Borry, Maxime Garcia, Aida Andrades Valtuena, Zandra Fagernäs, Stephen Clayton, Judith Neukamm, Alexander Peltzer" \
+LABEL authors="The nf-core/eager community" \
       description="Docker image containing all requirements for nf-core/eager pipeline"
 COPY environment.yml /
 RUN conda env create -f /environment.yml && conda clean -a
