@@ -113,23 +113,24 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 
 ## Credits
 
-This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [James A. Fellows Yates](https://github.com/jfy133),  [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas) and [Aida Andrades Valtueña](https://github.com/aidaanva). Additional ideas and discussion by Raphael Eisenhofer, and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
+This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [James A. Fellows Yates](https://github.com/jfy133),  [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas) and [Aida Andrades Valtueña](https://github.com/aidaanva). Additional ideas and discussion by Raphael Eisenhofer, and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
 
-## Contributors
+## Contributors (alphabetical)
 
-* [James A. Fellows-Yates](https://github.com/jfy133)
-* [Stephen Clayton](https://github.com/sc13-bioinf)
-* [Maxime Borry](https://github.com/maxibor)
-* [Judith Neukamm](https://github.com/JudithNeukamm)
-* [Raphael Eisenhofer](https://github.com/EisenRa)
-* [Maxime Garcia](https://github.com/MaxUlysse)
-* [Luc Venturini](https://github.com/lucventurini)
-* [Hester van Schalkwyk](https://github.com/hesterjvs)
-* [Thiseas C. Lamnidis](https://github.com/TCLamnidis)
 * [Aida Andrades Valtueña](https://github.com/aidaanva)
+* [Alexander Peltzer](https://github.com/apeltzer)
+* [Hester van Schalkwyk](https://github.com/hesterjvs)
+* [James A. Fellows-Yates](https://github.com/jfy133)
+* [Judith Neukamm](https://github.com/JudithNeukamm)
+* [Luc Venturini](https://github.com/lucventurini)
+* [Maxime Borry](https://github.com/maxibor)
+* [Maxime Garcia](https://github.com/MaxUlysse)
+* [Raphael Eisenhofer](https://github.com/EisenRa)
+* [Stephen Clayton](https://github.com/sc13-bioinf)
+* [Thiseas C. Lamnidis](https://github.com/TCLamnidis)
 * [Zandra Fagernäs](https://github.com/ZandraFagernas)
 
-If you've contributed and you're missing in here, please let me know and I'll add you in.
+If you've contributed and you're missing in here, please let us know and we will add you in of course!
 
 ## Tool References
 
