@@ -89,7 +89,7 @@ Additional functionality contained by the pipeline currently includes:
 
 6. Once your run has completed successfully, clean up the intermediate files.
 
-        nextflow clean -k
+        nextflow clean -f -k
 
 NB. You can see an overview of the run in the MultiQC report located at `<your_output_dir>/MultiQC/multiqc_report.html`
 
