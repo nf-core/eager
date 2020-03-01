@@ -33,16 +33,6 @@ jobs:
       - name:  BASIC Run the basic pipeline with the test profileBasic workflow, PE/SE, bwa aln
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --saveReference
-      - name: GATK 3.5 Download resource files
-        run: |
-            mkdir -p jars/gatk_3_5
-            wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -P jars/gatk_3_5
-            tar xvf jars/gatk_3_5/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -C jars/gatk_3_5/
-            chmod +x jars/gatk_3_5/GenomeAnalysisTK.jar
-            GATK_JAR=$(readlink -f jars/gatk_3_5/GenomeAnalysisTK.jar)
-      - name: GENOTYPING_UG/PMD/MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
-        run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
       - name: REFERENCE Basic workflow, with supplied indices
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
@@ -100,13 +90,19 @@ jobs:
       - name: TRIMBAM Test PMDtools works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_pmdtools
-
-      #- name: GENOTYPING_UG/PMD/MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
-      #  run: |
-      #   nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
-      #- name: VCF2Genome Run basic pipeline with GATK unifiedgenotyper and run VCF2Genome
-      #  run: |
-      #   nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_vcf2genome
+      - name: GATK 3.5 Download resource files
+        run: |
+            mkdir -p jars/gatk_3_5
+            wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -P jars/gatk_3_5
+            tar xvf jars/gatk_3_5/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -C jars/gatk_3_5/
+            chmod +x jars/gatk_3_5/GenomeAnalysisTK.jar
+            GATK_JAR=$(readlink -f jars/gatk_3_5/GenomeAnalysisTK.jar)
+      - name: GENOTYPING_UG AND MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
+        run: |
+         nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+      - name: GENOTYPING_UG ON TRIMMED BAM Test
+        run: |
+         nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --run_trim_bam --genotyping_source 'trimmed' --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
       - name: BAM_INPUT Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
         run: |
          nextflow run ${GITHUB_WORKSPACE} -profile test_bam,docker --bam --skip_adapterremoval --run_convertbam
