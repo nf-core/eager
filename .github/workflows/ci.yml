@@ -33,6 +33,16 @@ jobs:
       - name:  BASIC Run the basic pipeline with the test profileBasic workflow, PE/SE, bwa aln
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --saveReference
+      - name: GATK 3.5 Download resource files
+        run: |
+            mkdir -p jars/gatk_3_5
+            wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -P jars/gatk_3_5
+            tar xvf jars/gatk_3_5/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
+            chmod +x jars/gatk_3_5/GenomeAnalysisTK.jar
+            GATK_JAR=$(readlink -f jars/gatk_3_5/GenomeAnalysisTK.jar)
+      - name: GENOTYPING_UG/PMD/MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
+        run: |
+         nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --gatk_ug_jar "$GATK_JAR" --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
       - name: REFERENCE Basic workflow, with supplied indices
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
@@ -84,9 +94,13 @@ jobs:
       - name: SKIPPING Test checking all skip steps work i.e. input bam, skipping straight to genotyping
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_bam,docker --bam --single_end --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
-      #- name: TRIM_BAM/PMD/GENOTYPING_UG/MULTIVCFANALYZER Test running PMDTools, TrimBam, GATK UnifiedGenotyper and MultiVCFAnalyzer
-      #  run: |
-      #    nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
+      - name: TRIMBAM Test bamutils works alone
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_trim_bam
+      - name: TRIMBAM Test PMDtools works alone
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_pmdtools
+
       #- name: GENOTYPING_UG/PMD/MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
       #  run: |
       #   nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
