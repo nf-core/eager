@@ -1367,6 +1367,8 @@ if (params.run_bam_filtering) {
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
+  // Make fake second channel with the same as the first one and join that, then in endorSpy process have the conditional if bam filtering or not
+  // if not, only use ${stats}
   ch_flagstat_for_endorspy
     .groupTuple(by: 0)
     .set{ ch_allflagstats_for_endorspy }
@@ -1463,7 +1465,7 @@ process markDup{
     prefix = "${bam.baseName}"
     size = "${params.large_ref}" ? '-c' : ''
     """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}._rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.rmdup.metrics" VALIDATION_STRINGENCY=SILENT
     samtools index "${size}" ${prefix}_rmdup.bam
     """
 }
@@ -1830,8 +1832,8 @@ if ( params.gatk_ug_jar != '' ) {
   prefix="${bam.baseName}"
   skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
   """
-  freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${bam.baseName}.vcf 
-  pigz -p ${task.cpus} ${bam.baseName}.vcf
+  freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${bam.baseName}.freebayes.vcf
+  pigz -p ${task.cpus} ${bam.baseName}.freebayes.vcf
   """
  }
 
