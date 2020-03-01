@@ -124,3 +124,10 @@ read_count_prefix: ''
 read_count_desc: ''
 decimalPoint_format: '.'
 thousandsSep_format: ','
+report_section_order:
+    software_versions:
+        order: -1000
+    nf-core-eager-summary:
+        order: -1001
+
+export_plots: true
