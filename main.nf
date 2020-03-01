@@ -7,10 +7,7 @@
  #### Homepage / Documentation
  https://github.com/nf-core/eager
  #### Authors
- Alexander Peltzer apeltzer <alex.peltzer@gmail.com> - https://github.com/apeltzer>
- James A. Fellows Yates <jfy133@gmail.com> - https://github.com/jfy133
- Stephen Clayton <clayton@shh.mpg.de> - https://github.com/sc13-bioinf
- Maxime Borry <borry@shh.mpg.de.de> - https://github.com/maxibor
+ For a list of authors, see: https://github.com/nf-core/eager/blob/master/README.md
 ========================================================================================
 */
 
@@ -104,7 +101,8 @@ def helpMessage() {
 
     (aDNA) Damage Analysis
       --damageprofiler_length       Specify length filter for DamageProfiler
-      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler
+      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler (e.g. on damage plot). Default: 15
+      --damageprofiler_yaxis        Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: 0.30 
       --run_pmdtools                Turn on PMDtools
       --udg_type                    Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are set to UDG-.
       --pmdtools_range              Specify range of bases for PMDTools
@@ -182,7 +180,7 @@ def helpMessage() {
       --malt_top_percent            Specify the percent for LCA algorithm (see MEGAN6 CE manual). Default: 1
       --malt_min_support_mode       Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained. Options: 'percent', 'reads'. Default: 'percent'
       --malt_min_support_percent    Specify the minimum percentage of reads a taxon of sample total is required to have to be retained. Default: 0.01
-      --malt_min_support_reads      Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: 1
+      --metagenomic_min_support_reads      Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: 1
       --malt_max_queries            Specify the maximium number of queries a read can have. Default: 100
       --malt_memory_mode            Specify the memory load method. Do not use 'map' with GTFS file system. Options: 'load', 'page', 'map'. Default: 'load'
 
@@ -224,23 +222,9 @@ if (params.help){
     exit 0
 }
 
-// Configurable variables
-
-
-multiqc_config = file(params.multiqc_config)
-output_docs = file("$baseDir/docs/output.md")
-where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
-
 /*
 * SANITY CHECKING
 */
-
-// NF version check! Will replace with manifest system once allowed by nf-core/tools
-
-if( !nextflow.version.matches('>=19.10.0') ) {
-    println "This workflow requires Nextflow version 19.10.0 or greater -- You are running version $nextflow.version"
-    exit 1
-}
 
 // Validate inputs
 if ( params.fasta.isEmpty () ){
@@ -426,8 +410,8 @@ if (params.run_metagenomic_screening) {
   exit 1, "Metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
   }
 
-  if (params.metagenomic_tool != 'malt' ) {
-    exit 1, "Metagenomic classification can currently only be run with 'malt'. Please check your classifer. You gave '${params.metagenomic_tool}'!"
+  if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
+    exit 1, "Metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave '${params.metagenomic_tool}'!"
   }
 
   if (params.database == '' ) {
@@ -442,8 +426,8 @@ if (params.run_metagenomic_screening) {
     exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
   }
 
-  if (params.malt_min_support_mode == 'percent' && params.malt_min_support_reads != 1) {
-    exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --malt_min_support_reads!"
+  if (params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
+    exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --metagenomic_min_support_reads!"
   }
 
   if (params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
@@ -480,20 +464,25 @@ if (params.run_maltextract) {
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
 custom_runName = params.name
-if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
-  custom_runName = workflow.runName
+if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
+    custom_runName = workflow.runName
 }
 
-if( workflow.profile == 'awsbatch') {
-  // AWSBatch sanity checking
-  if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-  // Check outdir paths to be S3 buckets if running on AWSBatch
-  // related: https://github.com/nextflow-io/nextflow/issues/813
-  if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
-  // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-  if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+if (workflow.profile.contains('awsbatch')) {
+    // AWSBatch sanity checking
+    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+    // Check outdir paths to be S3 buckets if running on AWSBatch
+    // related: https://github.com/nextflow-io/nextflow/issues/813
+    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+    // Prevent trace files to be stored on S3 since S3 does not support rolling files.
+    if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
+// Stage config files
+ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
+where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
 /*
  * Create a channel for input read files
@@ -625,22 +614,24 @@ if(workflow.profile == 'awsbatch'){
 }
 if(params.email) summary['E-mail Address'] = params.email
 summary['Config Profile'] = workflow.profile
-if(params.config_profile_description) summary['Config Description'] = params.config_profile_description
-if(params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
-if(params.config_profile_url)         summary['Config URL']         = params.config_profile_url
-if(params.email) {
-  summary['E-mail Address']  = params.email
-  summary['MultiQC maxsize'] = params.maxMultiqcEmailFileSize
+if (params.config_profile_description) summary['Config Description'] = params.config_profile_description
+if (params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
+if (params.config_profile_url)         summary['Config URL']         = params.config_profile_url
+if (params.email || params.email_on_fail) {
+    summary['E-mail Address']    = params.email
+    summary['E-mail on failure'] = params.email_on_fail
+    summary['MultiQC maxsize']   = params.max_multiqc_email_size
 }
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
-log.info "\033[2m----------------------------------------------------\033[0m"
+log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 // Check the hostnames against configured profiles
 checkHostname()
 
-def create_workflow_summary(summary) {
-    def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
-    yaml_file.text  = """
+Channel.from(summary.collect{ [it.key, it.value] })
+    .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
+    .reduce { a, b -> return [a, b].join("\n            ") }
+    .map { x -> """
     id: 'nf-core-eager-summary'
     description: " - this information is collected when the pipeline is started."
     section_name: 'nf-core/eager Workflow Summary'
@@ -648,13 +639,10 @@ def create_workflow_summary(summary) {
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
-${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
+            $x
         </dl>
-    """.stripIndent()
-
-   return yaml_file
-}
-
+    """.stripIndent() }
+    .set { ch_workflow_summary }
 
 
 /* 
@@ -995,8 +983,6 @@ if (!params.skip_adapterremoval) {
         .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem;  } 
 }
 
-
-
 /*
 * STEP 2b - FastQC after clipping/merging (if applied!)
 */
@@ -1209,7 +1195,7 @@ process samtools_flagstat {
     file(bam) from ch_mapping_for_samtools_flagstat
 
     output:
-    file "*.stats" into ch_flagstat_for_multiqc
+    tuple val(prefix), file("*stats") into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
 
     script:
     prefix = "$bam" - ~/(\.bam)?$/
@@ -1242,7 +1228,7 @@ process samtools_filter {
 
     output:
     file "*filtered.bam" into ch_output_from_filtering
-    file "*.unmapped.fastq.gz" optional true into ch_bam_filtering_for_malt
+    file "*.unmapped.fastq.gz" optional true into ch_bam_filtering_for_metagenomic
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}" into ch_outputindex_from_filtering
 
@@ -1358,12 +1344,52 @@ process samtools_flagstat_after_filter {
     file(bam) from ch_filtering_for_flagstat
 
     output:
-    file "*.stats" into ch_bam_filtered_flagstat_for_multiqc
+    tuple val(prefix), file("*stats") into ch_bam_filtered_flagstat_for_multiqc, ch_bam_filtered_flagstat_for_endorspy
 
     script:
-    prefix = "$bam" - ~/(\.bam)?$/
+    prefix = "$bam" - ~/(\.bam.filtered.bam)?$/
     """
     samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
+    """
+}
+
+/*
+* Step 4c: Keep unmapped/remove unmapped reads flagstat
+*/
+
+// merge tuples, for when filtered has been run
+
+//ch_bam_filtered_flagstat_for_endorspy.view {it -> "DoubleBefore: $it"}
+
+if (params.run_bam_filtering) {
+  ch_flagstat_for_endorspy
+    .join(ch_bam_filtered_flagstat_for_endorspy)
+    .set{ ch_allflagstats_for_endorspy }
+
+} else {
+  ch_flagstat_for_endorspy
+    .groupTuple(by: 0)
+    .set{ ch_allflagstats_for_endorspy }
+}
+
+process endorSpy {
+    label 'sc_tiny'
+    tag "$prefix"
+    publishDir "${params.outdir}/endorSpy", mode: 'copy'
+
+    when:
+    !params.skip_mapping
+
+    input:
+    tuple val(name), file(stats), file(poststats) from ch_allflagstats_for_endorspy
+
+    output:
+    file "*.json" into ch_endorspy_for_multiqc
+
+    script:
+    prefix = "${name}"
+    """
+    endorS.py -o json -n ${name} ${stats} ${poststats}
     """
 }
 
@@ -1519,7 +1545,7 @@ process damageprofiler {
     script:
     base = "${bam.baseName}"
     """
-    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . 
+    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . -yaxis_damageplot ${params.damageprofiler_yaxis}
     """
 }
 
@@ -2007,18 +2033,32 @@ process print_nuclear_contamination{
  }
 
 /*
- * Step 17: Metagenomic screening of unmapped reads
+ * Step 17-A: Metagenomic screening of unmapped reads: MALT
 */
+
+if (params.metagenomic_tool == 'malt') {
+  ch_bam_filtering_for_metagenomic
+  .set {ch_bam_filtering_for_metagenomic_malt}
+
+  ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
+} else if (params.metagenomic_tool == 'kraken') {
+  ch_bam_filtering_for_metagenomic
+  .set {ch_bam_filtering_for_metagenomic_kraken}
+
+  ch_bam_filtering_for_metagenomic_malt = Channel.empty()
+}
+
+// params.metagenomic_tool == 'malt' ? ch_bam_filtering_for_metagenomic.set {ch_bam_filtering_for_metagenomic_malt} : ch_bam_filtering_for_metagenomic.set {ch_bam_filtering_for_metagenomic_kraken}
 
 process malt {
   label 'mc_huge'
-  publishDir "${params.outdir}/metagenomic_classification", mode:"copy"
+  publishDir "${params.outdir}/metagenomic_classification/malt", mode:"copy"
 
   when:
-  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq'
+  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
 
   input:
-  file fastqs from ch_bam_filtering_for_malt.collect()
+  file fastqs from ch_bam_filtering_for_metagenomic_malt.collect()
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
@@ -2054,7 +2094,7 @@ process malt {
   -m ${params.malt_mode} \
   -at ${params.malt_alignment_mode} \
   -top ${params.malt_top_percent} \
-  -sup ${params.malt_min_support_reads} \
+  -sup ${params.metagenomic_min_support_reads} \
   -mq ${params.malt_max_queries} \
   --memoryMode ${params.malt_memory_mode} \
   -i ${fastqs.join(' ')} |&tee malt.log
@@ -2075,7 +2115,7 @@ process maltextract {
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
 
   when: 
-  params.run_maltextract
+  params.run_maltextract && params.metagenomic_tool == 'malt'
 
   input:
   file rma6 from ch_rma_for_maltExtract.collect()
@@ -2114,6 +2154,94 @@ process maltextract {
   """
 }
 
+/*
+ * Step 17-B: Metagenomic screening of unmapped reads: Kraken2
+*/
+
+if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && params.metagenomic_tool == 'kraken'){
+  comp_kraken = file(params.database)
+
+  process decomp_kraken {
+    input:
+    file(ckdb) from comp_kraken
+    
+    output:
+    file(dbname) into ch_krakendb
+    
+    script:
+    dbname = params.database.tokenize("/")[-1].tokenize(".")[0]
+    """
+    tar xvzf $ckdb
+    """
+  }
+
+} else if (! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening && params.metagenomic_tool == 'kraken') {
+    ch_krakendb = file(params.database)
+} else {
+    ch_krakendb = Channel.empty()
+}
+
+
+process kraken {
+  tag "$prefix"
+  label 'mc_huge'
+  publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
+
+  when:
+  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
+
+  input:
+  file fastq from ch_bam_filtering_for_metagenomic_kraken
+  file(krakendb) from ch_krakendb
+
+  output:
+  file "*.kraken.out" into ch_kraken_out
+  set val(prefix), file("*.kreport") into ch_kraken_report
+  
+  
+  script:
+  prefix = fastq.toString().tokenize('.')[0]
+  out = prefix+".kraken.out"
+  kreport = prefix+".kreport"
+
+  """
+  kraken2 --db ${krakendb} --threads ${task.cpus} --output $out --report $kreport $fastq
+  """
+}
+
+process kraken_parse {
+  tag "$name"
+  errorStrategy 'ignore'
+
+  input:
+  set val(name), file(kraken_r) from ch_kraken_report
+
+  output:
+  set val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
+
+  script:
+  out = name+".kraken_parsed.csv"
+  """
+  kraken_parse.py -c ${params.metagenomic_min_support_reads} -o $out $kraken_r
+  """    
+}
+
+process kraken_merge {
+  publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
+
+  input:
+  file(csv_count) from ch_kraken_parsed.collect()
+
+  output:
+  file('kraken_count_table.csv') into kraken_merged
+
+  script:
+  out = "kraken_count_table.csv"
+  """
+  merge_kraken_res.py -o $out
+  """    
+}
+
 
 /*
 Genotyping tools:
@@ -2134,14 +2262,14 @@ process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
-    file output_docs
+    file output_docs from ch_output_docs
 
     output:
     file "results_description.html"
 
     script:
     """
-    markdown_to_html.r $output_docs results_description.html
+    markdown_to_html.py $output_docs -o results_description.html
     """
 }
 
@@ -2197,7 +2325,8 @@ process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
-    file multiqc_config
+    file multiqc_config from ch_multiqc_config
+    file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
     file ('fastqc_raw/*') from ch_prefastqc_for_multiqc.collect().ifEmpty([])
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file software_versions_mqc from software_versions_yaml.collect().ifEmpty([])
@@ -2212,8 +2341,9 @@ process multiqc {
     file ('fastp/*') from ch_fastp_for_multiqc.collect().ifEmpty([])
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
+    file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
 
-    file workflow_summary from create_workflow_summary(summary)
+    file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
     output:
     file "*multiqc_report.html" into multiqc_report
@@ -2222,8 +2352,9 @@ process multiqc {
     script:
     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
+    custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
-    multiqc -f $rtitle $rfilename --config $multiqc_config .
+    multiqc -f $rtitle $rfilename $multiqc_config $custom_config_file .
     """
 }
 
@@ -2234,8 +2365,8 @@ workflow.onComplete {
 
     // Set up the e-mail variables
     def subject = "[nf-core/eager] Successful: $workflow.runName"
-    if(!workflow.success){
-      subject = "[nf-core/eager] FAILED: $workflow.runName"
+    if (!workflow.success) {
+        subject = "[nf-core/eager] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -2253,10 +2384,9 @@ workflow.onComplete {
     email_fields['summary']['Date Completed'] = workflow.complete
     email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
     email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
-    if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
-    if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
-    if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
+    if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+    if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+    if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
@@ -2265,14 +2395,20 @@ workflow.onComplete {
     def mqc_report = null
     try {
         if (workflow.success) {
-            mqc_report = multiqc_report.getVal()
-            if (mqc_report.getClass() == ArrayList){
+            mqc_report = ch_multiqc_report.getVal()
+            if (mqc_report.getClass() == ArrayList) {
                 log.warn "[nf-core/eager] Found multiple reports from process 'multiqc', will use only one"
                 mqc_report = mqc_report[0]
             }
         }
     } catch (all) {
         log.warn "[nf-core/eager] Could not attach MultiQC report to summary email"
+    }
+
+    // Check if we are only sending emails on failure
+    email_address = params.email
+    if (!params.email && params.email_on_fail && !workflow.success) {
+        email_address = params.email_on_fail
     }
 
     // Render the TXT template
@@ -2287,89 +2423,88 @@ workflow.onComplete {
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.maxMultiqcEmailFileSize.toBytes() ]
+    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
     def sf = new File("$baseDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
 
     // Send the HTML e-mail
-    if (params.email) {
+    if (email_address) {
         try {
-          if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
-          // Try to send HTML e-mail using sendmail
-          [ 'sendmail', '-t' ].execute() << sendmail_html
-          log.info "[nf-core/eager] Sent summary e-mail to $params.email (sendmail)"
+            if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
+            // Try to send HTML e-mail using sendmail
+            [ 'sendmail', '-t' ].execute() << sendmail_html
+            log.info "[nf-core/eager] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
-          // Catch failures and try with plaintext
-          [ 'mail', '-s', subject, params.email ].execute() << email_txt
-          log.info "[nf-core/eager] Sent summary e-mail to $params.email (mail)"
+            // Catch failures and try with plaintext
+            [ 'mail', '-s', subject, email_address ].execute() << email_txt
+            log.info "[nf-core/eager] Sent summary e-mail to $email_address (mail)"
         }
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/pipeline_info/" )
-    if( !output_d.exists() ) {
-      output_d.mkdirs()
+    def output_d = new File("${params.outdir}/pipeline_info/")
+    if (!output_d.exists()) {
+        output_d.mkdirs()
     }
-    def output_hf = new File( output_d, "pipeline_report.html" )
+    def output_hf = new File(output_d, "pipeline_report.html")
     output_hf.withWriter { w -> w << email_html }
-    def output_tf = new File( output_d, "pipeline_report.txt" )
+    def output_tf = new File(output_d, "pipeline_report.txt")
     output_tf.withWriter { w -> w << email_txt }
 
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
 
     if (workflow.stats.ignoredCount > 0 && workflow.success) {
-      log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
-      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}"
-      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}"
+        log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
+        log.info "-${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}-"
+        log.info "-${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}-"
     }
 
     if (workflow.success) {
-        log.info "${c_purple}nf-core/eager${c_green} Pipeline completed successfully${c_reset}"
+        log.info "-${c_purple}[nf-core/eager]${c_green} Pipeline completed successfully${c_reset}-"
     } else {
         checkHostname()
-        log.info "${c_purple}nf-core/eager${c_red} Pipeline completed with errors${c_reset}"
+        log.info "-${c_purple}[nf-core/eager]${c_red} Pipeline completed with errors${c_reset}-"
     }
-
 }
 
 
-def nfcoreHeader(){
+def nfcoreHeader() {
     // Log colors ANSI codes
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
     c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
     c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
     c_white = params.monochrome_logs ? '' : "\033[0;37m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
 
-    return """    ${c_dim}----------------------------------------------------${c_reset}
+    return """    -${c_dim}--------------------------------------------------${c_reset}-
                                             ${c_green},--.${c_black}/${c_green},-.${c_reset}
     ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
     ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
     ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
                                             ${c_green}`._,._,\'${c_reset}
     ${c_purple}  nf-core/eager v${workflow.manifest.version}${c_reset}
-    ${c_dim}----------------------------------------------------${c_reset}
+    -${c_dim}--------------------------------------------------${c_reset}-
     """.stripIndent()
 }
 
-def checkHostname(){
+def checkHostname() {
     def c_reset = params.monochrome_logs ? '' : "\033[0m"
     def c_white = params.monochrome_logs ? '' : "\033[0;37m"
     def c_red = params.monochrome_logs ? '' : "\033[1;91m"
     def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
-    if(params.hostnames){
+    if (params.hostnames) {
         def hostname = "hostname".execute().text.trim()
         params.hostnames.each { prof, hnames ->
             hnames.each { hname ->
-                if(hostname.contains(hname) && !workflow.profile.contains(prof)){
+                if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
                     log.error "====================================================\n" +
                             "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
                             "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +

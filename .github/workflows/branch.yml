@@ -1,5 +1,6 @@
 name: nf-core branch protection
 # This workflow is triggered on PRs to master branch on the repository
+# It fails when someone tries to make a PR against the nf-core `master` branch instead of `dev`
 on:
   pull_request:
     branches:
@@ -9,20 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-18.04
     steps:
-      # PRs are only ok if coming from an nf-core dev branch
+      # PRs are only ok if coming from an nf-core `dev` branch or a fork `patch` branch
       - name: Check PRs
         run: |
           { [[ $(git remote get-url origin) == *nf-core/eager ]] && [[ ${GITHUB_HEAD_REF} = "dev" ]]; } || [[ ${GITHUB_HEAD_REF} == "patch" ]]
-          echo "HOME: ${HOME}"
-          echo "GITHUB_WORKFLOW: ${GITHUB_WORKFLOW}"
-          echo "GITHUB_ACTION: ${GITHUB_ACTION}"
-          echo "GITHUB_ACTOR: ${GITHUB_ACTOR}"
-          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
-          echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
-          echo "GITHUB_EVENT_PATH: ${GITHUB_EVENT_PATH}"
-          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
-          echo "GITHUB_SHA: ${GITHUB_SHA}"
-          echo "GITHUB_REF: ${GITHUB_REF}"
-          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
-          echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
-          [ ${GITHUB_ACTOR} = "nf-core" ] && [ ${GITHUB_HEAD_REF} = "dev" ]

@@ -11,102 +11,94 @@ jobs:
         run: |
           conda env create --prefix nf-core-eager-2.1.0dev-d95a13feb408cc17e95d38f16a81010d --file environment.yml
   test:
-    runs-on: ubuntu-18.04
     env:
-      TOWER_ACCESS_TOKEN: ${{ secrets.TOWER_ACCESS_TOKEN }}
-      NXF_ANSI_LOG: 0
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['19.10.0', '']
         endedness: ['--single_end', '--paired_end']
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Install Nextflow
         run: |
-          export NXF_VER=${{ matrix.nxf_ver }}
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Download image
+      - name: Pull docker image
         run: |
-          docker pull nfcore/eager:dev && docker tag nfcore/eager:dev nfcore/eager:dev
-      - name: Extract branch name
-        shell: bash
-        run: echo "::set-env name=RUN_NAME::`echo ${GITHUB_REPOSITORY//\//_}`-`echo ${GITHUB_HEAD_REF//\//@} | rev | cut -f1 -d@ | rev`-${{ github.event_name }}-`echo ${GITHUB_SHA} | cut -c1-6`"
-        id: extract_branch
-      - name: Determine tower usage
-        shell: bash
-        run: echo "::set-env name=TOWER::`[ -z "$TOWER_ACCESS_TOKEN" ] && echo '' || echo '-with-tower'`" 
-        id: tower_usage
+          docker pull nfcore/eager:dev
+          docker tag nfcore/eager:dev nfcore/eager:dev
       - name:  BASIC Run the basic pipeline with the test profileBasic workflow, PE/SE, bwa aln
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-basic" -profile test,docker ${{ matrix.endedness }} --saveReference
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --saveReference
       - name: REFERENCE Basic workflow, with supplied indices
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-preindex_ref" -profile test,docker ${{ matrix.endedness }} --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
       - name: REFERENCE Run the basic pipeline with FastA reference with `fna` extension
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-fna_ref" -profile test_fna,docker --paired_end
+          nextflow run ${GITHUB_WORKSPACE} -profile test_fna,docker --paired_end
       - name: REFERENCE Test with zipped reference input
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-gz_ref" -profile test,docker --paired_end --fasta 'https://github.com/nf-core/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --fasta 'https://github.com/nf-core/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
       - name: FASTP Test fastp complexity filtering
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-fastp" -profile test,docker --paired_end --complexity_filter
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --complexity_filter
       - name: ADAPTERREMOVAL Test skip paired end collapsing
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-skip_collapse" -profile test,docker --paired_end --skip_collapse
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --skip_collapse
       - name: ADAPTERREMOVAL Test paired end collapsing but no trimming
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-pretrim" -profile test_pretrim,docker --paired_end --skip_trim
+          nextflow run ${GITHUB_WORKSPACE} -profile test_pretrim,docker --paired_end --skip_trim
       - name: ADAPTERREMOVAL Run the basic pipeline with paired end data without adapterRemoval
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-skip_adapterremoval" -profile test,docker --paired_end --skip_adapterremoval
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --skip_adapterremoval
       - name: ADAPTERREMOVAL Run the basic pipeline with preserve5p end option
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-preserve5p" -profile test,docker --paired_end --preserve5p
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --preserve5p
       - name: ADAPTERREMOVAL Run the basic pipeline with merged only option
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-mergedonly" -profile test,docker --paired_end --mergedonly
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --mergedonly
       - name: ADAPTERREMOVAL Run the basic pipeline with preserve5p end and merged reads only options
         run: |
-         nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-preserve5p_mergedonly" -profile test,docker --paired_end --preserve5p --mergedonly
+         nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --preserve5p --mergedonly
       - name: MAPPER_CIRCULARMAPPER Test running with CircularMapper
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-circularmapper" -profile test,docker --paired_end --mapper 'circularmapper' --circulartarget 'NC_007596.2'
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --mapper 'circularmapper' --circulartarget 'NC_007596.2'
       - name: MAPPER_BWAMEM Test running with BWA Mem
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-bwa_mem" -profile test,docker --paired_end --mapper 'bwamem'
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --mapper 'bwamem'
       - name: STRIP_FASTQ Run the basic pipeline with output unmapped reads as fastq
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-stripfastq" -profile test,docker --paired_end --strip_input_fastq
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --strip_input_fastq
       - name: BAM_FILTERING Run basic mapping pipeline with mapping quality filtering, and unmapped export
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-unmapped_export" -profile test,docker --paired_end --run_bam_filtering --bam_mapping_quality_threshold 37 --bam_discard_umapped --bam_unmapped_type 'fastq'
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --run_bam_filtering --bam_mapping_quality_threshold 37 --bam_discard_umapped --bam_unmapped_type 'fastq'
       - name: GENOTYPING_HC Test running GATK HaplotypeCaller
         run: |
-         nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-haplotypercaller" -profile test_fna,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
+         nextflow run ${GITHUB_WORKSPACE} -profile test_fna,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
       - name: GENOTYPING_FB Test running FreeBayes
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-freebayes" -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'freebayes'
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'freebayes'
       - name: SKIPPING Test checking all skip steps work i.e. input bam, skipping straight to genotyping
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-skipping_logic" -profile test_bam,docker --bam --single_end --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_bam,docker --bam --single_end --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
       #- name: TRIM_BAM/PMD/GENOTYPING_UG/MULTIVCFANALYZER Test running PMDTools, TrimBam, GATK UnifiedGenotyper and MultiVCFAnalyzer
       #  run: |
-      #    nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-pmd_trimbam_gatkUG_MVA" -profile test,docker --paired_end  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
+      #    nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_trim_bam --run_pmdtools --run_genotyping --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
       #- name: GENOTYPING_UG/PMD/MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
       #  run: |
-      #   nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-MVA_additionalvcfs" -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+      #   nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
       #- name: VCF2Genome Run basic pipeline with GATK unifiedgenotyper and run VCF2Genome
       #  run: |
-      #   nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-vcf2genome" -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_vcf2genome
+      #   nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_vcf2genome
       - name: BAM_INPUT Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
         run: |
-         nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-baminput_noConvertBam" -profile test_bam,docker --bam --skip_adapterremoval --run_convertbam
+         nextflow run ${GITHUB_WORKSPACE} -profile test_bam,docker --bam --skip_adapterremoval --run_convertbam
       - name: BAM_INPUT Run the basic pipeline with the bam input profile, convert to FASTQ for adapterremoval test and downstream
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-baminput_convertbam_basic" -profile test_bam,docker --bam --run_convertbam
+          nextflow run ${GITHUB_WORKSPACE} -profile test_bam,docker --bam --run_convertbam
       - name: METAGENOMIC Download MALT database
         run: |
           mkdir -p databases/malt
@@ -114,20 +106,23 @@ jobs:
           for i in index0.idx ref.db ref.idx ref.inf table0.db table0.idx taxonomy.idx taxonomy.map taxonomy.tre; do wget https://github.com/nf-core/test-datasets/raw/eager/databases/malt/"$i" -P databases/malt/; done
       - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into MALT
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-malt" -profile test,docker --paired_end --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --database "/home/runner/work/eager/eager/databases/malt/"
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --database "/home/runner/work/eager/eager/databases/malt/"
       - name: MALTEXTRACT Download resource files
         run: |
             mkdir -p databases/maltextract
             for i in ncbi.tre ncbi.map; do wget https://github.com/rhuebler/HOPS/raw/0.33/Resources/"$i" -P databases/maltextract/; done
       - name: MALTEXTRACT Basic with MALT plus MaltExtract
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-maltextract" -profile test,docker --paired_end --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles "/home/runner/work/eager/eager/databases/maltextract/" --maltextract_taxon_list 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles "/home/runner/work/eager/eager/databases/maltextract/" --maltextract_taxon_list 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
+      - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into Kraken
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_kraken,docker ${{ matrix.endedness }} --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq'
       - name: SEXDETERMINATION Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-sexdeterrmine" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --run_sexdeterrmine
+          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --run_sexdeterrmine
       - name: NUCLEAR CONTAMINATION Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nuclear contamination estimation
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-nuclear_contamination" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --run_nuclear_contamination
+          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --run_nuclear_contamination
       - name: MTNUCRATIO Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nmtnucratio
         run: |
-          nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME-mtnucratio" -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --skip_preseq --skip_damage_calculation --run_mtnucratio
+          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --skip_preseq --skip_damage_calculation --run_mtnucratio
