@@ -1,14 +1,14 @@
 #!/usr/bin/env nextflow
 /*
-========================================================================================
+============================================================================================================
                          nf-core/eager
-========================================================================================
+============================================================================================================
  EAGER Analysis Pipeline. Started 2018-06-05
  #### Homepage / Documentation
  https://github.com/nf-core/eager
  #### Authors
- For a list of authors, see: https://github.com/nf-core/eager/blob/master/README.md
-========================================================================================
+ For a list of authors and contributors, see: https://github.com/nf-core/eager/tree/dev#authors-alphabetical
+============================================================================================================
 */
 
 def helpMessage() {
@@ -21,7 +21,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' -profile docker
+    nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs

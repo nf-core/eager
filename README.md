@@ -113,22 +113,35 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 
 ## Credits
 
-This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [James A. Fellows Yates](https://github.com/jfy133),  [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas) and [Aida Andrades Valtueña](https://github.com/aidaanva). Additional ideas and discussion by Raphael Eisenhofer, and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
+This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [James A. Fellows Yates](https://github.com/jfy133), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas), [Aida Andrades Valtueña](https://github.com/aidaanva) and [Maxime Garcia](https://github.com/MaxUlysse). If you want to contribute, please open an issue (or even better, a pull request!) and ask to be added to the project - everyone is welcome to contribute here!
 
-## Contributors (alphabetical)
+## Authors (alphabetical)
 
 * [Aida Andrades Valtueña](https://github.com/aidaanva)
 * [Alexander Peltzer](https://github.com/apeltzer)
-* [Hester van Schalkwyk](https://github.com/hesterjvs)
 * [James A. Fellows-Yates](https://github.com/jfy133)
 * [Judith Neukamm](https://github.com/JudithNeukamm)
-* [Luc Venturini](https://github.com/lucventurini)
 * [Maxime Borry](https://github.com/maxibor)
 * [Maxime Garcia](https://github.com/MaxUlysse)
-* [Raphael Eisenhofer](https://github.com/EisenRa)
 * [Stephen Clayton](https://github.com/sc13-bioinf)
 * [Thiseas C. Lamnidis](https://github.com/TCLamnidis)
 * [Zandra Fagernäs](https://github.com/ZandraFagernas)
+
+## Additional Contributors (alphabetical)
+
+Those who have provided conceptual guidance, suggestions, bug reports etc.
+
+* Arielle Munters
+* [Hester van Schalkwyk](https://github.com/hesterjvs)
+* [Irina Velsko](https://github.com/ivelsko)
+* [Katerine Eaton](https://github.com/ktmeaton)
+* [Luc Venturini](https://github.com/lucventurini)
+* Marcel Keller
+* [Pierre Lindenbaum](https://github.com/lindenb)
+* [Pontus Skoglund](https://github.com/pontussk)
+* [Raphael Eisenhofer](https://github.com/EisenRa)
+* [Torsten Günter](https://bitbucket.org/tguenther/)
+
 
 If you've contributed and you're missing in here, please let us know and we will add you in of course!
 
@@ -159,3 +172,4 @@ If you've contributed and you're missing in here, please let us know and we will
   * Herbig, A. et al., 2016. MALT: Fast alignment and analysis of metagenomic DNA sequence data applied to the Tyrolean Iceman. bioRxiv, p.050559. Available at: [http://biorxiv.org/content/early/2016/04/27/050559](http://biorxiv.org/content/early/2016/04/27/050559).
 * **MaltExtract** Huebler, R. et al., 2019. HOPS: Automated detection and authentication of pathogen DNA in archaeological remains. bioRxiv, p.534198. Available at: [https://www.biorxiv.org/content/10.1101/534198v1?rss=1](https://www.biorxiv.org/content/10.1101/534198v1?rss=1). Download: [https://github.com/rhuebler/MaltExtract](https://github.com/rhuebler/MaltExtract)
 * **Kraken2**     Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. Available at: [https://doi.org/10.1186/s13059-019-1891-0](https://doi.org/10.1186/s13059-019-1891-0). Download: [https://ccb.jhu.edu/software/kraken2/](https://ccb.jhu.edu/software/kraken2/)
+* **endorS.py** Aida Andrades Valtueña (Unpublished). Download: [https://github.com/aidaanva/endorS.py](https://github.com/aidaanva/endorS.py)
