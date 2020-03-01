@@ -1357,20 +1357,15 @@ process samtools_flagstat_after_filter {
 * Step 4c: Keep unmapped/remove unmapped reads flagstat
 */
 
-// merge tuples, for when filtered has been run
-
-//ch_bam_filtered_flagstat_for_endorspy.view {it -> "DoubleBefore: $it"}
-
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
     .join(ch_bam_filtered_flagstat_for_endorspy)
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
-  // Make fake second channel with the same as the first one and join that, then in endorSpy process have the conditional if bam filtering or not
-  // if not, only use ${stats}
+  // Add a file entry to match expected no. tuple elements for endorS.py even if not giving second file
   ch_flagstat_for_endorspy
-    .groupTuple(by: 0)
+    .map { it -> [it[0], it[1], file('dummy_postfilterflagstat.stats')] }
     .set{ ch_allflagstats_for_endorspy }
 }
 
@@ -1390,9 +1385,16 @@ process endorSpy {
 
     script:
     prefix = "${name}"
-    """
-    endorS.py -o json -n ${name} ${stats} ${poststats}
-    """
+
+    if (params.run_bam_filtering) {
+      """
+      endorS.py -o json -n ${name} ${stats} ${poststats}
+      """
+    } else {
+      """
+      endorS.py -o json -n ${name} ${stats}
+      """
+    }
 }
 
 
