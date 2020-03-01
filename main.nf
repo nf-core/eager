@@ -1357,18 +1357,15 @@ process samtools_flagstat_after_filter {
 * Step 4c: Keep unmapped/remove unmapped reads flagstat
 */
 
-// merge tuples, for when filtered has been run
-
-//ch_bam_filtered_flagstat_for_endorspy.view {it -> "DoubleBefore: $it"}
-
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
     .join(ch_bam_filtered_flagstat_for_endorspy)
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
+  // Add a file entry to match expected no. tuple elements for endorS.py even if not giving second file
   ch_flagstat_for_endorspy
-    .groupTuple(by: 0)
+    .map { it -> [it[0], it[1], file('dummy_postfilterflagstat.stats')] }
     .set{ ch_allflagstats_for_endorspy }
 }
 
@@ -1388,9 +1385,16 @@ process endorSpy {
 
     script:
     prefix = "${name}"
-    """
-    endorS.py -o json -n ${name} ${stats} ${poststats}
-    """
+
+    if (params.run_bam_filtering) {
+      """
+      endorS.py -o json -n ${name} ${stats} ${poststats}
+      """
+    } else {
+      """
+      endorS.py -o json -n ${name} ${stats}
+      """
+    }
 }
 
 
@@ -1463,7 +1467,7 @@ process markDup{
     prefix = "${bam.baseName}"
     size = "${params.large_ref}" ? '-c' : ''
     """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}._rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.rmdup.metrics" VALIDATION_STRINGENCY=SILENT
     samtools index "${size}" ${prefix}_rmdup.bam
     """
 }
@@ -1830,8 +1834,8 @@ if ( params.gatk_ug_jar != '' ) {
   prefix="${bam.baseName}"
   skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
   """
-  freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${bam.baseName}.vcf 
-  pigz -p ${task.cpus} ${bam.baseName}.vcf
+  freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${bam.baseName}.freebayes.vcf
+  pigz -p ${task.cpus} ${bam.baseName}.freebayes.vcf
   """
  }
 
