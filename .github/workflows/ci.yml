@@ -37,12 +37,12 @@ jobs:
         run: |
             mkdir -p jars/gatk_3_5
             wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -P jars/gatk_3_5
-            tar xvf jars/gatk_3_5/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2
+            tar xvf jars/gatk_3_5/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -C jars/gatk_3_5/
             chmod +x jars/gatk_3_5/GenomeAnalysisTK.jar
             GATK_JAR=$(readlink -f jars/gatk_3_5/GenomeAnalysisTK.jar)
       - name: GENOTYPING_UG/PMD/MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --gatk_ug_jar "$GATK_JAR" --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+         nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end  --dedupper 'dedup' --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
       - name: REFERENCE Basic workflow, with supplied indices
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
