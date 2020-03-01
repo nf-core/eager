@@ -2311,6 +2311,8 @@ process get_software_versions {
     vcf2genome -h |& head -n 1 &> v_vcf2genome.txt || true
     mtnucratio --help &> v_mtnucratiocalculator.txt || true
     sexdeterrmine --version &> v_sexdeterrmine.txt || true
+    kraken2 --version | head -n 1 &> v_kraken.txt || true
+    endorS.py --version &> v_endorSpy.txt || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
