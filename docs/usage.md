@@ -1213,7 +1213,7 @@ nextflow clean -n
 If you're ready, you can then remove the files with
 
 ```bash
-nextflow clean -f
+nextflow clean -f -k
 ```
 
 This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!
