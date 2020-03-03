@@ -1,6 +1,6 @@
 # Code Contribution Guidelines
 
-To make the EAGER2 code and processing logic more understandable for new contributers, and to ensure quality. We are making an attempt to somewhat-standardise the way the code is written.
+To make the EAGER2 code and processing logic more understandable for new contributors, and to ensure quality. We are making an attempt to somewhat-standardise the way the code is written.
 
 If you wish to contribute a new module, please use the following coding standards.
 
