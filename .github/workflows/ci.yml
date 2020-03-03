@@ -47,10 +47,10 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --complexity_filter
       - name: ADAPTERREMOVAL Test skip paired end collapsing
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --skip_collapse
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --skip_collapse
       - name: ADAPTERREMOVAL Test paired end collapsing but no trimming
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_pretrim,docker ${{ matrix.endedness }} --skip_trim
+          nextflow run ${GITHUB_WORKSPACE} -profile test_pretrim,docker --paired_end --skip_trim
       - name: ADAPTERREMOVAL Run the basic pipeline with paired end data without adapterRemoval
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --skip_adapterremoval
@@ -129,10 +129,10 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_kraken,docker ${{ matrix.endedness }} --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq'
       - name: SEXDETERMINATION Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --run_sexdeterrmine
+          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --run_sexdeterrmine
       - name: NUCLEAR CONTAMINATION Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nuclear contamination estimation
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --run_nuclear_contamination
+          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --run_nuclear_contamination
       - name: MTNUCRATIO Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nmtnucratio
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --single_end --skip_preseq --skip_damage_calculation --run_mtnucratio
+          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_mtnucratio
