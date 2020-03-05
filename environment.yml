@@ -1,33 +1,45 @@
-name: nf-core-eager-2.0.7
+name: nf-core-eager-2.1.0
 channels:
   - defaults
   - bioconda
   - conda-forge
 dependencies:
-  - anaconda::openjdk=8.0.152
-  - bioconda::fastqc=0.11.8
-  - bioconda::adapterremoval=2.2.2
-  - bioconda::adapterremovalfixprefix=0.0.4
+  - bioconda::rename=1.601
+  - conda-forge::pymdown-extensions=6.0
+  - conda-forge::pygments=2.5.2
+  - conda-forge::markdown=3.1.1 #Dont upgrade anymore ‚
+  - conda-forge::openjdk=8.0.144
+  - bioconda::fastqc=0.11.9
+  - bioconda::adapterremoval=2.3.1
+  - bioconda::adapterremovalfixprefix=0.0.5
   - bioconda::bwa=0.7.17
-  - bioconda::picard=2.20.2
+  - bioconda::picard=2.22.0
   - bioconda::samtools=1.9
   - bioconda::dedup=0.12.5
-  - bioconda::angsd=0.923
+  - bioconda::angsd=0.931
   - bioconda::circularmapper=1.93.4
-  - bioconda::gatk4=4.1.2.0
-  - bioconda::qualimap=2.2.2c
+  - bioconda::gatk4=4.1.4.1
+  - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
-  - bioconda::damageprofiler=0.4.6
-  - bioconda::multiqc=1.7
+  - bioconda::damageprofiler=0.4.9
+  - bioconda::multiqc=1.8
   - bioconda::pmdtools=0.60
-  - conda-forge::r-rmarkdown=1.12
+  - bioconda::bedtools=2.29.2
   - conda-forge::libiconv=1.15
   - conda-forge::pigz=2.3.4
   - bioconda::sequencetools=1.2.2
   - bioconda::preseq=2.0.3
   - bioconda::fastp=0.20.0
   - bioconda::bamutil=1.0.14
-  - bioconda::mtnucratio=0.5
-  - pysam=0.15.2
-  - python=3.6.3
+  - bioconda::mtnucratio=0.7
+  - pysam=0.15.4
+  - python=3.7.1
+  - bioconda::kraken2=2.0.8_beta
+  - conda-forge::pandas=1.0.1
+  - bioconda::freebayes=1.3.2
+  - bioconda::sexdeterrmine=1.1.1
+  - bioconda::multivcfanalyzer=0.85.1
+  - bioconda::hops=0.33
+  - conda-forge::biopython=1.76
+  - conda-forge::xopen=0.8.4
   #Missing Schmutzi,snpAD
