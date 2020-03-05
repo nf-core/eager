@@ -24,186 +24,186 @@ def helpMessage() {
     nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
     Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs
-      -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation
-      --single_end                   Specifies that the input is single end reads (required if not paired_end)
-      --paired_end                   Specifies that the input is paired end reads (required if not single_end)
-      --bam                         Specifies that the input is in BAM format
+      --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
+      -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
+      --single_end                  Specifies that the input is single end reads (required if not paired_end).
+      --paired_end                  Specifies that the input is paired end reads (required if not single_end).
+      --bam                         Specifies that the input is in BAM format.
       --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
-      --genome                      Name of iGenomes reference (required if not fasta reference)
+      --genome                      Name of iGenomes reference (required if not fasta reference).
 
     Output options:     
-      --outdir                      The output directory where the results will be saved
+      --outdir                      The output directory where the results will be saved.
       -w                            The directory where intermediate files will be stored. Recommended: '<outdir>/work/'
 
     BAM Input:
-    --run_convertbam                Species to convert an input BAM file into FASTQ format before processing.
+    --run_convertbam                Turns on to convert an input BAM file into FASTQ format before processing.
 
     Input Data Additional Options:
-      --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!)
+      --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!).
 
-    References                      Optional additional pre-made indicies, or you wish to overwrite any of the references.
-      --bwa_index                   Path and name of a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value supplied with the --fasta option)
-      --bedfile                     Path to BED file for SNPCapture methods
-      --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict')
-      --fasta_index                 Path to samtools FASTA index (typically ending in '.fai')
-      --saveReference               Saves reference genome indices for later reusage
+    References                      Optional additional pre-made indices, or you wish to overwrite any of the references.
+      --bwa_index                   Path and name of a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value as --fasta)
+      --bedfile                     Path to BED file for SNPCapture methods.
+      --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict').
+      --fasta_index                 Path to samtools FASTA index (typically ending in '.fai').
+      --save_reference              Turns on saving reference genome indices for later re-usage.
 
-    Skipping                        Skip any of the mentioned steps
+    Skipping                        Skip any of the mentioned steps.
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
-      --skip_mapping                Note: this maybe useful when input is a BAM file
+      --skip_mapping                Note: this maybe useful when input is a BAM file.
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
       --skip_deduplication
 
     Complexity Filtering 
-      --complexity_filter_poly_g        Run poly-G removal on FASTQ files
-      --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed (default: 10)
+      --complexity_filter_poly_g        Turn on running poly-G removal on FASTQ files.
+      --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed. Default: ${params.complexity_filter_poly_g_min}
 
     Clipping / Merging
-      --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward). Default: 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'
-      --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse). Default: 'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'
-      --clip_readlength             Specify read minimum length to be kept for downstream analysis. Default: 30
-      --clip_min_read_quality       Specify minimum base quality for trimming off bases. Default: 20 
-      --min_adap_overlap            Specify minimum adapter overlap: 1
-      --skip_collapse               Skip merging forward and reverse reads together. (Only for PE samples)
-      --skip_trim                   Skip adapter and quality trimming
-      --preserve5p                  Skip 5p quality base trimming (n, score, window) at 5p end.
-      --mergedonly                  Send downstream only merged reads (unmerged reads and singletons are discarded).
+      --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward). Default: '${params.clip_forward_adaptor}'
+      --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse). Default: '${params.clip_reverse_adaptor}'
+      --clip_readlength             Specify read minimum length to be kept for downstream analysis. Default: ${params.clip_readlength}
+      --clip_min_read_quality       Specify minimum base quality for trimming off bases. Default: ${params.clip_min_read_quality}
+      --min_adap_overlap            Specify minimum adapter overlap: Default: ${params.min_adap_overlap}
+      --skip_collapse               Turn on skipping of merging forward and reverse reads together. Only applicable for PE libraries.
+      --skip_trim                   Turn on skipping of adapter and quality trimming
+      --preserve5p                  Turn on skipping 5p quality base trimming (n, score, window) at 5p end.
+      --mergedonly                  Turn on sending downstream only merged reads (un-merged reads and singletons are discarded).
 
     Mapping
-      --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'
-      --bwaalnn                     Specify the -n parameter for BWA aln. Default: 0.3
-      --bwaalnk                     Specify the -k parameter for BWA aln. Default: 2
-      --bwaalnl                     Specify the -l parameter for BWA aln. Default: 32
-      --circularextension           Specify the number of bases to extend reference by
-      --circulartarget              Specify the target chromosome for CM
-      --circularfilter              Specify to filter off-target reads
+      --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: '${params.mapper}'
+      --bwaalnn                     Specify the -n parameter for BWA aln. Default: ${params.bwaalnn}
+      --bwaalnk                     Specify the -k parameter for BWA aln. Default: ${params.bwaalnk}
+      --bwaalnl                     Specify the -l parameter for BWA aln. Default: ${params.bwaalnl}
+      --circularextension           Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
+      --circulartarget              Specify the target chromosome for CM (circularmapper only). Default: '${params.circulartarget}'
+      --circularfilter              Turn on to filter off-target reads (circularmapper only).
  
     Stripping
-      --strip_input_fastq           Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
-      --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace)
+      --strip_input_fastq           Turn on creating pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+      --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace). Default: '${params.strip_mode}'
       
     BAM Filtering
       --run_bam_filtering                Turn on samtools filter for mapping quality or unmapped reads of BAM files.
-      --bam_mapping_quality_threshold    Minimum mapping quality for reads filter, default 0.
-      --bam_discard_unmapped             Discards unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
-      --bam_unmapped_type                Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'.
+      --bam_mapping_quality_threshold    Minimum mapping quality for reads filter. Default: ${params.bam_mapping_quality_threshold}
+      --bam_discard_unmapped             Turns on discarding of unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
+      --bam_unmapped_type                Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'. Default: ${params.bam_unmapped_type}
     
     DeDuplication
-      --dedupper                    Deduplication method to use. Default: dedup. Options: dedup, markduplicates
-      --dedup_all_merged            Treat all reads as merged reads
+      --dedupper                    Deduplication method to use. Options: 'dedup', 'markduplicates'. Default: '${params.dedupper}'
+      --dedup_all_merged            Turn on treating all reads as merged reads.
 
     Library Complexity Estimation
-      --preseq_step_size            Specify the step size of Preseq
+      --preseq_step_size            Specify the step size of Preseq. Default: ${params.preseq_step_size}
 
     (aDNA) Damage Analysis
-      --damageprofiler_length       Specify length filter for DamageProfiler
-      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler (e.g. on damage plot). Default: 15
-      --damageprofiler_yaxis        Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: 0.30 
+      --damageprofiler_length       Specify length filter for DamageProfiler. Default: ${params.damageprofiler_length}
+      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler (e.g. on damage plot). Default: ${params.damageprofiler_threshold}
+      --damageprofiler_yaxis        Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: ${params.damageprofiler_yaxis} 
       --run_pmdtools                Turn on PMDtools
-      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are set to UDG-.
-      --pmdtools_range              Specify range of bases for PMDTools
-      --pmdtools_threshold          Specify PMDScore threshold for PMDTools
-      --pmdtools_reference_mask     Specify a reference mask for PMDTools
-      --pmdtools_max_reads          Specify the max. number of reads to consider for metrics generation
+      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are assumed to have no UDG treatment.
+      --pmdtools_range              Specify range of bases for PMDTools. Default: ${params.pmdtools_range} 
+      --pmdtools_threshold          Specify PMDScore threshold for PMDTools. Default: ${params.pmdtools_threshold} 
+      --pmdtools_reference_mask     Specify a path to reference mask for PMDTools.
+      --pmdtools_max_reads          Specify the maximum number of reads to consider for metrics generation. Default: ${params.pmdtools_max_reads}
       
     Annotation Statistics
-      --run_bedtools_coverage       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference
-      --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes
+      --run_bedtools_coverage       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference.
+      --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.
 
     BAM Trimming
-      --run_trim_bam                Turn on BAM trimming for UDG(+ or 1/2) protocols
-      --bamutils_clip_left          Specify the number of bases to clip off reads from 'left' end of read
-      --bamutils_clip_right         Specify the number of bases to clip off reads from 'right' end of read
-      --bamutils_softclip           Use softclip instead of hard masking
+      --run_trim_bam                Turn on BAM trimming, for example for for full-UDG or half-UDG protocols.
+      --bamutils_clip_left          Specify the number of bases to clip off reads from 'left' end of read. Default: ${params.bamutils_clip_left}
+      --bamutils_clip_right         Specify the number of bases to clip off reads from 'right' end of read. Default: ${params.bamutils_clip_right}
+      --bamutils_softclip           Turn on using softclip instead of hard masking.
 
     Genotyping
-      --run_genotyping                Perform genotyping on deduplicated BAMs.
-      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes'
-      --genotyping_source             Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd' Default: 'raw'
+      --run_genotyping                Turn on genotyping of BAM files.
+      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes'.
+      --genotyping_source             Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'. Default: '${params.genotyping_source}'
       --gatk_ug_jar                   When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.
-      --gatk_call_conf                Specify GATK phred-scaled confidence threshold. Default: 30.
-      --gatk_ploidy                   Specify GATK organism ploidy. Default: 2.
-      --gatk_dbsnp                    Specify VCF file for output VCF SNP annotation (Optional). Gzip not accepted.
-      --gatk_ug_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
-      --gatk_hc_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', E'MIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'. Default: 'EMIT_VARIANTS_ONLY'. 
-      --gatk_ug_genotype_model        Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: 'SNP'. 
-      --gatk_hc_emitrefconf           Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: 'GVCF'.
-      --gatk_downsample               Maximum depth coverage allowed for genotyping before downsampling is turned on. Default: 250
-      --gatk_ug_defaultbasequalities  Supply a default base quality if a read is missing a base quality score. Default: -1 (turned off)
-      --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: 1
-      --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: turned off.
-      --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: 2 (diploid).
+      --gatk_call_conf                Specify GATK phred-scaled confidence threshold. Default: ${params.gatk_call_conf}
+      --gatk_ploidy                   Specify GATK organism ploidy. Default: ${params.gatk_ploidy}
+      --gatk_dbsnp                    Specify VCF file for output VCF SNP annotation. Optional. Gzip not accepted.
+      --gatk_ug_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: '${params.gatk_ug_out_mode}'
+      --gatk_hc_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'. Default: '${params.gatk_hc_out_mode}'
+      --gatk_ug_genotype_model        Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: '${params.gatk_ug_genotype_model}'
+      --gatk_hc_emitrefconf           Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: '${params.gatk_hc_emitrefconf}'
+      --gatk_downsample               Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
+      --gatk_ug_defaultbasequalities  Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.
+      --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
+      --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
+      --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
 
-    Concensus Sequence Generation
-      --run_vcf2genome              Turns on ability to create a concensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
-      --vcf2genome_outfile          Specify name of the output FASTA file containing the concensus sequence. Do not inclvcf2 Default: '<input_vcf>'
-      --vcf2genome_header           Specify the header name of the concensus sequence entry within the FASTA file. Default: '<input_vcf>'
-      --vcf2genome_minc             Minimum depth coverage required for a call to be included (else N will be called). Default: 5
-      --vcf2genome_minq             Minimum genotyping quality of a call to be called. Else N will be called. Default: 30
-      --vcf2genome_minfreq          Minimum fraction of reads supporting a call to be included. Else N will be called. Default: 0.8
+    consensus Sequence Generation
+      --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
+      --vcf2genome_outfile          Specify name of the output FASTA file containing the consensus sequence. Do not include `.vcf` in the file name. Default: '<input_vcf>'
+      --vcf2genome_header           Specify the header name of the consensus sequence entry within the FASTA file. Default: '<input_vcf>'
+      --vcf2genome_minc             Minimum depth coverage required for a call to be included (else N will be called). Default: ${params.vcf2genome_minc}
+      --vcf2genome_minq             Minimum genotyping quality of a call to be called. Else N will be called. Default: ${params.vcf2genome_minq}
+      --vcf2genome_minfreq          Minimum fraction of reads supporting a call to be included. Else N will be called. Default: ${params.vcf2genome_minfreq}
 
     SNP Table Generation
-      --run_multivcfanalyzer        Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input. Default: false
-      --write_allele_frequencies    Specify to also write allele frequencies in the SNP table. Default: turned off.
-      --min_genotype_quality        Specify the minimum genotyping quality threshold for a SNP to be called. Default: 30
-      --min_base_coverage           Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: 5
-      --min_allele_freq_hom         Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: 0.9
-      --min_allele_freq_het         Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: 0.9
-      --additional_vcf_files        Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files. (Optional)
-      --reference_gff_annotations   Specify the reference genome annotations in '.gff' format. (Optional)
-      --reference_gff_exclude       Specify positions to be excluded in '.gff' format. (Optional)
-      --snp_eff_results             Specify the output file from SNP effect analysis in '.txt' format. (Optional)
+      --run_multivcfanalyzer        Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input.
+      --write_allele_frequencies    Turn on writing write allele frequencies in the SNP table.
+      --min_genotype_quality        Specify the minimum genotyping quality threshold for a SNP to be called. Default: ${params.min_genotype_quality}
+      --min_base_coverage           Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: ${params.min_base_coverage}
+      --min_allele_freq_hom         Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: ${params.min_allele_freq_hom}
+      --min_allele_freq_het         Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: ${params.min_allele_freq_het}
+      --additional_vcf_files        Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files. Optional.
+      --reference_gff_annotations   Specify path to the reference genome annotations in '.gff' format. Optional.
+      --reference_gff_exclude       Specify path to the positions to be excluded in '.gff' format. Optional.
+      --snp_eff_results             Specify path to the output file from SNP effect analysis in '.txt' format. Optional.
 
     Mitochondrial to Nuclear Ratio
       --run_mtnucratio              Turn on mitochondrial to nuclear ratio calculation.
-      --mtnucratio_header           Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space). Default: 'MT'
+      --mtnucratio_header           Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space). Default: '${params.mtnucratio_header}'
 
     Sex Determination
-      --run_sexdeterrmine           Turn on sex determination.
-      --sexdeterrmine_bedfile       Specify SNP panel in bed format for error bar calculation. (Optional, see documentation)
+      --run_sexdeterrmine           Turn on sex determination for human reference genomes.
+      --sexdeterrmine_bedfile       Specify path to SNP panel in bed format for error bar calculation. Optional (see documentation).
 
     Nuclear Contamination for Human DNA
-      --run_nuclear_contamination   Enable nuclear contamination estimation.
-      --contamination_chrom_name    The name of the chromosome in your bam. 'X' for hs37d5, 'chrX' for HG19. 
+      --run_nuclear_contamination   Turn on nuclear contamination estimation for human reference genomes.
+      --contamination_chrom_name    The name of the chromosome in your bam. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
 
     Metagenomic Screening
-      --run_metagenomic_screening   Turn on metagenomic screening module for reference-unmapped reads
-      --metagenomic_tool            Specify which classifier to use. Options: 'malt'. Default: 'malt'
-      --database                    Specify path to classifer database directory.
-      --percent_identity            Percent identity value threshold. Default: 85
-      --malt_mode                   Specify which alignment method to use. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: 'BlastN'
-      --malt_alignment_mode         Specify alignment method. Options: 'Local', 'SemiGlobal'. Default: 'SemiGlobal'
-      --malt_top_percent            Specify the percent for LCA algorithm (see MEGAN6 CE manual). Default: 1
-      --malt_min_support_mode       Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained. Options: 'percent', 'reads'. Default: 'percent'
-      --malt_min_support_percent    Specify the minimum percentage of reads a taxon of sample total is required to have to be retained. Default: 0.01
-      --metagenomic_min_support_reads      Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: 1
-      --malt_max_queries            Specify the maximium number of queries a read can have. Default: 100
-      --malt_memory_mode            Specify the memory load method. Do not use 'map' with GTFS file system. Options: 'load', 'page', 'map'. Default: 'load'
+      --run_metagenomic_screening      Turn on metagenomic screening module for reference-unmapped reads
+      --metagenomic_tool               Specify which classifier to use. Options: 'malt', 'kraken'. Default: '${params.contamination_chrom_name}'
+      --database                       Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory.
+      --metagenomic_min_support_reads  Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: ${params.metagenomic_min_support_reads}
+      --percent_identity               Percent identity value threshold for MALT. Default: ${params.percent_identity}
+      --malt_mode                      Specify which alignment method to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: '${params.malt_mode}'
+      --malt_alignment_mode            Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'. Default: '${params.malt_alignment_mode}'
+      --malt_top_percent               Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual). Default: ${params.malt_top_percent}
+      --malt_min_support_mode          Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'. Default: '${params.malt_min_support_mode}'
+      --malt_min_support_percent       Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
+      --malt_max_queries               Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
+      --malt_memory_mode               Specify the memory load method. Do not use 'map' with GTFS file system for MALT. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
 
     Metagenomic Authentication
       --run_maltextract                  Turn on MaltExtract for MALT aDNA characteristics authentication
       --maltextract_taxon_list           Path to a txt file with taxa of interest (one taxon per row, NCBI taxonomy name format)
       --maltextract_ncbifiles            Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; avaliable: https://github.com/rhuebler/HOPS/)
-      --maltextract_filter               Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc' 
-      --maltextract_toppercent           Specify percent of top alignments to use. Default: 0.01
+      --maltextract_filter               Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: '${params.maltextract_filter}'
+      --maltextract_toppercent           Specify percent of top alignments to use. Default: ${params.maltextract_toppercent}
       --maltextract_destackingoff        Turn off destacking.
       --maltextract_downsamplingoff      Turn off downsampling.
       --maltextract_duplicateremovaloff  Turn off duplicate removal.
-      --maltextract_matches              Export alignments of hits in BLAST format. Default: off
-      --maltextract_megansummary         Export MEGAN summary files. Default: off
-      --maltextract_percentidentity      Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter. Default: 85.0
-      --maltextract_topalignment         Use top alignments per read after filtering. Default: off
-      --maltextract_singlestranded       Switch damage patterns to single-stranded mode. Default: off
+      --maltextract_matches              Turn on exporting alignments of hits in BLAST format.
+      --maltextract_megansummary         Turn on export of MEGAN summary files.
+      --maltextract_percentidentity      Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter. Default: ${params.maltextract_percentidentity}
+      --maltextract_topalignment         Turn on using top alignments per read after filtering.
+      --maltextract_singlestranded       Turn on calculating damage patterns in single-stranded mode.
 
     Other options:     
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
-      --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'
-      --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'
-      --max_cpus                    Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. --max_cpus 1
+      --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'. Default: '${params.max_memory}'
+      --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'. Default: '${params.max_time}'
+      --max_cpus                    Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. Default: '${params.max_cpus}'
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       --plaintext_email             Receive plain text emails rather than HTML
       --maxMultiqcEmailFileSize     Threshold size for MultiQC report to be attached in notification email. If file generated by pipeline exceeds the threshold, it will not be attached (Default: 25MB)
@@ -422,19 +422,19 @@ if (params.run_metagenomic_screening) {
     exit 1, "Unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
   }
 
-  if (params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
+  if (params.metagenomic_tool == 'malt' && params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
     exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
   }
 
-  if (params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
+  if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
     exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --metagenomic_min_support_reads!"
   }
 
-  if (params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
+  if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
     exit 1, "Incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
   }
 
-  if (params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
+  if (params.metagenomic_tool == 'malt' && params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
     exit 1, "Unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
   }
 }
@@ -539,7 +539,7 @@ if( params.readPaths ){
         .fromPath( params.reads )
         .filter { it =~/.*.bam/ }
         .map { row -> [  file( row )  ] }
-        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nValid input file types: .fastq.gz', '.fq.gz', '.fastq', or '.fq'\nNB: Path needs " +
+        .ifEmpty { exit 1, "Cannot find any bam file matching: ${params.reads}\nValid input file types: '.bam'" +
             "to be enclosed in quotes!\n" }
         .dump() //For debugging purposes
         .into { ch_input_for_skipconvertbam; ch_input_for_convertbam; ch_input_for_indexbam }
@@ -654,8 +654,8 @@ process makeBWAIndex {
     label 'sc_medium'
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
-            if (params.saveReference) filename 
-            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            if (params.save_reference) filename 
+            else if(!params.save_reference && filename == "where_are_my_files.txt") filename
             else null
     }
 
@@ -694,8 +694,8 @@ process makeFastaIndex {
     label 'sc_small'
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/fasta_index", mode: 'copy', saveAs: { filename -> 
-            if (params.saveReference) filename 
-            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            if (params.save_reference) filename 
+            else if(!params.save_reference && filename == "where_are_my_files.txt") filename
             else null
     }
     
@@ -740,8 +740,8 @@ process makeSeqDict {
     label 'sc_medium'
     tag {fasta}
     publishDir path: "${params.outdir}/reference_genome/seq_dict", mode: 'copy', saveAs: { filename -> 
-            if (params.saveReference) filename 
-            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            if (params.save_reference) filename 
+            else if(!params.save_reference && filename == "where_are_my_files.txt") filename
             else null
     }
     
@@ -1056,8 +1056,8 @@ process circulargenerator{
     label 'sc_tiny'
     tag "$prefix"
     publishDir "${params.outdir}/reference_genome/circularmapper_index", mode: 'copy', saveAs: { filename -> 
-            if (params.saveReference) filename 
-            else if(!params.saveReference && filename == "where_are_my_files.txt") filename
+            if (params.save_reference) filename 
+            else if(!params.save_reference && filename == "where_are_my_files.txt") filename
             else null
     }
 

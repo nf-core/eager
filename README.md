@@ -50,7 +50,7 @@ Additional functionality contained by the pipeline currently includes:
 #### aDNA Damage manipulation
 
 * Damage removal/clipping for UDG+/UDG-half treatment protocols (`BamUtil`)
-* Damage reads extraction and assessment (`PMDTools`)
+* Damaged reads extraction and assessment (`PMDTools`)
 
 #### Genotyping
 
