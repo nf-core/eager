@@ -32,7 +32,7 @@ jobs:
           docker tag nfcore/eager:dev nfcore/eager:2.1.0
       - name:  BASIC Run the basic pipeline with the test profileBasic workflow, PE/SE, bwa aln
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --saveReference
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --save_reference
       - name: REFERENCE Basic workflow, with supplied indices
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 

@@ -10,8 +10,8 @@ These are the most common things requested on pull requests (PRs).
 - [ ] This comment contains a description of changes (with reason)
 - [ ] If you've fixed a bug or added code that should be tested, add tests!
 - [ ] If necessary, also make a PR on the [nf-core/eager branch on the nf-core/test-datasets repo](https://github.com/nf-core/test-datasets/pull/new/nf-core/eager)
-- [ ] Ensure the test suite passes (`nextflow run . -profile test,docker`).
-- [ ] Make sure your code lints (`nf-core lint .`).
+- [ ] Ensure the test suite passes (`nextflow run . -profile test,docker --paired_end`).
+- [ ] Make sure your code lints ([`nf-core lint .`](https://nf-co.re/tools)).
 - [ ] Documentation in `docs` is updated
 - [ ] `CHANGELOG.md` is updated
 - [ ] `README.md` is updated

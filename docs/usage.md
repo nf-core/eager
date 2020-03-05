@@ -22,7 +22,7 @@
       * [`-w / -work-dir`](#-w---work-dir)
     * [Optional Reference Options](#optional-reference-options)
       * [`--large_ref`](#--large_ref)
-      * [`--saveReference`](#--savereference)
+      * [`--save_reference`](#--save_reference)
       * [`--bwa_index`](#--bwa_index)
       * [`--seq_dict`](#--seq_dict)
       * [`--fasta_index`](#--fasta_index)
@@ -374,7 +374,7 @@ For example:
 --fasta '/<path>/<to>/my_reference.fasta'
 ```
 
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--saveReference` flag.
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--save_reference` flag.
 > You must select either a `--fasta` or `--genome`
 
 #### `--genome` (using iGenomes)
@@ -434,7 +434,7 @@ Supplying pre-made indices saves time in pipeline execution and is especially ad
 
 This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. Default: off
 
-#### `--saveReference`
+#### `--save_reference`
 
 Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices EAGER2 generates for you will be stored in the `<your_output_dir>/results/reference_genomes` for you.
 
@@ -785,7 +785,7 @@ Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA da
 
 #### `--pmd_udg_type` \`half`
 
-If you have UDGhalf treated data (Rohland et al 2016), specify `'half'` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the DNA damage assesment will use CpG context only. If you don't specify the parameter at all, the library will be treated as non UDG treated.
+If you have UDGhalf treated data (Rohland et al 2016), specify `'half'` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the DNA damage assessment will use CpG context only. If you don't specify the parameter at all, the library will be treated as non UDG treated.
 
 #### `--pmdtools_range`
 
@@ -797,7 +797,7 @@ Specifies the PMDScore threshold to use in the pipeline when filtering BAM files
 
 #### `--pmdtools_reference_mask`
 
-Can be used to set a reference genome mask for PMDTools.
+Can be used to set a path to a reference genome mask for PMDTools.
 
 #### `--pmdtools_max_reads`
 
@@ -1039,7 +1039,7 @@ Please note the following:
   * To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
 * MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
-> RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK
+> :warning: Running MALT on a server with less than 128GB of memory should be performed at your own risk.
 
 #### `--run_metagenomic_screening`
 
