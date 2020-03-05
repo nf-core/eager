@@ -85,13 +85,13 @@ Additional functionality contained by the pipeline currently includes:
 
 5. Start running your own ancient DNA analysis!
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
 6. Once your run has completed successfully, clean up the intermediate files.
 
         nextflow clean -f -k
 
-NB. You can see an overview of the run in the MultiQC report located at `<your_output_dir>/MultiQC/multiqc_report.html`
+NB. You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
 
 Modifications to the default pipeline are easily made using various options
 as described in the documentation.

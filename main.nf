@@ -33,7 +33,7 @@ def helpMessage() {
       --genome                      Name of iGenomes reference (required if not fasta reference).
 
     Output options:     
-      --outdir                      The output directory where the results will be saved.
+      --outdir                      The output directory where the results will be saved. Default: ${params.outdir}
       -w                            The directory where intermediate files will be stored. Recommended: '<outdir>/work/'
 
     BAM Input:
@@ -400,7 +400,7 @@ if (params.run_multivcfanalyzer) {
   }
 }
 
-// MALT sanity checking
+// Metagenomic sanity checking
 if (params.run_metagenomic_screening) {
   if ( !params.bam_discard_unmapped ) {
   exit 1, "Metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
@@ -418,7 +418,7 @@ if (params.run_metagenomic_screening) {
     exit 1, "Metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
   }
 
-  if (params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
+  if (params.metagenomic_tool == 'malt' && params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
     exit 1, "Unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
   }
 
