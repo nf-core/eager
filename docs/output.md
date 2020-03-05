@@ -25,24 +25,24 @@ The output of EAGER2 consists of two main components: output files (e.g. BAM or 
 The directory structure of EAGER2 is as follows
 
 ```bash
-<RUN_OUTPUT_DIRECTORY>/
+results/
 ├── MultiQC/
 ├── <MODULE_1>/
 ├── <MODULE_2>/
 ├── <MODULE_3>/
 ├── pipeline_info/
-├── reference_genome/
-└── work/
+└── reference_genome/
+work/
 ```
 
-* The parent directory `<RUN_OUTPUT_DIRECTORY` is the parent directory of the run, either the directory the pipeline was run from or as specified by the `--outdir` flag.
+* The parent directory `<RUN_OUTPUT_DIRECTORY` is the parent directory of the run, either the directory the pipeline was run from or as specified by the `--outdir` flag. The default name of the output directory (unless otherwise specified) will be `./results/`.
 
 ### Primary Output Directories
 
 These directories are the ones you will use on a day-to-day basis and are those which you should familiarise yourself with.
 
 * The `MultiQC` directory is the most important directory and contains the main summary report of the run in HTML format, which can be viewed in a web-browser of your choice. The sub-diectory contains the MultiQC collected data used to build the HTML report. The Report allows you to get an overview of the sequencing and mapping quality as well as aDNA metrics (see the [MultiQC Report](#multiqc-report) section for more detail).
-* A `<MODULE_1>` directory contains the (cleaned-up) output from a particular software module. This is the second most important set of directories. This contains output files such as FASTQ, BAM, statistics, and/or plot files of a specific module (see the [Output Files](#output-files) section for more detail). The latter two are only needed when you need finer detail about that particular module.
+* A `<MODULE>` directory contains the (cleaned-up) output from a particular software module. This is the second most important set of directories. This contains output files such as FASTQ, BAM, statistics, and/or plot files of a specific module (see the [Output Files](#output-files) section for more detail). The latter two are only needed when you need finer detail about that particular module.
 
 ### Secondary Output Directories
 
@@ -50,7 +50,10 @@ These are less important directories which are used less often, normally in the 
 
 * `pipeline_info` contains back-end reporting of the pipeline itself such as run times and computational statistics. You rarely need this information other than for curiosity or when bug-reporting.
 * `reference_genome` contains either text files describing the location of specified reference genomes, and if not already supplied when running the pipeline, auxilary indexing files. This is often useful when re-running other samples using the same reference genome, but is otherwise often not otherwise important.
-* The `work` directory contains all the `nextflow` processing directories. This is where `nextflow` actually does all the work, but in an efficient programatic procedure that is not intuitive to human-readers. Due to this, the directory is often not important to a user as all the useful output files are linked to the module directories (see above). Otherwise, this directory maybe useful when a bug-reporting.
+
+* The `work` directory contains all the `nextflow` processing directories. This is where `nextflow` actually does all the work, but in an efficient programmatic procedure that is not intuitive to human-readers. Due to this, the directory is often not important to a user as all the useful output files are linked to the module directories (see above). Otherwise, this directory maybe useful when a bug-reporting.
+
+> :warning: Note that `work/` will be created wherever you are running the `nextflow run` command from, unless you specify the location with `-w`, i.e. it will not by default be in `outdir`!.
 
 ## MultiQC Report
 
@@ -82,7 +85,7 @@ The default columns are as follows:
 * **%GC** This is from Post-AdapterRemoval FastQC. Represents the average GC of all preprocessed reads in your adapter trimmed (paired end) merged FASTQ file.
 * **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _prior_ map quality filtering and deduplication.
 * **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _after_ map quality filtering and deduplication (note the column name does not distinguish itself from prior-map quality filtering, but the post-filter column is always second)
-* **Endogenous DNA (%)** This is from the endorS.py tool. It displays a percentage of mapped reads over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference).
+* **Endogenous DNA (%)** This is from the endorS.py tool. It displays a percentage of mapped reads over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). Assuming a perfect ancient sample with no modern contamination, this would be the the amount of true ancient DNA in the sample. However this value _most likely_ include contamination and will not entirely be the true 'endogenous' content.
 * **Endogenous DNA Post (%)** This is from the endorS.py tool. It displays a percentage of mapped reads _after_ BAM filtering (e.g. for mapping quality) over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). This column will only be displayed if BAM filtering is turned on and is based on the original mapping for total reads, and mapped reads as calculated from the post-filtering BAM.
 * **Duplication Rate** This is from DeDup. This is the percentage of overall number of mapped reads that were an exact duplicate of another read. The number of reads removed by DeDup can be calculating this number by mapped reads (if no map quality filtering was applied!)
 * **Coverage** This is from Qualimap. This is the median number of times a base on your reference genome was covered by a read (i.e. depth coverage).. This average includes bases with 0 reads covering that position.
