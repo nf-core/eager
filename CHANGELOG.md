@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
-* [#368](https://github.com/nf-core/eager/issues/368) - Fixed the profile `test` to contain a parameter for `--paired_end`. 
+* [#368](https://github.com/nf-core/eager/issues/368) - Fixed the profile `test` to contain a parameter for `--paired_end`.
 
 ### `Dependencies`
 
