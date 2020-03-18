@@ -18,7 +18,7 @@
 
 ## Introduction
 
-The output of EAGER2 consists of two main components: output files (e.g. BAM or FASTQ files), and summary statistics of the whole run presented in a [`MultiQC`](https://multiqc.info) report. (Some) intermediate files and module-specific statstics files are also retained.
+The output of EAGER2 consists of two main components: output files (e.g. BAM or FASTQ files), and summary statistics of the whole run presented in a [`MultiQC`](https://multiqc.info) report. (Some) intermediate files and module-specific statistics files are also retained.
 
 ## Directory Structure
 
@@ -90,7 +90,7 @@ The default columns are as follows:
 * **Duplication Rate** This is from DeDup. This is the percentage of overall number of mapped reads that were an exact duplicate of another read. The number of reads removed by DeDup can be calculating this number by mapped reads (if no map quality filtering was applied!)
 * **Coverage** This is from Qualimap. This is the median number of times a base on your reference genome was covered by a read (i.e. depth coverage).. This average includes bases with 0 reads covering that position.
 * **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
-* **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your refernece genome.
+* **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
 * **% MTNUC** This is actually a ratio of the number of mitochondrial reads to the number of reads hitting autosomal chromosomes.
 * **X Prime Y>Z N base** These columns are from DamageProfiler. The prime numbers represent which end of the reads the damage is referring to. The Y>Z is the type of substitution (C>T is the true damage, G>A is the complementary). You should see for no- and half- UDG treatment a decrease in frequency from the 1st to 2nd base.
 * **Mean Read Length** This is from DamageProfiler. This is the mean length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
@@ -159,7 +159,7 @@ You expect to see whole heatmap to be a relatively equal block of colour (normal
 
 Things to watch out for:
 
-* If you see a particular colour becoming more prominent this suggests there is an overrepresenation of those bases at that base-pair range across all reads (e.g. 20-24bp). This could happen if you have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no flouresence can mean both G or 'no-call').
+* If you see a particular colour becoming more prominent this suggests there is an over-representation of those bases at that base-pair range across all reads (e.g. 20-24bp). This could happen if you have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no fluorescence can mean both G or 'no-call').
 
 > If you see Poly-G tails, we recommend to turn on FastP poly-G trimming with EAGER. See the 'running' documentation page for details.
 
@@ -173,7 +173,7 @@ This line graph shows the number percentage reads (y-axis) with an average perce
 
 Things to watch out for:
 
-* If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no flouresence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
+* If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no fluorescence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
 
 #### Per Base N Content
 
