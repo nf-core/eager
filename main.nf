@@ -538,7 +538,6 @@ ch_input_for_convertbam = Channel.empty()
 
 bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; ch_input_for_skipconvertbam }
-  .dump()
 
 // Header log info
 log.info nfcoreHeader()
@@ -769,10 +768,10 @@ process convertBam {
     params.run_convertbam
 
     input: 
-    set sname, lid, lane, seqtype, organism, strandedness, udg, bam, group, pop, age from bam_channel 
+    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from bam_channel 
 
     output:
-    set sname, lid, lane, seqtype, organism, strandedness, udg, bam, group, pop, age into ch_output_from_convertbam
+    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -2520,10 +2519,9 @@ def checkHostname() {
 
 // Channelling the TSV file containing FASTQ or BAM
 // Header Format is: "Sample_Name  Library_ID  Lane  SeqType  Organism  Strandedness  UDG_Treatment  R1  R2  BAM  BAM_Index Group  Populations  Age"
-def extract_data(tsv_file) {
-    Channel.from(tsv_file)
+def extract_data(tsvFile) {
+    Channel.from(tsvFile)
         .splitCsv(header: true, sep: '\t')
-        .dump()
         .map { row ->
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID
@@ -2539,7 +2537,7 @@ def extract_data(tsv_file) {
             def group = row.Group
             def pop = row.Populations
             def age = row.Age
-
+           
             //  Ensure that we do not accept incompatible chemiistry setup
             if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "SeqType for one or more rows is neither SE nor PE!. You have: ${seqtype}"
             
@@ -2562,16 +2560,12 @@ def extract_data(tsv_file) {
     }
 
 // Return file if it exists, if NA is found this gets treated as a String information
-// file() doesn't accept URLs!
 static def return_file(it) {
-  println "Return File ${it}"
      if(it == 'NA') {
+        return 'NA'
     } else { 
-    if (!file(it).exists()) {
-      exit 1, "The following file is cannot be found: ${it}"
-      } else {
+    if (!file(it).exists()) exit 1, "The following file is cannot be found: ${it}"
         return file(it)
-      }
     }
 }
 
