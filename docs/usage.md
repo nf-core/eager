@@ -364,6 +364,18 @@ For example:
 
 Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `--single_end`.
 
+
+#### `--input`
+
+Specifies a path to a TSV file that contains additional the paths to FASTQ/BAM files and metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , libraries, and samples.
+
+This TSV should look like the following
+
+| Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                                                                                                  | R2                                                                                                                                  | BAM | BAM_Index | Group   | Populations        | Age          |
+|-------------|------------|------|---------|----------|--------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|-----|-----------|---------|--------------------|--------------|
+| JK2782      | JK2782     | 1    | PE      | Mammoth  | double       | full          | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  | NA        | Swabian | Europe,Asia,Africa | Palaeolithic |
+| JK2802      | JK2802     | 2    | SE      | Mammoth  | double       | full          | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  | NA        | Swabian | Europe,Asia,Africa | Palaeolithic |
+
 #### `--fasta`
 
 You specify the full path to your reference genome here. The FASTA file can have any file suffix, such as `.fasta`, `.fna`, `.fa`, `.FastA` etc. You may also supply a gzipped reference files, which will be unzipped automatically for you.
