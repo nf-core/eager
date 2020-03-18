@@ -515,6 +515,12 @@ if (workflow.profile.contains('awsbatch')) {
 // If NOT read paths && FASTQ
 // is NOT read paths && BAM
 
+// Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
+branched_input = input_sample.branch{
+    fastq: returnFile(it[7]) != 'NA' //These are all fastqs
+    bam: returnFile(it[9]) != 'NA' //These are all BAMs
+}
+
 //Removing BAM/BAI in case of a FASTQ input
 fastq_channel = branched_input.fastq.map {
   samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
@@ -532,6 +538,7 @@ ch_input_for_convertbam = Channel.empty()
 
 bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; ch_input_for_skipconvertbam }
+  .dump()
 
 // Header log info
 log.info nfcoreHeader()
@@ -762,10 +769,10 @@ process convertBam {
     params.run_convertbam
 
     input: 
-    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from bam_channel 
+    set sname, lid, lane, seqtype, organism, strandedness, udg, bam, group, pop, age from bam_channel 
 
     output:
-    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age into ch_output_from_convertbam
+    set sname, lid, lane, seqtype, organism, strandedness, udg, bam, group, pop, age into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -2513,9 +2520,10 @@ def checkHostname() {
 
 // Channelling the TSV file containing FASTQ or BAM
 // Header Format is: "Sample_Name  Library_ID  Lane  SeqType  Organism  Strandedness  UDG_Treatment  R1  R2  BAM  BAM_Index Group  Populations  Age"
-def extractData(tsvFile) {
-    Channel.from(tsvFile)
+def extract_data(tsv_file) {
+    Channel.from(tsv_file)
         .splitCsv(header: true, sep: '\t')
+        .dump()
         .map { row ->
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID
@@ -2524,28 +2532,28 @@ def extractData(tsvFile) {
             def organism = row.Organism
             def strandedness = row.Strandedness
             def udg = row.UDG_Treatment
-            def r1 = returnFile(row.R1)
+            def r1 = return_file(row.R1)
             def r2 = "null"
-            def bam = returnFile(row.BAM)
-            def bai = returnFile(row.BAM_Index)
+            def bam = return_file(row.BAM)
+            def bai = return_file(row.BAM_Index)
             def group = row.Group
             def pop = row.Populations
             def age = row.Age
-           
+
             //  Ensure that we do not accept incompatible chemiistry setup
             if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "SeqType for one or more rows is neither SE nor PE!. You have: ${seqtype}"
             
              // Only look for a R2 to load if FASTQ and PE input because BAMs could still be paired end data
             if (seqtype.matches('PE') &&  !r1.matches('NA') ) {
                 println ''
-                r2 = returnFile(row.R2)
+                r2 = return_file(row.R2)
             }
            
            // So we don't accept existing files that are wrong format: e.g. fasta or sam
-            if ( !r1.matches('NA') && !hasExtension(r1, "fastq.gz") && !hasExtension(r1, "fq.gz") && !hasExtension(r1, "fastq") && !hasExtension(r1, "fq")) exit 1, "The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
-            if ( !r2.matches('null') && !r2.matches('NA') && !hasExtension(r2, "fastq.gz") && !hasExtension(r2, "fq.gz") && !hasExtension(r2, "fastq") && !hasExtension(r2, "fq")) exit 1, "The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
-            if ( !bam.matches('NA') && !hasExtension(bam, "bam")) exit 1, "The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
-            if ( !bai.matches('NA') && !hasExtension(bai, "bai")) exit 1, "The following BAI file either has a non-recognizable extension or is not NA: ${bai}"
+            if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
+            if ( !r2.matches('null') && !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
+            if ( !bam.matches('NA') && !has_extension(bam, "bam")) exit 1, "The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
+            if ( !bai.matches('NA') && !has_extension(bai, "bai")) exit 1, "The following BAI file either has a non-recognizable extension or is not NA: ${bai}"
              
             [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ]
 
@@ -2554,16 +2562,20 @@ def extractData(tsvFile) {
     }
 
 // Return file if it exists, if NA is found this gets treated as a String information
-static def returnFile(it) {
+// file() doesn't accept URLs!
+static def return_file(it) {
+  println "Return File ${it}"
      if(it == 'NA') {
-        return 'NA'
     } else { 
-    if (!file(it).exists()) exit 1, "The following file is cannot be found: ${it}"
+    if (!file(it).exists()) {
+      exit 1, "The following file is cannot be found: ${it}"
+      } else {
         return file(it)
+      }
     }
 }
 
 // Check file extension
-def hasExtension(it, extension) {
+def has_extension(it, extension) {
     it.toString().toLowerCase().endsWith(extension.toLowerCase())
 }
