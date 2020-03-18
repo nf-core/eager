@@ -26,8 +26,7 @@ def helpMessage() {
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
       -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
-      --single_end                  Specifies that the input is single end reads (required if not paired_end).
-      --paired_end                  Specifies that the input is paired end reads (required if not single_end).
+      --single_end                  Specifies that the input is single end read (required if not data is not paired end, which is assumed default).
       --bam                         Specifies that the input is in BAM format.
       --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference).
@@ -300,12 +299,6 @@ if (params.run_convertbam && params.skip_mapping) {
 // Validate that you're not trying to pass FASTQs to BAM only processes
 if (params.bam && !params.run_convertbam && !params.skip_mapping) {
   exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
-}
-
-// Validate that either paired_end or single_end has been specified by the user!
-if( params.single_end || params.paired_end || params.bam){
-} else {
-    exit 1, "Please specify either --single_end, --paired_end to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
 }
 
 // Validate that skip_collapse is only set to True for paired_end reads!

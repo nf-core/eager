@@ -19,7 +19,7 @@ jobs:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['19.10.0', '']
-        endedness: ['--single_end', '--paired_end']
+        endedness: ['--single_end', '']
     steps:
       - uses: actions/checkout@v2
       - name: Install Nextflow
@@ -47,10 +47,10 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --complexity_filter
       - name: ADAPTERREMOVAL Test skip paired end collapsing
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --paired_end --skip_collapse
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --skip_collapse
       - name: ADAPTERREMOVAL Test paired end collapsing but no trimming
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_pretrim,docker --paired_end --skip_trim
+          nextflow run ${GITHUB_WORKSPACE} -profile test_pretrim,docker --skip_trim
       - name: ADAPTERREMOVAL Run the basic pipeline with paired end data without adapterRemoval
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --skip_adapterremoval
