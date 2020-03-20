@@ -510,8 +510,8 @@ if (workflow.profile.contains('awsbatch')) {
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
 branched_input = input_sample.branch{
-    fastq: return_file(it[7]) != 'NA' //These are all fastqs
-    bam: return_file(it[9]) != 'NA' //These are all BAMs
+    fastq: it[7] != 'NA' //These are all fastqs
+    bam: it[9] != 'NA' //These are all BAMs
 }
 
 //Removing BAM/BAI in case of a FASTQ input
@@ -531,6 +531,9 @@ ch_input_for_convertbam = Channel.empty()
 
 bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; ch_input_for_skipconvertbam }
+
+fastq_channel
+  .into { ch_input_for_skipconvertbam }
 
 // Header log info
 log.info nfcoreHeader()
@@ -761,10 +764,10 @@ process convertBam {
     params.run_convertbam
 
     input: 
-    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from ch_input_for_convertbam 
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_convertbam 
 
     output:
-    set sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age into ch_output_from_convertbam
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*fastq.gz"), 'NA', group, pop, age into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -780,14 +783,14 @@ process indexinputbam {
   label 'sc_small'
   tag "$prefix"
 
-  when: 
-  params.bam && !params.run_convertbam
-
   input:
-  file bam from ch_input_for_indexbam
+  tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_indexbam 
 
   output:
-  file "*.{bai,csi}" into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
+  tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*bam"), file("*bai"), group, pop, age  into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
+
+  when: 
+  params.bam && !params.run_convertbam && bai == 'NA'
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -804,7 +807,9 @@ if (params.run_convertbam) {
         .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 } else {
     ch_input_for_skipconvertbam
+      .dump()
       .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
+
 }
 
 /*
@@ -817,17 +822,17 @@ process fastqc {
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: 
-    !params.bam && !params.skip_fastqc || params.bam && params.run_convertbam
+    !params.skip_fastqc || params.bam && params.run_convertbam
 
     input:
-    set val(name), file(reads) from ch_convertbam_for_fastqc
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastqc
 
     output:
     file "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
 
     script:
     """
-    fastqc -q $reads
+    fastqc -q $r1 $r2
     rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
     rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
@@ -845,23 +850,23 @@ process fastp {
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
     when: 
-    !params.bam && params.complexity_filter_poly_g || params.bam && params.run_convertbam && params.complexity_filter_poly_g
+    bam != 'NA' && params.complexity_filter_poly_g || bam != 'NA' && params.run_convertbam && params.complexity_filter_poly_g
 
     input:
-    set val(name), file(reads) from ch_convertbam_for_fastp
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastp
 
     output:
-    set val(name), file("*pG.fq.gz") into ch_output_from_fastp
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("${r1}.pG.fq.gz"), file("${r2}.pG.fq.gz"), group, pop, age into ch_output_from_fastp
     file("*.json") into ch_fastp_for_multiqc
 
     script:
-    if(params.single_end){
+    if(r2 == 'NA'){
     """
-    fastp --in1 ${reads[0]} --out1 "${reads[0].baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${reads[0].baseName}"_fastp.json 
+    fastp --in1 ${r1} --out1 "${r1}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${r1.baseName}"_fastp.json 
     """
     } else {
     """
-    fastp --in1 ${reads[0]} --in2 ${reads[1]} --out1 "${reads[0].baseName}.pG.fq.gz" --out2 "${reads[1].baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${reads[0].baseName}"_fastp.json 
+    fastp --in1 ${r1} --in2 ${r2} --out1 "${r1.baseName}.pG.fq.gz" --out2 "${r2.baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${lid.baseName}"_fastp.json 
     """
     }
 }
@@ -887,18 +892,18 @@ process adapter_removal {
     tag "$name"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
-    when: 
-    !params.bam && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
-
     input:
-    set val(name), file(reads) from ch_fastp_for_adapterremoval
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_fastp_for_adapterremoval
 
     output:
-    set val(base), file("output/*.gz") into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
+    tuple val(base), file("output/*.gz") into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
     file("output/*.settings") into ch_adapterremoval_logs
 
+    when: 
+    bam != "NA"  && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
+
     script:
-    base = reads[0].baseName
+    base = lid
     //This checks whether we skip trimming and defines a variable respectively
     trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
     collapse_me = params.skip_collapse ? '' : '--collapse'
@@ -906,50 +911,50 @@ process adapter_removal {
     mergedonly = params.mergedonly ? "Y" : "N"
     
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
-    if (!params.single_end && !params.skip_collapse && !params.skip_trim){
+    if (r2 != 'NA' && !params.skip_collapse && !params.skip_trim){
     """
     mkdir -p output
-    AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${lid} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
     if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
-      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${lid}.combined.fq.gz
     elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz > output/${base}.combined.fq.gz
+      cat *.collapsed.gz > output/${lid}.combined.fq.gz
     elif [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${lid}.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${lid}.combined.fq.gz
     fi
    
     mv *.settings output/
     """
     //PE, don't collapse, but trim reads
-    } else if (!params.single_end && params.skip_collapse && !params.skip_trim) {
+    } else if (r2 != 'NA'  && params.skip_collapse && !params.skip_trim) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
-    mv *.settings ${base}.pair*.truncated.gz output/
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${lid} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
+    mv *.settings ${lid}.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
-    } else if (!params.single_end && !params.skip_collapse && params.skip_trim) {
+    } else if (r2 != 'NA'  && !params.skip_collapse && params.skip_trim) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${reads[0]} --file2 ${reads[1]} --basename ${base} --gzip --threads ${task.cpus} --basename ${base} ${collapse_me} ${trim_me}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${lid} --gzip --threads ${task.cpus} --basename ${lid} ${collapse_me} ${trim_me}
     
     if [ ${mergedonly} = "Y" ]; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${lid}.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${lid}.combined.fq.gz
     fi
 
     mv *.settings output/
     """
-    } else {
+    } else if (r2 == 'NA') {
     //SE, collapse not possible, trim reads
     """
     mkdir -p output
-    AdapterRemoval --file1 ${reads[0]} --basename ${base} --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --basename ${lid} --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
     
     mv *.settings *.truncated.gz output/
     """
@@ -979,7 +984,7 @@ process fastqc_after_clipping {
     when: !params.bam  && !params.skip_adapterremoval && !params.skip_fastqc || params.bam && params.run_convertbam && !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    set val(name), file(reads) from ch_adapterremoval_for_fastqc_after_clipping
+    tuple val(name), file(reads) from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
     file "*_fastqc.{zip,html}" optional true into ch_fastqc_after_clipping
@@ -1003,7 +1008,7 @@ process bwa {
     when: params.mapper == 'bwaaln' && !params.skip_mapping
 
     input:
-    set val(name), file(reads) from ch_adapteremoval_for_bwa
+    tuple val(name), file(reads) from ch_adapteremoval_for_bwa
     file index from bwa_index.collect()
 
     output:
@@ -1071,7 +1076,7 @@ process circularmapper{
     when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
-    set val(name), file(reads) from ch_adapteremoval_for_cm
+    tuple val(name), file(reads) from ch_adapteremoval_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from ch_fasta_for_circularmapper.collect()
 
@@ -1117,7 +1122,7 @@ process bwamem {
     when: params.mapper == 'bwamem' && !params.skip_mapping
 
     input:
-    set val(name), file(reads) from ch_adapteremoval_for_bwamem
+    tuple val(name), file(reads) from ch_adapteremoval_for_bwamem
     file index from bwa_index_bwamem.collect()
 
     output:
@@ -1286,7 +1291,7 @@ process strip_input_fastq {
     params.strip_input_fastq
 
     input: 
-    set val(name), file(fq) from ch_convertbam_for_stripfastq
+    tuple val(name), file(fq) from ch_convertbam_for_stripfastq
     file bam from ch_filtering_for_stripfastq
 
     output:
@@ -1794,7 +1799,7 @@ if ( params.gatk_ug_jar != '' ) {
  }
 
  /*
- *  Step 12c: FreeBayes genotyping, should probably add in some options for users to set 
+ *  Step 12c: FreeBayes genotyping, should probably add in some options for users to define
  */ 
  process genotyping_freebayes {
   label 'mc_small'
@@ -2184,7 +2189,7 @@ process kraken {
 
   output:
   file "*.kraken.out" into ch_kraken_out
-  set val(prefix), file("*.kreport") into ch_kraken_report
+  tuple val(prefix), file("*.kreport") into ch_kraken_report
   
   
   script:
@@ -2202,10 +2207,10 @@ process kraken_parse {
   errorStrategy 'ignore'
 
   input:
-  set val(name), file(kraken_r) from ch_kraken_report
+  tuple val(name), file(kraken_r) from ch_kraken_report
 
   output:
-  set val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
+  tuple val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
 
   script:
   out = name+".kraken_parsed.csv"
@@ -2516,7 +2521,6 @@ def checkHostname() {
 def extract_data(tsvFile) {
     Channel.from(tsvFile)
         .splitCsv(header: true, sep: '\t')
-        .dump()
         .map { row ->
             checkNumberOfItem(row, 14)
             def samplename = row.Sample_Name
@@ -2526,28 +2530,28 @@ def extract_data(tsvFile) {
             def organism = row.Organism
             def strandedness = row.Strandedness
             def udg = row.UDG_Treatment
-            def r1 = row.R1.matches("NA") ? "NA" : return_file(row.R1)
-            def r2 = row.R2.matches("NA") ? "NA" : return_file(row.R2)
-            def bam = row.BAM.matches("NA") ? "NA" : return_file(row.BAM)
-            def bai = row.BAM_Index.matches("NA") ? "NA" : return_file(row.BAM_Index)
+            def r1 = row.R1.matches('NA') ? 'NA' : return_file(row.R1)
+            def r2 = row.R2.matches('NA') ? 'NA' : return_file(row.R2)
+            def bam = row.BAM.matches('NA') ? 'NA' : return_file(row.BAM)
+            def bai = row.BAM_Index.matches('NA') ? 'NA' : return_file(row.BAM_Index)
             def group = row.Group
             def pop = row.Populations
             def age = row.Age
 
             // Check no 'empty' rows
-            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "A row appears has all files set to NA. Check row for: ${samplename}"
+            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "Invalid TSV input: A row appears has all files defined as NA. Check row for: ${samplename}"
 
             // Ensure BAMs aren't submitted with PE
-            if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "BAM input rows cannot be paired end (PE). Check row for: ${samplename}"
+            if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "Invalid TSV input: BAM input rows cannot be paired end (PE). Check row for: ${samplename}"
 
             //  Ensure that we do not accept incompatible chemistry setup
-            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "SeqType for one or more rows is neither SE nor PE!. You have: ${seqtype}"
+            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "Invalid TSV input:  SeqType for one or more rows is neither SE nor PE!. You have: ${seqtype}"
                    
            // So we don't accept existing files that are wrong format: e.g. fasta or sam
-            if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
-            if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
-            if ( !bam.matches('NA') && !has_extension(bam, "bam")) exit 1, "The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
-            if ( !bai.matches('NA') && !has_extension(bai, "bai")) exit 1, "The following BAI file either has a non-recognizable extension or is not NA: ${bai}"
+            if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "Invalid TSV input: The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
+            if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "Invalid TSV input: The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
+            if ( !bam.matches('NA') && !has_extension(bam, "bam")) exit 1, "Invalid TSV input: The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
+            if ( !bai.matches('NA') && !has_extension(bai, "bai")) exit 1, "Invalid TSV input: The following BAI file either has a non-recognizable extension or is not NA: ${bai}"
              
             [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ]
 
@@ -2557,13 +2561,13 @@ def extract_data(tsvFile) {
 
 // Check if a row has the expected number of item
 def checkNumberOfItem(row, number) {
-    if (row.size() != number) exit 1, "Malformed row in TSV file: ${row}, see --help for more information"
+    if (row.size() != number) exit 1, "Invalid TSV input: Malformed row (e.g. missing column) in ${row}, see --help for more information"
     return true
 }
 
 // Return file if it exists
 def return_file(it) {
-    if (!file(it).exists()) exit 1, "Missing file or NA in TSV file: ${it} see --help for more information"
+    if (!file(it).exists()) exit 1, "Invalid TSV input: Missing or incorrect file path. Set to NA if no file required. See --help for more information. Check file: ${it}" 
     return file(it)
 }
 
