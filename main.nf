@@ -533,7 +533,7 @@ bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; ch_input_for_skipconvertbam }
 
 fastq_channel
-  .into { ch_input_for_skipconvertbam }
+  .set { ch_input_for_skipconvertbam }
 
 // Header log info
 log.info nfcoreHeader()
@@ -758,7 +758,7 @@ ch_dict_for_skipdict.mix(ch_seq_dict)
 
 process convertBam {
     label 'mc_small'
-    tag "$bam"
+    tag "$lid"
     
     when: 
     params.run_convertbam
@@ -781,7 +781,7 @@ process convertBam {
 
 process indexinputbam {
   label 'sc_small'
-  tag "$prefix"
+  tag "$lid"
 
   input:
   tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_indexbam 
@@ -794,7 +794,6 @@ process indexinputbam {
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
-  prefix = "${bam.baseName}"
   """
   samtools index "${size}" ${bam}
   """
@@ -816,7 +815,7 @@ if (params.run_convertbam) {
  */
 process fastqc {
     label 'sc_tiny'
-    tag "$name"
+    tag "$lid"
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
@@ -830,11 +829,19 @@ process fastqc {
     file "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
 
     script:
+    if ( r2.getExtension() == 'gz' ) {
     """
     fastqc -q $r1 $r2
     rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
     rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
+    } else {
+    """
+    fastqc -q $r1
+    rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
+    rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
+    """
+    }
 }
 
 
@@ -845,7 +852,7 @@ process fastqc {
 
 process fastp {
     label 'mc_small'
-    tag "$name"
+    tag "$lid"
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
     when: 
@@ -888,14 +895,15 @@ if (params.complexity_filter_poly_g) {
 
 process adapter_removal {
     label 'mc_small'
-    tag "$name"
+    tag "$lid"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_fastp_for_adapterremoval.dump()
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_fastp_for_adapterremoval
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("output/*.gz"), val("NA"), group, pop, age into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("output/*{combined.fq,.se.truncated,pair1.truncated}.gz"), group, pop, age into ch_output_from_adapterremoval_r1
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("output/*pair2.truncated.gz"), group, pop, age optional true into ch_output_from_adapterremoval_r2
     tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("output/*.settings"), group, pop, age into ch_adapterremoval_logs
 
     when: 
@@ -910,7 +918,7 @@ process adapter_removal {
     mergedonly = params.mergedonly ? "Y" : "N"
     
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
-    if (r2.isEmpty() && !params.skip_collapse && !params.skip_trim){
+    if (r2.getExtension() == "gz"  && !params.skip_collapse && !params.skip_trim){
     """
     echo "1"
     mkdir -p output
@@ -930,7 +938,7 @@ process adapter_removal {
     mv *.settings output/
     """
     //PE, don't collapse, but trim reads
-    } else if (r2.isEmpty() && params.skip_collapse && !params.skip_trim) {
+    } else if (r2.getExtension() == "gz" && params.skip_collapse && !params.skip_trim) {
     """
     echo "2"
     mkdir -p output
@@ -938,7 +946,7 @@ process adapter_removal {
     mv *.settings ${lid}.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
-    } else if ( !r2.isEmpty()   && !params.skip_collapse && params.skip_trim) {
+    } else if (r2.getExtension() == "gz" && !params.skip_collapse && params.skip_trim) {
     """
     echo "3"
     mkdir -p output
@@ -952,16 +960,63 @@ process adapter_removal {
 
     mv *.settings output/
     """
-    } else if ( r2.isEmpty() ) {
+    } else if (r2.getExtension() != "gz") {
     //SE, collapse not possible, trim reads
     """
     echo "4"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --basename ${lid} --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --basename ${lid}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
     
-    mv *.settings *.truncated.gz output/
+    mv *.settings *.se.truncated.gz output/
     """
     }
+}
+
+// When not collapsing paired-end data, re-merge the R1 and R2 files into single map. Otherwise if SE or collapsed PE, R2 now becomes NA
+if ( params.skip_collapse ){
+  ch_output_from_adapterremoval_r1
+    .mix(ch_output_from_adapterremoval_r2)
+    .groupTuple(by: [0,1,2,3,4,5,6,8,9,10])
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7][0])
+        def r2 = file(it[7][1])
+        def group = it[8]
+        def pop = it[9]
+        def age = it[10]
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+
+    }
+    .dump()
+    .into { ch_output_from_adapterremoval; ch_adapterremoval_for_postfastqc }
+} else {
+  ch_output_from_adapterremoval_r1
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7])
+        def r2 = 'NA'
+        def group = it[8]
+        def pop = it[7][9]
+        def age = it[7][10]
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+    }
+    .into { ch_output_from_adapterremoval; ch_adapterremoval_for_postfastqc }
 }
 
 
@@ -978,24 +1033,32 @@ if (!params.skip_adapterremoval) {
 /*
 * STEP 2b - FastQC after clipping/merging (if applied!)
 */
+// TODO: fastqc_after_clipping not happy when skip collapsing 
 process fastqc_after_clipping {
     label 'sc_tiny'
-    tag "${name}"
+    tag "${lid}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: !params.bam  && !params.skip_adapterremoval && !params.skip_fastqc || params.bam && params.run_convertbam && !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), val(r2), group, pop, age from ch_adapterremoval_for_fastqc_after_clipping
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
     tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*_fastqc.{zip,html}"), val(r2), group, pop, agefile optional true into ch_fastqc_after_clipping
 
     script:
+    if (params.skip_collapse) {
     """
-    fastqc -q $r1
+    fastqc -q ${r1} ${r2}
     """
+    } else {
+    """
+    fastqc -q ${r1}
+    """
+    }
+
 }
 
 
@@ -1005,39 +1068,37 @@ Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
 
 process bwa {
     label 'mc_medium'
-    tag "${name}"
+    tag "${lid}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
     when: params.mapper == 'bwaaln' && !params.skip_mapping
 
     input:
-    tuple val(name), file(reads) from ch_adapteremoval_for_bwa
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_bwa
     file index from bwa_index.collect()
 
     output:
-    file "*.mapped.bam" into ch_output_from_bwa
-    file "*.{bai,csi}" into ch_outputindex_from_bwa
-    
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*.bam"), file(".{bam,csi}"), group, pop, age into ch_output_from_bwa, ch_outputindex_from_bwa    
 
     script:
     size = "${params.large_ref}" ? '-c' : ''
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if (!params.single_end && (params.skip_collapse || params.skip_adapterremoval)){
-    prefix = "${reads[0].baseName}"
+    if (r2.getExtension() == "gz" && (params.skip_collapse || params.skip_adapterremoval)){
+    prefix = lid
     """
-    bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
-    bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r2.sai ${reads[0]} ${reads[1]} | samtools sort -@ ${task.cpus} -O bam - > ${prefix}.mapped.bam
+    bwa aln -t ${task.cpus} $fasta ${r1[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
+    bwa aln -t ${task.cpus} $fasta ${r1[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
+    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r2.sai ${r1[0]} ${r1[1]} | samtools sort -@ ${task.cpus} -O bam - > ${prefix}.mapped.bam
     samtools index "${size}" "${prefix}".mapped.bam
     """
     } else {
     //PE collapsed, or SE data 
-    prefix = "${reads.baseName}"
+    prefix = lid
     """
-    bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
+    bwa aln -t ${task.cpus} $fasta $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
+    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
     samtools index "${size}" "${prefix}".mapped.bam
     """
     }
