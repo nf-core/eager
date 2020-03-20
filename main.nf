@@ -807,7 +807,6 @@ if (params.run_convertbam) {
         .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 } else {
     ch_input_for_skipconvertbam
-      .dump()
       .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
 
 }
@@ -893,11 +892,11 @@ process adapter_removal {
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_fastp_for_adapterremoval
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_fastp_for_adapterremoval.dump()
 
     output:
-    tuple val(base), file("output/*.gz") into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
-    file("output/*.settings") into ch_adapterremoval_logs
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("output/*.gz"), val("NA"), group, pop, age into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("output/*.settings"), group, pop, age into ch_adapterremoval_logs
 
     when: 
     bam != "NA"  && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
@@ -911,8 +910,9 @@ process adapter_removal {
     mergedonly = params.mergedonly ? "Y" : "N"
     
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
-    if (r2 != 'NA' && !params.skip_collapse && !params.skip_trim){
+    if (r2.isEmpty() && !params.skip_collapse && !params.skip_trim){
     """
+    echo "1"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${lid} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
@@ -930,15 +930,17 @@ process adapter_removal {
     mv *.settings output/
     """
     //PE, don't collapse, but trim reads
-    } else if (r2 != 'NA'  && params.skip_collapse && !params.skip_trim) {
+    } else if (r2.isEmpty() && params.skip_collapse && !params.skip_trim) {
     """
+    echo "2"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${lid} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
     mv *.settings ${lid}.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
-    } else if (r2 != 'NA'  && !params.skip_collapse && params.skip_trim) {
+    } else if ( !r2.isEmpty()   && !params.skip_collapse && params.skip_trim) {
     """
+    echo "3"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${lid} --gzip --threads ${task.cpus} --basename ${lid} ${collapse_me} ${trim_me}
     
@@ -950,9 +952,10 @@ process adapter_removal {
 
     mv *.settings output/
     """
-    } else if (r2 == 'NA') {
+    } else if ( r2.isEmpty() ) {
     //SE, collapse not possible, trim reads
     """
+    echo "4"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --basename ${lid} --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
     
@@ -984,14 +987,14 @@ process fastqc_after_clipping {
     when: !params.bam  && !params.skip_adapterremoval && !params.skip_fastqc || params.bam && params.run_convertbam && !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    tuple val(name), file(reads) from ch_adapterremoval_for_fastqc_after_clipping
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), val(r2), group, pop, age from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
-    file "*_fastqc.{zip,html}" optional true into ch_fastqc_after_clipping
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*_fastqc.{zip,html}"), val(r2), group, pop, agefile optional true into ch_fastqc_after_clipping
 
     script:
     """
-    fastqc -q $reads
+    fastqc -q $r1
     """
 }
 
