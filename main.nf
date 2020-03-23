@@ -829,7 +829,7 @@ process fastqc {
     file "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
 
     script:
-    if ( r2.getExtension() == 'gz' ) {
+    if ( seqtype == 'PE' ) {
     """
     fastqc -q $r1 $r2
     rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
@@ -918,7 +918,7 @@ process adapter_removal {
     mergedonly = params.mergedonly ? "Y" : "N"
     
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
-    if (r2.getExtension() == "gz"  && !params.skip_collapse && !params.skip_trim){
+    if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim ){
     """
     echo "1"
     mkdir -p output
@@ -938,7 +938,7 @@ process adapter_removal {
     mv *.settings output/
     """
     //PE, don't collapse, but trim reads
-    } else if (r2.getExtension() == "gz" && params.skip_collapse && !params.skip_trim) {
+    } else if ( seqtype == 'PE' && params.skip_collapse && !params.skip_trim ) {
     """
     echo "2"
     mkdir -p output
@@ -946,7 +946,7 @@ process adapter_removal {
     mv *.settings ${lid}.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
-    } else if (r2.getExtension() == "gz" && !params.skip_collapse && params.skip_trim) {
+    } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
     """
     echo "3"
     mkdir -p output
@@ -960,7 +960,7 @@ process adapter_removal {
 
     mv *.settings output/
     """
-    } else if (r2.getExtension() != "gz") {
+    } else if ( seqtype != 'PE' ) {
     //SE, collapse not possible, trim reads
     """
     echo "4"
@@ -1033,7 +1033,7 @@ if (!params.skip_adapterremoval) {
 /*
 * STEP 2b - FastQC after clipping/merging (if applied!)
 */
-// TODO: fastqc_after_clipping not happy when skip collapsing 
+// TODO: fastqc_after_clipping not happy when skip_collapsing 
 process fastqc_after_clipping {
     label 'sc_tiny'
     tag "${lid}"
@@ -1078,14 +1078,14 @@ process bwa {
     file index from bwa_index.collect()
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*.bam"), file(".{bam,csi}"), group, pop, age into ch_output_from_bwa, ch_outputindex_from_bwa    
+    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*.bam"), file("*.{bam,csi}"), group, pop, age into ch_output_from_bwa, ch_outputindex_from_bwa    
 
     script:
     size = "${params.large_ref}" ? '-c' : ''
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if (r2.getExtension() == "gz" && (params.skip_collapse || params.skip_adapterremoval)){
+    if ( seqtype == 'PE' && (params.skip_collapse || params.skip_adapterremoval) ){
     prefix = lid
     """
     bwa aln -t ${task.cpus} $fasta ${r1[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
