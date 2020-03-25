@@ -516,13 +516,13 @@ branched_input = input_sample.branch{
 
 //Removing BAM/BAI in case of a FASTQ input
 fastq_channel = branched_input.fastq.map {
-  samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
+  samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
     [samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
 }
 //Removing R1/R2 in case of BAM input
 bam_channel = branched_input.bam.map {
-  samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ->
-    [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai, group, pop, age]
+  samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, group, pop, age ->
+    [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, group, pop, age]
 }
 
 
@@ -790,7 +790,7 @@ process indexinputbam {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*bam"), file("*bai"), group, pop, age  into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
 
   when: 
-  params.bam && !params.run_convertbam && bai == 'NA'
+  bam != 'NA' && !params.run_convertbam
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -1404,13 +1404,11 @@ process samtools_flagstat_after_filter {
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
     .join(ch_bam_filtered_flagstat_for_endorspy)
-    .dump()
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
   // Add a file entry to match expected no. tuple elements for endorS.py even if not giving second file
   ch_flagstat_for_endorspy
-    .dump()
     .map { it -> 
         def samplename = it[0]
         def libraryid  = it[1]
@@ -1478,8 +1476,7 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.json" into ch_dedup_results_for_multiqc
-    file "${prefix}_rmdup.bam" into ch_output_from_dedup
-    file "*.{bai,csi}" into ch_outputindex_from_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${prefix}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_dedup, ch_outputindex_from_dedup
 
     script:
     prefix="${bam.baseName}"
@@ -2590,7 +2587,7 @@ def extract_data(tsvFile) {
     Channel.from(tsvFile)
         .splitCsv(header: true, sep: '\t')
         .map { row ->
-            checkNumberOfItem(row, 14)
+            checkNumberOfItem(row, 13)
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID
             def lane = row.Lane
@@ -2601,7 +2598,6 @@ def extract_data(tsvFile) {
             def r1 = row.R1.matches('NA') ? 'NA' : return_file(row.R1)
             def r2 = row.R2.matches('NA') ? 'NA' : return_file(row.R2)
             def bam = row.BAM.matches('NA') ? 'NA' : return_file(row.BAM)
-            def bai = row.BAM_Index.matches('NA') ? 'NA' : return_file(row.BAM_Index)
             def group = row.Group
             def pop = row.Populations
             def age = row.Age
@@ -2619,9 +2615,8 @@ def extract_data(tsvFile) {
             if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "Invalid TSV input: The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
             if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "Invalid TSV input: The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
             if ( !bam.matches('NA') && !has_extension(bam, "bam")) exit 1, "Invalid TSV input: The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
-            if ( !bai.matches('NA') && !has_extension(bai, "bai")) exit 1, "Invalid TSV input: The following BAI file either has a non-recognizable extension or is not NA: ${bai}"
              
-            [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ]
+            [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, group, pop, age ]
 
          }
 
