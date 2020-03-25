@@ -758,16 +758,16 @@ ch_dict_for_skipdict.mix(ch_seq_dict)
 
 process convertBam {
     label 'mc_small'
-    tag "$lid"
+    tag "$libraryid"
     
     when: 
     params.run_convertbam
 
     input: 
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_convertbam 
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_convertbam 
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*fastq.gz"), 'NA', group, pop, age into ch_output_from_convertbam
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*fastq.gz"), 'NA', group, pop, age into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -781,13 +781,13 @@ process convertBam {
 
 process indexinputbam {
   label 'sc_small'
-  tag "$lid"
+  tag "$libraryid"
 
   input:
-  tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_indexbam 
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_indexbam 
 
   output:
-  tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*bam"), file("*bai"), group, pop, age  into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*bam"), file("*bai"), group, pop, age  into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
 
   when: 
   params.bam && !params.run_convertbam && bai == 'NA'
@@ -815,7 +815,7 @@ if (params.run_convertbam) {
  */
 process fastqc {
     label 'sc_tiny'
-    tag "$lid"
+    tag "$libraryid"
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
@@ -823,7 +823,7 @@ process fastqc {
     !params.skip_fastqc || params.bam && params.run_convertbam
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastqc
 
     output:
     file "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
@@ -852,17 +852,17 @@ process fastqc {
 
 process fastp {
     label 'mc_small'
-    tag "$lid"
+    tag "$libraryid"
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
     when: 
     bam != 'NA' && params.complexity_filter_poly_g || bam != 'NA' && params.run_convertbam && params.complexity_filter_poly_g
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastp
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastp
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("${r1}.pG.fq.gz"), file("${r2}.pG.fq.gz"), group, pop, age into ch_output_from_fastp
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${r1}.pG.fq.gz"), file("${r2}.pG.fq.gz"), group, pop, age into ch_output_from_fastp
     file("*.json") into ch_fastp_for_multiqc
 
     script:
@@ -872,7 +872,7 @@ process fastp {
     """
     } else {
     """
-    fastp --in1 ${r1} --in2 ${r2} --out1 "${r1.baseName}.pG.fq.gz" --out2 "${r2.baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${lid.baseName}"_fastp.json 
+    fastp --in1 ${r1} --in2 ${r2} --out1 "${r1.baseName}.pG.fq.gz" --out2 "${r2.baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${libraryid}"_fastp.json 
     """
     }
 }
@@ -895,22 +895,22 @@ if (params.complexity_filter_poly_g) {
 
 process adapter_removal {
     label 'mc_small'
-    tag "$lid"
+    tag "$libraryid"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_fastp_for_adapterremoval
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_fastp_for_adapterremoval
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("output/*{combined.fq,.se.truncated,pair1.truncated}.gz"), group, pop, age into ch_output_from_adapterremoval_r1
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("output/*pair2.truncated.gz"), group, pop, age optional true into ch_output_from_adapterremoval_r2
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("output/*.settings"), group, pop, age into ch_adapterremoval_logs
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*{combined.fq,.se.truncated,pair1.truncated}.gz"), group, pop, age into ch_output_from_adapterremoval_r1
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*pair2.truncated.gz"), group, pop, age optional true into ch_output_from_adapterremoval_r2
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*.settings"), group, pop, age into ch_adapterremoval_logs
 
     when: 
     bam != "NA"  && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
 
     script:
-    base = lid
+    base = libraryid
     //This checks whether we skip trimming and defines a variable respectively
     trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
     collapse_me = params.skip_collapse ? '' : '--collapse'
@@ -922,17 +922,17 @@ process adapter_removal {
     """
     echo "1"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${lid} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
     if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
-      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${lid}.combined.fq.gz
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}.combined.fq.gz
     elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz > output/${lid}.combined.fq.gz
+      cat *.collapsed.gz > output/${libraryid}.combined.fq.gz
     elif [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${lid}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${lid}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}.pe.combined.fq.gz
     fi
    
     mv *.settings output/
@@ -942,20 +942,20 @@ process adapter_removal {
     """
     echo "2"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${lid} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
-    mv *.settings ${lid}.pair*.pe.truncated.gz output/
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
+    mv *.settings ${libraryid}.pair*.pe.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
     } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
     """
     echo "3"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${lid} --gzip --threads ${task.cpus} --basename ${lid} ${collapse_me} ${trim_me}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid} --gzip --threads ${task.cpus} --basename ${libraryid} ${collapse_me} ${trim_me}
     
     if [ ${mergedonly} = "Y" ]; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${lid}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${lid}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${libraryid}.pe.combined.fq.gz
     fi
 
     mv *.settings output/
@@ -965,7 +965,7 @@ process adapter_removal {
     """
     echo "4"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --basename ${lid}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --basename ${libraryid}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
     
     mv *.settings *.se.truncated.gz output/
     """
@@ -1035,17 +1035,17 @@ if (!params.skip_adapterremoval) {
 // TODO: fastqc_after_clipping not happy when skip_collapsing 
 process fastqc_after_clipping {
     label 'sc_tiny'
-    tag "${lid}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: !params.bam  && !params.skip_adapterremoval && !params.skip_fastqc || params.bam && params.run_convertbam && !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapterremoval_for_fastqc_after_clipping
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*_fastqc.{zip,html}"), group, pop, age into ch_fastqc_after_clipping
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_fastqc.{zip,html}"), group, pop, age into ch_fastqc_after_clipping
 
     script:
     if ( params.skip_collapse && seqtype == "PE" ) {
@@ -1066,17 +1066,17 @@ Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
 
 process bwa {
     label 'mc_medium'
-    tag "${lid}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
     when: params.mapper == 'bwaaln' && !params.skip_mapping
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_bwa
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_bwa
     file index from bwa_index.collect()
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwa, ch_outputindex_from_bwa    
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwa, ch_outputindex_from_bwa    
 
     script:
     size = "${params.large_ref}" ? '-c' : ''
@@ -1084,7 +1084,7 @@ process bwa {
 
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval) ){
-    prefix = lid
+    prefix = libraryid
     """
     bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
@@ -1093,7 +1093,7 @@ process bwa {
     """
     } else {
     //PE collapsed, or SE data 
-    prefix = lid
+    prefix = libraryid
     """
     bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
@@ -1138,12 +1138,12 @@ process circularmapper{
     when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_cm
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from ch_fasta_for_circularmapper.collect()
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_cm, ch_outputindex_from_cm
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_cm, ch_outputindex_from_cm
     
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
@@ -1153,7 +1153,7 @@ process circularmapper{
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse ){
-    prefix = lid
+    prefix = libraryid
     """
     bwa aln -t ${task.cpus} $elongated_root ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $elongated_root ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
@@ -1163,7 +1163,7 @@ process circularmapper{
     samtools index "${size}" ${prefix}.mapped.bam
     """
     } else {
-    prefix = lid
+    prefix = libraryid
     """ 
     bwa aln -t ${task.cpus} $elongated_root $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $elongated_root ${prefix}.sai $reads > tmp.out
@@ -1183,15 +1183,15 @@ process bwamem {
     when: params.mapper == 'bwamem' && !params.skip_mapping
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_bwamem
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_bwamem
     file index from bwa_index_bwamem.collect()
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwamem, ch_outputindex_from_bwamem
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwamem, ch_outputindex_from_bwamem
     
     script:
     fasta = "${index}/${bwa_base}"
-    prefix = lid
+    prefix = libraryid
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
@@ -1240,13 +1240,13 @@ process samtools_flagstat {
     !params.skip_mapping
 
     input:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_mapping_for_samtools_flagstat
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_mapping_for_samtools_flagstat
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*stats"), group, pop, age into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*stats"), group, pop, age into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
 
     script:
-    prefix = lid
+    prefix = libraryid
     """
     samtools flagstat $bam > ${prefix}_flagstat.stats
     """
@@ -1272,15 +1272,15 @@ process samtools_filter {
     params.run_bam_filtering
 
     input: 
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_mapping_for_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_mapping_for_filtering
 
     output:
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_filtering,ch_outputindex_from_filtering
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz"), group, pop, age optional true into ch_bam_filtering_for_metagenomic
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_filtering,ch_outputindex_from_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz"), group, pop, age optional true into ch_bam_filtering_for_metagenomic
     file "*.unmapped.bam" optional true
 
     script:
-    prefix = lid
+    prefix = libraryid
     size = "${params.large_ref}" ? '-c' : ''
     
     if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
@@ -1317,7 +1317,7 @@ process samtools_filter {
     }  
 }
 
-
+// TODO: remove all *index channels (counts for all places)
 // samtools_filter bypass 
 if (params.run_bam_filtering) {
     ch_mapping_for_skipfiltering.mix(ch_output_from_filtering)
@@ -1337,7 +1337,7 @@ if (params.run_bam_filtering) {
 
 }
 
-// TODO: Check works when turned on
+// TODO: Check works when turned on; fix output
 process strip_input_fastq {
     label 'mc_medium'
     tag "${bam.baseName}"
@@ -1347,8 +1347,8 @@ process strip_input_fastq {
     params.strip_input_fastq
 
     input: 
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_stripfastq
-    tuple sname, lid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_stripfastq
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_stripfastq
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_stripfastq
 
     output:
     file "*.fq.gz" into ch_output_from_stripfastq
@@ -1385,13 +1385,13 @@ process samtools_flagstat_after_filter {
     params.run_bam_filtering
 
     input:
-    file(bam) from ch_filtering_for_flagstat
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_flagstat
 
     output:
-    tuple val(prefix), file("*stats") into ch_bam_filtered_flagstat_for_multiqc, ch_bam_filtered_flagstat_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.stats"), group, pop, age into ch_bam_filtered_flagstat_for_multiqc, ch_bam_filtered_flagstat_for_endorspy
 
     script:
-    prefix = "$bam" - ~/(\.bam.filtered.bam)?$/
+    prefix = libraryid
     """
     samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
     """
@@ -1404,15 +1404,32 @@ process samtools_flagstat_after_filter {
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
     .join(ch_bam_filtered_flagstat_for_endorspy)
+    .dump()
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
   // Add a file entry to match expected no. tuple elements for endorS.py even if not giving second file
   ch_flagstat_for_endorspy
-    .map { it -> [it[0], it[1], file('dummy_postfilterflagstat.stats')] }
+    .dump()
+    .map { it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def stats = file(it[7])
+        def poststats = file('dummy_postfilterflagstat.stats')
+        def group = it[8]
+        def pop = it[9]
+        def age = it[10]
+
+      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats, group, pop, age] }
     .set{ ch_allflagstats_for_endorspy }
 }
 
+// TODO Fix output
 process endorSpy {
     label 'sc_tiny'
     tag "$prefix"
@@ -1422,21 +1439,21 @@ process endorSpy {
     !params.skip_mapping
 
     input:
-    tuple val(name), file(stats), file(poststats) from ch_allflagstats_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(stats), file(poststats), group, pop, age from ch_allflagstats_for_endorspy
 
     output:
     file "*.json" into ch_endorspy_for_multiqc
 
     script:
-    prefix = "${name}"
+    prefix = "${samplename}"
 
     if (params.run_bam_filtering) {
       """
-      endorS.py -o json -n ${name} ${stats} ${poststats}
+      endorS.py -o json -n ${samplename} ${stats} ${poststats}
       """
     } else {
       """
-      endorS.py -o json -n ${name} ${stats}
+      endorS.py -o json -n ${samplename} ${stats}
       """
     }
 }
@@ -1445,7 +1462,7 @@ process endorSpy {
 /*
 Step 5a: DeDup
 */ 
-
+// TODO: Fix output
 process dedup{
     label 'mc_small'
     tag "${bam.baseName}"
@@ -1456,7 +1473,7 @@ process dedup{
     !params.skip_deduplication && params.dedupper == 'dedup'
 
     input:
-    file bam from ch_filtering_for_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_dedup
 
     output:
     file "*.hist" into ch_hist_for_preseq
@@ -1499,7 +1516,7 @@ process markDup{
     !params.skip_deduplication && params.dedupper != 'dedup'
 
     input:
-    file bam from ch_filtering_for_markdup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_markdup
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
@@ -1579,10 +1596,8 @@ process damageprofiler {
     !params.skip_damage_calculation
 
     input:
-    file bam from ch_rmdup_for_damageprofiler
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_damageprofiler
     file fasta from ch_fasta_for_damageprofiler.collect()
-    file bai from ch_rmdupindex_for_damageprofiler
-    
 
     output:
     file "${base}/*.txt"
@@ -1610,7 +1625,7 @@ process qualimap {
     !params.skip_qualimap
 
     input:
-    file bam from ch_rmdup_for_qualimap
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_qualimap
     file fasta from ch_fasta_for_qualimap.collect()
 
     output:
@@ -1792,7 +1807,7 @@ if ( params.gatk_ug_jar != '' ) {
   input:
   file fasta from ch_fasta_for_genotyping_ug.collect()
   file jar from ch_unifiedgenotyper_jar.collect()
-  file bam from ch_damagemanipulation_for_genotyping_ug
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_ug
   file fai from ch_fai_for_ug.collect()
   file dict from ch_dict_for_ug.collect()
 
@@ -1830,10 +1845,9 @@ if ( params.gatk_ug_jar != '' ) {
 
   input:
   file fasta from ch_fasta_for_genotyping_hc.collect()
-  file bam from ch_damagemanipulation_for_genotyping_hc
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_hc
   file fai from ch_fai_for_hc.collect()
   file dict from ch_dict_for_hc.collect()
-  file bai from ch_damagemanipulationindex_for_genotyping_hc.collect()
 
   output: 
   file "*vcf.gz" into ch_vcf_hc
@@ -1866,10 +1880,9 @@ if ( params.gatk_ug_jar != '' ) {
 
   input:
   file fasta from ch_fasta_for_genotyping_freebayes.collect()
-  file bam from ch_damagemanipulation_for_genotyping_freebayes
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_freebayes
   file fai from ch_fai_for_freebayes.collect()
   file dict from ch_dict_for_freebayes.collect()
-  file bai from ch_damagemanipulationindex_for_genotyping_freebayes.collect()
 
   output: 
   file "*vcf.gz" into ch_vcf_freebayes
