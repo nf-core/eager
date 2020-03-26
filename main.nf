@@ -1277,7 +1277,7 @@ process samtools_filter {
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_filtering,ch_outputindex_from_filtering
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz"), group, pop, age optional true into ch_bam_filtering_for_metagenomic
-    file "*.unmapped.bam" optional true
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam"), group, pop, age optional true
 
     script:
     prefix = libraryid
@@ -1324,23 +1324,16 @@ if (params.run_bam_filtering) {
         .filter { it =~/.*filtered.bam/ }
         .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
 
-  ch_mappingindex_for_skipfiltering.mix(ch_outputindex_from_filtering)
-        .filter { it =~/.*filtered.bam.bai|.*filtered.bam.csi/ }
-        .into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
-
 } else {
     ch_mapping_for_skipfiltering
         .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
-
-    ch_mappingindex_for_skipfiltering
-        .into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
 
 }
 
 // TODO: Check works when turned on; fix output
 process strip_input_fastq {
     label 'mc_medium'
-    tag "${bam.baseName}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/stripped_fastq", mode: 'copy'
 
     when: 
@@ -1351,7 +1344,7 @@ process strip_input_fastq {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_stripfastq
 
     output:
-    file "*.fq.gz" into ch_output_from_stripfastq
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_output_from_stripfastq
 
 
     script:
@@ -1440,10 +1433,10 @@ process endorSpy {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(stats), file(poststats), group, pop, age from ch_allflagstats_for_endorspy
 
     output:
-    file "*.json" into ch_endorspy_for_multiqc
+   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_endorspy_for_multiqc
 
     script:
-    prefix = "${samplename}"
+    prefix = "${libraryid}"
 
     if (params.run_bam_filtering) {
       """
@@ -1463,7 +1456,7 @@ Step 5a: DeDup
 // TODO: Fix output
 process dedup{
     label 'mc_small'
-    tag "${bam.baseName}"
+    tag "${outname}"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${prefix}/$filename"}
 
@@ -1474,28 +1467,29 @@ process dedup{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_dedup
 
     output:
-    file "*.hist" into ch_hist_for_preseq
-    file "*.json" into ch_dedup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${prefix}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_dedup, ch_outputindex_from_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.hist"), group, pop, age into ch_hist_for_preseq
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_dedup_results_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_dedup, ch_outputindex_from_dedup
 
     script:
-    prefix="${bam.baseName}"
+    prefix="${libraryid}"
+    outname = "${bam.baseName}"
     treat_merged="${params.dedup_all_merged}" ? '-m' : ''
     size = "${params.large_ref}" ? '-c' : ''
     
-    if(params.single_end) {
+    if(seqtype == 'SE') {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.bam
-    samtools index "${size}" "$prefix"_rmdup.bam
+    samtools sort -@ ${task.cpus} "$outname"_rmdup.bam -o "$outname"_rmdup.bam
+    samtools index "${size}" "$outname"_rmdup.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.bam
-    samtools index "${size}" "$prefix"_rmdup.bam
+    samtools sort -@ ${task.cpus} "$outname"_rmdup.bam -o "$outname"_rmdup.bam
+    samtools index "${size}" "$outname"_rmdup.bam
     """  
     }
 }
@@ -1506,7 +1500,7 @@ process dedup{
 
 process markDup{
     label 'mc_small'
-    tag "${bam.baseName}"
+    tag "${outname}"
     publishDir "${params.outdir}/deduplication/"
 
     when:
@@ -1516,17 +1510,16 @@ process markDup{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_markdup
 
     output:
-    file "*.metrics" into ch_markdup_results_for_multiqc
-    file "*.rmdup.bam" into ch_output_from_markdup
-    file "*.{bai,csi}" into ch_outputindex_from_markdup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.metrics"), group, pop, age into ch_markdup_results_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_markdup, ch_outputindex_from_markdup
 
 
     script:
-    prefix = "${bam.baseName}"
+    outname = "${bam.baseName}"
     size = "${params.large_ref}" ? '-c' : ''
     """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.rmdup.metrics" VALIDATION_STRINGENCY=SILENT
-    samtools index "${size}" ${prefix}_rmdup.bam
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${outname}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${outname}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools index "${size}" ${outname}_rmdup.bam
     """
 }
 
@@ -1536,16 +1529,9 @@ if (!params.skip_deduplication) {
         .filter { it =~/.*_rmdup.bam/ }
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
-    ch_filteringindex_for_skiprmdup.mix(ch_outputindex_from_dedup, ch_outputindex_from_markdup)
-        .filter { it =~/.*_rmdup.bam.bai|.*_rmdup.bam.csi/ }
-        .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
-
 } else {
     ch_filtering_for_skiprmdup
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
-
-    ch_filteringindex_for_skiprmdup
-        .into { ch_rmdupindex_for_skipdamagemanipulation; ch_rmdupindex_for_damageprofiler; ch_rmdupindex_for_qualimap; ch_rmdupindex_for_pmdtools; ch_rmdupindex_for_bamutils } 
 }
 
 
@@ -1562,10 +1548,10 @@ process preseq {
     !params.skip_preseq
 
     input:
-    file input from (params.skip_deduplication ? ch_rmdup_for_preseq : ch_hist_for_preseq )
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input), group, pop, age from (params.skip_deduplication ? ch_rmdup_for_preseq : ch_hist_for_preseq )
 
     output:
-    file "${input.baseName}.ccurve" into ch_preseq_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${input.baseName}.ccurve"), group, pop, age into ch_preseq_for_multiqc
 
     script:
     if(!params.skip_deduplication){
@@ -1597,10 +1583,10 @@ process damageprofiler {
     file fasta from ch_fasta_for_damageprofiler.collect()
 
     output:
-    file "${base}/*.txt"
-    file "${base}/*.log"
-    file "${base}/*.pdf"
-    file "${base}/*.json" into ch_damageprofiler_results
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt"), group, pop, age
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log"), group, pop, age
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf"), group, pop, age
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json"), group, pop, age into ch_damageprofiler_results
 
     script:
     base = "${bam.baseName}"
@@ -1626,7 +1612,7 @@ process qualimap {
     file fasta from ch_fasta_for_qualimap.collect()
 
     output:
-    file "*" into ch_qualimap_results
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*"), group, pop, age into ch_qualimap_results
 
     script:
     snpcap = ''
@@ -1658,11 +1644,11 @@ process bedtools {
   params.run_bedtools_coverage
 
   input:
-  file bam from ch_rmdup_for_bedtools
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_bedtools
   file anno_file from ch_anno_for_bedtools.collect()
 
   output:
-  file "*"
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*"), group, pop, age
 
   script:
   """
@@ -1683,17 +1669,17 @@ process pmdtools {
     when: params.run_pmdtools
 
     input: 
-    file bam from ch_rmdup_for_pmdtools
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_pmdtools
     file fasta from ch_fasta_for_pmdtools.collect()
 
     output:
-    file "*.bam" into ch_output_from_pmdtools
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_pmdtools
     file "*.cpg.range*.txt"
     file "*.{bai,csi}" into ch_outputindex_from_pmdtools
 
     script:
     //Check which treatment for the libraries was used
-    def treatment = params.pmd_udg_type ? (params.pmd_udg_type =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
+    def treatment = udg ? (udg =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
     if(params.snpcapture){
         snpcap = (params.pmdtools_reference_mask != '') ? "--refseq ${params.pmdtools_reference_mask}" : ''
         log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
@@ -1724,11 +1710,10 @@ process bam_trim {
     when: params.run_trim_bam
 
     input:
-    file bam from ch_rmdup_for_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_bamutils
 
     output: 
-    file "*.trimmed.bam" into ch_output_from_bamutils
-    file "*.{bai,csi}" into ch_outputindex_from_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}") , group, pop, age into ch_output_from_bamutils
 
     script:
     prefix="${bam.baseName}"
@@ -1744,37 +1729,28 @@ process bam_trim {
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
-    ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .filter { it =~/.*trimmed.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-    ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
-        .filter { it =~/.*trimmed.bam.bai|.*.trimmed.bam.csi/ }
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" )  {
     ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
         .filter { it =~/.*pmd.bam/ }
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-    ch_rmdupindex_for_skipdamagemanipulation.mix(ch_outputindex_from_pmdtools,ch_outputindex_from_bamutils)
-        .filter { it =~/.*pmd.bam.bai|.*.pmd.bam.csi/ }
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-    ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-    ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+
 } else if ( !params.run_genotyping && params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
-    ch_rmdupindex_for_skipdamagemanipulation
-        .into { ch_damagemanipulationindex_for_skipgenotyping; ch_damagemanipulationindex_for_genotyping_hc; ch_damagemanipulationindex_for_genotyping_freebayes }
+
 }
 
 /*
@@ -1802,14 +1778,14 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_ug
   file fasta from ch_fasta_for_genotyping_ug.collect()
   file jar from ch_unifiedgenotyper_jar.collect()
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_ug
   file fai from ch_fai_for_ug.collect()
   file dict from ch_dict_for_ug.collect()
 
   output: 
-  file "*vcf.gz" into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz"), group, pop, age into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
 
   script:
   prefix="${bam.baseName}"
@@ -1841,13 +1817,13 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'hc'
 
   input:
-  file fasta from ch_fasta_for_genotyping_hc.collect()
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_hc
+  file fasta from ch_fasta_for_genotyping_hc.collect()
   file fai from ch_fai_for_hc.collect()
   file dict from ch_dict_for_hc.collect()
 
   output: 
-  file "*vcf.gz" into ch_vcf_hc
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz"), group, pop, age
 
   script:
   prefix="${bam.baseName}"
@@ -1876,13 +1852,13 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
-  file fasta from ch_fasta_for_genotyping_freebayes.collect()
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_freebayes
+  file fasta from ch_fasta_for_genotyping_freebayes.collect()
   file fai from ch_fai_for_freebayes.collect()
   file dict from ch_dict_for_freebayes.collect()
 
   output: 
-  file "*vcf.gz" into ch_vcf_freebayes
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz"), group, pop, age
   
   script:
   prefix="${bam.baseName}"
@@ -1906,11 +1882,11 @@ process vcf2genome {
   params.run_vcf2genome
 
   input:
-  file vcf from ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(vcf), group, pop, age from ch_ug_for_vcf2genome
   file fasta from ch_fasta_for_vcf2genome.collect()
 
   output:
-  file "*.fasta.gz"
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fasta.gz"), group, pop, age
 
   script:
   prefix = "${vcf.baseName}"
@@ -1928,13 +1904,13 @@ process vcf2genome {
 /*
  * Step 13: SNP Table Generation
  */
-
+// TODO: Might need to collect all VCF entries from map
 // Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
 if (params.additional_vcf_files == '') {
     ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.collect()
 } else {
     ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files)
-    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.mix(ch_extravcfs_for_multivcfanalyzer).collect()
+    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.collect().mix(ch_extravcfs_for_multivcfanalyzer)
 }
 
  process multivcfanalyzer {
@@ -1945,8 +1921,8 @@ if (params.additional_vcf_files == '') {
   params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
 
   input:
-  file fasta from ch_fasta_for_multivcfanalyzer.collect()
   file vcf from ch_vcfs_for_multivcfanalyzer.collect()
+  file fasta from ch_fasta_for_multivcfanalyzer.collect()
 
   output:
   file 'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
@@ -1982,11 +1958,11 @@ if (params.additional_vcf_files == '') {
   params.run_mtnucratio
 
   input:
-  file bam from ch_rmdup_formtnucratio
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_formtnucratio
 
   output:
-  file '*.mtnucratio'
-  file '*.json' into ch_mtnucratio_for_multiqc
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mtnucratio"), group, pop, age
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_mtnucratio_for_multiqc
 
   script:
   prefix="${bam.baseName}"
@@ -2015,12 +1991,12 @@ if (params.sexdeterrmine_bedfile == '') {
      params.run_sexdeterrmine
     
      input:
-     file bam from ch_for_sexdeterrmine.collect()
+     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_for_sexdeterrmine.collect()
      file bed from ch_bed_for_sexdeterrmine
 
      output:
-     file 'SexDet.txt'
-     file '*.json' into ch_sexdet_for_multiqc
+     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("SexDet.txt"), group, pop, age
+     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_sexdet_for_multiqc
      
      script:
      if (params.sexdeterrmine_bedfile == '') {
@@ -2058,10 +2034,10 @@ if (params.sexdeterrmine_bedfile == '') {
     params.run_nuclear_contamination
 
     input:
-    file input from ch_for_nuclear_contamination
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input), file(bai), group, pop, age from ch_for_nuclear_contamination
 
     output:
-    file '*.X.contamination.out' into ch_from_nuclear_contamination
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('*.X.contamination.out'), group, pop, age into ch_from_nuclear_contamination
 
     script:
     """
@@ -2079,10 +2055,10 @@ process print_nuclear_contamination{
     params.run_nuclear_contamination
 
     input:
-    val 'Contam' from ch_from_nuclear_contamination.collect()
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val('Contam'), group, pop, age from ch_from_nuclear_contamination.collect()
 
     output:
-    file 'nuclear_contamination.txt'
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('nuclear_contamination.txt'), group, pop, age
 
     script:
     """
@@ -2116,11 +2092,11 @@ process malt {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
 
   input:
-  file fastqs from ch_bam_filtering_for_metagenomic_malt.collect()
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(fastqs), group, pop, age from ch_bam_filtering_for_metagenomic_malt.collect()
 
   output:
-  file "*.rma6" into ch_rma_for_maltExtract
-  file "malt.log"
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.rma6"), group, pop, age into ch_rma_for_maltExtract
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("malt.log"), group, pop, age
 
   script:
   if ("${params.malt_min_support_mode}" == "percent") {
@@ -2176,7 +2152,7 @@ process maltextract {
   params.run_maltextract && params.metagenomic_tool == 'malt'
 
   input:
-  file rma6 from ch_rma_for_maltExtract.collect()
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(rma6), group, pop, age from ch_rma_for_maltExtract.collect()
   file taxon_list from ch_taxonlist_for_maltextract
   
   output:
@@ -2249,12 +2225,12 @@ process kraken {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
-  file fastq from ch_bam_filtering_for_metagenomic_kraken
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(fastq), group, pop, age from ch_bam_filtering_for_metagenomic_kraken
   file(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out
-  tuple val(prefix), file("*.kreport") into ch_kraken_report
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.kraken.out"), group, pop, age into ch_kraken_out
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val(prefix), file("*.kreport"), group, pop, age into ch_kraken_report
   
   
   script:
@@ -2272,10 +2248,10 @@ process kraken_parse {
   errorStrategy 'ignore'
 
   input:
-  tuple val(name), file(kraken_r) from ch_kraken_report
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val(name), file(kraken_r),  group, pop, age from ch_kraken_report
 
   output:
-  tuple val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val(name), file('*.kraken_parsed.csv'), group, pop, age into ch_kraken_parsed
 
   script:
   out = name+".kraken_parsed.csv"
@@ -2288,10 +2264,10 @@ process kraken_merge {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
   input:
-  file(csv_count) from ch_kraken_parsed.collect()
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val(name), file(csv_count), group, pop, age from ch_kraken_parsed.collect()
 
   output:
-  file('kraken_count_table.csv') into kraken_merged
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('kraken_count_table.csv'), group, pop, age
 
   script:
   out = "kraken_count_table.csv"
