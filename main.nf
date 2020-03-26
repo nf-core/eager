@@ -764,10 +764,10 @@ process convertBam {
     params.run_convertbam
 
     input: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_convertbam 
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from ch_input_for_convertbam 
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*fastq.gz"), 'NA', group, pop, age into ch_output_from_convertbam
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*fastq.gz"), val('NA'), group, pop, age into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -778,16 +778,16 @@ process convertBam {
 /*
 * PREPROCESSING - Index a input BAM if not being converted to FASTQ
 */
-
+// TODO issue: this is not passed on downstream, presumably because not filling output channels for some reason? Myabe skipping failing?
 process indexinputbam {
   label 'sc_small'
   tag "$libraryid"
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_indexbam 
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from ch_input_for_indexbam 
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*bam"), file("*bai"), group, pop, age  into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}"), group, pop, age  into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
 
   when: 
   bam != 'NA' && !params.run_convertbam
