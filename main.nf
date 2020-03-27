@@ -530,7 +530,7 @@ bam_channel = branched_input.bam.map {
 ch_input_for_convertbam = Channel.empty()
 
 bam_channel
-  .into { ch_input_for_convertbam; ch_input_for_indexbam; ch_input_for_skipconvertbam }
+  .into { ch_input_for_convertbam; ch_input_for_indexbam; }
 
 fastq_channel
   .set { ch_input_for_skipconvertbam }
@@ -779,6 +779,7 @@ process convertBam {
 * PREPROCESSING - Index a input BAM if not being converted to FASTQ
 */
 // TODO issue: this is not passed on downstream, presumably because not filling output channels for some reason? Myabe skipping failing?
+// Probably because output channels are only going into now remove index channels! Need to change logic so mixed with standard BAM channels!
 process indexinputbam {
   label 'sc_small'
   tag "$libraryid"
@@ -787,7 +788,7 @@ process indexinputbam {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from ch_input_for_indexbam 
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}"), group, pop, age  into ch_mappingindex_for_skipmapping,ch_filteringindex_for_skiprmdup
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}"), group, pop, age  into ch_indexbam_for_filtering
 
   when: 
   bam != 'NA' && !params.run_convertbam
@@ -1076,7 +1077,7 @@ process bwa {
     file index from bwa_index.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwa, ch_outputindex_from_bwa    
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwa   
 
     script:
     size = "${params.large_ref}" ? '-c' : ''
@@ -1187,7 +1188,7 @@ process bwamem {
     file index from bwa_index_bwamem.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwamem, ch_outputindex_from_bwamem
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwamem
     
     script:
     fasta = "${index}/${bwa_base}"
@@ -1213,18 +1214,13 @@ process bwamem {
 if (!params.skip_mapping) {
     ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm)
         .filter { it =~/.*mapped.bam/ }
+        .mix(ch_indexbam_for_filtering)
         .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; ch_mapping_for_samtools_flagstat } 
 
-    ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
-        .filter { it =~/.*mapped.bam.bai|.*mapped.bam.csi/ }
-          .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
-
 } else {
-    ch_adapterremoval_for_skipmap
+    ch_adapterremoval_for_skipmap.mix(ch_indexbam_for_filtering)
         .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
 
-     ch_mappingindex_for_skipmapping
-        .into {  ch_mappingindex_for_skipfiltering; ch_mappingindex_for_filtering } 
 }
 
 /*
@@ -1433,7 +1429,7 @@ process endorSpy {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(stats), file(poststats), group, pop, age from ch_allflagstats_for_endorspy
 
     output:
-   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_endorspy_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_endorspy_for_multiqc
 
     script:
     prefix = "${libraryid}"
@@ -1469,7 +1465,7 @@ process dedup{
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.hist"), group, pop, age into ch_hist_for_preseq
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_dedup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_dedup, ch_outputindex_from_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_dedup
 
     script:
     prefix="${libraryid}"
@@ -1511,8 +1507,7 @@ process markDup{
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.metrics"), group, pop, age into ch_markdup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_markdup, ch_outputindex_from_markdup
-
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_markdup
 
     script:
     outname = "${bam.baseName}"
@@ -1675,7 +1670,6 @@ process pmdtools {
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_pmdtools
     file "*.cpg.range*.txt"
-    file "*.{bai,csi}" into ch_outputindex_from_pmdtools
 
     script:
     //Check which treatment for the libraries was used
@@ -1925,16 +1919,16 @@ if (params.additional_vcf_files == '') {
   file fasta from ch_fasta_for_multivcfanalyzer.collect()
 
   output:
-  file 'fullAlignment.fasta.gz' into ch_output_multivcfanalyzer_fullalignment
-  file 'info.txt.gz' into ch_output_multivcfanalyzer_info
-  file 'snpAlignment.fasta.gz' into ch_output_multivcfanalyzer_snpalignment
-  file 'snpAlignmentIncludingRefGenome.fasta.gz' into ch_output_multivcfanalyzer_snpalignmentref
-  file 'snpStatistics.tsv.gz' into ch_output_multivcfanalyzer_snpstatistics
-  file 'snpTable.tsv.gz' into ch_output_multivcfanalyzer_snptable
-  file 'snpTableForSnpEff.tsv.gz' into ch_output_multivcfanalyzer_snptablesnpeff
-  file 'snpTableWithUncertaintyCalls.tsv.gz' into ch_output_multivcfanalyzer_snptableuncertainty
-  file 'structureGenotypes.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypes
-  file 'structureGenotypes_noMissingData-Columns.tsv.gz' into ch_output_multivcfanalyzer_structuregenotypesclean
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('fullAlignment.fasta.gz'), group, pop, age into ch_output_multivcfanalyzer_fullalignment
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('info.txt.gz'), group, pop, age into ch_output_multivcfanalyzer_info
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpAlignment.fasta.gz'), group, pop, age into ch_output_multivcfanalyzer_snpalignment
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpAlignmentIncludingRefGenome.fasta.gz'), group, pop, age into ch_output_multivcfanalyzer_snpalignmentref
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpStatistics.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_snpstatistics
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpTable.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_snptable
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpTableForSnpEff.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_snptablesnpeff
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpTableWithUncertaintyCalls.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_snptableuncertainty
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('structureGenotypes.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_structuregenotypes
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('structureGenotypes_noMissingData-Columns.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_structuregenotypesclean
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
@@ -1986,12 +1980,12 @@ if (params.sexdeterrmine_bedfile == '') {
  process sex_deterrmine {
     label 'sc_small'
     publishDir "${params.outdir}/sex_determination", mode:"copy"
-    
+    // TODO check .collect in script works as expected 
      when:
      params.run_sexdeterrmine
     
      input:
-     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_for_sexdeterrmine.collect()
+     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_for_sexdeterrmine
      file bed from ch_bed_for_sexdeterrmine
 
      output:
@@ -1999,6 +1993,7 @@ if (params.sexdeterrmine_bedfile == '') {
      tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_sexdet_for_multiqc
      
      script:
+     input_bams = bam.collect()
      if (params.sexdeterrmine_bedfile == '') {
          """
          for i in *.bam; do
@@ -2047,6 +2042,7 @@ if (params.sexdeterrmine_bedfile == '') {
     """
  }
  
+// TODO for collection issue, see sarek https://github.com/nf-core/sarek/blob/b952fe2b3fcd3541237c9f4a9f27e1852f537967/main.nf#L2011
 process print_nuclear_contamination{
     label 'sc_tiny'
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
