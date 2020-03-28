@@ -1392,7 +1392,7 @@ process samtools_flagstat_after_filter {
 
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
-    .join(ch_bam_filtered_flagstat_for_endorspy)
+    .join(ch_bam_filtered_flagstat_for_endorspy, by: [0,1,2,3,4,5,6,8,9,10])
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
@@ -1406,13 +1406,13 @@ if (params.run_bam_filtering) {
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]
-        def stats = file(it[7])
-        def poststats = file('dummy_postfilterflagstat.stats')
         def group = it[8]
         def pop = it[9]
-        def age = it[10]
+        def age = it[10]        
+        def stats = file(it[7])
+        def poststats = file('dummy_postfilterflagstat.stats')
 
-      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats, group, pop, age] }
+      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, group, pop, age, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
 }
 
@@ -1426,7 +1426,7 @@ process endorSpy {
     !params.skip_mapping
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(stats), file(poststats), group, pop, age from ch_allflagstats_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, group, pop, age, file(stats), file(poststats) from ch_allflagstats_for_endorspy
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_endorspy_for_multiqc
@@ -1976,24 +1976,23 @@ if (params.sexdeterrmine_bedfile == '') {
 }
 
 
-
+// As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
+// TODO Check works as epxected
  process sex_deterrmine {
     label 'sc_small'
     publishDir "${params.outdir}/sex_determination", mode:"copy"
-    // TODO check .collect in script works as expected 
      when:
      params.run_sexdeterrmine
     
      input:
-     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_for_sexdeterrmine
+     file bam from ch_for_sexdeterrmine.map { def file = file(it[7]) [ file ] }.collect()
      file bed from ch_bed_for_sexdeterrmine
 
      output:
-     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("SexDet.txt"), group, pop, age
-     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_sexdet_for_multiqc
+     file "SexDet.txt"
+     file "*.json" into ch_sexdet_for_multiqc
      
      script:
-     input_bams = bam.collect()
      if (params.sexdeterrmine_bedfile == '') {
          """
          for i in *.bam; do
@@ -2016,6 +2015,8 @@ if (params.sexdeterrmine_bedfile == '') {
  /* 
   * Step 16 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
   */
+
+
  process nuclear_contamination{
     label 'sc_small'
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
@@ -2042,7 +2043,8 @@ if (params.sexdeterrmine_bedfile == '') {
     """
  }
  
-// TODO for collection issue, see sarek https://github.com/nf-core/sarek/blob/b952fe2b3fcd3541237c9f4a9f27e1852f537967/main.nf#L2011
+// As we collect all files for a single print_nuclear_contamination run, we DO NOT use the normal input/output tuple
+// TODO Check works as epxected
 process print_nuclear_contamination{
     label 'sc_tiny'
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
@@ -2051,10 +2053,10 @@ process print_nuclear_contamination{
     params.run_nuclear_contamination
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val('Contam'), group, pop, age from ch_from_nuclear_contamination.collect()
+    val 'Contam' from ch_from_nuclear_contamination.map { def file = file(it[7]) [ file ] }.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('nuclear_contamination.txt'), group, pop, age
+    file 'nuclear_contamination.txt'
 
     script:
     """
@@ -2068,31 +2070,38 @@ process print_nuclear_contamination{
 
 if (params.metagenomic_tool == 'malt') {
   ch_bam_filtering_for_metagenomic
-  .set {ch_bam_filtering_for_metagenomic_malt}
+.map { it ->   
+        def file = file(it[7])
+      [ file ] }
+    .collect()
+    .set {ch_bam_filtering_for_metagenomic_malt}
 
   ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
 } else if (params.metagenomic_tool == 'kraken') {
   ch_bam_filtering_for_metagenomic
-  .set {ch_bam_filtering_for_metagenomic_kraken}
+    .map { it ->   
+          def file = file(it[7])
+        [ file ] }
+    .collect()
+    .set {ch_bam_filtering_for_metagenomic_kraken}
 
   ch_bam_filtering_for_metagenomic_malt = Channel.empty()
 }
 
-// params.metagenomic_tool == 'malt' ? ch_bam_filtering_for_metagenomic.set {ch_bam_filtering_for_metagenomic_malt} : ch_bam_filtering_for_metagenomic.set {ch_bam_filtering_for_metagenomic_kraken}
-
+// As we collect all files for a single MALT run, we DO NOT use the normal input/output tuple
 process malt {
-  label 'mc_huge'
+  label 'mc_small'
   publishDir "${params.outdir}/metagenomic_classification/malt", mode:"copy"
 
   when:
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(fastqs), group, pop, age from ch_bam_filtering_for_metagenomic_malt.collect()
+  file fastqs from ch_bam_filtering_for_metagenomic_malt
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.rma6"), group, pop, age into ch_rma_for_maltExtract
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("malt.log"), group, pop, age
+  file "*.rma6" into ch_rma_for_maltExtract
+  file "malt.log"
 
   script:
   if ("${params.malt_min_support_mode}" == "percent") {
@@ -2133,6 +2142,7 @@ process malt {
 
 }
 
+
 // Create input channel for MaltExtract taxon list, to allow downloading of taxon list
 if (params.maltextract_taxon_list== '') {
     ch_taxonlist_for_maltextract = Channel.empty()
@@ -2140,6 +2150,8 @@ if (params.maltextract_taxon_list== '') {
     ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list)
 }
 
+// As we collect all files for a single MALT extract run, we DO NOT use the normal input/output tuple
+// TODO Check works as epxected
 process maltextract {
   label 'mc_large'
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
@@ -2148,7 +2160,7 @@ process maltextract {
   params.run_maltextract && params.metagenomic_tool == 'malt'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(rma6), group, pop, age from ch_rma_for_maltExtract.collect()
+  file rma6 from ch_rma_for_maltExtract.collect()
   file taxon_list from ch_taxonlist_for_maltextract
   
   output:
@@ -2211,7 +2223,7 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
     ch_krakendb = Channel.empty()
 }
 
-
+// TODO Check this works with collected input
 process kraken {
   tag "$prefix"
   label 'mc_huge'
