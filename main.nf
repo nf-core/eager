@@ -1536,14 +1536,14 @@ Step 6: Preseq
 
 process preseq {
     label 'sc_tiny'
-    tag "${input.baseName}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/preseq", mode: 'copy'
 
     when:
     !params.skip_preseq
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input), group, pop, age from (params.skip_deduplication ? ch_rmdup_for_preseq : ch_hist_for_preseq )
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input), group, pop, age from (params.skip_deduplication ? ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7,9,10,11] } : ch_hist_for_preseq )
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${input.baseName}.ccurve"), group, pop, age into ch_preseq_for_multiqc
@@ -1787,24 +1787,24 @@ if ( params.gatk_ug_jar != '' ) {
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
-    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals ${defaultbasequalities}
-    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam ${defaultbasequalities}
-    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
-    pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
+    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
+    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
+    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
   else if (params.gatk_dbsnp != '')
     """
     samtools index ${bam}
-    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${bam}.intervals ${defaultbasequalities}
-    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${bam}.intervals -o ${bam}.realign.bam ${defaultbasequalities}
-    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${bam}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
-    pigz -p ${task.cpus} ${bam}.unifiedgenotyper.vcf
+    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
+    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
+    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
  }
 
   process genotyping_hc {
   label 'mc_small'
-  tag "${prefix}"
+  tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
   when:
@@ -1824,13 +1824,13 @@ if ( params.gatk_ug_jar != '' ) {
   if (params.gatk_dbsnp == '')
     """
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
+    pigz -p ${task.cpus} ${samplename}.haplotypecaller.vcf
     """
 
   else if (params.gatk_dbsnp != '')
     """
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${bam}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${bam}.haplotypecaller.vcf
+    pigz -p ${task.cpus} ${samplename}.haplotypecaller.vcf
     """
  }
 
@@ -1839,7 +1839,7 @@ if ( params.gatk_ug_jar != '' ) {
  */ 
  process genotyping_freebayes {
   label 'mc_small'
-  tag "${prefix}"
+  tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
   when:
@@ -1858,8 +1858,8 @@ if ( params.gatk_ug_jar != '' ) {
   prefix="${bam.baseName}"
   skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
   """
-  freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${bam.baseName}.freebayes.vcf
-  pigz -p ${task.cpus} ${bam.baseName}.freebayes.vcf
+  freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${samplename}.freebayes.vcf
+  pigz -p ${task.cpus} ${samplename}.freebayes.vcf
   """
  }
 
@@ -1869,7 +1869,7 @@ if ( params.gatk_ug_jar != '' ) {
 
 process vcf2genome {
   label  'mc_small'
-  tag "${prefix}"
+  tag "${samplename}"
   publishDir "${params.outdir}/consensus_sequence", mode: 'copy'
 
   when: 
@@ -1883,8 +1883,7 @@ process vcf2genome {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fasta.gz"), group, pop, age
 
   script:
-  prefix = "${vcf.baseName}"
-  out = "${params.vcf2genome_outfile}" == '' ? "${prefix}.fasta" : "${params.vcf2genome_outfile}"
+  out = "${params.vcf2genome_outfile}" == '' ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
   fasta_head = "${params.vcf2genome_header}" == '' ? "${prefix}" : "${params.vcf2genome_header}"
   """
   pigz -f -d -p ${task.cpus} *.vcf.gz
@@ -1901,10 +1900,10 @@ process vcf2genome {
 // TODO: Might need to collect all VCF entries from map
 // Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
 if (params.additional_vcf_files == '') {
-    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.collect()
+    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[7] }.collect()
 } else {
     ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files)
-    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.collect().mix(ch_extravcfs_for_multivcfanalyzer)
+    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it [7] }.collect().mix(ch_extravcfs_for_multivcfanalyzer)
 }
 
  process multivcfanalyzer {
@@ -1959,7 +1958,7 @@ if (params.additional_vcf_files == '') {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_mtnucratio_for_multiqc
 
   script:
-  prefix="${bam.baseName}"
+  prefix="${samplename}"
   """
   mtnucratio ${bam} "${params.mtnucratio_header}"
   """
@@ -1977,7 +1976,6 @@ if (params.sexdeterrmine_bedfile == '') {
 
 
 // As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
-// TODO Check works as epxected
  process sex_deterrmine {
     label 'sc_small'
     publishDir "${params.outdir}/sex_determination", mode:"copy"
@@ -1985,7 +1983,7 @@ if (params.sexdeterrmine_bedfile == '') {
      params.run_sexdeterrmine
     
      input:
-     file bam from ch_for_sexdeterrmine.map { def file = file(it[7]) [ file ] }.collect()
+     file bam from ch_for_sexdeterrmine.map { it[7] }.collect()
      file bed from ch_bed_for_sexdeterrmine
 
      output:
@@ -2019,6 +2017,7 @@ if (params.sexdeterrmine_bedfile == '') {
 
  process nuclear_contamination{
     label 'sc_small'
+    tag "${prefix}"
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
     validExitStatus 0,134
     /*
@@ -2036,6 +2035,7 @@ if (params.sexdeterrmine_bedfile == '') {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('*.X.contamination.out'), group, pop, age into ch_from_nuclear_contamination
 
     script:
+    prefix="${samplename}"
     """
     samtools index ${input}
     angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${input.baseName}.doCounts
@@ -2044,7 +2044,7 @@ if (params.sexdeterrmine_bedfile == '') {
  }
  
 // As we collect all files for a single print_nuclear_contamination run, we DO NOT use the normal input/output tuple
-// TODO Check works as epxected
+// TODO Check works as expected
 process print_nuclear_contamination{
     label 'sc_tiny'
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
@@ -2053,7 +2053,7 @@ process print_nuclear_contamination{
     params.run_nuclear_contamination
 
     input:
-    val 'Contam' from ch_from_nuclear_contamination.map { def file = file(it[7]) [ file ] }.collect()
+    val 'Contam' from ch_from_nuclear_contamination.map { it[7] }.collect()
 
     output:
     file 'nuclear_contamination.txt'
@@ -2068,21 +2068,16 @@ process print_nuclear_contamination{
  * Step 17-A: Metagenomic screening of unmapped reads: MALT
 */
 
+// As we collect all files for a all metagenomic runs, we DO NOT use the normal input/output tuple!
+
+
 if (params.metagenomic_tool == 'malt') {
   ch_bam_filtering_for_metagenomic
-.map { it ->   
-        def file = file(it[7])
-      [ file ] }
-    .collect()
     .set {ch_bam_filtering_for_metagenomic_malt}
 
   ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
 } else if (params.metagenomic_tool == 'kraken') {
   ch_bam_filtering_for_metagenomic
-    .map { it ->   
-          def file = file(it[7])
-        [ file ] }
-    .collect()
     .set {ch_bam_filtering_for_metagenomic_kraken}
 
   ch_bam_filtering_for_metagenomic_malt = Channel.empty()
@@ -2097,7 +2092,7 @@ process malt {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
 
   input:
-  file fastqs from ch_bam_filtering_for_metagenomic_malt
+  file fastqs from ch_bam_filtering_for_metagenomic_malt.map { it[7] }.collect()
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
@@ -2151,7 +2146,7 @@ if (params.maltextract_taxon_list== '') {
 }
 
 // As we collect all files for a single MALT extract run, we DO NOT use the normal input/output tuple
-// TODO Check works as epxected
+// TODO Check works as expected
 process maltextract {
   label 'mc_large'
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
@@ -2233,13 +2228,13 @@ process kraken {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(fastq), group, pop, age from ch_bam_filtering_for_metagenomic_kraken
+  file(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }.collect()
   file(krakendb) from ch_krakendb
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.kraken.out"), group, pop, age into ch_kraken_out
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val(prefix), file("*.kreport"), group, pop, age into ch_kraken_report
-  
+  file "*.kraken.out" into ch_kraken_out
+  tuple val(prefix), file("*.kreport") into ch_kraken_report
+
   
   script:
   prefix = fastq.toString().tokenize('.')[0]
@@ -2256,10 +2251,10 @@ process kraken_parse {
   errorStrategy 'ignore'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val(name), file(kraken_r),  group, pop, age from ch_kraken_report
+  tuple val(name), file(kraken_r) from ch_kraken_report
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val(name), file('*.kraken_parsed.csv'), group, pop, age into ch_kraken_parsed
+  tuple val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
 
   script:
   out = name+".kraken_parsed.csv"
@@ -2272,10 +2267,10 @@ process kraken_merge {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, val(name), file(csv_count), group, pop, age from ch_kraken_parsed.collect()
+  tuple val(name), file(csv_count) from ch_kraken_parsed.collect()
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('kraken_count_table.csv'), group, pop, age
+  file('kraken_count_table.csv')
 
   script:
   out = "kraken_count_table.csv"
