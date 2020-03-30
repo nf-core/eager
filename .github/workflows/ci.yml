@@ -30,7 +30,7 @@ jobs:
         run: |
           docker pull nfcore/eager:dev
           docker tag nfcore/eager:dev nfcore/eager:dev
-      - name:  BASIC Run the basic pipeline with the test profileBasic workflow, PE/SE, bwa aln
+      - name:  BASIC Run the basic pipeline with the test profile with, PE/SE, bwa aln
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }} --save_reference
       - name: REFERENCE Basic workflow, with supplied indices
@@ -38,7 +38,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }} --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
       - name: REFERENCE Run the basic pipeline with FastA reference with `fna` extension
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_fna,docker ${{ matrix.endedness }}
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker ${{ matrix.endedness }}
       - name: REFERENCE Test with zipped reference input
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }} --fasta 'https://github.com/nf-core/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
@@ -50,7 +50,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --paired_end --skip_collapse
       - name: ADAPTERREMOVAL Test paired end collapsing but no trimming
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_pretrim,docker --paired_end --skip_trim
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_pretrim,docker --paired_end --skip_trim
       - name: ADAPTERREMOVAL Run the basic pipeline with paired end data without adapterRemoval
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }} --skip_adapterremoval
@@ -75,6 +75,9 @@ jobs:
       - name: BAM_FILTERING Run basic mapping pipeline with mapping quality filtering, and unmapped export
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }} --run_bam_filtering --bam_mapping_quality_threshold 37 --bam_discard_umapped --bam_unmapped_type 'fastq'
+      - name: DEDUPLICATION Test with markduplicats
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }} --dedupper 'markduplicates'
       - name: GENOTYPING_HC Test running GATK HaplotypeCaller
         run: |
          nextflow run ${GITHUB_WORKSPACE} -profile test_fna,docker ${{ matrix.endedness }}  --dedupper 'dedup' --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
@@ -83,7 +86,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }}  --dedupper 'dedup' --run_genotyping --genotyping_tool 'freebayes'
       - name: SKIPPING Test checking all skip steps work i.e. input bam, skipping straight to genotyping
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_bam,docker --bam  --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --bam  --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
       - name: TRIMBAM Test bamutils works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }}  --dedupper 'dedup' --run_trim_bam
@@ -105,10 +108,10 @@ jobs:
          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }}  --dedupper 'dedup' --run_genotyping --run_trim_bam --genotyping_source 'trimmed' --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
       - name: BAM_INPUT Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_bam,docker --bam --skip_adapterremoval --run_convertbam
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --bam --skip_adapterremoval --run_convertbam
       - name: BAM_INPUT Run the basic pipeline with the bam input profile, convert to FASTQ for adapterremoval test and downstream
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_bam,docker --bam --run_convertbam
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --bam --run_convertbam
       - name: METAGENOMIC Download MALT database
         run: |
           mkdir -p databases/malt
@@ -126,13 +129,13 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }} --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles "/home/runner/work/eager/eager/databases/maltextract/" --maltextract_taxon_list 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
       - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into Kraken
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_kraken,docker ${{ matrix.endedness }} --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_kraken,docker ${{ matrix.endedness }} --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq'
       - name: SEXDETERMINATION Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --run_sexdeterrmine
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --run_sexdeterrmine
       - name: NUCLEAR CONTAMINATION Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nuclear contamination estimation
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --run_nuclear_contamination
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --run_nuclear_contamination
       - name: MTNUCRATIO Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nmtnucratio
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_mtnucratio
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --bam --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_mtnucratio
