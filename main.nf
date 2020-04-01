@@ -753,9 +753,6 @@ ch_dict_for_skipdict.mix(ch_seq_dict)
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
 */ 
 
-// TODO separate BAM channel should handle this, if params.bamconvert is set, all BAMs are converted to FASTQ and then mixed with the channel that provides the FASTQ files already
-// TODO STOPPED HERE. If that param is not provided, we can simply mix channels after mapping, to provide the same type of data. Need to find out whether we merge before DeDup or after DeDup. Different lanes, same library ID = merge together, then DeDup. Different lanes, different library ID = DeDup first, then merge together (PCR is done on library, not lanes!)
-
 process convertBam {
     label 'mc_small'
     tag "$libraryid"
@@ -778,8 +775,7 @@ process convertBam {
 /*
 * PREPROCESSING - Index a input BAM if not being converted to FASTQ
 */
-// TODO issue: this is not passed on downstream, presumably because not filling output channels for some reason? Myabe skipping failing?
-// Probably because output channels are only going into now remove index channels! Need to change logic so mixed with standard BAM channels!
+
 process indexinputbam {
   label 'sc_small'
   tag "$libraryid"
@@ -1252,7 +1248,6 @@ process samtools_flagstat {
 /*
 * Step 4a - Keep unmapped/remove unmapped reads
 */
-// TODO: Check works when turned on
 process samtools_filter {
     label 'mc_medium'
     tag "$prefix"
@@ -1313,7 +1308,6 @@ process samtools_filter {
     }  
 }
 
-// TODO: remove all *index channels (counts for all places)
 // samtools_filter bypass 
 if (params.run_bam_filtering) {
     ch_mapping_for_skipfiltering.mix(ch_output_from_filtering)
@@ -1416,7 +1410,6 @@ if (params.run_bam_filtering) {
     .set{ ch_allflagstats_for_endorspy }
 }
 
-// TODO Fix output
 process endorSpy {
     label 'sc_tiny'
     tag "$prefix"
@@ -1449,7 +1442,6 @@ process endorSpy {
 /*
 Step 5a: DeDup
 */ 
-// TODO: Fix output
 process dedup{
     label 'mc_small'
     tag "${outname}"
@@ -2044,7 +2036,6 @@ if (params.sexdeterrmine_bedfile == '') {
  }
  
 // As we collect all files for a single print_nuclear_contamination run, we DO NOT use the normal input/output tuple
-// TODO Check works as expected
 process print_nuclear_contamination{
     label 'sc_tiny'
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
