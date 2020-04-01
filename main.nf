@@ -1284,6 +1284,10 @@ if (params.run_bam_filtering) {
 }
 
 
+ch_filtering_for_stripfastq
+  .map {it -> [it.baseName.tokenize('.')[0], it]}
+  .set {ch_indexed_filtering_for_stripfastq}
+
 
 
 process strip_input_fastq {
@@ -1295,8 +1299,7 @@ process strip_input_fastq {
     params.strip_input_fastq
 
     input: 
-    set val(name), file(fq) from ch_convertbam_for_stripfastq
-    file bam from ch_filtering_for_stripfastq
+    set val(name), file(fq), file(bam) from ch_convertbam_for_stripfastq.join(ch_indexed_filtering_for_stripfastq)
 
     output:
     file "*.fq.gz" into ch_output_from_stripfastq
