@@ -31,6 +31,8 @@ regexes = {
     'sexdeterrmine':['v_sexdeterrmine.txt',r"(\S+)"],
     'MTNucRatioCalculator':['v_mtnucratiocalculator.txt',r"Version: (\S+)"],
     'VCF2genome':['v_vcf2genome.txt', r"VCF2Genome \(v. ([0-9].[0-9]+) "],
+    'endorS.py':['v_endorSpy.txt', r"endorS.py (\S+)"],
+    'kraken':['v_kraken.txt', r"Kraken version (\S+)"]
 }
 
 results = OrderedDict()
@@ -42,6 +44,7 @@ results['fastP'] = '<span style="color:#999999;\">N/A</span>'
 results['BWA'] = '<span style="color:#999999;\">N/A</span>'
 results['circulargenerator'] = '<span style="color:#999999;\">N/A</span>'
 results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
+results['endorS.py'] = '<span style="color:#999999;\">N/A</span>'
 results['DeDup'] = '<span style="color:#999999;\">N/A</span>'
 results['Picard MarkDuplicates'] = '<span style="color:#999999;\">N/A</span>'
 results['Qualimap'] = '<span style="color:#999999;\">N/A</span>'
@@ -59,19 +62,23 @@ results['angsd'] = '<span style="color:#999999;\">N/A</span>'
 results['sexdeterrmine'] = '<span style="color:#999999;\">N/A</span>'
 results['multivcfanalyzer'] = '<span style="color:#999999;\">N/A</span>'
 results['malt'] = '<span style="color:#999999;\">N/A</span>'
+results['kraken'] = '<span style="color:#999999;\">N/A</span>'
 results['maltextract'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
-    with open(v[0]) as x:
-        versions = x.read()
-        match = re.search(v[1], versions)
-        if match:
-            results[k] = "v{}".format(match.group(1))
+    try:
+        with open(v[0]) as x:
+            versions = x.read()
+            match = re.search(v[1], versions)
+            if match:
+                results[k] = "v{}".format(match.group(1))
+    except IOError:
+        results[k] = False
 
 # Remove software set to false in results
-for k in results:
+for k in list(results):
     if not results[k]:
         del(results[k])
 

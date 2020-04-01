@@ -2,41 +2,183 @@
 
 ## Table of contents
 
-- [nf-core/eager: Usage](#nf-coreeager-usage)
-  - [Table of contents](#table-of-contents)
-  - [General Nextflow info](#general-nextflow-info)
-    - [Help Message](#help-message)
-  - [Running the pipeline](#running-the-pipeline)
-    - [Updating the pipeline](#updating-the-pipeline)
-    - [Mandatory Arguments](#mandatory-arguments)
-    - [Output Directories](#output-directories)
-    - [Optional Reference Options](#optional-reference-options)
-    - [Generating Fresh Indices](#generating-fresh-indices)
-    - [Premade Indices](#premade-indices)
-    - [Other run specific parameters](#other-run-specific-parameters)
-  - [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
-    - [Step skipping parameters](#step-skipping-parameters)
-    - [BAM Conversion Options](#bam-conversion-options)
-    - [Complexity Filtering Options](#complexity-filtering-options)
-    - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
-    - [Read Mapping Parameters](#read-mapping-parameters)
-    - [Mapped Reads Stripping](#mapped-reads-stripping)
-    - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
-    - [Read DeDuplication Parameters](#read-deduplication-parameters)
-    - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
-    - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
-    - [BAM Trimming Parameters](#bam-trimming-parameters)
-    - [Captured Library Parameters](#captured-library-parameters)
-    - [Feature Annotation Statistics](#feature-annotation-statistics)
-    - [Genotyping Parameters](#genotyping-parameters)
-    - [Consensus Sequence Generation](#consensus-sequence-generation)
-    - [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
-    - [SNP Table Generation](#snp-table-generation)
-    - [Human Sex Determination](#human-sex-determination)
-    - [Human Nuclear Contamination](#human-nuclear-contamination)
-    - [Metagenomic Screening](#metagenomic-screening)
-    - [Automatic Resubmission](#automatic-resubmission)
-    - [Clean up](#clean-up)
+* [nf-core/eager: Usage](#nf-coreeager-usage)
+  * [Table of contents](#table-of-contents)
+  * [General Nextflow info](#general-nextflow-info)
+    * [Automatic Resubmission](#automatic-resubmission)
+    * [Help Message](#help-message)
+  * [Running the pipeline](#running-the-pipeline)
+    * [Updating the pipeline](#updating-the-pipeline)
+    * [Mandatory Arguments](#mandatory-arguments)
+      * [`-profile`](#-profile)
+      * [`--reads`](#--reads)
+      * [`--single_end`](#--single_end)
+      * [`--paired_end`](#--paired_end)
+      * [`--bam`](#--bam)
+      * [`--input`](#--input)
+      * [`--fasta`](#--fasta)
+      * [`--genome` (using iGenomes)](#--genome-using-igenomes)
+    * [Output Directories](#output-directories)
+      * [`--outdir`](#--outdir)
+      * [`-w / -work-dir`](#-w---work-dir)
+    * [Optional Reference Options](#optional-reference-options)
+      * [`--large_ref`](#--large_ref)
+      * [`--save_reference`](#--save_reference)
+      * [`--bwa_index`](#--bwa_index)
+      * [`--seq_dict`](#--seq_dict)
+      * [`--fasta_index`](#--fasta_index)
+    * [Other run specific parameters](#other-run-specific-parameters)
+      * [`-r`](#-r)
+      * [`--max_memory`](#--max_memory)
+      * [`--max_time`](#--max_time)
+      * [`--max_cpus`](#--max_cpus)
+      * [`--email`](#--email)
+      * [`-name`](#-name)
+      * [`-resume`](#-resume)
+      * [`-c`](#-c)
+      * [`--monochrome_logs`](#--monochrome_logs)
+      * [`--multiqc_config`](#--multiqc_config)
+      * [`--custom_config_version`](#--custom_config_version)
+      * [`--plaintext_email`](#--plaintext_email)
+  * [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
+    * [Step skipping parameters](#step-skipping-parameters)
+      * [`--skip_fastqc`](#--skip_fastqc)
+      * [`--skip_adapterremoval`](#--skip_adapterremoval)
+      * [`--skip_mapping`](#--skip_mapping)
+      * [`--skip_preseq`](#--skip_preseq)
+      * [`--skip_deduplication`](#--skip_deduplication)
+      * [`--skip_damage_calculation`](#--skip_damage_calculation)
+      * [`--skip_qualimap`](#--skip_qualimap)
+    * [BAM Conversion Options](#bam-conversion-options)
+      * [`--run_convertbam`](#--run_convertbam)
+    * [Complexity Filtering Options](#complexity-filtering-options)
+      * [`--complexity_filter_poly_g`](#--complexity_filter_poly_g)
+      * [`--complexity_filter_poly_g_min`](#--complexity_filter_poly_g_min)
+    * [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
+      * [`--clip_forward_adaptor`](#--clip_forward_adaptor)
+      * [`--clip_reverse_adaptor`](#--clip_reverse_adaptor)
+      * [`--clip_readlength` 30](#--clip_readlength-30)
+      * [`--clip_min_read_quality` 20](#--clip_min_read_quality-20)
+      * [`--clip_min_adap_overlap` 1](#--clip_min_adap_overlap-1)
+      * [`--skip_collapse`](#--skip_collapse)
+      * [`--skip_trim`](#--skip_trim)
+      * [`--preserve5p`](#--preserve5p)
+      * [`--mergedonly`](#--mergedonly)
+    * [Read Mapping Parameters](#read-mapping-parameters)
+      * [`--mapper`](#--mapper)
+      * [BWA (default)](#bwa-default)
+        * [`--bwaalnn`](#--bwaalnn)
+        * [`--bwaalnk`](#--bwaalnk)
+        * [`--bwaalnl`](#--bwaalnl)
+      * [CircularMapper](#circularmapper)
+        * [`--circularextension`](#--circularextension)
+        * [`--circulartarget`](#--circulartarget)
+        * [`--circularfilter`](#--circularfilter)
+    * [Mapped Reads Stripping](#mapped-reads-stripping)
+      * [`--strip_input_fastq`](#--strip_input_fastq)
+      * [`--strip_mode`](#--strip_mode)
+    * [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
+      * [`--run_bam_filtering`](#--run_bam_filtering)
+      * [`--bam_discard_unmapped`](#--bam_discard_unmapped)
+      * [`--bam_unmapped_type`](#--bam_unmapped_type)
+      * [`--bam_mapping_quality_threshold`](#--bam_mapping_quality_threshold)
+    * [Read DeDuplication Parameters](#read-deduplication-parameters)
+      * [`--dedupper`](#--dedupper)
+      * [`--dedup_all_merged`](#--dedup_all_merged)
+    * [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
+      * [`--preseq_step_size`](#--preseq_step_size)
+    * [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
+      * [`--damageprofiler_length`](#--damageprofiler_length)
+      * [`--damageprofiler_threshold`](#--damageprofiler_threshold)
+      * [`--damageprofiler_yaxis`](#--damageprofiler_yaxis)
+      * [`--run_pmdtools`](#--run_pmdtools)
+      * [`--udg` false](#--udg-false)
+      * [`--pmd_udg_type` \`half`](#--pmd_udg_type-half)
+      * [`--pmdtools_range`](#--pmdtools_range)
+      * [`--pmdtools_threshold`](#--pmdtools_threshold)
+      * [`--pmdtools_reference_mask`](#--pmdtools_reference_mask)
+      * [`--pmdtools_max_reads`](#--pmdtools_max_reads)
+    * [BAM Trimming Parameters](#bam-trimming-parameters)
+      * [`--run_trim_bam`](#--run_trim_bam)
+      * [`--bamutils_clip_left` / `--bamutils_clip_right`](#--bamutils_clip_left----bamutils_clip_right)
+      * [`--bamutils_softclip`](#--bamutils_softclip)
+    * [Captured Library Parameters](#captured-library-parameters)
+      * [`--snpcapture` false](#--snpcapture-false)
+      * [`--bedfile`](#--bedfile)
+    * [Feature Annotation Statistics](#feature-annotation-statistics)
+      * [`--run_bedtools_coverage`](#--run_bedtools_coverage)
+      * [`--anno_file`](#--anno_file)
+    * [Genotyping Parameters](#genotyping-parameters)
+      * [`--run_genotyping`](#--run_genotyping)
+      * [`--genotyping_tool`](#--genotyping_tool)
+      * [`--genotyping_source`](#--genotyping_source)
+      * [`--gatk_ug_jar`](#--gatk_ug_jar)
+      * [`--gatk_call_conf`](#--gatk_call_conf)
+      * [`--gatk_ploidy`](#--gatk_ploidy)
+      * [`--gatk_dbsnp`](#--gatk_dbsnp)
+      * [`--gatk_ug_out_mode`](#--gatk_ug_out_mode)
+      * [`--gatk_hc_out_mode`](#--gatk_hc_out_mode)
+      * [`--gatk_ug_genotype_model`](#--gatk_ug_genotype_model)
+      * [`--gatk_hc_emitrefconf`](#--gatk_hc_emitrefconf)
+      * [`--gatk_downsample`](#--gatk_downsample)
+      * [`--gatk_ug_gatk_ug_defaultbasequalities`](#--gatk_ug_gatk_ug_defaultbasequalities)
+      * [`--freebayes_C`](#--freebayes_c)
+      * [`--freebayes_g`](#--freebayes_g)
+      * [`--freebayes_p`](#--freebayes_p)
+    * [Consensus Sequence Generation](#consensus-sequence-generation)
+      * [`--run_vcf2genome`](#--run_vcf2genome)
+      * [`--vcf2genome_outfile`](#--vcf2genome_outfile)
+      * [`--vcf2genome_header`](#--vcf2genome_header)
+      * [`--vcf2genome_minc`](#--vcf2genome_minc)
+      * [`--vcf2genome_minq`](#--vcf2genome_minq)
+      * [`--vcf2genome_minfreq`](#--vcf2genome_minfreq)
+    * [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
+      * [`--run_mtnucratio`](#--run_mtnucratio)
+      * [`--mtnucratio_header`](#--mtnucratio_header)
+    * [SNP Table Generation](#snp-table-generation)
+      * [`--run_multivcfanalyzer`](#--run_multivcfanalyzer)
+      * [`--write_allele_frequencies`](#--write_allele_frequencies)
+      * [`--min_genotype_quality`](#--min_genotype_quality)
+      * [`--min_base_coverage`](#--min_base_coverage)
+      * [`--min_allele_freq_hom`](#--min_allele_freq_hom)
+      * [`--min_allele_freq_het`](#--min_allele_freq_het)
+      * [`--additional_vcf_files`](#--additional_vcf_files)
+      * [`--reference_gff_annotations`](#--reference_gff_annotations)
+      * [`--reference_gff_exclude`](#--reference_gff_exclude)
+      * [`--snp_eff_results`](#--snp_eff_results)
+    * [Human Sex Determination](#human-sex-determination)
+      * [`--run_sexdeterrmine`](#--run_sexdeterrmine)
+      * [`--sexdeterrmine_bedfile`](#--sexdeterrmine_bedfile)
+    * [Human Nuclear Contamination](#human-nuclear-contamination)
+      * [`--run_nuclear_contamination`](#--run_nuclear_contamination)
+      * [`--contamination_chrom_name`](#--contamination_chrom_name)
+    * [Metagenomic Screening](#metagenomic-screening)
+      * [`--run_metagenomic_screening`](#--run_metagenomic_screening)
+      * [`--metagenomic_tool`](#--metagenomic_tool)
+      * [`--metagenomic_min_support_reads`](#--metagenomic_min_support_reads)
+      * [`--database`](#--database)
+      * [`--percent_identity`](#--percent_identity)
+      * [`--malt_mode`](#--malt_mode)
+      * [`--malt_alignment_mode`](#--malt_alignment_mode)
+      * [`--malt_top_percent`](#--malt_top_percent)
+      * [`--malt_min_support_mode`](#--malt_min_support_mode)
+      * [`--malt_min_support_percent`](#--malt_min_support_percent)
+      * [`--malt_max_queries`](#--malt_max_queries)
+      * [`--malt_memory_mode`](#--malt_memory_mode)
+      * [`--run_maltextract`](#--run_maltextract)
+      * [`maltextract_taxon_list`](#maltextract_taxon_list)
+      * [`maltextract_ncbifiles`](#maltextract_ncbifiles)
+      * [`maltextract_filter`](#maltextract_filter)
+      * [`maltextract_toppercent`](#maltextract_toppercent)
+      * [`maltextract_destackingoff`](#maltextract_destackingoff)
+      * [`maltextract_downsamplingoff`](#maltextract_downsamplingoff)
+      * [`maltextract_duplicateremovaloff`](#maltextract_duplicateremovaloff)
+      * [`maltextract_matches`](#maltextract_matches)
+      * [`maltextract_megansummary`](#maltextract_megansummary)
+      * [`maltextract_percentidentity`](#maltextract_percentidentity)
+      * [`maltextract_topalignment`](#maltextract_topalignment)
+      * [`maltextract_singlestranded`](#maltextract_singlestranded)
+  * [Clean up](#clean-up)
 
 ## General Nextflow info
 
@@ -116,44 +258,45 @@ For more details on how to set up your own private profile, please see [installa
 **Basic profiles**
 These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
-- `awsbatch`
-  - A generic configuration profile to be used with AWS Batch.
-- `conda`
-  - A generic configuration profile to be used with [conda](https://conda.io/docs/)
-  - Pulls most software from [Bioconda](https://bioconda.github.io/)
-- `docker`
-  - A generic configuration profile to be used with [Docker](http://docker.com/)
-  - Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
-- `singularity`
-  - A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-  - Pulls software from singularity-hub
-- `test`
-  - A profile with a complete configuration for automated testing
-  - Includes links to test data so needs no other parameters
-- `none`
-  - No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
+* `awsbatch`
+  * A generic configuration profile to be used with AWS Batch.
+* `conda`
+  * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
+  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  * Pulls most software from [Bioconda](https://bioconda.github.io/)
+* `docker`
+  * A generic configuration profile to be used with [Docker](http://docker.com/)
+  * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
+* `singularity`
+  * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
+  * Pulls software from singularity-hub
+* `test`
+  * A profile with a complete configuration for automated testing
+  * Includes links to test data so needs no other parameters
+* `none`
+  * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
 **Institution Specific Profiles**
 These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
-- `uzh`
-  - A profile for the University of Zurich Research Cloud
-  - Loads Singularity and defines appropriate resources for running the pipeline.
-- `binac`
-  - A profile for the BinAC cluster at the University of Tuebingen
-  - Loads Singularity and defines appropriate resources for running the pipeline
-- `shh`
-  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
-  - Loads Singularity and defines appropriate resources for running the pipeline
+* `uzh`
+  * A profile for the University of Zurich Research Cloud
+  * Loads Singularity and defines appropriate resources for running the pipeline.
+* `binac`
+  * A profile for the BinAC cluster at the University of Tuebingen
+  * Loads Singularity and defines appropriate resources for running the pipeline
+* `shh`
+  * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
+  * Loads Singularity and defines appropriate resources for running the pipeline
 
 **Pipeline Specific Institution Profiles**
 There are also pipeline-specific institution profiles. I.e., we can also offer a profile which sets special resource settings to specific steps of the pipeline, which may not apply to all pipelines. This can be seen at [nf-core/configs](https://github.com/nf-core/configs) under [conf/pipelines/eager/](https://github.com/nf-core/configs/tree/master/conf/pipeline/eager).
 
 We currently offer a EAGER specific profile for
 
-- `shh`
-  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
-  - In addition to the nf-core wide profile, this also sets the MALT resources to match our commonly used databases
+* `shh`
+  * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
+  * In addition to the nf-core wide profile, this also sets the MALT resources to match our commonly used databases
 
 Further institutions can be added at [nf-core/configs](https://github.com/nf-core/configs). Please ask the eager developers to add your institution to the list above, if you add one!
 
@@ -186,35 +329,54 @@ If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
 #### `--single_end`
 
-If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
+
+For example:
 
 ```bash
---single_end --reads 'path/to/data/*.fastq'
+--single_end --reads 'path/to/data/*.fastq.gz'
 ```
 
 for a single sample, or
 
 ```bash
---single_end --reads 'path/to/data/*/*.fastq'
+--single_end --reads 'path/to/data/*/*.fastq.gz'
 ```
 
 for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`)
 
-**Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
+**Note**: It is currently not possible to run a mixture of single-end and paired-end files in one run.
 
 #### `--paired_end`
 
-If you have paired-end data, you need to specify `--paired_end` on the command line when you launc hthe pipeline.
+If you have paired-end data, you need to specify `--paired_end` on the command line when you launch the pipeline.
 
-A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
+
+For example:
 
 ```bash
---paired_end --reads '*.fastq'
+--paired_end --reads '*_R{1,2}_*.fastq.gz'
 ```
+
+**Important**: You must always supply a read-grouping with the `{1,2}` system for each sample when using the `--paired_end` flag.
 
 #### `--bam`
 
 Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `--single_end`.
+
+#### `--input`
+
+Specifies a path to a TSV file that contains additional the paths to FASTQ/BAM files and metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , libraries, and samples.
+
+This TSV should look like the following
+
+| Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                                                                                                  | R2                                                                                                                                  | BAM | BAM_Index | Group   | Populations        | Age          |
+|-------------|------------|------|---------|----------|--------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|-----|-----------|---------|--------------------|--------------|
+| JK2782      | JK2782     | 1    | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | NA        | Swabian | Europe,Asia,Africa | Palaeolithic |
+| JK2802      | JK2802     | 2    | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | NA        | Swabian | Europe,Asia,Africa | Palaeolithic |
+
+> :warning: Cells **must not** contain spaces before or after strings, as this will make the TSV unreadable by nextflow. Strings containing spaces should be wrapped in quotes.
 
 #### `--fasta`
 
@@ -226,7 +388,7 @@ For example:
 --fasta '/<path>/<to>/my_reference.fasta'
 ```
 
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--saveReference` flag.
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--save_reference` flag.
 > You must select either a `--fasta` or `--genome`
 
 #### `--genome` (using iGenomes)
@@ -237,15 +399,15 @@ There are 31 different species supported in the iGenomes references. To run the 
 
 You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
 
-- Human
-  - `--genome GRCh37`
-  - `--genome GRCh38`
-- Mouse *
-  - `--genome GRCm38`
-- _Drosophila_ *
-  - `--genome BDGP6`
-- _S. cerevisiae_ *
-  - `--genome 'R64-1-1'`
+* Human
+  * `--genome GRCh37`
+  * `--genome GRCh38`
+* Mouse *
+  * `--genome GRCm38`
+* _Drosophila_ *
+  * `--genome BDGP6`
+* _S. cerevisiae_ *
+  * `--genome 'R64-1-1'`
 
 > \* Not bundled with nf-core eager by default.
 
@@ -286,7 +448,7 @@ Supplying pre-made indices saves time in pipeline execution and is especially ad
 
 This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. Default: off
 
-#### `--saveReference`
+#### `--save_reference`
 
 Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices EAGER2 generates for you will be stored in the `<your_output_dir>/results/reference_genomes` for you.
 
@@ -522,9 +684,9 @@ Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'
 
 More documentation can be seen for each tool under:
 
-- [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
-- [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
-- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
+* [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+* [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+* [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
 
 #### BWA (default)
 
@@ -612,8 +774,8 @@ Can be used to configure the step size of Preseqs `c_curve` method. Can be usefu
 
 More documentation can be seen in the follow links for:
 
-- [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
-- [PMDTools documentation](https://github.com/pontussk/PMDtools)
+* [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
+* [PMDTools documentation](https://github.com/pontussk/PMDtools)
 
 #### `--damageprofiler_length`
 
@@ -622,6 +784,10 @@ Specifies the length filter for DamageProfiler. By default set to `100`.
 #### `--damageprofiler_threshold`
 
 Specifies the length of the read start and end to be considered for profile generation in DamageProfiler. By default set to `15` bases.
+
+#### `--damageprofiler_yaxis`
+
+Specifies what the maximum misincorporation frequency should be displayed as, in the DamageProfiler damage plot. This is set to `0.30` (i.e. 30%) by default as this matches the popular [mapDamage2.0](https://ginolhac.github.io/mapDamage) program. However, the default behaviour of DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any _possible_ damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behaviour can be turned on by specifying the number to `0`. Default: `0.30`.
 
 #### `--run_pmdtools`
 
@@ -633,7 +799,7 @@ Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA da
 
 #### `--pmd_udg_type` \`half`
 
-If you have UDGhalf treated data (Rohland et al 2016), specify `'half'` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the DNA damage assesment will use CpG context only. If you don't specify the parameter at all, the library will be treated as non UDG treated.
+If you have UDGhalf treated data (Rohland et al 2016), specify `'half'` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the DNA damage assessment will use CpG context only. If you don't specify the parameter at all, the library will be treated as non UDG treated.
 
 #### `--pmdtools_range`
 
@@ -645,7 +811,7 @@ Specifies the PMDScore threshold to use in the pipeline when filtering BAM files
 
 #### `--pmdtools_reference_mask`
 
-Can be used to set a reference genome mask for PMDTools.
+Can be used to set a path to a reference genome mask for PMDTools.
 
 #### `--pmdtools_max_reads`
 
@@ -701,9 +867,9 @@ There are options for different genotypers to be used. We suggest you the docume
 
 Documentation for each tool:
 
-- [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
-- [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
-- [FreeBayes](https://github.com/ekg/freebayes)
+* [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
+* [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
+* [FreeBayes](https://github.com/ekg/freebayes)
 
 #### `--run_genotyping`
 
@@ -879,44 +1045,58 @@ The name of the chromosome X in your bam. `'X'` for hs37d5, `'chrX'` for HG19. D
 
 ### Metagenomic Screening
 
-An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract.
+An increasingly common line of analysis in high-throughput aDNA analysis today is simultaenously screening off target reads of the host for endogenous microbial signals - particularly of pathogens. Metagenomic screening is currently offered via MALT with aDNA specific verification via MaltExtract, or Kraken2.
 
 Please note the following:
 
-- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
-  - To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
-- MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
+* MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
+  * To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
+* MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
-> RUNNING MALT ON A SERVER WITH LESS THAN 128GB OF MEMORY SHOULD BE PERFORMED AT YOUR OWN RISK
+> :warning: Running MALT on a server with less than 128GB of memory should be performed at your own risk.
 
-#### -`-run_metagenomic_screening`
+#### `--run_metagenomic_screening`
 
 Turn on the metagenomic screening module.
 
 #### `--metagenomic_tool`
 
-Specify which taxonomic classifier to use. The only option avaliable is currently 'malt'.
+Specify which taxonomic classifier to use. There are two options avaliable:
 
-More can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
-
+* `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
+* `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
+  
 :warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
+
+#### `--metagenomic_min_support_reads`
+
+Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.  
+For malt, this only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
 
 #### `--database`
 
-Specify the path to the _directory_ containing your taxonomic classifer's database.
+Specify the path to the _directory_ containing your taxonomic classifer's database (malt or kraken).
+
+For Kraken2, it can be either the path to the _directory_ or the path to the `.tar.gz` compressed directory of the Kraken2 database.
 
 #### `--percent_identity`
 
 Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85
 
+Only used when `--metagenomic_tool malt` is also supplied
+
 #### `--malt_mode`
 
 Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.
-respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'
+respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'  
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_alignment_mode`
 
 Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: 'SemiGlobal'
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_top_percent`
 
@@ -924,25 +1104,31 @@ Specify the top percent value of the LCA algorthim. From the [MALT manual](http:
 read, only those matches are used for taxonomic placement whose bit disjointScore is within
 10% of the best disjointScore for that read.". Default: 1.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `--malt_min_support_mode`
 
 Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_min_support_percent`
 
 Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.
 
-#### `--malt_min_support_reads`
-
-Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_max_queries`
 
 Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: 100
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `--malt_memory_mode`
 
 How to load the database into memory. Options are 'load', 'page' or 'map'. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. 'page' and 'map' perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote filesystems such as GPFS. Default is 'load'.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `--run_maltextract`
 
@@ -950,53 +1136,79 @@ Turn on MaltExtract for MALT aDNA characteristics authentication of metagenomic 
 
 More can be seen in the [MaltExtract documentation](https://github.com/rhuebler/)
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_taxon_list`
 
 Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_ncbifiles`
 
 Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; avaliable at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_filter`
 
 Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc'.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_toppercent`
 
 Specify percent of top alignments for each read to be considered for each node. Default: 0.01.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_destackingoff`
 
 Turn off destacking. If left on, a read that overlap with another read will be removed (leaving a depth coverage of 1).
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_downsamplingoff`
 
 Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_duplicateremovaloff`
 
 Turn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_matches`
 
 Export alignments of hits for each node in BLAST format. By default turned off.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_megansummary`
 
 Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 #### `maltextract_percentidentity`
 
 Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: 85.0.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_topalignment`
 
 Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.
 
+Only when `--metagenomic_tool malt` is also supplied
+
 #### `maltextract_singlestranded`
 
 Switch damage patterns to single-stranded mode. Default: off.
+
+Only when `--metagenomic_tool malt` is also supplied
 
 ## Clean up
 
@@ -1015,7 +1227,7 @@ nextflow clean -n
 If you're ready, you can then remove the files with
 
 ```bash
-nextflow clean -f
+nextflow clean -f -k
 ```
 
 This will make your system administrator very happy as you will _halve_ the harddrive footprint of the run, so be sure to do this!

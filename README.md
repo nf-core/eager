@@ -2,12 +2,11 @@
 
 **A fully reproducible ancient and modern DNA pipeline in Nextflow and with cloud support.**.
 
+![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20eager%20CI/badge.svg)
+![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
 [![nf-core](https://img.shields.io/badge/nf--core-pipeline-brightgreen.svg)](https://nf-co.re/)
 [![DOI](https://zenodo.org/badge/135918251.svg)](https://zenodo.org/badge/latestdoi/135918251)
-
-[![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/eager/actions)
-[![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/eager/actions)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker Container available](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager/)
@@ -51,7 +50,7 @@ Additional functionality contained by the pipeline currently includes:
 #### aDNA Damage manipulation
 
 * Damage removal/clipping for UDG+/UDG-half treatment protocols (`BamUtil`)
-* Damage reads extraction and assessment (`PMDTools`)
+* Damaged reads extraction and assessment (`PMDTools`)
 
 #### Genotyping
 
@@ -67,7 +66,8 @@ Additional functionality contained by the pipeline currently includes:
 #### Metagenomic Screening
 
 * Taxonomic binner with alignment (`MALT`)
-* aDNA characteristic screening of taxonomically binned data (`MaltExtract`)
+* Taxonomic binner without alignment (`Kraken2`)
+* aDNA characteristic screening of taxonomically binned data from MALT (`MaltExtract`)
 
 ## Quick Start
 
@@ -81,17 +81,17 @@ Additional functionality contained by the pipeline currently includes:
 
 4. Test the pipeline using the provided test data
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda>,test --paired_end
+        nextflow run nf-core/eager -profile <docker/singularity/conda>,test
 
 5. Start running your own ancient DNA analysis!
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
 6. Once your run has completed successfully, clean up the intermediate files.
 
-        nextflow clean -k
+        nextflow clean -f -k
 
-NB. You can see an overview of the run in the MultiQC report located at `<your_output_dir>/MultiQC/multiqc_report.html`
+NB. You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
 
 Modifications to the default pipeline are easily made using various options
 as described in the documentation.
@@ -113,23 +113,36 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 
 ## Credits
 
-This pipeline was written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [James A. Fellows Yates](https://github.com/jfy133),  [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas) and [Aida Andrades Valtueña](https://github.com/aidaanva). Additional ideas and discussion by Raphael Eisenhofer, and Judith Neukamm. If you want to contribute, please open an issue and ask to be added to the project - happy to do so and everyone is welcome to contribute here!
+This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [James A. Fellows Yates](https://github.com/jfy133), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas), [Aida Andrades Valtueña](https://github.com/aidaanva) and [Maxime Garcia](https://github.com/MaxUlysse). If you want to contribute, please open an issue (or even better, a pull request!) and ask to be added to the project - everyone is welcome to contribute here!
 
-## Contributors
+## Authors (alphabetical)
 
-* [James A. Fellows-Yates](https://github.com/jfy133)
-* [Stephen Clayton](https://github.com/sc13-bioinf)
-* [Maxime Borry](https://github.com/maxibor)
-* [Judith Neukamm](https://github.com/JudithNeukamm)
-* [Raphael Eisenhofer](https://github.com/EisenRa)
-* [Maxime Garcia](https://github.com/MaxUlysse)
-* [Luc Venturini](https://github.com/lucventurini)
-* [Hester van Schalkwyk](https://github.com/hesterjvs)
-* [Thiseas C. Lamnidis](https://github.com/TCLamnidis)
 * [Aida Andrades Valtueña](https://github.com/aidaanva)
+* [Alexander Peltzer](https://github.com/apeltzer)
+* [James A. Fellows-Yates](https://github.com/jfy133)
+* [Judith Neukamm](https://github.com/JudithNeukamm)
+* [Maxime Borry](https://github.com/maxibor)
+* [Maxime Garcia](https://github.com/MaxUlysse)
+* [Stephen Clayton](https://github.com/sc13-bioinf)
+* [Thiseas C. Lamnidis](https://github.com/TCLamnidis)
 * [Zandra Fagernäs](https://github.com/ZandraFagernas)
 
-If you've contributed and you're missing in here, please let me know and I'll add you in.
+## Additional Contributors (alphabetical)
+
+Those who have provided conceptual guidance, suggestions, bug reports etc.
+
+* Arielle Munters
+* [Hester van Schalkwyk](https://github.com/hesterjvs)
+* [Irina Velsko](https://github.com/ivelsko)
+* [Katerine Eaton](https://github.com/ktmeaton)
+* [Luc Venturini](https://github.com/lucventurini)
+* Marcel Keller
+* [Pierre Lindenbaum](https://github.com/lindenb)
+* [Pontus Skoglund](https://github.com/pontussk)
+* [Raphael Eisenhofer](https://github.com/EisenRa)
+* [Torsten Günter](https://bitbucket.org/tguenther/)
+
+If you've contributed and you're missing in here, please let us know and we will add you in of course!
 
 ## Tool References
 
@@ -157,3 +170,5 @@ If you've contributed and you're missing in here, please let me know and I'll ad
   * Vågene, Å.J. et al., 2018. Salmonella enterica genomes from victims of a major sixteenth-century epidemic in Mexico. Nature ecology & evolution, 2(3), pp.520–528. Available at: [http://dx.doi.org/10.1038/s41559-017-0446-6](http://dx.doi.org/10.1038/s41559-017-0446-6).
   * Herbig, A. et al., 2016. MALT: Fast alignment and analysis of metagenomic DNA sequence data applied to the Tyrolean Iceman. bioRxiv, p.050559. Available at: [http://biorxiv.org/content/early/2016/04/27/050559](http://biorxiv.org/content/early/2016/04/27/050559).
 * **MaltExtract** Huebler, R. et al., 2019. HOPS: Automated detection and authentication of pathogen DNA in archaeological remains. bioRxiv, p.534198. Available at: [https://www.biorxiv.org/content/10.1101/534198v1?rss=1](https://www.biorxiv.org/content/10.1101/534198v1?rss=1). Download: [https://github.com/rhuebler/MaltExtract](https://github.com/rhuebler/MaltExtract)
+* **Kraken2**     Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. Available at: [https://doi.org/10.1186/s13059-019-1891-0](https://doi.org/10.1186/s13059-019-1891-0). Download: [https://ccb.jhu.edu/software/kraken2/](https://ccb.jhu.edu/software/kraken2/)
+* **endorS.py** Aida Andrades Valtueña (Unpublished). Download: [https://github.com/aidaanva/endorS.py](https://github.com/aidaanva/endorS.py)
