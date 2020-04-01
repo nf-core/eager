@@ -245,10 +245,10 @@ if (tsv_path) {
 } else exit 1, 'TSV file was improperly defined, see --help and documentation for details.'
 
 /*
-* SANITY CHECKING
+* SANITY CHECKING reference inputs
 */
 
-// Validate inputs
+// Validate reference inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "Please specify --fasta with the path to your reference"
 } else if("${params.fasta}".endsWith(".gz")){
@@ -304,16 +304,6 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
         .into {bwa_index; bwa_index_bwamem}
 }
 
-// Validate not trying to run adapterremoval on a BAM file
-if (params.bam && !params.run_convertbam && !params.skip_adapterremoval ) {
-    exit 1, "AdapterRemoval cannot be run on BAMs. Please validate your parameters."
-}
-
-// Validate BAM is single end only
-if (params.bam && !params.single_end){
-    exit 1, "BAM input must be used with --single_end "
-}
-
 // Validate that you're not trying to pass FASTQs to BAM only processes
 if (params.run_convertbam && params.skip_mapping) {
   exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
@@ -333,10 +323,6 @@ if (params.skip_collapse  && params.single_end){
 if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
         exit 1, "--strip_mode can only be set to strip or replace!"
-    }
-
-    if (params.bam && !params.run_convertbam) {
-        exit 1, "--strip_input_fastq can only be used on FASTQ, but you gave BAM input and didn't specify --run_convertbam!"
     }
 }
 
@@ -404,7 +390,7 @@ if (params.run_vcf2genome) {
 // MultiVCFAnalyzer sanity checking
 if (params.run_multivcfanalyzer) {
   if (!params.run_genotyping) {
-    exit 1, "MultiVCFAnalyzer requires genotyping on be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
+    exit 1, "MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
   }
 
   if (params.genotyping_tool != "ug") {
@@ -500,7 +486,6 @@ if (workflow.profile.contains('awsbatch')) {
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
-
 // If read paths
 //    Is single FASTQ
 //    Is paired-end FASTQ
@@ -525,7 +510,6 @@ bam_channel = branched_input.bam.map {
     [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, group, pop, age]
 }
 
-
 // Prepare starting channels, here we go
 ch_input_for_convertbam = Channel.empty()
 
@@ -541,11 +525,10 @@ def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
-summary['Reads']        = params.reads
+summary['Input']        = params.input
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
-summary['Data Type']    = params.single_end ? 'Single-End' : 'Paired-End'
 summary['Skipping FASTQC?'] = params.skip_fastqc ? 'Yes' : 'No'
 summary['Skipping AdapterRemoval?'] = params.skip_adapterremoval ? 'Yes' : 'No'
 if (!params.skip_adapterremoval) {
@@ -752,6 +735,9 @@ ch_dict_for_skipdict.mix(ch_seq_dict)
 /*
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
 */ 
+
+// TODO separate BAM channel should handle this, if params.bamconvert is set, all BAMs are converted to FASTQ and then mixed with the channel that provides the FASTQ files already
+// TODO STOPPED HERE. If that param is not provided, we can simply mix channels after mapping, to provide the same type of data. Need to find out whether we merge before DeDup or after DeDup. Different lanes, same library ID = merge together, then DeDup. Different lanes, different library ID = DeDup first, then merge together (PCR is done on library, not lanes!)
 
 process convertBam {
     label 'mc_small'

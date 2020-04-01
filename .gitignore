@@ -6,3 +6,4 @@ results/
 tests/
 testing/
 *.pyc
+main_playground.nf
