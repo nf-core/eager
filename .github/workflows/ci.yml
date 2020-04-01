@@ -80,7 +80,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }} --dedupper 'markduplicates'
       - name: GENOTYPING_HC Test running GATK HaplotypeCaller
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_fna,docker ${{ matrix.endedness }}  --dedupper 'dedup' --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker ${{ matrix.endedness }}  --dedupper 'dedup' --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
       - name: GENOTYPING_FB Test running FreeBayes
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker ${{ matrix.endedness }}  --dedupper 'dedup' --run_genotyping --genotyping_tool 'freebayes'
