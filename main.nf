@@ -923,7 +923,7 @@ process adapter_removal {
     """
     echo "1"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid} ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
     if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
@@ -943,15 +943,15 @@ process adapter_removal {
     """
     echo "2"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid} --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
-    mv *.settings ${libraryid}.pair*.pe.truncated.gz output/
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
+    mv *.settings ${libraryid}.pe.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
     } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
     """
     echo "3"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid} --gzip --threads ${task.cpus} --basename ${libraryid} ${collapse_me} ${trim_me}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}.pe --gzip --threads ${task.cpus} --basename ${libraryid} ${collapse_me} ${trim_me}
     
     if [ ${mergedonly} = "Y" ]; then
       cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}.combined.fq.gz
