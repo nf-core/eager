@@ -772,7 +772,7 @@ process convertBam {
     file bam from ch_input_for_convertbam 
 
     output:
-    set val("${base}"), file("*.fastq.gz") into ch_output_from_convertbam
+    tuple val("${base}"), file("*.fastq.gz") into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -829,7 +829,7 @@ process fastqc {
     !params.bam && !params.skip_fastqc || params.bam && params.run_convertbam
 
     input:
-    set val(name), file(reads) from ch_convertbam_for_fastqc
+    tuple val(name), file(reads) from ch_convertbam_for_fastqc
 
     output:
     file "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
@@ -857,10 +857,10 @@ process fastp {
     !params.bam && params.complexity_filter_poly_g || params.bam && params.run_convertbam && params.complexity_filter_poly_g
 
     input:
-    set val(name), file(reads) from ch_convertbam_for_fastp
+    tuple val(name), file(reads) from ch_convertbam_for_fastp
 
     output:
-    set val(name), file("*pG.fq.gz") into ch_output_from_fastp
+    tuple val(name), file("*pG.fq.gz") into ch_output_from_fastp
     file("*.json") into ch_fastp_for_multiqc
 
     script:
@@ -900,14 +900,14 @@ process adapter_removal {
     !params.bam && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
 
     input:
-    set val(name), file(reads) from ch_fastp_for_adapterremoval
+    tuple val(name), file(reads) from ch_fastp_for_adapterremoval
 
     output:
-    set val(base), file("output/*.gz") into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
+    tuple val(name), file("output/*.gz") into ch_output_from_adapterremoval, ch_adapterremoval_for_postfastqc
     file("output/*.settings") into ch_adapterremoval_logs
 
     script:
-    base = reads[0].baseName
+    base = name
     //This checks whether we skip trimming and defines a variable respectively
     trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
     collapse_me = params.skip_collapse ? '' : '--collapse'
@@ -988,7 +988,7 @@ process fastqc_after_clipping {
     when: !params.bam  && !params.skip_adapterremoval && !params.skip_fastqc || params.bam && params.run_convertbam && !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    set val(name), file(reads) from ch_adapterremoval_for_fastqc_after_clipping
+    tuple val(name), file(reads) from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
     file "*_fastqc.{zip,html}" optional true into ch_fastqc_after_clipping
@@ -1006,17 +1006,17 @@ Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
 
 process bwa {
     label 'mc_medium'
-    tag "${name}"
+    tag "${prefix}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
     when: params.mapper == 'bwaaln' && !params.skip_mapping
 
     input:
-    set val(name), file(reads) from ch_adapteremoval_for_bwa
+    tuple val(prefix), file(reads) from ch_adapteremoval_for_bwa
     file index from bwa_index.collect()
 
     output:
-    file "*.mapped.bam" into ch_output_from_bwa
+    tuple val(prefix), file("*.mapped.bam") into ch_output_from_bwa
     file "*.{bai,csi}" into ch_outputindex_from_bwa
     
 
@@ -1026,7 +1026,6 @@ process bwa {
 
     //PE data without merging, PE data without any AR applied
     if (!params.single_end && (params.skip_collapse || params.skip_adapterremoval)){
-    prefix = "${reads[0].baseName}"
     """
     bwa aln -t ${task.cpus} $fasta ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
@@ -1035,7 +1034,6 @@ process bwa {
     """
     } else {
     //PE collapsed, or SE data 
-    prefix = "${reads.baseName}"
     """
     bwa aln -t ${task.cpus} $fasta $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $reads | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
@@ -1080,12 +1078,12 @@ process circularmapper{
     when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
-    set val(name), file(reads) from ch_adapteremoval_for_cm
+    tuple val(prefix), file(reads) from ch_adapteremoval_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from ch_fasta_for_circularmapper.collect()
 
     output:
-    file "*.mapped.bam" into ch_output_from_cm
+    tuple val(prefix), file ("*.mapped.bam") into ch_output_from_cm
     file "*.{bai,csi}" into ch_outputindex_from_cm
     
     script:
@@ -1096,7 +1094,6 @@ process circularmapper{
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse ){
-    prefix = "${reads[0].baseName}"
     """ 
     bwa aln -t ${task.cpus} $elongated_root ${reads[0]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
     bwa aln -t ${task.cpus} $elongated_root ${reads[1]} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
@@ -1106,7 +1103,6 @@ process circularmapper{
     samtools index "${size}" ${prefix}.mapped.bam
     """
     } else {
-    prefix = reads[0].toString().tokenize('.')[0]
     """ 
     bwa aln -t ${task.cpus} $elongated_root $reads -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $elongated_root ${prefix}.sai $reads > tmp.out
@@ -1126,17 +1122,16 @@ process bwamem {
     when: params.mapper == 'bwamem' && !params.skip_mapping
 
     input:
-    set val(name), file(reads) from ch_adapteremoval_for_bwamem
+    tuple val(prefix), file(reads) from ch_adapteremoval_for_bwamem
     file index from bwa_index_bwamem.collect()
 
     output:
-    file "*.mapped.bam" into ch_output_from_bwamem
+    tuple val(prefix), file("*.mapped.bam") into ch_output_from_bwamem
     file "*.{bai,csi}" into ch_outputindex_from_bwamem
     
 
     script:
     fasta = "${index}/${bwa_base}"
-    prefix = "${reads[0].baseName}"
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
@@ -1157,7 +1152,7 @@ process bwamem {
 // mapping bypass
 if (!params.skip_mapping) {
     ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm)
-        .filter { it =~/.*mapped.bam/ }
+        .filter { it[1] =~/.*mapped.bam/ }
         .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; ch_mapping_for_samtools_flagstat } 
 
     ch_outputindex_from_bwa.mix(ch_outputindex_from_bwamem, ch_outputindex_from_cm)
@@ -1185,13 +1180,12 @@ process samtools_flagstat {
     !params.skip_mapping
 
     input:
-    file(bam) from ch_mapping_for_samtools_flagstat
+    tuple val(prefix), file(bam) from ch_mapping_for_samtools_flagstat
 
     output:
     tuple val(prefix), file("*stats") into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
 
     script:
-    prefix = "$bam" - ~/(\.bam)?$/
     """
     samtools flagstat $bam > ${prefix}_flagstat.stats
     """
@@ -1217,16 +1211,15 @@ process samtools_filter {
     params.run_bam_filtering
 
     input: 
-    file bam from ch_mapping_for_filtering
+    tuple val(prefix), file(bam) from ch_mapping_for_filtering
 
     output:
-    file "*filtered.bam" into ch_output_from_filtering
+    tuple val(prefix), file("*filtered.bam") into ch_output_from_filtering
     file "*.unmapped.fastq.gz" optional true into ch_bam_filtering_for_metagenomic
     file "*.unmapped.bam" optional true
     file "*.{bai,csi}" into ch_outputindex_from_filtering
 
     script:
-    prefix="$bam" - ~/(\.bam)?/
     size = "${params.large_ref}" ? '-c' : ''
     
     if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
@@ -1267,7 +1260,7 @@ process samtools_filter {
 // samtools_filter bypass 
 if (params.run_bam_filtering) {
     ch_mapping_for_skipfiltering.mix(ch_output_from_filtering)
-        .filter { it =~/.*filtered.bam/ }
+        .filter { it[1] =~/.*filtered.bam/ }
         .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
 
   ch_mappingindex_for_skipfiltering.mix(ch_outputindex_from_filtering)
@@ -1280,14 +1273,7 @@ if (params.run_bam_filtering) {
 
     ch_mappingindex_for_skipfiltering
         .into { ch_filteringindex_for_skiprmdup; ch_filteringindex_for_dedup; ch_filteringindex_for_markdup } 
-
 }
-
-
-ch_filtering_for_stripfastq
-  .map {it -> [it.baseName.tokenize('.')[0], it]}
-  .set {ch_indexed_filtering_for_stripfastq}
-
 
 
 process strip_input_fastq {
@@ -1299,7 +1285,7 @@ process strip_input_fastq {
     params.strip_input_fastq
 
     input: 
-    set val(name), file(fq), file(bam) from ch_convertbam_for_stripfastq.join(ch_indexed_filtering_for_stripfastq)
+    tuple val(name), file(fq), file(bam) from ch_convertbam_for_stripfastq.join(ch_filtering_for_stripfastq)
 
     output:
     file "*.fq.gz" into ch_output_from_stripfastq
@@ -1400,7 +1386,7 @@ Step 5a: DeDup
 
 process dedup{
     label 'mc_small'
-    tag "${bam.baseName}"
+    tag "$prefix"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${prefix}/$filename"}
 
@@ -1408,16 +1394,15 @@ process dedup{
     !params.skip_deduplication && params.dedupper == 'dedup'
 
     input:
-    file bam from ch_filtering_for_dedup
+    tuple val(prefix), file(bam) from ch_filtering_for_dedup
 
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.json" into ch_dedup_results_for_multiqc
-    file "${prefix}_rmdup.bam" into ch_output_from_dedup
+    file "${prefix}.mapped_rmdup.sorted.bam" into ch_output_from_dedup
     file "*.{bai,csi}" into ch_outputindex_from_dedup
 
     script:
-    prefix="${bam.baseName}"
     treat_merged="${params.dedup_all_merged}" ? '-m' : ''
     size = "${params.large_ref}" ? '-c' : ''
     
@@ -1425,15 +1410,15 @@ process dedup{
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.bam
-    samtools index "${size}" "$prefix"_rmdup.bam
+    samtools sort -@ ${task.cpus} ${prefix}.mapped_rmdup.bam -o ${prefix}.mapped_rmdup.sorted.bam
+    samtools index ${size} ${prefix}.mapped_rmdup.sorted.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$prefix"_rmdup.bam -o "$prefix"_rmdup.bam
-    samtools index "${size}" "$prefix"_rmdup.bam
+    samtools sort -@ ${task.cpus} ${prefix}.mapped_rmdup.bam -o ${prefix}.mapped_rmdup.sorted.bam
+    samtools index ${size} ${prefix}.mapped_rmdup.sorted.bam
     """  
     }
 }
@@ -2196,7 +2181,7 @@ process kraken {
 
   output:
   file "*.kraken.out" into ch_kraken_out
-  set val(prefix), file("*.kreport") into ch_kraken_report
+  tuple val(prefix), file("*.kreport") into ch_kraken_report
   
   
   script:
@@ -2214,10 +2199,10 @@ process kraken_parse {
   errorStrategy 'ignore'
 
   input:
-  set val(name), file(kraken_r) from ch_kraken_report
+  tuple val(name), file(kraken_r) from ch_kraken_report
 
   output:
-  set val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
+  tuple val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
 
   script:
   out = name+".kraken_parsed.csv"
