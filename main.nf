@@ -1320,6 +1320,12 @@ if (params.run_bam_filtering) {
 
 }
 
+// Synchronise the input FASTQ and BAM channels
+ch_convertbam_for_stripfastq
+    .join(ch_filtering_for_stripfastq, by: [0,1,2,3,4,5,6,9,10,11])
+    .set { ch_synced_for_stripfastq }
+
+
 // TODO: Check works when turned on; fix output
 process strip_input_fastq {
     label 'mc_medium'
@@ -1330,8 +1336,7 @@ process strip_input_fastq {
     params.strip_input_fastq
 
     input: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_stripfastq
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_stripfastq
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg,  group, pop, age, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_output_from_stripfastq
