@@ -1323,13 +1323,12 @@ process samtools_flagstat_after_filter {
     params.run_bam_filtering
 
     input:
-    file(bam) from ch_filtering_for_flagstat
+    tuple val(prefix), file(bam) from ch_filtering_for_flagstat
 
     output:
     tuple val(prefix), file("*stats") into ch_bam_filtered_flagstat_for_multiqc, ch_bam_filtered_flagstat_for_endorspy
 
     script:
-    prefix = "$bam" - ~/(\.bam.filtered.bam)?$/
     """
     samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
     """
@@ -1360,21 +1359,19 @@ process endorSpy {
     !params.skip_mapping
 
     input:
-    tuple val(name), file(stats), file(poststats) from ch_allflagstats_for_endorspy
+    tuple val(prefix), file(stats), file(poststats) from ch_allflagstats_for_endorspy
 
     output:
     file "*.json" into ch_endorspy_for_multiqc
 
     script:
-    prefix = "${name}"
-
     if (params.run_bam_filtering) {
       """
-      endorS.py -o json -n ${name} ${stats} ${poststats}
+      endorS.py -o json -n ${prefix} ${stats} ${poststats}
       """
     } else {
       """
-      endorS.py -o json -n ${name} ${stats}
+      endorS.py -o json -n ${prefix} ${stats}
       """
     }
 }
@@ -1399,7 +1396,7 @@ process dedup{
     output:
     file "*.hist" into ch_hist_for_preseq
     file "*.json" into ch_dedup_results_for_multiqc
-    file "${prefix}.mapped_rmdup.sorted.bam" into ch_output_from_dedup
+    file "${prefix}.rmdup.sorted.bam" into ch_output_from_dedup
     file "*.{bai,csi}" into ch_outputindex_from_dedup
 
     script:
@@ -1410,15 +1407,15 @@ process dedup{
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} ${prefix}.mapped_rmdup.bam -o ${prefix}.mapped_rmdup.sorted.bam
-    samtools index ${size} ${prefix}.mapped_rmdup.sorted.bam
+    samtools sort -@ ${task.cpus} ${prefix}*rmdup.bam -o ${prefix}.rmdup.sorted.bam
+    samtools index ${size} ${prefix}.rmdup.sorted.bam
     """  
     } else {
     """
     dedup -i $bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} ${prefix}.mapped_rmdup.bam -o ${prefix}.mapped_rmdup.sorted.bam
-    samtools index ${size} ${prefix}.mapped_rmdup.sorted.bam
+    samtools sort -@ ${task.cpus} ${prefix}*rmdup.bam -o ${prefix}.rmdup.sorted.bam
+    samtools index ${size} ${prefix}.rmdup.sorted.bam
     """  
     }
 }
@@ -1436,7 +1433,7 @@ process markDup{
     !params.skip_deduplication && params.dedupper != 'dedup'
 
     input:
-    file bam from ch_filtering_for_markdup
+    tuple val(prefix), file(bam) from ch_filtering_for_markdup
 
     output:
     file "*.metrics" into ch_markdup_results_for_multiqc
@@ -1445,7 +1442,6 @@ process markDup{
 
 
     script:
-    prefix = "${bam.baseName}"
     size = "${params.large_ref}" ? '-c' : ''
     """
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${prefix}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${prefix}.rmdup.metrics" VALIDATION_STRINGENCY=SILENT
