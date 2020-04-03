@@ -797,7 +797,7 @@ if (params.run_convertbam) {
  * STEP 1a - FastQC
  */
 process fastqc {
-    label 'sc_tiny'
+    label 'sc_small'
     tag "$libraryid"
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -1017,7 +1017,7 @@ if (!params.skip_adapterremoval) {
 */
 // TODO: fastqc_after_clipping not happy when skip_collapsing 
 process fastqc_after_clipping {
-    label 'sc_tiny'
+    label 'sc_small'
     tag "${libraryid}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -1281,8 +1281,8 @@ process samtools_filter {
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam)
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
         samtools index "${size}" ${prefix}.filtered.bam
         samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         """
@@ -1306,6 +1306,12 @@ if (params.run_bam_filtering) {
 
 }
 
+// Synchronise the input FASTQ and BAM channels
+ch_convertbam_for_stripfastq
+    .join(ch_filtering_for_stripfastq, by: [0,1,2,3,4,5,6,9,10,11])
+    .set { ch_synced_for_stripfastq }
+
+
 // TODO: Check works when turned on; fix output
 process strip_input_fastq {
     label 'mc_medium'
@@ -1316,8 +1322,7 @@ process strip_input_fastq {
     params.strip_input_fastq
 
     input: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_stripfastq
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_stripfastq
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg,  group, pop, age, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_output_from_stripfastq
@@ -1767,7 +1772,7 @@ if ( params.gatk_ug_jar != '' ) {
     samtools index -b ${bam}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
-    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${bam}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
   else if (params.gatk_dbsnp != '')
@@ -1896,16 +1901,16 @@ if (params.additional_vcf_files == '') {
   file fasta from ch_fasta_for_multivcfanalyzer.collect()
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('fullAlignment.fasta.gz'), group, pop, age into ch_output_multivcfanalyzer_fullalignment
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('info.txt.gz'), group, pop, age into ch_output_multivcfanalyzer_info
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpAlignment.fasta.gz'), group, pop, age into ch_output_multivcfanalyzer_snpalignment
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpAlignmentIncludingRefGenome.fasta.gz'), group, pop, age into ch_output_multivcfanalyzer_snpalignmentref
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpStatistics.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_snpstatistics
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpTable.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_snptable
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpTableForSnpEff.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_snptablesnpeff
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('snpTableWithUncertaintyCalls.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_snptableuncertainty
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('structureGenotypes.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_structuregenotypes
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('structureGenotypes_noMissingData-Columns.tsv.gz'), group, pop, age into ch_output_multivcfanalyzer_structuregenotypesclean
+  file('fullAlignment.fasta.gz') into ch_output_multivcfanalyzer_fullalignment
+  file('info.txt.gz') into ch_output_multivcfanalyzer_info
+  file('snpAlignment.fasta.gz') into ch_output_multivcfanalyzer_snpalignment
+  file('snpAlignmentIncludingRefGenome.fasta.gz') into ch_output_multivcfanalyzer_snpalignmentref
+  file('snpStatistics.tsv.gz') into ch_output_multivcfanalyzer_snpstatistics
+  file('snpTable.tsv.gz') into ch_output_multivcfanalyzer_snptable
+  file('snpTableForSnpEff.tsv.gz') into ch_output_multivcfanalyzer_snptablesnpeff
+  file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
+  file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
+  file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
