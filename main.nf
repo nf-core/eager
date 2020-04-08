@@ -820,7 +820,7 @@ if (params.run_convertbam) {
  * STEP 1a - FastQC
  */
 process fastqc {
-    label 'sc_small'
+    label 'mc_small'
     tag "$name"
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -836,7 +836,7 @@ process fastqc {
 
     script:
     """
-    fastqc -q $reads
+    fastqc -t $cpus -q $reads
     rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
     rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
@@ -980,7 +980,7 @@ if (!params.skip_adapterremoval) {
 * STEP 2b - FastQC after clipping/merging (if applied!)
 */
 process fastqc_after_clipping {
-    label 'sc_small'
+    label 'mc_small'
     tag "${name}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -995,7 +995,7 @@ process fastqc_after_clipping {
 
     script:
     """
-    fastqc -q $reads
+    fastqc -t $cpus -q $reads
     """
 }
 
