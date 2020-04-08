@@ -836,7 +836,7 @@ process fastqc {
 
     script:
     """
-    fastqc -t $cpus -q $reads
+    fastqc -t ${task.cpus} -q $reads
     rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
     rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
@@ -995,7 +995,7 @@ process fastqc_after_clipping {
 
     script:
     """
-    fastqc -t $cpus -q $reads
+    fastqc -t ${task.cpus} -q $reads
     """
 }
 
