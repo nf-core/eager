@@ -238,10 +238,10 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 tsv_path = null
 if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.input
 
-input_sample = Channel.empty()
+ch_input_sample = Channel.empty()
 if (tsv_path) {
     tsv_file = file(tsv_path)
-    input_sample = extract_data(tsv_file)
+    ch_input_sample = extract_data(tsv_file)
 } else exit 1, 'TSV file was improperly defined, see --help and documentation for details.'
 
 /*
@@ -494,18 +494,18 @@ if (workflow.profile.contains('awsbatch')) {
 // is NOT read paths && BAM
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
-branched_input = input_sample.branch{
+ch_branched_input = ch_input_sample.branch{
     fastq: it[7] != 'NA' //These are all fastqs
     bam: it[9] != 'NA' //These are all BAMs
 }
 
 //Removing BAM/BAI in case of a FASTQ input
-fastq_channel = branched_input.fastq.map {
+ch_fastq_channel = ch_branched_input.fastq.map {
   samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
     [samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
 }
 //Removing R1/R2 in case of BAM input
-bam_channel = branched_input.bam.map {
+ch_bam_channel = ch_branched_input.bam.map {
   samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, group, pop, age ->
     [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, group, pop, age]
 }
@@ -513,10 +513,10 @@ bam_channel = branched_input.bam.map {
 // Prepare starting channels, here we go
 ch_input_for_convertbam = Channel.empty()
 
-bam_channel
+ch_bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; }
 
-fastq_channel
+ch_fastq_channel
   .set { ch_input_for_skipconvertbam }
 
 // Header log info
@@ -905,17 +905,17 @@ process adapter_removal {
     """
     echo "1"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}_${lane}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
     if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
-      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}.combined.fq.gz
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
     elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz > output/${libraryid}.combined.fq.gz
+      cat *.collapsed.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
     elif [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
     fi
    
     mv *.settings output/
@@ -925,20 +925,20 @@ process adapter_removal {
     """
     echo "2"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
-    mv *.settings ${libraryid}.pe.pair*.truncated.gz output/
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}_${lane}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
+    mv *.settings ${libraryid}_${lane}.pe.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
     } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
     """
     echo "3"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}.pe --gzip --threads ${task.cpus} --basename ${libraryid} ${collapse_me} ${trim_me}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}_${lane}.pe --gzip --threads ${task.cpus} ${collapse_me} ${trim_me}
     
     if [ ${mergedonly} = "Y" ]; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${libraryid}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${libraryid}_${lane}.pe.combined.fq.gz
     fi
 
     mv *.settings output/
@@ -948,7 +948,7 @@ process adapter_removal {
     """
     echo "4"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --basename ${libraryid}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --basename ${libraryid}_${lane}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
     
     mv *.settings *.se.truncated.gz output/
     """
@@ -1043,6 +1043,7 @@ process fastqc_after_clipping {
 
 }
 
+
 /*
 Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
 */
@@ -1066,7 +1067,7 @@ process bwa {
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval) ){
+    if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
     prefix = libraryid
     """
     bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -1501,14 +1502,56 @@ process markDup{
     """
 }
 
+/* 
+ Library merging
+*/
 
+// Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
+// IMPORTANT for DOCS: We will merge by samplename, seqtype, organism, strandedness, udg, group, pop and age! All others are ignored
+if (params.skip_deduplication) {
+  ch_input_for_librarymerging = ch_filtering_for_skiprmdup
+    .groupTuple(by:[0,3,4,5,6,9,10,11])
+    .branch{
+      skip_merging: it[7].size() == 1
+      merge_me: it[7].size() > 1
+    }
+} else {
+    ch_input_for_librarymerging = ch_output_from_dedup.mix(ch_output_from_markdup)
+    .groupTuple(by:[0,3,4,5,6,9,10,11])
+    .branch{
+      skip_merging: it[7].size() == 1
+      merge_me: it[7].size() > 1
+    }
+}
+
+
+// Step two: perform a library cat step
+process library_merge {
+  label 'mc_tiny'
+  tag "${libraryid}"
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_librarymerging.merge_me.dump()
+
+  output:
+  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rmdup.bam"), file("*_libmerged_rmdup.{bam,csi}"), group, pop, age into ch_output_from_librarymerging
+
+  script:
+  size = "${params.large_ref}" ? '-c' : ''
+  """
+  samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
+  samtools index "${size}" ${samplename}_libmerged_rmdup.bam
+  """
+}
+
+// Step three: mix back in libraries from skipping dedup, skipping library merging
 if (!params.skip_deduplication) {
-    ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
+    ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
 } else {
-    ch_filtering_for_skiprmdup
+    ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 }
 
