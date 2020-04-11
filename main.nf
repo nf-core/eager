@@ -798,7 +798,7 @@ if (params.run_convertbam) {
  */
 process fastqc {
     label 'sc_small'
-    tag "$libraryid"
+    tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
@@ -835,7 +835,7 @@ process fastqc {
 
 process fastp {
     label 'mc_small'
-    tag "$libraryid"
+    tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
     when: 
@@ -878,7 +878,7 @@ if (params.complexity_filter_poly_g) {
 
 process adapter_removal {
     label 'mc_small'
-    tag "$libraryid"
+    tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
     input:
@@ -1018,7 +1018,7 @@ if (!params.skip_adapterremoval) {
 // TODO: fastqc_after_clipping not happy when skip_collapsing 
 process fastqc_after_clipping {
     label 'sc_small'
-    tag "${libraryid}"
+    tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
@@ -1313,7 +1313,7 @@ ch_convertbam_for_stripfastq
     .set { ch_synced_for_stripfastq }
 
 
-// TODO: Check works when turned on; fix output
+// TODO: Check works when turned on; fix output - with lane merging this becomes problematic. Will need extra process to merge by lane the fASTQS as well as bams
 process strip_input_fastq {
     label 'mc_medium'
     tag "${libraryid}"
@@ -1421,11 +1421,11 @@ process endorSpy {
 
     if (params.run_bam_filtering) {
       """
-      endorS.py -o json -n ${samplename} ${stats} ${poststats}
+      endorS.py -o json -n ${libraryid} ${stats} ${poststats}
       """
     } else {
       """
-      endorS.py -o json -n ${samplename} ${stats}
+      endorS.py -o json -n ${libraryid} ${stats}
       """
     }
 }
@@ -1507,17 +1507,18 @@ process markDup{
 */
 
 // Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
-// IMPORTANT for DOCS: We will merge by samplename, seqtype, organism, strandedness, udg, group, pop and age! All others are ignored
-if (params.skip_deduplication) {
+// IMPORTANT for DOCS: We will merge by samplename, organism, strandedness, udg, group, pop and age! All others are ignored - i.e. we only merge libraries with the same UDG/strandedness type because otherwise TrimBam/PMDtools won't work
+if ( params.skip_deduplication ) {
   ch_input_for_librarymerging = ch_filtering_for_skiprmdup
-    .groupTuple(by:[0,3,4,5,6,9,10,11])
+    .groupTuple(by:[0,4,5,6,9,10,11])
     .branch{
       skip_merging: it[7].size() == 1
       merge_me: it[7].size() > 1
     }
 } else {
     ch_input_for_librarymerging = ch_output_from_dedup.mix(ch_output_from_markdup)
-    .groupTuple(by:[0,3,4,5,6,9,10,11])
+    .groupTuple(by:[0,4,5,6,9,10,11])
+    .dump()
     .branch{
       skip_merging: it[7].size() == 1
       merge_me: it[7].size() > 1
@@ -1526,6 +1527,7 @@ if (params.skip_deduplication) {
 
 
 // Step two: perform a library cat step
+// TODO: Need to update read group with Picard tools addOrReplaceReadGroups:https://broadinstitute.github.io/picard/command-line-overview.html#AddOrReplaceReadGroups
 process library_merge {
   label 'mc_tiny'
   tag "${libraryid}"
@@ -1534,13 +1536,14 @@ process library_merge {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_librarymerging.merge_me.dump()
 
   output:
-  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rmdup.bam"), file("*_libmerged_rmdup.{bam,csi}"), group, pop, age into ch_output_from_librarymerging
+  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rmdup.bam"), file("*_libmerged_rmdup.bam.{bai,csi}"), group, pop, age into ch_output_from_librarymerging
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
-  samtools index "${size}" ${samplename}_libmerged_rmdup.bam
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rmdup_rg.bam
+  samtools index "${size}" ${samplename}_libmerged_rmdup_rg.bam
   """
 }
 
