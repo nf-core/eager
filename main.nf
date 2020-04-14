@@ -1436,7 +1436,7 @@ Step 5a: DeDup
 */ 
 process dedup{
     label 'mc_small'
-    tag "${outname}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${prefix}/$filename"}
 
@@ -1518,7 +1518,6 @@ if ( params.skip_deduplication ) {
 } else {
     ch_input_for_librarymerging = ch_output_from_dedup.mix(ch_output_from_markdup)
     .groupTuple(by:[0,4,5,6,9,10,11])
-    .dump()
     .branch{
       skip_merging: it[7].size() == 1
       merge_me: it[7].size() > 1
@@ -1530,20 +1529,20 @@ if ( params.skip_deduplication ) {
 // TODO: Need to update read group with Picard tools addOrReplaceReadGroups:https://broadinstitute.github.io/picard/command-line-overview.html#AddOrReplaceReadGroups
 process library_merge {
   label 'mc_tiny'
-  tag "${libraryid}"
+  tag "${samplename}"
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_librarymerging.merge_me.dump()
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_librarymerging.merge_me
 
   output:
-  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rmdup.bam"), file("*_libmerged_rmdup.bam.{bai,csi}"), group, pop, age into ch_output_from_librarymerging
+  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}"), group, pop, age into ch_output_from_librarymerging
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
-  picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rmdup_rg.bam
-  samtools index "${size}" ${samplename}_libmerged_rmdup_rg.bam
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged"
+  samtools index "${size}" ${samplename}_libmerged_rg_rmdup.bam
   """
 }
 
@@ -1565,7 +1564,7 @@ Step 6: Preseq
 
 process preseq {
     label 'sc_tiny'
-    tag "${libraryid}"
+    tag "${samplename}"
     publishDir "${params.outdir}/preseq", mode: 'copy'
 
     when:
@@ -1596,7 +1595,7 @@ Step 7a: DMG Assessment
 
 process damageprofiler {
     label 'sc_tiny'
-    tag "${bam.baseName}"
+    tag "${samplename}"
     publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
     when:
@@ -1625,7 +1624,7 @@ Step 8: Qualimap
 
 process qualimap {
     label 'mc_small'
-    tag "${bam.baseName}"
+    tag "${samplename}"
     publishDir "${params.outdir}/qualimap", mode: 'copy'
 
     when:
@@ -1661,7 +1660,7 @@ if (!params.run_bedtools_coverage){
 
 process bedtools {
   label 'mc_small'
-  tag "${bam.baseName}"
+  tag "${samplename}"
   publishDir "${params.outdir}/bedtools", mode: 'copy'
 
   when:
@@ -1687,7 +1686,7 @@ process bedtools {
 
 process pmdtools {
     label 'mc_small'
-    tag "${bam.baseName}"
+    tag "${samplename}"
     publishDir "${params.outdir}/pmdtools", mode: 'copy'
 
     when: params.run_pmdtools
@@ -1727,7 +1726,7 @@ process pmdtools {
 
 process bam_trim {
     label 'mc_small'
-    tag "${prefix}" 
+    tag "${samplename}" 
     publishDir "${params.outdir}/trimmed_bam", mode: 'copy'
  
     when: params.run_trim_bam
@@ -1794,7 +1793,7 @@ if ( params.gatk_ug_jar != '' ) {
 
  process genotyping_ug {
   label 'mc_small'
-  tag "${prefix}"
+  tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
   when:
