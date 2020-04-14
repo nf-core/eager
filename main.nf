@@ -876,6 +876,8 @@ if (params.complexity_filter_poly_g) {
  * STEP 2 - Adapter Clipping / Read Merging
  */
 
+ // TODO Fix output name so it matches FASTQC.zip output for inline for multiQC
+
 process adapter_removal {
     label 'mc_small'
     tag "${libraryid}_L${lane}"
@@ -893,7 +895,7 @@ process adapter_removal {
     bam != "NA"  && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
 
     script:
-    base = libraryid
+    base = "${r1.baseName}"
     //This checks whether we skip trimming and defines a variable respectively
     trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
     collapse_me = params.skip_collapse ? '' : '--collapse'
@@ -905,17 +907,17 @@ process adapter_removal {
     """
     echo "1"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}_${lane}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
     if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
-      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.fq.gz
     elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
+      cat *.collapsed.gz > output/${base}.pe.combined.fq.gz
     elif [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.fq.gz
     fi
    
     mv *.settings output/
@@ -925,20 +927,20 @@ process adapter_removal {
     """
     echo "2"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}_${lane}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
-    mv *.settings ${libraryid}_${lane}.pe.pair*.truncated.gz output/
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
+    mv *.settings ${base}.pe.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
     } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
     """
     echo "3"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}_${lane}.pe --gzip --threads ${task.cpus} ${collapse_me} ${trim_me}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${collapse_me} ${trim_me}
     
     if [ ${mergedonly} = "Y" ]; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}_${lane}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${libraryid}_${lane}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.pe.combined.fq.gz
     fi
 
     mv *.settings output/
@@ -948,7 +950,7 @@ process adapter_removal {
     """
     echo "4"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --basename ${libraryid}_${lane}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
     
     mv *.settings *.se.truncated.gz output/
     """
@@ -1001,16 +1003,78 @@ if ( params.skip_collapse ){
     .into { ch_output_from_adapterremoval; ch_adapterremoval_for_postfastqc }
 }
 
-
 // Adapterremoval bypass
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge } 
 } else {
     ch_fastp_for_skipadapterremoval
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem;  } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge } 
 }
+
+// Prepare for lane merging (and skipping if no merging required)
+ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
+  .groupTuple(by: [0,1,3,4,5,6,9,10,11])
+  .branch {
+    skip_merge: it[7].size() == 1
+    merge_me: it[7].size() > 1 //These are all fastqs
+  }
+
+// Lane merging
+// TODO Need to add same thing for raw FASTQs for strip_fastq 
+
+process lanemerge {
+  label 'mc_tiny'
+  tag "${libraryid}"
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_branched_for_lanemerge.merge_me
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_lanemerge_for_mapping
+
+  script:
+  if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
+  lane = 0
+  """
+  cat ${r1} > "${libraryid}"_R1_lanemerged.fq.gz
+  cat ${r2} > "${libraryid}"_R2_lanemerged.fq.gz
+  """
+  } else {
+  """
+  cat ${r1} > "${libraryid}"_lanemerged.fq.gz
+  """
+  }
+
+}
+
+// preparation for mapping - including splitting pairs into two variables if not merged PE data
+// What about if user supplies both PE and SE data but skip collapse?  Removing seqtype info for is then lost...
+// Add branch to skip lane merging if not required?
+
+// TODO check lane merged skipped non-collapse'd R2
+
+ch_lanemerge_for_mapping
+  .map {
+      def samplename = it[0]
+      def libraryid  = it[1]
+      def lane = it[2]
+      def seqtype = it[3]
+      def organism = it[4]
+      def strandedness = it[5]
+      def udg = it[6]
+      def r1 = it[7]
+      def r2 = it[7].endsWith("_R2_lanemerged.fq.gz") ? it[7].endsWith("_R2_lanemerged.fq.gz") : "NA"      
+      def group = it[8]
+      def pop = it[9]
+      def age = it[10]
+
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+
+  }
+  .mix(ch_branched_for_lanemerge.skip_merge)
+  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem } 
 
 /*
 * STEP 2b - FastQC after clipping/merging (if applied!)
@@ -1028,7 +1092,7 @@ process fastqc_after_clipping {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_fastqc.{zip,html}"), group, pop, age into ch_fastqc_after_clipping
+    file("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
 
     script:
     if ( params.skip_collapse && seqtype == "PE" ) {
@@ -1056,7 +1120,7 @@ process bwa {
     when: params.mapper == 'bwaaln' && !params.skip_mapping
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_bwa
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_bwa
     file index from bwa_index.collect()
 
     output:
@@ -1122,7 +1186,7 @@ process circularmapper{
     when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_cm
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from ch_fasta_for_circularmapper.collect()
 
@@ -1167,7 +1231,7 @@ process bwamem {
     when: params.mapper == 'bwamem' && !params.skip_mapping
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_bwamem
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_bwamem
     file index from bwa_index_bwamem.collect()
 
     output:
@@ -1227,7 +1291,7 @@ process samtools_flagstat {
     script:
     prefix = libraryid
     """
-    samtools flagstat $bam > ${prefix}_flagstat.stats
+    samtools flagstat $bam > ${prefix}.stats
     """
 }
 
@@ -1354,7 +1418,7 @@ process strip_input_fastq {
 process samtools_flagstat_after_filter {
     label 'sc_tiny'
     tag "$prefix"
-    publishDir "${params.outdir}/samtools/stats", mode: 'copy'
+    publishDir "${params.outdir}/samtools/filtered_stats", mode: 'copy'
 
     when:
     params.run_bam_filtering
@@ -1368,7 +1432,7 @@ process samtools_flagstat_after_filter {
     script:
     prefix = libraryid
     """
-    samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
+    samtools flagstat $bam > ${prefix}.stats
     """
 }
 
@@ -1564,7 +1628,7 @@ Step 6: Preseq
 
 process preseq {
     label 'sc_tiny'
-    tag "${samplename}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/preseq", mode: 'copy'
 
     when:
