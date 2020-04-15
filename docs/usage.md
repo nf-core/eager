@@ -15,7 +15,7 @@
       * [`--single_end`](#--single_end)
       * [`--paired_end`](#--paired_end)
       * [`--bam`](#--bam)
-      * [`--input`](#--input)
+      * [`--tsv_input`](#--tsv_input)
       * [`--fasta`](#--fasta)
       * [`--genome` (using iGenomes)](#--genome-using-igenomes)
     * [Output Directories](#output-directories)
@@ -93,7 +93,7 @@
       * [`--damageprofiler_yaxis`](#--damageprofiler_yaxis)
       * [`--run_pmdtools`](#--run_pmdtools)
       * [`--udg` false](#--udg-false)
-      * [`--pmd_udg_type` \`half`](#--pmd_udg_type-half)
+      * [`--pmd_udg_type` `half`](#--pmd_udg_type-half)
       * [`--pmdtools_range`](#--pmdtools_range)
       * [`--pmdtools_threshold`](#--pmdtools_threshold)
       * [`--pmdtools_reference_mask`](#--pmdtools_reference_mask)
@@ -302,30 +302,34 @@ Further institutions can be added at [nf-core/configs](https://github.com/nf-cor
 
 #### `--reads`
 
-Use this to specify the location of your input FastQ (optionally gzipped) or BAM file(s). The files maybe either from a single, or multiple samples. For example:
+Use this to specify the location of your input FastQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to [`--tsv_input`](#tsv_input) which is used for more complex input configurations such as lane and library merging.
+
+When using `--reads` you can specify one or multiple samples in one or more directories files.
+
+> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with `--reads`! Please see [`--tsv_input`](#tsv_input) for possibilities.
+
+For a single set FASTQ, or multiple files paired-end FASTQ files in one directory, you can specify:
 
 ```bash
---reads 'path/to/data/sample_*_{1,2}.fastq'
+--reads 'path/to/data/sample_*_{1,2}.fastq.gz'
 ```
 
-for a single sample, or
+If you have multiple files in different directories, you can use additional wildcards (`*`) e.g.:
 
 ```bash
---reads 'path/to/data/*/sample_*_{1,2}.fastq'
+--reads 'path/to/data/*/sample_*_{1,2}.fastq.gz'
 ```
 
-for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`).
+By default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')
 
 Please note the following requirements:
 
 1. Valid file extensions: `.fastq.gz`, `.fastq`, `.fq.gz`, `.fq`, `.bam`.
-2. The path must be enclosed in quotes
+2. The path **must** be enclosed in quotes
 3. The path must have at least one `*` wildcard character
-4. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.
+4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
 
-If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
-
-**Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
+If `--reads` is left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
 #### `--single_end`
 
@@ -337,46 +341,47 @@ For example:
 --single_end --reads 'path/to/data/*.fastq.gz'
 ```
 
-for a single sample, or
-
-```bash
---single_end --reads 'path/to/data/*/*.fastq.gz'
-```
-
-for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`)
-
 **Note**: It is currently not possible to run a mixture of single-end and paired-end files in one run.
-
-#### `--paired_end`
-
-If you have paired-end data, you need to specify `--paired_end` on the command line when you launch the pipeline.
-
-A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
-
-For example:
-
-```bash
---paired_end --reads '*_R{1,2}_*.fastq.gz'
-```
-
-**Important**: You must always supply a read-grouping with the `{1,2}` system for each sample when using the `--paired_end` flag.
 
 #### `--bam`
 
-Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `--single_end`.
+Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `-reads` and `--single_end`.
 
-#### `--input`
+#### `--tsv_input`
 
-Specifies a path to a TSV file that contains additional the paths to FASTQ/BAM files and metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , libraries, and samples.
+Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
 
-This TSV should look like the following
+This is mutually exclusive from `--reads`, and it is recommended only to be used when performing the more complex procedures above. Thus you do not need to specify `--single_end` or `--bam` when using TSV input - this is defined within the TSV file itself.
 
-| Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                                                                                                  | R2                                                                                                                                  | BAM | BAM_Index | Group   | Populations        | Age          |
+This TSV should look like the following:
+
+| Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                                                                                                  | R2                                                                                                                                  | BAM | Group   | Populations        | Age          |
 |-------------|------------|------|---------|----------|--------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|-----|-----------|---------|--------------------|--------------|
-| JK2782      | JK2782     | 1    | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | NA        | Swabian | Europe,Asia,Africa | Palaeolithic |
-| JK2802      | JK2802     | 2    | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | NA        | Swabian | Europe,Asia,Africa | Palaeolithic |
+| JK2782      | JK2782     | 1    | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
+| JK2802      | JK2802     | 2    | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
 
 > :warning: Cells **must not** contain spaces before or after strings, as this will make the TSV unreadable by nextflow. Strings containing spaces should be wrapped in quotes.
+
+When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging). 
+It will also merge BAM files with the `Sample_Lane` but different `Library_ID` after duplicate removal, but prior to genotyping.
+
+For example, with the following 
+
+| Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM | Group   | Populations        | Age          |
+|-------------|------------|------|---------|----------|--------------|---------------|----------------------------------------------------------------|----------------------------------------------------------------|-----|---------|--------------------|--------------|
+| JK2782      | JK2782     | 7    | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
+| JK2782      | JK2782     | 8    | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
+| JK2802      | JK2802_SE  | 7    | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
+| JK2802      | JK2802_PE  | 8    | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
+
+After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ will be concatenated together for each **Library**. After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` will be merged together.
+
+Note the following important caveats:
+
+- The TSV must use actual tabs (not spaces) between cells.
+- nf-core/eager will only merge lanes of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
+- You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
+- nf-core/eager functionality such as `--run_trim_bam` will currently be applied to _all_ BAM files irrespective of SeqType or UDG_treatment. If this functionality would be of interest, please let us know on the [nf-core github](https://github.com/nf-core/eager/issues)
 
 #### `--fasta`
 
@@ -797,7 +802,7 @@ Specifies to run PMDTools for damage based read filtering and assessment of DNA 
 
 Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment.
 
-#### `--pmd_udg_type` \`half`
+#### `--pmd_udg_type`
 
 If you have UDGhalf treated data (Rohland et al 2016), specify `'half'` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the DNA damage assessment will use CpG context only. If you don't specify the parameter at all, the library will be treated as non UDG treated.
 

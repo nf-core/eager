@@ -31,7 +31,7 @@ def helpMessage() {
         --single_end                  Specifies that the input is single end reads. [CURRENTLY NOT FUNCTIONAL]
 
       TSV Input
-        --input                       Path to TSV file containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
+        --tsv_input                   Path to TSV file containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
 
       Reference
         --bam                         Specifies that the input is in BAM format.
@@ -236,13 +236,13 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
 // Read in files properly from TSV file
 tsv_path = null
-if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.input
+if (params.tsv_input && (has_extension(params.tsv_input, "tsv"))) tsv_path = params.tsv_input
 
 ch_input_sample = Channel.empty()
 if (tsv_path) {
     tsv_file = file(tsv_path)
     ch_input_sample = extract_data(tsv_file)
-} else exit 1, 'TSV file was improperly defined, see --help and documentation for details.'
+} else exit 1, "TSV file was improperly defined, see --help and documentation under 'running the pipeline' for details."
 
 /*
 * SANITY CHECKING reference inputs
@@ -525,7 +525,7 @@ def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
-summary['Input']        = params.input
+summary['Input']        = params.tsv_input
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
@@ -1074,7 +1074,7 @@ ch_lanemerge_for_mapping
 
   }
   .mix(ch_branched_for_lanemerge.skip_merge)
-  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem } 
+  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_validation } 
 
 /*
 * STEP 2b - FastQC after clipping/merging (if applied!)
@@ -2673,17 +2673,17 @@ def extract_data(tsvFile) {
             def age = row.Age
 
             // Check no 'empty' rows
-            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "Invalid TSV input: A row appears has all files defined as NA. Check row for: ${samplename}"
+            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "Invalid TSV input: A row appears has all files defined as NA. See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
             // Ensure BAMs aren't submitted with PE
-            if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "Invalid TSV input: BAM input rows cannot be paired end (PE). Check row for: ${samplename}"
+            if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "Invalid TSV input: BAM input rows cannot be paired end (PE). See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
             //  Ensure that we do not accept incompatible chemistry setup
-            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "Invalid TSV input:  SeqType for one or more rows is neither SE nor PE!. You have: ${seqtype}"
+            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "Invalid TSV input:  SeqType for one or more rows is neither SE nor PE! see --help or documentation under 'running the pipeline' for more information. You have: ${seqtype}"
                    
            // So we don't accept existing files that are wrong format: e.g. fasta or sam
-            if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "Invalid TSV input: The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
-            if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "Invalid TSV input: The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
+            if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "Invalid TSV input: see --help or documentation under 'running the pipeline' for more information. The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
+            if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "Invalid TSV input: see --help or documentation under 'running the pipeline' for more information. The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
             if ( !bam.matches('NA') && !has_extension(bam, "bam")) exit 1, "Invalid TSV input: The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
              
             [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, group, pop, age ]
@@ -2694,13 +2694,13 @@ def extract_data(tsvFile) {
 
 // Check if a row has the expected number of item
 def checkNumberOfItem(row, number) {
-    if (row.size() != number) exit 1, "Invalid TSV input: Malformed row (e.g. missing column) in ${row}, see --help for more information"
+    if (row.size() != number) exit 1, "Invalid TSV input: Malformed row (e.g. missing column) in ${row}, see --help or documentation under 'running the pipeline' for more information"
     return true
 }
 
 // Return file if it exists
 def return_file(it) {
-    if (!file(it).exists()) exit 1, "Invalid TSV input: Missing or incorrect file path. Set to NA if no file required. See --help for more information. Check file: ${it}" 
+    if (!file(it).exists()) exit 1, "Invalid TSV input: Missing or incorrect file path. Set to NA if no file required. See --help or documentation under 'running the pipeline' for more information. Check file: ${it}" 
     return file(it)
 }
 
