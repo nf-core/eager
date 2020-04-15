@@ -242,7 +242,7 @@ ch_input_sample = Channel.empty()
 if (tsv_path) {
     tsv_file = file(tsv_path)
     ch_input_sample = extract_data(tsv_file)
-} else exit 1, "TSV file was improperly defined, see --help and documentation under 'running the pipeline' for details."
+} else exit 1, "TSV file was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
 /*
 * SANITY CHECKING reference inputs
@@ -526,6 +526,7 @@ summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Input']        = params.tsv_input
+summary['Convert input BAM?'] = params.run_convertbam ? 'Yes' : 'No'
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
@@ -783,15 +784,8 @@ process indexinputbam {
 }
 
 // convertbam bypass
-if (params.run_convertbam) {
     ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
-        .filter{ it =~/.*converted.fastq.gz/}
         .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
-} else {
-    ch_input_for_skipconvertbam
-      .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
-
-}
 
 /*
  * STEP 1a - FastQC
@@ -1064,8 +1058,9 @@ ch_lanemerge_for_mapping
       def organism = it[4]
       def strandedness = it[5]
       def udg = it[6]
-      def r1 = it[7]
-      def r2 = it[7].endsWith("_R2_lanemerged.fq.gz") ? it[7].endsWith("_R2_lanemerged.fq.gz") : "NA"      
+      def reads = arrayify(it[7])
+      def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
+      def r2 = reads[1] ? reads[1] : "NA"      
       def group = it[8]
       def pop = it[9]
       def age = it[10]
@@ -1074,6 +1069,7 @@ ch_lanemerge_for_mapping
 
   }
   .mix(ch_branched_for_lanemerge.skip_merge)
+  .dump()
   .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_validation } 
 
 /*
@@ -2708,4 +2704,10 @@ def return_file(it) {
 // Check file extension
 def has_extension(it, extension) {
     it.toString().toLowerCase().endsWith(extension.toLowerCase())
+}
+
+// To convert a string to an array when not an array already
+// From: https://stackoverflow.com/a/55453674/11502856
+def arrayify(it) {
+  [] + it ?: [it]
 }
