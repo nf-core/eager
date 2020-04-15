@@ -362,10 +362,10 @@ This TSV should look like the following:
 
 > :warning: Cells **must not** contain spaces before or after strings, as this will make the TSV unreadable by nextflow. Strings containing spaces should be wrapped in quotes.
 
-When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging). 
+When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging).
 It will also merge BAM files with the `Sample_Lane` but different `Library_ID` after duplicate removal, but prior to genotyping.
 
-For example, with the following 
+For example, with the following:
 
 | Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM | Group   | Populations        | Age          |
 |-------------|------------|------|---------|----------|--------------|---------------|----------------------------------------------------------------|----------------------------------------------------------------|-----|---------|--------------------|--------------|
@@ -378,10 +378,12 @@ After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _
 
 Note the following important caveats:
 
-- The TSV must use actual tabs (not spaces) between cells.
-- nf-core/eager will only merge lanes of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
-- You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
-- nf-core/eager functionality such as `--run_trim_bam` will currently be applied to _all_ BAM files irrespective of SeqType or UDG_treatment. If this functionality would be of interest, please let us know on the [nf-core github](https://github.com/nf-core/eager/issues)
+* The TSV must use actual tabs (not spaces) between cells.
+* All BAM files must be specified as `SE` under `SeqType`.
+* nf-core/eager will only merge lanes of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
+* You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
+* Accordingly nf-core/eager will not merge lanes libraries of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
+* nf-core/eager functionality such as `--run_trim_bam` will currently be applied to _all_ BAM files irrespective of SeqType or UDG_treatment. If this functionality would be of interest, please let us know on the [nf-core github](https://github.com/nf-core/eager/issues).
 
 #### `--fasta`
 

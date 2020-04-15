@@ -39,7 +39,7 @@ When using TSV input, nf-core EAGER will attempt to merge all files with the
 same `Sample ID`. However, if you have specified the same `Library_ID` for two
 sets of FASTQ files you will likely receive an error such as
 
-```
+```bash
 Error executing process > 'library_merge (JK2782)'
 Caused by:
   Process `library_merge` input file name collision -- There are multiple input files for each of the following file names: JK2782.mapped_rmdup.bam.csi, JK2782.mapped_rmdup.bam
@@ -72,7 +72,7 @@ pipeline has failed. This is identifiable that you get an `exit status` and
 a `Command error:`, the latter of which is what is reported by the failed
 program itself.
 
-```
+```bash
 ERROR ~ Error executing process > 'circulargenerator (hg19_complete_500.fasta)'
 
 Caused by:
@@ -118,7 +118,7 @@ To further investigate, go to step 2.
 Alternatively, you may get an error with nextflow itself. The most common one
 would be a 'process fails' and it looks like the following.
 
-```
+```bash
 Error executing process > 'library_merge (JK2782)'
 Caused by:
   Process `library_merge` input file name collision -- There are multiple input files for each of the following file names: JK2782.mapped_rmdup.bam.csi, JK2782.mapped_rmdup.bam
@@ -152,7 +152,7 @@ For example, in the error in
 [1a](#1a-Nextflow-reports-an-error-executing-process-with-command-error) you can
 see the following line
 
-```
+```bash
 Work dir:
   /projects1/microbiome_calculus/RIII/03-preprocessing/mtCap_preprocessing/work/7f/52f33fdd50ed2593d3d62e7c74e408
 ```
