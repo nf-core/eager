@@ -31,7 +31,7 @@ def helpMessage() {
         --single_end                  Specifies that the input is single end reads. [CURRENTLY NOT FUNCTIONAL]
 
       TSV Input
-        --input                       Path to TSV file containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
+        --tsv_input                   Path to TSV file containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
 
       Reference
         --bam                         Specifies that the input is in BAM format.
@@ -236,13 +236,13 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
 // Read in files properly from TSV file
 tsv_path = null
-if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.input
+if (params.tsv_input && (has_extension(params.tsv_input, "tsv"))) tsv_path = params.tsv_input
 
-input_sample = Channel.empty()
+ch_input_sample = Channel.empty()
 if (tsv_path) {
     tsv_file = file(tsv_path)
-    input_sample = extract_data(tsv_file)
-} else exit 1, 'TSV file was improperly defined, see --help and documentation for details.'
+    ch_input_sample = extract_data(tsv_file)
+} else exit 1, "TSV file was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
 /*
 * SANITY CHECKING reference inputs
@@ -494,18 +494,18 @@ if (workflow.profile.contains('awsbatch')) {
 // is NOT read paths && BAM
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
-branched_input = input_sample.branch{
+ch_branched_input = ch_input_sample.branch{
     fastq: it[7] != 'NA' //These are all fastqs
     bam: it[9] != 'NA' //These are all BAMs
 }
 
 //Removing BAM/BAI in case of a FASTQ input
-fastq_channel = branched_input.fastq.map {
+ch_fastq_channel = ch_branched_input.fastq.map {
   samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
     [samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
 }
 //Removing R1/R2 in case of BAM input
-bam_channel = branched_input.bam.map {
+ch_bam_channel = ch_branched_input.bam.map {
   samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, group, pop, age ->
     [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, group, pop, age]
 }
@@ -513,10 +513,10 @@ bam_channel = branched_input.bam.map {
 // Prepare starting channels, here we go
 ch_input_for_convertbam = Channel.empty()
 
-bam_channel
+ch_bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; }
 
-fastq_channel
+ch_fastq_channel
   .set { ch_input_for_skipconvertbam }
 
 // Header log info
@@ -525,7 +525,8 @@ def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
-summary['Input']        = params.input
+summary['Input']        = params.tsv_input
+summary['Convert input BAM?'] = params.run_convertbam ? 'Yes' : 'No'
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
@@ -783,22 +784,15 @@ process indexinputbam {
 }
 
 // convertbam bypass
-if (params.run_convertbam) {
     ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
-        .filter{ it =~/.*converted.fastq.gz/}
         .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
-} else {
-    ch_input_for_skipconvertbam
-      .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
-
-}
 
 /*
  * STEP 1a - FastQC
  */
 process fastqc {
     label 'sc_small'
-    tag "$libraryid"
+    tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
@@ -835,7 +829,7 @@ process fastqc {
 
 process fastp {
     label 'mc_small'
-    tag "$libraryid"
+    tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
     when: 
@@ -876,9 +870,11 @@ if (params.complexity_filter_poly_g) {
  * STEP 2 - Adapter Clipping / Read Merging
  */
 
+ // TODO Fix output name so it matches FASTQC.zip output for inline for multiQC
+
 process adapter_removal {
     label 'mc_small'
-    tag "$libraryid"
+    tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
     input:
@@ -893,7 +889,7 @@ process adapter_removal {
     bam != "NA"  && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
 
     script:
-    base = libraryid
+    base = "${r1.baseName}"
     //This checks whether we skip trimming and defines a variable respectively
     trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
     collapse_me = params.skip_collapse ? '' : '--collapse'
@@ -905,17 +901,17 @@ process adapter_removal {
     """
     echo "1"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
     if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
-      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}.combined.fq.gz
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.fq.gz
     elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz > output/${libraryid}.combined.fq.gz
+      cat *.collapsed.gz > output/${base}.pe.combined.fq.gz
     elif [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${libraryid}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.fq.gz
     fi
    
     mv *.settings output/
@@ -925,20 +921,20 @@ process adapter_removal {
     """
     echo "2"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
-    mv *.settings ${libraryid}.pe.pair*.truncated.gz output/
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
+    mv *.settings ${base}.pe.pair*.truncated.gz output/
     """
     //PE, collapse, but don't trim reads
     } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
     """
     echo "3"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${libraryid}.pe --gzip --threads ${task.cpus} --basename ${libraryid} ${collapse_me} ${trim_me}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${collapse_me} ${trim_me}
     
     if [ ${mergedonly} = "Y" ]; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${libraryid}.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.fq.gz
     else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${libraryid}.pe.combined.fq.gz
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.pe.combined.fq.gz
     fi
 
     mv *.settings output/
@@ -948,7 +944,7 @@ process adapter_removal {
     """
     echo "4"
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --basename ${libraryid}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
     
     mv *.settings *.se.truncated.gz output/
     """
@@ -1001,16 +997,80 @@ if ( params.skip_collapse ){
     .into { ch_output_from_adapterremoval; ch_adapterremoval_for_postfastqc }
 }
 
-
 // Adapterremoval bypass
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge } 
 } else {
     ch_fastp_for_skipadapterremoval
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_skipmap; ch_adapteremoval_for_bwa; ch_adapteremoval_for_cm; ch_adapteremoval_for_bwamem;  } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge } 
 }
+
+// Prepare for lane merging (and skipping if no merging required)
+ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
+  .groupTuple(by: [0,1,3,4,5,6,9,10,11])
+  .branch {
+    skip_merge: it[7].size() == 1
+    merge_me: it[7].size() > 1 //These are all fastqs
+  }
+
+// Lane merging
+// TODO Need to add same thing for raw FASTQs for strip_fastq 
+
+process lanemerge {
+  label 'mc_tiny'
+  tag "${libraryid}"
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_branched_for_lanemerge.merge_me
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_lanemerge_for_mapping
+
+  script:
+  if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
+  lane = 0
+  """
+  cat ${r1} > "${libraryid}"_R1_lanemerged.fq.gz
+  cat ${r2} > "${libraryid}"_R2_lanemerged.fq.gz
+  """
+  } else {
+  """
+  cat ${r1} > "${libraryid}"_lanemerged.fq.gz
+  """
+  }
+
+}
+
+// preparation for mapping - including splitting pairs into two variables if not merged PE data
+// What about if user supplies both PE and SE data but skip collapse?  Removing seqtype info for is then lost...
+// Add branch to skip lane merging if not required?
+
+// TODO check lane merged skipped non-collapse'd R2
+
+ch_lanemerge_for_mapping
+  .map {
+      def samplename = it[0]
+      def libraryid  = it[1]
+      def lane = it[2]
+      def seqtype = it[3]
+      def organism = it[4]
+      def strandedness = it[5]
+      def udg = it[6]
+      def reads = arrayify(it[7])
+      def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
+      def r2 = reads[1] ? reads[1] : "NA"      
+      def group = it[8]
+      def pop = it[9]
+      def age = it[10]
+
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+
+  }
+  .mix(ch_branched_for_lanemerge.skip_merge)
+  .dump()
+  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_validation } 
 
 /*
 * STEP 2b - FastQC after clipping/merging (if applied!)
@@ -1018,7 +1078,7 @@ if (!params.skip_adapterremoval) {
 // TODO: fastqc_after_clipping not happy when skip_collapsing 
 process fastqc_after_clipping {
     label 'sc_small'
-    tag "${libraryid}"
+    tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
@@ -1028,7 +1088,7 @@ process fastqc_after_clipping {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_fastqc.{zip,html}"), group, pop, age into ch_fastqc_after_clipping
+    file("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
 
     script:
     if ( params.skip_collapse && seqtype == "PE" ) {
@@ -1043,6 +1103,7 @@ process fastqc_after_clipping {
 
 }
 
+
 /*
 Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
 */
@@ -1055,7 +1116,7 @@ process bwa {
     when: params.mapper == 'bwaaln' && !params.skip_mapping
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_bwa
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_bwa
     file index from bwa_index.collect()
 
     output:
@@ -1066,7 +1127,7 @@ process bwa {
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
-    if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval) ){
+    if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
     prefix = libraryid
     """
     bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
@@ -1121,7 +1182,7 @@ process circularmapper{
     when: params.mapper == 'circularmapper' && !params.skip_mapping
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_cm
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from ch_fasta_for_circularmapper.collect()
 
@@ -1166,7 +1227,7 @@ process bwamem {
     when: params.mapper == 'bwamem' && !params.skip_mapping
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapteremoval_for_bwamem
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_bwamem
     file index from bwa_index_bwamem.collect()
 
     output:
@@ -1226,7 +1287,7 @@ process samtools_flagstat {
     script:
     prefix = libraryid
     """
-    samtools flagstat $bam > ${prefix}_flagstat.stats
+    samtools flagstat $bam > ${prefix}.stats
     """
 }
 
@@ -1312,7 +1373,7 @@ ch_convertbam_for_stripfastq
     .set { ch_synced_for_stripfastq }
 
 
-// TODO: Check works when turned on; fix output
+// TODO: Check works when turned on; fix output - with lane merging this becomes problematic. Will need extra process to merge by lane the fASTQS as well as bams
 process strip_input_fastq {
     label 'mc_medium'
     tag "${libraryid}"
@@ -1353,7 +1414,7 @@ process strip_input_fastq {
 process samtools_flagstat_after_filter {
     label 'sc_tiny'
     tag "$prefix"
-    publishDir "${params.outdir}/samtools/stats", mode: 'copy'
+    publishDir "${params.outdir}/samtools/filtered_stats", mode: 'copy'
 
     when:
     params.run_bam_filtering
@@ -1367,7 +1428,7 @@ process samtools_flagstat_after_filter {
     script:
     prefix = libraryid
     """
-    samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
+    samtools flagstat $bam > ${prefix}.stats
     """
 }
 
@@ -1420,11 +1481,11 @@ process endorSpy {
 
     if (params.run_bam_filtering) {
       """
-      endorS.py -o json -n ${samplename} ${stats} ${poststats}
+      endorS.py -o json -n ${libraryid} ${stats} ${poststats}
       """
     } else {
       """
-      endorS.py -o json -n ${samplename} ${stats}
+      endorS.py -o json -n ${libraryid} ${stats}
       """
     }
 }
@@ -1435,7 +1496,7 @@ Step 5a: DeDup
 */ 
 process dedup{
     label 'mc_small'
-    tag "${outname}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${prefix}/$filename"}
 
@@ -1501,14 +1562,58 @@ process markDup{
     """
 }
 
+/* 
+ Library merging
+*/
 
+// Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
+// IMPORTANT for DOCS: We will merge by samplename, organism, strandedness, udg, group, pop and age! All others are ignored - i.e. we only merge libraries with the same UDG/strandedness type because otherwise TrimBam/PMDtools won't work
+if ( params.skip_deduplication ) {
+  ch_input_for_librarymerging = ch_filtering_for_skiprmdup
+    .groupTuple(by:[0,4,5,6,9,10,11])
+    .branch{
+      skip_merging: it[7].size() == 1
+      merge_me: it[7].size() > 1
+    }
+} else {
+    ch_input_for_librarymerging = ch_output_from_dedup.mix(ch_output_from_markdup)
+    .groupTuple(by:[0,4,5,6,9,10,11])
+    .branch{
+      skip_merging: it[7].size() == 1
+      merge_me: it[7].size() > 1
+    }
+}
+
+
+// Step two: perform a library cat step
+// TODO: Need to update read group with Picard tools addOrReplaceReadGroups:https://broadinstitute.github.io/picard/command-line-overview.html#AddOrReplaceReadGroups
+process library_merge {
+  label 'mc_tiny'
+  tag "${samplename}"
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_librarymerging.merge_me
+
+  output:
+  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}"), group, pop, age into ch_output_from_librarymerging
+
+  script:
+  size = "${params.large_ref}" ? '-c' : ''
+  """
+  samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged"
+  samtools index "${size}" ${samplename}_libmerged_rg_rmdup.bam
+  """
+}
+
+// Step three: mix back in libraries from skipping dedup, skipping library merging
 if (!params.skip_deduplication) {
-    ch_filtering_for_skiprmdup.mix(ch_output_from_dedup, ch_output_from_markdup)
+    ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
 } else {
-    ch_filtering_for_skiprmdup
+    ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 }
 
@@ -1550,7 +1655,7 @@ Step 7a: DMG Assessment
 
 process damageprofiler {
     label 'sc_tiny'
-    tag "${bam.baseName}"
+    tag "${samplename}"
     publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
     when:
@@ -1579,7 +1684,7 @@ Step 8: Qualimap
 
 process qualimap {
     label 'mc_small'
-    tag "${bam.baseName}"
+    tag "${samplename}"
     publishDir "${params.outdir}/qualimap", mode: 'copy'
 
     when:
@@ -1615,7 +1720,7 @@ if (!params.run_bedtools_coverage){
 
 process bedtools {
   label 'mc_small'
-  tag "${bam.baseName}"
+  tag "${samplename}"
   publishDir "${params.outdir}/bedtools", mode: 'copy'
 
   when:
@@ -1641,7 +1746,7 @@ process bedtools {
 
 process pmdtools {
     label 'mc_small'
-    tag "${bam.baseName}"
+    tag "${samplename}"
     publishDir "${params.outdir}/pmdtools", mode: 'copy'
 
     when: params.run_pmdtools
@@ -1681,7 +1786,7 @@ process pmdtools {
 
 process bam_trim {
     label 'mc_small'
-    tag "${prefix}" 
+    tag "${samplename}" 
     publishDir "${params.outdir}/trimmed_bam", mode: 'copy'
  
     when: params.run_trim_bam
@@ -1748,7 +1853,7 @@ if ( params.gatk_ug_jar != '' ) {
 
  process genotyping_ug {
   label 'mc_small'
-  tag "${prefix}"
+  tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
   when:
@@ -2564,17 +2669,17 @@ def extract_data(tsvFile) {
             def age = row.Age
 
             // Check no 'empty' rows
-            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "Invalid TSV input: A row appears has all files defined as NA. Check row for: ${samplename}"
+            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "Invalid TSV input: A row appears has all files defined as NA. See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
             // Ensure BAMs aren't submitted with PE
-            if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "Invalid TSV input: BAM input rows cannot be paired end (PE). Check row for: ${samplename}"
+            if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "Invalid TSV input: BAM input rows cannot be paired end (PE). See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
             //  Ensure that we do not accept incompatible chemistry setup
-            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "Invalid TSV input:  SeqType for one or more rows is neither SE nor PE!. You have: ${seqtype}"
+            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "Invalid TSV input:  SeqType for one or more rows is neither SE nor PE! see --help or documentation under 'running the pipeline' for more information. You have: ${seqtype}"
                    
            // So we don't accept existing files that are wrong format: e.g. fasta or sam
-            if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "Invalid TSV input: The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
-            if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "Invalid TSV input: The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
+            if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "Invalid TSV input: see --help or documentation under 'running the pipeline' for more information. The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
+            if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "Invalid TSV input: see --help or documentation under 'running the pipeline' for more information. The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
             if ( !bam.matches('NA') && !has_extension(bam, "bam")) exit 1, "Invalid TSV input: The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
              
             [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, group, pop, age ]
@@ -2585,13 +2690,13 @@ def extract_data(tsvFile) {
 
 // Check if a row has the expected number of item
 def checkNumberOfItem(row, number) {
-    if (row.size() != number) exit 1, "Invalid TSV input: Malformed row (e.g. missing column) in ${row}, see --help for more information"
+    if (row.size() != number) exit 1, "Invalid TSV input: Malformed row (e.g. missing column) in ${row}, see --help or documentation under 'running the pipeline' for more information"
     return true
 }
 
 // Return file if it exists
 def return_file(it) {
-    if (!file(it).exists()) exit 1, "Invalid TSV input: Missing or incorrect file path. Set to NA if no file required. See --help for more information. Check file: ${it}" 
+    if (!file(it).exists()) exit 1, "Invalid TSV input: Missing or incorrect file path. Set to NA if no file required. See --help or documentation under 'running the pipeline' for more information. Check file: ${it}" 
     return file(it)
 }
 
@@ -2599,4 +2704,10 @@ def return_file(it) {
 // Check file extension
 def has_extension(it, extension) {
     it.toString().toLowerCase().endsWith(extension.toLowerCase())
+}
+
+// To convert a string to an array when not an array already
+// From: https://stackoverflow.com/a/55453674/11502856
+def arrayify(it) {
+  [] + it ?: [it]
 }
