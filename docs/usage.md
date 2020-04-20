@@ -365,6 +365,23 @@ This TSV should look like the following:
 When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging).
 It will also merge BAM files with the `Sample_Lane` but different `Library_ID` after duplicate removal, but prior to genotyping.
 
+Column descriptions are as follows:
+
+* **Sample_Name:** A text string containing the name of a given sample of which there can be multiple libraries. All libraries with the same sample name and same SeqType will be merged after deduplication.
+* **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).
+* **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (with same SeqType) will be concatenated after read clipping and merging.
+* **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [foward], or BAM).
+* **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
+* **Strandedness:** A text string indicating whether the library type is 'single' or 'double'. This currently has no functionality, but will affect lane/library merging if different per library.
+* **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.
+* **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column.
+* **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column.
+* **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'
+* **Group:** A text string with a given group assignment of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library.
+* **Populations:** A text string with a given population assignment of the sample. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library.
+* **Age:** A text string with a given age assignment of the sample. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library.
+
+
 For example, with the following:
 
 | Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM | Group   | Populations        | Age          |
