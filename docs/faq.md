@@ -1,5 +1,25 @@
 # Frequently Asked Questions
 
+## Warning about sticked on revision
+
+If you get a warning like the following:
+
+```bash
+Project nf-core/eager currently is sticked on revision: dev -- you need to specify explicitly a revision with the option -r to use it
+```
+
+This is a nextflow error. This means that you have multiple versions of nf-core/eager downloaded (e.g. 2.0.0, 2.1.0, 2.1.1, dev etc.). This means with every `nextflow run nf-core/eager` command you must always specify which one you want to use - there is no 'default'.
+
+For example:
+
+```bash
+nextflow run nf-core/eager -r 2.1.0 --reads '/<path>/<to>/data/*_{R1,R2}_*.fq.gz' <...>
+```
+
+Specifying the version of the run you are using is highly recommended, as it helps in fully reproducibility - as if you record the whole command _with_ the version for your publication or internal reports, then anyone who wants to check your work can get the exact version you used (including all internal tools).
+
+You can see more information on the nextflow documentation [here](https://www.nextflow.io/docs/latest/sharing.html?highlight=revision#handling-revisions).
+
 ## I specified a module and it didn't produce the expected output
 
 Possible options:
