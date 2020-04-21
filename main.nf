@@ -58,7 +58,6 @@ def helpMessage() {
     Skipping                        Skip any of the mentioned steps.
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
-      --skip_mapping                Note: this maybe useful when input is a BAM file.
       --skip_preseq
       --skip_damage_calculation
       --skip_qualimap
@@ -310,16 +309,6 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
         .into {bwa_index; bwa_index_bwamem}
 }
 
-// Validate that you're not trying to pass FASTQs to BAM only processes
-if (params.run_convertbam && params.skip_mapping) {
-  exit 1, "You can't convert a BAM to FASTQ and skip mapping! Post-mapping steps require BAM input. Please validate your parameters!"
-}
-
-// Validate that you're not trying to pass FASTQs to BAM only processes
-if (params.bam && !params.run_convertbam && !params.skip_mapping) {
-  exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
-}
-
 // Validate that skip_collapse is only set to True for paired_end reads!
 if (params.skip_collapse  && params.single_end){
     exit 1, "--skip_collapse can only be set for paired_end samples!"
@@ -561,7 +550,6 @@ summary['Run Fastq Stripping'] = params.strip_input_fastq ? 'Yes' : 'No'
 if (params.strip_input_fastq){
     summary['Strip mode'] = params.strip_mode
 }
-summary['Skipping Mapping?'] = params.skip_mapping ? 'Yes' : 'No'
 summary['Skipping Preseq?'] = params.skip_preseq ? 'Yes' : 'No'
 summary['Skipping Deduplication?'] = params.skip_deduplication ? 'Yes' : 'No'
 summary['Skipping DamageProfiler?'] = params.skip_damage_calculation ? 'Yes' : 'No'
@@ -1332,9 +1320,6 @@ process samtools_flagstat {
     tag "$prefix"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
-    when:
-    !params.skip_mapping
-
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_mapping_for_samtools_flagstat
 
@@ -1564,9 +1549,6 @@ process endorSpy {
     label 'sc_tiny'
     tag "$prefix"
     publishDir "${params.outdir}/endorSpy", mode: 'copy'
-
-    when:
-    !params.skip_mapping
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, group, pop, age, file(stats), file(poststats) from ch_allflagstats_for_endorspy
