@@ -509,7 +509,6 @@ Set this parameter to your e-mail address to get a summary e-mail with details o
 
 Note that this functionality requires either `mail` or `sendmail` to be installed on your system.
 
-
 #### `--plaintext_email`
 
 Set to receive plain-text e-mails instead of HTML formatted.
