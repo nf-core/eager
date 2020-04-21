@@ -233,7 +233,7 @@ results         # Finished results (configurable, see below)
 
 To see the the EAGER pipeline help message run: `nextflow run nf-core/eager --help`
 
-> By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
+> By default, if a pipeline step fails, nf-core/eager will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
 
 ### Updating the pipeline
 
@@ -380,7 +380,6 @@ Column descriptions are as follows:
 * **Group:** A text string with a given group assignment of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library.
 * **Populations:** A text string with a given population assignment of the sample. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library.
 * **Age:** A text string with a given age assignment of the sample. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library.
-
 
 For example, with the following:
 

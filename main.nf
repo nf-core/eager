@@ -517,8 +517,9 @@ ch_input_for_convertbam = Channel.empty()
 ch_bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; }
 
+// Also need to send raw files for lange merging, if we want to strip fastq
 ch_fastq_channel
-  .set { ch_input_for_skipconvertbam }
+  .into { ch_input_for_skipconvertbam; ch_input_for_lanemerge_stripfastq }
 
 // Header log info
 log.info nfcoreHeader()
@@ -786,7 +787,7 @@ process indexinputbam {
 
 // convertbam bypass
     ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
-        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc; ch_convertbam_for_stripfastq } 
+        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc } 
 
 /*
  * STEP 1a - FastQC
@@ -1044,6 +1045,38 @@ process lanemerge {
 
 }
 
+
+// Sync BAM and FASTQ
+process lanemerge_stripfastq {
+  label 'mc_tiny'
+  tag "${libraryid}"
+
+
+  when: 
+  params.strip_input_fastq
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_input_for_lanemerge_stripfastq.groupTuple(by: [0,1,3,4,5,6,9,10,11])
+
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_fastqlanemerge_for_stripfastq
+
+  script:
+  if ( seqtype == 'PE' ){
+  lane = 0
+  """
+  cat ${r1} > "${libraryid}"_R1_lanemerged.fq.gz
+  cat ${r2} > "${libraryid}"_R2_lanemerged.fq.gz
+  """
+  } else {
+  """
+  cat ${r1} > "${libraryid}"_R1_lanemerged.fq.gz
+  """
+  }
+
+}
+
 // preparation for mapping - including splitting pairs into two variables if not merged PE data
 // What about if user supplies both PE and SE data but skip collapse?  Removing seqtype info for is then lost...
 // Add branch to skip lane merging if not required?
@@ -1070,7 +1103,6 @@ ch_lanemerge_for_mapping
 
   }
   .mix(ch_branched_for_lanemerge.skip_merge)
-  .dump()
   .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_validation } 
 
 /*
@@ -1288,7 +1320,7 @@ process samtools_flagstat {
     script:
     prefix = libraryid
     """
-    samtools flagstat $bam > ${prefix}.stats
+    samtools flagstat $bam > ${prefix}_flagstat.stats
     """
 }
 
@@ -1369,12 +1401,51 @@ if (params.run_bam_filtering) {
 }
 
 // Synchronise the input FASTQ and BAM channels
-ch_convertbam_for_stripfastq
-    .join(ch_filtering_for_stripfastq, by: [0,1,2,3,4,5,6,9,10,11])
+ch_fastqlanemerge_for_stripfastq
+    .map {
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def reads = arrayify(it[7])
+        def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
+        def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
+        def group = it[8]
+        def pop = it[9]
+        def age = it[10]
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+
+    }
+    .mix(ch_filtering_for_stripfastq)
+    .groupTuple(by: [0,1,3,4,5,6,9,10,11])
+    .map {
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = it[7][0]
+        def r2 = it[8][0]
+        def bam = it[7][1]
+        def bai = it[8][1]
+        def group = it[9]
+        def pop = it[10]
+        def age = it[11]
+
+       [ samplename, libraryid, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ]
+
+    }
     .set { ch_synced_for_stripfastq }
 
 
 // TODO: Check works when turned on; fix output - with lane merging this becomes problematic. Will need extra process to merge by lane the fASTQS as well as bams
+// TODO: Map above fails because of groupTuple mixing arrays by index position.
 process strip_input_fastq {
     label 'mc_medium'
     tag "${libraryid}"
@@ -1384,10 +1455,10 @@ process strip_input_fastq {
     params.strip_input_fastq
 
     input: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg,  group, pop, age, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai), group, pop, age from ch_synced_for_stripfastq.dump()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_output_from_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_output_from_stripfastq
 
 
     script:
@@ -1429,7 +1500,7 @@ process samtools_flagstat_after_filter {
     script:
     prefix = libraryid
     """
-    samtools flagstat $bam > ${prefix}.stats
+    samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
     """
 }
 
