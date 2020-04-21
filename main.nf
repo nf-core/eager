@@ -492,12 +492,21 @@ if (workflow.profile.contains('awsbatch')) {
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
 
+
+// From --reads
+
 // If read paths
 //    Is single FASTQ
 //    Is paired-end FASTQ
 //    Is single BAM
 // If NOT read paths && FASTQ
 // is NOT read paths && BAM
+
+
+ch_reads_for_input = Channel.empty()
+
+// From --tsv_input
+
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
 ch_branched_input = ch_input_sample.branch{
@@ -804,7 +813,7 @@ process fastqc {
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: 
-    !params.skip_fastqc || bam != 'NA' && params.run_convertbam
+    !params.skip_fastqc
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastqc
@@ -840,19 +849,19 @@ process fastp {
     publishDir "${params.outdir}/FastP", mode: 'copy'
 
     when: 
-    bam != 'NA' && params.complexity_filter_poly_g || bam != 'NA' && params.run_convertbam && params.complexity_filter_poly_g
+    params.complexity_filter_poly_g
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastp
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${r1}.pG.fq.gz"), file("${r2}.pG.fq.gz"), group, pop, age into ch_output_from_fastp
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.pG.fq.gz"), group, pop, age into ch_output_from_fastp
     file("*.json") into ch_fastp_for_multiqc
 
     script:
-    if(r2 == 'NA'){
+    if( seqtype == 'SE' ){
     """
-    fastp --in1 ${r1} --out1 "${r1}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${r1.baseName}"_fastp.json 
+    fastp --in1 ${r1} --out1 "${r1.baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${r1.baseName}"_fastp.json 
     """
     } else {
     """
@@ -865,7 +874,26 @@ process fastp {
 // fastp bypass
 if (params.complexity_filter_poly_g) {
     ch_convertbam_for_skipfastp.mix(ch_output_from_fastp)
+      .map{
+        it -> 
+          def samplename = it[0]
+          def libraryid  = it[1]
+          def lane = it[2]
+          def seqtype = it[3]
+          def organism = it[4]
+          def strandedness = it[5]
+          def udg = it[6]
+          def r1 = it[7].getClass() == ArrayList ? it[7][0] : it[7]
+          def r2 = seqtype == "PE" ? file(it[7][1]) : 'NA'
+          def group = it[8]
+          def pop = it[9]
+          def age = it[10]
+
+          [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+
+      }
         .filter { it =~/.*pG.fq.gz/ }
+        .dump()
         .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
 } else {
     ch_convertbam_for_skipfastp
@@ -893,7 +921,7 @@ process adapter_removal {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*.settings"), group, pop, age into ch_adapterremoval_logs
 
     when: 
-    bam != "NA"  && !params.skip_adapterremoval || params.bam && params.run_convertbam && !params.skip_adapterremoval
+    !params.skip_adapterremoval
 
     script:
     base = "${r1.baseName}"
@@ -1120,7 +1148,7 @@ process fastqc_after_clipping {
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
-    when: !params.bam  && !params.skip_adapterremoval && !params.skip_fastqc || params.bam && params.run_convertbam && !params.skip_adapterremoval && !params.skip_fastqc
+    when: !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapterremoval_for_fastqc_after_clipping
@@ -1292,7 +1320,6 @@ process bwamem {
 
 // Gather all mapped BAMs to send for downstream
 ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for_filtering)
-  .dump()
   .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
 
 
@@ -1832,7 +1859,7 @@ process pmdtools {
 
     script:
     //Check which treatment for the libraries was used
-    def treatment = udg ? (udg =='half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
+    def treatment = udg ? (udg == 'half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
     if(params.snpcapture){
         snpcap = (params.pmdtools_reference_mask != '') ? "--refseq ${params.pmdtools_reference_mask}" : ''
         log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
