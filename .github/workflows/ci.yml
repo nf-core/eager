@@ -43,7 +43,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --fasta 'https://github.com/nf-core/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.gz'
       - name: FASTP Test fastp complexity filtering
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --complexity_filter
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --complexity_filter_poly_g
       - name: ADAPTERREMOVAL Test skip paired end collapsing
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --paired_end --skip_collapse
