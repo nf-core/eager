@@ -235,6 +235,11 @@ ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
 ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
+// check we have valid --reads or --tsv_input
+if ( params.tsv_input == null && params.reads == null ) {
+  exit 1, "Error: Neither --reads or --tsv_input was supplied. Please see --help and documentation under 'running the pipeline' for details"
+}
+
 // Read in files properly from TSV file
 tsv_path = null
 if (params.tsv_input && (has_extension(params.tsv_input, "tsv"))) tsv_path = params.tsv_input
@@ -243,7 +248,7 @@ ch_input_sample = Channel.empty()
 if (tsv_path) {
     tsv_file = file(tsv_path)
     ch_input_sample = extract_data(tsv_file)
-} else exit 1, "TSV file was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
+} else exit 1, "Error: TSV file was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
 /*
 * SANITY CHECKING reference inputs
@@ -769,14 +774,14 @@ process indexinputbam {
   label 'sc_small'
   tag "$libraryid"
 
+  when: 
+  bam != 'NA' && !params.run_convertbam
+
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from ch_input_for_indexbam 
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}"), group, pop, age  into ch_indexbam_for_filtering
-
-  when: 
-  bam != 'NA' && !params.run_convertbam
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -799,7 +804,7 @@ process fastqc {
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when: 
-    !params.skip_fastqc || params.bam && params.run_convertbam
+    !params.skip_fastqc || bam != 'NA' && params.run_convertbam
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastqc
@@ -1003,10 +1008,10 @@ if ( params.skip_collapse ){
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
 } else {
     ch_fastp_for_skipadapterremoval
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge } 
+        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
 }
 
 // Prepare for lane merging (and skipping if no merging required)
@@ -1103,7 +1108,7 @@ ch_lanemerge_for_mapping
 
   }
   .mix(ch_branched_for_lanemerge.skip_merge)
-  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_validation } 
+  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem } 
 
 /*
 * STEP 2b - FastQC after clipping/merging (if applied!)
@@ -1146,7 +1151,7 @@ process bwa {
     tag "${libraryid}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: params.mapper == 'bwaaln' && !params.skip_mapping
+    when: params.mapper == 'bwaaln'
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_bwa
@@ -1189,7 +1194,7 @@ process circulargenerator{
             else null
     }
 
-    when: params.mapper == 'circularmapper' && !params.skip_mapping
+    when: params.mapper == 'circularmapper'
 
     input:
     file fasta from ch_fasta_for_circulargenerator
@@ -1212,7 +1217,7 @@ process circularmapper{
     tag "$prefix"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
 
-    when: params.mapper == 'circularmapper' && !params.skip_mapping
+    when: params.mapper == 'circularmapper'
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_cm
@@ -1257,7 +1262,7 @@ process bwamem {
     tag "$prefix"
     publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
 
-    when: params.mapper == 'bwamem' && !params.skip_mapping
+    when: params.mapper == 'bwamem'
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_bwamem
@@ -1285,19 +1290,11 @@ process bwamem {
     
 }
 
+// Gather all mapped BAMs to send for downstream
+ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for_filtering)
+  .dump()
+  .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
 
-// mapping bypass
-if (!params.skip_mapping) {
-    ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm)
-        .filter { it =~/.*mapped.bam/ }
-        .mix(ch_indexbam_for_filtering)
-        .into { ch_mapping_for_filtering; ch_mapping_for_skipfiltering; ch_mapping_for_samtools_flagstat } 
-
-} else {
-    ch_adapterremoval_for_skipmap.mix(ch_indexbam_for_filtering)
-        .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
-
-}
 
 /*
 * Step 3b - flagstat
@@ -1441,6 +1438,7 @@ ch_fastqlanemerge_for_stripfastq
        [ samplename, libraryid, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ]
 
     }
+    .filter{ it[8] != null }
     .set { ch_synced_for_stripfastq }
 
 
@@ -1454,8 +1452,9 @@ process strip_input_fastq {
     when: 
     params.strip_input_fastq
 
+
     input: 
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai), group, pop, age from ch_synced_for_stripfastq.dump()
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai), group, pop, age from ch_synced_for_stripfastq
 
     output:
     tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_output_from_stripfastq

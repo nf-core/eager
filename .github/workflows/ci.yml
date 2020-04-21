@@ -85,7 +85,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker  --dedupper 'dedup' --run_genotyping --genotyping_tool 'freebayes'
       - name: SKIPPING Test checking all skip steps work i.e. input bam, skipping straight to genotyping
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --bam  --skip_fastqc --skip_adapterremoval --skip_mapping --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --bam  --skip_fastqc --skip_adapterremoval --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
       - name: TRIMBAM Test bamutils works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker  --dedupper 'dedup' --run_trim_bam

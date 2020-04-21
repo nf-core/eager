@@ -44,7 +44,6 @@
     * [Step skipping parameters](#step-skipping-parameters)
       * [`--skip_fastqc`](#--skip_fastqc)
       * [`--skip_adapterremoval`](#--skip_adapterremoval)
-      * [`--skip_mapping`](#--skip_mapping)
       * [`--skip_preseq`](#--skip_preseq)
       * [`--skip_deduplication`](#--skip_deduplication)
       * [`--skip_damage_calculation`](#--skip_damage_calculation)
@@ -605,10 +604,6 @@ Turns off FastQC pre- and post-Adapter Removal, to speed up the pipeline. Use of
 
 Turns off adaptor trimming and paired-end read merging. Equivalent to setting both `--skip_collapse` and `--skip_trim`.
 
-#### `--skip_mapping`
-
-Allows you to skip mapping step and go straight downstream to BAM processing steps.
-
 #### `--skip_preseq`
 
 Turns off the computation of library complexity estimation.
@@ -630,6 +625,8 @@ Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 #### `--run_convertbam`
 
 Allows you to convert BAM input back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
+
+If not turned on, BAMs will automatically be sent to post-mapping steps.
 
 ### Complexity Filtering Options
 
