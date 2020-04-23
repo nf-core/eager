@@ -230,6 +230,7 @@ if (params.help){
 // Stage config files
 ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+ch_eager_logo = file("$baseDir/docs/images/nf-core_eager_logo.png")
 ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
 ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
@@ -2547,6 +2548,7 @@ process multiqc {
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
+    file logo from ch_eager_logo
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
