@@ -863,7 +863,6 @@ process fastp {
 if (params.complexity_filter_poly_g) {
     ch_convertbam_for_skipfastp.mix(ch_output_from_fastp)
       .map{
-        it -> 
           def samplename = it[0]
           def libraryid  = it[1]
           def lane = it[2]
@@ -872,7 +871,7 @@ if (params.complexity_filter_poly_g) {
           def strandedness = it[5]
           def udg = it[6]
           def r1 = it[7].getClass() == ArrayList ? it[7][0] : it[7]
-          def r2 = seqtype == "PE" ? file(it[7][1]) : 'NA'
+          def r2 = seqtype == "PE" ? it[7][1] : 'NA'
           def group = it[8]
           def pop = it[9]
           def age = it[10]
@@ -881,7 +880,6 @@ if (params.complexity_filter_poly_g) {
 
       }
         .filter { it =~/.*pG.fq.gz/ }
-        .dump()
         .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
 } else {
     ch_convertbam_for_skipfastp
