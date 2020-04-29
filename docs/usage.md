@@ -13,7 +13,6 @@
       * [`-profile`](#-profile)
       * [`--reads`](#--reads)
       * [`--single_end`](#--single_end)
-      * [`--paired_end`](#--paired_end)
       * [`--colour_chemistry`](#--colour_chemistry)
       * [`--bam`](#--bam)
       * [`--tsv_input`](#--tsv_input)
@@ -359,8 +358,8 @@ This is mutually exclusive from `--reads`, and it is recommended only to be used
 
 This TSV should look like the following:
 
-| Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                                                                                                  | R2                                                                                                                                  | BAM | Group   | Populations        | Age          |
-|-------------|------------|------|---------|----------|--------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|-----|-----------|---------|--------------------|--------------|
+| Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1 | R2 | BAM | Group   | Populations        | Age          |
+|-------------|------------|------|---------|----------|--------------|---------------|----|----|-----|---------|--------------------|--------------|
 | JK2782      | JK2782     | 1    | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
 | JK2802      | JK2802     | 2    | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
 
@@ -394,7 +393,7 @@ For example, with the following:
 | JK2802      | JK2802_SE  | 7    | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
 | JK2802      | JK2802_PE  | 8    | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
 
-After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ will be concatenated together for each **Library**. After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` will be merged together.
+After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**. After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` will be merged together.
 
 Note the following important caveats:
 
