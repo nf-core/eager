@@ -833,10 +833,10 @@ process fastqc {
 * Note: Clipping, Merging, Quality Trimning are turned off here - we leave this to adapter removal itself!
 */
 
-// fastp decision
+// fastp decision: have to have in condition as including params doesn't seem to work properly
 if (params.complexity_filter_poly_g) {
   ch_input_for_fastp = ch_convertbam_for_fastp.branch{
-    twocol: it[3] == '2' // Nextseq/Novaseq data with possible sequencing artegact
+    twocol: it[3] == '2' // Nextseq/Novaseq data with possible sequencing artefact
     fourcol: it[3] == '4'  // HiSeq/MiSeq data where polyGs would be true
   }
 
@@ -875,6 +875,7 @@ process fastp {
     }
 }
 
+// colour column only useful for fastp, so dropping now to reduce complexity downstream
 ch_input_for_fastp.fourcol
   .map {
       def samplename = it[0]
@@ -890,9 +891,7 @@ ch_input_for_fastp.fourcol
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
     }
- .dump()
  .set { ch_skipfastp_for_merge }
-
 
 ch_output_from_fastp
   .map{
