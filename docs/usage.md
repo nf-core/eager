@@ -14,6 +14,7 @@
       * [`--reads`](#--reads)
       * [`--single_end`](#--single_end)
       * [`--paired_end`](#--paired_end)
+      * [`--colour_chemistry`](#--colour_chemistry)
       * [`--bam`](#--bam)
       * [`--tsv_input`](#--tsv_input)
       * [`--fasta`](#--fasta)
@@ -345,6 +346,10 @@ For example:
 #### `--bam`
 
 Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `-reads` and `--single_end`.
+
+#### `--colour_chemistry`
+
+Specifies which Illumina colour chemistry was a library was sequenced with. This informs  whether to perform poly-G trimming (if `--complexity_filter_poly_g` is also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can generate uncertain poly-G tails (due to 'G' being indicated via a no-colour detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do not require poly-G trimming. Options: 2, 4. Default: 4
 
 #### `--tsv_input`
 
