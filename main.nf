@@ -833,6 +833,21 @@ process fastqc {
 * Note: Clipping, Merging, Quality Trimning are turned off here - we leave this to adapter removal itself!
 */
 
+// fastp decision
+if (params.complexity_filter_poly_g) {
+  ch_input_for_fastp = ch_convertbam_for_fastp.branch{
+    twocol: it[3] == '2' // Nextseq/Novaseq data with possible sequencing artegact
+    fourcol: it[3] == '4'  // HiSeq/MiSeq data where polyGs would be true
+  }
+
+} else {
+  ch_input_for_fastp = ch_convertbam_for_fastp.branch{
+    twocol: it[3] == "dummy" // seq/Novaseq data with possible sequencing artefact
+    fourcol: it[3] == '4' || it[3] == '2'  // HiSeq/MiSeq data where polyGs would be true
+  }
+
+}
+
 process fastp {
     label 'mc_small'
     tag "${libraryid}_L${lane}"
@@ -842,7 +857,7 @@ process fastp {
     params.complexity_filter_poly_g
 
     input:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_convertbam_for_fastp
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_fastp.twocol
 
     output:
     tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*.pG.fq.gz") into ch_output_from_fastp
@@ -860,49 +875,44 @@ process fastp {
     }
 }
 
+ch_input_for_fastp.fourcol
+  .map {
+      def samplename = it[0]
+      def libraryid  = it[1]
+      def lane = it[2]
+      def seqtype = it[4]
+      def organism = it[5]
+      def strandedness = it[6]
+      def udg = it[7]
+      def r1 = it[8]
+      def r2 = seqtype == "PE" ? it[9] : 'NA'
+      
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
-// fastp bypass 
-if (params.complexity_filter_poly_g) {
-    ch_convertbam_for_skipfastp.mix(ch_output_from_fastp)
-      .map{
-          def samplename = it[0]
-          def libraryid  = it[1]
-          def lane = it[2]
-          def seqtype = it[4]
-          def organism = it[5]
-          def strandedness = it[6]
-          def udg = it[7]
-          def r1 = it[8].getClass() == ArrayList ? it[8][0] : it[8]
-          def r2 = seqtype == "PE" ? it[8][1] : 'NA'
+    }
+ .dump()
+ .set { ch_skipfastp_for_merge }
 
-          [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
-      }
-        .filter { it =~/.*pG.fq.gz/ }
-        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
-} else {
-    ch_convertbam_for_skipfastp
-      .dump()
-      .map{
-          def samplename = it[0]
-          def libraryid  = it[1]
-          def lane = it[2]
-          def seqtype = it[4]
-          def organism = it[5]
-          def strandedness = it[6]
-          def udg = it[7]
-          def r1 = it[8]
-          def r2 = seqtype == "PE" ? it[9] : 'NA'
+ch_output_from_fastp
+  .map{
+    def samplename = it[0]
+    def libraryid  = it[1]
+    def lane = it[2]
+    def seqtype = it[4]
+    def organism = it[5]
+    def strandedness = it[6]
+    def udg = it[7]
+    def r1 = it[8].getClass() == ArrayList ? it[8][0] : it[8]
+    def r2 = seqtype == "PE" ? it[8][1] : 'NA'
 
-          println("")
-          println("$samplename $r2")
-          println("")
+    [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
-          [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
-        }
-        .dump()
-        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
-}
+  }
+  .set{ ch_fastp_for_merge }
+
+ch_skipfastp_for_merge.mix(ch_fastp_for_merge)
+  .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
 
 
 /*
@@ -2737,7 +2747,7 @@ def extract_data(tsvFile) {
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID
             def lane = row.Lane
-            def colour = row.ColourChemistry
+            def colour = row.Colour_Chemistry
             def seqtype = row.SeqType
             def organism = row.Organism
             def strandedness = row.Strandedness
