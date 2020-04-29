@@ -29,6 +29,7 @@ def helpMessage() {
       Path Input
         --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs. [CURRENTLY NOT FUNCTIONAL]
         --single_end                  Specifies that the input is single end reads. [CURRENTLY NOT FUNCTIONAL]
+        --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Options: 2, 4. Default: ${params.colour_chemistry} [CURRENTLY NOT FUNCTIONAL]
 
       TSV Input
         --tsv_input                   Path to TSV file containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
@@ -64,7 +65,7 @@ def helpMessage() {
       --skip_deduplication
 
     Complexity Filtering 
-      --complexity_filter_poly_g        Turn on running poly-G removal on FASTQ files.
+      --complexity_filter_poly_g        Turn on running poly-G removal on FASTQ files. Will only be performed on 2 colour chemistry.
       --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed. Default: ${params.complexity_filter_poly_g_min}
 
     Clipping / Merging
@@ -500,19 +501,20 @@ ch_reads_for_input = Channel.empty()
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
 ch_branched_input = ch_input_sample.branch{
-    fastq: it[7] != 'NA' //These are all fastqs
-    bam: it[9] != 'NA' //These are all BAMs
+    fastq: it[8] != 'NA' //These are all fastqs
+    bam: it[10] != 'NA' //These are all BAMs
 }
 
 //Removing BAM/BAI in case of a FASTQ input
 ch_fastq_channel = ch_branched_input.fastq.map {
-  samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam,group, pop, age ->
-    [samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age]
+  samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2, bam ->
+    [samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2]
 }
+
 //Removing R1/R2 in case of BAM input
 ch_bam_channel = ch_branched_input.bam.map {
-  samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, group, pop, age ->
-    [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, group, pop, age]
+  samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2, bam ->
+    [samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, bam]
 }
 
 // Prepare starting channels, here we go
@@ -753,10 +755,10 @@ process convertBam {
     params.run_convertbam
 
     input: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from ch_input_for_convertbam 
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_convertbam 
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*fastq.gz"), val('NA'), group, pop, age into ch_output_from_convertbam
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*fastq.gz"), val('NA') into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -776,10 +778,10 @@ process indexinputbam {
   bam != 'NA' && !params.run_convertbam
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), group, pop, age from ch_input_for_indexbam 
+  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_indexbam 
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}"), group, pop, age  into ch_indexbam_for_filtering
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}")  into ch_indexbam_for_filtering
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -805,7 +807,7 @@ process fastqc {
     !params.skip_fastqc
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastqc
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_convertbam_for_fastqc
 
     output:
     file "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
@@ -832,6 +834,21 @@ process fastqc {
 * Note: Clipping, Merging, Quality Trimning are turned off here - we leave this to adapter removal itself!
 */
 
+// fastp decision: have to have in condition as including params doesn't seem to work properly
+if (params.complexity_filter_poly_g) {
+  ch_input_for_fastp = ch_convertbam_for_fastp.branch{
+    twocol: it[3] == '2' // Nextseq/Novaseq data with possible sequencing artefact
+    fourcol: it[3] == '4'  // HiSeq/MiSeq data where polyGs would be true
+  }
+
+} else {
+  ch_input_for_fastp = ch_convertbam_for_fastp.branch{
+    twocol: it[3] == "dummy" // seq/Novaseq data with possible sequencing artefact
+    fourcol: it[3] == '4' || it[3] == '2'  // HiSeq/MiSeq data where polyGs would be true
+  }
+
+}
+
 process fastp {
     label 'mc_small'
     tag "${libraryid}_L${lane}"
@@ -841,10 +858,10 @@ process fastp {
     params.complexity_filter_poly_g
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_convertbam_for_fastp
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_fastp.twocol
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.pG.fq.gz"), group, pop, age into ch_output_from_fastp
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*.pG.fq.gz") into ch_output_from_fastp
     file("*.json") into ch_fastp_for_multiqc
 
     script:
@@ -859,33 +876,43 @@ process fastp {
     }
 }
 
+// colour column only useful for fastp, so dropping now to reduce complexity downstream
+ch_input_for_fastp.fourcol
+  .map {
+      def samplename = it[0]
+      def libraryid  = it[1]
+      def lane = it[2]
+      def seqtype = it[4]
+      def organism = it[5]
+      def strandedness = it[6]
+      def udg = it[7]
+      def r1 = it[8]
+      def r2 = seqtype == "PE" ? it[9] : 'NA'
+      
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
-// fastp bypass
-if (params.complexity_filter_poly_g) {
-    ch_convertbam_for_skipfastp.mix(ch_output_from_fastp)
-      .map{
-          def samplename = it[0]
-          def libraryid  = it[1]
-          def lane = it[2]
-          def seqtype = it[3]
-          def organism = it[4]
-          def strandedness = it[5]
-          def udg = it[6]
-          def r1 = it[7].getClass() == ArrayList ? it[7][0] : it[7]
-          def r2 = seqtype == "PE" ? it[7][1] : 'NA'
-          def group = it[8]
-          def pop = it[9]
-          def age = it[10]
+    }
+ .set { ch_skipfastp_for_merge }
 
-          [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+ch_output_from_fastp
+  .map{
+    def samplename = it[0]
+    def libraryid  = it[1]
+    def lane = it[2]
+    def seqtype = it[4]
+    def organism = it[5]
+    def strandedness = it[6]
+    def udg = it[7]
+    def r1 = it[8].getClass() == ArrayList ? it[8][0] : it[8]
+    def r2 = seqtype == "PE" ? it[8][1] : 'NA'
 
-      }
-        .filter { it =~/.*pG.fq.gz/ }
-        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
-} else {
-    ch_convertbam_for_skipfastp
-        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
-}
+    [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+  }
+  .set{ ch_fastp_for_merge }
+
+ch_skipfastp_for_merge.mix(ch_fastp_for_merge)
+  .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
 
 
 /*
@@ -900,12 +927,12 @@ process adapter_removal {
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_fastp_for_adapterremoval
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*{combined.fq,.se.truncated,pair1.truncated}.gz"), group, pop, age into ch_output_from_adapterremoval_r1
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*pair2.truncated.gz"), group, pop, age optional true into ch_output_from_adapterremoval_r2
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*.settings"), group, pop, age into ch_adapterremoval_logs
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*pair2.truncated.gz") optional true into ch_output_from_adapterremoval_r2
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*.settings") into ch_adapterremoval_logs
 
     when: 
     !params.skip_adapterremoval
@@ -977,7 +1004,7 @@ process adapter_removal {
 if ( params.skip_collapse ){
   ch_output_from_adapterremoval_r1
     .mix(ch_output_from_adapterremoval_r2)
-    .groupTuple(by: [0,1,2,3,4,5,6,8,9,10])
+    .groupTuple(by: [0,1,2,3,4,5,6])
     .map{
       it -> 
         def samplename = it[0]
@@ -989,11 +1016,8 @@ if ( params.skip_collapse ){
         def udg = it[6]
         def r1 = file(it[7][0])
         def r2 = seqtype == "PE" ? file(it[7][1]) : 'NA'
-        def group = it[8]
-        def pop = it[9]
-        def age = it[10]
 
-        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
     }
     .into { ch_output_from_adapterremoval; ch_adapterremoval_for_postfastqc }
@@ -1010,11 +1034,8 @@ if ( params.skip_collapse ){
         def udg = it[6]
         def r1 = file(it[7])
         def r2 = 'NA'
-        def group = it[8]
-        def pop = it[9]
-        def age = it[10]
 
-        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
     }
     .into { ch_output_from_adapterremoval; ch_adapterremoval_for_postfastqc }
 }
@@ -1031,7 +1052,7 @@ if (!params.skip_adapterremoval) {
 
 // Prepare for lane merging (and skipping if no merging required)
 ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
-  .groupTuple(by: [0,1,3,4,5,6,9,10,11])
+  .groupTuple(by: [0,1,3,4,5,6])
   .branch {
     skip_merge: it[7].size() == 1
     merge_me: it[7].size() > 1 //These are all fastqs
@@ -1045,10 +1066,10 @@ process lanemerge {
   tag "${libraryid}"
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_branched_for_lanemerge.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_branched_for_lanemerge.merge_me
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_lanemerge_for_mapping
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_lanemerge_for_mapping
 
   script:
   if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
@@ -1076,11 +1097,11 @@ process lanemerge_stripfastq {
   params.strip_input_fastq
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_input_for_lanemerge_stripfastq.groupTuple(by: [0,1,3,4,5,6,9,10,11])
+  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_lanemerge_stripfastq.groupTuple(by: [0,1,3,4,5,6,7])
 
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_fastqlanemerge_for_stripfastq
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
 
   script:
   if ( seqtype == 'PE' ){
@@ -1115,11 +1136,8 @@ ch_lanemerge_for_mapping
       def reads = arrayify(it[7])
       def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : "NA"      
-      def group = it[8]
-      def pop = it[9]
-      def age = it[10]
 
-      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
   }
   .mix(ch_branched_for_lanemerge.skip_merge)
@@ -1138,7 +1156,7 @@ process fastqc_after_clipping {
     when: !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_adapterremoval_for_fastqc_after_clipping
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
     file("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
@@ -1169,11 +1187,11 @@ process bwa {
     when: params.mapper == 'bwaaln'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_bwa
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwa
     file index from bwa_index.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwa   
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwa   
 
     script:
     size = "${params.large_ref}" ? '-c' : ''
@@ -1235,12 +1253,12 @@ process circularmapper{
     when: params.mapper == 'circularmapper'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_cm
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from ch_fasta_for_circularmapper.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_cm, ch_outputindex_from_cm
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_cm, ch_outputindex_from_cm
     
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
@@ -1280,11 +1298,11 @@ process bwamem {
     when: params.mapper == 'bwamem'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2), group, pop, age from ch_lanemerge_for_bwamem
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwamem
     file index from bwa_index_bwamem.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_bwamem
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwamem
     
     script:
     fasta = "${index}/${bwa_base}"
@@ -1320,10 +1338,10 @@ process samtools_flagstat {
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_mapping_for_samtools_flagstat
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_mapping_for_samtools_flagstat
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*stats"), group, pop, age into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*stats") into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
 
     script:
     prefix = libraryid
@@ -1351,12 +1369,12 @@ process samtools_filter {
     params.run_bam_filtering
 
     input: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_mapping_for_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_mapping_for_filtering
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_filtering,ch_outputindex_from_filtering
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz"), group, pop, age optional true into ch_bam_filtering_for_metagenomic
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam"), group, pop, age optional true
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering,ch_outputindex_from_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
     script:
     prefix = libraryid
@@ -1421,15 +1439,12 @@ ch_fastqlanemerge_for_stripfastq
         def reads = arrayify(it[7])
         def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
         def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
-        def group = it[8]
-        def pop = it[9]
-        def age = it[10]
 
-        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, group, pop, age ]
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
     }
     .mix(ch_filtering_for_stripfastq)
-    .groupTuple(by: [0,1,3,4,5,6,9,10,11])
+    .groupTuple(by: [0,1,3,4,5,6])
     .map {
         def samplename = it[0]
         def libraryid  = it[1]
@@ -1442,11 +1457,8 @@ ch_fastqlanemerge_for_stripfastq
         def r2 = it[8][0]
         def bam = it[7][1]
         def bai = it[8][1]
-        def group = it[9]
-        def pop = it[10]
-        def age = it[11]
 
-       [ samplename, libraryid, seqtype, organism, strandedness, udg, r1, r2, bam, bai, group, pop, age ]
+       [ samplename, libraryid, seqtype, organism, strandedness, udg, r1, r2, bam, bai ]
 
     }
     .filter{ it[8] != null }
@@ -1465,10 +1477,10 @@ process strip_input_fastq {
 
 
     input: 
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai), group, pop, age from ch_synced_for_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
 
     output:
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz"), group, pop, age into ch_output_from_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_stripfastq
 
 
     script:
@@ -1502,10 +1514,10 @@ process samtools_flagstat_after_filter {
     params.run_bam_filtering
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_flagstat
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_filtering_for_flagstat
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.stats"), group, pop, age into ch_bam_filtered_flagstat_for_multiqc, ch_bam_filtered_flagstat_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.stats") into ch_bam_filtered_flagstat_for_multiqc, ch_bam_filtered_flagstat_for_endorspy
 
     script:
     prefix = libraryid
@@ -1520,7 +1532,7 @@ process samtools_flagstat_after_filter {
 
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
-    .join(ch_bam_filtered_flagstat_for_endorspy, by: [0,1,2,3,4,5,6,8,9,10])
+    .join(ch_bam_filtered_flagstat_for_endorspy, by: [0,1,2,3,4,5,6])
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
@@ -1533,14 +1545,11 @@ if (params.run_bam_filtering) {
         def seqtype = it[3]
         def organism = it[4]
         def strandedness = it[5]
-        def udg = it[6]
-        def group = it[8]
-        def pop = it[9]
-        def age = it[10]        
+        def udg = it[6]     
         def stats = file(it[7])
         def poststats = file('dummy_postfilterflagstat.stats')
 
-      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, group, pop, age, stats, poststats ] }
+      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
 }
 
@@ -1550,10 +1559,10 @@ process endorSpy {
     publishDir "${params.outdir}/endorSpy", mode: 'copy'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, group, pop, age, file(stats), file(poststats) from ch_allflagstats_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(stats), file(poststats) from ch_allflagstats_for_endorspy
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_endorspy_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_endorspy_for_multiqc
 
     script:
     prefix = "${libraryid}"
@@ -1583,12 +1592,12 @@ process dedup{
     !params.skip_deduplication && params.dedupper == 'dedup'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_filtering_for_dedup
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.hist"), group, pop, age into ch_hist_for_preseq
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_dedup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.hist") into ch_hist_for_preseq
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_dedup_results_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup
 
     script:
     prefix="${libraryid}"
@@ -1626,11 +1635,11 @@ process markDup{
     !params.skip_deduplication && params.dedupper != 'dedup'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_filtering_for_markdup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_filtering_for_markdup
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.metrics"), group, pop, age into ch_markdup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_markdup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.metrics") into ch_markdup_results_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup
 
     script:
     outname = "${bam.baseName}"
@@ -1646,17 +1655,17 @@ process markDup{
 */
 
 // Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
-// IMPORTANT for DOCS: We will merge by samplename, organism, strandedness, udg, group, pop and age! All others are ignored - i.e. we only merge libraries with the same UDG/strandedness type because otherwise TrimBam/PMDtools won't work
+// IMPORTANT for DOCS: We will merge by samplename, organism, strandedness, udg, All others are ignored - i.e. we only merge libraries with the same UDG/strandedness type because otherwise TrimBam/PMDtools won't work
 if ( params.skip_deduplication ) {
   ch_input_for_librarymerging = ch_filtering_for_skiprmdup
-    .groupTuple(by:[0,4,5,6,9,10,11])
+    .groupTuple(by:[0,4,5,6])
     .branch{
       skip_merging: it[7].size() == 1
       merge_me: it[7].size() > 1
     }
 } else {
     ch_input_for_librarymerging = ch_output_from_dedup.mix(ch_output_from_markdup)
-    .groupTuple(by:[0,4,5,6,9,10,11])
+    .groupTuple(by:[0,4,5,6])
     .branch{
       skip_merging: it[7].size() == 1
       merge_me: it[7].size() > 1
@@ -1671,10 +1680,10 @@ process library_merge {
   tag "${samplename}"
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_input_for_librarymerging.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_input_for_librarymerging.merge_me
 
   output:
-  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}"), group, pop, age into ch_output_from_librarymerging
+  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -1710,10 +1719,10 @@ process preseq {
     !params.skip_preseq
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input), group, pop, age from (params.skip_deduplication ? ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7,9,10,11] } : ch_hist_for_preseq )
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input) from (params.skip_deduplication ? ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7] } : ch_hist_for_preseq )
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${input.baseName}.ccurve"), group, pop, age into ch_preseq_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${input.baseName}.ccurve") into ch_preseq_for_multiqc
 
     script:
     if(!params.skip_deduplication){
@@ -1741,14 +1750,14 @@ process damageprofiler {
     !params.skip_damage_calculation
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_damageprofiler
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_damageprofiler
     file fasta from ch_fasta_for_damageprofiler.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt"), group, pop, age
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log"), group, pop, age
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf"), group, pop, age
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json"), group, pop, age into ch_damageprofiler_results
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json") into ch_damageprofiler_results
 
     script:
     base = "${bam.baseName}"
@@ -1770,11 +1779,11 @@ process qualimap {
     !params.skip_qualimap
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_qualimap
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_qualimap
     file fasta from ch_fasta_for_qualimap.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*"), group, pop, age into ch_qualimap_results
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*") into ch_qualimap_results
 
     script:
     snpcap = ''
@@ -1806,11 +1815,11 @@ process bedtools {
   params.run_bedtools_coverage
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_bedtools
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_bedtools
   file anno_file from ch_anno_for_bedtools.collect()
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*"), group, pop, age
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*")
 
   script:
   """
@@ -1831,11 +1840,11 @@ process pmdtools {
     when: params.run_pmdtools
 
     input: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_pmdtools
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_pmdtools
     file fasta from ch_fasta_for_pmdtools.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.bam"), file("*.{bai,csi}"), group, pop, age into ch_output_from_pmdtools
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.bam"), file("*.{bai,csi}") into ch_output_from_pmdtools
     file "*.cpg.range*.txt"
 
     script:
@@ -1871,10 +1880,10 @@ process bam_trim {
     when: params.run_trim_bam
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_for_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_bamutils
 
     output: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}") , group, pop, age into ch_output_from_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}")  into ch_output_from_bamutils
 
     script:
     prefix="${bam.baseName}"
@@ -1939,14 +1948,14 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_ug
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_ug
   file fasta from ch_fasta_for_genotyping_ug.collect()
   file jar from ch_unifiedgenotyper_jar.collect()
   file fai from ch_fai_for_ug.collect()
   file dict from ch_dict_for_ug.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz"), group, pop, age into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
 
   script:
   prefix="${bam.baseName}"
@@ -1978,13 +1987,13 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'hc'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_hc
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_hc
   file fasta from ch_fasta_for_genotyping_hc.collect()
   file fai from ch_fai_for_hc.collect()
   file dict from ch_dict_for_hc.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz"), group, pop, age
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz")
 
   script:
   prefix="${bam.baseName}"
@@ -2013,13 +2022,13 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_damagemanipulation_for_genotyping_freebayes
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_freebayes
   file fasta from ch_fasta_for_genotyping_freebayes.collect()
   file fai from ch_fai_for_freebayes.collect()
   file dict from ch_dict_for_freebayes.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz"), group, pop, age
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz")
   
   script:
   prefix="${bam.baseName}"
@@ -2043,11 +2052,11 @@ process vcf2genome {
   params.run_vcf2genome
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(vcf), group, pop, age from ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(vcf) from ch_ug_for_vcf2genome
   file fasta from ch_fasta_for_vcf2genome.collect()
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fasta.gz"), group, pop, age
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fasta.gz")
 
   script:
   out = "${params.vcf2genome_outfile}" == '' ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
@@ -2118,11 +2127,11 @@ if (params.additional_vcf_files == '') {
   params.run_mtnucratio
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai), group, pop, age from ch_rmdup_formtnucratio
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_formtnucratio
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mtnucratio"), group, pop, age
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json"), group, pop, age into ch_mtnucratio_for_multiqc
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mtnucratio")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_mtnucratio_for_multiqc
 
   script:
   prefix="${samplename}"
@@ -2196,10 +2205,10 @@ if (params.sexdeterrmine_bedfile == '') {
     params.run_nuclear_contamination
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input), file(bai), group, pop, age from ch_for_nuclear_contamination
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input), file(bai) from ch_for_nuclear_contamination
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('*.X.contamination.out'), group, pop, age into ch_from_nuclear_contamination
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('*.X.contamination.out') into ch_from_nuclear_contamination
 
     script:
     prefix="${samplename}"
@@ -2734,10 +2743,11 @@ def extract_data(tsvFile) {
     Channel.from(tsvFile)
         .splitCsv(header: true, sep: '\t')
         .map { row ->
-            checkNumberOfItem(row, 13)
+            checkNumberOfItem(row, 11)
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID
             def lane = row.Lane
+            def colour = row.Colour_Chemistry
             def seqtype = row.SeqType
             def organism = row.Organism
             def strandedness = row.Strandedness
@@ -2745,15 +2755,15 @@ def extract_data(tsvFile) {
             def r1 = row.R1.matches('NA') ? 'NA' : return_file(row.R1)
             def r2 = row.R2.matches('NA') ? 'NA' : return_file(row.R2)
             def bam = row.BAM.matches('NA') ? 'NA' : return_file(row.BAM)
-            def group = row.Group
-            def pop = row.Populations
-            def age = row.Age
 
             // Check no 'empty' rows
             if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "Invalid TSV input: A row appears has all files defined as NA. See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
             // Ensure BAMs aren't submitted with PE
             if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "Invalid TSV input: BAM input rows cannot be paired end (PE). See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
+
+            // Check valid colour chemistry
+            if (!colour == 2 && !colour == 4) exit 1, "Invalid TSV input: Colour chemistry can either be 2 (e.g. NextSeq/NovaSeq) or 4 (e.g. HiSeq/MiSeq)"
 
             //  Ensure that we do not accept incompatible chemistry setup
             if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "Invalid TSV input:  SeqType for one or more rows is neither SE nor PE! see --help or documentation under 'running the pipeline' for more information. You have: ${seqtype}"
@@ -2763,7 +2773,7 @@ def extract_data(tsvFile) {
             if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "Invalid TSV input: see --help or documentation under 'running the pipeline' for more information. The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
             if ( !bam.matches('NA') && !has_extension(bam, "bam")) exit 1, "Invalid TSV input: The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
              
-            [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2, bam, group, pop, age ]
+            [ samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2, bam ]
 
          }
 

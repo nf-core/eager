@@ -13,7 +13,7 @@
       * [`-profile`](#-profile)
       * [`--reads`](#--reads)
       * [`--single_end`](#--single_end)
-      * [`--paired_end`](#--paired_end)
+      * [`--colour_chemistry`](#--colour_chemistry)
       * [`--bam`](#--bam)
       * [`--tsv_input`](#--tsv_input)
       * [`--fasta`](#--fasta)
@@ -346,6 +346,10 @@ For example:
 
 Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `-reads` and `--single_end`.
 
+#### `--colour_chemistry`
+
+Specifies which Illumina colour chemistry was a library was sequenced with. This informs  whether to perform poly-G trimming (if `--complexity_filter_poly_g` is also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can generate uncertain poly-G tails (due to 'G' being indicated via a no-colour detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do not require poly-G trimming. Options: 2, 4. Default: 4
+
 #### `--tsv_input`
 
 Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
@@ -354,14 +358,14 @@ This is mutually exclusive from `--reads`, and it is recommended only to be used
 
 This TSV should look like the following:
 
-| Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                                                                                                  | R2                                                                                                                                  | BAM | Group   | Populations        | Age          |
-|-------------|------------|------|---------|----------|--------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|-----|-----------|---------|--------------------|--------------|
-| JK2782      | JK2782     | 1    | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
-| JK2802      | JK2802     | 2    | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
+| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1 | R2 | BAM |
+|-------------|------------|------|------------------|--------|----------|--------------|---------------|----|----|-----|
+| JK2782      | JK2782     | 1    | 4                | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |
+| JK2802      | JK2802     | 2    | 2                | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |
 
 > :warning: Cells **must not** contain spaces before or after strings, as this will make the TSV unreadable by nextflow. Strings containing spaces should be wrapped in quotes.
 
-When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging).
+When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging), assuming all other metadata columns are the same.
 It will also merge BAM files with the `Sample_Lane` but different `Library_ID` after duplicate removal, but prior to genotyping.
 
 Column descriptions are as follows:
@@ -369,6 +373,7 @@ Column descriptions are as follows:
 * **Sample_Name:** A text string containing the name of a given sample of which there can be multiple libraries. All libraries with the same sample name and same SeqType will be merged after deduplication.
 * **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).
 * **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (with same SeqType) will be concatenated after read clipping and merging.
+* **Colour Chemistry** A number indiciating whether the Illumina sequencing machine the library was sequenced on was 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq). This informs whether poly-G trimming (if turned on) should be performed.
 * **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [foward], or BAM).
 * **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
 * **Strandedness:** A text string indicating whether the library type is 'single' or 'double'. This currently has no functionality, but will affect lane/library merging if different per library.
@@ -382,14 +387,18 @@ Column descriptions are as follows:
 
 For example, with the following:
 
-| Sample_Name | Library_ID | Lane | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM | Group   | Populations        | Age          |
-|-------------|------------|------|---------|----------|--------------|---------------|----------------------------------------------------------------|----------------------------------------------------------------|-----|---------|--------------------|--------------|
-| JK2782      | JK2782     | 7    | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
-| JK2782      | JK2782     | 8    | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
-| JK2802      | JK2802_SE  | 7    | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
-| JK2802      | JK2802_PE  | 8    | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  | Swabian | Europe,Asia,Africa | Palaeolithic |
+| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM |
+|-------------|------------|------|------------------|---------|----------|--------------|---------------|----------------------------------------------------------------|----------------------------------------------------------------|-----|
+| JK2782      | JK2782     | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |
+| JK2782      | JK2782     | 8    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |
+| JK2802      | JK2802_SE  | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |
+| JK2802      | JK2802_PE  | 8    | 4                | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  |
 
-After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ will be concatenated together for each **Library**. After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` will be merged together.
+After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**. After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` will be merged together.
+
+<p align="center">
+  <img src="images/usage/tsv_merging_names_v2.png" width="75%" height = "75%">
+</p>
 
 Note the following important caveats:
 
