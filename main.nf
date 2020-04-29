@@ -501,8 +501,8 @@ ch_reads_for_input = Channel.empty()
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
 ch_branched_input = ch_input_sample.branch{
-    fastq: it[7] != 'NA' //These are all fastqs
-    bam: it[9] != 'NA' //These are all BAMs
+    fastq: it[8] != 'NA' //These are all fastqs
+    bam: it[10] != 'NA' //These are all BAMs
 }
 
 //Removing BAM/BAI in case of a FASTQ input
@@ -510,6 +510,7 @@ ch_fastq_channel = ch_branched_input.fastq.map {
   samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2, bam ->
     [samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2]
 }
+
 //Removing R1/R2 in case of BAM input
 ch_bam_channel = ch_branched_input.bam.map {
   samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2, bam ->
@@ -780,7 +781,7 @@ process indexinputbam {
   tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_indexbam 
 
   output:
-  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}")  into ch_indexbam_for_filtering
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}")  into ch_indexbam_for_filtering
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
