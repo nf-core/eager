@@ -2718,7 +2718,7 @@ def extract_data(tsvFile) {
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID
             def lane = row.Lane
-            def colour = row.ColourChemistry
+            def colour = row.Colour_Chemistry
             def seqtype = row.SeqType
             def organism = row.Organism
             def strandedness = row.Strandedness
