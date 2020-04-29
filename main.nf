@@ -791,7 +791,7 @@ process indexinputbam {
 
 // convertbam bypass
     ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
-        .into { ch_convertbam_for_fastp; ch_convertbam_for_fastqc } 
+        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc } 
 
 /*
  * STEP 1a - FastQC
@@ -833,12 +833,6 @@ process fastqc {
 * Note: Clipping, Merging, Quality Trimning are turned off here - we leave this to adapter removal itself!
 */
 
-ch_input_for_fastp = ch_convertbam_for_fastp.branch{
-    ns: it[3] == 2 && params.complexity_filter_poly_g //These are all NextseqSeq etc. and shouldbe poly-G trimmed
-    hs: it[3] == 4 || ( it[3] == 2 ! params.complexity_filter_poly_g ) //These are all HiSeq etc. and shouldn't be poly-G trimmed
-}
-
-
 process fastp {
     label 'mc_small'
     tag "${libraryid}_L${lane}"
@@ -848,7 +842,7 @@ process fastp {
     params.complexity_filter_poly_g
 
     input:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_fastp.ns
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_convertbam_for_fastp
 
     output:
     tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*.pG.fq.gz") into ch_output_from_fastp
@@ -866,13 +860,14 @@ process fastp {
     }
 }
 
-// Recombine FASTP poly-G trimmed and non-polyG trimmed channels, dropping now useless colour element to reduce complexity downstream
-ch_output_from_fastp.mix(ch_input_for_fastp.hs)
+
+// fastp bypass 
+if (params.complexity_filter_poly_g) {
+    ch_convertbam_for_skipfastp.mix(ch_output_from_fastp)
       .map{
           def samplename = it[0]
           def libraryid  = it[1]
           def lane = it[2]
-          def colour = it[3]
           def seqtype = it[4]
           def organism = it[5]
           def strandedness = it[6]
@@ -883,7 +878,31 @@ ch_output_from_fastp.mix(ch_input_for_fastp.hs)
           [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
       }
-      .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
+        .filter { it =~/.*pG.fq.gz/ }
+        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
+} else {
+    ch_convertbam_for_skipfastp
+      .dump()
+      .map{
+          def samplename = it[0]
+          def libraryid  = it[1]
+          def lane = it[2]
+          def seqtype = it[4]
+          def organism = it[5]
+          def strandedness = it[6]
+          def udg = it[7]
+          def r1 = it[8]
+          def r2 = seqtype == "PE" ? it[9] : 'NA'
+
+          println("")
+          println("$samplename $r2")
+          println("")
+
+          [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+        }
+        .dump()
+        .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
+}
 
 
 /*
@@ -898,7 +917,7 @@ process adapter_removal {
     publishDir "${params.outdir}/read_merging", mode: 'copy'
 
     input:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
@@ -975,7 +994,7 @@ process adapter_removal {
 if ( params.skip_collapse ){
   ch_output_from_adapterremoval_r1
     .mix(ch_output_from_adapterremoval_r2)
-    .groupTuple(by: [0,1,2,3,4,5,6,8,9,10])
+    .groupTuple(by: [0,1,2,3,4,5,6])
     .map{
       it -> 
         def samplename = it[0]
@@ -1023,7 +1042,7 @@ if (!params.skip_adapterremoval) {
 
 // Prepare for lane merging (and skipping if no merging required)
 ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
-  .groupTuple(by: [0,1,3,4,5,6,9,10,11])
+  .groupTuple(by: [0,1,3,4,5,6])
   .branch {
     skip_merge: it[7].size() == 1
     merge_me: it[7].size() > 1 //These are all fastqs
@@ -1068,11 +1087,11 @@ process lanemerge_stripfastq {
   params.strip_input_fastq
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_lanemerge_stripfastq.groupTuple(by: [0,1,3,4,5,6,9,10,11])
+  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_lanemerge_stripfastq.groupTuple(by: [0,1,3,4,5,6,7])
 
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
+  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
 
   script:
   if ( seqtype == 'PE' ){
@@ -1108,7 +1127,7 @@ ch_lanemerge_for_mapping
       def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : "NA"      
 
-      [ samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2 ]
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
   }
   .mix(ch_branched_for_lanemerge.skip_merge)
@@ -1127,7 +1146,7 @@ process fastqc_after_clipping {
     when: !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_adapterremoval_for_fastqc_after_clipping
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
     file("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
@@ -1411,11 +1430,11 @@ ch_fastqlanemerge_for_stripfastq
         def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
         def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
 
-        [ samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2 ]
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
     }
     .mix(ch_filtering_for_stripfastq)
-    .groupTuple(by: [0,1,3,4,5,6,9,10,11])
+    .groupTuple(by: [0,1,3,4,5,6])
     .map {
         def samplename = it[0]
         def libraryid  = it[1]
@@ -1626,7 +1645,7 @@ process markDup{
 */
 
 // Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
-// IMPORTANT for DOCS: We will merge by samplename, organism, strandedness, udg! All others are ignored - i.e. we only merge libraries with the same UDG/strandedness type because otherwise TrimBam/PMDtools won't work
+// IMPORTANT for DOCS: We will merge by samplename, organism, strandedness, udg, All others are ignored - i.e. we only merge libraries with the same UDG/strandedness type because otherwise TrimBam/PMDtools won't work
 if ( params.skip_deduplication ) {
   ch_input_for_librarymerging = ch_filtering_for_skiprmdup
     .groupTuple(by:[0,4,5,6])
@@ -1690,7 +1709,7 @@ process preseq {
     !params.skip_preseq
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input) from (params.skip_deduplication ? ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7,] } : ch_hist_for_preseq )
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input) from (params.skip_deduplication ? ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7] } : ch_hist_for_preseq )
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${input.baseName}.ccurve") into ch_preseq_for_multiqc
@@ -2718,7 +2737,7 @@ def extract_data(tsvFile) {
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID
             def lane = row.Lane
-            def colour = row.Colour_Chemistry
+            def colour = row.ColourChemistry
             def seqtype = row.SeqType
             def organism = row.Organism
             def strandedness = row.Strandedness
@@ -2734,7 +2753,7 @@ def extract_data(tsvFile) {
             if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "Invalid TSV input: BAM input rows cannot be paired end (PE). See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
             // Check valid colour chemistry
-            if (!colour == 2 && !colour == 4), exit 1, "Invalid TSV input: Colour chemistry can either be 2 (e.g. NextSeq/NovaSeq) or 4 (e.g. HiSeq/MiSeq)"
+            if (!colour == 2 && !colour == 4) exit 1, "Invalid TSV input: Colour chemistry can either be 2 (e.g. NextSeq/NovaSeq) or 4 (e.g. HiSeq/MiSeq)"
 
             //  Ensure that we do not accept incompatible chemistry setup
             if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "Invalid TSV input:  SeqType for one or more rows is neither SE nor PE! see --help or documentation under 'running the pipeline' for more information. You have: ${seqtype}"
