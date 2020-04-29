@@ -1100,7 +1100,7 @@ process lanemerge_stripfastq {
 
 
   output:
-  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
 
   script:
   if ( seqtype == 'PE' ){
