@@ -1655,7 +1655,6 @@ process markDup{
 */
 
 // Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
-// IMPORTANT for DOCS: We will merge by samplename, organism, strandedness, udg, All others are ignored - i.e. we only merge libraries with the same UDG/strandedness type because otherwise TrimBam/PMDtools won't work
 if ( params.skip_deduplication ) {
   ch_input_for_librarymerging = ch_filtering_for_skiprmdup
     .groupTuple(by:[0,4,5,6])
@@ -1672,8 +1671,7 @@ if ( params.skip_deduplication ) {
     }
 }
 
-
-// Step two: perform a library cat step
+// This is a primary library merge, which merges all libraries of a sample but only when organism, strandeness and UDG treatment is the same, because bamtrim needs udg info.
 process library_merge {
   label 'mc_tiny'
   tag "${samplename}"
@@ -1936,24 +1934,23 @@ ch_trimmed_formerge = ch_bamutils_decision.notrim
     merge_me: it[7].size() > 1
   }
 
-process posttrim_library_merge {
+// This is a secondary merge, which merges all libraries of a sample regardless of UDG treatment (see above groupTuple)
+process additional_library_merge {
   label 'mc_tiny'
   tag "${samplename}"
-
-  when: params.run_trim_bam
 
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_trimmed_formerge.merge_me
 
   output:
-  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_posttrim.bam"), file("*_libmerged_rg_posttrim.bam.{bai,csi}") into ch_output_from_trimmerge
+  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_add.bam"), file("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
   """
-  samtools merge ${samplename}_libmerged_posttrim.bam ${bam}
-  picard AddOrReplaceReadGroups I=${samplename}_libmerged_posttrim.bam O=${samplename}_libmerged_rg_posttrim.bam RGID=1 RGLB="${samplename}_posttrimmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_posttrimmerged"
-  samtools index "${size}" ${samplename}_libmerged_rg_posttrim.bam
+  samtools merge ${samplename}_libmerged_add.bam ${bam}
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_additionalmerged"
+  samtools index "${size}" ${samplename}_libmerged_rg_add.bam
   """
 }
 
@@ -1962,10 +1959,9 @@ ch_trimmed_formerge.skip_merging
   .set{ch_output_from_bamutils}
 
 
-// Reroute files for genotyping
+// Reroute files for genotyping; we have to ensure to select lib-merged BAMs, as input channel will also contain the un-merged ones resulting in unwanted multi-sample VCFs
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
-    // Need to check selection for trimmed vs libmerged trimmed if multiple during a grouping
-    ch_rmdup_for_skipdamagemanipulation
+    ch_output_from_bamutils
       .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" && !params.run_trim_bam )  {
@@ -2095,7 +2091,7 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_freebayes.dump()
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_freebayes
   file fasta from ch_fasta_for_genotyping_freebayes.collect()
   file fai from ch_fai_for_freebayes.collect()
   file dict from ch_dict_for_freebayes.collect()
