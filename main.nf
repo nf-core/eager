@@ -33,7 +33,7 @@ def helpMessage() {
         --single_stranded             Specifies whether libraries single stranded libraries. Currently only affects MALTExtract. Default: ${params.single_stranded}
 
       TSV Input
-        --tsv_input                   Path to TSV file containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
+        --input                   Path to TSV file containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
 
       Reference
         --bam                         Specifies that the input is in BAM format.
@@ -236,19 +236,25 @@ ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
 ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
-// check we have valid --reads or --tsv_input
-if ( params.tsv_input == null && params.reads == null ) {
-  exit 1, "Error: Neither --reads or --tsv_input was supplied. Please see --help and documentation under 'running the pipeline' for details"
+// check we have valid --reads or --input
+if ( params.input == null && params.reads == null ) {
+  exit 1, "Error: Neither --reads or --input was supplied. Please see --help and documentation under 'running the pipeline' for details"
 }
 
 // Read in files properly from TSV file
 tsv_path = null
-if (params.tsv_input && (has_extension(params.tsv_input, "tsv"))) tsv_path = params.tsv_input
+if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.input
 
 ch_input_sample = Channel.empty()
 if (tsv_path) {
     tsv_file = file(tsv_path)
     ch_input_sample = extract_data(tsv_file)
+} else if (params.input && !has_extension(params.input, "tsv")) {
+    log.info "No TSV file provided - creating TSV from supplied directory."
+    log.info "Reading ${params.input} directory"
+    inputSample = extractFastqFromDir(params.input)
+    ch_input_sample = inputSample
+    tsv_file = params.input  // used in the reports
 } else exit 1, "Error: TSV file was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
 /*
@@ -496,7 +502,7 @@ if (workflow.profile.contains('awsbatch')) {
 
 ch_reads_for_input = Channel.empty()
 
-// From --tsv_input
+// From --input
 
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
@@ -533,7 +539,7 @@ def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
-summary['Input']        = params.tsv_input
+summary['Input']        = params.input
 summary['Convert input BAM?'] = params.run_convertbam ? 'Yes' : 'No'
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
@@ -743,9 +749,6 @@ ch_dict_for_skipdict.mix(ch_seq_dict)
 /*
 * PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
 */ 
-
-// TODO separate BAM channel should handle this, if params.bamconvert is set, all BAMs are converted to FASTQ and then mixed with the channel that provides the FASTQ files already
-// TODO STOPPED HERE. If that param is not provided, we can simply mix channels after mapping, to provide the same type of data. Need to find out whether we merge before DeDup or after DeDup. Different lanes, same library ID = merge together, then DeDup. Different lanes, different library ID = DeDup first, then merge together (PCR is done on library, not lanes!)
 
 process convertBam {
     label 'mc_small'
@@ -2807,7 +2810,6 @@ def checkHostname() {
 
 // Channelling the TSV file containing FASTQ or BAM 
 // Header Format is: "Sample_Name  Library_ID  Lane  SeqType  Organism  Strandedness  UDG_Treatment  R1  R2  BAM  BAM_Index Group  Populations  Age"
-// TODO: Validate TSV is formatted properly (tabs not spaces, for example)
 def extract_data(tsvFile) {
     Channel.from(tsvFile)
         .splitCsv(header: true, sep: '\t')
@@ -2870,4 +2872,73 @@ def has_extension(it, extension) {
 // From: https://stackoverflow.com/a/55453674/11502856
 def arrayify(it) {
   [] + it ?: [it]
+}
+
+//Extract FastQs from Path
+// Create a channel of FASTQs from a directory pattern: "my_samples/*/"
+// All FASTQ files in subdirectories are collected and emitted;
+// they must have _R1_ and _R2_ in their names.
+def extractFastqFromDir(pattern) {
+    def fastq = Channel.create()
+    // a temporary channel does all the work
+    Channel
+        .fromPath(pattern, type: 'dir')
+        .ifEmpty { error "No directories found matching pattern '${pattern}'" }
+        .subscribe onNext: { sampleDir ->
+            // the last name of the sampleDir is assumed to be a unique sample id
+            sampleId = sampleDir.getFileName().toString()
+            //Sample_Name	Library_ID	Lane	Colour_Chemistry	SeqType	Organism	Strandedness	UDG_Treatment	R1	R2	BAM
+
+            if(params.paired_end){
+              for (path1 in file("${sampleDir}/**_R1_*.fastq.gz")) {
+                assert path1.getName().contains('_R1_')
+                path2 = file(path1.toString().replace('_R1_', '_R2_'))
+                if (!path2.exists()) error "Path '${path2}' not found"
+                (flowcell, lane) = flowcellLaneFromFastq(path1)
+                sample_name = sampleId
+                library_id = sampleID
+                result = [sample_name, library_id, lane, '4', 'PE', 'Homo sapiens', 'double', 'none', path1, path2, 'NA']
+                fastq.bind(result)
+              }
+            } else {
+              for (path1 in file("${sampleDir}/**_R1_*.fastq.gz")) {
+                assert path1.getName().contains('_R1_')
+                (flowcell, lane) = flowcellLaneFromFastq(path1)
+                sample_name = sampleId
+                library_id = sampleID
+                result = [sample_name, library_id, lane, '4', 'SE', 'Homo sapiens', 'double', 'none', path1, 'NA', 'NA']
+                fastq.bind(result)
+              }
+            }
+            
+    }, onComplete: { fastq.close() }
+    fastq
+}
+
+//Maximes method from sarek
+// Parse first line of a FASTQ file, return the flowcell id and lane number.
+def flowcellLaneFromFastq(path) {
+    // expected format:
+    // xx:yy:FLOWCELLID:LANE:... (seven fields)
+    // or
+    // FLOWCELLID:LANE:xx:... (five fields)
+    InputStream fileStream = new FileInputStream(path.toFile())
+    InputStream gzipStream = new java.util.zip.GZIPInputStream(fileStream)
+    Reader decoder = new InputStreamReader(gzipStream, 'ASCII')
+    BufferedReader buffered = new BufferedReader(decoder)
+    def line = buffered.readLine()
+    assert line.startsWith('@')
+    line = line.substring(1)
+    def fields = line.split(' ')[0].split(':')
+    String fcid
+    int lane
+    if (fields.size() == 7) {
+        // CASAVA 1.8+ format
+        fcid = fields[2]
+        lane = fields[3].toInteger()
+    } else if (fields.size() == 5) {
+        fcid = fields[0]
+        lane = fields[1].toInteger()
+    }
+    [fcid, lane]
 }
