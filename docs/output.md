@@ -90,7 +90,7 @@ The default columns are as follows:
 * **Duplication Rate** This is from DeDup. This is the percentage of overall number of mapped reads that were an exact duplicate of another read. The number of reads removed by DeDup can be calculating this number by mapped reads (if no map quality filtering was applied!)
 * **Coverage** This is from Qualimap. This is the median number of times a base on your reference genome was covered by a read (i.e. depth coverage).. This average includes bases with 0 reads covering that position.
 * **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
-* **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your refernece genome.
+* **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
 * **% MTNUC** This is actually a ratio of the number of mitochondrial reads to the number of reads hitting autosomal chromosomes.
 * **X Prime Y>Z N base** These columns are from DamageProfiler. The prime numbers represent which end of the reads the damage is referring to. The Y>Z is the type of substitution (C>T is the true damage, G>A is the complementary). You should see for no- and half- UDG treatment a decrease in frequency from the 1st to 2nd base.
 * **Mean Read Length** This is from DamageProfiler. This is the mean length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
@@ -112,7 +112,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 This shows a barplot with the overall number of sequences (x axis) in your raw library after demultiplexing, **per file** (y-axis).  If you have paired end data, you will have one bar for Read 1 (or forward), and a second bar for Read 2 (or reverse). Each entire bar should represent approximately what you requested from the sequencer itself - unless you have your library sequenced over multiple lanes, where it should be what you request divided by the number of lanes it was split over.
 
-A section of the bar will also show an approximate estimation of the fraction of the total number of reads that are duplicates of another. This can derive from over-amplifcation of the library, or lots of single adapters. This can be later checked with the Deduplication check. A good library and sequencing run should have very low amounts of duplicates reads.
+A section of the bar will also show an approximate estimation of the fraction of the total number of reads that are duplicates of another. This can derive from over-amplification of the library, or lots of single adapters. This can be later checked with the Deduplication check. A good library and sequencing run should have very low amounts of duplicates reads.
 
 <p align="center">
   <img src="images/output/fastqc/fastqc_sequence_counts.png" width="75%" height = "75%">
@@ -122,7 +122,7 @@ A section of the bar will also show an approximate estimation of the fraction of
 
 This line plot represents the Phred scores across each base pair of all the reads. The x-axis is the base position across each read, and the y-axis is the average base-calling score (Phred-scaled) of the nucleotides across all reads. Again, this is per FASTQ file (i.e. forward/reverse and/or lanes separately). The background colours represent approximate ranges of quality, with green section being acceptable quality, orange is dubious and red is bad.
 
-You will often see that the first 5 or so bases have slightly lower quality than the rest of the read as this the calibration steps of the machine. The bulk of the read should then stay ~35. Do not worry if you see the last 10-20 bases of reads do often have lower quality base calls that the middle of the read, as the sequencing reagents start to deplete during these cycles (e.g. making nucleotide flourescence weaker). Furthermore, the reverse reads of sequencing data will often be even lower at ends than forward reads for the same reason.
+You will often see that the first 5 or so bases have slightly lower quality than the rest of the read as this the calibration steps of the machine. The bulk of the read should then stay ~35. Do not worry if you see the last 10-20 bases of reads do often have lower quality base calls that the middle of the read, as the sequencing reagents start to deplete during these cycles (e.g. making nucleotide fluorescence weaker). Furthermore, the reverse reads of sequencing data will often be even lower at ends than forward reads for the same reason.
 
 <p align="center">
   <img src="images/output/fastqc/fastqc_sequence_quality_histogram.png
@@ -160,7 +160,7 @@ You expect to see whole heatmap to be a relatively equal block of colour (normal
 
 Things to watch out for:
 
-* If you see a particular colour becoming more prominent this suggests there is an overrepresenation of those bases at that base-pair range across all reads (e.g. 20-24bp). This could happen if you have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no flouresence can mean both G or 'no-call').
+* If you see a particular colour becoming more prominent this suggests there is an over-representation of those bases at that base-pair range across all reads (e.g. 20-24bp). This could happen if you have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no flouresence can mean both G or 'no-call').
 
 > If you see Poly-G tails, we recommend to turn on FastP poly-G trimming with EAGER. See the 'running' documentation page for details.
 
@@ -174,7 +174,7 @@ This line graph shows the number percentage reads (y-axis) with an average perce
 
 Things to watch out for:
 
-* If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no flouresence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
+* If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no florescence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
 
 #### Per Base N Content
 
@@ -198,7 +198,7 @@ A good library should have very low rates of duplication (vast majority of reads
 
 Note that good libraries may sometimes have small peaks at high duplication levels. This maybe due to free-adapters (with no inserts), or mono-nucleotide reads (e.g. GGGGG in NextSeq/NovaSeq data).
 
-Bad libraries which have extremely low input DNA (so during amplification the same molecules been amplified repeatly), or a good library that has been erroneously over-amplified will show very high duplication levels - so a very slowly decreasing curve. Alternatively, if your library construction failed and many adapters were not ligated to insert molecules, a high duplication rate may be caused by these free-adapters (see 'Overrepresnted sequences' for more information).
+Bad libraries which have extremely low input DNA (so during amplification the same molecules been amplified repeatedly), or a good library that has been erroneously over-amplified will show very high duplication levels - so a very slowly decreasing curve. Alternatively, if your library construction failed and many adapters were not ligated to insert molecules, a high duplication rate may be caused by these free-adapters (see 'Overrepresented sequences' for more information).
 
 > **NB:** Amplicon librares such as for 16S rRNA analysis may appear here as having high duplication rates and these peaks can be ignored. This can be verified if no contaminants are found in the 'Overrepresented sequences' section.
 
@@ -206,11 +206,11 @@ Bad libraries which have extremely low input DNA (so during amplification the sa
 
 After identifying duplicates (see the previous section), a table will be displayed in the 'Overrepresented sequences' section of the report. This is an attempt by FastQC to check to see if the duplicates identified match common contaminants such as free adapters or mono-nucleotide reads.
 
-You can then use this table help inform you in identification where the problem occured in the construction and sequencing of this library. E.g. if you have high duplication rates but no identified contaminants, this suggests over-amplification of reads rather than left over adapters.
+You can then use this table help inform you in identification where the problem occurred in the construction and sequencing of this library. E.g. if you have high duplication rates but no identified contaminants, this suggests over-amplification of reads rather than left over adapters.
 
 #### Adapter Content
 
-This plot shows the percentage of reads (y-axis), which has an adapter starting at a particular position along a read (x-axis). There can be muliple lines per sample as each line represents a particular adapter.
+This plot shows the percentage of reads (y-axis), which has an adapter starting at a particular position along a read (x-axis). There can be multiple lines per sample as each line represents a particular adapter.
 
 It is common in aDNA libraries to see very rapid increases in the proportion of reads with an adapter 'early on' in the read, as by nature aDNA molecules are fragmented and very short. Palaeolithic samples can have reads as short as 25bp, so sequences can already start having adapters 25bp into a read.
 
@@ -273,10 +273,10 @@ The most important value is the **Retained Read Pairs** which gives you the fina
 
 Other Categories:
 
-* If paired-end, the **Singleton [mate] R1(/R2)** cateogries represent reads which were unable to be collapsed, possibly due to the reads being too long to overlap.
+* If paired-end, the **Singleton [mate] R1(/R2)** categories represent reads which were unable to be collapsed, possibly due to the reads being too long to overlap.
 * If paired-end, **Full-length collapsed pairs** are reads which were collapsed and did not require low-quality bases at end of reads to be removed.
 * If paired-end, **Truncated collapsed pairs** are paired-end that were collapsed but did required the removal of low quality bases at the end of reads.
-* **Discarded [mate] R1/R2** represent reads which were a part of a pair, but one member of the pair did not reach other quality criteria and weas discarded. However the other member of the pair is still retained in the output file as it still reached other quality criteria.
+* **Discarded [mate] R1/R2** represent reads which were a part of a pair, but one member of the pair did not reach other quality criteria and was discarded. However the other member of the pair is still retained in the output file as it still reached other quality criteria.
 
 <p align="center">
   <img src="images/output/adapter_removal/adapter_removal_discarded_reads.png" width="75%" height = "75%">
@@ -288,7 +288,7 @@ If you see high numbers of discarded or truncated reads, you should check your F
 
 #### Length Distribution Plot
 
-The length distribution plots show the number of reads at each read-length. You can change the plot to display different cateogories.
+The length distribution plots show the number of reads at each read-length. You can change the plot to display different categories.
 
 * All represent the overall distribution of reads. In the case of paired-end sequencing You may see a peak at the turn around from forward to reverse cycles.
 * **Mate 1** and **Mate 2** represents the length of the forward and reverse read respectively prior collapsing
@@ -328,7 +328,7 @@ The remaining rows will be 0 when running `bwa aln` as these characteristucs of 
 
 #### Background
 
-DeDup is a duplicate removal tool which searchs for PCR duplicates and removes them from your BAM file. We remove these duplicates because otherwise you would be artificially increasing your coverage and subsequently confidence in genotyping, by considering these lab artefacts which are not biologically meaningful. DeDup looks for reads with the same start and end coordinates, and whether they have exactly the same sequence. The main difference of DeDup versus e.g. `samtools markduplicates` is that DeDup considers _both_ ends of a read, not just the start position, so it is more precise in removing actual duplicates without penalising often already low aDNA data.
+DeDup is a duplicate removal tool which searches for PCR duplicates and removes them from your BAM file. We remove these duplicates because otherwise you would be artificially increasing your coverage and subsequently confidence in genotyping, by considering these lab artefacts which are not biologically meaningful. DeDup looks for reads with the same start and end coordinates, and whether they have exactly the same sequence. The main difference of DeDup versus e.g. `samtools markduplicates` is that DeDup considers _both_ ends of a read, not just the start position, so it is more precise in removing actual duplicates without penalising often already low aDNA data.
 
 #### DeDup Plot
 
@@ -377,13 +377,13 @@ Plateauing can be caused by a number of reasons:
 
 * You have simply sequenced your library to exhaustion
 * You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio
-* You have a low quality library made up of mappable seuqencing artefacts that were able to pass filtering (e.g. adapters)
+* You have a low quality library made up of mappable sequencing artefacts that were able to pass filtering (e.g. adapters)
 
 ### QualiMap
 
 #### QualiMap
 
-Qualimap is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the ference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
+Qualimap is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
 
 > NB: Neither fold coverage nor percent coverage on there own is sufficient enough to asssess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or unremoved-adapter-containing reference genomes can artifically inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
 
@@ -402,7 +402,7 @@ The greater the number of bases covered at as high as possible fold coverage, th
 Things to watch out for:
 
 * You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
-* If you have stacking of reads i.e. a small region with an abnormally large amount of reads despite the rest of the reference being quite shallowly covered, this will artifically increase your coverage. This would be represented by a small peak that is a much further along the X axis away from the main distribution of reads.
+* If you have stacking of reads i.e. a small region with an abnormally large amount of reads despite the rest of the reference being quite shallowly covered, this will artificially increase your coverage. This would be represented by a small peak that is a much further along the X axis away from the main distribution of reads.
   
 #### Cumulative Genome Coverage
 
@@ -426,7 +426,7 @@ Things to watch out for:
 
 * This plot should normally show a normal distribution around the average GC content of your reference genome.
 * Binomial peaks may represent lab-based artefacts that should be further investigated.
-* Skews of the peak to a higher GC content that the refernence in Illumina dual-colour chemistry data (e.g. NextSeq or NovaSeq), may suggest long poly-G tails that are mapping to poly-G stretches of your genome. The EAGER2 trimming option `--complexity_filter_poly_g` can be used to remove these tails by utilising the tool FastP for detection and trimming.
+* Skews of the peak to a higher GC content that the reference in Illumina dual-colour chemistry data (e.g. NextSeq or NovaSeq), may suggest long poly-G tails that are mapping to poly-G stretches of your genome. The EAGER2 trimming option `--complexity_filter_poly_g` can be used to remove these tails by utilising the tool FastP for detection and trimming.
   
 ### DamageProfiler
 
@@ -457,7 +457,7 @@ When looking at the misincorporation plots, keep the following in mind:
   <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
 </p>
 
-> **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplmentation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
+> **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
 
 #### Length Distribution
 
@@ -467,7 +467,7 @@ When looking at the length distribution plots, keep in mind the following:
 
 * Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
 * You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
-* You may see large peaks at paired-end turn arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
+* You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
   
 ## Output Files
 
@@ -480,20 +480,20 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 * `read_merging/` - this contains the log files (ending with `.settings`) with raw trimming (and merging) statistics after AdapterRemoval. In the `output` sub-directory, are the output trimmed (and merged) FASTQ files. These you can use for downstream applications such as taxonomic binning for metagenomic studies.
 * `mapping/` - this contains a sub-directory corresponding to the mapping tool you used, inside of which will be the initial BAM files containing the reads that mapped to your reference genome with no modification (see below). You will also find a corresponding BAM index file (ending in `.csi` or `.bam`). You can use these for downstream applications e.g. if you wish to use a different de-duplication tool not included in EAGER2 (although please feel free to add a new module request on the Github repository's [issue page](https://github.com/nf-core/eager/issues)!).
 * `samtools/` - this contains two sub-directories. `stats/` contain the raw mapping statistics files (ending in `.stats`) from directly after mapping. `filter/` contains BAM files that have had a mapping quality filter applied (set by the `--bam_mapping_quality_threshold` flag) and a corresponding index file. Furthermore, if you selected `--bam_discard_unmapped`, you will find your separate file with only unmapped reads in the format you selected. Note unmapped read BAM files will _not_ have an index file.
-* `deduplication/` - this contains a sub-directory called `dedup/`, inside here are sample specific directories. Each directory contains a BAM file containing mapped reads but with PCR duplicates removed, a corresponding index file and two stats file. `.hist.` contains raw data for a deduplication histogram used for tools like preseq (see below), and the `.log` contains overall summary dedupliction statistics.
+* `deduplication/` - this contains a sub-directory called `dedup/`, inside here are sample specific directories. Each directory contains a BAM file containing mapped reads but with PCR duplicates removed, a corresponding index file and two stats file. `.hist.` contains raw data for a deduplication histogram used for tools like preseq (see below), and the `.log` contains overall summary deduplication statistics.
 * `endorSpy/` - this contains all JSON files exported from the endorSpy endogenous DNA calculation tool. The JSON files are generated specifically for display in the MultiQC general statistics table and is otherwise very likely not useful for you.
 * `preseq/` - this contains a `.ccurve` file for every BAM file that had enough deduplication statistics to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced. You can use this file for plotting e.g. in `R` to find your sequencing target depth.
 * `qualimap/` - this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
 * `damageprofiler/` - this contains sample specific directories containing raw statistics and damage plots from DamageProfiler. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
-* `pmdtools/` this contains raw output statistics of pmdtools (estimates of frequencies of subsititutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`. The BAM files do not have corresponding index files.
+* `pmdtools/` this contains raw output statistics of pmdtools (estimates of frequencies of substitutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`. The BAM files do not have corresponding index files.
 * `trimmed_bam/` this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_left` and `--bamutils_clip_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read).
 * `genotyping/` this contains all the (gzipped) VCF files produced by your genotyping module. The file suffix will have the genotyping tool name. You will have VCF files corresponding to your deduplicated BAM files, as well as any turned-on downstream processes that create BAMs (e.g. trimmed bams or pmd tools).
 * `MultiVCFAnalyzer/` this contains all output from MultiVCFAnalyzer, including SNP calling statistics, various SNP table(s) and FASTA alignment files.
 * `sex_determination/` this contains the output for the sex determination run. This is a single `.tsv` file that includes a table with the Sample Name, the Nr of Autosomal SNPs, Nr of SNPs on the X/Y chromosome, the Nr of reads mapping to the Autosomes, the Nr of reads mapping to the X/Y chromosome, the relative coverage on the X/Y chromosomes, and the standard error associated with the relative coverages. These measures are provided for each bam file, one row per bam. If the `sexdeterrmine_bedfile` option has not been provided, the error bars cannot be trusted, and runtime will be considerably longer.
 * `nuclear_contamination/` this contains the output of the nuclear contamination processes. The directory contains one `*.X.contamination.out` file per individual, as well as `nuclear_contamination.txt` which is a summary table of the results for all individual. `nuclear_contamination.txt` contains a header, followed by one line per individual, comprised of the Method of Moments (MOM) and Maximum Likelihood (ML) contamination estimate (with their respective standard errors) for both Method1 and Method2.
 * `bedtools/` this contains two files as the output from bedtools coverage. One file contains the 'breadth' coverage (`*.breadth.gz`). This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature. The second file (`*.depth.gz`), contains the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
-* `metagenomic_classification/` This contains the output for a given metagenomic classifer.
+* `metagenomic_classification/` This contains the output for a given metagenomic classifier.
   * Malt will contain RMA6 files that can be loaded into MEGAN6 or MaltExtract for phylogenetic visualisation of read taxonomic assignments and aDNA characteristics respectively. Additional a `malt.log` file is provided which gives additional information such as run-time, memory usage and per-sample statistics of numbers of alignments with taxonomic assignment etc.
   * Kraken will contain the Kraken output and report files, as well as a merged Taxon count table.
 * `MaltExtract/` this will contain a `results` directory in which contains the output from MaltExtract - typically one folder for each filter type, an error and a log file. The characteristics of each node (e.g. damage, read lengths, edit distances - each in different txt formats) can be seen in each sub-folder of the filter folders. Output can be visualised either with the [HOPS postprocessing script](https://github.com/rhuebler/HOPS) or [MEx-IPA](https://github.com/jfy133/MEx-IPA)
-* `consensus_sequence` this contains three FASTA files from VCF2Genome, of a consensus sequence based on the reference FASTA with each sample's unique modifications. The main FASTA is a standard file with bases not passing the specified thresholds as Ns. The two other FASTAS (`_refmod.fasta.gz`) and (`_uncertainity.fasta.gz`) are IUPAC uncertainty codes (rather than Ns) and a special number-based uncertainity system used for other downstream tools, respectively.
+* `consensus_sequence` this contains three FASTA files from VCF2Genome, of a consensus sequence based on the reference FASTA with each sample's unique modifications. The main FASTA is a standard file with bases not passing the specified thresholds as Ns. The two other FASTAS (`_refmod.fasta.gz`) and (`_uncertainity.fasta.gz`) are IUPAC uncertainty codes (rather than Ns) and a special number-based uncertainty system used for other downstream tools, respectively.
