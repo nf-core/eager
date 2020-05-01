@@ -115,7 +115,7 @@ This shows a barplot with the overall number of sequences (x axis) in your raw l
 A section of the bar will also show an approximate estimation of the fraction of the total number of reads that are duplicates of another. This can derive from over-amplifcation of the library, or lots of single adapters. This can be later checked with the Deduplication check. A good library and sequencing run should have very low amounts of duplicates reads.
 
 <p align="center">
-  <img src="images/output/fastqc/sequence_counts.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/fastqc_sequence_counts.png" width="75%" height = "75%">
 </p>
 
 #### Sequence Quality Histograms
@@ -125,7 +125,7 @@ This line plot represents the Phred scores across each base pair of all the read
 You will often see that the first 5 or so bases have slightly lower quality than the rest of the read as this the calibration steps of the machine. The bulk of the read should then stay ~35. Do not worry if you see the last 10-20 bases of reads do often have lower quality base calls that the middle of the read, as the sequencing reagents start to deplete during these cycles (e.g. making nucleotide flourescence weaker). Furthermore, the reverse reads of sequencing data will often be even lower at ends than forward reads for the same reason.
 
 <p align="center">
-  <img src="images/output/fastqc/sequencing_quality_histogram.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/fastqc_sequence_quality_histogram.png" width="75%" height = "75%">
 </p>
 
 Things to watch out for:
@@ -139,7 +139,7 @@ Things to watch out for:
 This is a further summary of the previous plot. This is a histogram of the _overall_ read quality (compared to per-base, above). The x axis is the mean read-quality score (summarising all the bases of the read in a single value), and the y-axis is the number of reads with this Phred score. You should see a peak with the majority of your reads between 27-35.
 
 <p align="center">
-  <img src="images/output/fastqc/per_sequence_quality_score.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/fastqc_per_sequence_quality_score.png" width="75%" height = "75%">
 </p>
 
 Things to watch out for:
@@ -154,7 +154,7 @@ This is a heatmap which shows the average percentage of C, G, T, and A nucleotid
 You expect to see whole heatmap to be a relatively equal block of colour (normally black), representing an equal mix of A, C, T, G colors (see legend).
 
 <p align="center">
-  <img src="images/output/fastqc/per_base_sequence_content.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/fastqc_per_base_sequence_content.png" width="75%" height = "75%">
 </p>
 
 Things to watch out for:
@@ -168,7 +168,7 @@ Things to watch out for:
 This line graph shows the number percentage reads (y-axis) with an average percent GC content (y-axis). In 'isolate' samples (i.e. majority of the reads should be from the host species of the sample), this should be represented by a sharp peak around the average percent GC content of the reference genome. In metagenomic contexts this should be a wide flat distribution with a mean around 50%, however this can be highly different for other types of data.
 
 <p align="center">
-  <img src="images/output/fastqc/per_sequence_GC_content.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/fastqc_per_sequence_GC_content.png" width="75%" height = "75%">
 </p>
 
 Things to watch out for:
@@ -180,7 +180,7 @@ Things to watch out for:
 This line graph shows you the average numbers of Ns found across all reads of a sample. Ns can be caused for a variety of reasons such as low-confidence base call, or the base has been masked. The lines should be very low (as close to 0 as possible) and generally be flat across the whole read. Increases in Ns may reflect in HiSeq data issues of the last cycles running out of chemistry.
 
 <p align="center">
-  <img src="images/output/fastqc/per_base_n_content.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/fastqc_per_base_n_content.png" width="75%" height = "75%">
 </p>
 
 > **NB:** Publicly downloaded data may have extremely high N contents across all reads. These normally come from 'masked' reads that may have originally be, for example, from a human sample for microbial analysis where the consent for publishing of the host DNA was not given. In these cases you do not need to worry about this plot.
@@ -190,7 +190,7 @@ This line graph shows you the average numbers of Ns found across all reads of a 
 This plot is some-what similar to looking at duplication rate or 'cluster factor' of mapped reads. In this case however FastQC takes the sequences of the first 100 thousand reads of a library, and looks to see how often a read sequence is repeated in the rest of the library.
 
 <p align="center">
-  <img src="images/output/fastqc/sequence_duplication_level.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/fastqc_sequence_duplication_level.png" width="75%" height = "75%">
 </p>
 
 A good library should have very low rates of duplication (vast majority of reads having a duplication rate of 1) - suggesting 'high complexity' or lots of unique reads and useful data. This is represented as a steep drop in the line plot and possible a very small curve at about a duplication rate of 2 or 3 and then remaining at ~0 for higher duplication rates.
@@ -216,7 +216,7 @@ It is common in aDNA libraries to see very rapid increases in the proportion of 
 This can already give you an indication on the authenticity of your library - as if you see very low proportions of reads with adapters this suggests long insert molecules that are less likely to derive from a 'true' aDNA library. On the flipside, if you are working with modern DNA - it can give an indication of over-sonication if you have artificially fragmented your reads to lower than your target molecule length.
 
 <p align="center">
-  <img src="images/output/fastqc/adapter_content.png" width="75%" height = "75%">
+  <img src="images/output/fastqc/fastqc_adapter_content.png" width="75%" height = "75%">
 </p>
 
 ### FastP
@@ -344,7 +344,7 @@ Exceptions to the above:
 * If you use the `--dedup_all_merged` flag, you will not have the 'Forward removed' or 'Reverse removed' sections.
 
 <p align="center">
-  <img src="images/output/dedup/deduplicated_reads.png" width="75%" height = "75%">
+  <img src="images/output/dedup/dedup_deduplicated_reads.png" width="75%" height = "75%">
 </p>
 
 Things to look out for:
@@ -369,7 +369,7 @@ Using the de-duplication information from DeDup, the calculated curve (a solid l
 The dashed line represents a 'perfect' library containing only unique molecules and no duplicates. You are looking for your library stay as close to this line as possible. Plateauing of your curve shows that at that point you would not be getting any more unique molecules and you shouldn't sequence further than this.
 
 <p align="center">
-  <img src="images/output/preseq/complexity_curve.png" width="75%" height = "75%">
+  <img src="images/output/preseq/preseq_complexity_curve.png" width="75%" height = "75%">
 </p>
 
 Plateauing can be caused by a number of reasons:
@@ -395,7 +395,7 @@ This plot shows on the Y axis the range of fold coverages that the bases of the 
 The greater the number of bases covered at as high as possible fold coverage, the better.
 
 <p align="center">
-  <img src="images/output/qualimap/coverage_histogram.png" width="75%" height = "75%">
+  <img src="images/output/qualimap/qualimap_coverage_histogram.png" width="75%" height = "75%">
 </p>
 
 Things to watch out for:
@@ -410,7 +410,7 @@ This plot shows how much of the genome in percentage (X axis) is covered by a gi
 An ideal plot for this is to see an increasing curve, representing larger greater fractions of the genome being increasingly covered at higher depth. However, for low-coverage ancient DNA data, it will be more likely to see decreasing curves starting at a large percentage of the genome being covered at 0 fold coverage.
 
 <p align="center">
-  <img src="images/output/qualimap/cumulative_genome_coverage.png" width="75%" height = "75%">
+  <img src="images/output/qualimap/qualimap_cumulative_genome_coverage.png" width="75%" height = "75%">
 </p>
 
 #### GC Content Distribution
@@ -418,7 +418,7 @@ An ideal plot for this is to see an increasing curve, representing larger greate
 This plot shows the distirbution of th frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
 
 <p align="center">
-  <img src="images/output/qualimap/gc_content_distribution.png" width="75%" height = "75%">
+  <img src="images/output/qualimap/qualimap_gc_content_distribution.png" width="75%" height = "75%">
 </p>
 
 Things to watch out for:
@@ -453,7 +453,7 @@ When looking at the misincorporation plots, keep the following in mind:
 * The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
 
 <p align="center">
-  <img src="images/output/damageprofiler/damageprofiler.png" width="75%" height = "75%">
+  <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
 </p>
 
 > **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplmentation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
