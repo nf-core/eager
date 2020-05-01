@@ -491,6 +491,12 @@ Do not set this higher than what is available on your workstation or computing n
 
 Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.
 
+Note that this functionality requires either `mail` or `sendmail` to be installed on your system.
+
+#### `--plaintext_email`
+
+Set to receive plain-text e-mails instead of HTML formatted.
+
 #### `-name`
 
 Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -531,10 +537,6 @@ Provide git commit id for custom Institutional configs hosted at `nf-core/config
 \#\# Download and use config file with following git commid id
 --custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
 ```
-
-#### `--plaintext_email`
-
-Set to receive plain-text e-mails instead of HTML formatted.
 
 ## Adjustable parameters for nf-core/eager
 
