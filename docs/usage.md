@@ -926,7 +926,7 @@ If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/IN
 
 #### `--gatk_ploidy`
 
-If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid orgaisms. Default: 2
+If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid organisms. Default: 2
 
 #### `--gatk_dbsnp`
 
