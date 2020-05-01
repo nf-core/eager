@@ -29,7 +29,8 @@ def helpMessage() {
       Path Input
         --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs. [CURRENTLY NOT FUNCTIONAL]
         --single_end                  Specifies that the input is single end reads. [CURRENTLY NOT FUNCTIONAL]
-        --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Options: 2, 4. Default: ${params.colour_chemistry} [CURRENTLY NOT FUNCTIONAL]
+        --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Options: 2, 4. Default: ${params.colour_chemistry}
+        --single_stranded             Specifies whether libraries single stranded libraries. Currently only affects MALTExtract. Default: ${params.single_stranded}
 
       TSV Input
         --tsv_input                   Path to TSV file containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
@@ -110,7 +111,7 @@ def helpMessage() {
       --damageprofiler_threshold    Specify number of bases to consider for damageProfiler (e.g. on damage plot). Default: ${params.damageprofiler_threshold}
       --damageprofiler_yaxis        Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: ${params.damageprofiler_yaxis} 
       --run_pmdtools                Turn on PMDtools
-      --udg_type                    Specify here if you have UDG half treated libraries, Set to 'half' in that case, or 'full' for UDG+. If not set, libraries are assumed to have no UDG treatment.
+      --udg_type                    Specify here if you have UDG treated libraries, Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Default: ${udg_type}
       --pmdtools_range              Specify range of bases for PMDTools. Default: ${params.pmdtools_range} 
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools. Default: ${params.pmdtools_threshold} 
       --pmdtools_reference_mask     Specify a path to reference mask for PMDTools.
@@ -203,7 +204,6 @@ def helpMessage() {
       --maltextract_megansummary         Turn on export of MEGAN summary files.
       --maltextract_percentidentity      Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter. Default: ${params.maltextract_percentidentity}
       --maltextract_topalignment         Turn on using top alignments per read after filtering.
-      --maltextract_singlestranded       Turn on calculating damage patterns in single-stranded mode.
 
     Other options:     
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -924,7 +924,7 @@ ch_skipfastp_for_merge.mix(ch_fastp_for_merge)
 process adapter_removal {
     label 'mc_small'
     tag "${libraryid}_L${lane}"
-    publishDir "${params.outdir}/read_merging", mode: 'copy'
+    publishDir "${params.outdir}/AdapterRemoval", mode: 'copy'
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
@@ -1655,7 +1655,6 @@ process markDup{
 */
 
 // Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
-// IMPORTANT for DOCS: We will merge by samplename, organism, strandedness, udg, All others are ignored - i.e. we only merge libraries with the same UDG/strandedness type because otherwise TrimBam/PMDtools won't work
 if ( params.skip_deduplication ) {
   ch_input_for_librarymerging = ch_filtering_for_skiprmdup
     .groupTuple(by:[0,4,5,6])
@@ -1672,9 +1671,7 @@ if ( params.skip_deduplication ) {
     }
 }
 
-
-// Step two: perform a library cat step
-// TODO: Need to update read group with Picard tools addOrReplaceReadGroups:https://broadinstitute.github.io/picard/command-line-overview.html#AddOrReplaceReadGroups
+// This is a primary library merge, which merges all libraries of a sample but only when organism, strandeness and UDG treatment is the same, because bamtrim needs udg info.
 process library_merge {
   label 'mc_tiny'
   tag "${samplename}"
@@ -1869,8 +1866,27 @@ process pmdtools {
 
 /*
 * Step 11 - BAM Trimming step using bamUtils 
-* Can be used for UDGhalf protocols to clip off -n bases of each read
+* Can be used for e.g. UDGhalf protocols to clip off -n bases of each read
 */
+
+if ( params.run_trim_bam ) {
+
+    // You wouldn't want to make UDG treated reads even shorter, so skip trimming if UDG.
+    // We assume same trim amount for both non-UDG/UDG half as could trim a bit more off half-UDG to match non-UDG if needed, with minimal effect 
+    // Note: Trimming of e.g. adapters are sequencing artefacts and should be removed before mapping, so we don't account for this here.
+    ch_bamutils_decision = ch_rmdup_for_bamutils.branch{
+        totrim: it[6] == 'none' || it[6] == 'half' 
+        notrim: it[6] == 'full'
+    }
+
+} else {
+
+    ch_bamutils_decision = ch_rmdup_for_bamutils.branch{
+        totrim: it[6] == "dummy"
+        notrim: it[6] == 'full' || it[6] == 'none' || it[6] == 'half'
+    }
+
+}
 
 process bam_trim {
     label 'mc_small'
@@ -1880,10 +1896,10 @@ process bam_trim {
     when: params.run_trim_bam
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_bamutils_decision.totrim
 
     output: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}")  into ch_output_from_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}")  into ch_trimmed_from_bamutils
 
     script:
     prefix="${bam.baseName}"
@@ -1896,30 +1912,83 @@ process bam_trim {
     """
 }
 
+// Post trimming merging, because we will presume that if trimming is turned on lab-damage removed libraries can be combined with merged with in silico-damage removed libraries to boost genotyping
+ch_trimmed_formerge = ch_bamutils_decision.notrim
+  .mix(ch_trimmed_from_bamutils)
+  .groupTuple(by:[0,4,5])
+  .map{
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]     
+        def bam = it[7].flatten()
+        def bai = it[8].flatten()
+
+      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai ]
+  }
+  .branch{
+    skip_merging: it[7].size() == 1
+    merge_me: it[7].size() > 1
+  }
+
+// This is a secondary merge, which merges all libraries of a sample regardless of UDG treatment (see above groupTuple)
+process additional_library_merge {
+  label 'mc_tiny'
+  tag "${samplename}"
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_trimmed_formerge.merge_me
+
+  output:
+  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_add.bam"), file("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
+
+  script:
+  size = "${params.large_ref}" ? '-c' : ''
+  """
+  samtools merge ${samplename}_libmerged_add.bam ${bam}
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_additionalmerged"
+  samtools index "${size}" ${samplename}_libmerged_rg_add.bam
+  """
+}
+
+ch_trimmed_formerge.skip_merging
+  .mix(ch_output_from_trimmerge)
+  .set{ch_output_from_bamutils}
+
+
+// Reroute files for genotyping; we have to ensure to select lib-merged BAMs, as input channel will also contain the un-merged ones resulting in unwanted multi-sample VCFs
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
-    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
-} else if ( params.run_genotyping && params.genotyping_source == "trimmed" )  {
-    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
-        .filter { it =~/.*trimmed.bam/ }
+    ch_output_from_bamutils
+      .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
+
+} else if ( params.run_genotyping && params.genotyping_source == "trimmed" && !params.run_trim_bam )  {
+    exit 1, "Error: Cannot run genotyping with 'trimmed' source without running BAM trimming (--run_trim_bam)! Please check input parameters."
+
+} else if ( params.run_genotyping && params.genotyping_source == "trimmed" && params.run_trim_bam )  {
+    ch_output_from_bamutils
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
-} else if ( params.run_genotyping && params.genotyping_source == "pmd" )  {
-    ch_rmdup_for_skipdamagemanipulation.mix(ch_output_from_pmdtools,ch_output_from_bamutils)
-        .filter { it =~/.*pmd.bam/ }
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+} else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_run_pmdtools )  {
+    exit 1, "Error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
+
+} else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
+   ch_output_from_pmdtools
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
 } else if ( !params.run_genotyping && params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
 }
 
@@ -2344,7 +2413,7 @@ process maltextract {
   matches = params.maltextract_matches ? "--matches" : ""
   megsum = params.maltextract_megansummary ? "--meganSummary" : ""
   topaln = params.maltextract_topalignment ?  "--useTopAlignment" : ""
-  ss = params.maltextract_singlestranded ? "--singleStranded" : ""
+  ss = params.single_stranded ? "--singleStranded" : ""
   """
   MaltExtract \
   -Xmx${task.memory.toGiga()}g \
