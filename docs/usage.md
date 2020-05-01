@@ -15,6 +15,7 @@
       * [`--single_end`](#--single_end)
       * [`--colour_chemistry`](#--colour_chemistry)
       * [`--bam`](#--bam)
+      * [`--single_stranded`](#--single_stranded)
       * [`--tsv_input`](#--tsv_input)
       * [`--fasta`](#--fasta)
       * [`--genome` (using iGenomes)](#--genome-using-igenomes)
@@ -91,8 +92,7 @@
       * [`--damageprofiler_threshold`](#--damageprofiler_threshold)
       * [`--damageprofiler_yaxis`](#--damageprofiler_yaxis)
       * [`--run_pmdtools`](#--run_pmdtools)
-      * [`--udg` false](#--udg-false)
-      * [`--pmd_udg_type` `half`](#--pmd_udg_type-half)
+      * [`--udg_type`](#--udg_type)
       * [`--pmdtools_range`](#--pmdtools_range)
       * [`--pmdtools_threshold`](#--pmdtools_threshold)
       * [`--pmdtools_reference_mask`](#--pmdtools_reference_mask)
@@ -176,7 +176,6 @@
       * [`maltextract_megansummary`](#maltextract_megansummary)
       * [`maltextract_percentidentity`](#maltextract_percentidentity)
       * [`maltextract_topalignment`](#maltextract_topalignment)
-      * [`maltextract_singlestranded`](#maltextract_singlestranded)
   * [Clean up](#clean-up)
 
 ## General Nextflow info
@@ -346,6 +345,12 @@ For example:
 
 Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `-reads` and `--single_end`.
 
+#### `--single_stranded`
+
+Indicates libraries are single stranded.
+
+Currently only affects MALTExtract, where it will switch on damage patterns calculation mode to single-stranded. Default: false.
+
 #### `--colour_chemistry`
 
 Specifies which Illumina colour chemistry was a library was sequenced with. This informs  whether to perform poly-G trimming (if `--complexity_filter_poly_g` is also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can generate uncertain poly-G tails (due to 'G' being indicated via a no-colour detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do not require poly-G trimming. Options: 2, 4. Default: 4
@@ -374,16 +379,13 @@ Column descriptions are as follows:
 * **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).
 * **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (with same SeqType) will be concatenated after read clipping and merging.
 * **Colour Chemistry** A number indicating whether the Illumina sequencing machine the library was sequenced on was 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq). This informs whether poly-G trimming (if turned on) should be performed.
-* **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [forward], or BAM).
+* **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [forward], or BAM). This will affect lane merging if different per library.
 * **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
 * **Strandedness:** A text string indicating whether the library type is 'single' or 'double'. This currently has no functionality, but will affect lane/library merging if different per library.
 * **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.
 * **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column.
 * **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column.
 * **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'
-* **Group:** A text string with a given group assignment of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library.
-* **Populations:** A text string with a given population assignment of the sample. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library.
-* **Age:** A text string with a given age assignment of the sample. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library.
 
 For example, with the following:
 
@@ -394,20 +396,20 @@ For example, with the following:
 | JK2802      | JK2802_SE  | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |
 | JK2802      | JK2802_PE  | 8    | 4                | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  |
 
-After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**. After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` will be merged together.
+After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**. After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` will be merged together. If BAM trimming is turned, all post-trimming BAMs (i.e. non-UDG and half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the same `Sample_Name`.
 
 <p align="center">
   <img src="images/usage/tsvinput_merging_names.png" width="75%" height = "75%">
 </p>
 
-Note the following important caveats:
+Note the following important points:
 
 * The TSV must use actual tabs (not spaces) between cells.
-* All BAM files must be specified as `SE` under `SeqType`.
-* nf-core/eager will only merge lanes of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
+* All _BAM_ files must be specified as `SE` under `SeqType`.
+* nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
 * You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
-* Accordingly nf-core/eager will not merge lanes libraries of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
-* nf-core/eager functionality such as `--run_trim_bam` will currently be applied to _all_ BAM files irrespective of SeqType or UDG_treatment. If this functionality would be of interest, please let us know on the [nf-core github](https://github.com/nf-core/eager/issues).
+* Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
+* nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
 
 #### `--fasta`
 
@@ -806,6 +808,12 @@ More documentation can be seen in the follow links for:
 * [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
 * [PMDTools documentation](https://github.com/pontussk/PMDtools)
 
+#### `--udg_type`
+
+Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries.
+
+Specify `'none'` if no treatment was performed. If you have partial UDG treated data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify `'half'`. If you have complete UDG treated data ([Briggs et al. 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using PMDtools `'half'` will use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage assessment will use CpG context only. Default: `'none'`.
+
 #### `--damageprofiler_length`
 
 Specifies the length filter for DamageProfiler. By default set to `100`.
@@ -821,14 +829,6 @@ Specifies what the maximum misincorporation frequency should be displayed as, in
 #### `--run_pmdtools`
 
 Specifies to run PMDTools for damage based read filtering and assessment of DNA damage in sequencing libraries. By default turned off.
-
-#### `--udg` false
-
-Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries. If set, the parameter is used by downstream tools such as PMDTools to estimate damage only on CpG sites that are left after such a treatment.
-
-#### `--pmd_udg_type`
-
-If you have UDGhalf treated data (Rohland et al 2016), specify `'half'` as option to this parameter to use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the DNA damage assessment will use CpG context only. If you don't specify the parameter at all, the library will be treated as non UDG treated.
 
 #### `--pmdtools_range`
 
@@ -854,11 +854,15 @@ More documentation can be seen in the [bamUtil documentation](https://genome.sph
 
 #### `--run_trim_bam`
 
-Turns on the BAM trimming method. Trims off `[n]` bases from reads in the deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently.
+Turns on the BAM trimming method. Trims off `[n]` bases from reads in the deduplicated BAM file  Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming os typically performed to reduce errors during genotyping that can be caused by aDNA damage.
+
+BAM trimming will only be performed on libraries indicated as `--udg_type 'none'` or `--udg_type 'half'`. Complete UDG treatment ('full') should already have all damage removed. The amount of bases that will be trimmed off (see `--bamutils_clip_left` / `--bamutils_clip_right`) will be the same regardless whether `'none'` of `'half'`.
+
+> Note: additional artefacts such as bar-codes or adapters that could potentially also be trimmed should be removed prior mapping.
 
 #### `--bamutils_clip_left` / `--bamutils_clip_right`
 
-Default set to `1` and clipps off one base of the left or right side of reads. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).
+Default set to `1` and clips off one base of the left or right side of reads. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).
 
 #### `--bamutils_softclip`
 
@@ -1230,12 +1234,6 @@ Only when `--metagenomic_tool malt` is also supplied
 #### `maltextract_topalignment`
 
 Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.
-
-Only when `--metagenomic_tool malt` is also supplied
-
-#### `maltextract_singlestranded`
-
-Switch damage patterns to single-stranded mode. Default: off.
 
 Only when `--metagenomic_tool malt` is also supplied
 
