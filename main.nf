@@ -2722,7 +2722,7 @@ workflow.onComplete {
             log.info "[nf-core/eager] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
             // Catch failures and try with plaintext
-            [ 'mail', '-s', subject, email_address ].execute() << email_txt
+            [ 'mail', '-s', subject, email_address, '-A', mqc_report ].execute() << email_txt
             log.info "[nf-core/eager] Sent summary e-mail to $email_address (mail)"
         }
     }
