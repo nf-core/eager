@@ -26,8 +26,7 @@ def helpMessage() {
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
       -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
-      --single_end                  Specifies that the input is single end reads (required if not paired_end).
-      --paired_end                  Specifies that the input is paired end reads (required if not single_end).
+      --single_end                  Specifies that the input is single end read (required if not data is not paired end, which is assumed default).
       --bam                         Specifies that the input is in BAM format.
       --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
       --genome                      Name of iGenomes reference (required if not fasta reference).
@@ -300,12 +299,6 @@ if (params.run_convertbam && params.skip_mapping) {
 // Validate that you're not trying to pass FASTQs to BAM only processes
 if (params.bam && !params.run_convertbam && !params.skip_mapping) {
   exit 1, "You can't directly map a BAM file! Please supply the --run_convertbam parameter!"
-}
-
-// Validate that either paired_end or single_end has been specified by the user!
-if( params.single_end || params.paired_end || params.bam){
-} else {
-    exit 1, "Please specify either --single_end, --paired_end to execute the pipeline on FastQ files and --bam for previously processed BAM files!"
 }
 
 // Validate that skip_collapse is only set to True for paired_end reads!
@@ -827,7 +820,7 @@ if (params.run_convertbam) {
  * STEP 1a - FastQC
  */
 process fastqc {
-    label 'sc_tiny'
+    label 'mc_small'
     tag "$name"
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -843,7 +836,7 @@ process fastqc {
 
     script:
     """
-    fastqc -q $reads
+    fastqc -t ${task.cpus} -q $reads
     rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
     rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
@@ -987,7 +980,7 @@ if (!params.skip_adapterremoval) {
 * STEP 2b - FastQC after clipping/merging (if applied!)
 */
 process fastqc_after_clipping {
-    label 'sc_tiny'
+    label 'mc_small'
     tag "${name}"
     publishDir "${params.outdir}/FastQC/after_clipping", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
@@ -1002,7 +995,7 @@ process fastqc_after_clipping {
 
     script:
     """
-    fastqc -q $reads
+    fastqc -t ${task.cpus} -q $reads
     """
 }
 
@@ -1257,8 +1250,8 @@ process samtools_filter {
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam)
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam)
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
         samtools index "${size}" ${prefix}.filtered.bam
         samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
         """

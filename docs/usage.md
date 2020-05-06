@@ -13,7 +13,6 @@
       * [`-profile`](#-profile)
       * [`--reads`](#--reads)
       * [`--single_end`](#--single_end)
-      * [`--paired_end`](#--paired_end)
       * [`--bam`](#--bam)
       * [`--fasta`](#--fasta)
       * [`--genome` (using iGenomes)](#--genome-using-igenomes)
@@ -320,15 +319,15 @@ Please note the following requirements:
 1. Valid file extensions: `.fastq.gz`, `.fastq`, `.fq.gz`, `.fq`, `.bam`.
 2. The path must be enclosed in quotes
 3. The path must have at least one `*` wildcard character
-4. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.
+4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
 
 If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
-**Note**: It is not possible to run a mixture of single-end and paired-end files in one run.
+**Note**: It is currently not possible to run a mixture of single-end and paired-end files in one run.
 
 #### `--single_end`
 
-If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
+The default expected input data is paired-end. If you have single-end data or BAM files, you therefore need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
 
 For example:
 
@@ -345,20 +344,6 @@ for a single sample, or
 for multiple samples, where each sample's FASTQs are in it's own directory (indicated by the first `*`)
 
 **Note**: It is currently not possible to run a mixture of single-end and paired-end files in one run.
-
-#### `--paired_end`
-
-If you have paired-end data, you need to specify `--paired_end` on the command line when you launch the pipeline.
-
-A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
-
-For example:
-
-```bash
---paired_end --reads '*_R{1,2}_*.fastq.gz'
-```
-
-**Important**: You must always supply a read-grouping with the `{1,2}` system for each sample when using the `--paired_end` flag.
 
 #### `--bam`
 
@@ -447,7 +432,6 @@ For example:
 ```bash
 nextflow run nf-core/eager \
 -profile test,docker \
---paired_end \
 --reads '*{R1,R2}*.fq.gz'
 --fasta 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' \
 --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta'
@@ -641,7 +625,7 @@ Turns off the paired-end read merging.
 For example
 
 ```bash
---paired_end --skip_collapse  --reads '*.fastq'
+--skip_collapse  --reads '*.fastq'
 ```
 
 #### `--skip_trim`
@@ -651,7 +635,7 @@ Turns off adaptor and quality trimming.
 For example:
 
 ```bash
---paired_end --skip_trim  --reads '*.fastq'
+--skip_trim  --reads '*.fastq'
 ```
 
 #### `--preserve5p`
