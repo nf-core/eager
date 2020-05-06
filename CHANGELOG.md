@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+* Added sanity check and clearer error message when `--fasta_index` is provided and filepath does not end in `.fai`.
+
 ### `Fixed`
 
 * [#368](https://github.com/nf-core/eager/issues/368) - Fixed the profile `test` to contain a parameter for `--paired_end`.

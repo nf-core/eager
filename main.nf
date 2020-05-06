@@ -261,6 +261,11 @@ if ( params.fasta.isEmpty () ){
     bwa_base = params.fasta.substring(lastPath+1)
 }
 
+// Check that fasta index file path ends in '.fai'
+if (params.fasta_index && !params.fasta_index.endsWith(".fai")) {
+    exit 1, "The specified fasta index file (${params.fasta_index}) is not valid. Fasta index files should end in '.fai'."
+}
+
 // Check if genome exists in the config file. params.genomes is from igenomes.conf, params.genome specified by user
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
     exit 1, "The provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
