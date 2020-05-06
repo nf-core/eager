@@ -625,8 +625,9 @@ Turns off the paired-end read merging.
 For example
 
 ```bash
---skip_collapse  --reads '*.fastq'
+--skip_collapse  --reads '*_{R1,R2}_*.fastq'
 ```
+> It is important to use the paired-end wildcard globbing as `--skip_collapse` can only be used on paired-end data!
 
 #### `--skip_trim`
 
