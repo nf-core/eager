@@ -29,9 +29,15 @@ jobs:
         run: |
           docker pull nfcore/eager:dev
           docker tag nfcore/eager:dev nfcore/eager:dev
+      - name: Get test data for cases where we don't use TSV input
+        run: |
+          git clone --single-branch --branch eager https://github.com/nf-core/test-datasets.git data
       - name:  BASIC Run the basic pipeline with the test profile with, PE/SE, bwa aln
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --save_reference
+      - name: BASIC Run the basic pipeline with supplied --input folder
+        run: | 
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input data/testdata/Mammoth/fastq --single_end
       - name: REFERENCE Basic workflow, with supplied indices
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
