@@ -11,12 +11,11 @@
     * [Updating the pipeline](#updating-the-pipeline)
     * [Mandatory Arguments](#mandatory-arguments)
       * [`-profile`](#-profile)
-      * [`--reads`](#--reads)
+      * [`--input`](#--input)
       * [`--single_end`](#--single_end)
       * [`--colour_chemistry`](#--colour_chemistry)
       * [`--bam`](#--bam)
       * [`--single_stranded`](#--single_stranded)
-      * [`--tsv_input`](#--tsv_input)
       * [`--fasta`](#--fasta)
       * [`--genome` (using iGenomes)](#--genome-using-igenomes)
     * [Output Directories](#output-directories)
@@ -213,7 +212,7 @@ To access the nextflow help message run: `nextflow run -help`
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/eager --reads '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
+nextflow run nf-core/eager --input '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
 
 where the reads are from libraries of the same pairing.
@@ -298,68 +297,48 @@ We currently offer a EAGER specific profile for
 
 Further institutions can be added at [nf-core/configs](https://github.com/nf-core/configs). Please ask the eager developers to add your institution to the list above, if you add one!
 
-#### `--reads`
+#### `--input`
 
-Use this to specify the location of your input FastQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to [`--tsv_input`](#tsv_input) which is used for more complex input configurations such as lane and library merging.
+There are two possible ways of supplying input sequencing data to nf-core/eager. The most efficient but more simplistic is supplying direct paths (with wildcards) to your FASTQ or BAM files, with each file or pair being considered a single library and each one run independently. TSV input requires creation of an extra file by the user and extra metadta, but allows more powerful lane and library merging.
 
-When using `--reads` you can specify one or multiple samples in one or more directories files.
+##### Paths Input Method
 
-> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with `--reads`! Please see [`--tsv_input`](#tsv_input) for possibilities.
+Use this to specify the location of your input FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to [`--tsv_input`](#tsv_input) which is used for more complex input configurations such as lane and library merging.
 
-For a single set FASTQ, or multiple files paired-end FASTQ files in one directory, you can specify:
+When using the paths method of `--input` you can specify one or multiple samples in one or more directories files.
+
+By default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')
+
+For a single set of FASTQs, or multiple files paired-end FASTQ files in one directory, you can specify:
 
 ```bash
---reads 'path/to/data/sample_*_{1,2}.fastq.gz'
+--input 'path/to/data/sample_*_{1,2}.fastq.gz'
 ```
 
 If you have multiple files in different directories, you can use additional wildcards (`*`) e.g.:
 
 ```bash
---reads 'path/to/data/*/sample_*_{1,2}.fastq.gz'
+--input 'path/to/data/*/sample_*_{1,2}.fastq.gz'
 ```
 
-By default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')
+> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see [`--tsv_input`](#tsv_input) for possibilities.
 
-Please note the following requirements:
+
+**Please note** the following requirements:
 
 1. Valid file extensions: `.fastq.gz`, `.fastq`, `.fq.gz`, `.fq`, `.bam`.
 2. The path **must** be enclosed in quotes
 3. The path must have at least one `*` wildcard character
 4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
+5. Paired-end files must be unique _prior_ the `{1,2}` notation, otherwise different libraries with the same file prefixes may be mixed. 
 
-If `--reads` is left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
+If `--input` is left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
-#### `--single_end`
-
-If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`.
-
-For example:
-
-```bash
---single_end --reads 'path/to/data/*.fastq.gz'
-```
-
-**Note**: It is currently not possible to run a mixture of single-end and paired-end files in one run.
-
-#### `--bam`
-
-Specifies the input file type to `--reads` is in BAM format. This is only valid in combination with `-reads` and `--single_end`.
-
-#### `--single_stranded`
-
-Indicates libraries are single stranded.
-
-Currently only affects MALTExtract, where it will switch on damage patterns calculation mode to single-stranded. Default: false.
-
-#### `--colour_chemistry`
-
-Specifies which Illumina colour chemistry was a library was sequenced with. This informs  whether to perform poly-G trimming (if `--complexity_filter_poly_g` is also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can generate uncertain poly-G tails (due to 'G' being indicated via a no-colour detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do not require poly-G trimming. Options: 2, 4. Default: 4
-
-#### `--tsv_input`
+### TSV Input Method
 
 Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
 
-This is mutually exclusive from `--reads`, and it is recommended only to be used when performing the more complex procedures above. Thus you do not need to specify `--single_end` or `--bam` when using TSV input - this is defined within the TSV file itself.
+This is mutually exclusive from `--input`, and it is recommended only to be used when performing the more complex procedures above. Thus you do not need to specify `--single_end` or `--bam` when using TSV input - this is defined within the TSV file itself.
 
 This TSV should look like the following:
 
@@ -410,6 +389,39 @@ Note the following important points:
 * You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
 * Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
 * nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
+
+
+#### `--single_end`
+
+If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--input`.
+
+Only required when using the 'Path' method of [`--input`](#--input).
+
+For example:
+
+```bash
+--single_end --input 'path/to/data/*.fastq.gz'
+```
+
+**Note**: It is currently not possible to run a mixture of single-end and paired-end files in one run.
+
+#### `--bam`
+
+Specifies the input file type to `--input` is in BAM format. This is only valid in combination with `-reads` and `--single_end`.
+
+Only required when using the 'Path' method of [`--input`](#--input).
+
+#### `--single_stranded`
+
+Indicates libraries are single stranded.
+
+Currently only affects MALTExtract, where it will switch on damage patterns calculation mode to single-stranded. Default: false.
+
+#### `--colour_chemistry`
+
+Specifies which Illumina colour chemistry was a library was sequenced with. This informs  whether to perform poly-G trimming (if `--complexity_filter_poly_g` is also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can generate uncertain poly-G tails (due to 'G' being indicated via a no-colour detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do not require poly-G trimming. Options: 2, 4. Default: 4
+
+Only required when using the 'Path' method of [`--input`](#--input).
 
 #### `--fasta`
 
@@ -495,7 +507,7 @@ For example:
 nextflow run nf-core/eager \
 -profile test,docker \
 --paired_end \
---reads '*{R1,R2}*.fq.gz'
+--input '*{R1,R2}*.fq.gz'
 --fasta 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' \
 --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta'
 ```
@@ -684,7 +696,7 @@ Turns off the paired-end read merging.
 For example
 
 ```bash
---paired_end --skip_collapse  --reads '*.fastq'
+--paired_end --skip_collapse  --input '*.fastq'
 ```
 
 #### `--skip_trim`
@@ -694,7 +706,7 @@ Turns off adaptor and quality trimming.
 For example:
 
 ```bash
---paired_end --skip_trim  --reads '*.fastq'
+--paired_end --skip_trim  --input '*.fastq'
 ```
 
 #### `--preserve5p`
