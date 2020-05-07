@@ -606,15 +606,15 @@ Defines the adapter sequence to be used for the forward read. By default, this i
 
 Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.
 
-#### `--clip_readlength` 30
+#### `--clip_readlength
 
 Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.
 
-#### `--clip_min_read_quality` 20
+#### `--clip_min_read_quality`
 
 Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off. Default is set to `20`.
 
-#### `--clip_min_adap_overlap` 1
+#### `--clip_min_adap_overlap`
 
 Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.
 
@@ -668,7 +668,7 @@ These parameters configure mapping algorithm parameters.
 
 ##### `--bwaalnn`
 
-Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.03`, if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
+Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
 
 ##### `--bwaalnk`
 
@@ -676,7 +676,9 @@ Configures the `bwa aln -k` parameter for the seeding phase in the mapping algor
 
 ##### `--bwaalnl`
 
-Configures the length of the seed used in `bwa aln -l`. Default is set to BWA default of `32`.
+Configures the length of the seed used in `bwa aln -l`. Default is set to be 'turned off' at recommendation the of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with `1024`.
+
+> Note: Despite being recommended, turning off seeding can result in long runtimes!
 
 #### CircularMapper
 

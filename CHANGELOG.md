@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Mini bugfix for typo in line 1260+1261
 * Added basic json_schema
 * [#379](https://github.com/nf-core/eager/issues/378) - Fixed insufficient memory requirements for FASTQC edge case
+* Set correct recommended bwa mapping parameters from [Schubert et al. 2012](https://doi.org/10.1186/1471-2164-13-178)
 
 ### `Dependencies`
 
