@@ -2919,6 +2919,8 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
                 .map { row -> [ row[0], [ row[1][0], row[1][1] ] ] }
                 .ifEmpty { exit 1, "--input was empty - no input files supplied!" }
                 .set { ch_reads_for_faketsv }
+
+                // TODO: ADD CHECK IF ROW[0] HAS MORE THAN ONE UNIQUE ENTRY FAIL!
         } 
 
     } else if ( bam_in ) {
