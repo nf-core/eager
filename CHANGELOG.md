@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
+* Latest version of DeDup (0.12.6) which now reports mapped reads after deduplication
+* Latest version of ANGSD (0.933) which doesn't seg fault when running contamination on BAMs with insufficent reads
+
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 
 ### `Added`
