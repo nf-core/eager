@@ -323,14 +323,13 @@ If you have multiple files in different directories, you can use additional wild
 
 > :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see [`--tsv_input`](#tsv_input) for possibilities.
 
-
 **Please note** the following requirements:
 
 1. Valid file extensions: `.fastq.gz`, `.fastq`, `.fq.gz`, `.fq`, `.bam`.
 2. The path **must** be enclosed in quotes
 3. The path must have at least one `*` wildcard character
 4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
-5. Paired-end files must be unique _prior_ the `{1,2}` notation, otherwise different libraries with the same file prefixes may be mixed. 
+5. Paired-end files must be unique _prior_ the `{1,2}` notation, otherwise different libraries with the same file prefixes may be mixed.
 
 If `--input` is left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
@@ -390,7 +389,6 @@ Note the following important points:
 * Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
 * nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
 
-
 #### `--single_end`
 
 If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--input`.
@@ -407,7 +405,7 @@ For example:
 
 #### `--bam`
 
-Specifies the input file type to `--input` is in BAM format. This is only valid in combination with `-reads` and `--single_end`.
+Specifies the input file type to `--input` is in BAM format. This will automatically also apply `--single_end` 
 
 Only required when using the 'Path' method of [`--input`](#--input).
 

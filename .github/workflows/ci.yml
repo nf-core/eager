@@ -32,12 +32,18 @@ jobs:
       - name: Get test data for cases where we don't use TSV input
         run: |
           git clone --single-branch --branch eager https://github.com/nf-core/test-datasets.git data
-      - name:  BASIC Run the basic pipeline with the test profile with, PE/SE, bwa aln
+      - name: BASIC Run the basic pipeline with directly supplied single-end FASTQ
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input 'data/testdata/Mammoth/fastq/*_R1_*.fq.gz' --single_end
+      - name: BASIC Run the basic pipeline with directly supplied paired-end FASTQ
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input 'data/testdata/Mammoth/fastq/*_{R1,R2}_*tengrand.fq.gz'
+      - name: BASIC Run the basic pipeline with supplied --input folder
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input 'data/testdata/Mammoth/bam/*_R1_*.bam' --bam
+      - name: BASIC Run the basic pipeline with the test profile with, PE/SE, bwa aln
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --save_reference
-      - name: BASIC Run the basic pipeline with supplied --input folder
-        run: | 
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input data/testdata/Mammoth/fastq --single_end
       - name: REFERENCE Basic workflow, with supplied indices
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
