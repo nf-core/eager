@@ -27,13 +27,15 @@ def helpMessage() {
         -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
 
       Path Input
-        --reads                       Path to input data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs. [CURRENTLY NOT FUNCTIONAL]
+        --input                       Either paths to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
+                                      Or path to TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
+
         --single_end                  Specifies that the input is single end reads. [CURRENTLY NOT FUNCTIONAL]
         --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Options: 2, 4. Default: ${params.colour_chemistry}
         --single_stranded             Specifies whether libraries single stranded libraries. Currently only affects MALTExtract. Default: ${params.single_stranded}
 
       TSV Input
-        --input                   Path to TSV file containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
+        --input                   
 
       Reference
         --bam                         Specifies that the input is in BAM format.
@@ -237,8 +239,8 @@ ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
 // check we have valid --reads or --input
-if ( params.input == null && params.reads == null ) {
-  exit 1, "Error: Neither --reads or --input was supplied. Please see --help and documentation under 'running the pipeline' for details"
+if ( params.input == null ) {
+  exit 1, "Error: --input was supplied. Please see --help and documentation under 'running the pipeline' for details"
 }
 
 // Read in files properly from TSV file
@@ -247,15 +249,18 @@ if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.inpu
 
 ch_input_sample = Channel.empty()
 if (tsv_path) {
+
     tsv_file = file(tsv_path)
     ch_input_sample = extract_data(tsv_file)
+
 } else if (params.input && !has_extension(params.input, "tsv")) {
+
     log.info "No TSV file provided - creating TSV from supplied directory."
-    log.info "Reading ${params.input} directory"
-    inputSample = extractFastqFromDir(params.input)
+    log.info "Reading path(s): ${params.input}\n"
+    inputSample = retrieve_input_paths(params.input, params.colour_chemistry, params.single_end, params.single_stranded, params.udg_type, params.bam)
     ch_input_sample = inputSample
-    tsv_file = params.input  // used in the reports
-} else exit 1, "Error: TSV file was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
+
+} else exit 1, "Error: --input file(s) was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
 /*
 * SANITY CHECKING reference inputs
@@ -318,7 +323,7 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
 }
 
 // Validate that skip_collapse is only set to True for paired_end reads!
-if (params.skip_collapse  && params.single_end){
+if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.single_end){
     exit 1, "--skip_collapse can only be set for paired_end samples!"
 }
 
@@ -795,7 +800,7 @@ process indexinputbam {
 
 // convertbam bypass
     ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
-        .into { ch_convertbam_for_fastp; ch_convertbam_for_skipfastp; ch_convertbam_for_fastqc } 
+        .into { ch_convertbam_for_fastp; ch_convertbam_for_fastqc } 
 
 /*
  * STEP 1a - FastQC
@@ -2856,13 +2861,13 @@ def extract_data(tsvFile) {
 
 // Check if a row has the expected number of item
 def checkNumberOfItem(row, number) {
-    if (row.size() != number) exit 1, "Invalid TSV input: Malformed row (e.g. missing column) in ${row}, see --help or documentation under 'running the pipeline' for more information"
+    if (row.size() != number) exit 1, "Error: Invalid TSV input - malformed row (e.g. missing column) in ${row}, see --help or documentation under 'running the pipeline' for more information"
     return true
 }
 
 // Return file if it exists
 def return_file(it) {
-    if (!file(it).exists()) exit 1, "Invalid TSV input: Missing or incorrect file path. Set to NA if no file required. See --help or documentation under 'running the pipeline' for more information. Check file: ${it}" 
+    if (!file(it).exists()) exit 1, "Error: Missing or incorrect supplied FASTQ or BAM input file. If using input method TSV set to NA if no file required. See --help or documentation under 'running the pipeline' for more information. Check file: ${it}" 
     return file(it)
 }
 
@@ -2881,68 +2886,62 @@ def arrayify(it) {
 //Extract FastQs from Path
 // Create a channel of FASTQs from a directory pattern: "my_samples/*/"
 // All FASTQ files in subdirectories are collected and emitted;
-// they must have _R1_ and _R2_ in their names.
-def extractFastqFromDir(pattern) {
-    def fastq = Channel.create()
-    // a temporary channel does all the work
-    Channel
-        .fromPath(pattern, type: 'dir')
-        .ifEmpty { error "No directories found matching pattern '${pattern}'" }
-        .subscribe onNext: { sampleDir ->
-            // the last name of the sampleDir is assumed to be a unique sample id
-            sampleId = sampleDir.getFileName().toString()
-            //Sample_Name	Library_ID	Lane	Colour_Chemistry	SeqType	Organism	Strandedness	UDG_Treatment	R1	R2	BAM
+// they must have _R1_ and/or _R2_ in their names.
+def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
 
-            if(params.paired_end){
-              for (path1 in file("${sampleDir}/**_R1_*.fastq.gz")) {
-                assert path1.getName().contains('_R1_')
-                path2 = file(path1.toString().replace('_R1_', '_R2_'))
-                if (!path2.exists()) error "Path '${path2}' not found"
-                (flowcell, lane) = flowcellLaneFromFastq(path1)
-                sample_name = sampleId
-                library_id = sampleID
-                result = [sample_name, library_id, lane, '4', 'PE', 'Homo sapiens', 'double', 'none', path1, path2, 'NA']
-                fastq.bind(result)
-              }
-            } else {
-              for (path1 in file("${sampleDir}/**_R1_*.fastq.gz")) {
-                assert path1.getName().contains('_R1_')
-                (flowcell, lane) = flowcellLaneFromFastq(path1)
-                sample_name = sampleId
-                library_id = sampleID
-                result = [sample_name, library_id, lane, '4', 'SE', 'Homo sapiens', 'double', 'none', path1, 'NA', 'NA']
-                fastq.bind(result)
-              }
-            }
-            
-    }, onComplete: { fastq.close() }
-    fastq
-}
+  if ( !bam_in ) {
+        if( pe_se ) {
+            log.info "Generating single-end FASTQ data TSV"
+            Channel
+                .fromFilePairs( input, size: 1 )
+                .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
+                .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq'. Did you forget --bam?" }
+                .map { row -> [ row[0], [ row[1][0] ] ] }
+                .ifEmpty { exit 1, "--input was empty - no input files supplied!" }
+                .set { ch_reads_for_faketsv }
 
-//Maximes method from sarek
-// Parse first line of a FASTQ file, return the flowcell id and lane number.
-def flowcellLaneFromFastq(path) {
-    // expected format:
-    // xx:yy:FLOWCELLID:LANE:... (seven fields)
-    // or
-    // FLOWCELLID:LANE:xx:... (five fields)
-    InputStream fileStream = new FileInputStream(path.toFile())
-    InputStream gzipStream = new java.util.zip.GZIPInputStream(fileStream)
-    Reader decoder = new InputStreamReader(gzipStream, 'ASCII')
-    BufferedReader buffered = new BufferedReader(decoder)
-    def line = buffered.readLine()
-    assert line.startsWith('@')
-    line = line.substring(1)
-    def fields = line.split(' ')[0].split(':')
-    String fcid
-    int lane
-    if (fields.size() == 7) {
-        // CASAVA 1.8+ format
-        fcid = fields[2]
-        lane = fields[3].toInteger()
-    } else if (fields.size() == 5) {
-        fcid = fields[0]
-        lane = fields[1].toInteger()
+        } else if (!pe_se ){
+            log.info "Generating paired-end FASTQ data TSV"
+
+            Channel
+                .fromFilePairs( input )
+                .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
+                .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
+                .map { row -> [ row[0], [ row[1][0], row[1][1] ] ] }
+                .ifEmpty { exit 1, "--input was empty - no input files supplied!" }
+                .set { ch_reads_for_faketsv }
+        } 
+
+    } else if ( bam_in ) {
+              log.info "Generating BAM data TSV"
+
+         Channel
+            .fromFilePairs( input, size: 1 )
+            .filter { it =~/.*.bam/ }
+            .map { row -> [ row[0], [ row[1][0] ] ] }
+            .ifEmpty { exit 1, "Cannot find any bam file matching: ${input}" }
+            .set { ch_reads_for_faketsv }
+
     }
-    [fcid, lane]
+
+ch_reads_for_faketsv
+  .map{
+
+      def samplename = it[0]
+      def libraryid  = it[0]
+      def lane = 0
+      def colour = "${colour_chem}"
+      def seqtype = pe_se ? 'SE' : 'PE'
+      def organism = 'NA'
+      def strandedness = ds_ss ? 'single' : 'double'
+      def udg = udg_treat
+      def r1 = !bam_in ? return_file(it[1][0]) : 'NA'
+      def r2 = !bam_in && !pe_se ? return_file(it[1][1]) : 'NA'
+      def bam = bam_in && pe_se ? return_file(it[1][0]) : 'NA'
+
+      [ samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2, bam ]
+  }
+  .ifEmpty {exit 1, "Error: Invalid file paths with --input"}
+
 }
+
