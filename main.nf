@@ -230,41 +230,15 @@ if (params.help){
     exit 0
 }
 
-// Stage config files
-ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-ch_eager_logo = file("$baseDir/docs/images/nf-core_eager_logo.png")
-ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
-ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
-where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
-
-// check we have valid --reads or --input
-if ( params.input == null ) {
-  exit 1, "Error: --input was supplied. Please see --help and documentation under 'running the pipeline' for details"
-}
-
-// Read in files properly from TSV file
-tsv_path = null
-if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.input
-
-ch_input_sample = Channel.empty()
-if (tsv_path) {
-
-    tsv_file = file(tsv_path)
-    ch_input_sample = extract_data(tsv_file)
-
-} else if (params.input && !has_extension(params.input, "tsv")) {
-
-    log.info "No TSV file provided - creating TSV from supplied directory."
-    log.info "Reading path(s): ${params.input}\n"
-    inputSample = retrieve_input_paths(params.input, params.colour_chemistry, params.single_end, params.single_stranded, params.udg_type, params.bam)
-    ch_input_sample = inputSample
-
-} else exit 1, "Error: --input file(s) was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
-
 /*
 * SANITY CHECKING reference inputs
 */
+
+// Validate --input configurations
+
+if ( params.bam ) {
+  params.single_end = true
+}
 
 // Validate reference inputs
 if ( params.fasta.isEmpty () ){
@@ -489,10 +463,45 @@ if (workflow.profile.contains('awsbatch')) {
 }
 
 
+ // Stage config files
+ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+ch_eager_logo = file("$baseDir/docs/images/nf-core_eager_logo.png")
+ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
+where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
+
+
 /*
  * Create a channel for input read files
  * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
  */
+
+
+// check we have valid --reads or --input
+if ( params.input == null ) {
+  exit 1, "Error: --input was supplied. Please see --help and documentation under 'running the pipeline' for details"
+}
+
+// Read in files properly from TSV file
+tsv_path = null
+if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.input
+
+ch_input_sample = Channel.empty()
+if (tsv_path) {
+
+    tsv_file = file(tsv_path)
+    ch_input_sample = extract_data(tsv_file)
+
+} else if (params.input && !has_extension(params.input, "tsv")) {
+
+    log.info "No TSV file provided - creating TSV from supplied directory."
+    log.info "Reading path(s): ${params.input}\n"
+    inputSample = retrieve_input_paths(params.input, params.colour_chemistry, params.single_end, params.single_stranded, params.udg_type, params.bam)
+    ch_input_sample = inputSample
+
+} else exit 1, "Error: --input file(s) was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
+
 
 
 // From --reads

@@ -405,7 +405,7 @@ For example:
 
 #### `--bam`
 
-Specifies the input file type to `--input` is in BAM format. This is only valid in combination with `-reads` and `--single_end`.
+Specifies the input file type to `--input` is in BAM format. This will automatically also apply `--single_end` 
 
 Only required when using the 'Path' method of [`--input`](#--input).
 
