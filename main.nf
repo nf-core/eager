@@ -242,7 +242,7 @@ if ( params.bam ) {
 
 // Validate reference inputs
 if ( params.fasta.isEmpty () ){
-    exit 1, "Please specify --fasta with the path to your reference"
+    exit 1, "[nf-core/eager] error: please specify --fasta with the path to your reference"
 } else if("${params.fasta}".endsWith(".gz")){
     //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
     zipped_fasta = file("${params.fasta}")
@@ -278,12 +278,12 @@ if ( params.fasta.isEmpty () ){
 
 // Check if genome exists in the config file. params.genomes is from igenomes.conf, params.genome specified by user
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-    exit 1, "The provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
+    exit 1, "[nf-core/eager] error: the provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
 }
 
 // Index files provided? Then check whether they are correct and complete
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
-    exit 1, "Invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave ${params.mapper}!"
+    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave ${params.mapper}!"
 }
 if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
     lastPath = params.bwa_index.lastIndexOf(File.separator)
@@ -292,134 +292,134 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
 
     Channel
         .fromPath(bwa_dir, checkIfExists: true)
-        .ifEmpty { exit 1, "BWA index directory not found: ${bwa_dir}" }
+        .ifEmpty { exit 1, "[nf-core/eager] error: bwa index directory not found: ${bwa_dir}" }
         .into {bwa_index; bwa_index_bwamem}
 }
 
 // Validate that skip_collapse is only set to True for paired_end reads!
 if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.single_end){
-    exit 1, "--skip_collapse can only be set for paired_end samples!"
+    exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples!"
 }
 
 // Strip mode sanity checking
 if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
-        exit 1, "--strip_mode can only be set to strip or replace!"
+        exit 1, "[nf-core/eager] error: --strip_mode can only be set to strip or replace!"
     }
 }
 
 // Mapper sanity checking
 if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "circularmapper") {
-    exit 1, "Please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}!"
+    exit 1, "[nf-core/eager] error: please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}!"
 }
 
 if (params.bam_discard_unmapped && params.bam_unmapped_type == '') {
-    exit 1, "Please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
+    exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
 }
 
 // Bedtools sanity checking
 if(params.run_bedtools_coverage && params.anno_file == ''){
-  exit 1, "You have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
+  exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
 }
 
-// BAM filtering sanity checking - FIRST ONE CURRENTLY DOES NOT WORK!
+// TODO BAM filtering sanity checking - FIRST ONE CURRENTLY DOES NOT WORK!
 if (params.bam_discard_unmapped && !params.run_bam_filtering) {
-  "Please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering"
+  "[nf-core/eager] error: please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering"
 }
 
 if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == '') {
-  "Please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'"
+  "[nf-core/eager] error: please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'"
 }
 
 // Genotyping sanity checking
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
-  exit 1, "Please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
+  exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
   }
 
   if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
-  exit 1, "Please specify path to a GATK 3.5 .jar file with --gatk_ug_jar."
+  exit 1, "[nf-core/eager] error: please specify path to a GATK 3.5 .jar file with --gatk_ug_jar."
   }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
-  exit 1, "Please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
+  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
   }
 
   if (params.gatk_hc_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_hc_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_hc_out_mode != 'EMIT_ALL_ACTIVE_SITES') {
-  exit 1, "Please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
+  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
   }
   
   if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "Please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}!"
+    exit 1, "[nf-core/eager] error:  please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}!"
   }
 
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "Please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
+    exit 1, "[nf-core/eager] error:  please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
   }
 }
 
 // Consensus sequence generation sanity checking
 if (params.run_vcf2genome) {
     if (!params.run_genotyping) {
-      exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
+      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
     }
 
     if (params.genotyping_tool != 'ug') {
-      exit 1, "Consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
+      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
     }
 }
 
 // MultiVCFAnalyzer sanity checking
 if (params.run_multivcfanalyzer) {
   if (!params.run_genotyping) {
-    exit 1, "MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
   }
 
   if (params.genotyping_tool != "ug") {
-    exit 1, "MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
   }
 
   if (params.gatk_ploidy != '2') {
-    exit 1, "MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
   }
 }
 
 // Metagenomic sanity checking
 if (params.run_metagenomic_screening) {
   if ( !params.bam_discard_unmapped ) {
-  exit 1, "Metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
   }
 
   if (params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
-  exit 1, "Metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
   }
 
   if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
-    exit 1, "Metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave '${params.metagenomic_tool}'!"
+    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave '${params.metagenomic_tool}'!"
   }
 
   if (params.database == '' ) {
-    exit 1, "Metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
+    exit 1, "[nf-core/eager] error: metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
-    exit 1, "Unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
-    exit 1, "Unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
-    exit 1, "Incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --metagenomic_min_support_reads!"
+    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --metagenomic_min_support_reads!"
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
-    exit 1, "Incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
+    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
-    exit 1, "Unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
   }
 }
 
@@ -427,19 +427,19 @@ if (params.run_metagenomic_screening) {
 if (params.run_maltextract) {
 
   if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
-    exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
   }
 
   if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
-    exit 1, "MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
   }
 
   if (params.maltextract_taxon_list == '') {
-    exit 1, "MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list!"
+    exit 1, "[nf-core/eager] error: MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list!"
   }
 
   if (params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
-    exit 1, "Unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: ${params.maltextract_filter}!"
+    exit 1, "[nf-core/eager] error: unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: ${params.maltextract_filter}!"
   }
 
 }
@@ -480,7 +480,7 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
 // check we have valid --reads or --input
 if ( params.input == null ) {
-  exit 1, "Error: --input was not supplied! Please see --help and documentation under 'running the pipeline' for details"
+  exit 1, "[nf-core/eager] error: --input was not supplied! Please see --help and documentation under 'running the pipeline' for details"
 }
 
 // Read in files properly from TSV file
@@ -495,12 +495,13 @@ if (tsv_path) {
 
 } else if (params.input && !has_extension(params.input, "tsv")) {
 
+    log.info ""
     log.info "No TSV file provided - creating TSV from supplied directory."
     log.info "Reading path(s): ${params.input}\n"
     inputSample = retrieve_input_paths(params.input, params.colour_chemistry, params.single_end, params.single_stranded, params.udg_type, params.bam)
     ch_input_sample = inputSample
 
-} else exit 1, "Error: --input file(s) was not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
+} else exit 1, "[nf-core/eager] error: --input file(s) not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
 
 
@@ -1582,7 +1583,7 @@ process endorSpy {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_endorspy_for_multiqc
 
     script:
-    prefix = "${libraryid}"
+    prefix = libraryid
 
     if (params.run_bam_filtering) {
       """
@@ -1982,14 +1983,14 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
       .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" && !params.run_trim_bam )  {
-    exit 1, "Error: Cannot run genotyping with 'trimmed' source without running BAM trimming (--run_trim_bam)! Please check input parameters."
+    exit 1, "[nf-core/eager] error: Cannot run genotyping with 'trimmed' source without running BAM trimming (--run_trim_bam)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" && params.run_trim_bam )  {
     ch_output_from_bamutils
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_run_pmdtools )  {
-    exit 1, "Error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
+    exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
    ch_output_from_pmdtools
@@ -2846,21 +2847,21 @@ def extract_data(tsvFile) {
             def bam = row.BAM.matches('NA') ? 'NA' : return_file(row.BAM)
 
             // Check no 'empty' rows
-            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "Invalid TSV input: A row appears has all files defined as NA. See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
+            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "[nf-core/eager] error: A row in your TSV appears to have all files defined as NA. See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
             // Ensure BAMs aren't submitted with PE
-            if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "Invalid TSV input: BAM input rows cannot be paired end (PE). See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
+            if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "[nf-core/eager] error: BAM input rows in TSV cannot be set as PE, only SE. See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
             // Check valid colour chemistry
-            if (!colour == 2 && !colour == 4) exit 1, "Invalid TSV input: Colour chemistry can either be 2 (e.g. NextSeq/NovaSeq) or 4 (e.g. HiSeq/MiSeq)"
+            if (!colour == 2 && !colour == 4) exit 1, "[nf-core/eager] error: Colour chemistry in TSV can either be 2 (e.g. NextSeq/NovaSeq) or 4 (e.g. HiSeq/MiSeq)"
 
             //  Ensure that we do not accept incompatible chemistry setup
-            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "Invalid TSV input:  SeqType for one or more rows is neither SE nor PE! see --help or documentation under 'running the pipeline' for more information. You have: ${seqtype}"
+            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "[nf-core/eager] error:  SeqType for one or more rows in TSV is neither SE nor PE! see --help or documentation under 'running the pipeline' for more information. You have: ${seqtype}"
                    
            // So we don't accept existing files that are wrong format: e.g. fasta or sam
-            if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "Invalid TSV input: see --help or documentation under 'running the pipeline' for more information. The following R1 file either has a non-recognizable extension or is not NA: ${r1}"
-            if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "Invalid TSV input: see --help or documentation under 'running the pipeline' for more information. The following R2 file either has a non-recognizable extension or is not NA: ${r2}"
-            if ( !bam.matches('NA') && !has_extension(bam, "bam")) exit 1, "Invalid TSV input: The following BAM file either has a non-recognizable extension or is not NA: ${bam}"
+            if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "[nf-core/eager] error: A specified R1 file either has a non-recognizable FASTQ extension or is not NA. See --help or documentation under 'running the pipeline' for more information. Check: ${r1}"
+            if ( !r2.matches('NA') && !has_extension(r2, "fastq.gz") && !has_extension(r2, "fq.gz") && !has_extension(r2, "fastq") && !has_extension(r2, "fq")) exit 1, "[nf-core/eager] error: A specified R2 file either has a non-recognizable FASTQ extension or is not NA. See --help or documentation under 'running the pipeline' for more information. Check: ${r2}"
+            if ( !bam.matches('NA') && !has_extension(bam, "bam")) exit 1, "[nf-core/eager] error: A specified R1 file either has a non-recognizable BAM extension or is not NA. See --help or documentation under 'running the pipeline' for more information. Check: ${bam}"
              
             [ samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2, bam ]
 
@@ -2870,13 +2871,13 @@ def extract_data(tsvFile) {
 
 // Check if a row has the expected number of item
 def checkNumberOfItem(row, number) {
-    if (row.size() != number) exit 1, "Error: Invalid TSV input - malformed row (e.g. missing column) in ${row}, see --help or documentation under 'running the pipeline' for more information"
+    if (row.size() != number) exit 1, "[nf-core/eager] error:  Invalid TSV input - malformed row (e.g. missing column) in ${row}, see --help or documentation under 'running the pipeline' for more information"
     return true
 }
 
 // Return file if it exists
 def return_file(it) {
-    if (!file(it).exists()) exit 1, "Error: Missing or incorrect supplied FASTQ or BAM input file. If using input method TSV set to NA if no file required. See --help or documentation under 'running the pipeline' for more information. Check file: ${it}" 
+    if (!file(it).exists()) exit 1, "[nf-core/eager] error: Cannot find supplied FASTQ or BAM input file. If using input method TSV set to NA if no file required. See --help or documentation under 'running the pipeline' for more information. Check file: ${it}" 
     return file(it)
 }
 
@@ -2904,10 +2905,17 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
             Channel
                 .fromFilePairs( input, size: 1 )
                 .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-                .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq'. Did you forget --bam?" }
+                .ifEmpty { exit 1, "[nf-core/eager] error:  Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq'. Did you forget --bam?" }
                 .map { row -> [ row[0], [ row[1][0] ] ] }
-                .ifEmpty { exit 1, "--input was empty - no input files supplied!" }
-                .set { ch_reads_for_faketsv }
+                .ifEmpty { exit 1, "[nf-core/eager] error:  --input was empty - no input files supplied!" }
+                .into { ch_reads_for_faketsv; ch_reads_for_validate }
+
+                ch_reads_for_validate
+                  .groupTuple()
+                  .dump()
+                  .map{
+                    if ( validate_size(it[1], 1) ) { null } else { exit 1, "[nf-core/eager] error: You have supplied non-unique sample names (text before R1/R2 indication). Did you accidentally supply paired-end data?  See --help or documentation under 'running the pipeline' for more information. Check duplicates of: ${it[0]}" } 
+                  }
 
         } else if (!pe_se ){
             log.info "Generating paired-end FASTQ data TSV"
@@ -2915,12 +2923,19 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
             Channel
                 .fromFilePairs( input )
                 .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-                .ifEmpty { exit 1, "Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
+                .ifEmpty { exit 1, "[nf-core/eager] error: Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
                 .map { row -> [ row[0], [ row[1][0], row[1][1] ] ] }
-                .ifEmpty { exit 1, "--input was empty - no input files supplied!" }
-                .set { ch_reads_for_faketsv }
+                .ifEmpty { exit 1, "[nf-core/eager] error: --input was empty - no input files supplied!" }
+                .into { ch_reads_for_faketsv; ch_reads_for_validate }
 
                 // TODO: ADD CHECK IF ROW[0] HAS MORE THAN ONE UNIQUE ENTRY FAIL!
+
+                ch_reads_for_validate
+                  .groupTuple()
+                  .map{
+                    if ( validate_size(it[1], 1) ) { null } else { exit 1, "[nf-core/eager] error: You have supplied non-unique sample names (text before R1/R2 indication). See --help or documentation under 'running the pipeline' for more information. Check duplicates of: ${it[0]}" } 
+                  }
+
         } 
 
     } else if ( bam_in ) {
@@ -2930,7 +2945,7 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
             .fromFilePairs( input, size: 1 )
             .filter { it =~/.*.bam/ }
             .map { row -> [ row[0], [ row[1][0] ] ] }
-            .ifEmpty { exit 1, "Cannot find any bam file matching: ${input}" }
+            .ifEmpty { exit 1, "[nf-core/eager] error: Cannot find any bam file matching: ${input}" }
             .set { ch_reads_for_faketsv }
 
     }
@@ -2952,7 +2967,11 @@ ch_reads_for_faketsv
 
       [ samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, r1, r2, bam ]
   }
-  .ifEmpty {exit 1, "Error: Invalid file paths with --input"}
+  .ifEmpty {exit 1, "[nf-core/eager] error: Invalid file paths with --input"}
 
 }
 
+// Function to check length of collection in a channel closure (e.g. with .map())
+def validate_size(collection, size){
+    if ( collection.size() != size ) { return false } else { return true }
+}
