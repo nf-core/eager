@@ -2910,6 +2910,7 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
                 .ifEmpty { exit 1, "[nf-core/eager] error:  --input was empty - no input files supplied!" }
                 .into { ch_reads_for_faketsv; ch_reads_for_validate }
 
+                // Check we don't have any duplicated sample names due to fromFilePairs behaviour of calculating sample name from anything before R1/R2 glob
                 ch_reads_for_validate
                   .groupTuple()
                   .dump()
@@ -2928,8 +2929,7 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
                 .ifEmpty { exit 1, "[nf-core/eager] error: --input was empty - no input files supplied!" }
                 .into { ch_reads_for_faketsv; ch_reads_for_validate }
 
-                // TODO: ADD CHECK IF ROW[0] HAS MORE THAN ONE UNIQUE ENTRY FAIL!
-
+                // Check we don't have any duplicated sample names due to fromFilePairs behaviour of calculating sample name from anything before R1/R2 glob
                 ch_reads_for_validate
                   .groupTuple()
                   .map{
@@ -2971,7 +2971,7 @@ ch_reads_for_faketsv
 
 }
 
-// Function to check length of collection in a channel closure (e.g. with .map())
+// Function to check length of collection in a channel closure is as expected (e.g. with .map())
 def validate_size(collection, size){
     if ( collection.size() != size ) { return false } else { return true }
 }

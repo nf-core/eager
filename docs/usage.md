@@ -301,15 +301,15 @@ Further institutions can be added at [nf-core/configs](https://github.com/nf-cor
 
 There are two possible ways of supplying input sequencing data to nf-core/eager. The most efficient but more simplistic is supplying direct paths (with wildcards) to your FASTQ or BAM files, with each file or pair being considered a single library and each one run independently. TSV input requires creation of an extra file by the user and extra metadta, but allows more powerful lane and library merging.
 
-##### Paths Input Method
+##### Direct Input Method
 
 Use this to specify the location of your input FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to [`--tsv_input`](#tsv_input) which is used for more complex input configurations such as lane and library merging.
 
-When using the paths method of `--input` you can specify one or multiple samples in one or more directories files.
+When using the direct method of `--input` you can specify one or multiple samples in one or more directories files.
 
 By default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')
 
-For a single set of FASTQs, or multiple files paired-end FASTQ files in one directory, you can specify:
+For example, for a single set of FASTQs, or multiple files paired-end FASTQ files in one directory, you can specify:
 
 ```bash
 --input 'path/to/data/sample_*_{1,2}.fastq.gz'
@@ -329,15 +329,13 @@ If you have multiple files in different directories, you can use additional wild
 2. The path **must** be enclosed in quotes
 3. The path must have at least one `*` wildcard character
 4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
-5. Paired-end files must be unique _prior_ the `{1,2}` notation, otherwise different libraries with the same file prefixes may be mixed.
-
-If `--input` is left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
+5. Files names must be unique _prior_ the `{1,2}` notation, otherwise an error will be thrown.
 
 ### TSV Input Method
 
 Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
 
-This is mutually exclusive from `--input`, and it is recommended only to be used when performing the more complex procedures above. Thus you do not need to specify `--single_end` or `--bam` when using TSV input - this is defined within the TSV file itself.
+The use of the TSV `--input` method is recommended to be used when performing more complex procedures such as lane or library merging. You do not need to specify `--single_end`, `--bam`, `--colour_chemistry`, `-udg_type` etc. when using TSV input - this is defined within the TSV file itself.
 
 This TSV should look like the following:
 
