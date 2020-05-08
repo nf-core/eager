@@ -219,7 +219,7 @@ This can already give you an indication on the authenticity of your library - as
   <img src="images/output/fastqc/adapter_content.png" width="75%" height = "75%">
 </p>
 
-If you have downloaded publically data this often is uploaded already with adapters removed, so you can expect the a flat distribution straight away.
+If you have downloaded public data this often is uploaded with adapters already removed, so you can expect a flat distribution straight away.
 
 When comparing pre- and post-AdapterRemoval FASTQC plots of fresh sequencing data (assuming your sequencing center doesn't already remove adapters), you expect to see something similar to the left panel of the example above _pre-_ adapter removal and the right hand panel _post-_ adapter removal.
 
