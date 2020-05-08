@@ -480,7 +480,7 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
 // check we have valid --reads or --input
 if ( params.input == null ) {
-  exit 1, "Error: --input was supplied. Please see --help and documentation under 'running the pipeline' for details"
+  exit 1, "Error: --input was not supplied! Please see --help and documentation under 'running the pipeline' for details"
 }
 
 // Read in files properly from TSV file
@@ -1564,7 +1564,7 @@ if (params.run_bam_filtering) {
         def strandedness = it[5]
         def udg = it[6]     
         def stats = file(it[7])
-        def poststats = file('dummy_postfilterflagstat.stats')
+        def poststats = file("$baseDir/assets/dummy_postfilterflagstat.stats")
 
       [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
@@ -2919,6 +2919,8 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
                 .map { row -> [ row[0], [ row[1][0], row[1][1] ] ] }
                 .ifEmpty { exit 1, "--input was empty - no input files supplied!" }
                 .set { ch_reads_for_faketsv }
+
+                // TODO: ADD CHECK IF ROW[0] HAS MORE THAN ONE UNIQUE ENTRY FAIL!
         } 
 
     } else if ( bam_in ) {
