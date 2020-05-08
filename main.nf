@@ -480,7 +480,7 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
 // check we have valid --reads or --input
 if ( params.input == null ) {
-  exit 1, "Error: --input was supplied. Please see --help and documentation under 'running the pipeline' for details"
+  exit 1, "Error: --input not was supplied! Please see --help and documentation under 'running the pipeline' for details"
 }
 
 // Read in files properly from TSV file
