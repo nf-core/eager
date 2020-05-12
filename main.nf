@@ -26,16 +26,13 @@ def helpMessage() {
     Mandatory arguments:
         -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
 
-      Path Input
+      Direct Input
         --input                       Either paths to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
                                       Or path to TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
 
-        --single_end                  Specifies that the input is single end reads. [CURRENTLY NOT FUNCTIONAL]
-        --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Options: 2, 4. Default: ${params.colour_chemistry}
-        --single_stranded             Specifies whether libraries single stranded libraries. Currently only affects MALTExtract. Default: ${params.single_stranded}
-
-      TSV Input
-        --input                   
+        --single_end                  Specifies that the input is single end reads. Not required for TSV input.
+        --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
+        --single_stranded             Specifies whether libraries single stranded libraries. Currently only affects MALTExtract. Not required for TSV input. Default: ${params.single_stranded}
 
       Reference
         --bam                         Specifies that the input is in BAM format.
@@ -147,7 +144,7 @@ def helpMessage() {
       --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
 
-    consensus Sequence Generation
+    Consensus Sequence Generation
       --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
       --vcf2genome_outfile          Specify name of the output FASTA file containing the consensus sequence. Do not include `.vcf` in the file name. Default: '<input_vcf>'
       --vcf2genome_header           Specify the header name of the consensus sequence entry within the FASTA file. Default: '<input_vcf>'
@@ -235,6 +232,8 @@ if (params.help){
 */
 
 // Validate --input configurations
+
+// TODO Add checks where running --input with FASTQs/Bams but no colour_chem etc is not specified
 
 if ( params.bam ) {
   params.single_end = true
@@ -490,6 +489,7 @@ if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.inpu
 ch_input_sample = Channel.empty()
 if (tsv_path) {
 
+  // TODO add check file exists here first
     tsv_file = file(tsv_path)
     ch_input_sample = extract_data(tsv_file)
 
@@ -2622,7 +2622,7 @@ process get_software_versions {
  * Step 18c - MultiQC
  */
 process multiqc {
-    label 'sc_tiny'
+    label 'sc_small'
 
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
