@@ -489,6 +489,7 @@ if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.inpu
 ch_input_sample = Channel.empty()
 if (tsv_path) {
 
+  // TODO add check file exists here first
     tsv_file = file(tsv_path)
     ch_input_sample = extract_data(tsv_file)
 
@@ -2621,7 +2622,7 @@ process get_software_versions {
  * Step 18c - MultiQC
  */
 process multiqc {
-    label 'sc_tiny'
+    label 'sc_small'
 
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
