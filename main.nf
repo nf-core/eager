@@ -216,9 +216,11 @@ def helpMessage() {
     For a full list and more information of available parameters, consider the documentation (https://github.com/nf-core/eager/).
     """.stripIndent()
 }
-/*
- * SET UP CONFIGURATION VARIABLES
- */
+
+
+///////////////////////////////////////////////////////////////////////////////
+/* --                SET UP CONFIGURATION VARIABLES                       -- */
+///////////////////////////////////////////////////////////////////////////////
 
 // Show help message
 params.help = false
@@ -227,11 +229,9 @@ if (params.help){
     exit 0
 }
 
-/*
-* SANITY CHECKING reference inputs
-*/
-
-// Validate --input configurations
+////////////////////////////////////////////////////
+/* --          VALIDATE INPUTS                 -- */
+////////////////////////////////////////////////////
 
 // TODO Add checks where running --input with FASTQs/Bams but no colour_chem etc is not specified
 
@@ -443,7 +443,6 @@ if (params.run_maltextract) {
 
 }
 
-
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
 custom_runName = params.name
@@ -461,8 +460,10 @@ if (workflow.profile.contains('awsbatch')) {
     if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
+////////////////////////////////////////////////////
+/* --          CONFIG FILES                    -- */
+////////////////////////////////////////////////////
 
- // Stage config files
 ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
 ch_eager_logo = file("$baseDir/docs/images/nf-core_eager_logo.png")
@@ -470,12 +471,9 @@ ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
 ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 
-
-/*
- * Create a channel for input read files
- * Dump can be used for debugging purposes, e.g. using the -dump-channels operator on run
- */
-
+///////////////////////////////////////////////////
+/* --    INPUT FILE LOADING AND VALIDATING    -- */
+///////////////////////////////////////////////////
 
 // check we have valid --reads or --input
 if ( params.input == null ) {
@@ -504,21 +502,11 @@ if (tsv_path) {
 } else exit 1, "[nf-core/eager] error: --input file(s) not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
 
-
-// From --reads
-
-// If read paths
-//    Is single FASTQ
-//    Is paired-end FASTQ
-//    Is single BAM
-// If NOT read paths && FASTQ
-// is NOT read paths && BAM
-
-
 ch_reads_for_input = Channel.empty()
 
-// From --input
-
+///////////////////////////////////////////////////
+/* --         INPUT CHANNEL CREATION          -- */
+///////////////////////////////////////////////////
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
 ch_branched_input = ch_input_sample.branch{
@@ -548,7 +536,10 @@ ch_bam_channel
 ch_fastq_channel
   .into { ch_input_for_skipconvertbam; ch_input_for_lanemerge_stripfastq }
 
-// Header log info
+///////////////////////////////////////////////////
+/* --             HEADER LOG INFO             -- */
+///////////////////////////////////////////////////
+
 log.info nfcoreHeader()
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
@@ -645,10 +636,12 @@ Channel.from(summary.collect{ [it.key, it.value] })
     """.stripIndent() }
     .set { ch_workflow_summary }
 
-/* 
-* PREPROCESSING - Create BWA indices if they are not present
-*/ 
+///////////////////////////////////////////////////
+/* --          REFERENCE FASTA INDEXING       -- */
+///////////////////////////////////////////////////
 
+
+// BWA Index
 if(!params.bwa_index && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
 process makeBWAIndex {
     label 'sc_medium'
@@ -675,10 +668,7 @@ process makeBWAIndex {
     }
 }
 
-/*
- * PREPROCESSING - Index Fasta file if not specified on CLI 
- */
-
+// FASTA Index (FAI)
 if (params.fasta_index != '') {
   Channel
     .fromPath( params.fasta_index )
@@ -716,10 +706,6 @@ process makeFastaIndex {
 
 ch_fai_for_skipfastaindexing.mix(ch_fasta_faidx_index) 
   .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes }
-
-/*
- * PREPROCESSING - Create Sequence Dictionary for FastA if not specified on CLI 
- */
 
 // Stage dict index file if supplied, else load it into the channel
 
@@ -761,10 +747,11 @@ process makeSeqDict {
 ch_dict_for_skipdict.mix(ch_seq_dict)
   .into { ch_dict_for_ug; ch_dict_for_hc; ch_dict_for_freebayes }
 
-/*
-* PREPROCESSING - Convert BAM to FastQ if BAM input is specified instead of FastQ file(s)
-*/ 
+//////////////////////////////////////////////////
+/* --         BAM INPUT PREPROCESSING        -- */
+//////////////////////////////////////////////////
 
+// Convert to FASTQ if re-mapping is requested
 process convertBam {
     label 'mc_small'
     tag "$libraryid"
@@ -784,10 +771,8 @@ process convertBam {
     samtools fastq -tn ${bam} | pigz -p ${task.cpus} > ${base}.converted.fastq.gz
     """ 
 }
-/*
-* PREPROCESSING - Index a input BAM if not being converted to FASTQ
-*/
 
+// If not converted to FASTQ generate pipeline compatible BAM index file (i.e. with correct samtools version) 
 process indexinputbam {
   label 'sc_small'
   tag "$libraryid"
@@ -812,9 +797,12 @@ process indexinputbam {
     ch_input_for_skipconvertbam.mix(ch_output_from_convertbam)
         .into { ch_convertbam_for_fastp; ch_convertbam_for_fastqc } 
 
-/*
- * STEP 1a - FastQC
- */
+//////////////////////////////////////////////////
+/* -- SEQUENCING QC AND FASTQ PREPROCESSING  -- */
+//////////////////////////////////////////////////
+
+// Raw sequencing QC - allow user evaluate if sequencing any good?
+
 process fastqc {
     label 'sc_small'
     tag "${libraryid}_L${lane}"
@@ -846,13 +834,8 @@ process fastqc {
     }
 }
 
+// Poly-G clipping for 2-colour chemistry sequencers, to reduce erroenous mapping of sequencing artefacts
 
-/* STEP 1b - FastP
-* Optional poly-G complexity filtering step before read merging/adapter clipping etc
-* Note: Clipping, Merging, Quality Trimning are turned off here - we leave this to adapter removal itself!
-*/
-
-// fastp decision: have to have in condition as including params doesn't seem to work properly
 if (params.complexity_filter_poly_g) {
   ch_input_for_fastp = ch_convertbam_for_fastp.branch{
     twocol: it[3] == '2' // Nextseq/Novaseq data with possible sequencing artefact
@@ -894,7 +877,7 @@ process fastp {
     }
 }
 
-// colour column only useful for fastp, so dropping now to reduce complexity downstream
+// Colour column only useful for fastp, so dropping now to reduce complexity downstream
 ch_input_for_fastp.fourcol
   .map {
       def samplename = it[0]
@@ -933,12 +916,9 @@ ch_skipfastp_for_merge.mix(ch_fastp_for_merge)
   .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
 
 
-/*
- * STEP 2 - Adapter Clipping / Read Merging
- */
+// Sequencing adapter clipping and optional paired-end merging in preparation for mapping
 
- // TODO Fix output name so it matches FASTQC.zip output for inline for multiQC
-
+// TODO Fix output name so it matches FASTQC.zip output for inline for multiQC
 process adapter_removal {
     label 'mc_small'
     tag "${libraryid}_L${lane}"
@@ -1058,7 +1038,7 @@ if ( params.skip_collapse ){
     .into { ch_output_from_adapterremoval; ch_adapterremoval_for_postfastqc }
 }
 
-// Adapterremoval bypass
+// AdapterRemoval bypass when not running it
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
@@ -1068,16 +1048,15 @@ if (!params.skip_adapterremoval) {
         .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
 }
 
-// Prepare for lane merging (and skipping if no merging required)
+// Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
+
+// TODO Need to add same thing for raw FASTQs for strip_fastq 
 ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
   .groupTuple(by: [0,1,3,4,5,6])
   .branch {
-    skip_merge: it[7].size() == 1
-    merge_me: it[7].size() > 1 //These are all fastqs
+    skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
+    merge_me: it[7].size() > 1
   }
-
-// Lane merging
-// TODO Need to add same thing for raw FASTQs for strip_fastq 
 
 process lanemerge {
   label 'mc_tiny'
@@ -1104,12 +1083,32 @@ process lanemerge {
 
 }
 
+// TODO check lane merged skipped non-collapse'd R2
+ch_lanemerge_for_mapping
+  .map {
+      def samplename = it[0]
+      def libraryid  = it[1]
+      def lane = it[2]
+      def seqtype = it[3]
+      def organism = it[4]
+      def strandedness = it[5]
+      def udg = it[6]
+      def reads = arrayify(it[7])
+      def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
+      def r2 = reads[1] ? reads[1] : "NA"      
 
-// Sync BAM and FASTQ
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+  }
+  .mix(ch_branched_for_lanemerge.skip_merge)
+  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem } 
+
+// ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads stripping 
+
+// Per-library lane grouping done within process
 process lanemerge_stripfastq {
   label 'mc_tiny'
   tag "${libraryid}"
-
 
   when: 
   params.strip_input_fastq
@@ -1136,35 +1135,8 @@ process lanemerge_stripfastq {
 
 }
 
-// preparation for mapping - including splitting pairs into two variables if not merged PE data
-// What about if user supplies both PE and SE data but skip collapse?  Removing seqtype info for is then lost...
-// Add branch to skip lane merging if not required?
+// Post-preprocessing QC to help user check pre-processing removed all sequencing artefacts
 
-// TODO check lane merged skipped non-collapse'd R2
-
-ch_lanemerge_for_mapping
-  .map {
-      def samplename = it[0]
-      def libraryid  = it[1]
-      def lane = it[2]
-      def seqtype = it[3]
-      def organism = it[4]
-      def strandedness = it[5]
-      def udg = it[6]
-      def reads = arrayify(it[7])
-      def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
-      def r2 = reads[1] ? reads[1] : "NA"      
-
-      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
-
-  }
-  .mix(ch_branched_for_lanemerge.skip_merge)
-  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem } 
-
-/*
-* STEP 2b - FastQC after clipping/merging (if applied!)
-*/
-// TODO: fastqc_after_clipping not happy when skip_collapsing 
 process fastqc_after_clipping {
     label 'sc_small'
     tag "${libraryid}_L${lane}"
@@ -1192,10 +1164,11 @@ process fastqc_after_clipping {
 
 }
 
+//////////////////////////////////////////////////
+/* --    READ MAPPING AND POSTPROCESSING     -- */
+//////////////////////////////////////////////////
 
-/*
-Step 3a  - Mapping with BWA, SAM to BAM, Sort BAM
-*/
+// bwa aln as standard aDNA mapper
 
 process bwa {
     label 'mc_medium'
@@ -1236,6 +1209,43 @@ process bwa {
     
 }
 
+// bwa mem for more complex or for modern data mapping
+
+process bwamem {
+    label 'mc_medium'
+    tag "$prefix"
+    publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
+
+    when: params.mapper == 'bwamem'
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwamem
+    file index from bwa_index_bwamem.collect()
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwamem
+    
+    script:
+    fasta = "${index}/${bwa_base}"
+    prefix = libraryid
+    size = "${params.large_ref}" ? '-c' : ''
+
+    if (!params.single_end && params.skip_collapse){
+    """
+    bwa mem -t ${task.cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
+    samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
+    """
+    } else {
+    """
+    bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
+    samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
+    """
+    }
+    
+}
+
+// CircularMapper reference preparation and mapping for circular genomes e.g. mtDNA
+
 process circulargenerator{
     label 'sc_tiny'
     tag "$prefix"
@@ -1261,7 +1271,6 @@ process circulargenerator{
     """
 
 }
-
 
 process circularmapper{
     label 'mc_medium'
@@ -1308,47 +1317,11 @@ process circularmapper{
     
 }
 
-process bwamem {
-    label 'mc_medium'
-    tag "$prefix"
-    publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
-
-    when: params.mapper == 'bwamem'
-
-    input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwamem
-    file index from bwa_index_bwamem.collect()
-
-    output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwamem
-    
-    script:
-    fasta = "${index}/${bwa_base}"
-    prefix = libraryid
-    size = "${params.large_ref}" ? '-c' : ''
-
-    if (!params.single_end && params.skip_collapse){
-    """
-    bwa mem -t ${task.cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
-    samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
-    """
-    } else {
-    """
-    bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
-    samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
-    """
-    }
-    
-}
-
-// Gather all mapped BAMs to send for downstream
+// Gather all mapped BAMs from all possible mappers into common channels to send downstream
 ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for_filtering)
   .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
 
-
-/*
-* Step 3b - flagstat
-*/
+// Post-mapping QC
 
 process samtools_flagstat {
     label 'sc_tiny'
@@ -1368,10 +1341,8 @@ process samtools_flagstat {
     """
 }
 
+// BAM filtering e.g. to extract unmapped reads for downstream or stricter mapping quality
 
-/*
-* Step 4a - Keep unmapped/remove unmapped reads
-*/
 process samtools_filter {
     label 'mc_medium'
     tag "$prefix"
@@ -1432,7 +1403,7 @@ process samtools_filter {
     }  
 }
 
-// samtools_filter bypass 
+// samtools_filter bypass in case not run
 if (params.run_bam_filtering) {
     ch_mapping_for_skipfiltering.mix(ch_output_from_filtering)
         .filter { it =~/.*filtered.bam/ }
@@ -1444,7 +1415,7 @@ if (params.run_bam_filtering) {
 
 }
 
-// Synchronise the input FASTQ and BAM channels
+// Synchronise the mapped input FASTQ and input non-remapped BAM channels
 ch_fastqlanemerge_for_stripfastq
     .map {
         def samplename = it[0]
@@ -1482,6 +1453,7 @@ ch_fastqlanemerge_for_stripfastq
     .filter{ it[8] != null }
     .set { ch_synced_for_stripfastq }
 
+// Remove mapped reads from original (lane merged) input FASTQ e.g. for sensitive host data when running metagenomic data
 
 // TODO: Check works when turned on; fix output - with lane merging this becomes problematic. Will need extra process to merge by lane the fASTQS as well as bams
 // TODO: Map above fails because of groupTuple mixing arrays by index position.
@@ -1519,9 +1491,7 @@ process strip_input_fastq {
     
 }
 
-/*
-* Step 4b: Keep unmapped/remove unmapped reads flagstat
-*/
+// Post filtering mapping QC - particularly to help see how much was removed from mapping quality filtering
 
 process samtools_flagstat_after_filter {
     label 'sc_tiny'
@@ -1543,10 +1513,6 @@ process samtools_flagstat_after_filter {
     samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
     """
 }
-
-/*
-* Step 4c: Keep unmapped/remove unmapped reads flagstat
-*/
 
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
@@ -1570,6 +1536,8 @@ if (params.run_bam_filtering) {
       [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
 }
+
+// Endogenous DNA calculator to say how much of a library contained 'on-target' DNA
 
 process endorSpy {
     label 'sc_tiny'
@@ -1596,10 +1564,8 @@ process endorSpy {
     }
 }
 
+// Post-mapping PCR amplicon removal because these lab artefacts inflate coverage statistics
 
-/*
-Step 5a: DeDup
-*/ 
 process dedup{
     label 'mc_small'
     tag "${libraryid}"
@@ -1640,10 +1606,6 @@ process dedup{
     }
 }
 
-/*
- Step 5b: MarkDuplicates
- */
-
 process markDup{
     label 'mc_small'
     tag "${outname}"
@@ -1668,9 +1630,7 @@ process markDup{
     """
 }
 
-/* 
- Library merging
-*/
+// Merge independent libraries sequenced but with same treatment (often done to improve complexity). Different strand/UDG libs not merged because bamtrim/pmdtools needs UDG info
 
 // Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
 if ( params.skip_deduplication ) {
@@ -1689,7 +1649,6 @@ if ( params.skip_deduplication ) {
     }
 }
 
-// This is a primary library merge, which merges all libraries of a sample but only when organism, strandeness and UDG treatment is the same, because bamtrim needs udg info.
 process library_merge {
   label 'mc_tiny'
   tag "${samplename}"
@@ -1709,7 +1668,7 @@ process library_merge {
   """
 }
 
-// Step three: mix back in libraries from skipping dedup, skipping library merging
+// Mix back in libraries from skipping dedup, skipping library merging
 if (!params.skip_deduplication) {
     ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
@@ -1720,10 +1679,11 @@ if (!params.skip_deduplication) {
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 }
 
+//////////////////////////////////////////////////
+/* --     POST DEDUPLICATION EVALUATION      -- */
+//////////////////////////////////////////////////
 
-/*
-Step 6: Preseq
-*/
+// Library complexity calculation from mapped reads - could a user cost-effectively sequence deeper for more unique information?
 
 process preseq {
     label 'sc_tiny'
@@ -1752,38 +1712,7 @@ process preseq {
     }
 }
 
-/*
-Step 7a: DMG Assessment
-*/ 
-
-process damageprofiler {
-    label 'sc_tiny'
-    tag "${samplename}"
-    publishDir "${params.outdir}/damageprofiler", mode: 'copy'
-
-    when:
-    !params.skip_damage_calculation
-
-    input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_damageprofiler
-    file fasta from ch_fasta_for_damageprofiler.collect()
-
-    output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt")
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log")
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf")
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json") into ch_damageprofiler_results
-
-    script:
-    base = "${bam.baseName}"
-    """
-    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . -yaxis_damageplot ${params.damageprofiler_yaxis}
-    """
-}
-
-/* 
-Step 8: Qualimap
-*/
+// General mapping quality statistics for whole reference sequence - e.g. X and % coverage
 
 process qualimap {
     label 'mc_small'
@@ -1808,9 +1737,7 @@ process qualimap {
     """
 }
 
-/*
- Step 9: Bedtools
-*/
+// Optional mapping statistics for specific annotations - e.g. genes in bacterial genome
 
 // Set up channels for annotation file
 
@@ -1843,9 +1770,38 @@ process bedtools {
   """
 }
 
-/*
- Step 10: PMDtools
- */
+//////////////////////////////////////////////////////////////
+/* --    ANCIENT DNA EVALUATION AND BAM MODIFICATION     -- */
+//////////////////////////////////////////////////////////////
+
+// Calculate typical aDNA damage frequency distribution
+
+process damageprofiler {
+    label 'sc_tiny'
+    tag "${samplename}"
+    publishDir "${params.outdir}/damageprofiler", mode: 'copy'
+
+    when:
+    !params.skip_damage_calculation
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_damageprofiler
+    file fasta from ch_fasta_for_damageprofiler.collect()
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json") into ch_damageprofiler_results
+
+    script:
+    base = "${bam.baseName}"
+    """
+    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . -yaxis_damageplot ${params.damageprofiler_yaxis}
+    """
+}
+
+// Optionally perform further aDNA evaluation or filtering for  just reads with damage etc.
 
 process pmdtools {
     label 'mc_small'
@@ -1882,10 +1838,7 @@ process pmdtools {
     """
 }
 
-/*
-* Step 11 - BAM Trimming step using bamUtils 
-* Can be used for e.g. UDGhalf protocols to clip off -n bases of each read
-*/
+// BAM Trimming for just non-UDG or half-UDG libraries to remove damage prior genotyping
 
 if ( params.run_trim_bam ) {
 
@@ -1930,7 +1883,8 @@ process bam_trim {
     """
 }
 
-// Post trimming merging, because we will presume that if trimming is turned on lab-damage removed libraries can be combined with merged with in silico-damage removed libraries to boost genotyping
+// Post trimming merging, because we will presume that if trimming is turned on, 'lab-removed' libraries can be combined with merged with 'in-silico damage removed' libraries to improve genotyping
+
 ch_trimmed_formerge = ch_bamutils_decision.notrim
   .mix(ch_trimmed_from_bamutils)
   .groupTuple(by:[0,4,5])
@@ -1952,7 +1906,6 @@ ch_trimmed_formerge = ch_bamutils_decision.notrim
     merge_me: it[7].size() > 1
   }
 
-// This is a secondary merge, which merges all libraries of a sample regardless of UDG treatment (see above groupTuple)
 process additional_library_merge {
   label 'mc_tiny'
   tag "${samplename}"
@@ -1976,6 +1929,9 @@ ch_trimmed_formerge.skip_merging
   .mix(ch_output_from_trimmerge)
   .set{ch_output_from_bamutils}
 
+/////////////////////////////
+/* --    GENOTYPING     -- */
+/////////////////////////////
 
 // Reroute files for genotyping; we have to ensure to select lib-merged BAMs, as input channel will also contain the un-merged ones resulting in unwanted multi-sample VCFs
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
@@ -2010,10 +1966,7 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
 
 }
 
-/*
- Step 12b: Genotyping - UG
- NB: GATK 3.5 is the last release with VCF output in "old" VCF format, not breaking MVA. Therefore we need it (for now at least until downstream tools can read proper 4.2 VCFs... )
- */
+// Unified Genotyper - although not-supported, better for aDNA (because HC does de novo assembly which requires higher coverages), and needed for MultiVCFAnalyzer
 
 if ( params.gatk_ug_jar != '' ) {
   Channel
@@ -2024,7 +1977,6 @@ if ( params.gatk_ug_jar != '' ) {
     .empty()
     .set{ ch_unifiedgenotyper_jar }
 }
-
 
  process genotyping_ug {
   label 'mc_small'
@@ -2065,7 +2017,9 @@ if ( params.gatk_ug_jar != '' ) {
     """
  }
 
-  process genotyping_hc {
+ // HaplotypeCaller as 'best practise' tool for human DNA in particular 
+
+ process genotyping_hc {
   label 'mc_small'
   tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
@@ -2097,9 +2051,8 @@ if ( params.gatk_ug_jar != '' ) {
     """
  }
 
- /*
- *  Step 12c: FreeBayes genotyping, should probably add in some options for users to define
- */ 
+ // Freebayes for 'more efficient/simple' and more generic genotyping (vs HC) 
+
  process genotyping_freebayes {
   label 'mc_small'
   tag "${samplename}"
@@ -2126,9 +2079,11 @@ if ( params.gatk_ug_jar != '' ) {
   """
  }
 
-/*
- * Step 13: VCF2Genome
-*/
+////////////////////////////////////
+/* --    CONSENSUS CALLING     -- */
+////////////////////////////////////
+
+// Generate a simple consensus-called FASTA file based on genotype VCF
 
 process vcf2genome {
   label  'mc_small'
@@ -2156,11 +2111,8 @@ process vcf2genome {
   """
 }
 
+// More complex consensus caller with additional filtering functionality (e.g. for heterozygous calls) to generate SNP tables and other things sometimes used in aDNA bacteria studies
 
-/*
- * Step 13: SNP Table Generation
- */
-// TODO: Might need to collect all VCF entries from map
 // Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
 if (params.additional_vcf_files == '') {
     ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[7] }.collect()
@@ -2202,9 +2154,11 @@ if (params.additional_vcf_files == '') {
   """
  }
 
- /*
-  * Step 14 Mitochondrial to Nuclear Ratio
- */
+////////////////////////////////////////////////////////////
+/* --    HUMAN DNA SPECIFIC ADDITIONAL INFORMATION     -- */
+////////////////////////////////////////////////////////////
+
+// Mitochondrial to nuclear ratio helps to evaluate quality of tissue sampled
 
  process mtnucratio {
   tag "${prefix}"
@@ -2227,16 +2181,13 @@ if (params.additional_vcf_files == '') {
   """
  }
 
- /*
-  * Step 15 Sex determintion with error bar calculation.
-  */
+// Human biological sex esimtaiton
 
 if (params.sexdeterrmine_bedfile == '') {
   ch_bed_for_sexdeterrmine = file('NO_FILE')
 } else {
   ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
 }
-
 
 // As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
  process sex_deterrmine {
@@ -2273,20 +2224,15 @@ if (params.sexdeterrmine_bedfile == '') {
      }
  }
 
- /* 
-  * Step 16 Nuclear contamination for Human DNA based on chromosome X heterozygosity.
-  */
-
+// Human DNA nuclear contamination estimation
 
  process nuclear_contamination{
     label 'sc_small'
     tag "${prefix}"
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
+
+    // ANGSD Xcontamination will exit with status 134 when the number of SNPs is too low
     validExitStatus 0,134
-    /*
-     * ANGSD Xcontamination will exit with status 134 when the number of SNPs
-     *     is not large enough for estimation.
-     */
 
     when:
     params.run_nuclear_contamination
@@ -2326,13 +2272,13 @@ process print_nuclear_contamination{
     """
  }
 
-/*
- * Step 17-A: Metagenomic screening of unmapped reads: MALT
-*/
+/////////////////////////////////////////////////////////
+/* --    METAGENOMICS-SPECIFIC ADDITIONAL STEPS     -- */
+/////////////////////////////////////////////////////////
+
+// MALT is a super-fast BLAST replacement typically used for pathogen detection or microbiome profiling against large databases, here using off-target reads from mapping
 
 // As we collect all files for a all metagenomic runs, we DO NOT use the normal input/output tuple!
-
-
 if (params.metagenomic_tool == 'malt') {
   ch_bam_filtering_for_metagenomic
     .set {ch_bam_filtering_for_metagenomic_malt}
@@ -2399,13 +2345,14 @@ process malt {
 
 }
 
-
 // Create input channel for MaltExtract taxon list, to allow downloading of taxon list
 if (params.maltextract_taxon_list== '') {
     ch_taxonlist_for_maltextract = Channel.empty()
 } else {
     ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list)
 }
+
+// MaltExtract performs aDNA evaluation from the output of MALT (damage patterns, read lengths etc.)
 
 // As we collect all files for a single MALT extract run, we DO NOT use the normal input/output tuple
 // TODO Check works as expected
@@ -2453,9 +2400,7 @@ process maltextract {
   """
 }
 
-/*
- * Step 17-B: Metagenomic screening of unmapped reads: Kraken2
-*/
+// Kraken is offered as a replacement for MALT as MALT is _very_ resource hungry
 
 if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && params.metagenomic_tool == 'kraken'){
   comp_kraken = file(params.database)
@@ -2541,21 +2486,12 @@ process kraken_merge {
   """    
 }
 
+//////////////////////////////////////
+/* --    PIPELINE COMPLETION     -- */
+//////////////////////////////////////
 
-/*
-Genotyping tools:
-- snpAD
-- sequenceTools
+// Pipeline documentation for on-server guidance
 
-Downstream VCF tools:
-- gencons?
-- READ/mcMLKin?
-- popGen output? PLINK? 
-*/
-
-/*
- * Step 18a - Output Description HTML
- */
 process output_documentation {
     label 'sc_tiny'
     publishDir "${params.outdir}/Documentation", mode: 'copy'
@@ -2573,9 +2509,8 @@ process output_documentation {
     """
 }
 
-/*
- * Step 18b - Parse software version numbers
- */
+// Collect all software versions for inclusion in MultiQC report
+
 process get_software_versions {
   label 'sc_tiny'
   publishDir "${params.outdir}/SoftwareVersions", mode: 'copy'
@@ -2618,9 +2553,8 @@ process get_software_versions {
     """
 }
 
-/*
- * Step 18c - MultiQC
- */
+// MultiQC file generation for pipeline report
+
 process multiqc {
     label 'sc_small'
 
@@ -2661,9 +2595,8 @@ process multiqc {
     """
 }
 
-/*
- * Step 18d - Completion e-mail notification
- */
+// Send completion emails if requested, so user knows data is ready
+
 workflow.onComplete {
 
     // Set up the e-mail variables
@@ -2778,6 +2711,9 @@ workflow.onComplete {
     }
 }
 
+/////////////////////////////////////
+/* --    AUXILARY FUNCTIONS     -- */
+/////////////////////////////////////
 
 def nfcoreHeader() {
     // Log colors ANSI codes
@@ -2822,10 +2758,6 @@ def checkHostname() {
         }
     }
 }
-
-/*
-  Custom functions
-*/
 
 // Channelling the TSV file containing FASTQ or BAM 
 // Header Format is: "Sample_Name  Library_ID  Lane  SeqType  Organism  Strandedness  UDG_Treatment  R1  R2  BAM  BAM_Index Group  Populations  Age"
@@ -2893,7 +2825,7 @@ def arrayify(it) {
   [] + it ?: [it]
 }
 
-//Extract FastQs from Path
+// Extract FastQs from Path
 // Create a channel of FASTQs from a directory pattern: "my_samples/*/"
 // All FASTQ files in subdirectories are collected and emitted;
 // they must have _R1_ and/or _R2_ in their names.
