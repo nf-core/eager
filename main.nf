@@ -217,7 +217,6 @@ def helpMessage() {
     """.stripIndent()
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 /* --                SET UP CONFIGURATION VARIABLES                       -- */
 ///////////////////////////////////////////////////////////////////////////////
@@ -501,7 +500,6 @@ if (tsv_path) {
 
 } else exit 1, "[nf-core/eager] error: --input file(s) not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
-
 ch_reads_for_input = Channel.empty()
 
 ///////////////////////////////////////////////////
@@ -639,7 +637,6 @@ Channel.from(summary.collect{ [it.key, it.value] })
 ///////////////////////////////////////////////////
 /* --          REFERENCE FASTA INDEXING       -- */
 ///////////////////////////////////////////////////
-
 
 // BWA Index
 if(!params.bwa_index && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
@@ -904,8 +901,8 @@ ch_output_from_fastp
     def organism = it[5]
     def strandedness = it[6]
     def udg = it[7]
-    def r1 = it[8].getClass() == ArrayList ? it[8][0] : it[8]
-    def r2 = seqtype == "PE" ? it[8][1] : 'NA'
+    def r1 = it[8].getClass() == ArrayList ? it[8].sort()[0] : it[8]
+    def r2 = seqtype == "PE" ? it[8].sort()[1] : 'NA'
 
     [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -914,7 +911,6 @@ ch_output_from_fastp
 
 ch_skipfastp_for_merge.mix(ch_fastp_for_merge)
   .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval } 
-
 
 // Sequencing adapter clipping and optional paired-end merging in preparation for mapping
 
@@ -1012,8 +1008,8 @@ if ( params.skip_collapse ){
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]
-        def r1 = file(it[7][0])
-        def r2 = seqtype == "PE" ? file(it[7][1]) : 'NA'
+        def r1 = file(it[7].sort()[0])
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : 'NA'
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1093,7 +1089,7 @@ ch_lanemerge_for_mapping
       def organism = it[4]
       def strandedness = it[5]
       def udg = it[6]
-      def reads = arrayify(it[7])
+      def reads = arrayify(it[7]).sort()
       def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : "NA"      
 
@@ -1115,7 +1111,6 @@ process lanemerge_stripfastq {
 
   input:
   tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_lanemerge_stripfastq.groupTuple(by: [0,1,3,4,5,6,7])
-
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
@@ -1291,7 +1286,6 @@ process circularmapper{
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
     elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
 
-    
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse ){
@@ -1425,7 +1419,7 @@ ch_fastqlanemerge_for_stripfastq
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]
-        def reads = arrayify(it[7])
+        def reads = arrayify(it[7]).sort()
         def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
         def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
 
@@ -1465,13 +1459,11 @@ process strip_input_fastq {
     when: 
     params.strip_input_fastq
 
-
     input: 
     tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
 
     output:
     tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_stripfastq
-
 
     script:
     if ( seqtype == 'SE' ) {
@@ -2812,7 +2804,6 @@ def return_file(it) {
     if (!file(it).exists()) exit 1, "[nf-core/eager] error: Cannot find supplied FASTQ or BAM input file. If using input method TSV set to NA if no file required. See --help or documentation under 'running the pipeline' for more information. Check file: ${it}" 
     return file(it)
 }
-
 
 // Check file extension
 def has_extension(it, extension) {
