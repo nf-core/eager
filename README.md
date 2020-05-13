@@ -81,11 +81,11 @@ Additional functionality contained by the pipeline currently includes:
 
 4. Test the pipeline using the provided test data
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda>,test --paired_end
+        nextflow run nf-core/eager -profile <docker/singularity/conda>,test
 
 5. Start running your own ancient DNA analysis!
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+        nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
 6. Once your run has completed successfully, clean up the intermediate files.
 

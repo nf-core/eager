@@ -5,7 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.1.0] - Ravensburg - 2020-03-05
+## [dev]
+
+### `Added`
+
+* **Major** Re-wrote input logic to accept a TSV 'map' file in addition to direct paths to FASTQ
+* **Major** Lane and library merging implement
+  * When using TSV input, one libraries with the multiple _lane_ will be merged together, before mapping
+    * Strip FASTQ will also produce a lane merged 'raw' but 'stripped' FASTQ file
+  * When using TSV input, one sample with multiple (same treatment) libraries will be merged together.
+  * Important: direct FASTQ paths will not have this functionality. TSV is required.
+* Added sanity check and clearer error message when `--fasta_index` is provided and filepath does not end in `.fai`.
+* Added basic json_schema
+* Improved error messages
+* Added ability for automated emails using `mailutils` to also send MultiQC reports
+* General documentation additions and cleaning, updated figures with CC-BY license
+
+### `Fixed`
+
+* [#368](https://github.com/nf-core/eager/issues/368) - Fixed the profile `test` to contain a parameter for `--paired_end`.
+* Mini bugfix for typo in line 1260+1261
+* [#374](https://github.com/nf-core/eager/issues/374) - Fixed output documentation rendering not containing images
+* [#379](https://github.com/nf-core/eager/issues/378) - Fixed insufficient memory requirements for FASTQC edge case
+* [#390](https://github.com/nf-core/eager/issues/390) - Renamed clipped/merged output directory to be more descriptive
+* [#398](https://github.com/nf-core/eager/issues/498) - Stopped incompatible FASTA indexes being accepted
+* [#400](https://github.com/nf-core/eager/issues/400) -  Set correct recommended bwa mapping parameters from [Schubert et al. 2012](https://doi.org/10.1186/1471-2164-13-178)
+* [#410](https://github.com/nf-core/eager/issues/410) - Fixed nf-core/configs not being loaded properly
+* Increase MultiQC process memory requirements to ensure enough memory for large runs
+
+### `Dependencies`
+
+* Latest version of DeDup (0.12.6) which now reports mapped reads after deduplication
+* Latest version of ANGSD (0.933) which doesn't seg fault when running contamination on BAMs with insufficient reads
+
+## [2.1.0] - 2020-03-05 - "Ravensburg"
 
 ### `Added`
 
