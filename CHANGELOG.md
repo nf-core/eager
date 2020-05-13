@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   * When using TSV input, one libraries with the multiple _lane_ will be merged together, before mapping
     * Strip FASTQ will also produce a lane merged 'raw' but 'stripped' FASTQ file
   * When using TSV input, one sample with multiple (same treatment) libraries will be merged together.
-  * Importnat: direct FASTQ paths will not have this functionality. TSV is required. 
+  * Important: direct FASTQ paths will not have this functionality. TSV is required.
 * Added sanity check and clearer error message when `--fasta_index` is provided and filepath does not end in `.fai`.
 * Added basic json_schema
 * Improved error messages
@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#374](https://github.com/nf-core/eager/issues/374) - Fixed output documentation rendering not containing images
 * [#379](https://github.com/nf-core/eager/issues/378) - Fixed insufficient memory requirements for FASTQC edge case
 * [#390](https://github.com/nf-core/eager/issues/390) - Renamed clipped/merged output directory to be more descriptive
-* [#398](https://github.com/nf-core/eager/issues/498) - Stopped incompatible FASTA indexes being accepted 
+* [#398](https://github.com/nf-core/eager/issues/498) - Stopped incompatible FASTA indexes being accepted
 * [#400](https://github.com/nf-core/eager/issues/400) -  Set correct recommended bwa mapping parameters from [Schubert et al. 2012](https://doi.org/10.1186/1471-2164-13-178)
 * [#410](https://github.com/nf-core/eager/issues/410) - Fixed nf-core/configs not being loaded properly
 * Increase MultiQC process memory requirements to ensure enough memory for large runs
