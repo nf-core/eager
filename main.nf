@@ -235,12 +235,6 @@ println ""
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
 
-// TODO Add checks where running --input with FASTQs/Bams but no colour_chem etc is not specified
-
-if ( params.bam ) {
-  params.single_end = true
-}
-
 // Validate reference inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "[nf-core/eager] error: please specify --fasta with the path to your reference"
@@ -295,6 +289,11 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
         .fromPath(bwa_dir, checkIfExists: true)
         .ifEmpty { exit 1, "[nf-core/eager] error: bwa index directory not found: ${bwa_dir}" }
         .into {bwa_index; bwa_index_bwamem}
+}
+
+// Validate BAM input isn't set to paired_end
+if ( params.bam && !params.single_end ) {
+  exit 1, "[nf-core/eager] error: bams can only be specified with --single_end. Please check input command."
 }
 
 // Validate that skip_collapse is only set to True for paired_end reads!
@@ -2841,7 +2840,6 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
                 // Check we don't have any duplicated sample names due to fromFilePairs behaviour of calculating sample name from anything before R1/R2 glob
                 ch_reads_for_validate
                   .groupTuple()
-                  .dump()
                   .map{
                     if ( validate_size(it[1], 1) ) { null } else { exit 1, "[nf-core/eager] error: You have supplied non-unique sample names (text before R1/R2 indication). Did you accidentally supply paired-end data?  See --help or documentation under 'running the pipeline' for more information. Check duplicates of: ${it[0]}" } 
                   }

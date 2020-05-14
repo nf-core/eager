@@ -257,45 +257,45 @@ For more details on how to set up your own private profile, please see [installa
 **Basic profiles**
 These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
 
-* `awsbatch`
-  * A generic configuration profile to be used with AWS Batch.
-* `conda`
-  * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
-  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
-  * Pulls most software from [Bioconda](https://bioconda.github.io/)
-* `docker`
-  * A generic configuration profile to be used with [Docker](http://docker.com/)
-  * Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
-* `singularity`
-  * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-  * Pulls software from singularity-hub
-* `test`
-  * A profile with a complete configuration for automated testing
-  * Includes links to test data so needs no other parameters
-* `none`
-  * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
+- `awsbatch`
+  - A generic configuration profile to be used with AWS Batch.
+- `conda`
+  - Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
+  - A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  - Pulls most software from [Bioconda](https://bioconda.github.io/)
+- `docker`
+  - A generic configuration profile to be used with [Docker](http://docker.com/)
+  - Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
+- `singularity`
+  - A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
+  - Pulls software from singularity-hub
+- `test`
+  - A profile with a complete configuration for automated testing
+  - Includes links to test data so needs no other parameters
+- `none`
+  - No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
 **Institution Specific Profiles**
 These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
-* `uzh`
-  * A profile for the University of Zurich Research Cloud
-  * Loads Singularity and defines appropriate resources for running the pipeline.
-* `binac`
-  * A profile for the BinAC cluster at the University of Tuebingen
-  * Loads Singularity and defines appropriate resources for running the pipeline
-* `shh`
-  * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
-  * Loads Singularity and defines appropriate resources for running the pipeline
+- `uzh`
+  - A profile for the University of Zurich Research Cloud
+  - Loads Singularity and defines appropriate resources for running the pipeline.
+- `binac`
+  - A profile for the BinAC cluster at the University of Tuebingen
+  0 Loads Singularity and defines appropriate resources for running the pipeline
+- `shh`
+  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
+  - Loads Singularity and defines appropriate resources for running the pipeline
 
 **Pipeline Specific Institution Profiles**
 There are also pipeline-specific institution profiles. I.e., we can also offer a profile which sets special resource settings to specific steps of the pipeline, which may not apply to all pipelines. This can be seen at [nf-core/configs](https://github.com/nf-core/configs) under [conf/pipelines/eager/](https://github.com/nf-core/configs/tree/master/conf/pipeline/eager).
 
 We currently offer a EAGER specific profile for
 
-* `shh`
-  * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
-  * In addition to the nf-core wide profile, this also sets the MALT resources to match our commonly used databases
+- `shh`
+  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
+  - In addition to the nf-core wide profile, this also sets the MALT resources to match our commonly used databases
 
 Further institutions can be added at [nf-core/configs](https://github.com/nf-core/configs). Please ask the eager developers to add your institution to the list above, if you add one!
 
@@ -353,17 +353,17 @@ It will also merge BAM files with the `Sample_Lane` but different `Library_ID` a
 
 Column descriptions are as follows:
 
-* **Sample_Name:** A text string containing the name of a given sample of which there can be multiple libraries. All libraries with the same sample name and same SeqType will be merged after deduplication.
-* **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).
-* **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (with same SeqType) will be concatenated after read clipping and merging.
-* **Colour Chemistry** A number indicating whether the Illumina sequencing machine the library was sequenced on was 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq). This informs whether poly-G trimming (if turned on) should be performed.
-* **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [forward], or BAM). This will affect lane merging if different per library.
-* **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
-* **Strandedness:** A text string indicating whether the library type is 'single' or 'double'. This currently has no functionality, but will affect lane/library merging if different per library.
-* **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.
-* **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column.
-* **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column.
-* **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'
+- **Sample_Name:** A text string containing the name of a given sample of which there can be multiple libraries. All libraries with the same sample name and same SeqType will be merged after deduplication.
+- **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).
+- **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (with same SeqType) will be concatenated after read clipping and merging.
+- **Colour Chemistry** A number indicating whether the Illumina sequencing machine the library was sequenced on was 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq). This informs whether poly-G trimming (if turned on) should be performed.
+- **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [forward], or BAM). This will affect lane merging if different per library.
+- **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
+- **Strandedness:** A text string indicating whether the library type is 'single' or 'double'. This currently has no functionality, but will affect lane/library merging if different per library.
+- **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.
+- **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column.
+- **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column.
+- **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'
 
 For example, with the following:
 
@@ -382,15 +382,15 @@ After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _
 
 Note the following important points:
 
-* The TSV must use actual tabs (not spaces) between cells.
-* All _BAM_ files must be specified as `SE` under `SeqType`.
-* nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
-* You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
-* Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
-* nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
-* Qualimap is run on each mapped same-treated, so you may have _multiple_ entries for one sample. 
-  * Example: if for one sample you have one library with full-UDG treatment and one indicated as non-UDG treated, these will not be merged at the library merging step. Therefore you will get one qualimap report (and thus one line in the General Statistics table of the MultiQC Report) for each.
-  * If you would rather the qualimap  occur _after_ merging of libraries, please leave an [issue](https://github.com/nf-core/eager/issues) 
+- The TSV must use actual tabs (not spaces) between cells.
+- All _BAM_ files must be specified as `SE` under `SeqType`.
+- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
+- You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
+- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
+- nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
+- Qualimap is run on each mapped same-treated, so you may have _multiple_ entries for one sample.
+  - Example: if for one sample you have one library with full-UDG treatment and one indicated as non-UDG treated, these will not be merged at the library merging step. Therefore you will get one qualimap report (and thus one line in the General Statistics table of the MultiQC Report) for each.
+  - If you would rather the qualimap  occur _after_ merging of libraries, please leave an [issue](https://github.com/nf-core/eager/issues)
 
 #### `--single_end`
 
@@ -445,15 +445,15 @@ There are 31 different species supported in the iGenomes references. To run the 
 
 You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
 
-* Human
-  * `--genome GRCh37`
-  * `--genome GRCh38`
-* Mouse *
-  * `--genome GRCm38`
-* _Drosophila_ *
-  * `--genome BDGP6`
-* _S. cerevisiae_ *
-  * `--genome 'R64-1-1'`
+- Human
+  - `--genome GRCh37`
+  - `--genome GRCh38`
+- Mouse *
+  - `--genome GRCm38`
+- _Drosophila_ *
+  - `--genome BDGP6`
+- _S. cerevisiae_ *
+  - `--genome 'R64-1-1'`
 
 > \* Not bundled with nf-core eager by default.
 
@@ -728,9 +728,9 @@ Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'
 
 More documentation can be seen for each tool under:
 
-* [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
-* [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
-* [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
+- [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+- [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
 
 #### BWA (default)
 
@@ -818,8 +818,8 @@ Can be used to configure the step size of Preseqs `c_curve` method. Can be usefu
 
 More documentation can be seen in the follow links for:
 
-* [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
-* [PMDTools documentation](https://github.com/pontussk/PMDtools)
+- [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
+- [PMDTools documentation](https://github.com/pontussk/PMDtools)
 
 #### `--udg_type`
 
@@ -913,9 +913,9 @@ There are options for different genotypers to be used. We suggest you the docume
 
 Documentation for each tool:
 
-* [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
-* [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
-* [FreeBayes](https://github.com/ekg/freebayes)
+- [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
+- [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
+- [FreeBayes](https://github.com/ekg/freebayes)
 
 #### `--run_genotyping`
 
@@ -1095,9 +1095,9 @@ An increasingly common line of analysis in high-throughput aDNA analysis today i
 
 Please note the following:
 
-* MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
-  * To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
-* MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
+- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
+  - To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
+- MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
 > :warning: Running MALT on a server with less than 128GB of memory should be performed at your own risk.
 
@@ -1109,8 +1109,8 @@ Turn on the metagenomic screening module.
 
 Specify which taxonomic classifier to use. There are two options available:
 
-* `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
-* `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
+- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
+- `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
   
 :warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
 
