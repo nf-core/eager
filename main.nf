@@ -228,15 +228,12 @@ if (params.help){
     exit 0
 }
 
+// Small console separator to make it easier to read errors after launch
+println ""
+
 ////////////////////////////////////////////////////
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
-
-// TODO Add checks where running --input with FASTQs/Bams but no colour_chem etc is not specified
-
-if ( params.bam ) {
-  params.single_end = true
-}
 
 // Validate reference inputs
 if ( params.fasta.isEmpty () ){
@@ -292,6 +289,11 @@ if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem'))
         .fromPath(bwa_dir, checkIfExists: true)
         .ifEmpty { exit 1, "[nf-core/eager] error: bwa index directory not found: ${bwa_dir}" }
         .into {bwa_index; bwa_index_bwamem}
+}
+
+// Validate BAM input isn't set to paired_end
+if ( params.bam && !params.single_end ) {
+  exit 1, "[nf-core/eager] error: bams can only be specified with --single_end. Please check input command."
 }
 
 // Validate that skip_collapse is only set to True for paired_end reads!
@@ -995,6 +997,7 @@ process adapter_removal {
 }
 
 // When not collapsing paired-end data, re-merge the R1 and R2 files into single map. Otherwise if SE or collapsed PE, R2 now becomes NA
+// Sort to make sure we get consistent R1 and R2 ordered when using `-resume`, even if not needed for FastQC
 if ( params.skip_collapse ){
   ch_output_from_adapterremoval_r1
     .mix(ch_output_from_adapterremoval_r2)
@@ -1089,7 +1092,7 @@ ch_lanemerge_for_mapping
       def organism = it[4]
       def strandedness = it[5]
       def udg = it[6]
-      def reads = arrayify(it[7]).sort()
+      def reads = arrayify(it[7])
       def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : "NA"      
 
@@ -1419,7 +1422,7 @@ ch_fastqlanemerge_for_stripfastq
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]
-        def reads = arrayify(it[7]).sort()
+        def reads = arrayify(it[7])
         def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
         def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
 
@@ -1573,7 +1576,7 @@ process dedup{
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.hist") into ch_hist_for_preseq
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_dedup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup
 
     script:
     prefix="${libraryid}"
@@ -1583,17 +1586,27 @@ process dedup{
     
     if(seqtype == 'SE') {
     """
-    dedup -i $bam $treat_merged -o . -u 
+    ## To make sure direct BAMs have a clean name
+    if [[ "${bam}" != "${libraryid}.bam" ]]; then
+      mv ${bam} ${libraryid}.bam
+    fi
+    
+    dedup -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$outname"_rmdup.bam -o "$outname"_rmdup.bam
-    samtools index "${size}" "$outname"_rmdup.bam
+    samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
+    samtools index "${size}" "${libraryid}"_rmdup.bam
     """  
     } else {
     """
-    dedup -i $bam $treat_merged -o . -u 
+    ## To make sure direct BAMs have a clean name
+    if [[ "${bam}" != "${libraryid}.bam" ]]; then 
+      mv ${bam} ${libraryid}.bam
+    fi
+    
+    dedup -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$outname"_rmdup.bam -o "$outname"_rmdup.bam
-    samtools index "${size}" "$outname"_rmdup.bam
+    samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
+    samtools index "${size}" "${libraryid}"_rmdup.bam
     """  
     }
 }
@@ -1611,14 +1624,14 @@ process markDup{
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.metrics") into ch_markdup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup
 
     script:
     outname = "${bam.baseName}"
     size = "${params.large_ref}" ? '-c' : ''
     """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${outname}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${outname}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
-    samtools index "${size}" ${outname}_rmdup.bam
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools index "${size}" ${libraryid}_rmdup.bam
     """
 }
 
@@ -1664,11 +1677,11 @@ process library_merge {
 if (!params.skip_deduplication) {
     ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
 } else {
     ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 }
 
 //////////////////////////////////////////////////
@@ -1704,35 +1717,9 @@ process preseq {
     }
 }
 
-// General mapping quality statistics for whole reference sequence - e.g. X and % coverage
-
-process qualimap {
-    label 'mc_small'
-    tag "${samplename}"
-    publishDir "${params.outdir}/qualimap", mode: 'copy'
-
-    when:
-    !params.skip_qualimap
-
-    input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_qualimap
-    file fasta from ch_fasta_for_qualimap.collect()
-
-    output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*") into ch_qualimap_results
-
-    script:
-    snpcap = ''
-    if(params.snpcapture) snpcap = "-gff ${params.bedfile}"
-    """
-    qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
-    """
-}
-
 // Optional mapping statistics for specific annotations - e.g. genes in bacterial genome
 
 // Set up channels for annotation file
-
 if (!params.run_bedtools_coverage){
   ch_anno_for_bedtools = Channel.empty()
 } else {
@@ -1898,9 +1885,14 @@ ch_trimmed_formerge = ch_bamutils_decision.notrim
     merge_me: it[7].size() > 1
   }
 
+//////////////////////////////////////////////////////////////////////////
+/* --    POST aDNA BAM MODIFICATION AND FINAL MAPPING STATISTICS     -- */
+//////////////////////////////////////////////////////////////////////////
+
 process additional_library_merge {
   label 'mc_tiny'
   tag "${samplename}"
+  publishDir "${params.outdir}/librarymerged_bams", mode: 'copy'
 
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_trimmed_formerge.merge_me
@@ -1919,7 +1911,32 @@ process additional_library_merge {
 
 ch_trimmed_formerge.skip_merging
   .mix(ch_output_from_trimmerge)
-  .set{ch_output_from_bamutils}
+  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap }
+
+  // General mapping quality statistics for whole reference sequence - e.g. X and % coverage
+
+process qualimap {
+    label 'mc_small'
+    tag "${samplename}"
+    publishDir "${params.outdir}/qualimap", mode: 'copy'
+
+    when:
+    !params.skip_qualimap
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_addlibmerge_for_qualimap
+    file fasta from ch_fasta_for_qualimap.collect()
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*") into ch_qualimap_results
+
+    script:
+    snpcap = ''
+    if(params.snpcapture) snpcap = "-gff ${params.bedfile}"
+    """
+    qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
+    """
+}
 
 /////////////////////////////
 /* --    GENOTYPING     -- */
@@ -2708,7 +2725,7 @@ workflow.onComplete {
 /////////////////////////////////////
 
 def nfcoreHeader() {
-    // Log colors ANSI codes
+    // Log colours ANSI codes
     c_black = params.monochrome_logs ? '' : "\033[0;30m";
     c_blue = params.monochrome_logs ? '' : "\033[0;34m";
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
@@ -2836,7 +2853,6 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
                 // Check we don't have any duplicated sample names due to fromFilePairs behaviour of calculating sample name from anything before R1/R2 glob
                 ch_reads_for_validate
                   .groupTuple()
-                  .dump()
                   .map{
                     if ( validate_size(it[1], 1) ) { null } else { exit 1, "[nf-core/eager] error: You have supplied non-unique sample names (text before R1/R2 indication). Did you accidentally supply paired-end data?  See --help or documentation under 'running the pipeline' for more information. Check duplicates of: ${it[0]}" } 
                   }

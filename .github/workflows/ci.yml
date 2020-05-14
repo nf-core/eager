@@ -38,9 +38,9 @@ jobs:
       - name: BASIC Run the basic pipeline with directly supplied paired-end FASTQ
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input 'data/testdata/Mammoth/fastq/*_{R1,R2}_*tengrand.fq.gz'
-      - name: BASIC Run the basic pipeline with supplied --input folder
+      - name: BASIC Run the basic pipeline with supplied --input BAM
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input 'data/testdata/Mammoth/bam/*_R1_*.bam' --bam
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input 'data/testdata/Mammoth/bam/*_R1_*.bam' --bam --single_end
       - name: BASIC Run the basic pipeline with the test profile with, PE/SE, bwa aln
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --save_reference
