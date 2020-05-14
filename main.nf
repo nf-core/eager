@@ -1586,7 +1586,11 @@ process dedup{
     
     if(seqtype == 'SE') {
     """
-    mv ${bam} ${libraryid}.bam
+    ## To make sure direct BAMs have a clean name
+    if [[ "${bam}" != "${libraryid}.bam" ]]; then
+      mv ${bam} ${libraryid}.bam
+    fi
+    
     dedup -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
@@ -1594,7 +1598,11 @@ process dedup{
     """  
     } else {
     """
-    mv ${bam} ${libraryid}.bam
+    ## To make sure direct BAMs have a clean name
+    if [[ "${bam}" != "${libraryid}.bam" ]]; then 
+      mv ${bam} ${libraryid}.bam
+    fi
+    
     dedup -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
@@ -1622,8 +1630,8 @@ process markDup{
     outname = "${bam.baseName}"
     size = "${params.large_ref}" ? '-c' : ''
     """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${outname}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${outname}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
-    samtools index "${size}" ${outname}_rmdup.bam
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools index "${size}" ${libraryid}_rmdup.bam
     """
 }
 
@@ -2717,7 +2725,7 @@ workflow.onComplete {
 /////////////////////////////////////
 
 def nfcoreHeader() {
-    // Log colors ANSI codes
+    // Log colours ANSI codes
     c_black = params.monochrome_logs ? '' : "\033[0;30m";
     c_blue = params.monochrome_logs ? '' : "\033[0;34m";
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
