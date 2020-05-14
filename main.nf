@@ -1624,7 +1624,7 @@ process markDup{
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.metrics") into ch_markdup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup
 
     script:
     outname = "${bam.baseName}"
