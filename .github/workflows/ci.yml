@@ -30,7 +30,7 @@ jobs:
           docker pull nfcore/eager:dev
           docker tag nfcore/eager:dev nfcore/eager:dev
       - name: Get test data for cases where we don't use TSV input
-        run: |Not
+        run: |
           git clone --single-branch --branch eager https://github.com/nf-core/test-datasets.git data
       - name: BASIC Run the basic pipeline with directly supplied single-end FASTQ
         run: |
