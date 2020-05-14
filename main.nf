@@ -228,6 +228,9 @@ if (params.help){
     exit 0
 }
 
+// Small console separator to make it easier to read errors after launch
+println ""
+
 ////////////////////////////////////////////////////
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
@@ -995,6 +998,7 @@ process adapter_removal {
 }
 
 // When not collapsing paired-end data, re-merge the R1 and R2 files into single map. Otherwise if SE or collapsed PE, R2 now becomes NA
+// Sort to make sure we get consistent R1 and R2 ordered when using `-resume`, even if not needed for FastQC
 if ( params.skip_collapse ){
   ch_output_from_adapterremoval_r1
     .mix(ch_output_from_adapterremoval_r2)
@@ -1089,7 +1093,7 @@ ch_lanemerge_for_mapping
       def organism = it[4]
       def strandedness = it[5]
       def udg = it[6]
-      def reads = arrayify(it[7]).sort()
+      def reads = arrayify(it[7])
       def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : "NA"      
 
@@ -1419,7 +1423,7 @@ ch_fastqlanemerge_for_stripfastq
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]
-        def reads = arrayify(it[7]).sort()
+        def reads = arrayify(it[7])
         def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
         def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
 
@@ -1901,6 +1905,7 @@ ch_trimmed_formerge = ch_bamutils_decision.notrim
 process additional_library_merge {
   label 'mc_tiny'
   tag "${samplename}"
+  publishDir "${params.outdir}/librarymerged_bams", mode: 'copy'
 
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_trimmed_formerge.merge_me

@@ -20,6 +20,9 @@ extra_fn_clean_exts:
     - '_libmerged_rg_rmdup_stats'
     - '_postfilterflagstat.stats'
     - '_flagstat.stat'
+    - '.filtered'
+    - '.filtered_rmdup'
+    - '.filtered_rmdup_stats'
 
  
 top_modules:
