@@ -1576,7 +1576,7 @@ process dedup{
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.hist") into ch_hist_for_preseq
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_dedup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${outname}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup
 
     script:
     prefix="${libraryid}"
@@ -1586,17 +1586,19 @@ process dedup{
     
     if(seqtype == 'SE') {
     """
-    dedup -i $bam $treat_merged -o . -u 
+    mv ${bam} ${libraryid}.bam
+    dedup -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$outname"_rmdup.bam -o "$outname"_rmdup.bam
-    samtools index "${size}" "$outname"_rmdup.bam
+    samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
+    samtools index "${size}" "${libraryid}"_rmdup.bam
     """  
     } else {
     """
-    dedup -i $bam $treat_merged -o . -u 
+    mv ${bam} ${libraryid}.bam
+    dedup -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "$outname"_rmdup.bam -o "$outname"_rmdup.bam
-    samtools index "${size}" "$outname"_rmdup.bam
+    samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
+    samtools index "${size}" "${libraryid}"_rmdup.bam
     """  
     }
 }
@@ -1667,11 +1669,11 @@ process library_merge {
 if (!params.skip_deduplication) {
     ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
 } else {
     ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_qualimap; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 }
 
 //////////////////////////////////////////////////
@@ -1707,35 +1709,9 @@ process preseq {
     }
 }
 
-// General mapping quality statistics for whole reference sequence - e.g. X and % coverage
-
-process qualimap {
-    label 'mc_small'
-    tag "${samplename}"
-    publishDir "${params.outdir}/qualimap", mode: 'copy'
-
-    when:
-    !params.skip_qualimap
-
-    input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_qualimap
-    file fasta from ch_fasta_for_qualimap.collect()
-
-    output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*") into ch_qualimap_results
-
-    script:
-    snpcap = ''
-    if(params.snpcapture) snpcap = "-gff ${params.bedfile}"
-    """
-    qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
-    """
-}
-
 // Optional mapping statistics for specific annotations - e.g. genes in bacterial genome
 
 // Set up channels for annotation file
-
 if (!params.run_bedtools_coverage){
   ch_anno_for_bedtools = Channel.empty()
 } else {
@@ -1901,6 +1877,10 @@ ch_trimmed_formerge = ch_bamutils_decision.notrim
     merge_me: it[7].size() > 1
   }
 
+//////////////////////////////////////////////////////////////////////////
+/* --    POST aDNA BAM MODIFICATION AND FINAL MAPPING STATISTICS     -- */
+//////////////////////////////////////////////////////////////////////////
+
 process additional_library_merge {
   label 'mc_tiny'
   tag "${samplename}"
@@ -1923,7 +1903,32 @@ process additional_library_merge {
 
 ch_trimmed_formerge.skip_merging
   .mix(ch_output_from_trimmerge)
-  .set{ch_output_from_bamutils}
+  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap }
+
+  // General mapping quality statistics for whole reference sequence - e.g. X and % coverage
+
+process qualimap {
+    label 'mc_small'
+    tag "${samplename}"
+    publishDir "${params.outdir}/qualimap", mode: 'copy'
+
+    when:
+    !params.skip_qualimap
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_addlibmerge_for_qualimap
+    file fasta from ch_fasta_for_qualimap.collect()
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*") into ch_qualimap_results
+
+    script:
+    snpcap = ''
+    if(params.snpcapture) snpcap = "-gff ${params.bedfile}"
+    """
+    qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
+    """
+}
 
 /////////////////////////////
 /* --    GENOTYPING     -- */

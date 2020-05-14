@@ -28,6 +28,8 @@ extra_fn_clean_exts:
     - '.filtered'
     - '.filtered_rmdup'
     - '.filtered_rmdup_stats'
+    - '_libmerged_rg_add_stats'
+    - '_rmdup'
  
 top_modules:
      - 'fastqc':
@@ -86,13 +88,6 @@ table_columns_visible:
         mapped_passed: True
     DeDup:
         dup_rate: False
-    QualiMap:
-        mean_coverage: True
-        1_x_pc: True
-        5_x_pc: True
-        percentage_aligned: False
-    mtnucratio: 
-        mt_nuc_ratio: True
     DamageProfiler:
         3 Prime1: True
         3 Prime2: True
@@ -100,6 +95,14 @@ table_columns_visible:
         5 Prime2: True
         mean_readlength: True
         median_readlength: True
+    QualiMap:
+        mean_coverage: True
+        1_x_pc: True
+        5_x_pc: True
+        percentage_aligned: False
+    mtnucratio: 
+        mt_nuc_ratio: True
+
 table_columns_placement:
     FastQC (pre-AdapterRemoval):
         total_sequences: 100
@@ -120,6 +123,13 @@ table_columns_placement:
         endogenous_dna_post: 590
     DeDup:
         clusterfactor: 600
+    DamageProfiler:
+        3 Prime1: 1000
+        3 Prime2: 1010
+        5 Prime1: 1020
+        5 Prime2: 1030
+        mean_readlength: 1040
+        median_readlength: 1050
     QualiMap:
         mean_coverage: 700
         median_coverage: 710
@@ -136,13 +146,6 @@ table_columns_placement:
     sexdeterrmine:
         RateX: 900
         RateY: 910
-    DamageProfiler:
-        3 Prime1: 1000
-        3 Prime2: 1010
-        5 Prime1: 1020
-        5 Prime2: 1030
-        mean_readlength: 1040
-        median_readlength: 1050
 read_count_multiplier: 1
 read_count_prefix: ''
 read_count_desc: ''
