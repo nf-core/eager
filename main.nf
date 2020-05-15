@@ -422,7 +422,7 @@ if (params.run_metagenomic_screening) {
     exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
   }
 
-  if (! metagenomic_min_support_reads.toString.isInteger()){
+  if (!params.metagenomic_min_support_reads.toString.isInteger()){
     exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. You gave ${metagenomic_min_support_reads}!"
   }
 }
