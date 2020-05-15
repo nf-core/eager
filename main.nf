@@ -1198,20 +1198,18 @@ process bwa {
 
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
-    prefix = libraryid
     """
-    bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
-    bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.r1.sai ${prefix}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${prefix}.mapped.bam
-    samtools index "${size}" "${prefix}".mapped.bam
+    bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
+    bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
+    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${libraryid}.mapped.bam
+    samtools index "${size}" "${libraryid}".mapped.bam
     """
     } else {
     //PE collapsed, or SE data 
-    prefix = libraryid
     """
-    bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $fasta ${prefix}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
-    samtools index "${size}" "${prefix}".mapped.bam
+    bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
+    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
+    samtools index "${size}" "${libraryid}".mapped.bam
     """
     }
     
@@ -1221,7 +1219,7 @@ process bwa {
 
 process bwamem {
     label 'mc_medium'
-    tag "$prefix"
+    tag "$libraryid"
     publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
 
     when: params.mapper == 'bwamem'
@@ -1235,18 +1233,17 @@ process bwamem {
     
     script:
     fasta = "${index}/${bwa_base}"
-    prefix = libraryid
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
     """
-    bwa mem -t ${task.cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
-    samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
+    bwa mem -t ${task.cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
+    samtools index "${size}" -@ ${task.cpus} "${libraryid}".mapped.bam
     """
     } else {
     """
-    bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${prefix}".mapped.bam
-    samtools index "${size}" -@ ${task.cpus} "${prefix}".mapped.bam
+    bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
+    samtools index "${size}" -@ ${task.cpus} "${libraryid}".mapped.bam
     """
     }
     
@@ -1282,7 +1279,7 @@ process circulargenerator{
 
 process circularmapper{
     label 'mc_medium'
-    tag "$prefix"
+    tag "$libraryid"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
 
     when: params.mapper == 'circularmapper'
@@ -1302,23 +1299,21 @@ process circularmapper{
     size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse ){
-    prefix = libraryid
     """
-    bwa aln -t ${task.cpus} $elongated_root $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r1.sai
-    bwa aln -t ${task.cpus} $elongated_root $r2 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $elongated_root ${prefix}.r1.sai ${prefix}.r2.sai $r1 $r2 > tmp.out
+    bwa aln -t ${task.cpus} $elongated_root $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
+    bwa aln -t ${task.cpus} $elongated_root $r2 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
+    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $elongated_root ${libraryid}.r1.sai ${libraryid}.r2.sai $r1 $r2 > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
-    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${prefix}.mapped.bam
-    samtools index "${size}" ${prefix}.mapped.bam
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${libraryid}.mapped.bam
+    samtools index "${size}" ${libraryid}.mapped.bam
     """
     } else {
-    prefix = libraryid
     """ 
-    bwa aln -t ${task.cpus} $elongated_root $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${prefix}.sai
-    bwa samse -r "@RG\\tID:ILLUMINA-${prefix}\\tSM:${prefix}\\tPL:illumina" $elongated_root ${prefix}.sai $r1 > tmp.out
+    bwa aln -t ${task.cpus} $elongated_root $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
+    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $elongated_root ${libraryid}.sai $r1 > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
-    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${prefix}".mapped.bam
-    samtools index "${size}" "${prefix}".mapped.bam
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${libraryid}".mapped.bam
+    samtools index "${size}" "${libraryid}".mapped.bam
     """
     }
     
@@ -1332,7 +1327,7 @@ ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for
 
 process samtools_flagstat {
     label 'sc_tiny'
-    tag "$prefix"
+    tag "$libraryid"
     publishDir "${params.outdir}/samtools/stats", mode: 'copy'
 
     input:
@@ -1342,9 +1337,8 @@ process samtools_flagstat {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*stats") into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
 
     script:
-    prefix = libraryid
     """
-    samtools flagstat $bam > ${prefix}_flagstat.stats
+    samtools flagstat $bam > ${libraryid}_flagstat.stats
     """
 }
 
@@ -1352,7 +1346,7 @@ process samtools_flagstat {
 
 process samtools_filter {
     label 'mc_medium'
-    tag "$prefix"
+    tag "$libraryid"
     publishDir "${params.outdir}/samtools/filter", mode: 'copy',
     saveAs: {filename ->
             if (filename.indexOf(".fq.gz") > 0) "unmapped/$filename"
@@ -1373,39 +1367,38 @@ process samtools_filter {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
     script:
-    prefix = libraryid
     size = "${params.large_ref}" ? '-c' : ''
     
     if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
         """
-        samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index "${size}" ${prefix}.filtered.bam
+        samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index "${size}" ${prefix}.filtered.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "fastq"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index "${size}" ${prefix}.filtered.bam
-        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
-        rm ${prefix}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
+        rm ${libraryid}.unmapped.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index "${size}" ${prefix}.filtered.bam
-        samtools fastq -tn ${prefix}.unmapped.bam | pigz -p ${task.cpus} > ${prefix}.unmapped.fastq.gz
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
         """
     } else { //Only apply quality filtering, default
         """
-        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${prefix}.filtered.bam
-        samtools index "${size}" ${prefix}.filtered.bam
+        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
         """
     }  
 }
@@ -1500,7 +1493,7 @@ process strip_input_fastq {
 
 process samtools_flagstat_after_filter {
     label 'sc_tiny'
-    tag "$prefix"
+    tag "$libraryid"
     publishDir "${params.outdir}/samtools/filtered_stats", mode: 'copy'
 
     when:
@@ -1513,9 +1506,8 @@ process samtools_flagstat_after_filter {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.stats") into ch_bam_filtered_flagstat_for_multiqc, ch_bam_filtered_flagstat_for_endorspy
 
     script:
-    prefix = libraryid
     """
-    samtools flagstat $bam > ${prefix}_postfilterflagstat.stats
+    samtools flagstat $bam > ${libraryid}_postfilterflagstat.stats
     """
 }
 
@@ -1546,7 +1538,7 @@ if (params.run_bam_filtering) {
 
 process endorSpy {
     label 'sc_tiny'
-    tag "$prefix"
+    tag "$libraryid"
     publishDir "${params.outdir}/endorSpy", mode: 'copy'
 
     input:
@@ -1556,7 +1548,6 @@ process endorSpy {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_endorspy_for_multiqc
 
     script:
-    prefix = libraryid
 
     if (params.run_bam_filtering) {
       """
@@ -1575,7 +1566,7 @@ process dedup{
     label 'mc_small'
     tag "${libraryid}"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
-        saveAs: {filename -> "${prefix}/$filename"}
+        saveAs: {filename -> "${libraryid}/$filename"}
 
     when:
     !params.skip_deduplication && params.dedupper == 'dedup'
@@ -1589,7 +1580,6 @@ process dedup{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup
 
     script:
-    prefix="${libraryid}"
     outname = "${bam.baseName}"
     treat_merged="${params.dedup_all_merged}" ? '-m' : ''
     size = "${params.large_ref}" ? '-c' : ''
@@ -1817,13 +1807,12 @@ process pmdtools {
         snpcap = ''
     }
     size = "${params.large_ref}" ? '-c' : ''
-    prefix = "${bam.baseName}"
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${bam.baseName}".pmd.bam
     #Run Calc Range step
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${bam.baseName}".cpg.range."${params.pmdtools_range}".txt 
-    samtools index "${size}" ${prefix}.pmd.bam
+    samtools index "${size}" ${libraryid}.pmd.bam
     """
 }
 
@@ -1862,13 +1851,12 @@ process bam_trim {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}")  into ch_trimmed_from_bamutils
 
     script:
-    prefix="${bam.baseName}"
     softclip = "${params.bamutils_softclip}" ? '-c' : '' 
     size = "${params.large_ref}" ? '-c' : ''
     """
     bam trimBam $bam tmp.bam -L ${params.bamutils_clip_left} -R ${params.bamutils_clip_right} ${softclip}
-    samtools sort -@ ${task.cpus} tmp.bam -o ${prefix}.trimmed.bam 
-    samtools index "${size}" ${prefix}.trimmed.bam
+    samtools sort -@ ${task.cpus} tmp.bam -o ${libraryid}.trimmed.bam 
+    samtools index "${size}" ${libraryid}.trimmed.bam
     """
 }
 
@@ -2016,7 +2004,6 @@ if ( params.gatk_ug_jar != '' ) {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
 
   script:
-  prefix="${bam.baseName}"
   defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
   if (params.gatk_dbsnp == '')
     """
@@ -2056,7 +2043,6 @@ if ( params.gatk_ug_jar != '' ) {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz")
 
   script:
-  prefix="${bam.baseName}"
   if (params.gatk_dbsnp == '')
     """
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
@@ -2090,7 +2076,6 @@ if ( params.gatk_ug_jar != '' ) {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz")
   
   script:
-  prefix="${bam.baseName}"
   skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
   """
   freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${samplename}.freebayes.vcf
@@ -2121,7 +2106,7 @@ process vcf2genome {
 
   script:
   out = "${params.vcf2genome_outfile}" == '' ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
-  fasta_head = "${params.vcf2genome_header}" == '' ? "${prefix}" : "${params.vcf2genome_header}"
+  fasta_head = "${params.vcf2genome_header}" == '' ? "${samplename}" : "${params.vcf2genome_header}"
   """
   pigz -f -d -p ${task.cpus} *.vcf.gz
   vcf2genome -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
@@ -2180,7 +2165,7 @@ if (params.additional_vcf_files == '') {
 // Mitochondrial to nuclear ratio helps to evaluate quality of tissue sampled
 
  process mtnucratio {
-  tag "${prefix}"
+  tag "${samplename}"
   publishDir "${params.outdir}/mtnucratio", mode: "copy"
 
   when: 
@@ -2194,7 +2179,6 @@ if (params.additional_vcf_files == '') {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_mtnucratio_for_multiqc
 
   script:
-  prefix="${samplename}"
   """
   mtnucratio ${bam} "${params.mtnucratio_header}"
   """
@@ -2247,7 +2231,7 @@ if (params.sexdeterrmine_bedfile == '') {
 
  process nuclear_contamination{
     label 'sc_small'
-    tag "${prefix}"
+    tag "${samplename}"
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
 
     // ANGSD Xcontamination will exit with status 134 when the number of SNPs is too low
@@ -2263,7 +2247,6 @@ if (params.sexdeterrmine_bedfile == '') {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('*.X.contamination.out') into ch_from_nuclear_contamination
 
     script:
-    prefix="${samplename}"
     """
     samtools index ${input}
     angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${input.baseName}.doCounts
