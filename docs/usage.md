@@ -13,7 +13,7 @@
       - [`-profile`](#profile)
       - [`--input`](#input)
         - [Direct Input Method](#direct-input-method)
-    - [TSV Input Method](#tsv-input-method)
+        - [TSV Input Method](#tsv-input-method)
       - [`--single_end`](#singleend)
       - [`--bam`](#bam)
       - [`--single_stranded`](#singlestranded)
@@ -333,7 +333,7 @@ If you have multiple files in different directories, you can use additional wild
 4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
 5. Files names must be unique _prior_ the `{1,2}` notation, otherwise an error will be thrown.
 
-### TSV Input Method
+##### TSV Input Method
 
 Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
 
