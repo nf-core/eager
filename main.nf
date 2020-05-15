@@ -282,10 +282,12 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
     exit 1, "[nf-core/eager] error: the provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
 }
 
-// Index files provided? Then check whether they are correct and complete
+// Mapper sanity checking
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
     exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave ${params.mapper}!"
 }
+
+// Index files provided? Then check whether they are correct and complete
 if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
     lastPath = params.bwa_index.lastIndexOf(File.separator)
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
@@ -312,11 +314,6 @@ if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
         exit 1, "[nf-core/eager] error: --strip_mode can only be set to strip or replace!"
     }
-}
-
-// Mapper sanity checking
-if(params.mapper != "bwaaln" && params.mapper != "bwamem" && params.mapper != "circularmapper") {
-    exit 1, "[nf-core/eager] error: please specify a valid mapper. Options: 'bwaaln', 'bwamem', 'circularmapper'. You gave: ${params.mapper}!"
 }
 
 if (params.bam_discard_unmapped && params.bam_unmapped_type == '') {
