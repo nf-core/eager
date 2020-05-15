@@ -428,7 +428,7 @@ if (params.run_metagenomic_screening) {
     exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
   }
 
-  if (!params.metagenomic_min_support_reads.toString.isInteger()){
+  if (!params.metagenomic_min_support_reads.toString().isInteger()){
     exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. You gave ${metagenomic_min_support_reads}!"
   }
 }
@@ -487,7 +487,7 @@ where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
 ///////////////////////////////////////////////////
 
 // check we have valid --reads or --input
-if ( params.input == null ) {
+if (params.input == null) {
   exit 1, "[nf-core/eager] error: --input was not supplied! Please see --help and documentation under 'running the pipeline' for details"
 }
 
@@ -542,7 +542,7 @@ ch_input_for_convertbam = Channel.empty()
 ch_bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; }
 
-// Also need to send raw files for lange merging, if we want to strip fastq
+// Also need to send raw files for lane merging, if we want to strip fastq
 ch_fastq_channel
   .into { ch_input_for_skipconvertbam; ch_input_for_lanemerge_stripfastq }
 
