@@ -28,7 +28,8 @@ def helpMessage() {
 
       Direct Input
         --input                       Either paths to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
-                                      Or path to TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
+                                      OR 
+                                      A path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
 
         --single_end                  Specifies that the input is single end reads. Not required for TSV input.
         --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
@@ -269,6 +270,11 @@ if ( params.fasta.isEmpty () ){
     
     lastPath = params.fasta.lastIndexOf(File.separator)
     bwa_base = params.fasta.substring(lastPath+1)
+}
+
+// Check that fasta index file path ends in '.fai'
+if (params.fasta_index && !params.fasta_index.endsWith(".fai")) {
+    exit 1, "The specified fasta index file (${params.fasta_index}) is not valid. Fasta index files should end in '.fai'."
 }
 
 // Check if genome exists in the config file. params.genomes is from igenomes.conf, params.genome specified by user
@@ -824,7 +830,7 @@ process fastqc {
     script:
     if ( seqtype == 'PE' ) {
     """
-    fastqc -q $r1 $r2
+    fastqc -t ${task.cpus} -q $r1 $r2
     rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
     rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
@@ -1156,11 +1162,11 @@ process fastqc_after_clipping {
     script:
     if ( params.skip_collapse && seqtype == "PE" ) {
     """
-    fastqc -q ${r1} ${r2}
+    fastqc -t ${task.cpus} -q ${r1} ${r2}
     """
     } else {
     """
-    fastqc -q ${r1}
+    fastqc -t ${task.cpus} -q ${r1}
     """
     }
 
