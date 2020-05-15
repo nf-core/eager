@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+* **Major** Automated Cloud Tests with large-scale data on [AWS](https://aws.amazon.com/)
 * **Major** Re-wrote input logic to accept a TSV 'map' file in addition to direct paths to FASTQ
 * **Major** Lane and library merging implement
   * When using TSV input, one libraries with the multiple _lane_ will be merged together, before mapping

@@ -18,7 +18,7 @@
 
 ## Introduction
 
-The output of EAGER2 consists of two main components: output files (e.g. BAM or FASTQ files), and summary statistics of the whole run presented in a [`MultiQC`](https://multiqc.info) report. (Some) intermediate files and module-specific statstics files are also retained.
+The output of EAGER2 consists of two main components: output files (e.g. BAM or FASTQ files), and summary statistics of the whole run presented in a [`MultiQC`](https://multiqc.info) report. (Some) intermediate files and module-specific statistics files are also retained.
 
 ## Directory Structure
 
@@ -160,7 +160,7 @@ You expect to see whole heatmap to be a relatively equal block of colour (normal
 
 Things to watch out for:
 
-* If you see a particular colour becoming more prominent this suggests there is an over-representation of those bases at that base-pair range across all reads (e.g. 20-24bp). This could happen if you have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no flouresence can mean both G or 'no-call').
+* If you see a particular colour becoming more prominent this suggests there is an over-representation of those bases at that base-pair range across all reads (e.g. 20-24bp). This could happen if you have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no fluorescence can mean both G or 'no-call').
 
 > If you see Poly-G tails, we recommend to turn on FastP poly-G trimming with EAGER. See the 'running' documentation page for details.
 
@@ -174,7 +174,7 @@ This line graph shows the number percentage reads (y-axis) with an average perce
 
 Things to watch out for:
 
-* If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no florescence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
+* If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no fluorescence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
 
 #### Per Base N Content
 
@@ -219,6 +219,10 @@ This can already give you an indication on the authenticity of your library - as
 <p align="center">
   <img src="images/output/fastqc/fastqc_adapter_content.png" width="75%" height = "75%">
 </p>
+
+If you have downloaded public data this often is uploaded with adapters already removed, so you can expect a flat distribution straight away.
+
+When comparing pre- and post-AdapterRemoval FASTQC plots of fresh sequencing data (assuming your sequencing center doesn't already remove adapters), you expect to see something similar to the left panel of the example above _pre-_ adapter removal and the right hand panel _post-_ adapter removal.
 
 ### FastP
 

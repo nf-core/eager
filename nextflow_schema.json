@@ -1,0 +1,554 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/'nf-core/eager'/master/nextflow_schema.json",
+    "title": "'nf-core/eager' pipeline parameters",
+    "description": "'A fully reproducible ancient and modern DNA pipeline in Nextflow and with cloud support.'",
+    "type": "object",
+    "properties": {
+        "reads": {
+            "type": "string",
+            "default": "data/*{1,2}.fastq.gz"
+        },
+        "single_end": {
+            "type": "string"
+        },
+        "paired_end": {
+            "type": "string",
+            "hidden": true
+        },
+        "readPaths": {
+            "type": "string",
+            "hidden": true
+        },
+        "bam": {
+            "type": "string"
+        },
+        "fasta": {
+            "type": "string"
+        },
+        "large_ref": {
+            "type": "string"
+        },
+        "save_reference": {
+            "type": "string",
+            "description": "Use this if you want to save your reference indices that were created.",
+            "default": "false"
+        },
+        "saveTrimmed": {
+            "type": "string",
+            "default": "true"
+        },
+        "saveAlignedIntermediates": {
+            "type": "string"
+        },
+        "genome": {
+            "type": "string"
+        },
+        "fasta_index": {
+            "type": "string"
+        },
+        "bwa_index": {
+            "type": "string"
+        },
+        "snpcapture": {
+            "type": "string"
+        },
+        "bedfile": {
+            "type": "string"
+        },
+        "seq_dict": {
+            "type": "string"
+        },
+        "outdir": {
+            "type": "string",
+            "default": "./results"
+        },
+        "skip_fastqc": {
+            "type": "string"
+        },
+        "skip_mapping": {
+            "type": "string"
+        },
+        "skip_preseq": {
+            "type": "string"
+        },
+        "skip_damage_calculation": {
+            "type": "string"
+        },
+        "skip_qualimap": {
+            "type": "string"
+        },
+        "skip_deduplication": {
+            "type": "string"
+        },
+        "run_convertbam": {
+            "type": "string"
+        },
+        "skip_adapterremoval": {
+            "type": "string"
+        },
+        "skip_trim": {
+            "type": "string"
+        },
+        "complexity_filter_poly_g": {
+            "type": "string"
+        },
+        "complexity_filter_poly_g_min": {
+            "type": "integer",
+            "default": 10
+        },
+        "trim_bam": {
+            "type": "string"
+        },
+        "clip_forward_adaptor": {
+            "type": "string",
+            "default": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
+        },
+        "clip_reverse_adaptor": {
+            "type": "string",
+            "default": "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
+        },
+        "clip_readlength": {
+            "type": "integer",
+            "default": 30
+        },
+        "clip_min_read_quality": {
+            "type": "integer",
+            "default": 20
+        },
+        "min_adap_overlap": {
+            "type": "integer",
+            "default": 1
+        },
+        "skip_collapse": {
+            "type": "string"
+        },
+        "preserve5p": {
+            "type": "string"
+        },
+        "mergedonly": {
+            "type": "string"
+        },
+        "mapper": {
+            "type": "string",
+            "default": "bwaaln"
+        },
+        "bwaalnn": {
+            "type": "number",
+            "default": 0.03
+        },
+        "bwaalnk": {
+            "type": "integer",
+            "default": 2
+        },
+        "bwaalnl": {
+            "type": "integer",
+            "default": 32
+        },
+        "circularextension": {
+            "type": "integer",
+            "default": 500
+        },
+        "circulartarget": {
+            "type": "string",
+            "default": "MT"
+        },
+        "circularfilter": {
+            "type": "string"
+        },
+        "run_bam_filtering": {
+            "type": "string"
+        },
+        "bam_discard_unmapped": {
+            "type": "string"
+        },
+        "bam_unmapped_type": {
+            "type": "string",
+            "default": "discard"
+        },
+        "bam_mapping_quality_threshold": {
+            "type": "integer",
+            "default": 0
+        },
+        "damageprofiler_length": {
+            "type": "integer",
+            "default": 100
+        },
+        "damageprofiler_threshold": {
+            "type": "integer",
+            "default": 15
+        },
+        "damageprofiler_yaxis": {
+            "type": "number",
+            "default": 0.3
+        },
+        "dedupper": {
+            "type": "string",
+            "default": "dedup"
+        },
+        "dedup_all_merged": {
+            "type": "string"
+        },
+        "preseq_step_size": {
+            "type": "integer",
+            "default": 1000
+        },
+        "run_bedtools_coverage": {
+            "type": "string"
+        },
+        "anno_file": {
+            "type": "string"
+        },
+        "run_pmdtools": {
+            "type": "string"
+        },
+        "pmd_udg_type": {
+            "type": "string",
+            "default": "half"
+        },
+        "pmdtools_range": {
+            "type": "integer",
+            "default": 10
+        },
+        "pmdtools_threshold": {
+            "type": "integer",
+            "default": 3
+        },
+        "pmdtools_reference_mask": {
+            "type": "string"
+        },
+        "pmdtools_max_reads": {
+            "type": "integer",
+            "default": 10000
+        },
+        "run_trim_bam": {
+            "type": "string"
+        },
+        "bamutils_clip_left": {
+            "type": "integer",
+            "default": 1
+        },
+        "bamutils_clip_right": {
+            "type": "integer",
+            "default": 1
+        },
+        "bamutils_softclip": {
+            "type": "string"
+        },
+        "strip_input_fastq": {
+            "type": "string"
+        },
+        "strip_mode": {
+            "type": "string",
+            "default": "strip"
+        },
+        "run_genotyping": {
+            "type": "string"
+        },
+        "genotyping_tool": {
+            "type": "string"
+        },
+        "genotyping_source": {
+            "type": "string",
+            "default": "raw"
+        },
+        "gatk_ug_jar": {
+            "type": "string"
+        },
+        "gatk_ug_genotype_model": {
+            "type": "string",
+            "default": "SNP"
+        },
+        "gatk_hc_emitrefconf": {
+            "type": "string",
+            "default": "GVCF"
+        },
+        "gatk_call_conf": {
+            "type": "integer",
+            "default": 30
+        },
+        "gatk_ploidy": {
+            "type": "integer",
+            "default": 2
+        },
+        "gatk_downsample": {
+            "type": "integer",
+            "default": 250
+        },
+        "gatk_ug_out_mode": {
+            "type": "string",
+            "default": "EMIT_VARIANTS_ONLY"
+        },
+        "gatk_hc_out_mode": {
+            "type": "string",
+            "default": "EMIT_VARIANTS_ONLY"
+        },
+        "gatk_dbsnp": {
+            "type": "string"
+        },
+        "gatk_ug_defaultbasequalities": {
+            "type": "string"
+        },
+        "freebayes_C": {
+            "type": "integer",
+            "default": 1
+        },
+        "freebayes_g": {
+            "type": "integer",
+            "default": 0
+        },
+        "freebayes_p": {
+            "type": "integer",
+            "default": 2
+        },
+        "run_vcf2genome": {
+            "type": "string"
+        },
+        "vcf2genome_outfile": {
+            "type": "string"
+        },
+        "vcf2genome_header": {
+            "type": "string"
+        },
+        "vcf2genome_minc": {
+            "type": "integer",
+            "default": 5
+        },
+        "vcf2genome_minq": {
+            "type": "integer",
+            "default": 30
+        },
+        "vcf2genome_minfreq": {
+            "type": "number",
+            "default": 0.8
+        },
+        "run_multivcfanalyzer": {
+            "type": "string"
+        },
+        "write_allele_frequencies": {
+            "type": "string"
+        },
+        "min_genotype_quality": {
+            "type": "integer",
+            "default": 30
+        },
+        "min_base_coverage": {
+            "type": "integer",
+            "default": 5
+        },
+        "min_allele_freq_hom": {
+            "type": "number",
+            "default": 0.9
+        },
+        "min_allele_freq_het": {
+            "type": "number",
+            "default": 0.9
+        },
+        "additional_vcf_files": {
+            "type": "string"
+        },
+        "reference_gff_annotations": {
+            "type": "string",
+            "default": "NA"
+        },
+        "reference_gff_exclude": {
+            "type": "string",
+            "default": "NA"
+        },
+        "snp_eff_results": {
+            "type": "string",
+            "default": "NA"
+        },
+        "run_mtnucratio": {
+            "type": "string"
+        },
+        "mtnucratio_header": {
+            "type": "string",
+            "default": "MT"
+        },
+        "run_sexdeterrmine": {
+            "type": "string"
+        },
+        "sexdeterrmine_bedfile": {
+            "type": "string"
+        },
+        "run_nuclear_contamination": {
+            "type": "string"
+        },
+        "contamination_chrom_name": {
+            "type": "string",
+            "default": "X"
+        },
+        "run_metagenomic_screening": {
+            "type": "string"
+        },
+        "metagenomic_tool": {
+            "type": "string",
+            "default": "malt"
+        },
+        "metagenomic_min_support_reads": {
+            "type": "integer",
+            "default": 1
+        },
+        "database": {
+            "type": "string"
+        },
+        "percent_identity": {
+            "type": "integer",
+            "default": 85
+        },
+        "malt_mode": {
+            "type": "string",
+            "default": "BlastN"
+        },
+        "malt_alignment_mode": {
+            "type": "string",
+            "default": "SemiGlobal"
+        },
+        "malt_top_percent": {
+            "type": "integer",
+            "default": 1
+        },
+        "malt_min_support_mode": {
+            "type": "string",
+            "default": "percent"
+        },
+        "malt_min_support_percent": {
+            "type": "number",
+            "default": 0.01
+        },
+        "malt_max_queries": {
+            "type": "integer",
+            "default": 100
+        },
+        "malt_memory_mode": {
+            "type": "string",
+            "default": "load"
+        },
+        "malt_weighted_lca": {
+            "type": "string"
+        },
+        "run_maltextract": {
+            "type": "string"
+        },
+        "maltextract_taxon_list": {
+            "type": "string"
+        },
+        "maltextract_ncbifiles": {
+            "type": "string"
+        },
+        "maltextract_filter": {
+            "type": "string",
+            "default": "def_anc"
+        },
+        "maltextract_toppercent": {
+            "type": "number",
+            "default": 0.01
+        },
+        "maltextract_destackingoff": {
+            "type": "string"
+        },
+        "maltextract_downsamplingoff": {
+            "type": "string"
+        },
+        "maltextract_duplicateremovaloff": {
+            "type": "string"
+        },
+        "maltextract_matches": {
+            "type": "string"
+        },
+        "maltextract_megansummary": {
+            "type": "string"
+        },
+        "maltextract_percentidentity": {
+            "type": "integer",
+            "default": 85
+        },
+        "maltextract_topalignment": {
+            "type": "string"
+        },
+        "maltextract_singlestranded": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string"
+        },
+        "multiqc_config": {
+            "type": "string"
+        },
+        "email": {
+            "type": "string"
+        },
+        "email_on_fail": {
+            "type": "string"
+        },
+        "max_multiqc_email_size": {
+            "type": "string",
+            "default": "25 MB"
+        },
+        "plaintext_email": {
+            "type": "string"
+        },
+        "monochrome_logs": {
+            "type": "string"
+        },
+        "help": {
+            "type": "string"
+        },
+        "igenomes_base": {
+            "type": "string",
+            "default": "s3://ngi-igenomes/igenomes/"
+        },
+        "tracedir": {
+            "type": "string",
+            "default": "./results/pipeline_info"
+        },
+        "awsqueue": {
+            "type": "string"
+        },
+        "awsregion": {
+            "type": "string",
+            "default": "eu-west-1"
+        },
+        "igenomes_ignore": {
+            "type": "string"
+        },
+        "custom_config_version": {
+            "type": "string",
+            "default": "master"
+        },
+        "custom_config_base": {
+            "type": "string",
+            "default": "https://raw.githubusercontent.com/nf-core/configs/master"
+        },
+        "hostnames": {
+            "type": "string",
+            "default": "[binac:['.binac.uni-tuebingen.de'], cbe:['.cbe.vbc.ac.at'], cfc:['.hpc.uni-tuebingen.de'], crick:['.thecrick.org'], genotoul:['.genologin1.toulouse.inra.fr', '.genologin2.toulouse.inra.fr'], genouest:['.genouest.org'], uppmax:['.uppmax.uu.se'], utd_ganymede:['ganymede.utdallas.edu']]"
+        },
+        "config_profile_description": {
+            "type": "string"
+        },
+        "config_profile_contact": {
+            "type": "string"
+        },
+        "config_profile_url": {
+            "type": "string"
+        },
+        "max_memory": {
+            "type": "string",
+            "default": "128 GB"
+        },
+        "max_cpus": {
+            "type": "integer",
+            "default": 16
+        },
+        "max_time": {
+            "type": "string",
+            "default": "10d"
+        }
+    },
+    "required": [
+        "reads",
+        "single_end"
+    ]
+}

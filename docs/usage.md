@@ -392,20 +392,6 @@ Note the following important points:
   - Example: if for one sample you have one library with full-UDG treatment and one indicated as non-UDG treated, these will not be merged at the library merging step. Therefore you will get one qualimap report (and thus one line in the General Statistics table of the MultiQC Report) for each.
   - If you would rather the qualimap  occur _after_ merging of libraries, please leave an [issue](https://github.com/nf-core/eager/issues)
 
-#### `--single_end`
-
-If you have single-end data or BAM files, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--input`.
-
-Only required when using the 'Path' method of [`--input`](#--input).
-
-For example:
-
-```bash
---single_end --input 'path/to/data/*.fastq.gz'
-```
-
-**Note**: It is currently not possible to run a mixture of single-end and paired-end files in one run.
-
 #### `--bam`
 
 Specifies the input file type to `--input` is in BAM format. This will automatically also apply `--single_end`.
@@ -507,7 +493,6 @@ For example:
 ```bash
 nextflow run nf-core/eager \
 -profile test,docker \
---paired_end \
 --input '*{R1,R2}*.fq.gz'
 --fasta 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta' \
 --bwa_index 'results/reference_genome/bwa_index/BWAIndex/Mammoth_MT_Krause.fasta'
@@ -567,6 +552,12 @@ Do not set this higher than what is available on your workstation or computing n
 
 Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.
 
+Note that this functionality requires either `mail` or `sendmail` to be installed on your system.
+
+#### `--plaintext_email`
+
+Set to receive plain-text e-mails instead of HTML formatted.
+
 #### `-name`
 
 Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -607,10 +598,6 @@ Provide git commit id for custom Institutional configs hosted at `nf-core/config
 \#\# Download and use config file with following git commid id
 --custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
 ```
-
-#### `--plaintext_email`
-
-Set to receive plain-text e-mails instead of HTML formatted.
 
 ## Adjustable parameters for nf-core/eager
 
@@ -678,15 +665,15 @@ Defines the adapter sequence to be used for the forward read. By default, this i
 
 Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.
 
-#### `--clip_readlength` 30
+#### `--clip_readlength
 
 Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.
 
-#### `--clip_min_read_quality` 20
+#### `--clip_min_read_quality`
 
 Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off. Default is set to `20`.
 
-#### `--clip_min_adap_overlap` 1
+#### `--clip_min_adap_overlap`
 
 Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.
 
@@ -697,8 +684,10 @@ Turns off the paired-end read merging.
 For example
 
 ```bash
---paired_end --skip_collapse  --input '*.fastq'
+--skip_collapse  --input '*_{R1,R2}_*.fastq'
 ```
+
+> It is important to use the paired-end wildcard globbing as `--skip_collapse` can only be used on paired-end data!
 
 #### `--skip_trim`
 
@@ -707,7 +696,7 @@ Turns off adaptor and quality trimming.
 For example:
 
 ```bash
---paired_end --skip_trim  --input '*.fastq'
+--skip_trim  --input '*.fastq'
 ```
 
 #### `--preserve5p`
@@ -738,7 +727,7 @@ These parameters configure mapping algorithm parameters.
 
 ##### `--bwaalnn`
 
-Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.03`, if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
+Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
 
 ##### `--bwaalnk`
 
@@ -746,7 +735,9 @@ Configures the `bwa aln -k` parameter for the seeding phase in the mapping algor
 
 ##### `--bwaalnl`
 
-Configures the length of the seed used in `bwa aln -l`. Default is set to BWA default of `32`.
+Configures the length of the seed used in `bwa aln -l`. Default is set to be 'turned off' at recommendation the of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with `1024`.
+
+> Note: Despite being recommended, turning off seeding can result in long runtimes!
 
 #### CircularMapper
 
