@@ -58,10 +58,10 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --complexity_filter_poly_g
       - name: ADAPTERREMOVAL Test skip paired end collapsing
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --paired_end --skip_collapse
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --skip_collapse
       - name: ADAPTERREMOVAL Test paired end collapsing but no trimming
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_pretrim,docker --paired_end --skip_trim
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_pretrim,docker --skip_trim
       - name: ADAPTERREMOVAL Run the basic pipeline with paired end data without adapterRemoval
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --skip_adapterremoval
