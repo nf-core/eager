@@ -388,9 +388,7 @@ Note the following important points:
 - You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
 - Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
-- Qualimap is run on each mapped same-treated, so you may have _multiple_ entries for one sample.
-  - Example: if for one sample you have one library with full-UDG treatment and one indicated as non-UDG treated, these will not be merged at the library merging step. Therefore you will get one qualimap report (and thus one line in the General Statistics table of the MultiQC Report) for each.
-  - If you would rather the qualimap  occur _after_ merging of libraries, please leave an [issue](https://github.com/nf-core/eager/issues)
+- Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
 
 #### `--bam`
 
