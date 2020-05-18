@@ -125,8 +125,7 @@ This line plot represents the Phred scores across each base pair of all the read
 You will often see that the first 5 or so bases have slightly lower quality than the rest of the read as this the calibration steps of the machine. The bulk of the read should then stay ~35. Do not worry if you see the last 10-20 bases of reads do often have lower quality base calls that the middle of the read, as the sequencing reagents start to deplete during these cycles (e.g. making nucleotide fluorescence weaker). Furthermore, the reverse reads of sequencing data will often be even lower at ends than forward reads for the same reason.
 
 <p align="center">
-  <img src="images/output/fastqc/fastqc_sequence_quality_histogram.png
-  " width="75%" height = "75%">
+  <img src="images/output/fastqc/fastqc_sequence_quality_histogram.png" width="75%" height = "75%">
 </p>
 
 Things to watch out for:
