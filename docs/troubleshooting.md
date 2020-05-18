@@ -33,7 +33,7 @@ If the pipeline can't find your files then you will get the following error
 ERROR ~ Cannot find any reads matching: *{1,2}.fastq.gz
 ```
 
-Note that if your sample name is "messy" then you have to be very particular with your glob specification. A file name like `L1-1-D-2h_S1_L002_R1_001.fastq.gz` can be difficult enough for a human to read. Specifying `*{1,2}*.gz` wont work give you what you want Whilst `*{R1,R2}*.gz` will.
+Note that if your sample name is "messy" then you have to be very particular with your glob specification. A file name like `L1-1-D-2h_S1_L002_R1_001.fastq.gz` can be difficult enough for a human to read. Specifying `*{1,2}*.gz` won't work give you what you want whilst `*{R1,R2}*.gz` will.
 
 ## Data organization
 

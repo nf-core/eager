@@ -85,7 +85,7 @@ Additional functionality contained by the pipeline currently includes:
 
 5. Start running your own ancient DNA analysis!
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+        nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
 6. Once your run has completed successfully, clean up the intermediate files.
 
@@ -136,11 +136,12 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Irina Velsko](https://github.com/ivelsko)
 * [Katerine Eaton](https://github.com/ktmeaton)
 * [Luc Venturini](https://github.com/lucventurini)
-* Marcel Keller
+* [Marcel Keller](https://github.com/marcel-keller)
 * [Pierre Lindenbaum](https://github.com/lindenb)
 * [Pontus Skoglund](https://github.com/pontussk)
 * [Raphael Eisenhofer](https://github.com/EisenRa)
 * [Torsten Günter](https://bitbucket.org/tguenther/)
+* [Kevin Lord](https://github.com/lordkev)
 
 If you've contributed and you're missing in here, please let us know and we will add you in of course!
 
