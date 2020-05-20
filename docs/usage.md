@@ -13,7 +13,7 @@
       - [`-profile`](#profile)
       - [`--input`](#input)
         - [Direct Input Method](#direct-input-method)
-    - [TSV Input Method](#tsv-input-method)
+        - [TSV Input Method](#tsv-input-method)
       - [`--single_end`](#singleend)
       - [`--bam`](#bam)
       - [`--single_stranded`](#singlestranded)
@@ -333,7 +333,7 @@ If you have multiple files in different directories, you can use additional wild
 4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
 5. Files names must be unique _prior_ the `{1,2}` notation, otherwise an error will be thrown.
 
-### TSV Input Method
+##### TSV Input Method
 
 Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
 
@@ -345,6 +345,8 @@ This TSV should look like the following:
 |-------------|------------|------|------------------|--------|----------|--------------|---------------|----|----|-----|
 | JK2782      | JK2782     | 1    | 4                | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |
 | JK2802      | JK2802     | 2    | 2                | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |
+
+A template can be taken from [here](images/usage/nfcore-eager_tsv_template.tsv).
 
 > :warning: Cells **must not** contain spaces before or after strings, as this will make the TSV unreadable by nextflow. Strings containing spaces should be wrapped in quotes.
 
@@ -388,9 +390,7 @@ Note the following important points:
 - You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
 - Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
-- Qualimap is run on each mapped same-treated, so you may have _multiple_ entries for one sample.
-  - Example: if for one sample you have one library with full-UDG treatment and one indicated as non-UDG treated, these will not be merged at the library merging step. Therefore you will get one qualimap report (and thus one line in the General Statistics table of the MultiQC Report) for each.
-  - If you would rather the qualimap  occur _after_ merging of libraries, please leave an [issue](https://github.com/nf-core/eager/issues)
+- Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
 
 #### `--bam`
 
