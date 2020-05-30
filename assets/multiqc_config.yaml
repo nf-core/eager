@@ -22,6 +22,7 @@ run_modules:
     - malt
     - multivcfanalyzer
     - picard
+    - custom_content
 
 extra_fn_clean_exts:
 - '.fastq.gz'
