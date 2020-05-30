@@ -22,7 +22,7 @@ dependencies:
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
   - bioconda::damageprofiler=0.4.9
-  - bioconda::multiqc=1.8
+  - bioconda::multiqc=1.9
   - bioconda::pmdtools=0.60
   - bioconda::bedtools=2.29.2
   - conda-forge::libiconv=1.15
