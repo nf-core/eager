@@ -2299,7 +2299,7 @@ process malt {
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
-  file "malt.log"
+  file "malt.log" into ch_malt_out
 
   script:
   if ("${params.malt_min_support_mode}" == "percent") {
@@ -2434,7 +2434,7 @@ process kraken {
   file(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out
+  file "*.kraken.out" into ch_kraken_out, ch_kraken_out_mqc
   tuple val(prefix), file("*.kreport") into ch_kraken_report
 
   
@@ -2573,6 +2573,8 @@ process multiqc {
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
+    file ('kraken/*') from ch_kraken_out_mqc.collect().ifEmpty([])
+    file ('malt/*') from ch_malt_out.collect().ifEmpty([])
     file logo from ch_eager_logo
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
