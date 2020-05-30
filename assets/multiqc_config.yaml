@@ -8,21 +8,22 @@ report_comment: >
     <a href="https://github.com/nf-core/eager" target="_blank">documentation</a>.
 
 run_modules:
-    - fastqc
-    - fastp
     - adapterRemoval
-    - samtools
-    - dedup
-    - preseq
-    - qualimap
-    - mtnucratio
+    - custom_content
     - damageprofiler
-    - sexdeterrmine
+    - dedup
+    - fastp
+    - fastqc
     - gatk
+    - kraken
     - malt
+    - mtnucratio
     - multivcfanalyzer
     - picard
-    - custom_content
+    - preseq
+    - qualimap
+    - samtools
+    - sexdeterrmine
 
 extra_fn_clean_exts:
 - '.fastq.gz'
