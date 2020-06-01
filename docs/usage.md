@@ -385,7 +385,7 @@ Note the following important points:
 
 - The TSV must use actual tabs (not spaces) between cells.
 - _File_ names must be unique irregardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
-  - If it is 'too late' and already have duplicate file names, a work around is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get indepdent FASTQC results for each file.
+  - If it is 'too late' and already have duplicate file names, a work around is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
 - Lane IDs must be unique for each sequencing of each library.
   - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
