@@ -390,7 +390,7 @@ Note the following important points:
   - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
 - nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
-  -  `DeDup` utilises both 5' and 3' ends of reads to remove duplicates, and thus will only work correctly on Paired-End data and Single-End data separately.
+  - `DeDup` utilises both 5' and 3' ends of reads to remove duplicates, and thus will only work correctly on Paired-End data and Single-End data separately.
 - You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (i.e. PE/SE)
   - e.g. by specifying `_SE` and `_PE` as in the example table above.
   - If you do not have different IDs nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
