@@ -2144,6 +2144,7 @@ if (params.additional_vcf_files == '') {
   file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
   file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
   file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
+  file('MultiVFAnalyzer.json') into ch_multivcfanalyzer_for_multiqc
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
@@ -2303,7 +2304,7 @@ process malt {
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
-  file "malt.log"
+  file "malt.log" into ch_malt_for_multiqc
 
   script:
   if ("${params.malt_min_support_mode}" == "percent") {
@@ -2368,6 +2369,7 @@ process maltextract {
   
   output:
   path "results/" type('dir')
+  file "results/*_Wevid.json" optional true into ch_hops_for_multiqc 
 
   script:
   ncbifiles = params.maltextract_ncbifiles == '' ? "" : "-r ${params.maltextract_ncbifiles}"
@@ -2396,6 +2398,8 @@ process maltextract {
   ${megsum} \
   ${topaln} \
   ${ss}
+
+  postprocessing.AMPS.r -r results/ -m ${params.maltextract_filter} -t ${task.cpus} -n ${taxon_list} -j
   """
 }
 
@@ -2439,9 +2443,8 @@ process kraken {
 
   output:
   file "*.kraken.out" into ch_kraken_out
-  tuple val(prefix), file("*.kreport") into ch_kraken_report
+  tuple val(prefix), file("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
 
-  
   script:
   prefix = fastq.toString().tokenize('.')[0]
   out = prefix+".kraken.out"
@@ -2577,6 +2580,10 @@ process multiqc {
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
+    file ('multivcfanalyzer/*') from ch_multivcfanalyzer_for_multiqc.collect().ifEmpty([])
+    file ('malt/*') from ch_malt_for_multiqc.collect().ifEmpty([])
+    file ('kraken/*') from ch_kraken_for_multiqc.collect().ifEmpty([])
+    file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
     file logo from ch_eager_logo
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
