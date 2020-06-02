@@ -951,7 +951,6 @@ process adapter_removal {
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
     if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim ){
     """
-    echo "1"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
@@ -971,7 +970,6 @@ process adapter_removal {
     //PE, don't collapse, but trim reads
     } else if ( seqtype == 'PE' && params.skip_collapse && !params.skip_trim ) {
     """
-    echo "2"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
     mv *.settings ${base}.pe.pair*.truncated.gz output/
@@ -979,7 +977,6 @@ process adapter_removal {
     //PE, collapse, but don't trim reads
     } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
     """
-    echo "3"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${collapse_me} ${trim_me}
     
@@ -994,7 +991,6 @@ process adapter_removal {
     } else if ( seqtype != 'PE' ) {
     //SE, collapse not possible, trim reads
     """
-    echo "4"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
     
@@ -2442,8 +2438,8 @@ process kraken {
   file(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out
-  tuple val(prefix), file("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
+  file "*.kraken.out" into ch_kraken_out, ch_kraken_for_multiqc
+  tuple val(prefix), file("*.kreport") into ch_kraken_report
 
   script:
   prefix = fastq.toString().tokenize('.')[0]
