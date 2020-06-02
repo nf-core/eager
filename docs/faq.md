@@ -77,7 +77,7 @@ Unable to acquire lock on session with ID 84333844-66e3-4846-a664-b446d070f775
 ```
 
 Normally suggest a previous nextflow run (on the same folder) was not cleanly
-killed by a user (e.g. using ctrl + z to hard kill an errored run). 
+killed by a user (e.g. using ctrl + z to hard kill an errored run).
 
 To fix this, you must clean the entirety of the output directory (including
 output files) e.g. with `rm -r <output_dir>/* <output_dir>/.*` and re-running
