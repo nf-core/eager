@@ -1761,9 +1761,9 @@ process damageprofiler {
     file fasta from ch_fasta_for_damageprofiler.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt")
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log")
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt") optional true
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log") optional true
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf") optional true
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json") into ch_damageprofiler_results
 
     script:
