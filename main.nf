@@ -651,7 +651,7 @@ Channel.from(summary.collect{ [it.key, it.value] })
 if(!params.bwa_index && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
 process makeBWAIndex {
     label 'sc_medium'
-    tag {fasta}
+    tag "${fasta}"
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
             if (params.save_reference) filename 
             else if(!params.save_reference && filename == "where_are_my_files.txt") filename
@@ -687,7 +687,7 @@ if (params.fasta_index != '') {
 
 process makeFastaIndex {
     label 'sc_small'
-    tag {fasta}
+    tag "${fasta}"
     publishDir path: "${params.outdir}/reference_genome/fasta_index", mode: 'copy', saveAs: { filename -> 
             if (params.save_reference) filename 
             else if(!params.save_reference && filename == "where_are_my_files.txt") filename
@@ -727,7 +727,7 @@ if (params.seq_dict != '') {
 
 process makeSeqDict {
     label 'sc_medium'
-    tag {fasta}
+    tag "${fasta}"
     publishDir path: "${params.outdir}/reference_genome/seq_dict", mode: 'copy', saveAs: { filename -> 
             if (params.save_reference) filename 
             else if(!params.save_reference && filename == "where_are_my_files.txt") filename
