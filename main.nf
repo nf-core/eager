@@ -1762,9 +1762,9 @@ process damageprofiler {
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt") optional true
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log") optional true
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log")
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf") optional true
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json") into ch_damageprofiler_results
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json") optional true into ch_damageprofiler_results
 
     script:
     base = "${bam.baseName}"
