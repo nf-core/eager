@@ -11,3 +11,6 @@ The nf-core/eager documentation is split into the following files:
 4. [Output and how to interpret the results](output.md)
 5. [Code Contribution Guidelines](code_contribution.md)
 6. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+   1. This covers common nf-core errors
+7. [Frequently Asked Questions](faq.md)
+   1. This covers more specific nf-core/eager errors

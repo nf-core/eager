@@ -951,7 +951,6 @@ process adapter_removal {
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
     if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim ){
     """
-    echo "1"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
@@ -971,7 +970,6 @@ process adapter_removal {
     //PE, don't collapse, but trim reads
     } else if ( seqtype == 'PE' && params.skip_collapse && !params.skip_trim ) {
     """
-    echo "2"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
     mv *.settings ${base}.pe.pair*.truncated.gz output/
@@ -979,7 +977,6 @@ process adapter_removal {
     //PE, collapse, but don't trim reads
     } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
     """
-    echo "3"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${collapse_me} ${trim_me}
     
@@ -994,7 +991,6 @@ process adapter_removal {
     } else if ( seqtype != 'PE' ) {
     //SE, collapse not possible, trim reads
     """
-    echo "4"
     mkdir -p output
     AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
     
@@ -1765,10 +1761,10 @@ process damageprofiler {
     file fasta from ch_fasta_for_damageprofiler.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt") optional true
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log")
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf")
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json") into ch_damageprofiler_results
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf") optional true
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json") optional true into ch_damageprofiler_results
 
     script:
     base = "${bam.baseName}"
@@ -2303,7 +2299,7 @@ process malt {
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
-  file "malt.log"
+  file "malt.log" into ch_malt_out
 
   script:
   if ("${params.malt_min_support_mode}" == "percent") {
@@ -2438,7 +2434,7 @@ process kraken {
   file(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out
+  file "*.kraken.out" into ch_kraken_out, ch_kraken_out_mqc
   tuple val(prefix), file("*.kreport") into ch_kraken_report
 
   
@@ -2577,6 +2573,8 @@ process multiqc {
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
+    file ('kraken/*') from ch_kraken_out_mqc.collect().ifEmpty([])
+    file ('malt/*') from ch_malt_out.collect().ifEmpty([])
     file logo from ch_eager_logo
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")

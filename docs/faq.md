@@ -36,6 +36,21 @@ an issue where a run almost immediately crashes
 (e.g. at `fastqc`, `outputdocumentation` etc.) saying the tool could not be
 found or similar.
 
+## I am running Docker
+
+You may have an outdated container. This happens more often when running on the
+`dev` branch of nf-core/eager, because docker will _not_ update the container
+on each new commit, and thus may not get new tools called within the pipeline
+code.
+
+To fix, just re-pull the nf-core/eager docker container manually with:
+
+```bash
+docker pull nfcore/eager:dev
+```
+
+## I am running Singularity
+
 If you're running singularity, it could be that nextflow cannot access your
 singularity image properly - often due to missing bind paths.
 
