@@ -2437,8 +2437,8 @@ process kraken {
   file(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out, ch_kraken_for_multiqc
-  tuple val(prefix), file("*.kreport") into ch_kraken_report
+  file "*.kraken.out" into ch_kraken_out
+  tuple prefix, file("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
 
   script:
   prefix = fastq.toString().tokenize('.')[0]

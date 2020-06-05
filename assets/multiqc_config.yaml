@@ -51,6 +51,7 @@ extra_fn_clean_exts:
     - '.fq.gz'
     - '.fq'
     - '.bam'
+    - '.kreport'
  
 top_modules:
      - 'fastqc':
@@ -112,6 +113,9 @@ table_columns_visible:
         Mappability: True
         Total reads: False
         Num. of queries: False
+    Kraken:
+        '% Unclassified': True
+        '% Top 5': False
     Samtools Flagstat (pre-samtools filter):
         mapped_passed: True
     Samtools Flagstat (post-samtools filter):
