@@ -1607,7 +1607,8 @@ process dedup{
 process markDup{
     label 'mc_small'
     tag "${outname}"
-    publishDir "${params.outdir}/deduplication/"
+    publishDir "${params.outdir}/deduplication/", mode: 'copy',
+        saveAs: {filename -> "${libraryid}/$filename"}
 
     when:
     !params.skip_deduplication && params.dedupper != 'dedup'
