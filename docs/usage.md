@@ -125,6 +125,11 @@
       - [`--freebayes_C`](#freebayesc)
       - [`--freebayes_g`](#freebayesg)
       - [`--freebayes_p`](#freebayesp)
+      - [`--pileupcaller_bedfile`](#pileupcallerbedfile)
+      - [`--pileupcaller_snpfile`](#pileupcallersnpfile)
+      - [`pileupcaller_majority_call`](#pileupcallermajoritycall)
+      - [`pileupcaller_random_diploid`](#pileupcallerrandomdiploid)
+      - [`pileupcaller_single_stranded`](#pileupcallersinglestranded)
     - [Consensus Sequence Generation](#consensus-sequence-generation)
       - [`--run_vcf2genome`](#runvcf2genome)
       - [`--vcf2genome_outfile`](#vcf2genomeoutfile)
@@ -975,6 +980,26 @@ Specify to skip over regions of high depth by discarding alignments overlapping 
 #### `--freebayes_p`
 
 Specify ploidy of sample in FreeBayes. Default is diploid. Default: 2
+
+#### `pileupcaller_bedfile`
+
+Specify SNP panel as bed file of sites in which to generate pileup for pileupCaller.
+
+#### `--pileupcaller_snpfile`
+
+Specify SNP panel in EIGENSTRAT format, pileupCaller will call these sites.
+
+#### `--pileupcaller_majority_call`
+
+Specify the use of majority caller. Default is random haploid.
+
+#### `--pileupcaller_random_diploid`
+
+Specify the use of random diploid caller. Default is random haploid.
+
+#### `--pileupcaller_single_stranded`
+
+Specify the use of single stranded mode. (Will use strandedness for TSV input)
 
 ### Consensus Sequence Generation
 
