@@ -42,4 +42,5 @@ dependencies:
   - bioconda::hops=0.34
   - conda-forge::biopython=1.76
   - conda-forge::xopen=0.8.4
+  - bioconda::bowtie2:2.4.1
   #Missing Schmutzi,snpAD
