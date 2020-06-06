@@ -144,9 +144,11 @@ def helpMessage() {
       --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
       --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
-      --pileupcaller_random_diploid   Specify diploid calling. Default: haploid.
       --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller. Optional (see documentation).
       --pileupcaller_snpfile          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
+      --pileupcaller_majority_call    Specify majority calling. Default: ${params.pileupcaller_caller}
+      --pileupcaller_random_diploid   Specify diploid calling. ${params.pileupcaller_caller}
+
 
     Consensus Sequence Generation
       --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
@@ -257,7 +259,7 @@ if ( params.fasta.isEmpty () ){
         file zipped_fasta
 
         output:
-        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer
+        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer
 
         script:
         rm_zip = zipped_fasta - '.gz'
@@ -269,7 +271,7 @@ if ( params.fasta.isEmpty () ){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer }
     
     lastPath = params.fasta.lastIndexOf(File.separator)
     bwa_base = params.fasta.substring(lastPath+1)
@@ -363,9 +365,10 @@ if (params.run_genotyping){
     exit 1, "[nf-core/eager] error:  please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
   }
 
-  if (params.genotyping_tool == 'pileupcaller' && !params.pileupcaller_snpfile ) {
-    exit 1, "[nf-core/eager] error:  please check your pileupCaller snp file parameter. You must supply a snp file!"
+  if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile instanceof Boolean ||  params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile instanceof Boolean ||  params.pileupcaller_snpfile == '' ) ) {
+    exit 1, "[nf-core/eager] error:  please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file!"
   }
+
 }
 
 // Consensus sequence generation sanity checking
@@ -718,7 +721,7 @@ process makeFastaIndex {
 }
 
 ch_fai_for_skipfastaindexing.mix(ch_fasta_faidx_index) 
-  .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes }
+  .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes; ch_fai_for_pileupcaller }
 
 // Stage dict index file if supplied, else load it into the channel
 
@@ -758,7 +761,7 @@ process makeSeqDict {
 }
 
 ch_dict_for_skipdict.mix(ch_seq_dict)
-  .into { ch_dict_for_ug; ch_dict_for_hc; ch_dict_for_freebayes }
+  .into { ch_dict_for_ug; ch_dict_for_hc; ch_dict_for_freebayes; ch_dict_for_pileupcaller }
 
 //////////////////////////////////////////////////
 /* --         BAM INPUT PREPROCESSING        -- */
@@ -2086,13 +2089,13 @@ if ( params.gatk_ug_jar != '' ) {
 
  // pileupCaller for 'random sampling' genotyping
 
-if (params.pileupcaller_bedfile == '') {
-  ch_bed_for_pileupcaller = file('NO_FILE')
+if (params.pileupcaller_bedfile.isEmpty()) {
+  ch_bed_for_pileupcaller = file('NO_FILE_BED')
 } else {
   ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile)
 }
 
-if (params.pileupcaller_snpfile == '') {
+if (params.pileupcaller_snpfile.isEmpty ()) {
   ch_snp_for_pileupcaller = file('NO_FILE')
 } else {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
@@ -2117,13 +2120,18 @@ if (params.pileupcaller_snpfile == '') {
   file snp from ch_snp_for_pileupcaller
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.*")
 
   script:
-  haploid_diploid = ${params.pileupcaller_random_diploid} ? "--randomDiploid" : "--randomHaploid"
-  bed_file = "${bed}" == "" ? "" : "-l ${bed}"
+  caller = "--${params.pileupcaller_caller}"
+  if (params.pileupcaller_majority_call) {
+    caller = "--majorityCall"
+  }
+  if (params.pileupcaller_random_diploid) {
+    caller = "--randomDiploid"
+  }
   """
-  samtools mpileup -B -q 30 -Q 30 ${bed_file} -f ${fasta} ${bam} | pileupCaller ${haploid_diploid} --sampleNames ${samplename} --samplePopName ${libraryid} -f ${snp} -e pileupcaller
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} --sampleNames ${samplename} --samplePopName ${libraryid} -f ${snp} -e pileupcaller.
   """
  }
 
