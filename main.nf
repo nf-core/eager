@@ -144,10 +144,11 @@ def helpMessage() {
       --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
       --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
-      --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller. Optional (see documentation).
+      --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller.
       --pileupcaller_snpfile          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
       --pileupcaller_majority_call    Specify majority calling. Default: ${params.pileupcaller_caller}
-      --pileupcaller_random_diploid   Specify diploid calling. ${params.pileupcaller_caller}
+      --pileupcaller_random_diploid   Specify diploid calling. Default: ${params.pileupcaller_caller}
+      --pileupcaller_single_stranded  Specify single stranded mode. (Will use strandedness for TSV input)
 
 
     Consensus Sequence Generation
@@ -2130,8 +2131,12 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   if (params.pileupcaller_random_diploid) {
     caller = "--randomDiploid"
   }
+  ssmode = ""
+  if (params.pileupcaller_single_stranded || strandedness == 'single' ) {
+    ssmode = "--singleStrandMode"
+  }
   """
-  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} --sampleNames ${samplename} --samplePopName ${libraryid} -f ${snp} -e pileupcaller.
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.
   """
  }
 
