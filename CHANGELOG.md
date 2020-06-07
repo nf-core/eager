@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+* [#40](https://github.com/nf-core/eager/issues/40) - Added the pileupCaller genotyper from sequenceTools
 * **Major** Automated Cloud Tests with large-scale data on [AWS](https://aws.amazon.com/)
 * **Major** Re-wrote input logic to accept a TSV 'map' file in addition to direct paths to FASTQ
 * **Major** Lane and library merging implement
@@ -36,6 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
+* Added bioconda::sequencetools v1.4.0.6
 * Latest version of DeDup (0.12.6) which now reports mapped reads after deduplication
 * Latest version of ANGSD (0.933) which doesn't seg fault when running contamination on BAMs with insufficient reads
 * Latest version of MultiQC (1.9) with support for lots of extra tools in the pipeline (MALT, SexDetERRmine, DamageProfiler, MultiVCFAnalyzer)
