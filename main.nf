@@ -34,9 +34,10 @@ def helpMessage() {
         --single_end                  Specifies that the input is single end reads. Not required for TSV input.
         --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
         --single_stranded             Specifies whether libraries single stranded libraries. Currently only affects MALTExtract. Not required for TSV input. Default: ${params.single_stranded}
+        --bam                         Specifies that the input is in BAM format. Not required for TSV input.
+
 
       Reference
-        --bam                         Specifies that the input is in BAM format.
         --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
         --genome                      Name of iGenomes reference (required if not fasta reference).
 
@@ -523,14 +524,38 @@ if (tsv_path) {
 
 } else exit 1, "[nf-core/eager] error: --input file(s) not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
-ch_reads_for_input = Channel.empty()
+ch_input_sample
+  .into { ch_input_sample_downstream; ch_input_sample_check }
 
 ///////////////////////////////////////////////////
 /* --         INPUT CHANNEL CREATION          -- */
 ///////////////////////////////////////////////////
 
+// Check we don't have any duplicate file names
+ch_input_sample_check
+    .map {
+      it ->
+        def r1 = file(it[8]).getName()
+        def r2 = file(it[9]).getName()
+        def bam = file(it[10]).getName()
+
+      [r1, r2, bam]
+
+    }
+    .collect()
+    .map{
+       file -> 
+       filenames = file
+       filenames -= 'NA'
+      
+       difference = 
+       
+       if( filenames.size() != filenames.unique().size() )
+           exit 1, "[nf-core/eager] error: You have duplicate input FASTQ and/or BAM file names! All files must have unique names, different directories are not sufficent. Please check your input."
+    }
+
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
-ch_branched_input = ch_input_sample.branch{
+ch_branched_input = ch_input_sample_downstream.branch{
     fastq: it[8] != 'NA' //These are all fastqs
     bam: it[10] != 'NA' //These are all BAMs
 }
