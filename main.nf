@@ -372,8 +372,6 @@ if (params.run_genotyping){
     exit 1, "[nf-core/eager] error:  please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
   }
 
-
-
 }
 
 // Consensus sequence generation sanity checking

@@ -100,7 +100,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --strip_input_fastq
       - name: BAM_FILTERING Run basic mapping pipeline with mapping quality filtering, and unmapped export
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_mapping_quality_threshold 37 --bam_discard_umapped --bam_unmapped_type 'fastq'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_mapping_quality_threshold 37 --bam_discard_unmapped --bam_unmapped_type 'fastq'
       - name: DEDUPLICATION Test with markduplicates
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'markduplicates'
