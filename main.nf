@@ -141,6 +141,7 @@ def helpMessage() {
       --gatk_hc_emitrefconf           Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: '${params.gatk_hc_emitrefconf}'
       --gatk_downsample               Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
       --gatk_ug_defaultbasequalities  Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.
+      --gatk_ug_keep_realign_bam      Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.
       --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
       --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
@@ -284,7 +285,7 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
 
 // Mapper sanity checking
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
-    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave ${params.mapper}!"
+    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave: ${params.mapper}!"
 }
 
 // Index files provided? Then check whether they are correct and complete
@@ -343,6 +344,10 @@ if (params.run_genotyping){
   if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
   exit 1, "[nf-core/eager] error: please specify path to a GATK 3.5 .jar file with --gatk_ug_jar."
   }
+
+  if (params.genotyping_tool == 'ug' && !params.gatk_ug_jar.endsWith('.jar') ) {
+    exit 1, "[nf-core/eager] error: please specify path with --gatk_ug_jar to a valid GATK 3.5 binary that ends with .jar!. You gave: ${params.gatk_ug_jar}"
+  }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
   exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
@@ -394,11 +399,11 @@ if (params.run_metagenomic_screening) {
   }
 
   if (params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave: '${params.bam_unmapped_type}'!"
   }
 
   if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
-    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave '${params.metagenomic_tool}'!"
+    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave: '${params.metagenomic_tool}'!"
   }
 
   if (params.database == '' ) {
@@ -406,11 +411,11 @@ if (params.run_metagenomic_screening) {
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
-    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave: '${params.malt_mode}'!"
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
-    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave: '${params.malt_alignment_mode}'!"
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
@@ -422,11 +427,11 @@ if (params.run_metagenomic_screening) {
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
-    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave: '${params.malt_memory_mode}'!"
   }
 
   if (!params.metagenomic_min_support_reads.toString().isInteger()){
-    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. You gave ${metagenomic_min_support_reads}!"
+    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. You gave: ${metagenomic_min_support_reads}!"
   }
 }
 
@@ -1996,15 +2001,22 @@ if ( params.gatk_ug_jar != '' ) {
 
   output: 
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*realign.bam") optional true
 
   script:
   defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
+  keep_realign = params.gatk_ug_keep_realign_bam ? "T" : "F"
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    
+    if [[ ${keep_realign} == 'F' ]]; then
+      rm ${samplename}.realign.bam
+    fi
+    
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
   else if (params.gatk_dbsnp != '')
@@ -2013,6 +2025,11 @@ if ( params.gatk_ug_jar != '' ) {
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    
+    if [[ ${keep_realign} == 'F' ]]; then
+      rm ${samplename}.realign.bam
+    fi
+    
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
  }
