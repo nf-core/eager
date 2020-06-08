@@ -547,8 +547,6 @@ ch_input_sample_check
        file -> 
        filenames = file
        filenames -= 'NA'
-      
-       difference = 
        
        if( filenames.size() != filenames.unique().size() )
            exit 1, "[nf-core/eager] error: You have duplicate input FASTQ and/or BAM file names! All files must have unique names, different directories are not sufficent. Please check your input."
