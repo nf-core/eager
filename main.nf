@@ -325,7 +325,7 @@ if(params.run_bedtools_coverage && params.anno_file == ''){
 }
 
 // BAM filtering sanity checking
-if (!params.run_bam_filtering && bam_mapping_quality_threshold != 0) {
+if (!params.run_bam_filtering && params.bam_mapping_quality_threshold != 0) {
   exit 1, "[nf-core/eager] error: please turn on BAM filtering if you want to perform mapping quality filtering! Give --run_bam_filtering"
 }
 
@@ -337,7 +337,7 @@ if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapp
   exit 1, "[nf-core/eager] error: please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'"
 }
 
-if (params.run_bam_filtering && !bam_discard_unmapped && bam_unmapped_type != 'discard') {
+if (params.run_bam_filtering && !params.bam_discard_unmapped && params.bam_unmapped_type != 'discard') {
   exit 1, "[nf-core/eager] error: Please turned on unmapped read discarding, if you have specifed a different unmapped type. Give: --bam_discard_unmapped"
 }
 
