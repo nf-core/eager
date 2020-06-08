@@ -33,7 +33,7 @@ def helpMessage() {
 
         --single_end                  Specifies that the input is single end reads. Not required for TSV input.
         --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
-        --single_stranded             Specifies whether libraries single stranded libraries. Currently only affects MALTExtract. Not required for TSV input. Default: ${params.single_stranded}
+        --single_stranded             Specifies whether libraries are single stranded. Always affects MALTExtract but will be ignored by pileupCaller with TSV input. Default: ${params.single_stranded}
 
       Reference
         --bam                         Specifies that the input is in BAM format.
@@ -146,10 +146,8 @@ def helpMessage() {
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
       --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller.
       --pileupcaller_snpfile          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
-      --pileupcaller_majority_call    Specify majority calling. Default: ${params.pileupcaller_caller}
-      --pileupcaller_random_diploid   Specify diploid calling. Default: ${params.pileupcaller_caller}
-      --pileupcaller_single_stranded  Specify single stranded mode. (Will use strandedness for TSV input)
-
+      --pileupcaller_majority_call    Specify majority calling. Default: random haploid
+      --pileupcaller_random_diploid   Specify diploid calling. Default: random haploid
 
     Consensus Sequence Generation
       --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
@@ -359,15 +357,15 @@ if (params.run_genotyping){
   }
   
   if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "[nf-core/eager] error:  please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}!"
+    exit 1, "[nf-core/eager] error: please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}!"
   }
 
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "[nf-core/eager] error:  please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
+    exit 1, "[nf-core/eager] error: please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
   }
 
   if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile instanceof Boolean ||  params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile instanceof Boolean ||  params.pileupcaller_snpfile == '' ) ) {
-    exit 1, "[nf-core/eager] error:  please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file!"
+    exit 1, "[nf-core/eager] error: please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file!"
   }
 
 }
@@ -2121,22 +2119,19 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   file snp from ch_snp_for_pileupcaller
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.*")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${samplename}.*")
 
   script:
-  caller = "--${params.pileupcaller_caller}"
+  caller = "--randomHaploid"
   if (params.pileupcaller_majority_call) {
     caller = "--majorityCall"
   }
   if (params.pileupcaller_random_diploid) {
     caller = "--randomDiploid"
   }
-  ssmode = ""
-  if (params.pileupcaller_single_stranded || strandedness == 'single' ) {
-    ssmode = "--singleStrandMode"
-  }
+  ssmode = strandedness == "single" ? "--singleStrandMode" : ""
   """
-  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}.
   """
  }
 

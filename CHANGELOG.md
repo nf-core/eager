@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
-* Added bioconda::sequencetools v1.4.0.6
+* Added Sequencetools (1.4.0.6) that adds the ability to do genotyping with the 'pileupCaller'
 * Latest version of DeDup (0.12.6) which now reports mapped reads after deduplication
 * Latest version of ANGSD (0.933) which doesn't seg fault when running contamination on BAMs with insufficient reads
 * Latest version of MultiQC (1.9) with support for lots of extra tools in the pipeline (MALT, SexDetERRmine, DamageProfiler, MultiVCFAnalyzer)
