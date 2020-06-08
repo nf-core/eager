@@ -341,7 +341,6 @@ Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additi
   <img src="images/usage/merging_files.png" alt="Schematic diagram indicated merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
 </p>
 
-
 The use of the TSV `--input` method is recommended to be used when performing more complex procedures such as lane or library merging. You do not need to specify `--single_end`, `--bam`, `--colour_chemistry`, `-udg_type` etc. when using TSV input - this is defined within the TSV file itself.
 
 This TSV should look like the following:
