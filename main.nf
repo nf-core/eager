@@ -2100,8 +2100,6 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
 }
 
-
-
  process genotyping_pileupcaller {
   label 'mc_small'
   tag "${samplename}"
