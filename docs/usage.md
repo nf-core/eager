@@ -331,7 +331,8 @@ If you have multiple files in different directories, you can use additional wild
 2. The path **must** be enclosed in quotes
 3. The path must have at least one `*` wildcard character
 4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
-5. Files names must be unique _prior_ the `{1,2}` notation, otherwise an error will be thrown.
+5. Files names must be unique, having files with the same name, but in different directories is _not_ sufficient
+   - This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
 
 ##### TSV Input Method
 
@@ -385,6 +386,8 @@ After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _
 Note the following important points:
 
 - The TSV must use actual tabs (not spaces) between cells.
+- Files names must be unique, having files with the same name, but in different directories is _not_ sufficient
+  - This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
 - nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
 - You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
