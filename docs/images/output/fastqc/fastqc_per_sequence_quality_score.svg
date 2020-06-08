@@ -9,13 +9,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="204.49078mm"
+   height="88.074127mm"
+   viewBox="0 0 204.49078 88.074127"
    version="1.1"
    id="svg8"
-   sodipodi:docname="per_sequence_quality_score.svg"
-   inkscape:version="0.92.1 r15371">
+   sodipodi:docname="fastqc_per_sequence_quality_score.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -1131,21 +1131,27 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="364.76071"
-     inkscape:cy="864.22557"
+     inkscape:cx="499.77144"
+     inkscape:cy="91.379154"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g4795"
      showgrid="false"
      inkscape:measure-start="0,0"
      inkscape:measure-end="0,0"
      inkscape:window-width="1920"
-     inkscape:window-height="986"
-     inkscape:window-x="-11"
-     inkscape:window-y="-11"
-     inkscape:window-maximized="1">
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
     <inkscape:grid
        type="xygrid"
-       id="grid4491" />
+       id="grid4491"
+       originx="-2.2650189"
+       originy="-174.24418" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -1155,14 +1161,15 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-2.2650189,-34.681686)">
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:6.3499999px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
@@ -1172,7 +1179,7 @@
          sodipodi:role="line"
          id="tspan6550"
          x="159.69354"
-         y="75.01284"
+         y="74.837807"
          style="stroke-width:0.26458332" /></text>
     <g
        id="g4795"
@@ -1191,7 +1198,7 @@
          id="g4880">
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
            x="111.14799"
            y="53.629723"
            id="text6115-1-2-0"
@@ -1200,24 +1207,24 @@
              sodipodi:role="line"
              x="111.14799"
              y="53.629723"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan6546-3"><tspan
    style="font-size:3.52777767px;fill:#ff0000"
    id="tspan4752">Not good!</tspan> You</tspan><tspan
              sodipodi:role="line"
              x="111.14799"
              y="58.039444"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4886">have a bimodal peak,</tspan><tspan
              sodipodi:role="line"
              x="111.14799"
              y="62.449165"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4815">maybe an artefact from</tspan><tspan
              sodipodi:role="line"
              x="111.14799"
              y="66.858887"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4817">location on flowcell?</tspan></text>
         <rect
            style="opacity:1;fill:#e6e6e6;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.3634741;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
@@ -1288,32 +1295,32 @@
            inkscape:export-ydpi="289.40701" />
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
            x="180.03955"
            y="54.621704"
            id="text6115-1-2"
            inkscape:export-xdpi="289.40701"
            inkscape:export-ydpi="289.40701"><tspan
              sodipodi:role="line"
-             x="180.90082"
+             x="180.74579"
              y="54.621704"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan6342-2"><tspan
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#008000;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#008000;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
    id="tspan6548">Beautiful!</tspan> Go </tspan><tspan
              sodipodi:role="line"
              x="180.03955"
              y="59.031425"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4894">reward yourself with</tspan><tspan
              sodipodi:role="line"
              x="180.03955"
              y="63.441147"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4745">a good book!</tspan></text>
         <path
            style="fill:none;stroke:#000000;stroke-width:0.49723923;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-           d="m 128.12076,71.781988 c -0.50425,-0.66147 -1.51273,-1.984385 -1.78269,-2.693114 -0.26995,-0.70873 0.19829,-0.803228 1.01033,-1.16934 0.81205,-0.366112 1.99728,-1.019919 2.99274,-1.685943 0.99546,-0.666023 1.83185,-1.365673 2.44937,-2.013762 0.61752,-0.648089 1.03917,-1.27335 1.30018,-1.989709 0.261,-0.71636 0.36911,-1.535725 0.43212,-2.189209 0.063,-0.653483 0.081,-1.141882 -0.17099,-1.826611 -0.25201,-0.684728 -0.77455,-1.567164 -1.46388,-2.390403 -0.68933,-0.823239 -1.56166,-1.602015 -2.5701,-2.318576 -1.00843,-0.716562 -2.16098,-1.378022 -3.69173,-2.015878 -1.53075,-0.637857 -3.43952,-1.252025 -5.35748,-1.708772 -1.91796,-0.456746 -3.84471,-0.755953 -5.60062,-0.920987 -1.75592,-0.165034 -3.41249,-0.19723 -5.23153,-0.15786 -1.81904,0.03937 -3.83562,0.149593 -5.57354,0.362199 -1.73792,0.212607 -3.19639,0.527539 -4.68306,0.918767 -1.486663,0.391228 -3.033455,0.868659 -4.319997,1.398408 -1.286543,0.529749 -2.369199,1.139562 -3.287778,1.738099 -0.918579,0.598536 -1.692681,1.196793 -2.341137,1.842613 -0.648456,0.645819 -1.17049,1.338495 -1.548775,2.000082 -0.378285,0.661586 -0.612293,1.29127 -0.747003,1.937193 -0.134709,0.645922 -0.171546,1.338501 0.04142,2.127871 0.212969,0.78937 0.687394,1.714918 1.191691,2.47883 0.504297,0.763913 1.044476,1.378037 1.788284,1.997783 0.743807,0.619746 1.705443,1.254449 2.674985,1.788606 0.969543,0.534157 1.965919,0.977758 3.107295,1.386588 1.141376,0.408831 2.442367,0.788083 3.783915,1.126661 1.34155,0.338578 2.7284,0.637852 4.21405,0.841949 1.48565,0.204097 3.10658,0.31559 4.56516,0.38645 1.45858,0.07086 2.77343,0.102363 4.04292,0.03936 1.26948,-0.063 2.49432,-0.220527 3.5747,-0.378002 1.08039,-0.157474 2.0171,-0.315009 2.93536,-0.464596 0.91827,-0.149588 1.81903,-0.291381 3.27725,0.07861 1.45821,0.369992 3.47594,1.252276 4.48434,1.693214 1.0084,0.440938 1.00845,0.440946 0.5042,-0.220523 z"
+           d="m 128.12076,71.781988 c -0.50425,-0.66147 -1.51273,-1.984385 -1.78269,-2.693114 -0.26995,-0.70873 0.19829,-0.803228 1.01033,-1.16934 0.81205,-0.366112 1.99728,-1.019919 2.99274,-1.685943 0.99546,-0.666023 1.83185,-1.365673 2.44937,-2.013762 0.61752,-0.648089 1.03917,-1.27335 1.30018,-1.989709 0.261,-0.71636 0.36911,-1.535725 0.43212,-2.189209 0.063,-0.653483 0.081,-1.141882 -0.17099,-1.826611 -0.25201,-0.684728 -0.77455,-1.567164 -1.46388,-2.390403 -0.68933,-0.823239 -1.56166,-1.602015 -2.5701,-2.318576 -1.00843,-0.716562 -2.16098,-1.378022 -3.69173,-2.015878 -1.53075,-0.637857 -3.43952,-1.252025 -5.35748,-1.708772 -1.91796,-0.456746 -3.84471,-0.755953 -5.60062,-0.920987 -1.75592,-0.165034 -3.41249,-0.19723 -5.23153,-0.15786 -1.81904,0.03937 -3.83562,0.149593 -5.57354,0.362199 -1.73792,0.212607 -3.19639,0.527539 -4.68306,0.918767 -1.486663,0.391228 -3.033455,0.868659 -4.319997,1.398408 -1.286543,0.529749 -2.369199,1.139562 -3.287778,1.738099 -0.918579,0.598536 -1.692681,1.196793 -2.341137,1.842613 -0.648456,0.645819 -1.17049,1.338495 -1.548775,2.000082 -0.378285,0.661586 -0.612293,1.29127 -0.747003,1.937193 -0.134709,0.645922 -0.171546,1.338501 0.04142,2.127871 0.212969,0.78937 0.687394,1.714918 1.191691,2.47883 0.504297,0.763913 1.044476,1.378037 1.788284,1.997783 0.743807,0.619746 1.705443,1.254449 2.674985,1.788606 0.969543,0.534157 1.965919,0.977758 3.107295,1.386588 1.141376,0.408831 2.442367,0.788083 3.783913,1.126661 1.34155,0.338578 2.7284,0.637852 4.21405,0.841949 1.48565,0.204097 3.10658,0.31559 4.56516,0.38645 1.45858,0.07086 2.77343,0.102363 4.04292,0.03936 1.26948,-0.063 2.49432,-0.220527 3.5747,-0.378002 1.08039,-0.157474 2.0171,-0.315009 2.93536,-0.464596 0.91827,-0.149588 1.81903,-0.291381 3.27725,0.07861 1.45821,0.369992 3.47594,1.252276 4.48434,1.693214 1.0084,0.440938 1.00845,0.440946 0.5042,-0.220523 z"
            id="path6109-9-3-7"
            inkscape:connector-curvature="0"
            inkscape:path-effect="#path-effect6111-6-4-6"
@@ -1331,7 +1338,7 @@
            inkscape:export-ydpi="289.40701" />
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
            x="45.474113"
            y="55.923824"
            id="text6115-1-2-0-1"
@@ -1340,19 +1347,19 @@
              sodipodi:role="line"
              x="45.474113"
              y="55.923824"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4876"><tspan
    style="font-size:3.52777767px;fill:#ff0000;stroke-width:0.465"
    id="tspan4752-8">Not good!</tspan> All reads</tspan><tspan
              sodipodi:role="line"
              x="45.474113"
              y="60.333546"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4759">have low quality, was it</tspan><tspan
              sodipodi:role="line"
              x="45.474113"
              y="64.743271"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4763">a bad sequencing run?</tspan></text>
         <path
            style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -1366,7 +1373,7 @@
            inkscape:export-ydpi="289.40701" />
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="33.734375"
            y="114.43749"
            id="text4610"
@@ -1376,10 +1383,10 @@
              id="tspan4608"
              x="33.734375"
              y="114.43749"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Phred score</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Phred score</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="-97.534348"
            y="12.402469"
            id="text4610-3"
@@ -1390,10 +1397,10 @@
              id="tspan4608-2"
              x="-97.534348"
              y="12.402469"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Count</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Count</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
            x="4.6517291"
            y="43.432079"
            id="text6245-5-0-8-5-1"
@@ -1403,10 +1410,10 @@
              id="tspan6243-5-1-1-4-9"
              x="4.6517291"
              y="43.432079"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">FASTQC - Per sequence quality score</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">FASTQC - Per sequence quality score</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="186.38161"
            y="45.02911"
            id="text4674"
@@ -1416,7 +1423,7 @@
              id="tspan4672"
              x="186.38161"
              y="45.02911"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#b3b3b3;stroke-width:0.26458332">ZandraSelina</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#b3b3b3;stroke-width:0.26458332">ZandraSelina</tspan></text>
         <rect
            style="opacity:1;fill:#e6e6e6;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.3634741;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
            id="rect4624-2-4"
@@ -1464,7 +1471,7 @@
            inkscape:export-ydpi="289.40701" />
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="166.02603"
            y="114.70208"
            id="text4610-1"
@@ -1474,10 +1481,10 @@
              id="tspan4608-7"
              x="166.02603"
              y="114.70208"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Phred score</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Phred score</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="-97.798935"
            y="144.69414"
            id="text4610-3-1"
@@ -1488,7 +1495,7 @@
              id="tspan4608-2-54"
              x="-97.798935"
              y="144.69414"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Count</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Count</tspan></text>
         <path
            style="fill:none;stroke:#aa0000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 148.16666,109.41043 c 12.34749,0 24.69471,0 32.19124,-0.66152 7.49652,-0.66153 10.14241,-1.98447 12.12657,-7.49612 1.98416,-5.51164 3.30723,-15.214196 4.63011,-24.915287"
@@ -1559,7 +1566,7 @@
            inkscape:export-ydpi="289.40701" />
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="99.615631"
            y="114.43748"
            id="text4610-5"
@@ -1569,10 +1576,10 @@
              id="tspan4608-71"
              x="99.615631"
              y="114.43748"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Phred score</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Phred score</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="-97.534348"
            y="78.283722"
            id="text4610-3-2"
@@ -1583,7 +1590,7 @@
              id="tspan4608-2-2"
              x="-97.534348"
              y="78.283722"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Count</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Count</tspan></text>
         <path
            style="fill:none;stroke:#aa0000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 82.020832,109.14583 c 1.764069,-3.08712 3.527956,-6.17392 4.961103,-8.26846 1.433148,-2.094537 2.976662,-3.638051 4.339314,-3.831826 1.362652,-0.193776 2.605893,0.635052 4.369716,1.957921 1.763823,1.322865 3.968785,3.086835 6.835175,4.189265 2.86638,1.10243 6.39422,1.54341 9.04005,0.44081 2.64582,-1.10259 4.40971,-3.748431 7.27602,-8.378641 2.86631,-4.63021 6.83506,-11.244796 10.80362,-17.859066"
@@ -1606,20 +1613,15 @@
          id="text4674-3"
          y="119.69645"
          x="203.65779"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
          xml:space="preserve"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332"
            y="119.69645"
            x="203.65779"
            sodipodi:role="line"
-           id="tspan4673">CC BY-SA 4<tspan
+           id="tspan4662">CC BY 4.0<tspan
    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.26458332"
-   id="tspan4675">.</tspan>0</tspan><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332"
-           y="123.22423"
-           x="203.65779"
-           sodipodi:role="line"
-           id="tspan4662" /></text>
+   id="tspan4675" /></tspan></text>
     </g>
   </g>
 </svg>
