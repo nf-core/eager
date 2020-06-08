@@ -44,11 +44,9 @@ def helpMessage() {
       --outdir                      The output directory where the results will be saved. Default: ${params.outdir}
       -w                            The directory where intermediate files will be stored. Recommended: '<outdir>/work/'
 
-    BAM Input:
-    --run_convertbam                Turns on to convert an input BAM file into FASTQ format before processing.
-
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!).
+      --run_convertinputbam         Turns on convertion of an input BAM file into FASTQ format before pre-processing (e.g. AdapterRemoval etc.).
 
     References                      Optional additional pre-made indices, or you wish to overwrite any of the references.
       --bwa_index                   Path and name of a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value as --fasta)
@@ -558,7 +556,7 @@ summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Input']        = params.input
-summary['Convert input BAM?'] = params.run_convertbam ? 'Yes' : 'No'
+summary['Convert input BAM?'] = params.run_convertinputbam ? 'Yes' : 'No'
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
@@ -768,7 +766,7 @@ process convertBam {
     tag "$libraryid"
     
     when: 
-    params.run_convertbam
+    params.run_convertinputbam
 
     input: 
     tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_convertbam 
@@ -789,7 +787,7 @@ process indexinputbam {
   tag "$libraryid"
 
   when: 
-  bam != 'NA' && !params.run_convertbam
+  bam != 'NA' && !params.run_convertinputbam
 
   input:
   tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_indexbam 

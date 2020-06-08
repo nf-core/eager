@@ -50,7 +50,7 @@
       - [`--skip_damage_calculation`](#--skip_damage_calculation)
       - [`--skip_qualimap`](#--skip_qualimap)
     - [BAM Conversion Options](#bam-conversion-options)
-      - [`--run_convertbam`](#--run_convertbam)
+      - [`--run_convertinputbam`](#--run_convertinputbam)
     - [Complexity Filtering Options](#complexity-filtering-options)
       - [`--complexity_filter_poly_g`](#--complexity_filter_poly_g)
       - [`--complexity_filter_poly_g_min`](#--complexity_filter_poly_g_min)
@@ -388,7 +388,7 @@ Note the following important points:
 - All _BAM_ files must be specified as `SE` under `SeqType`.
 - nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
 - You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
+- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertinputbam`), as only FASTQ files are lane-merged together.
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
 - Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
 
@@ -633,9 +633,9 @@ Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
 ### BAM Conversion Options
 
-#### `--run_convertbam`
+#### `--run_convertinputbam`
 
-Allows you to convert BAM input back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
+Allows you to convert a input BAM file back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
 
 If not turned on, BAMs will automatically be sent to post-mapping steps.
 
