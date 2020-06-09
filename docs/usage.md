@@ -126,8 +126,7 @@
       - [`--freebayes_p`](#--freebayes_p)
       - [`--pileupcaller_bedfile`](#pileupcallerbedfile)
       - [`--pileupcaller_snpfile`](#pileupcallersnpfile)
-      - [`--pileupcaller_majority_call`](#pileupcallermajoritycall)
-      - [`--pileupcaller_random_diploid`](#pileupcallerrandomdiploid)
+      - [`--pileupcaller_method`](#pileupcallermethod)
     - [Consensus Sequence Generation](#consensus-sequence-generation)
       - [`--run_vcf2genome`](#--run_vcf2genome)
       - [`--vcf2genome_outfile`](#--vcf2genome_outfile)
@@ -999,13 +998,9 @@ Specify a SNP panel in the form of a bed file of sites at which to generate pile
 
 Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/tree/master/CONVERTF) format, pileupCaller will call these sites.
 
-#### `--pileupcaller_majority_call`
+#### `--pileupcaller_method`
 
-Specify the use of majority caller. Default is random haploid.
-
-#### `--pileupcaller_random_diploid`
-
-Specify the use of random diploid caller. Default is random haploid.
+Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: randomHaploid
 
 ### Consensus Sequence Generation
 

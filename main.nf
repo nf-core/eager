@@ -146,8 +146,7 @@ def helpMessage() {
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
       --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller.
       --pileupcaller_snpfile          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
-      --pileupcaller_majority_call    Specify majority calling. Default: random haploid
-      --pileupcaller_random_diploid   Specify diploid calling. Default: random haploid
+      --pileupcaller_method           Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: randomHaploid
 
     Consensus Sequence Generation
       --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
@@ -362,6 +361,10 @@ if (params.run_genotyping){
 
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
     exit 1, "[nf-core/eager] error: please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
+  }
+
+  if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_method == 'randomHaploid' || params.pileupcaller_method == 'randomDiploid' || params.pileupcaller_method == 'majorityCall' ) ) {
+	exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. You gave: ${params.pileupcaller_method}"
   }
 
   if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile instanceof Boolean ||  params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile instanceof Boolean ||  params.pileupcaller_snpfile == '' ) ) {
@@ -2120,13 +2123,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${samplename}.*")
 
   script:
-  caller = "--randomHaploid"
-  if (params.pileupcaller_majority_call) {
-    caller = "--majorityCall"
-  }
-  if (params.pileupcaller_random_diploid) {
-    caller = "--randomDiploid"
-  }
+  caller = "--${params.pileupcaller_method}"
   ssmode = strandedness == "single" ? "--singleStrandMode" : ""
   """
   samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}.
