@@ -44,6 +44,9 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
+      - name: HELPTEXT Run with the help flag
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} --help
       - name: Get test data for cases where we don't use TSV input
         run: |
           git clone --single-branch --branch eager https://github.com/nf-core/test-datasets.git data
