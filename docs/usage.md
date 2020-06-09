@@ -391,7 +391,7 @@ Note the following important points:
 - All _BAM_ files must be specified as `SE` under `SeqType`.
 - nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
 - You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertinputbam`), as only FASTQ files are lane-merged together.
+- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertinputbam`), as only FASTQ files are lane-merged together.
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
 - Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
 
