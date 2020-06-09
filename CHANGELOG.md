@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     * Strip FASTQ will also produce a lane merged 'raw' but 'stripped' FASTQ file
   * When using TSV input, one sample with multiple (same treatment) libraries will be merged together.
   * Important: direct FASTQ paths will not have this functionality. TSV is required.
-* [#40](https://github.com/nf-core/eager/issues/40) - Added the pileupCaller genotyper from sequenceTools
+* [#40](https://github.com/nf-core/eager/issues/40) - Added the pileupCaller genotyper from [sequenceTools](https://github.com/stschiff/sequenceTools)
 * Added sanity check and clearer error message when `--fasta_index` is provided and filepath does not end in `.fai`.
 * Added basic json_schema
 * Improved error messages
