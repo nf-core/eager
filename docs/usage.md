@@ -50,7 +50,7 @@
       - [`--skip_damage_calculation`](#--skip_damage_calculation)
       - [`--skip_qualimap`](#--skip_qualimap)
     - [BAM Conversion Options](#bam-conversion-options)
-      - [`--run_convertbam`](#--run_convertbam)
+      - [`--run_convertinputbam`](#--run_convertinputbam)
     - [Complexity Filtering Options](#complexity-filtering-options)
       - [`--complexity_filter_poly_g`](#--complexity_filter_poly_g)
       - [`--complexity_filter_poly_g_min`](#--complexity_filter_poly_g_min)
@@ -119,6 +119,7 @@
       - [`--gatk_hc_out_mode`](#--gatk_hc_out_mode)
       - [`--gatk_ug_genotype_model`](#--gatk_ug_genotype_model)
       - [`--gatk_hc_emitrefconf`](#--gatk_hc_emitrefconf)
+      - [`--gatk_ug_keep_realign_bam`](#--gatk_ug_keep_realign_bam)
       - [`--gatk_downsample`](#--gatk_downsample)
       - [`--gatk_ug_gatk_ug_defaultbasequalities`](#--gatk_ug_gatk_ug_defaultbasequalities)
       - [`--freebayes_C`](#--freebayes_c)
@@ -333,7 +334,8 @@ If you have multiple files in different directories, you can use additional wild
 2. The path **must** be enclosed in quotes
 3. The path must have at least one `*` wildcard character
 4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
-5. Files names must be unique _prior_ the `{1,2}` notation, otherwise an error will be thrown.
+5. Files names must be unique, having files with the same name, but in different directories is _not_ sufficient
+   - This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
 
 ##### TSV Input Method
 
@@ -402,7 +404,7 @@ Note the following important points:
   - e.g. by specifying `_SE` and `_PE` as in the example table above.
   - If you do not have different IDs nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
   - Please note this setup is **not** optimal, as you therefore cannot deduplicate PE and SE data of the same library together (and therefore may still have PCR duplicates at the library merging level).
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
+- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
 - Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
 
@@ -647,9 +649,9 @@ Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
 ### BAM Conversion Options
 
-#### `--run_convertbam`
+#### `--run_convertinputbam`
 
-Allows you to convert BAM input back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
+Allows you to convert a input BAM file back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
 
 If not turned on, BAMs will automatically be sent to post-mapping steps.
 
@@ -928,7 +930,7 @@ Turns on genotyping to run on all post-dedup and downstream BAMs. For example if
 
 #### `--genotyping_tool`
 
-Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify `'freebayes'`, `'hc'` or `'ug'` respectively.
+Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc' or 'freebayes' respectively.
 
 > NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file.
 
@@ -969,6 +971,12 @@ If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whethe
 #### `--gatk_hc_emitrefconf`
 
 If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`
+
+#### `--gatk_ug_keep_realign_bam`
+
+If provided, this will put into the output folder the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping.
+
+These BAMs will be stored in the same folder as the corresponding VCF files.
 
 #### `--gatk_downsample`
 

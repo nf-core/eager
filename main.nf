@@ -34,9 +34,9 @@ def helpMessage() {
         --single_end                  Specifies that the input is single end reads. Not required for TSV input.
         --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
         --single_stranded             Specifies whether libraries are single stranded. Always affects MALTExtract but will be ignored by pileupCaller with TSV input. Default: ${params.single_stranded}
+        --bam                         Specifies that the input is in BAM format. Not required for TSV input.
 
       Reference
-        --bam                         Specifies that the input is in BAM format.
         --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
         --genome                      Name of iGenomes reference (required if not fasta reference).
 
@@ -44,11 +44,9 @@ def helpMessage() {
       --outdir                      The output directory where the results will be saved. Default: ${params.outdir}
       -w                            The directory where intermediate files will be stored. Recommended: '<outdir>/work/'
 
-    BAM Input:
-    --run_convertbam                Turns on to convert an input BAM file into FASTQ format before processing.
-
     Input Data Additional Options:
       --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!).
+      --run_convertinputbam         Turns on convertion of an input BAM file into FASTQ format before pre-processing (e.g. AdapterRemoval etc.).
 
     References                      Optional additional pre-made indices, or you wish to overwrite any of the references.
       --bwa_index                   Path and name of a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value as --fasta)
@@ -141,6 +139,7 @@ def helpMessage() {
       --gatk_hc_emitrefconf           Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: '${params.gatk_hc_emitrefconf}'
       --gatk_downsample               Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
       --gatk_ug_defaultbasequalities  Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.
+      --gatk_ug_keep_realign_bam      Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.
       --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
       --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
@@ -287,7 +286,7 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
 
 // Mapper sanity checking
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
-    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave ${params.mapper}!"
+    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave: ${params.mapper}!"
 }
 
 // Index files provided? Then check whether they are correct and complete
@@ -328,13 +327,21 @@ if(params.run_bedtools_coverage && params.anno_file == ''){
   exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
 }
 
-// TODO BAM filtering sanity checking - FIRST ONE CURRENTLY DOES NOT WORK!
-if (params.bam_discard_unmapped && !params.run_bam_filtering) {
-  "[nf-core/eager] error: please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering"
+// BAM filtering sanity checking
+if (!params.run_bam_filtering && params.bam_mapping_quality_threshold != 0) {
+  exit 1, "[nf-core/eager] error: please turn on BAM filtering if you want to perform mapping quality filtering! Give --run_bam_filtering"
+}
+
+if (!params.run_bam_filtering && params.bam_discard_unmapped) {
+  exit 1, "[nf-core/eager] error: please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering"
 }
 
 if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == '') {
-  "[nf-core/eager] error: please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'"
+  exit 1, "[nf-core/eager] error: please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'"
+}
+
+if (params.run_bam_filtering && !params.bam_discard_unmapped && params.bam_unmapped_type != 'discard') {
+  exit 1, "[nf-core/eager] error: Please turned on unmapped read discarding, if you have specifed a different unmapped type. Give: --bam_discard_unmapped"
 }
 
 // Genotyping sanity checking
@@ -345,6 +352,10 @@ if (params.run_genotyping){
 
   if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
   exit 1, "[nf-core/eager] error: please specify path to a GATK 3.5 .jar file with --gatk_ug_jar."
+  }
+
+  if (params.genotyping_tool == 'ug' && !params.gatk_ug_jar.endsWith('.jar') ) {
+    exit 1, "[nf-core/eager] error: please specify path with --gatk_ug_jar to a valid GATK 3.5 binary that ends with .jar!. You gave: ${params.gatk_ug_jar}"
   }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
@@ -367,7 +378,7 @@ if (params.run_genotyping){
 	exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. You gave: ${params.pileupcaller_method}"
   }
 
-  if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile instanceof Boolean ||  params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile instanceof Boolean ||  params.pileupcaller_snpfile == '' ) ) {
+  if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile == '' ) ) {
     exit 1, "[nf-core/eager] error: please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file!"
   }
 
@@ -406,11 +417,11 @@ if (params.run_metagenomic_screening) {
   }
 
   if (params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave '${params.bam_unmapped_type}'!"
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave: '${params.bam_unmapped_type}'!"
   }
 
   if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
-    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave '${params.metagenomic_tool}'!"
+    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave: '${params.metagenomic_tool}'!"
   }
 
   if (params.database == '' ) {
@@ -418,11 +429,11 @@ if (params.run_metagenomic_screening) {
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
-    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave '${params.malt_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave: '${params.malt_mode}'!"
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
-    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave '${params.malt_alignment_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave: '${params.malt_alignment_mode}'!"
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
@@ -434,11 +445,11 @@ if (params.run_metagenomic_screening) {
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
-    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave '${params.malt_memory_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave: '${params.malt_memory_mode}'!"
   }
 
   if (!params.metagenomic_min_support_reads.toString().isInteger()){
-    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. You gave ${metagenomic_min_support_reads}!"
+    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. You gave: ${metagenomic_min_support_reads}!"
   }
 }
 
@@ -521,14 +532,36 @@ if (tsv_path) {
 
 } else exit 1, "[nf-core/eager] error: --input file(s) not correctly not supplied or improperly defined, see --help and documentation under 'running the pipeline' for details."
 
-ch_reads_for_input = Channel.empty()
+ch_input_sample
+  .into { ch_input_sample_downstream; ch_input_sample_check }
 
 ///////////////////////////////////////////////////
 /* --         INPUT CHANNEL CREATION          -- */
 ///////////////////////////////////////////////////
 
+// Check we don't have any duplicate file names
+ch_input_sample_check
+    .map {
+      it ->
+        def r1 = file(it[8]).getName()
+        def r2 = file(it[9]).getName()
+        def bam = file(it[10]).getName()
+
+      [r1, r2, bam]
+
+    }
+    .collect()
+    .map{
+       file -> 
+       filenames = file
+       filenames -= 'NA'
+       
+       if( filenames.size() != filenames.unique().size() )
+           exit 1, "[nf-core/eager] error: You have duplicate input FASTQ and/or BAM file names! All files must have unique names, different directories are not sufficent. Please check your input."
+    }
+
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
-ch_branched_input = ch_input_sample.branch{
+ch_branched_input = ch_input_sample_downstream.branch{
     fastq: it[8] != 'NA' //These are all fastqs
     bam: it[10] != 'NA' //These are all BAMs
 }
@@ -565,7 +598,7 @@ summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Input']        = params.input
-summary['Convert input BAM?'] = params.run_convertbam ? 'Yes' : 'No'
+summary['Convert input BAM?'] = params.run_convertinputbam ? 'Yes' : 'No'
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
 if(params.bwa_index) summary['BWA Index'] = params.bwa_index
@@ -775,7 +808,7 @@ process convertBam {
     tag "$libraryid"
     
     when: 
-    params.run_convertbam
+    params.run_convertinputbam
 
     input: 
     tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_convertbam 
@@ -796,7 +829,7 @@ process indexinputbam {
   tag "$libraryid"
 
   when: 
-  bam != 'NA' && !params.run_convertbam
+  bam != 'NA' && !params.run_convertinputbam
 
   input:
   tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_indexbam 
@@ -2008,15 +2041,22 @@ if ( params.gatk_ug_jar != '' ) {
 
   output: 
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*realign.bam") optional true
 
   script:
   defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
+  keep_realign = params.gatk_ug_keep_realign_bam ? "T" : "F"
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    
+    if [[ ${keep_realign} == 'F' ]]; then
+      rm ${samplename}.realign.bam
+    fi
+    
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
   else if (params.gatk_dbsnp != '')
@@ -2025,6 +2065,11 @@ if ( params.gatk_ug_jar != '' ) {
     java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    
+    if [[ ${keep_realign} == 'F' ]]; then
+      rm ${samplename}.realign.bam
+    fi
+    
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
  }
