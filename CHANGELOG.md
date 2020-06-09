@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     * Strip FASTQ will also produce a lane merged 'raw' but 'stripped' FASTQ file
   * When using TSV input, one sample with multiple (same treatment) libraries will be merged together.
   * Important: direct FASTQ paths will not have this functionality. TSV is required.
+* [#40](https://github.com/nf-core/eager/issues/40) - Added the pileupCaller genotyper from [sequenceTools](https://github.com/stschiff/sequenceTools)
 * Added sanity check and clearer error message when `--fasta_index` is provided and filepath does not end in `.fai`.
 * Added basic json_schema
 * Improved error messages
@@ -36,6 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
+* Added Sequencetools (1.4.0.6) that adds the ability to do genotyping with the 'pileupCaller'
 * Latest version of DeDup (0.12.6) which now reports mapped reads after deduplication
 * Latest version of ANGSD (0.933) which doesn't seg fault when running contamination on BAMs with insufficient reads
 * Latest version of MultiQC (1.9) with support for lots of extra tools in the pipeline (MALT, SexDetERRmine, DamageProfiler, MultiVCFAnalyzer)

@@ -59,6 +59,7 @@ Additional functionality contained by the pipeline currently includes:
 #### Genotyping
 
 * Creation of VCF genotyping files (`GATK UnifiedGenotyper`, `GATK HaplotypeCaller` and `FreeBayes`)
+* Creation of EIGENSTRAT genotyping files (`pileupCaller`)
 * Consensus sequence FASTA creation (`VCF2Genome`)
 * SNP Table generation (`MultiVCFAnalyzer`)
 

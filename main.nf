@@ -33,9 +33,8 @@ def helpMessage() {
 
         --single_end                  Specifies that the input is single end reads. Not required for TSV input.
         --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
-        --single_stranded             Specifies whether libraries single stranded libraries. Currently only affects MALTExtract. Not required for TSV input. Default: ${params.single_stranded}
+        --single_stranded             Specifies whether libraries are single stranded. Always affects MALTExtract but will be ignored by pileupCaller with TSV input. Default: ${params.single_stranded}
         --bam                         Specifies that the input is in BAM format. Not required for TSV input.
-
 
       Reference
         --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
@@ -128,7 +127,7 @@ def helpMessage() {
 
     Genotyping
       --run_genotyping                Turn on genotyping of BAM files.
-      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller or Freebayes. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes'.
+      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'.
       --genotyping_source             Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'. Default: '${params.genotyping_source}'
       --gatk_ug_jar                   When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.
       --gatk_call_conf                Specify GATK phred-scaled confidence threshold. Default: ${params.gatk_call_conf}
@@ -144,6 +143,9 @@ def helpMessage() {
       --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
       --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
+      --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller.
+      --pileupcaller_snpfile          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
+      --pileupcaller_method           Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: ${params.pileupcaller_method}
 
     Consensus Sequence Generation
       --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
@@ -254,7 +256,7 @@ if ( params.fasta.isEmpty () ){
         file zipped_fasta
 
         output:
-        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer
+        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer
 
         script:
         rm_zip = zipped_fasta - '.gz'
@@ -266,7 +268,7 @@ if ( params.fasta.isEmpty () ){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer }
     
     lastPath = params.fasta.lastIndexOf(File.separator)
     bwa_base = params.fasta.substring(lastPath+1)
@@ -344,8 +346,8 @@ if (params.run_bam_filtering && !params.bam_discard_unmapped && params.bam_unmap
 
 // Genotyping sanity checking
 if (params.run_genotyping){
-  if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes') {
-  exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes'. You gave: ${params.genotyping_tool}!"
+  if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' ) {
+  exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. You gave: ${params.genotyping_tool}!"
   }
 
   if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
@@ -365,11 +367,19 @@ if (params.run_genotyping){
   }
   
   if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "[nf-core/eager] error:  please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}!"
+    exit 1, "[nf-core/eager] error: please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}!"
   }
 
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "[nf-core/eager] error:  please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
+    exit 1, "[nf-core/eager] error: please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
+  }
+
+  if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_method == 'randomHaploid' || params.pileupcaller_method == 'randomDiploid' || params.pileupcaller_method == 'majorityCall' ) ) {
+	exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. You gave: ${params.pileupcaller_method}"
+  }
+
+  if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile == '' ) ) {
+    exit 1, "[nf-core/eager] error: please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file!"
   }
 
 }
@@ -746,7 +756,7 @@ process makeFastaIndex {
 }
 
 ch_fai_for_skipfastaindexing.mix(ch_fasta_faidx_index) 
-  .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes }
+  .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes; ch_fai_for_pileupcaller }
 
 // Stage dict index file if supplied, else load it into the channel
 
@@ -786,7 +796,7 @@ process makeSeqDict {
 }
 
 ch_dict_for_skipdict.mix(ch_seq_dict)
-  .into { ch_dict_for_ug; ch_dict_for_hc; ch_dict_for_freebayes }
+  .into { ch_dict_for_ug; ch_dict_for_hc; ch_dict_for_freebayes; ch_dict_for_pileupcaller }
 
 //////////////////////////////////////////////////
 /* --         BAM INPUT PREPROCESSING        -- */
@@ -1972,33 +1982,33 @@ process qualimap {
 // Reroute files for genotyping; we have to ensure to select lib-merged BAMs, as input channel will also contain the un-merged ones resulting in unwanted multi-sample VCFs
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_output_from_bamutils
-      .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes }
+      .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" && !params.run_trim_bam )  {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'trimmed' source without running BAM trimming (--run_trim_bam)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" && params.run_trim_bam )  {
     ch_output_from_bamutils
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_run_pmdtools )  {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
    ch_output_from_pmdtools
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
 
 } else if ( !params.run_genotyping && params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes } 
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
 
 }
 
@@ -2121,6 +2131,47 @@ if ( params.gatk_ug_jar != '' ) {
   """
   freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${samplename}.freebayes.vcf
   pigz -p ${task.cpus} ${samplename}.freebayes.vcf
+  """
+ }
+
+ // pileupCaller for 'random sampling' genotyping
+
+if (params.pileupcaller_bedfile.isEmpty()) {
+  ch_bed_for_pileupcaller = file('NO_FILE_BED')
+} else {
+  ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile)
+}
+
+if (params.pileupcaller_snpfile.isEmpty ()) {
+  ch_snp_for_pileupcaller = file('NO_FILE')
+} else {
+  ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
+}
+
+ process genotyping_pileupcaller {
+  label 'mc_small'
+  tag "${samplename}"
+  publishDir "${params.outdir}/genotyping", mode: 'copy'
+
+  when:
+  params.run_genotyping && params.genotyping_tool == 'pileupcaller'
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_pileupcaller
+  file fasta from ch_fasta_for_genotyping_pileupcaller.collect()
+  file fai from ch_fai_for_pileupcaller.collect()
+  file dict from ch_dict_for_pileupcaller.collect()
+  file bed from ch_bed_for_pileupcaller
+  file snp from ch_snp_for_pileupcaller
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${samplename}.*")
+
+  script:
+  caller = "--${params.pileupcaller_method}"
+  ssmode = strandedness == "single" ? "--singleStrandMode" : ""
+  """
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}.
   """
  }
 
@@ -2591,6 +2642,7 @@ process get_software_versions {
     sexdeterrmine --version &> v_sexdeterrmine.txt || true
     kraken2 --version | head -n 1 &> v_kraken.txt || true
     endorS.py --version &> v_endorSpy.txt || true
+    pileupCaller --version &> v_sequencetools.txt 2>&1 || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """

@@ -125,6 +125,9 @@
       - [`--freebayes_C`](#--freebayes_c)
       - [`--freebayes_g`](#--freebayes_g)
       - [`--freebayes_p`](#--freebayes_p)
+      - [`--pileupcaller_bedfile`](#pileupcallerbedfile)
+      - [`--pileupcaller_snpfile`](#pileupcallersnpfile)
+      - [`--pileupcaller_method`](#pileupcallermethod)
     - [Consensus Sequence Generation](#consensus-sequence-generation)
       - [`--run_vcf2genome`](#--run_vcf2genome)
       - [`--vcf2genome_outfile`](#--vcf2genome_outfile)
@@ -994,6 +997,18 @@ Specify to skip over regions of high depth by discarding alignments overlapping 
 #### `--freebayes_p`
 
 Specify ploidy of sample in FreeBayes. Default is diploid. Default: 2
+
+#### `--pileupcaller_bedfile`
+
+Specify a SNP panel in the form of a bed file of sites at which to generate pileup for pileupCaller.
+
+#### `--pileupcaller_snpfile`
+
+Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/tree/master/CONVERTF) format, pileupCaller will call these sites.
+
+#### `--pileupcaller_method`
+
+Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: randomHaploid
 
 ### Consensus Sequence Generation
 
