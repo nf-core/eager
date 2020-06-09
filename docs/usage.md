@@ -307,7 +307,7 @@ There are two possible ways of supplying input sequencing data to nf-core/eager.
 
 Use this to specify the location of your input FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to [`--tsv_input`](#tsv_input) which is used for more complex input configurations such as lane and library merging.
 
-When using the direct method of `--input` you can specify one or multiple samples in one or more directories files.
+When using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.  
 
 By default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')
 
@@ -338,6 +338,10 @@ If you have multiple files in different directories, you can use additional wild
 
 Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
 
+<p align="center">
+  <img src="images/usage/merging_files.png" alt="Schematic diagram indicated merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
+</p>
+
 The use of the TSV `--input` method is recommended to be used when performing more complex procedures such as lane or library merging. You do not need to specify `--single_end`, `--bam`, `--colour_chemistry`, `-udg_type` etc. when using TSV input - this is defined within the TSV file itself.
 
 This TSV should look like the following:
@@ -364,8 +368,8 @@ Column descriptions are as follows:
 - **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
 - **Strandedness:** A text string indicating whether the library type is 'single' or 'double'. This currently has no functionality, but will affect lane/library merging if different per library.
 - **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.
-- **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column.
-- **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column.
+- **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column. File names **must be unique**, even if in different directories.
+- **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column. File names **must be unique**, even if in different directories.
 - **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'
 
 For example, with the following:
@@ -386,12 +390,18 @@ After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _
 Note the following important points:
 
 - The TSV must use actual tabs (not spaces) between cells.
-- Files names must be unique, having files with the same name, but in different directories is _not_ sufficient
-  - This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
+- _File_ names must be unique irregardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
+  - If it is 'too late' and already have duplicate file names, a work around is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
+- Lane IDs must be unique for each sequencing of each library.
+  - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
-- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
-- You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertinputbam`), as only FASTQ files are lane-merged together.
+- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
+  - `DeDup` utilises both 5' and 3' ends of reads to remove duplicates, and thus will only work correctly on Paired-End data and Single-End data separately.
+- You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (i.e. PE/SE)
+  - e.g. by specifying `_SE` and `_PE` as in the example table above.
+  - If you do not have different IDs nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
+  - Please note this setup is **not** optimal, as you therefore cannot deduplicate PE and SE data of the same library together (and therefore may still have PCR duplicates at the library merging level).
+- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
 - Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
 
