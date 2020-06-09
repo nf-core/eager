@@ -112,7 +112,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker  --dedupper 'dedup' --run_genotyping --genotyping_tool 'freebayes'
       - name: GENOTYPING_PC Test running pileupCaller
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker  --dedupper 'dedup' --run_genotyping --genotyping_tool 'pileupcaller'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --dedupper 'dedup' --run_genotyping --genotyping_tool 'pileupcaller'
       - name: SKIPPING Test checking all skip steps work i.e. input bam, skipping straight to genotyping
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --skip_fastqc --skip_adapterremoval --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
