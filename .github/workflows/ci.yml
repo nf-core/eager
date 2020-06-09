@@ -30,6 +30,9 @@ jobs:
         run: |
           docker pull nfcore/eager:dev
           docker tag nfcore/eager:dev nfcore/eager:2.1.0
+      - name: HELPTEXT Run with the help flag
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} --help
       - name:  BASIC Run the basic pipeline with the test profileBasic workflow, PE/SE, bwa aln
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.endedness }} --save_reference
