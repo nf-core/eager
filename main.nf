@@ -146,7 +146,7 @@ def helpMessage() {
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
       --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller.
       --pileupcaller_snpfile          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
-      --pileupcaller_method           Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: randomHaploid
+      --pileupcaller_method           Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: ${params.pileupcaller_method}
 
     Consensus Sequence Generation
       --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
