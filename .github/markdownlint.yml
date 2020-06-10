@@ -7,3 +7,4 @@ no-inline-html:
     allowed_elements:
         - img
         - p
+        - kbd

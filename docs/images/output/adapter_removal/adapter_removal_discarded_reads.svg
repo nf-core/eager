@@ -9,13 +9,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="164.80263mm"
+   height="93.365112mm"
+   viewBox="0 0 164.80263 93.365112"
    version="1.1"
    id="svg8"
    sodipodi:docname="adapter_removal_discarded_reads.svg"
-   inkscape:version="0.92.1 r15371">
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -1801,21 +1801,27 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="269.07115"
-     inkscape:cy="833.24432"
+     inkscape:cx="328.61326"
+     inkscape:cy="256.68521"
      inkscape:document-units="mm"
-     inkscape:current-layer="g5327"
+     inkscape:current-layer="g4857"
      showgrid="false"
      inkscape:measure-start="0,0"
      inkscape:measure-end="0,0"
      inkscape:window-width="1920"
-     inkscape:window-height="986"
-     inkscape:window-x="-11"
-     inkscape:window-y="-11"
-     inkscape:window-maximized="1">
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
     <inkscape:grid
        type="xygrid"
-       id="grid4491" />
+       id="grid4491"
+       originx="-7.5570251"
+       originy="-190.11953" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -1825,14 +1831,15 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-7.5570253,-13.515358)">
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:6.3499999px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
@@ -1842,7 +1849,7 @@
          sodipodi:role="line"
          id="tspan6550"
          x="159.69354"
-         y="75.01284"
+         y="74.837807"
          style="stroke-width:0.26458332" /></text>
     <text
        xml:space="preserve"
@@ -1853,7 +1860,7 @@
          sodipodi:role="line"
          id="tspan4676"
          x="50.459824"
-         y="140.64151"
+         y="140.46646"
          style="stroke-width:0.26458332" /></text>
     <g
        id="g5327"
@@ -1868,7 +1875,7 @@
            sodipodi:role="line"
            id="tspan5172"
            x="148.43124"
-           y="68.947296"
+           y="68.664589"
            style="stroke-width:0.26458332" /></text>
       <g
          id="g4857"
@@ -1904,29 +1911,29 @@
         <text
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
            x="134.05171"
            y="35.40057"
            id="text6115-1-2"
            inkscape:export-xdpi="289.40701"
            inkscape:export-ydpi="289.40701"><tspan
              sodipodi:role="line"
-             x="134.99911"
+             x="134.82858"
              y="35.40057"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan6546"><tspan
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#008000;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#008000;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
    id="tspan6548">This is normal,</tspan> lots of </tspan><tspan
              id="tspan5166"
              sodipodi:role="line"
-             x="134.99911"
+             x="134.82858"
              y="40.692238"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">adapter trimmed short reads! </tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">adapter trimmed short reads! </tspan><tspan
              id="tspan5170"
              sodipodi:role="line"
              x="134.05171"
              y="45.983902"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Go eat some popcorn!</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Go eat some popcorn!</tspan></text>
         <path
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            style="fill:none;stroke:#000000;stroke-width:0.41461608;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -2001,7 +2008,7 @@
         <text
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
            x="46.755131"
            y="34.836609"
            id="text6115-1-2-0-1"
@@ -2009,21 +2016,21 @@
            inkscape:export-ydpi="289.40701"><tspan
              id="tspan4899"
              sodipodi:role="line"
-             x="47.702534"
+             x="47.531998"
              y="34.836609"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"><tspan
    style="font-size:3.88055563px;fill:#ff0000;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
    id="tspan4752-8">Not good!</tspan> Are your </tspan><tspan
              id="tspan4837"
              sodipodi:role="line"
-             x="47.70253"
+             x="47.532001"
              y="40.128277"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">filtering parameters correct </tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">filtering parameters correct </tspan><tspan
              id="tspan4839"
              sodipodi:role="line"
              x="46.755131"
              y="45.419941"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">for your data?</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">for your data?</tspan></text>
         <path
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -2038,7 +2045,7 @@
         <text
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
            x="29.377264"
            y="96.508545"
            id="text6245-5-0-8-5"
@@ -2048,11 +2055,11 @@
              id="tspan6243-5-1-1-4"
              x="29.377264"
              y="96.508545"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Number of reads</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Number of reads</tspan></text>
         <text
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
            x="95.500168"
            y="95.863174"
            id="text6245-5-0-8-5-7"
@@ -2062,11 +2069,11 @@
              id="tspan6243-5-1-1-4-0"
              x="95.500168"
              y="95.863174"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Number of reads</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Number of reads</tspan></text>
         <text
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
            x="9.5625267"
            y="22.483974"
            id="text6245-5-0-8-5-1"
@@ -2076,11 +2083,11 @@
              id="tspan6243-5-1-1-4-9"
              x="9.5625267"
              y="22.483974"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">Adapter removal - Discarded reads</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">Adapter removal - Discarded reads</tspan></text>
         <text
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="152.1346"
            y="24.081007"
            id="text4674"
@@ -2090,7 +2097,7 @@
              id="tspan4672"
              x="152.1346"
              y="24.081007"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#b3b3b3;stroke-width:0.26458332">ZandraSelina</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#b3b3b3;stroke-width:0.26458332">ZandraSelina</tspan></text>
         <path
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            style="fill:none;stroke:#000000;stroke-width:0.58367211;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -2115,7 +2122,7 @@
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            transform="rotate(-90)"
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
            x="-79.103096"
            y="18.360216"
            id="text6245-5-0-8-5-19"
@@ -2125,12 +2132,12 @@
              id="tspan6243-5-1-1-4-2"
              x="-79.103096"
              y="18.360216"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Sample</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Sample</tspan></text>
         <text
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            transform="rotate(-90)"
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
            x="-79.791756"
            y="83.210533"
            id="text6245-5-0-8-5-19-2"
@@ -2140,7 +2147,7 @@
              id="tspan6243-5-1-1-4-2-4"
              x="-79.791756"
              y="83.210533"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Sample</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Sample</tspan></text>
         <path
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -2570,7 +2577,7 @@
         <text
            inkscape:export-filename="C:\Users\Zandra\Documents\Illustration\FASTQC_graphs\EAGER2\Final\adapter_removal_discarded_reads_v2.png"
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.88055563px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
            x="137.0728"
            y="63.021927"
            id="text6245-5-0-8-5-7-3"
@@ -2580,48 +2587,46 @@
              id="tspan6243-5-1-1-4-0-0"
              x="137.0728"
              y="63.021927"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#00ccff;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Retained</tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#00ccff;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Retained</tspan><tspan
              id="tspan5194"
              sodipodi:role="line"
              x="137.0728"
              y="67.87262"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#1c1f24;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Singleton R1</tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#1c1f24;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Singleton R1</tspan><tspan
              id="tspan5196"
              sodipodi:role="line"
              x="137.0728"
              y="72.723312"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#37c871;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Singleton R2</tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#37c871;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Singleton R2</tspan><tspan
              id="tspan5198"
              sodipodi:role="line"
              x="137.0728"
              y="77.574013"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#d42aff;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Truncated</tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#d42aff;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Truncated</tspan><tspan
              id="tspan5200"
              sodipodi:role="line"
              x="137.0728"
              y="82.424706"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#f43b29;fill-opacity:1;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Discarded R1</tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#f43b29;fill-opacity:1;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Discarded R1</tspan><tspan
              id="tspan5202"
              sodipodi:role="line"
              x="137.0728"
              y="87.275398"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#fff02a;fill-opacity:1;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Discarded R2</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#fff02a;fill-opacity:1;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none">Discarded R2</tspan></text>
         <text
            inkscape:export-ydpi="289.40701"
            inkscape:export-xdpi="289.40701"
            id="text4674-4"
            y="104.02655"
            x="169.44066"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            xml:space="preserve"><tspan
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332"
              y="104.02655"
              x="169.44066"
              sodipodi:role="line"
-             id="tspan4673">CC BY-SA 4<tspan
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.26458332"
-   id="tspan4675">.</tspan>0</tspan><tspan
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332"
+             id="tspan4673">CC BY 4.0</tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332"
              y="107.55433"
              x="169.44066"
              sodipodi:role="line"

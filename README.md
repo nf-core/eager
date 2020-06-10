@@ -20,6 +20,10 @@
 
 The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
+<p align="center">
+    <img src="docs/images/output/overview/eager2_workflow.png" alt="nf-core/eager schematic workflow" width="70%"
+</p>
+
 ## Pipeline steps
 
 ### Default Steps
@@ -55,6 +59,7 @@ Additional functionality contained by the pipeline currently includes:
 #### Genotyping
 
 * Creation of VCF genotyping files (`GATK UnifiedGenotyper`, `GATK HaplotypeCaller` and `FreeBayes`)
+* Creation of EIGENSTRAT genotyping files (`pileupCaller`)
 * Consensus sequence FASTA creation (`VCF2Genome`)
 * SNP Table generation (`MultiVCFAnalyzer`)
 

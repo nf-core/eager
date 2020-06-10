@@ -10,173 +10,176 @@
   - [Running the pipeline](#running-the-pipeline)
     - [Updating the pipeline](#updating-the-pipeline)
     - [Mandatory Arguments](#mandatory-arguments)
-      - [`-profile`](#profile)
-      - [`--input`](#input)
+      - [`-profile`](#-profile)
+      - [`--input`](#--input)
         - [Direct Input Method](#direct-input-method)
         - [TSV Input Method](#tsv-input-method)
-      - [`--single_end`](#singleend)
-      - [`--bam`](#bam)
-      - [`--single_stranded`](#singlestranded)
-      - [`--colour_chemistry`](#colourchemistry)
-      - [`--fasta`](#fasta)
-      - [`--genome` (using iGenomes)](#genome-using-igenomes)
+      - [`--bam`](#--bam)
+      - [`--single_stranded`](#--single_stranded)
+      - [`--colour_chemistry`](#--colour_chemistry)
+      - [`--fasta`](#--fasta)
+      - [`--genome` (using iGenomes)](#--genome-using-igenomes)
     - [Output Directories](#output-directories)
-      - [`--outdir`](#outdir)
-      - [`-w / -work-dir`](#w---work-dir)
+      - [`--outdir`](#--outdir)
+      - [`-w / -work-dir`](#-w---work-dir)
     - [Optional Reference Options](#optional-reference-options)
-      - [`--large_ref`](#largeref)
-      - [`--save_reference`](#savereference)
-      - [`--bwa_index`](#bwaindex)
-      - [`--seq_dict`](#seqdict)
-      - [`--fasta_index`](#fastaindex)
+      - [`--large_ref`](#--large_ref)
+      - [`--save_reference`](#--save_reference)
+      - [`--bwa_index`](#--bwa_index)
+      - [`--seq_dict`](#--seq_dict)
+      - [`--fasta_index`](#--fasta_index)
     - [Other run specific parameters](#other-run-specific-parameters)
-      - [`-r`](#r)
-      - [`--max_memory`](#maxmemory)
-      - [`--max_time`](#maxtime)
-      - [`--max_cpus`](#maxcpus)
-      - [`--email`](#email)
-      - [`-name`](#name)
-      - [`-resume`](#resume)
-      - [`-c`](#c)
-      - [`--monochrome_logs`](#monochromelogs)
-      - [`--multiqc_config`](#multiqcconfig)
-      - [`--custom_config_version`](#customconfigversion)
-      - [`--plaintext_email`](#plaintextemail)
+      - [`-r`](#-r)
+      - [`--max_memory`](#--max_memory)
+      - [`--max_time`](#--max_time)
+      - [`--max_cpus`](#--max_cpus)
+      - [`--email`](#--email)
+      - [`--plaintext_email`](#--plaintext_email)
+      - [`-name`](#-name)
+      - [`-resume`](#-resume)
+      - [`-c`](#-c)
+      - [`--monochrome_logs`](#--monochrome_logs)
+      - [`--multiqc_config`](#--multiqc_config)
+      - [`--custom_config_version`](#--custom_config_version)
   - [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
     - [Step skipping parameters](#step-skipping-parameters)
-      - [`--skip_fastqc`](#skipfastqc)
-      - [`--skip_adapterremoval`](#skipadapterremoval)
-      - [`--skip_preseq`](#skippreseq)
-      - [`--skip_deduplication`](#skipdeduplication)
-      - [`--skip_damage_calculation`](#skipdamagecalculation)
-      - [`--skip_qualimap`](#skipqualimap)
+      - [`--skip_fastqc`](#--skip_fastqc)
+      - [`--skip_adapterremoval`](#--skip_adapterremoval)
+      - [`--skip_preseq`](#--skip_preseq)
+      - [`--skip_deduplication`](#--skip_deduplication)
+      - [`--skip_damage_calculation`](#--skip_damage_calculation)
+      - [`--skip_qualimap`](#--skip_qualimap)
     - [BAM Conversion Options](#bam-conversion-options)
-      - [`--run_convertbam`](#runconvertbam)
+      - [`--run_convertinputbam`](#--run_convertinputbam)
     - [Complexity Filtering Options](#complexity-filtering-options)
-      - [`--complexity_filter_poly_g`](#complexityfilterpolyg)
-      - [`--complexity_filter_poly_g_min`](#complexityfilterpolygmin)
+      - [`--complexity_filter_poly_g`](#--complexity_filter_poly_g)
+      - [`--complexity_filter_poly_g_min`](#--complexity_filter_poly_g_min)
     - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
-      - [`--clip_forward_adaptor`](#clipforwardadaptor)
-      - [`--clip_reverse_adaptor`](#clipreverseadaptor)
-      - [`--clip_readlength` 30](#clipreadlength-30)
-      - [`--clip_min_read_quality` 20](#clipminreadquality-20)
-      - [`--clip_min_adap_overlap` 1](#clipminadapoverlap-1)
-      - [`--skip_collapse`](#skipcollapse)
-      - [`--skip_trim`](#skiptrim)
-      - [`--preserve5p`](#preserve5p)
-      - [`--mergedonly`](#mergedonly)
+      - [`--clip_forward_adaptor`](#--clip_forward_adaptor)
+      - [`--clip_reverse_adaptor`](#--clip_reverse_adaptor)
+      - [`--clip_readlength](#--clip_readlength)
+      - [`--clip_min_read_quality`](#--clip_min_read_quality)
+      - [`--clip_min_adap_overlap`](#--clip_min_adap_overlap)
+      - [`--skip_collapse`](#--skip_collapse)
+      - [`--skip_trim`](#--skip_trim)
+      - [`--preserve5p`](#--preserve5p)
+      - [`--mergedonly`](#--mergedonly)
     - [Read Mapping Parameters](#read-mapping-parameters)
-      - [`--mapper`](#mapper)
+      - [`--mapper`](#--mapper)
       - [BWA (default)](#bwa-default)
-        - [`--bwaalnn`](#bwaalnn)
-        - [`--bwaalnk`](#bwaalnk)
-        - [`--bwaalnl`](#bwaalnl)
+        - [`--bwaalnn`](#--bwaalnn)
+        - [`--bwaalnk`](#--bwaalnk)
+        - [`--bwaalnl`](#--bwaalnl)
       - [CircularMapper](#circularmapper)
-        - [`--circularextension`](#circularextension)
-        - [`--circulartarget`](#circulartarget)
-        - [`--circularfilter`](#circularfilter)
+        - [`--circularextension`](#--circularextension)
+        - [`--circulartarget`](#--circulartarget)
+        - [`--circularfilter`](#--circularfilter)
     - [Mapped Reads Stripping](#mapped-reads-stripping)
-      - [`--strip_input_fastq`](#stripinputfastq)
-      - [`--strip_mode`](#stripmode)
+      - [`--strip_input_fastq`](#--strip_input_fastq)
+      - [`--strip_mode`](#--strip_mode)
     - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
-      - [`--run_bam_filtering`](#runbamfiltering)
-      - [`--bam_discard_unmapped`](#bamdiscardunmapped)
-      - [`--bam_unmapped_type`](#bamunmappedtype)
-      - [`--bam_mapping_quality_threshold`](#bammappingqualitythreshold)
+      - [`--run_bam_filtering`](#--run_bam_filtering)
+      - [`--bam_discard_unmapped`](#--bam_discard_unmapped)
+      - [`--bam_unmapped_type`](#--bam_unmapped_type)
+      - [`--bam_mapping_quality_threshold`](#--bam_mapping_quality_threshold)
     - [Read DeDuplication Parameters](#read-deduplication-parameters)
-      - [`--dedupper`](#dedupper)
-      - [`--dedup_all_merged`](#dedupallmerged)
+      - [`--dedupper`](#--dedupper)
+      - [`--dedup_all_merged`](#--dedup_all_merged)
     - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
-      - [`--preseq_step_size`](#preseqstepsize)
+      - [`--preseq_step_size`](#--preseq_step_size)
     - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
-      - [`--udg_type`](#udgtype)
-      - [`--damageprofiler_length`](#damageprofilerlength)
-      - [`--damageprofiler_threshold`](#damageprofilerthreshold)
-      - [`--damageprofiler_yaxis`](#damageprofileryaxis)
-      - [`--run_pmdtools`](#runpmdtools)
-      - [`--pmdtools_range`](#pmdtoolsrange)
-      - [`--pmdtools_threshold`](#pmdtoolsthreshold)
-      - [`--pmdtools_reference_mask`](#pmdtoolsreferencemask)
-      - [`--pmdtools_max_reads`](#pmdtoolsmaxreads)
+      - [`--udg_type`](#--udg_type)
+      - [`--damageprofiler_length`](#--damageprofiler_length)
+      - [`--damageprofiler_threshold`](#--damageprofiler_threshold)
+      - [`--damageprofiler_yaxis`](#--damageprofiler_yaxis)
+      - [`--run_pmdtools`](#--run_pmdtools)
+      - [`--pmdtools_range`](#--pmdtools_range)
+      - [`--pmdtools_threshold`](#--pmdtools_threshold)
+      - [`--pmdtools_reference_mask`](#--pmdtools_reference_mask)
+      - [`--pmdtools_max_reads`](#--pmdtools_max_reads)
     - [BAM Trimming Parameters](#bam-trimming-parameters)
-      - [`--run_trim_bam`](#runtrimbam)
-      - [`--bamutils_clip_left` / `--bamutils_clip_right`](#bamutilsclipleft----bamutilsclipright)
-      - [`--bamutils_softclip`](#bamutilssoftclip)
+      - [`--run_trim_bam`](#--run_trim_bam)
+      - [`--bamutils_clip_left` / `--bamutils_clip_right`](#--bamutils_clip_left----bamutils_clip_right)
+      - [`--bamutils_softclip`](#--bamutils_softclip)
     - [Captured Library Parameters](#captured-library-parameters)
-      - [`--snpcapture` false](#snpcapture-false)
-      - [`--bedfile`](#bedfile)
+      - [`--snpcapture` false](#--snpcapture-false)
+      - [`--bedfile`](#--bedfile)
     - [Feature Annotation Statistics](#feature-annotation-statistics)
-      - [`--run_bedtools_coverage`](#runbedtoolscoverage)
-      - [`--anno_file`](#annofile)
+      - [`--run_bedtools_coverage`](#--run_bedtools_coverage)
+      - [`--anno_file`](#--anno_file)
     - [Genotyping Parameters](#genotyping-parameters)
-      - [`--run_genotyping`](#rungenotyping)
-      - [`--genotyping_tool`](#genotypingtool)
-      - [`--genotyping_source`](#genotypingsource)
-      - [`--gatk_ug_jar`](#gatkugjar)
-      - [`--gatk_call_conf`](#gatkcallconf)
-      - [`--gatk_ploidy`](#gatkploidy)
-      - [`--gatk_dbsnp`](#gatkdbsnp)
-      - [`--gatk_ug_out_mode`](#gatkugoutmode)
-      - [`--gatk_hc_out_mode`](#gatkhcoutmode)
-      - [`--gatk_ug_genotype_model`](#gatkuggenotypemodel)
-      - [`--gatk_hc_emitrefconf`](#gatkhcemitrefconf)
-      - [`--gatk_downsample`](#gatkdownsample)
-      - [`--gatk_ug_gatk_ug_defaultbasequalities`](#gatkuggatkugdefaultbasequalities)
-      - [`--freebayes_C`](#freebayesc)
-      - [`--freebayes_g`](#freebayesg)
-      - [`--freebayes_p`](#freebayesp)
+      - [`--run_genotyping`](#--run_genotyping)
+      - [`--genotyping_tool`](#--genotyping_tool)
+      - [`--genotyping_source`](#--genotyping_source)
+      - [`--gatk_ug_jar`](#--gatk_ug_jar)
+      - [`--gatk_call_conf`](#--gatk_call_conf)
+      - [`--gatk_ploidy`](#--gatk_ploidy)
+      - [`--gatk_dbsnp`](#--gatk_dbsnp)
+      - [`--gatk_ug_out_mode`](#--gatk_ug_out_mode)
+      - [`--gatk_hc_out_mode`](#--gatk_hc_out_mode)
+      - [`--gatk_ug_genotype_model`](#--gatk_ug_genotype_model)
+      - [`--gatk_hc_emitrefconf`](#--gatk_hc_emitrefconf)
+      - [`--gatk_ug_keep_realign_bam`](#--gatk_ug_keep_realign_bam)
+      - [`--gatk_downsample`](#--gatk_downsample)
+      - [`--gatk_ug_gatk_ug_defaultbasequalities`](#--gatk_ug_gatk_ug_defaultbasequalities)
+      - [`--freebayes_C`](#--freebayes_c)
+      - [`--freebayes_g`](#--freebayes_g)
+      - [`--freebayes_p`](#--freebayes_p)
+      - [`--pileupcaller_bedfile`](#pileupcallerbedfile)
+      - [`--pileupcaller_snpfile`](#pileupcallersnpfile)
+      - [`--pileupcaller_method`](#pileupcallermethod)
     - [Consensus Sequence Generation](#consensus-sequence-generation)
-      - [`--run_vcf2genome`](#runvcf2genome)
-      - [`--vcf2genome_outfile`](#vcf2genomeoutfile)
-      - [`--vcf2genome_header`](#vcf2genomeheader)
-      - [`--vcf2genome_minc`](#vcf2genomeminc)
-      - [`--vcf2genome_minq`](#vcf2genomeminq)
-      - [`--vcf2genome_minfreq`](#vcf2genomeminfreq)
+      - [`--run_vcf2genome`](#--run_vcf2genome)
+      - [`--vcf2genome_outfile`](#--vcf2genome_outfile)
+      - [`--vcf2genome_header`](#--vcf2genome_header)
+      - [`--vcf2genome_minc`](#--vcf2genome_minc)
+      - [`--vcf2genome_minq`](#--vcf2genome_minq)
+      - [`--vcf2genome_minfreq`](#--vcf2genome_minfreq)
     - [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
-      - [`--run_mtnucratio`](#runmtnucratio)
-      - [`--mtnucratio_header`](#mtnucratioheader)
+      - [`--run_mtnucratio`](#--run_mtnucratio)
+      - [`--mtnucratio_header`](#--mtnucratio_header)
     - [SNP Table Generation](#snp-table-generation)
-      - [`--run_multivcfanalyzer`](#runmultivcfanalyzer)
-      - [`--write_allele_frequencies`](#writeallelefrequencies)
-      - [`--min_genotype_quality`](#mingenotypequality)
-      - [`--min_base_coverage`](#minbasecoverage)
-      - [`--min_allele_freq_hom`](#minallelefreqhom)
-      - [`--min_allele_freq_het`](#minallelefreqhet)
-      - [`--additional_vcf_files`](#additionalvcffiles)
-      - [`--reference_gff_annotations`](#referencegffannotations)
-      - [`--reference_gff_exclude`](#referencegffexclude)
-      - [`--snp_eff_results`](#snpeffresults)
+      - [`--run_multivcfanalyzer`](#--run_multivcfanalyzer)
+      - [`--write_allele_frequencies`](#--write_allele_frequencies)
+      - [`--min_genotype_quality`](#--min_genotype_quality)
+      - [`--min_base_coverage`](#--min_base_coverage)
+      - [`--min_allele_freq_hom`](#--min_allele_freq_hom)
+      - [`--min_allele_freq_het`](#--min_allele_freq_het)
+      - [`--additional_vcf_files`](#--additional_vcf_files)
+      - [`--reference_gff_annotations`](#--reference_gff_annotations)
+      - [`--reference_gff_exclude`](#--reference_gff_exclude)
+      - [`--snp_eff_results`](#--snp_eff_results)
     - [Human Sex Determination](#human-sex-determination)
-      - [`--run_sexdeterrmine`](#runsexdeterrmine)
-      - [`--sexdeterrmine_bedfile`](#sexdeterrminebedfile)
+      - [`--run_sexdeterrmine`](#--run_sexdeterrmine)
+      - [`--sexdeterrmine_bedfile`](#--sexdeterrmine_bedfile)
     - [Human Nuclear Contamination](#human-nuclear-contamination)
-      - [`--run_nuclear_contamination`](#runnuclearcontamination)
-      - [`--contamination_chrom_name`](#contaminationchromname)
+      - [`--run_nuclear_contamination`](#--run_nuclear_contamination)
+      - [`--contamination_chrom_name`](#--contamination_chrom_name)
     - [Metagenomic Screening](#metagenomic-screening)
-      - [`--run_metagenomic_screening`](#runmetagenomicscreening)
-      - [`--metagenomic_tool`](#metagenomictool)
-      - [`--metagenomic_min_support_reads`](#metagenomicminsupportreads)
-      - [`--database`](#database)
-      - [`--percent_identity`](#percentidentity)
-      - [`--malt_mode`](#maltmode)
-      - [`--malt_alignment_mode`](#maltalignmentmode)
-      - [`--malt_top_percent`](#malttoppercent)
-      - [`--malt_min_support_mode`](#maltminsupportmode)
-      - [`--malt_min_support_percent`](#maltminsupportpercent)
-      - [`--malt_max_queries`](#maltmaxqueries)
-      - [`--malt_memory_mode`](#maltmemorymode)
-      - [`--run_maltextract`](#runmaltextract)
-      - [`maltextract_taxon_list`](#maltextracttaxonlist)
-      - [`maltextract_ncbifiles`](#maltextractncbifiles)
-      - [`maltextract_filter`](#maltextractfilter)
-      - [`maltextract_toppercent`](#maltextracttoppercent)
-      - [`maltextract_destackingoff`](#maltextractdestackingoff)
-      - [`maltextract_downsamplingoff`](#maltextractdownsamplingoff)
-      - [`maltextract_duplicateremovaloff`](#maltextractduplicateremovaloff)
-      - [`maltextract_matches`](#maltextractmatches)
-      - [`maltextract_megansummary`](#maltextractmegansummary)
-      - [`maltextract_percentidentity`](#maltextractpercentidentity)
-      - [`maltextract_topalignment`](#maltextracttopalignment)
+      - [`--run_metagenomic_screening`](#--run_metagenomic_screening)
+      - [`--metagenomic_tool`](#--metagenomic_tool)
+      - [`--metagenomic_min_support_reads`](#--metagenomic_min_support_reads)
+      - [`--database`](#--database)
+      - [`--percent_identity`](#--percent_identity)
+      - [`--malt_mode`](#--malt_mode)
+      - [`--malt_alignment_mode`](#--malt_alignment_mode)
+      - [`--malt_top_percent`](#--malt_top_percent)
+      - [`--malt_min_support_mode`](#--malt_min_support_mode)
+      - [`--malt_min_support_percent`](#--malt_min_support_percent)
+      - [`--malt_max_queries`](#--malt_max_queries)
+      - [`--malt_memory_mode`](#--malt_memory_mode)
+      - [`--run_maltextract`](#--run_maltextract)
+      - [`maltextract_taxon_list`](#maltextract_taxon_list)
+      - [`maltextract_ncbifiles`](#maltextract_ncbifiles)
+      - [`maltextract_filter`](#maltextract_filter)
+      - [`maltextract_toppercent`](#maltextract_toppercent)
+      - [`maltextract_destackingoff`](#maltextract_destackingoff)
+      - [`maltextract_downsamplingoff`](#maltextract_downsamplingoff)
+      - [`maltextract_duplicateremovaloff`](#maltextract_duplicateremovaloff)
+      - [`maltextract_matches`](#maltextract_matches)
+      - [`maltextract_megansummary`](#maltextract_megansummary)
+      - [`maltextract_percentidentity`](#maltextract_percentidentity)
+      - [`maltextract_topalignment`](#maltextract_topalignment)
   - [Clean up](#clean-up)
 
 ## General Nextflow info
@@ -307,7 +310,7 @@ There are two possible ways of supplying input sequencing data to nf-core/eager.
 
 Use this to specify the location of your input FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to [`--tsv_input`](#tsv_input) which is used for more complex input configurations such as lane and library merging.
 
-When using the direct method of `--input` you can specify one or multiple samples in one or more directories files.
+When using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.  
 
 By default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')
 
@@ -331,11 +334,16 @@ If you have multiple files in different directories, you can use additional wild
 2. The path **must** be enclosed in quotes
 3. The path must have at least one `*` wildcard character
 4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.
-5. Files names must be unique _prior_ the `{1,2}` notation, otherwise an error will be thrown.
+5. Files names must be unique, having files with the same name, but in different directories is _not_ sufficient
+   - This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
 
 ##### TSV Input Method
 
 Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
+
+<p align="center">
+  <img src="images/usage/merging_files.png" alt="Schematic diagram indicated merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
+</p>
 
 The use of the TSV `--input` method is recommended to be used when performing more complex procedures such as lane or library merging. You do not need to specify `--single_end`, `--bam`, `--colour_chemistry`, `-udg_type` etc. when using TSV input - this is defined within the TSV file itself.
 
@@ -363,8 +371,8 @@ Column descriptions are as follows:
 - **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
 - **Strandedness:** A text string indicating whether the library type is 'single' or 'double'. This currently has no functionality, but will affect lane/library merging if different per library.
 - **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.
-- **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column.
-- **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column.
+- **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column. File names **must be unique**, even if in different directories.
+- **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column. File names **must be unique**, even if in different directories.
 - **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'
 
 For example, with the following:
@@ -385,10 +393,18 @@ After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _
 Note the following important points:
 
 - The TSV must use actual tabs (not spaces) between cells.
+- _File_ names must be unique irregardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
+  - If it is 'too late' and already have duplicate file names, a work around is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
+- Lane IDs must be unique for each sequencing of each library.
+  - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
-- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration (as `DeDup` utilises both 5' and 3' ends of reads to remove duplicates).
-- You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (e.g. by specifying `_SE` and `_PE` in the example above), otherwise nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you us `--run_convertbam`), as only FASTQ files are lane-merged together.
+- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
+  - `DeDup` utilises both 5' and 3' ends of reads to remove duplicates, and thus will only work correctly on Paired-End data and Single-End data separately.
+- You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (i.e. PE/SE)
+  - e.g. by specifying `_SE` and `_PE` as in the example table above.
+  - If you do not have different IDs nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
+  - Please note this setup is **not** optimal, as you therefore cannot deduplicate PE and SE data of the same library together (and therefore may still have PCR duplicates at the library merging level).
+- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
 - Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
 
@@ -633,9 +649,9 @@ Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
 ### BAM Conversion Options
 
-#### `--run_convertbam`
+#### `--run_convertinputbam`
 
-Allows you to convert BAM input back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
+Allows you to convert a input BAM file back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
 
 If not turned on, BAMs will automatically be sent to post-mapping steps.
 
@@ -914,7 +930,7 @@ Turns on genotyping to run on all post-dedup and downstream BAMs. For example if
 
 #### `--genotyping_tool`
 
-Specifies which genotyper to use. Current options are GATK (v3.5) UnifiedGenotyper or GATK (v4.xx). Furthermore, the FreeBayes Caller is available. Specify `'freebayes'`, `'hc'` or `'ug'` respectively.
+Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc' or 'freebayes' respectively.
 
 > NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file.
 
@@ -956,6 +972,12 @@ If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whethe
 
 If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`
 
+#### `--gatk_ug_keep_realign_bam`
+
+If provided, this will put into the output folder the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping.
+
+These BAMs will be stored in the same folder as the corresponding VCF files.
+
 #### `--gatk_downsample`
 
 Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to 250 reads. Default: 250
@@ -975,6 +997,18 @@ Specify to skip over regions of high depth by discarding alignments overlapping 
 #### `--freebayes_p`
 
 Specify ploidy of sample in FreeBayes. Default is diploid. Default: 2
+
+#### `--pileupcaller_bedfile`
+
+Specify a SNP panel in the form of a bed file of sites at which to generate pileup for pileupCaller.
+
+#### `--pileupcaller_snpfile`
+
+Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/tree/master/CONVERTF) format, pileupCaller will call these sites.
+
+#### `--pileupcaller_method`
+
+Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: randomHaploid
 
 ### Consensus Sequence Generation
 

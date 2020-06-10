@@ -9,13 +9,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="204.53563mm"
+   height="98.702301mm"
+   viewBox="0 0 204.53563 98.702301"
    version="1.1"
    id="svg8"
    sodipodi:docname="preseq_complexity_curve.svg"
-   inkscape:version="0.92.1 r15371">
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -1110,22 +1110,28 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.9899495"
-     inkscape:cx="372.54276"
-     inkscape:cy="895.96583"
+     inkscape:zoom="1.979899"
+     inkscape:cx="489.77389"
+     inkscape:cy="143.20141"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g4729"
      showgrid="false"
      inkscape:measure-start="0,0"
      inkscape:measure-end="0,0"
      inkscape:window-width="1920"
-     inkscape:window-height="986"
-     inkscape:window-x="-11"
-     inkscape:window-y="-11"
-     inkscape:window-maximized="1">
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
     <inkscape:grid
        type="xygrid"
-       id="grid4491" />
+       id="grid4491"
+       originx="-1.7080598"
+       originy="-169.25109" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -1142,7 +1148,8 @@
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-1.7080598,-29.046606)">
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:6.3499999px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
@@ -1152,7 +1159,7 @@
          sodipodi:role="line"
          id="tspan6550"
          x="159.69354"
-         y="75.01284"
+         y="74.837807"
          style="stroke-width:0.26458332" /></text>
     <g
        id="g4671"
@@ -1196,38 +1203,38 @@
            inkscape:export-ydpi="289.40701" />
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
            x="165.92967"
            y="55.496616"
            id="text6115-1-2"
            inkscape:export-xdpi="289.40701"
            inkscape:export-ydpi="289.40701"><tspan
              sodipodi:role="line"
-             x="166.79094"
+             x="166.63591"
              y="55.496616"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4759"><tspan
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#008000;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#008000;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
    id="tspan6548">Beautiful</tspan>, you have high </tspan><tspan
              id="tspan4678"
              sodipodi:role="line"
-             x="166.79095"
+             x="166.63591"
              y="59.906338"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">complexity and can sequence </tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">complexity and can sequence </tspan><tspan
              id="tspan4680"
              sodipodi:role="line"
-             x="166.79094"
+             x="166.63591"
              y="64.316063"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">deeper! Go reward yourself with </tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">deeper! Go reward yourself with </tspan><tspan
              id="tspan4682"
              sodipodi:role="line"
              x="165.92967"
              y="68.725784"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">your favourite Disney movie!</tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">your favourite Disney movie!</tspan><tspan
              sodipodi:role="line"
              x="165.92967"
              y="73.135506"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4755" /></text>
         <path
            style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -1240,16 +1247,16 @@
            inkscape:export-ydpi="289.40701" />
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
            x="72.542496"
            y="56.527149"
            id="text6115-1-2-0-1"
            inkscape:export-xdpi="289.40701"
            inkscape:export-ydpi="289.40701"><tspan
              sodipodi:role="line"
-             x="73.40377"
+             x="73.248741"
              y="56.527149"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
              id="tspan4689"><tspan
    style="font-size:3.52777767px;fill:#ff6600;stroke-width:0.465"
    id="tspan4628">Not great!</tspan> You have likely </tspan><tspan
@@ -1257,17 +1264,17 @@
              sodipodi:role="line"
              x="72.542496"
              y="60.936871"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">reached your sequencing limit,</tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">reached your sequencing limit,</tspan><tspan
              id="tspan4659"
              sodipodi:role="line"
-             x="73.40377"
+             x="73.248741"
              y="65.346596"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"> more sequencing won't give </tspan><tspan
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"> more sequencing won't give </tspan><tspan
              id="tspan4661"
              sodipodi:role="line"
              x="72.542496"
              y="69.756317"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">many unique reads!</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:center;text-anchor:middle;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">many unique reads!</tspan></text>
         <path
            style="fill:none;stroke:#000000;stroke-width:0.61226755;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            d="m 84.543561,120.96202 c -21.900829,0 -43.80204,0 -55.074737,0 -11.272696,0 -11.916833,0 -12.561322,-0.24324 -0.644488,-0.24324 -1.28826,-0.72921 -1.61039,-1.21566 -0.32213,-0.48645 -0.32213,-0.97271 -0.32213,-7.2905 0,-6.31779 0,-18.481729 0,-30.638071"
@@ -1280,7 +1287,7 @@
            inkscape:export-ydpi="289.40701" />
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="37.423969"
            y="124.71643"
            id="text4610"
@@ -1290,10 +1297,10 @@
              id="tspan4608"
              x="37.423969"
              y="124.71643"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Unique + duplicates</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Unique + duplicates</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="-104.46272"
            y="12.457822"
            id="text4610-3"
@@ -1304,10 +1311,10 @@
              id="tspan4608-2"
              x="-104.46272"
              y="12.457822"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Unique</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Unique</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none"
            x="4.6517291"
            y="43.432079"
            id="text6245-5-0-8-5-1"
@@ -1317,10 +1324,10 @@
              id="tspan6243-5-1-1-4-9"
              x="4.6517291"
              y="43.432079"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">Preseq - Complexity curve</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.05555534px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.465;stroke-miterlimit:4;stroke-dasharray:none">Preseq - Complexity curve</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="185.85245"
            y="45.02911"
            id="text4674"
@@ -1330,27 +1337,22 @@
              id="tspan4672"
              x="185.85245"
              y="45.02911"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';fill:#b3b3b3;stroke-width:0.26458332">ZandraSelina</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:Kalam;-inkscape-font-specification:Kalam;fill:#b3b3b3;stroke-width:0.26458332">ZandraSelina</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="203.213"
            y="130.22443"
            id="text4674-7"
            inkscape:export-xdpi="289.40701"
            inkscape:export-ydpi="289.40701"><tspan
-             id="tspan4673"
-             sodipodi:role="line"
-             x="203.213"
-             y="130.22443"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332">CC BY-SA 4<tspan
-   id="tspan4675"
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.26458332">.</tspan>0</tspan><tspan
              id="tspan4662"
              sodipodi:role="line"
              x="203.213"
-             y="133.7522"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332" /></text>
+             y="130.22443"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.26458332">CC BY 4.0<tspan
+   id="tspan4675"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.26458332" /></tspan></text>
         <path
            sodipodi:nodetypes="cc"
            inkscape:connector-curvature="0"
@@ -1377,7 +1379,7 @@
            inkscape:export-ydpi="289.40701" />
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="137.96565"
            y="124.71642"
            id="text4610-9"
@@ -1387,10 +1389,10 @@
              id="tspan4608-0"
              x="137.96565"
              y="124.71642"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Unique + duplicates</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Unique + duplicates</tspan></text>
         <text
            xml:space="preserve"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
            x="-104.46272"
            y="112.99947"
            id="text4610-3-6"
@@ -1401,7 +1403,7 @@
              id="tspan4608-2-9"
              x="-104.46272"
              y="112.99947"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:'MV Boli';-inkscape-font-specification:'MV Boli';stroke-width:0.26458332">Unique</tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;font-family:Kalam;-inkscape-font-specification:Kalam;stroke-width:0.26458332">Unique</tspan></text>
         <path
            sodipodi:nodetypes="cc"
            inkscape:connector-curvature="0"
