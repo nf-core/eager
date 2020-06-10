@@ -24,6 +24,7 @@ run_modules:
     - qualimap
     - samtools
     - sexdeterrmine
+    - hops
 
 extra_fn_clean_exts:
     - '_fastp'
@@ -52,6 +53,7 @@ extra_fn_clean_exts:
     - '.fq'
     - '.bam'
     - '.kreport'
+    - '.unifiedgenotyper'
  
 top_modules:
      - 'fastqc':
@@ -66,6 +68,7 @@ top_modules:
             - '*.truncated_fastqc.zip'
             - '*.combined*_fastqc.zip'
      - 'malt'
+     - 'hops'
      - 'kraken'
      - 'samtools':
         name: 'Samtools Flagstat (pre-samtools filter)'
@@ -76,13 +79,15 @@ top_modules:
         path_filters:
              - '*_postfilterflagstat.stats'
      - 'dedup'
-     - 'preseq'
+     - 'damageprofiler'
      - 'qualimap'
      - 'mtnucratio'
-     - 'damageprofiler'
+     - 'preseq'
      - 'sexdeterrmine'
      - 'gatk'
-     - 'multivcfanalyzer'
+     - 'multivcfanalyzer':
+        path_filters:
+            - '*MultiVCFAnalyzer.json'
 qualimap_config:
     general_stats_coverage:
         - 1
@@ -90,6 +95,7 @@ qualimap_config:
         - 3
         - 4
         - 5
+
 table_columns_visible:
     FastQC (pre-AdapterRemoval):
         percent_duplicates: False
@@ -117,18 +123,21 @@ table_columns_visible:
         '% Unclassified': True
         '% Top 5': False
     Samtools Flagstat (pre-samtools filter):
+        flagstat_total: True
         mapped_passed: True
     Samtools Flagstat (post-samtools filter):
         mapped_passed: True
     DeDup:
         dup_rate: False
+        clusterfactor: True
+        mapped_after_dedup: True
     DamageProfiler:
         3 Prime1: True
         3 Prime2: True
         5 Prime1: True
         5 Prime2: True
         mean_readlength: True
-        median_readlength: True
+        median: True
     QualiMap:
         mean_coverage: True
         1_x_pc: True
@@ -136,6 +145,8 @@ table_columns_visible:
         percentage_aligned: False
     mtnucratio: 
         mt_nuc_ratio: True
+    MultiVCFAnalyzer:
+        Heterozygous SNP alleles (percent): True
 
 table_columns_placement:
     FastQC (pre-AdapterRemoval):
@@ -151,44 +162,56 @@ table_columns_placement:
         avg_sequence_length: 410
         percent_gc: 420
     MALT:
-        Num. of queries: 450
-        Total reads: 460
-        Mappability: 470
-        Assig. Taxonomy: 480
-        Taxonomic assignment success: 490
-    Samtools Flagstat:
-        mapped_passed: 500
-    custom_content:
-        endogenous_dna: 580
-        endogenous_dna_post: 590
+        Num. of queries: 430
+        Total reads: 440
+        Mappability: 450
+        Assig. Taxonomy: 460
+        Taxonomic assignment success: 470
+    Kraken:
+        '% Unclassified': 480
+    Samtools Flagstat (pre-samtools filter):
+        flagstat_total: 551
+        mapped_passed: 552
+    Samtools Flagstat (post-samtools filter):
+        flagstat_total: 553
+        mapped_passed: 554
     DeDup:
-        clusterfactor: 600
+        mapped_after_dedup: 600
+        clusterfactor: 610
+    custom_content:
+        endogenous_dna: 680
+        endogenous_dna_post: 690
     DamageProfiler:
-        3 Prime1: 1000
-        3 Prime2: 1010
-        5 Prime1: 1020
-        5 Prime2: 1030
-        mean_readlength: 1040
-        median_readlength: 1050
+        3 Prime1: 700
+        3 Prime2: 710
+        5 Prime1: 720
+        5 Prime2: 730
+        mean_readlength: 740
+        median: 750
     QualiMap:
-        mean_coverage: 700
-        median_coverage: 710
-        1_x_pc: 720
-        2_x_pc: 730
-        3_x_pc: 740
-        4_x_pc: 750
-        5_x_pc: 760
-        avg_gc: 770
+        mean_coverage: 800
+        median_coverage: 810
+        1_x_pc: 820
+        2_x_pc: 830
+        3_x_pc: 840
+        4_x_pc: 850
+        5_x_pc: 860
+        avg_gc: 870
     mtnucratio:
-        mtreads: 800
-        mt_cov_avg: 810
-        mt_nuc_ratio: 820
+        mtreads: 900
+        mt_cov_avg: 910
+        mt_nuc_ratio: 920
     sexdeterrmine:
-        RateX: 900
-        RateY: 910
+        RateX: 100
+        RateY: 1010
+    MultiVCFAnalyzer:
+        Heterozygous SNP alleles (percent): 1100
 read_count_multiplier: 1
 read_count_prefix: ''
 read_count_desc: ''
+ancient_read_count_prefix: ''
+ancient_read_count_desc: ''
+ancient_read_count_multiplier: 1
 decimalPoint_format: '.'
 thousandsSep_format: ','
 report_section_order:
