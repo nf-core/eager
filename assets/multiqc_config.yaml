@@ -49,6 +49,8 @@ extra_fn_clean_exts:
 - '.filtered_rmdup_stats'
 - '_libmerged_rg_add_stats'
 - '_rmdup'
+- '.trimmed_stats'
+- '_libmerged'
  
 top_modules:
      - 'fastqc':
