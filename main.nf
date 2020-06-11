@@ -2239,6 +2239,7 @@ if (params.additional_vcf_files == '') {
   file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
   file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
   file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
+  file('MultiVFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
@@ -2246,7 +2247,6 @@ if (params.additional_vcf_files == '') {
   gunzip -f *.vcf.gz
   multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
   pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
-  rm *.vcf
   """
  }
 
@@ -2398,7 +2398,7 @@ process malt {
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
-  file "malt.log" into ch_malt_out
+  file "malt.log" into ch_malt_for_multiqc
 
   script:
   if ("${params.malt_min_support_mode}" == "percent") {
@@ -2463,6 +2463,7 @@ process maltextract {
   
   output:
   path "results/" type('dir')
+  file "results/*_Wevid.json" optional true into ch_hops_for_multiqc 
 
   script:
   ncbifiles = params.maltextract_ncbifiles == '' ? "" : "-r ${params.maltextract_ncbifiles}"
@@ -2491,6 +2492,8 @@ process maltextract {
   ${megsum} \
   ${topaln} \
   ${ss}
+
+  postprocessing.AMPS.r -r results/ -m ${params.maltextract_filter} -t ${task.cpus} -n ${taxon_list} -j
   """
 }
 
@@ -2533,10 +2536,9 @@ process kraken {
   file(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out, ch_kraken_out_mqc
-  tuple val(prefix), file("*.kreport") into ch_kraken_report
+  file "*.kraken.out" into ch_kraken_out
+  tuple prefix, file("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
 
-  
   script:
   prefix = fastq.toString().tokenize('.')[0]
   out = prefix+".kraken.out"
@@ -2673,8 +2675,10 @@ process multiqc {
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
-    file ('kraken/*') from ch_kraken_out_mqc.collect().ifEmpty([])
-    file ('malt/*') from ch_malt_out.collect().ifEmpty([])
+    file ('multivcfanalyzer/*') from ch_multivcfanalyzer_for_multiqc.collect().ifEmpty([])
+    file ('malt/*') from ch_malt_for_multiqc.collect().ifEmpty([])
+    file ('kraken/*') from ch_kraken_for_multiqc.collect().ifEmpty([])
+    file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
     file logo from ch_eager_logo
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
