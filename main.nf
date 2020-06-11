@@ -2137,13 +2137,13 @@ if ( params.gatk_ug_jar != '' ) {
  // pileupCaller for 'random sampling' genotyping
 
 if (params.pileupcaller_bedfile.isEmpty()) {
-  ch_bed_for_pileupcaller = file('NO_FILE_BED')
+  ch_bed_for_pileupcaller = 'NO_FILE_BED'
 } else {
   ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile)
 }
 
 if (params.pileupcaller_snpfile.isEmpty ()) {
-  ch_snp_for_pileupcaller = file('NO_FILE')
+  ch_snp_for_pileupcaller = 'NO_FILE'
 } else {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
 }
@@ -2171,7 +2171,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   caller = "--${params.pileupcaller_method}"
   ssmode = strandedness == "single" ? "--singleStrandMode" : ""
   """
-  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}.
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}
   """
  }
 
