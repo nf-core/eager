@@ -24,61 +24,73 @@ run_modules:
     - qualimap
     - samtools
     - sexdeterrmine
+    - hops
 
 extra_fn_clean_exts:
-- '.fastq.gz'
-- '.fastq'
-- '.fq.gz'
-- '.fq'
-- '.bam'
-- '_fastp'
-- '.pe.settings'
-- '.se.settings'
-- '.settings'
-- '.pe.combined'
-- '.se.truncated'
-- '.mapped'
-- '.mapped_rmdup'
-- '.mapped_rmdup_stats'
-- '_libmerged_rg_rmdup'
-- '_libmerged_rg_rmdup_stats'
-- '_postfilterflagstat.stats'
-- '_flagstat.stat'
-- '.filtered'
-- '.filtered_rmdup'
-- '.filtered_rmdup_stats'
-- '_libmerged_rg_add_stats'
-- '_rmdup'
-- '.trimmed_stats'
-- '_libmerged'
+    - '_fastp'
+    - '.pe.settings'
+    - '.se.settings'
+    - '.settings'
+    - '.pe.combined'
+    - '.se.truncated'
+    - '.mapped'
+    - '.mapped_rmdup'
+    - '.mapped_rmdup_stats'
+    - '_libmerged_rg_rmdup'
+    - '_libmerged_rg_rmdup_stats'
+    - '_postfilterflagstat.stats'
+    - '_flagstat.stat'
+    - '.filtered'
+    - '.filtered_rmdup'
+    - '.filtered_rmdup_stats'
+    - '_libmerged_rg_add'
+    - '_libmerged_rg_add_stats'
+    - '_rmdup'
+    - '.unmapped'
+    - '.fastq.gz'
+    - '.fastq'
+    - '.fq.gz'
+    - '.fq'
+    - '.bam'
+    - '.kreport'
+    - '.unifiedgenotyper'
+    - '.trimmed_stats'
+    - '_libmerged'
+
  
 top_modules:
-     - 'fastqc':
-        name: 'FastQC (pre-AdapterRemoval)'
-        path_filters:
-            - '*_raw_fastqc.zip'
-     - 'fastp'
-     - 'adapterRemoval'
-     - 'fastqc':
-        name: 'FastQC (post-AdapterRemoval)'
-        path_filters:
-            - '*.truncated_fastqc.zip'
-            - '*.combined*_fastqc.zip'
-     - 'samtools':
-        name: 'Samtools Flagstat (pre-samtools filter)'
-        path_filters:
-             - '*_flagstat.stats'
-     - 'samtools':
-        name: 'Samtools Flagstat (post-samtools filter)'
-        path_filters:
-             - '*_postfilterflagstat.stats'
-     - 'dedup'
-     - 'preseq'
-     - 'qualimap'
-     - 'mtnucratio'
-     - 'damageprofiler'
-     - 'sexdeterrmine'
-     - 'gatk'
+    - 'fastqc':
+       name: 'FastQC (pre-AdapterRemoval)'
+       path_filters:
+           - '*_raw_fastqc.zip'
+    - 'fastp'
+    - 'adapterRemoval'
+    - 'fastqc':
+       name: 'FastQC (post-AdapterRemoval)'
+       path_filters:
+           - '*.truncated_fastqc.zip'
+           - '*.combined*_fastqc.zip'
+    - 'malt'
+    - 'hops'
+    - 'kraken'
+    - 'samtools':
+       name: 'Samtools Flagstat (pre-samtools filter)'
+       path_filters:
+            - '*_flagstat.stats'
+    - 'samtools':
+       name: 'Samtools Flagstat (post-samtools filter)'
+       path_filters:
+            - '*_postfilterflagstat.stats'
+    - 'dedup'
+    - 'damageprofiler'
+    - 'qualimap'
+    - 'mtnucratio'
+    - 'preseq'
+    - 'sexdeterrmine'
+    - 'gatk'
+    - 'multivcfanalyzer':
+       path_filters:
+           - '*MultiVCFAnalyzer.json'
 qualimap_config:
     general_stats_coverage:
         - 1
@@ -86,6 +98,7 @@ qualimap_config:
         - 3
         - 4
         - 5
+
 table_columns_visible:
     FastQC (pre-AdapterRemoval):
         percent_duplicates: False
@@ -103,19 +116,31 @@ table_columns_visible:
         percent_duplicates: False
         total_sequences: True
         percent_gc: True
+    MALT:
+        Taxonomic assignment success: False
+        Assig. Taxonomy: False
+        Mappability: True
+        Total reads: False
+        Num. of queries: False
+    Kraken:
+        '% Unclassified': True
+        '% Top 5': False
     Samtools Flagstat (pre-samtools filter):
+        flagstat_total: True
         mapped_passed: True
     Samtools Flagstat (post-samtools filter):
         mapped_passed: True
     DeDup:
         dup_rate: False
+        clusterfactor: True
+        mapped_after_dedup: True
     DamageProfiler:
         3 Prime1: True
         3 Prime2: True
         5 Prime1: True
         5 Prime2: True
         mean_readlength: True
-        median_readlength: True
+        median: True
     QualiMap:
         mean_coverage: True
         1_x_pc: True
@@ -123,6 +148,8 @@ table_columns_visible:
         percentage_aligned: False
     mtnucratio: 
         mt_nuc_ratio: True
+    MultiVCFAnalyzer:
+        Heterozygous SNP alleles (percent): True
 
 table_columns_placement:
     FastQC (pre-AdapterRemoval):
@@ -137,39 +164,57 @@ table_columns_placement:
         total_sequences: 400
         avg_sequence_length: 410
         percent_gc: 420
-    Samtools Flagstat:
-        mapped_passed: 500
-    custom_content:
-        endogenous_dna: 580
-        endogenous_dna_post: 590
+    MALT:
+        Num. of queries: 430
+        Total reads: 440
+        Mappability: 450
+        Assig. Taxonomy: 460
+        Taxonomic assignment success: 470
+    Kraken:
+        '% Unclassified': 480
+    Samtools Flagstat (pre-samtools filter):
+        flagstat_total: 551
+        mapped_passed: 552
+    Samtools Flagstat (post-samtools filter):
+        flagstat_total: 553
+        mapped_passed: 554
     DeDup:
-        clusterfactor: 600
+        mapped_after_dedup: 600
+        clusterfactor: 610
+    custom_content:
+        endogenous_dna: 680
+        endogenous_dna_post: 690
     DamageProfiler:
-        3 Prime1: 1000
-        3 Prime2: 1010
-        5 Prime1: 1020
-        5 Prime2: 1030
-        mean_readlength: 1040
-        median_readlength: 1050
+        3 Prime1: 700
+        3 Prime2: 710
+        5 Prime1: 720
+        5 Prime2: 730
+        mean_readlength: 740
+        median: 750
     QualiMap:
-        mean_coverage: 700
-        median_coverage: 710
-        1_x_pc: 720
-        2_x_pc: 730
-        3_x_pc: 740
-        4_x_pc: 750
-        5_x_pc: 760
-        avg_gc: 770
+        mean_coverage: 800
+        median_coverage: 810
+        1_x_pc: 820
+        2_x_pc: 830
+        3_x_pc: 840
+        4_x_pc: 850
+        5_x_pc: 860
+        avg_gc: 870
     mtnucratio:
-        mtreads: 800
-        mt_cov_avg: 810
-        mt_nuc_ratio: 820
+        mtreads: 900
+        mt_cov_avg: 910
+        mt_nuc_ratio: 920
     sexdeterrmine:
-        RateX: 900
-        RateY: 910
+        RateX: 100
+        RateY: 1010
+    MultiVCFAnalyzer:
+        Heterozygous SNP alleles (percent): 1100
 read_count_multiplier: 1
 read_count_prefix: ''
 read_count_desc: ''
+ancient_read_count_prefix: ''
+ancient_read_count_desc: ''
+ancient_read_count_multiplier: 1
 decimalPoint_format: '.'
 thousandsSep_format: ','
 report_section_order:

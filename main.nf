@@ -968,7 +968,6 @@ ch_skipfastp_for_merge.mix(ch_fastp_for_merge)
 
 // Sequencing adapter clipping and optional paired-end merging in preparation for mapping
 
-// TODO Fix output name so it matches FASTQC.zip output for inline for multiQC
 process adapter_removal {
     label 'mc_small'
     tag "${libraryid}_L${lane}"
@@ -1097,7 +1096,6 @@ if (!params.skip_adapterremoval) {
 
 // Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
 
-// TODO Need to add same thing for raw FASTQs for strip_fastq 
 ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
   .groupTuple(by: [0,1,3,4,5,6])
   .branch {
@@ -1108,6 +1106,7 @@ ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
 process lanemerge {
   label 'mc_tiny'
   tag "${libraryid}"
+  publishDir "${params.outdir}/lanemerging", mode: 'copy'
 
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_branched_for_lanemerge.merge_me
@@ -1493,8 +1492,6 @@ ch_fastqlanemerge_for_stripfastq
 
 // Remove mapped reads from original (lane merged) input FASTQ e.g. for sensitive host data when running metagenomic data
 
-// TODO: Check works when turned on; fix output - with lane merging this becomes problematic. Will need extra process to merge by lane the fASTQS as well as bams
-// TODO: Map above fails because of groupTuple mixing arrays by index position.
 process strip_input_fastq {
     label 'mc_medium'
     tag "${libraryid}"
@@ -1708,6 +1705,7 @@ ch_input_for_librarymerging.clean_libraryid
 process library_merge {
   label 'mc_tiny'
   tag "${samplename}"
+  publishDir "${params.outdir}/merged_bams/initial", mode: 'copy'
 
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_input_for_librarymerging.merge_me
@@ -1941,7 +1939,7 @@ ch_trimmed_formerge = ch_bamutils_decision.notrim
 process additional_library_merge {
   label 'mc_tiny'
   tag "${samplename}"
-  publishDir "${params.outdir}/librarymerged_bams", mode: 'copy'
+  publishDir "${params.outdir}/merged_bams/additional", mode: 'copy'
 
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_trimmed_formerge.merge_me
@@ -2251,6 +2249,7 @@ if (params.additional_vcf_files == '') {
   file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
   file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
   file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
+  file('MultiVFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
@@ -2258,7 +2257,6 @@ if (params.additional_vcf_files == '') {
   gunzip -f *.vcf.gz
   multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
   pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
-  rm *.vcf
   """
  }
 
@@ -2410,7 +2408,7 @@ process malt {
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
-  file "malt.log" into ch_malt_out
+  file "malt.log" into ch_malt_for_multiqc
 
   script:
   if ("${params.malt_min_support_mode}" == "percent") {
@@ -2461,7 +2459,6 @@ if (params.maltextract_taxon_list== '') {
 // MaltExtract performs aDNA evaluation from the output of MALT (damage patterns, read lengths etc.)
 
 // As we collect all files for a single MALT extract run, we DO NOT use the normal input/output tuple
-// TODO Check works as expected
 process maltextract {
   label 'mc_large'
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
@@ -2475,6 +2472,7 @@ process maltextract {
   
   output:
   path "results/" type('dir')
+  file "results/*_Wevid.json" optional true into ch_hops_for_multiqc 
 
   script:
   ncbifiles = params.maltextract_ncbifiles == '' ? "" : "-r ${params.maltextract_ncbifiles}"
@@ -2503,6 +2501,8 @@ process maltextract {
   ${megsum} \
   ${topaln} \
   ${ss}
+
+  postprocessing.AMPS.r -r results/ -m ${params.maltextract_filter} -t ${task.cpus} -n ${taxon_list} -j
   """
 }
 
@@ -2545,10 +2545,9 @@ process kraken {
   file(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out, ch_kraken_out_mqc
-  tuple val(prefix), file("*.kreport") into ch_kraken_report
+  file "*.kraken.out" into ch_kraken_out
+  tuple prefix, file("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
 
-  
   script:
   prefix = fastq.toString().tokenize('.')[0]
   out = prefix+".kraken.out"
@@ -2685,8 +2684,10 @@ process multiqc {
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
-    file ('kraken/*') from ch_kraken_out_mqc.collect().ifEmpty([])
-    file ('malt/*') from ch_malt_out.collect().ifEmpty([])
+    file ('multivcfanalyzer/*') from ch_multivcfanalyzer_for_multiqc.collect().ifEmpty([])
+    file ('malt/*') from ch_malt_for_multiqc.collect().ifEmpty([])
+    file ('kraken/*') from ch_kraken_for_multiqc.collect().ifEmpty([])
+    file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
     file logo from ch_eager_logo
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
