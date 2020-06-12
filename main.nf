@@ -1678,17 +1678,29 @@ if ( params.skip_deduplication ) {
   ch_input_for_librarymerging = ch_filtering_for_skiprmdup
     .groupTuple(by:[0,4,5,6])
     .branch{
-      skip_merging: it[7].size() == 1
+      clean_libraryid: it[7].size() == 1
       merge_me: it[7].size() > 1
     }
 } else {
     ch_input_for_librarymerging = ch_output_from_dedup.mix(ch_output_from_markdup)
     .groupTuple(by:[0,4,5,6])
     .branch{
-      skip_merging: it[7].size() == 1
+      clean_libraryid: it[7].size() == 1
       merge_me: it[7].size() > 1
     }
 }
+
+// For non-merging libraries, fix group libraryIDs into single values. 
+// This is a bit hacky as theoretically could have different, but this should
+// rarely be the case.
+
+ch_input_for_librarymerging.clean_libraryid
+  .map{
+    it ->
+      def libraryid = it[1][0]
+      [it[0], libraryid, it[2], it[3], it[4], it[5], it[6], it[7], it[8] ]
+    }
+  .set { ch_input_for_skiplibrarymerging }
 
 process library_merge {
   label 'mc_tiny'
@@ -1699,7 +1711,7 @@ process library_merge {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_input_for_librarymerging.merge_me
 
   output:
-  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -1712,12 +1724,12 @@ process library_merge {
 
 // Mix back in libraries from skipping dedup, skipping library merging
 if (!params.skip_deduplication) {
-    ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
+    ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
 } else {
-    ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
+    ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 }
 
@@ -1766,7 +1778,7 @@ if (!params.run_bedtools_coverage){
 
 process bedtools {
   label 'mc_small'
-  tag "${samplename}"
+  tag "${libraryid}"
   publishDir "${params.outdir}/bedtools", mode: 'copy'
 
   when:
@@ -1794,7 +1806,7 @@ process bedtools {
 
 process damageprofiler {
     label 'sc_tiny'
-    tag "${samplename}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
     when:
@@ -1821,7 +1833,7 @@ process damageprofiler {
 
 process pmdtools {
     label 'mc_small'
-    tag "${samplename}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/pmdtools", mode: 'copy'
 
     when: params.run_pmdtools
@@ -1876,7 +1888,7 @@ if ( params.run_trim_bam ) {
 
 process bam_trim {
     label 'mc_small'
-    tag "${samplename}" 
+    tag "${libraryid}" 
     publishDir "${params.outdir}/trimmed_bam", mode: 'copy'
  
     when: params.run_trim_bam
@@ -1885,7 +1897,7 @@ process bam_trim {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_bamutils_decision.totrim
 
     output: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}")  into ch_trimmed_from_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}") into ch_trimmed_from_bamutils
 
     script:
     softclip = "${params.bamutils_softclip}" ? '-c' : '' 
@@ -1933,7 +1945,7 @@ process additional_library_merge {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_trimmed_formerge.merge_me
 
   output:
-  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_add.bam"), file("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_add.bam"), file("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
 
   script:
   size = "${params.large_ref}" ? '-c' : ''

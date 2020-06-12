@@ -54,40 +54,43 @@ extra_fn_clean_exts:
     - '.bam'
     - '.kreport'
     - '.unifiedgenotyper'
+    - '.trimmed_stats'
+    - '_libmerged'
+
  
 top_modules:
-     - 'fastqc':
-        name: 'FastQC (pre-AdapterRemoval)'
-        path_filters:
-            - '*_raw_fastqc.zip'
-     - 'fastp'
-     - 'adapterRemoval'
-     - 'fastqc':
-        name: 'FastQC (post-AdapterRemoval)'
-        path_filters:
-            - '*.truncated_fastqc.zip'
-            - '*.combined*_fastqc.zip'
-     - 'malt'
-     - 'hops'
-     - 'kraken'
-     - 'samtools':
-        name: 'Samtools Flagstat (pre-samtools filter)'
-        path_filters:
-             - '*_flagstat.stats'
-     - 'samtools':
-        name: 'Samtools Flagstat (post-samtools filter)'
-        path_filters:
-             - '*_postfilterflagstat.stats'
-     - 'dedup'
-     - 'damageprofiler'
-     - 'qualimap'
-     - 'mtnucratio'
-     - 'preseq'
-     - 'sexdeterrmine'
-     - 'gatk'
-     - 'multivcfanalyzer':
-        path_filters:
-            - '*MultiVCFAnalyzer.json'
+    - 'fastqc':
+       name: 'FastQC (pre-AdapterRemoval)'
+       path_filters:
+           - '*_raw_fastqc.zip'
+    - 'fastp'
+    - 'adapterRemoval'
+    - 'fastqc':
+       name: 'FastQC (post-AdapterRemoval)'
+       path_filters:
+           - '*.truncated_fastqc.zip'
+           - '*.combined*_fastqc.zip'
+    - 'malt'
+    - 'hops'
+    - 'kraken'
+    - 'samtools':
+       name: 'Samtools Flagstat (pre-samtools filter)'
+       path_filters:
+            - '*_flagstat.stats'
+    - 'samtools':
+       name: 'Samtools Flagstat (post-samtools filter)'
+       path_filters:
+            - '*_postfilterflagstat.stats'
+    - 'dedup'
+    - 'damageprofiler'
+    - 'qualimap'
+    - 'mtnucratio'
+    - 'preseq'
+    - 'sexdeterrmine'
+    - 'gatk'
+    - 'multivcfanalyzer':
+       path_filters:
+           - '*MultiVCFAnalyzer.json'
 qualimap_config:
     general_stats_coverage:
         - 1
