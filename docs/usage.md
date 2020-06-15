@@ -326,7 +326,7 @@ If you have multiple files in different directories, you can use additional wild
 --input 'path/to/data/*/sample_*_{1,2}.fastq.gz'
 ```
 
-> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see the [TSV unput method](#tsv-input-method) for possibilities.
+> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see the [TSV input method](#tsv-input-method) for possibilities.
 
 **Please note** the following requirements:
 
