@@ -169,17 +169,17 @@
       - [`--malt_max_queries`](#--malt_max_queries)
       - [`--malt_memory_mode`](#--malt_memory_mode)
       - [`--run_maltextract`](#--run_maltextract)
-      - [`maltextract_taxon_list`](#maltextract_taxon_list)
-      - [`maltextract_ncbifiles`](#maltextract_ncbifiles)
-      - [`maltextract_filter`](#maltextract_filter)
-      - [`maltextract_toppercent`](#maltextract_toppercent)
-      - [`maltextract_destackingoff`](#maltextract_destackingoff)
-      - [`maltextract_downsamplingoff`](#maltextract_downsamplingoff)
-      - [`maltextract_duplicateremovaloff`](#maltextract_duplicateremovaloff)
-      - [`maltextract_matches`](#maltextract_matches)
-      - [`maltextract_megansummary`](#maltextract_megansummary)
-      - [`maltextract_percentidentity`](#maltextract_percentidentity)
-      - [`maltextract_topalignment`](#maltextract_topalignment)
+      - [`--maltextract_taxon_list`](#--maltextract_taxon_list)
+      - [`--maltextract_ncbifiles`](#--maltextract_ncbifiles)
+      - [`--maltextract_filter`](#--maltextract_filter)
+      - [`--maltextract_toppercent`](#--maltextract_toppercent)
+      - [`--maltextract_destackingoff`](#--maltextract_destackingoff)
+      - [`--maltextract_downsamplingoff`](#--maltextract_downsamplingoff)
+      - [`--maltextract_duplicateremovaloff`](#--maltextract_duplicateremovaloff)
+      - [`--maltextract_matches`](#--maltextract_matches)
+      - [`--maltextract_megansummary`](#--maltextract_megansummary)
+      - [`--maltextract_percentidentity`](#--maltextract_percentidentity)
+      - [`--maltextract_topalignment`](#--maltextract_topalignment)
   - [Clean up](#clean-up)
 
 ## General Nextflow info
@@ -308,7 +308,7 @@ There are two possible ways of supplying input sequencing data to nf-core/eager.
 
 ##### Direct Input Method
 
-Use this to specify the location of your input FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to [`--tsv_input`](#tsv_input) which is used for more complex input configurations such as lane and library merging.
+This method is where you specify with `--input`, the path locations of FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to the [TSV input method](#tsv-input-method) which is used for more complex input configurations such as lane and library merging.
 
 When using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.  
 
@@ -326,7 +326,7 @@ If you have multiple files in different directories, you can use additional wild
 --input 'path/to/data/*/sample_*_{1,2}.fastq.gz'
 ```
 
-> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see [`--tsv_input`](#tsv_input) for possibilities.
+> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see the [TSV input method](#tsv-input-method) for possibilities.
 
 **Please note** the following requirements:
 
@@ -339,7 +339,7 @@ If you have multiple files in different directories, you can use additional wild
 
 ##### TSV Input Method
 
-Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
+Alternatively to the [direct input method](#direct-input-method), you can supply to `--input` a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata. This allows for more complex procedures such as merging of sequencing data across lanes, sequencing runs, sequencing configuration types, and samples.
 
 <p align="center">
   <img src="images/usage/merging_files.png" alt="Schematic diagram indicated merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
@@ -354,7 +354,7 @@ This TSV should look like the following:
 | JK2782      | JK2782     | 1    | 4                | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |
 | JK2802      | JK2802     | 2    | 2                | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |
 
-A template can be taken from [here](images/usage/nfcore-eager_tsv_template.tsv).
+A template can be taken from [here](https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/TSV_template.tsv).
 
 > :warning: Cells **must not** contain spaces before or after strings, as this will make the TSV unreadable by nextflow. Strings containing spaces should be wrapped in quotes.
 
@@ -1209,61 +1209,61 @@ More can be seen in the [MaltExtract documentation](https://github.com/rhuebler/
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_taxon_list`
+#### `--maltextract_taxon_list`
 
 Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_ncbifiles`
+#### `--maltextract_ncbifiles`
 
 Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_filter`
+#### `--maltextract_filter`
 
 Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc'.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_toppercent`
+#### `--maltextract_toppercent`
 
 Specify percent of top alignments for each read to be considered for each node. Default: 0.01.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_destackingoff`
+#### `--maltextract_destackingoff`
 
 Turn off destacking. If left on, a read that overlap with another read will be removed (leaving a depth coverage of 1).
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_downsamplingoff`
+#### `--maltextract_downsamplingoff`
 
 Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_duplicateremovaloff`
+#### `--maltextract_duplicateremovaloff`
 
 Turn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_matches`
+#### `--maltextract_matches`
 
 Export alignments of hits for each node in BLAST format. By default turned off.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_megansummary`
+#### `--maltextract_megansummary`
 
 Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_percentidentity`
+#### `--maltextract_percentidentity`
 
 Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: 85.0.
 

@@ -82,6 +82,7 @@ top_modules:
        path_filters:
             - '*_postfilterflagstat.stats'
     - 'dedup'
+    - 'picard'
     - 'damageprofiler'
     - 'qualimap'
     - 'mtnucratio'
@@ -134,11 +135,13 @@ table_columns_visible:
         dup_rate: False
         clusterfactor: True
         mapped_after_dedup: True
+    Picard:
+        PERCENT_DUPLICATION: True
     DamageProfiler:
-        3 Prime1: True
-        3 Prime2: True
         5 Prime1: True
         5 Prime2: True
+        3 Prime1: False
+        3 Prime2: False
         mean_readlength: True
         median: True
     QualiMap:
@@ -181,14 +184,16 @@ table_columns_placement:
     DeDup:
         mapped_after_dedup: 600
         clusterfactor: 610
+    Picard:
+        PERCENT_DUPLICATION: 650
     custom_content:
         endogenous_dna: 680
         endogenous_dna_post: 690
     DamageProfiler:
-        3 Prime1: 700
-        3 Prime2: 710
-        5 Prime1: 720
-        5 Prime2: 730
+        5 Prime1: 700
+        5 Prime2: 710
+        3 Prime1: 720
+        3 Prime2: 730
         mean_readlength: 740
         median: 750
     QualiMap:
