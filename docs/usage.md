@@ -169,17 +169,17 @@
       - [`--malt_max_queries`](#--malt_max_queries)
       - [`--malt_memory_mode`](#--malt_memory_mode)
       - [`--run_maltextract`](#--run_maltextract)
-      - [`maltextract_taxon_list`](#maltextract_taxon_list)
-      - [`maltextract_ncbifiles`](#maltextract_ncbifiles)
-      - [`maltextract_filter`](#maltextract_filter)
-      - [`maltextract_toppercent`](#maltextract_toppercent)
-      - [`maltextract_destackingoff`](#maltextract_destackingoff)
-      - [`maltextract_downsamplingoff`](#maltextract_downsamplingoff)
-      - [`maltextract_duplicateremovaloff`](#maltextract_duplicateremovaloff)
-      - [`maltextract_matches`](#maltextract_matches)
-      - [`maltextract_megansummary`](#maltextract_megansummary)
-      - [`maltextract_percentidentity`](#maltextract_percentidentity)
-      - [`maltextract_topalignment`](#maltextract_topalignment)
+      - [`--maltextract_taxon_list`](#--maltextract_taxon_list)
+      - [`--maltextract_ncbifiles`](#--maltextract_ncbifiles)
+      - [`--maltextract_filter`](#--maltextract_filter)
+      - [`--maltextract_toppercent`](#--maltextract_toppercent)
+      - [`--maltextract_destackingoff`](#--maltextract_destackingoff)
+      - [`--maltextract_downsamplingoff`](#--maltextract_downsamplingoff)
+      - [`--maltextract_duplicateremovaloff`](#--maltextract_duplicateremovaloff)
+      - [`--maltextract_matches`](#--maltextract_matches)
+      - [`--maltextract_megansummary`](#--maltextract_megansummary)
+      - [`--maltextract_percentidentity`](#--maltextract_percentidentity)
+      - [`--maltextract_topalignment`](#--maltextract_topalignment)
   - [Clean up](#clean-up)
 
 ## General Nextflow info
@@ -1209,61 +1209,61 @@ More can be seen in the [MaltExtract documentation](https://github.com/rhuebler/
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_taxon_list`
+#### `--maltextract_taxon_list`
 
 Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_ncbifiles`
+#### `--maltextract_ncbifiles`
 
 Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_filter`
+#### `--maltextract_filter`
 
 Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc'.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_toppercent`
+#### `--maltextract_toppercent`
 
 Specify percent of top alignments for each read to be considered for each node. Default: 0.01.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_destackingoff`
+#### `--maltextract_destackingoff`
 
 Turn off destacking. If left on, a read that overlap with another read will be removed (leaving a depth coverage of 1).
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_downsamplingoff`
+#### `--maltextract_downsamplingoff`
 
 Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_duplicateremovaloff`
+#### `--maltextract_duplicateremovaloff`
 
 Turn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_matches`
+#### `--maltextract_matches`
 
 Export alignments of hits for each node in BLAST format. By default turned off.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_megansummary`
+#### `--maltextract_megansummary`
 
 Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.
 
 Only when `--metagenomic_tool malt` is also supplied
 
-#### `maltextract_percentidentity`
+#### `--maltextract_percentidentity`
 
 Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: 85.0.
 
