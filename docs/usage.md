@@ -308,7 +308,7 @@ There are two possible ways of supplying input sequencing data to nf-core/eager.
 
 ##### Direct Input Method
 
-Use this to specify the location of your input FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to [`--tsv_input`](#tsv_input) which is used for more complex input configurations such as lane and library merging.
+This method is where you specify with `--input`, the path locations of FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to the [TSV input method](#tsv-input-method) which is used for more complex input configurations such as lane and library merging.
 
 When using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.  
 
@@ -326,7 +326,7 @@ If you have multiple files in different directories, you can use additional wild
 --input 'path/to/data/*/sample_*_{1,2}.fastq.gz'
 ```
 
-> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see [`--tsv_input`](#tsv_input) for possibilities.
+> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see the [TSV unput method](#tsv-input-method) for possibilities.
 
 **Please note** the following requirements:
 
@@ -339,7 +339,7 @@ If you have multiple files in different directories, you can use additional wild
 
 ##### TSV Input Method
 
-Specifies a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata, which allows performing of more complex procedures such as merging of sequencing data across lanes, sequencing runs , sequencing configuration types, and samples.
+Alternatively to the [direct input method](#direct-input-method), you can supply to `--input` a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata. This allows for more complex procedures such as merging of sequencing data across lanes, sequencing runs, sequencing configuration types, and samples.
 
 <p align="center">
   <img src="images/usage/merging_files.png" alt="Schematic diagram indicated merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
