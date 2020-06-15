@@ -344,6 +344,11 @@ if (params.run_bam_filtering && !params.bam_discard_unmapped && params.bam_unmap
   exit 1, "[nf-core/eager] error: Please turned on unmapped read discarding, if you have specifed a different unmapped type. Give: --bam_discard_unmapped"
 }
 
+// Deduplication sanity checking
+if (params.dedupper != 'dedup' && params.dedupper != 'markduplicates') {
+  exit 1, "[nf-core/eager] error: Selected deduplication tool is not recognised. Options: 'dedup' or 'markduplicates'. You gave: ${params.dedupper}"
+}
+
 // Genotyping sanity checking
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' ) {
@@ -1653,7 +1658,7 @@ process markDup{
         saveAs: {filename -> "${libraryid}/$filename"}
 
     when:
-    !params.skip_deduplication && params.dedupper != 'dedup'
+    !params.skip_deduplication && params.dedupper == 'markduplicates'
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_filtering_for_markdup
