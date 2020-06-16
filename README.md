@@ -124,7 +124,7 @@ This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github
 
 * [Aida Andrades Valtueña](https://github.com/aidaanva)
 * [Alexander Peltzer](https://github.com/apeltzer)
-* [James A. Fellows-Yates](https://github.com/jfy133)
+* [James A. Fellows Yates](https://github.com/jfy133)
 * [Judith Neukamm](https://github.com/JudithNeukamm)
 * [Maxime Borry](https://github.com/maxibor)
 * [Maxime Garcia](https://github.com/MaxUlysse)
