@@ -2179,7 +2179,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
        singleStranded: it[5] == "single"
        doubleStranded: it[5] == "double"
    }
-   .into{ch_input_for_genotyping_pileupcaller}
+   .set{ch_input_for_genotyping_pileupcaller}
  
  // Create pileupcaller input tuples
  ch_input_for_genotyping_pileupcaller.singleStranded
