@@ -83,10 +83,10 @@ top_modules:
             - '*_postfilterflagstat.stats'
     - 'dedup'
     - 'picard'
-    - 'damageprofiler'
-    - 'qualimap'
-    - 'mtnucratio'
     - 'preseq'
+    - 'damageprofiler'
+    - 'mtnucratio'
+    - 'qualimap'
     - 'sexdeterrmine'
     - 'gatk'
     - 'multivcfanalyzer':
@@ -144,13 +144,13 @@ table_columns_visible:
         3 Prime2: False
         mean_readlength: True
         median: True
+    mtnucratio: 
+        mt_nuc_ratio: True
     QualiMap:
         mean_coverage: True
         1_x_pc: True
         5_x_pc: True
         percentage_aligned: False
-    mtnucratio: 
-        mt_nuc_ratio: True
     MultiVCFAnalyzer:
         Heterozygous SNP alleles (percent): True
 
@@ -196,6 +196,10 @@ table_columns_placement:
         3 Prime2: 730
         mean_readlength: 740
         median: 750
+    mtnucratio:
+        mtreads: 760
+        mt_cov_avg: 770
+        mt_nuc_ratio: 780
     QualiMap:
         mean_coverage: 800
         median_coverage: 810
@@ -205,10 +209,6 @@ table_columns_placement:
         4_x_pc: 850
         5_x_pc: 860
         avg_gc: 870
-    mtnucratio:
-        mtreads: 900
-        mt_cov_avg: 910
-        mt_nuc_ratio: 920
     sexdeterrmine:
         RateX: 100
         RateY: 1010

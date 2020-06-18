@@ -1737,11 +1737,11 @@ process library_merge {
 if (!params.skip_deduplication) {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation;  ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation;  ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
 
 } else {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
 }
 
 //////////////////////////////////////////////////
@@ -1969,7 +1969,7 @@ process additional_library_merge {
 
 ch_trimmed_formerge.skip_merging
   .mix(ch_output_from_trimmerge)
-  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap }
+  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap; ch_for_sexdeterrmine }
 
   // General mapping quality statistics for whole reference sequence - e.g. X and % coverage
 

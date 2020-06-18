@@ -102,6 +102,8 @@ The default columns are as follows:
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your raw reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C) as sequenced. You also get information about adapter contamination and other overrepresented sequences.
 
+You will receive output for each supplied FASTQ file.
+
 When dealing with ancient DNA data the MultiQC plots for FastQC will often show lots of 'warning' or 'failed' samples. You generally can discard this sort of information as we are dealing with very degraded and metagenomic samples which have artefacts that violate the FastQC 'quality definitions', while still being valid data for aDNA researchers. Instead you will _normally_ be looking for 'global' patterns across all samples of a sequencing run to check for library construction or sequencing failures. Decision on whether a individual sample has 'failed' or not should be made by the user after checking all the plots themselves (e.g. if the sample is consistently an outlier to all others in the run).
 
 For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
@@ -237,6 +239,8 @@ In the case of dual-indexed paired-end sequencing, it is likely poly-G tails are
 
 While the MultiQC report has multiple plots for FastP, we will only look at GC content as that's the functionality we use currently.
 
+You will receive output for each supplied FASTQ file.
+
 #### GC Content
 
 This line plot shows the average GC content (Y axis) across each nucleotide of the reads (X-axis). There are two buttons per read (i.e. 2 for single-end, and 4 for paired-end) representing before and after the poly-G tail trimming.
@@ -267,6 +271,8 @@ Adapter removal involves finding overlaps at the 5' and 3' end of reads for the 
 Quality trimming (or 'truncating') involves looking at ends of reads for low-confidence bases (i.e. where the FASTQ Phred score is below a certain threshold). These are then removed remove the read.
 
 Length filtering involves removing any read that does not reach the number of bases specified by a particular value.
+
+You will receive output for each FASTQ file supplied for single end data, or for each pair of merged FASTQ files for paired end data.
 
 #### Retained and Discarded Reads Plot
 
@@ -311,6 +317,8 @@ With paired-end ancient DNA sequencing runs You expect to see a slight increase 
 
 This module provides numbers in raw counts of the mapping of your DNA reads to your reference genome.
 
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes in one value. 
+
 #### Flagstat Plot
 
 This dot plot shows different statistics, and the number of reads (typically as an multiple e.g. million, or thousands), are represented by dots on the X axis.
@@ -328,6 +336,8 @@ The remaining rows will be 0 when running `bwa aln` as these characteristucs of 
 > **NB:** The Samtools (pre-samtools filter) plots displayed in the MultiQC report shows mapped reads without mapping quality filtering. This will contain reads that can map to multiple places on your reference genome with equal or slightly less mapping quality score. To see how your reads look after mapping quality, look at the FastQC reports in the Samtools (pre-samtools filter). You should expect after mapping quality filtering, that you will have less reads.
 
 ### DeDup
+
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value. 
 
 #### Background
 
@@ -358,6 +368,8 @@ Things to look out for:
 
 ### Preseq
 
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
+
 #### Background
 
 Preseq is a collection of tools that allow assessment of the complexity of the library, where complexity means the number of unique molecules in your library (i.e. not molecules with the exact same length and sequence).
@@ -382,56 +394,9 @@ Plateauing can be caused by a number of reasons:
 * You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio
 * You have a low quality library made up of mappable sequencing artefacts that were able to pass filtering (e.g. adapters)
 
-### QualiMap
-
-#### QualiMap
-
-Qualimap is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
-
-> NB: Neither fold coverage nor percent coverage on there own is sufficient enough to asssess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or unremoved-adapter-containing reference genomes can artifically inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
-
-Note that many of the statistics from this module are displayed in the General Stats table (see above), as they represent single values that are not plottable.
-
-#### Coverage Histogram
-
-This plot shows on the Y axis the range of fold coverages that the bases of the reference genome are possibly covered by. The Y axis shows the number of bases that were covered at the given fold coverage depth as indicated on the Y axis.
-
-The greater the number of bases covered at as high as possible fold coverage, the better.
-
-<p align="center">
-  <img src="images/output/qualimap/qualimap_coverage_histogram.png" width="75%" height = "75%">
-</p>
-
-Things to watch out for:
-
-* You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
-* If you have stacking of reads i.e. a small region with an abnormally large amount of reads despite the rest of the reference being quite shallowly covered, this will artificially increase your coverage. This would be represented by a small peak that is a much further along the X axis away from the main distribution of reads.
-  
-#### Cumulative Genome Coverage
-
-This plot shows how much of the genome in percentage (X axis) is covered by a given fold depth coverage (Y axis).
-
-An ideal plot for this is to see an increasing curve, representing larger greater fractions of the genome being increasingly covered at higher depth. However, for low-coverage ancient DNA data, it will be more likely to see decreasing curves starting at a large percentage of the genome being covered at 0 fold coverage.
-
-<p align="center">
-  <img src="images/output/qualimap/qualimap_cumulative_genome_coverage.png" width="75%" height = "75%">
-</p>
-
-#### GC Content Distribution
-
-This plot shows the distirbution of th frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
-
-<p align="center">
-  <img src="images/output/qualimap/qualimap_gc_content_distribution.png" width="75%" height = "75%">
-</p>
-
-Things to watch out for:
-
-* This plot should normally show a normal distribution around the average GC content of your reference genome.
-* Binomial peaks may represent lab-based artefacts that should be further investigated.
-* Skews of the peak to a higher GC content that the reference in Illumina dual-colour chemistry data (e.g. NextSeq or NovaSeq), may suggest long poly-G tails that are mapping to poly-G stretches of your genome. The EAGER2 trimming option `--complexity_filter_poly_g` can be used to remove these tails by utilising the tool FastP for detection and trimming.
-  
 ### DamageProfiler
+
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value. 
 
 #### Background
 
@@ -471,7 +436,58 @@ When looking at the length distribution plots, keep in mind the following:
 * Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
 * You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
 * You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
+
+### QualiMap
+
+#### Background
+
+Qualimap is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
+
+> NB: Neither fold coverage nor percent coverage on there own is sufficient enough to asssess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or unremoved-adapter-containing reference genomes can artifically inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
+
+Note that many of the statistics from this module are displayed in the General Stats table (see above), as they represent single values that are not plottable.
+
+You will receive output for each _sample_. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
+
+#### Coverage Histogram
+
+This plot shows on the Y axis the range of fold coverages that the bases of the reference genome are possibly covered by. The Y axis shows the number of bases that were covered at the given fold coverage depth as indicated on the Y axis.
+
+The greater the number of bases covered at as high as possible fold coverage, the better.
+
+<p align="center">
+  <img src="images/output/qualimap/qualimap_coverage_histogram.png" width="75%" height = "75%">
+</p>
+
+Things to watch out for:
+
+* You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
+* If you have stacking of reads i.e. a small region with an abnormally large amount of reads despite the rest of the reference being quite shallowly covered, this will artificially increase your coverage. This would be represented by a small peak that is a much further along the X axis away from the main distribution of reads.
   
+#### Cumulative Genome Coverage
+
+This plot shows how much of the genome in percentage (X axis) is covered by a given fold depth coverage (Y axis).
+
+An ideal plot for this is to see an increasing curve, representing larger greater fractions of the genome being increasingly covered at higher depth. However, for low-coverage ancient DNA data, it will be more likely to see decreasing curves starting at a large percentage of the genome being covered at 0 fold coverage.
+
+<p align="center">
+  <img src="images/output/qualimap/qualimap_cumulative_genome_coverage.png" width="75%" height = "75%">
+</p>
+
+#### GC Content Distribution
+
+This plot shows the distirbution of th frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
+
+<p align="center">
+  <img src="images/output/qualimap/qualimap_gc_content_distribution.png" width="75%" height = "75%">
+</p>
+
+Things to watch out for:
+
+* This plot should normally show a normal distribution around the average GC content of your reference genome.
+* Binomial peaks may represent lab-based artefacts that should be further investigated.
+* Skews of the peak to a higher GC content that the reference in Illumina dual-colour chemistry data (e.g. NextSeq or NovaSeq), may suggest long poly-G tails that are mapping to poly-G stretches of your genome. The EAGER2 trimming option `--complexity_filter_poly_g` can be used to remove these tails by utilising the tool FastP for detection and trimming.
+
 ## Output Files
 
 This section gives a brief summary of where to look for what files for downstream analysis.
@@ -483,21 +499,21 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 * `AdapterRemoval/` - this contains the log files (ending with `.settings`) with raw trimming (and merging) statistics after AdapterRemoval. In the `output` sub-directory, are the output trimmed (and merged) FASTQ files. These you can use for downstream applications such as taxonomic binning for metagenomic studies.
 * `mapping/` - this contains a sub-directory corresponding to the mapping tool you used, inside of which will be the initial BAM files containing the reads that mapped to your reference genome with no modification (see below). You will also find a corresponding BAM index file (ending in `.csi` or `.bam`). You can use these for downstream applications e.g. if you wish to use a different de-duplication tool not included in EAGER2 (although please feel free to add a new module request on the Github repository's [issue page](https://github.com/nf-core/eager/issues)!).
 * `samtools/` - this contains two sub-directories. `stats/` contain the raw mapping statistics files (ending in `.stats`) from directly after mapping. `filter/` contains BAM files that have had a mapping quality filter applied (set by the `--bam_mapping_quality_threshold` flag) and a corresponding index file. Furthermore, if you selected `--bam_discard_unmapped`, you will find your separate file with only unmapped reads in the format you selected. Note unmapped read BAM files will _not_ have an index file.
-* `deduplication/` - this contains a sub-directory called `dedup/`, inside here are sample specific directories. Each directory contains a BAM file containing mapped reads but with PCR duplicates removed, a corresponding index file and two stats file. `.hist.` contains raw data for a deduplication histogram used for tools like preseq (see below), and the `.log` contains overall summary deduplication statistics.
-* `endorSpy/` - this contains all JSON files exported from the endorSpy endogenous DNA calculation tool. The JSON files are generated specifically for display in the MultiQC general statistics table and is otherwise very likely not useful for you.
-* `preseq/` - this contains a `.ccurve` file for every BAM file that had enough deduplication statistics to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced. You can use this file for plotting e.g. in `R` to find your sequencing target depth.
-* `qualimap/` - this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
-* `damageprofiler/` - this contains sample specific directories containing raw statistics and damage plots from DamageProfiler. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
-* `pmdtools/` this contains raw output statistics of pmdtools (estimates of frequencies of substitutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`. The BAM files do not have corresponding index files.
-* `trimmed_bam/` this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_left` and `--bamutils_clip_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read).
-* `genotyping/` this contains all the (gzipped) VCF files produced by your genotyping module. The file suffix will have the genotyping tool name. You will have VCF files corresponding to your deduplicated BAM files, as well as any turned-on downstream processes that create BAMs (e.g. trimmed bams or pmd tools). If `--gatk_ug_keep_realign_bam` supplied, this may also contain BAM files from InDel realignment when using GATK 3 and UnifiedGenotyping for variant calling.
-* `MultiVCFAnalyzer/` this contains all output from MultiVCFAnalyzer, including SNP calling statistics, various SNP table(s) and FASTA alignment files.
-* `sex_determination/` this contains the output for the sex determination run. This is a single `.tsv` file that includes a table with the Sample Name, the Nr of Autosomal SNPs, Nr of SNPs on the X/Y chromosome, the Nr of reads mapping to the Autosomes, the Nr of reads mapping to the X/Y chromosome, the relative coverage on the X/Y chromosomes, and the standard error associated with the relative coverages. These measures are provided for each bam file, one row per bam. If the `sexdeterrmine_bedfile` option has not been provided, the error bars cannot be trusted, and runtime will be considerably longer.
-* `nuclear_contamination/` this contains the output of the nuclear contamination processes. The directory contains one `*.X.contamination.out` file per individual, as well as `nuclear_contamination.txt` which is a summary table of the results for all individual. `nuclear_contamination.txt` contains a header, followed by one line per individual, comprised of the Method of Moments (MOM) and Maximum Likelihood (ML) contamination estimate (with their respective standard errors) for both Method1 and Method2.
-* `bedtools/` this contains two files as the output from bedtools coverage. One file contains the 'breadth' coverage (`*.breadth.gz`). This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature. The second file (`*.depth.gz`), contains the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
+* `deduplication/` - this contains a sub-directory called `dedup/`, inside here are sample specific directories. Each directory contains a BAM file containing mapped reads but with PCR duplicates removed, a corresponding index file and two stats file. `.hist.` contains raw data for a deduplication histogram used for tools like preseq (see below), and the `.log` contains overall summary deduplication statistics.  This is per library.
+* `endorSpy/` - this contains all JSON files exported from the endorSpy endogenous DNA calculation tool. The JSON files are generated specifically for display in the MultiQC general statistics table and is otherwise very likely not useful for you. This is per library.
+* `preseq/` - this contains a `.ccurve` file for every BAM file that had enough deduplication statistics to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced. You can use this file for plotting e.g. in `R` to find your sequencing target depth.  This is per library.
+* `qualimap/` - this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.  This is per sample.
+* `damageprofiler/` - this contains sample specific directories containing raw statistics and damage plots from DamageProfiler. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.  This is per library.
+* `pmdtools/` this contains raw output statistics of pmdtools (estimates of frequencies of substitutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`. The BAM files do not have corresponding index files.  This is per differently-treated library, and will not exist for UDG treated libraries.
+* `trimmed_bam/` this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_left` and `--bamutils_clip_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read). This is per differently-treated library, but full-UDG treated libraries will be ignored.
+* `genotyping/` this contains all the (gzipped) VCF files produced by your genotyping module. The file suffix will have the genotyping tool name. You will have VCF files corresponding to your deduplicated BAM files, as well as any turned-on downstream processes that create BAMs (e.g. trimmed bams or pmd tools). If `--gatk_ug_keep_realign_bam` supplied, this may also contain BAM files from InDel realignment when using GATK 3 and UnifiedGenotyping for variant calling. This will be per sample.
+* `MultiVCFAnalyzer/` this contains all output from MultiVCFAnalyzer, including SNP calling statistics, various SNP table(s) and FASTA alignment files. This will be for all samples together in one output.
+* `sex_determination/` this contains the output for the sex determination run. This is a single `.tsv` file that includes a table with the Sample Name, the Nr of Autosomal SNPs, Nr of SNPs on the X/Y chromosome, the Nr of reads mapping to the Autosomes, the Nr of reads mapping to the X/Y chromosome, the relative coverage on the X/Y chromosomes, and the standard error associated with the relative coverages. These measures are provided for each bam file, one row per bam. If the `sexdeterrmine_bedfile` option has not been provided, the error bars cannot be trusted, and runtime will be considerably longer. This will be per sample.
+* `nuclear_contamination/` this contains the output of the nuclear contamination processes. The directory contains one `*.X.contamination.out` file per individual, as well as `nuclear_contamination.txt` which is a summary table of the results for all individual. `nuclear_contamination.txt` contains a header, followed by one line per individual, comprised of the Method of Moments (MOM) and Maximum Likelihood (ML) contamination estimate (with their respective standard errors) for both Method1 and Method2. This will be per library.
+* `bedtools/` this contains two files as the output from bedtools coverage. One file contains the 'breadth' coverage (`*.breadth.gz`). This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature. The second file (`*.depth.gz`), contains the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position). This will be per library, but with same-treated libraries merged.
 * `metagenomic_classification/` This contains the output for a given metagenomic classifier.
-  * Malt will contain RMA6 files that can be loaded into MEGAN6 or MaltExtract for phylogenetic visualisation of read taxonomic assignments and aDNA characteristics respectively. Additional a `malt.log` file is provided which gives additional information such as run-time, memory usage and per-sample statistics of numbers of alignments with taxonomic assignment etc.
-  * Kraken will contain the Kraken output and report files, as well as a merged Taxon count table.
-* `MaltExtract/` this will contain a `results` directory in which contains the output from MaltExtract - typically one folder for each filter type, an error and a log file. The characteristics of each node (e.g. damage, read lengths, edit distances - each in different txt formats) can be seen in each sub-folder of the filter folders. Output can be visualised either with the [HOPS postprocessing script](https://github.com/rhuebler/HOPS) or [MEx-IPA](https://github.com/jfy133/MEx-IPA)
-* `consensus_sequence/` this contains three FASTA files from VCF2Genome, of a consensus sequence based on the reference FASTA with each sample's unique modifications. The main FASTA is a standard file with bases not passing the specified thresholds as Ns. The two other FASTAS (`_refmod.fasta.gz`) and (`_uncertainity.fasta.gz`) are IUPAC uncertainty codes (rather than Ns) and a special number-based uncertainty system used for other downstream tools, respectively.
-* `librarymerged_bams/` these contain the final BAM files that would go into genotyping (if genotyping is turned on). This means the BAM will contain all libraries of a given sample (including trimmed non-UDG or half-UDG treated libraries, if BAM trimming turned on)
+  * Malt will contain RMA6 files that can be loaded into MEGAN6 or MaltExtract for phylogenetic visualisation of read taxonomic assignments and aDNA characteristics respectively. Additional a `malt.log` file is provided which gives additional information such as run-time, memory usage and per-sample statistics of numbers of alignments with taxonomic assignment etc. This will with all (lane-merged) libraries together.
+  * Kraken will contain the Kraken output and report files, as well as a merged Taxon count table.  This will with all (lane-merged) libraries together.
+* `MaltExtract/` this will contain a `results` directory in which contains the output from MaltExtract - typically one folder for each filter type, an error and a log file. The characteristics of each node (e.g. damage, read lengths, edit distances - each in different txt formats) can be seen in each sub-folder of the filter folders. Output can be visualised either with the [HOPS postprocessing script](https://github.com/rhuebler/HOPS) or [MEx-IPA](https://github.com/jfy133/MEx-IPA).  This will with all (lane-merged) libraries together.
+* `consensus_sequence/` this contains three FASTA files from VCF2Genome, of a consensus sequence based on the reference FASTA with each sample's unique modifications. The main FASTA is a standard file with bases not passing the specified thresholds as Ns. The two other FASTAS (`_refmod.fasta.gz`) and (`_uncertainity.fasta.gz`) are IUPAC uncertainty codes (rather than Ns) and a special number-based uncertainty system used for other downstream tools, respectively. This will be per sample.
+* `librarymerged_bams/` these contain the final BAM files that would go into genotyping (if genotyping is turned on). This means the BAM will contain all libraries of a given sample (including trimmed non-UDG or half-UDG treated libraries, if BAM trimming turned on). This will be per sample.
