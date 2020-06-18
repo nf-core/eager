@@ -128,6 +128,7 @@
       - [`--pileupcaller_bedfile`](#--pileupcaller_bedfile)
       - [`--pileupcaller_snpfile`](#--pileupcaller_snpfile)
       - [`--pileupcaller_method`](#--pileupcaller_method)
+      - [`--pileupcaller_transitions_mode`](#--pileupcaller_transitions_mode)
     - [Consensus Sequence Generation](#consensus-sequence-generation)
       - [`--run_vcf2genome`](#--run_vcf2genome)
       - [`--vcf2genome_outfile`](#--vcf2genome_outfile)
@@ -1029,6 +1030,10 @@ Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/tree/master
 #### `--pileupcaller_method`
 
 Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: randomHaploid
+
+#### `--pileupcaller_transitions_mode`
+
+Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: AllSites, TransitionsMissing, SkipTransitions. Default: AllSites
 
 ### Consensus Sequence Generation
 
