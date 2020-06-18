@@ -1820,7 +1820,7 @@ process bedtools {
 // Calculate typical aDNA damage frequency distribution
 
 process damageprofiler {
-    label 'sc_tiny'
+    label 'sc_small'
     tag "${libraryid}"
     publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
