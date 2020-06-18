@@ -2184,11 +2184,11 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
  // Create pileupcaller input tuples
  ch_input_for_genotyping_pileupcaller.singleStranded
    .groupTuple(by:[5])
-   .into {ch_prepped_for_pileupcaller_single}
+   .set {ch_prepped_for_pileupcaller_single}
 
  ch_input_for_genotyping_pileupcaller.doubleStranded
    .groupTuple(by:[5])
-   .into {ch_prepped_for_pileupcaller_double}
+   .set {ch_prepped_for_pileupcaller_double}
 
  process genotyping_pileupcaller {
   label 'mc_small'
