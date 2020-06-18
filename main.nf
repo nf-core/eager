@@ -2173,6 +2173,23 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
 }
 
+ // Branch channel by strandedness
+ ch_damagemanipulation_for_genotyping_pileupcaller
+   .branch{
+       singleStranded: it[5] == "single"
+       doubleStranded: it[5] == "double"
+   }
+   .into{ch_input_for_genotyping_pileupcaller}
+ 
+ // Create pileupcaller input tuples
+ ch_input_for_genotyping_pileupcaller.singleStranded
+   .groupTuple(by:[5])
+   .into {ch_prepped_for_pileupcaller_single}
+
+ ch_input_for_genotyping_pileupcaller.doubleStranded
+   .groupTuple(by:[5])
+   .into {ch_prepped_for_pileupcaller_double}
+
  process genotyping_pileupcaller {
   label 'mc_small'
   tag "${samplename}"
@@ -2182,7 +2199,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   params.run_genotyping && params.genotyping_tool == 'pileupcaller'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_pileupcaller
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_prepped_for_pileupcaller_double.mix(ch_prepped_for_pileupcaller_single)
   file fasta from ch_fasta_for_genotyping_pileupcaller.collect()
   file fai from ch_fai_for_pileupcaller.collect()
   file dict from ch_dict_for_pileupcaller.collect()
@@ -2190,13 +2207,13 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   file snp from ch_snp_for_pileupcaller.collect()
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${samplename}.*")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${strandedness}.*")
 
   script:
   caller = "--${params.pileupcaller_method}"
   ssmode = strandedness == "single" ? "--singleStrandMode" : ""
   """
-  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam}.join(" ") | pileupCaller ${caller} ${ssmode} --transitionsMode ${params.pileupcaller_transitions_mode} --sampleNames ${samplename}.join(",") -f ${snp} -e pileupcaller.${strandedness}
   """
  }
 
