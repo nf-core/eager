@@ -179,6 +179,15 @@ If you've contributed and you're missing in here, please let us know and we will
 * **Kraken2**     Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. Available at: [https://doi.org/10.1186/s13059-019-1891-0](https://doi.org/10.1186/s13059-019-1891-0). Download: [https://ccb.jhu.edu/software/kraken2/](https://ccb.jhu.edu/software/kraken2/)
 * **endorS.py** Aida Andrades Valtueña (Unpublished). Download: [https://github.com/aidaanva/endorS.py](https://github.com/aidaanva/endorS.py)
 
+## Data References
+
+This repository uses test data from the following studies:
+
+* Fellows Yates, J. A. et al. (2017) ‘Central European Woolly Mammoth Population Dynamics: Insights from Late Pleistocene Mitochondrial Genomes’, Scientific reports, 7(1), p. 17714. [doi: 10.1038/s41598-017-17723-1](https://doi.org/10.1038/s41598-017-17723-1).
+* Gamba, C. et al. (2014) ‘Genome flux and stasis in a five millennium transect of European prehistory’, Nature communications, 5, p. 5257. [doi: 10.1038/ncomms6257](https://doi.org/10.1038/ncomms6257).
+* Star, B. et al. (2017) ‘Ancient DNA reveals the Arctic origin of Viking Age cod from Haithabu, Germany’, Proceedings of the National Academy of Sciences of the United States of America, 114(34), pp. 9152–9157. [doi: 10.1073/pnas.1710186114](https://doi.org/10.1073/pnas.1710186114).
+* Andrades Valtueña, A. et al. (2017) ‘The Stone Age Plague and Its Persistence in Eurasia’, Current biology: CB, 27(23), pp. 3683–3691.e8. [doi: 10.1016/j.cub.2017.10.025](https://doi.org/10.1016/j.cub.2017.10.025).
+
 ## Citation
 
 If you use `nf-core/eager` for your analysis, please cite the `eager` preprint as follows:
