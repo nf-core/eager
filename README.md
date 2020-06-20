@@ -124,7 +124,7 @@ This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github
 
 * [Aida Andrades Valtueña](https://github.com/aidaanva)
 * [Alexander Peltzer](https://github.com/apeltzer)
-* [James A. Fellows-Yates](https://github.com/jfy133)
+* [James A. Fellows Yates](https://github.com/jfy133)
 * [Judith Neukamm](https://github.com/JudithNeukamm)
 * [Maxime Borry](https://github.com/maxibor)
 * [Maxime Garcia](https://github.com/MaxUlysse)
@@ -178,3 +178,19 @@ If you've contributed and you're missing in here, please let us know and we will
 * **MaltExtract** Huebler, R. et al., 2019. HOPS: Automated detection and authentication of pathogen DNA in archaeological remains. bioRxiv, p.534198. Available at: [https://www.biorxiv.org/content/10.1101/534198v1?rss=1](https://www.biorxiv.org/content/10.1101/534198v1?rss=1). Download: [https://github.com/rhuebler/MaltExtract](https://github.com/rhuebler/MaltExtract)
 * **Kraken2**     Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. Available at: [https://doi.org/10.1186/s13059-019-1891-0](https://doi.org/10.1186/s13059-019-1891-0). Download: [https://ccb.jhu.edu/software/kraken2/](https://ccb.jhu.edu/software/kraken2/)
 * **endorS.py** Aida Andrades Valtueña (Unpublished). Download: [https://github.com/aidaanva/endorS.py](https://github.com/aidaanva/endorS.py)
+
+## Citation
+
+If you use `nf-core/eager` for your analysis, please cite the `eager` preprint as follows:
+> James A. Fellows Yates, Thiseas Christos Lamnidis, Maxime Borry, Aida Andrades Valtueña, Zandra Fagneräs, Stephen Clayton, Maxime U. Garcia, Judith Neukamm, Alexander Peltzer **Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager** bioRxiv 2020.06.11.145615; [doi: https://doi.org/10.1101/2020.06.11.145615](https://doi.org/10.1101/2020.06.11.145615)
+
+You can cite the eager zenodo record for a specific version using the following [doi: 10.5281/zenodo.3698082](https://zenodo.org/badge/latestdoi/135918251)
+
+You can cite the `nf-core` publication as follows:
+
+> **The nf-core framework for community-curated bioinformatics pipelines.**
+>
+> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
+>
+> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).  
+> ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)

@@ -344,6 +344,11 @@ if (params.run_bam_filtering && !params.bam_discard_unmapped && params.bam_unmap
   exit 1, "[nf-core/eager] error: Please turned on unmapped read discarding, if you have specifed a different unmapped type. Give: --bam_discard_unmapped"
 }
 
+// Deduplication sanity checking
+if (params.dedupper != 'dedup' && params.dedupper != 'markduplicates') {
+  exit 1, "[nf-core/eager] error: Selected deduplication tool is not recognised. Options: 'dedup' or 'markduplicates'. You gave: ${params.dedupper}"
+}
+
 // Genotyping sanity checking
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' ) {
@@ -968,7 +973,6 @@ ch_skipfastp_for_merge.mix(ch_fastp_for_merge)
 
 // Sequencing adapter clipping and optional paired-end merging in preparation for mapping
 
-// TODO Fix output name so it matches FASTQC.zip output for inline for multiQC
 process adapter_removal {
     label 'mc_small'
     tag "${libraryid}_L${lane}"
@@ -1097,7 +1101,6 @@ if (!params.skip_adapterremoval) {
 
 // Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
 
-// TODO Need to add same thing for raw FASTQs for strip_fastq 
 ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
   .groupTuple(by: [0,1,3,4,5,6])
   .branch {
@@ -1108,6 +1111,7 @@ ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
 process lanemerge {
   label 'mc_tiny'
   tag "${libraryid}"
+  publishDir "${params.outdir}/lanemerging", mode: 'copy'
 
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_branched_for_lanemerge.merge_me
@@ -1493,8 +1497,6 @@ ch_fastqlanemerge_for_stripfastq
 
 // Remove mapped reads from original (lane merged) input FASTQ e.g. for sensitive host data when running metagenomic data
 
-// TODO: Check works when turned on; fix output - with lane merging this becomes problematic. Will need extra process to merge by lane the fASTQS as well as bams
-// TODO: Map above fails because of groupTuple mixing arrays by index position.
 process strip_input_fastq {
     label 'mc_medium'
     tag "${libraryid}"
@@ -1656,7 +1658,7 @@ process markDup{
         saveAs: {filename -> "${libraryid}/$filename"}
 
     when:
-    !params.skip_deduplication && params.dedupper != 'dedup'
+    !params.skip_deduplication && params.dedupper == 'markduplicates'
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_filtering_for_markdup
@@ -1681,27 +1683,40 @@ if ( params.skip_deduplication ) {
   ch_input_for_librarymerging = ch_filtering_for_skiprmdup
     .groupTuple(by:[0,4,5,6])
     .branch{
-      skip_merging: it[7].size() == 1
+      clean_libraryid: it[7].size() == 1
       merge_me: it[7].size() > 1
     }
 } else {
     ch_input_for_librarymerging = ch_output_from_dedup.mix(ch_output_from_markdup)
     .groupTuple(by:[0,4,5,6])
     .branch{
-      skip_merging: it[7].size() == 1
+      clean_libraryid: it[7].size() == 1
       merge_me: it[7].size() > 1
     }
 }
 
+// For non-merging libraries, fix group libraryIDs into single values. 
+// This is a bit hacky as theoretically could have different, but this should
+// rarely be the case.
+
+ch_input_for_librarymerging.clean_libraryid
+  .map{
+    it ->
+      def libraryid = it[1][0]
+      [it[0], libraryid, it[2], it[3], it[4], it[5], it[6], it[7], it[8] ]
+    }
+  .set { ch_input_for_skiplibrarymerging }
+
 process library_merge {
   label 'mc_tiny'
   tag "${samplename}"
+  publishDir "${params.outdir}/merged_bams/initial", mode: 'copy'
 
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_input_for_librarymerging.merge_me
 
   output:
-  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -1714,12 +1729,12 @@ process library_merge {
 
 // Mix back in libraries from skipping dedup, skipping library merging
 if (!params.skip_deduplication) {
-    ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
+    ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 
 } else {
-    ch_input_for_librarymerging.skip_merging.mix(ch_output_from_librarymerging)
+    ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
 }
 
@@ -1768,7 +1783,7 @@ if (!params.run_bedtools_coverage){
 
 process bedtools {
   label 'mc_small'
-  tag "${samplename}"
+  tag "${libraryid}"
   publishDir "${params.outdir}/bedtools", mode: 'copy'
 
   when:
@@ -1796,7 +1811,8 @@ process bedtools {
 
 process damageprofiler {
     label 'sc_small'
-    tag "${samplename}"
+    tag "${libraryid}"
+
     publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
     when:
@@ -1823,7 +1839,7 @@ process damageprofiler {
 
 process pmdtools {
     label 'mc_small'
-    tag "${samplename}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/pmdtools", mode: 'copy'
 
     when: params.run_pmdtools
@@ -1878,7 +1894,7 @@ if ( params.run_trim_bam ) {
 
 process bam_trim {
     label 'mc_small'
-    tag "${samplename}" 
+    tag "${libraryid}" 
     publishDir "${params.outdir}/trimmed_bam", mode: 'copy'
  
     when: params.run_trim_bam
@@ -1887,7 +1903,7 @@ process bam_trim {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_bamutils_decision.totrim
 
     output: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}")  into ch_trimmed_from_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}") into ch_trimmed_from_bamutils
 
     script:
     softclip = "${params.bamutils_softclip}" ? '-c' : '' 
@@ -1929,13 +1945,13 @@ ch_trimmed_formerge = ch_bamutils_decision.notrim
 process additional_library_merge {
   label 'mc_tiny'
   tag "${samplename}"
-  publishDir "${params.outdir}/librarymerged_bams", mode: 'copy'
+  publishDir "${params.outdir}/merged_bams/additional", mode: 'copy'
 
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_trimmed_formerge.merge_me
 
   output:
-  tuple samplename, val("merged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_add.bam"), file("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_add.bam"), file("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -2137,13 +2153,13 @@ if ( params.gatk_ug_jar != '' ) {
  // pileupCaller for 'random sampling' genotyping
 
 if (params.pileupcaller_bedfile.isEmpty()) {
-  ch_bed_for_pileupcaller = file('NO_FILE_BED')
+  ch_bed_for_pileupcaller = 'NO_FILE_BED'
 } else {
   ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile)
 }
 
 if (params.pileupcaller_snpfile.isEmpty ()) {
-  ch_snp_for_pileupcaller = file('NO_FILE')
+  ch_snp_for_pileupcaller = 'NO_FILE'
 } else {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
 }
@@ -2161,8 +2177,8 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   file fasta from ch_fasta_for_genotyping_pileupcaller.collect()
   file fai from ch_fai_for_pileupcaller.collect()
   file dict from ch_dict_for_pileupcaller.collect()
-  file bed from ch_bed_for_pileupcaller
-  file snp from ch_snp_for_pileupcaller
+  file bed from ch_bed_for_pileupcaller.collect()
+  file snp from ch_snp_for_pileupcaller.collect()
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${samplename}.*")
@@ -2171,7 +2187,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   caller = "--${params.pileupcaller_method}"
   ssmode = strandedness == "single" ? "--singleStrandMode" : ""
   """
-  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}.
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}
   """
  }
 
@@ -2239,6 +2255,7 @@ if (params.additional_vcf_files == '') {
   file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
   file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
   file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
+  file('MultiVFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
@@ -2246,7 +2263,6 @@ if (params.additional_vcf_files == '') {
   gunzip -f *.vcf.gz
   multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
   pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
-  rm *.vcf
   """
  }
 
@@ -2398,7 +2414,7 @@ process malt {
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
-  file "malt.log" into ch_malt_out
+  file "malt.log" into ch_malt_for_multiqc
 
   script:
   if ("${params.malt_min_support_mode}" == "percent") {
@@ -2449,7 +2465,6 @@ if (params.maltextract_taxon_list== '') {
 // MaltExtract performs aDNA evaluation from the output of MALT (damage patterns, read lengths etc.)
 
 // As we collect all files for a single MALT extract run, we DO NOT use the normal input/output tuple
-// TODO Check works as expected
 process maltextract {
   label 'mc_large'
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
@@ -2463,6 +2478,7 @@ process maltextract {
   
   output:
   path "results/" type('dir')
+  file "results/*_Wevid.json" optional true into ch_hops_for_multiqc 
 
   script:
   ncbifiles = params.maltextract_ncbifiles == '' ? "" : "-r ${params.maltextract_ncbifiles}"
@@ -2491,6 +2507,8 @@ process maltextract {
   ${megsum} \
   ${topaln} \
   ${ss}
+
+  postprocessing.AMPS.r -r results/ -m ${params.maltextract_filter} -t ${task.cpus} -n ${taxon_list} -j
   """
 }
 
@@ -2533,10 +2551,9 @@ process kraken {
   file(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out, ch_kraken_out_mqc
-  tuple val(prefix), file("*.kreport") into ch_kraken_report
+  file "*.kraken.out" into ch_kraken_out
+  tuple prefix, file("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
 
-  
   script:
   prefix = fastq.toString().tokenize('.')[0]
   out = prefix+".kraken.out"
@@ -2673,8 +2690,10 @@ process multiqc {
     file ('sexdeterrmine/*') from ch_sexdet_for_multiqc.collect().ifEmpty([])
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
-    file ('kraken/*') from ch_kraken_out_mqc.collect().ifEmpty([])
-    file ('malt/*') from ch_malt_out.collect().ifEmpty([])
+    file ('multivcfanalyzer/*') from ch_multivcfanalyzer_for_multiqc.collect().ifEmpty([])
+    file ('malt/*') from ch_malt_for_multiqc.collect().ifEmpty([])
+    file ('kraken/*') from ch_kraken_for_multiqc.collect().ifEmpty([])
+    file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
     file logo from ch_eager_logo
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
