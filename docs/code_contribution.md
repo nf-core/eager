@@ -4,6 +4,19 @@ To make the EAGER2 code and processing logic more understandable for new contrib
 
 If you wish to contribute a new module, please use the following coding standards.
 
+The typical workflow for adding a new module is as follows:
+
+1. Define the corresponding input channel into your new process from the expected previous process channel (or re-routing block, see below).
+2. Write the process block (see below).
+3. Define the output channel if needed (see below).
+4. Add any new flags/options to `nextflow.config` with a default (see below).
+5. Add any new flags/options to the help message (for integer/text parameters, print to help the corresponding `nextflow.config` parameter).
+6. Add any new software to the `scrape_software_versions.py` secript in `bin/` and the version command to the `scrape_software_versions` process in `main.nf`.
+7. Do a local test that the new code works properly
+8. Add a new test command in `.github/workflow/ci.yaml`.
+9. Add new flags/options to 'usage' documentation under `docs/usage.md`.
+10. Add any descriptions of MultiQC report sections and output files to `docs/output.md`.
+
 ## Default Values
 
 Default values should go in `nextflow.config` under the `params` scope.

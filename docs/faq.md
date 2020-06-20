@@ -36,13 +36,28 @@ an issue where a run almost immediately crashes
 (e.g. at `fastqc`, `outputdocumentation` etc.) saying the tool could not be
 found or similar.
 
+### I am running Docker
+
+You may have an outdated container. This happens more often when running on the
+`dev` branch of nf-core/eager, because docker will _not_ update the container
+on each new commit, and thus may not get new tools called within the pipeline
+code.
+
+To fix, just re-pull the nf-core/eager docker container manually with:
+
+```bash
+docker pull nfcore/eager:dev
+```
+
+### I am running Singularity
+
 If you're running singularity, it could be that nextflow cannot access your
 singularity image properly - often due to missing bind paths.
 
 See [here](https://nf-co.re/usage/troubleshooting#cannot-find-input-files-when-using-singularity)
 for more information.
 
-## The pipeline has crashed with an error but nextflow is still running
+## The pipeline has crashed with an error but Nextflow is still running
 
 If this happens, you can either wait until all other already running jobs to
 safely finish, or if nextflow _still_ does not stop press `ctrl + c` on your
@@ -52,6 +67,28 @@ keyboard (or equivalent) to stop the nextflow run.
 the output folder. Otherwise you may end up a lot of large intermediate files
 being left! You can clean a nextflow run of all intermediate files with
 `nextflow clean -f -k` or delete the `work/` directory.
+
+## I get a unable to acquire lock
+
+Errors like the following
+
+```bash
+Unable to acquire lock on session with ID 84333844-66e3-4846-a664-b446d070f775
+```
+
+Normally suggest a previous nextflow run (on the same folder) was not cleanly
+killed by a user (e.g. using ctrl + z to hard kill an errored run).
+
+To fix this, you must clean the entirety of the output directory (including
+output files) e.g. with `rm -r <output_dir>/* <output_dir>/.*` and re-running
+from scratch.
+
+<kbd>ctrl</kbd> + <kbd>z<kbd> is **not** a recommended way of killing a
+Nextflow job. Runs that take a long time to fail are often still running because
+other job submissions are still running. Nextflow will normally wait for those
+processes to complete before cleaning shutting down the run (to allow rerunning
+of a run with `-resume`). <kbd>ctrl</kbd> + <kbd>c</kbd> is much safer as
+it will tell Nextflow to stop earlier but cleanly.
 
 ## I get a file name collision error during library merging
 

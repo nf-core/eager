@@ -24,6 +24,7 @@ regexes = {
     'circulargenerator':['v_circulargenerator.txt',r"CircularGeneratorv(\S+)"],
     'DeDup':['v_dedup.txt',r"DeDup v(\S+)"],
     'freebayes':['v_freebayes.txt',r"v([0-9]\S+)"],
+    'Sequence Tools':['v_sequencetools.txt',r"v([0-9]\S+)"],
     'maltextract':['v_maltextract.txt', r"version(\S+)"],
     'malt':['v_malt.txt',r"version (\S+)"],
     'multivcfanalyzer':['v_multivcfanalyzer.txt', r"MultiVCFAnalyzer - (\S+)"],
@@ -52,6 +53,7 @@ results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
 results['GATK HaplotypeCaller'] = '<span style="color:#999999;\">N/A</span>'
 #results['GATK UnifiedGenotyper'] = '<span style="color:#999999;\">N/A</span>'
 results['freebayes'] = '<span style="color:#999999;\">N/A</span>'
+results['sequenceTools'] = '<span style="color:#999999;\">N/A</span>'
 results['VCF2genome'] = '<span style="color:#999999;\">N/A</span>'
 results['MTNucRatioCalculator'] = '<span style="color:#999999;\">N/A</span>'
 results['bedtools'] = '<span style="color:#999999;\">N/A</span>'
