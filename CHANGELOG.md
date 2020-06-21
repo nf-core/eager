@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Improved error messages
 * Added ability for automated emails using `mailutils` to also send MultiQC reports
 * General documentation additions and cleaning, updated figures with CC-BY license
+* Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
 
 ### `Fixed`
 

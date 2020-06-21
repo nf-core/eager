@@ -1810,8 +1810,9 @@ process bedtools {
 // Calculate typical aDNA damage frequency distribution
 
 process damageprofiler {
-    label 'sc_tiny'
+    label 'sc_small'
     tag "${libraryid}"
+
     publishDir "${params.outdir}/damageprofiler", mode: 'copy'
 
     when:
@@ -1830,7 +1831,7 @@ process damageprofiler {
     script:
     base = "${bam.baseName}"
     """
-    damageprofiler -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . -yaxis_damageplot ${params.damageprofiler_yaxis}
+    damageprofiler -Xmx${task.memory.toGiga()}g -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . -yaxis_damageplot ${params.damageprofiler_yaxis}
     """
 }
 
