@@ -290,7 +290,7 @@ if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.m
 }
 
 // Index files provided? Then check whether they are correct and complete
-if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
+if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
     lastPath = params.bwa_index.lastIndexOf(File.separator)
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
     bwa_base = params.bwa_index.substring(lastPath+1)
@@ -697,7 +697,7 @@ Channel.from(summary.collect{ [it.key, it.value] })
 ///////////////////////////////////////////////////
 
 // BWA Index
-if(!params.bwa_index && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
+if(params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
 process makeBWAIndex {
     label 'sc_medium'
     tag "${fasta}"
