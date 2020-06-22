@@ -49,7 +49,8 @@ def helpMessage() {
       --run_convertinputbam         Turns on convertion of an input BAM file into FASTQ format before pre-processing (e.g. AdapterRemoval etc.).
 
     References                      Optional additional pre-made indices, or you wish to overwrite any of the references.
-      --bwa_index                   Path and name of a bwa indexed FASTA reference file with index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value as --fasta)
+      --bwa_index                   Path and name of a bwa indexed FASTA reference file without index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value as --fasta)
+      --bt2_index                   Path and name of a bowtie2 indexed FASTA reference file without index index suffixes (i.e. everything before the endings e.g. '.1.bt2', '.2.bt2', '.rev.1.bt2'. Most likely the same value as --fasta)
       --bedfile                     Path to BED file for SNPCapture methods.
       --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict').
       --fasta_index                 Path to samtools FASTA index (typically ending in '.fai').
@@ -79,14 +80,20 @@ def helpMessage() {
       --mergedonly                  Turn on sending downstream only merged reads (un-merged reads and singletons are discarded).
 
     Mapping
-      --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper'. Default: '${params.mapper}'
+      --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: '${params.mapper}'
       --bwaalnn                     Specify the -n parameter for BWA aln. Default: ${params.bwaalnn}
       --bwaalnk                     Specify the -k parameter for BWA aln. Default: ${params.bwaalnk}
       --bwaalnl                     Specify the -l parameter for BWA aln. Default: ${params.bwaalnl}
       --circularextension           Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
       --circulartarget              Specify the target chromosome for CM (circularmapper only). Default: '${params.circulartarget}'
       --circularfilter              Turn on to filter off-target reads (circularmapper only).
- 
+      --bt2_alignmode               Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: ${params.bt2_alignmode}
+      --bt2_sensitivity             Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: ${params.bt2_sensitivity}
+      --bt2n                        Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity. Default: ${params.bt2n}
+      --bt2l                        Specify the -L parameter for bowtie2 (length of seed substrings). Default: ${params.bt2l}
+      --bt2_trim5                   Specify number of bases to trim off from 5' (left) end of read before alignment. Default: ${params.bt2_trim5}
+      --bt2_trim3                   Specify number of bases to trim off from 3' (right) end of read before alignment. Default: ${params.bt2_trim3}
+
     Stripping
       --strip_input_fastq           Turn on creating pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
       --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace). Default: '${params.strip_mode}'
@@ -256,7 +263,7 @@ if ( params.fasta.isEmpty () ){
         file zipped_fasta
 
         output:
-        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer
+        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer
 
         script:
         rm_zip = zipped_fasta - '.gz'
@@ -268,10 +275,11 @@ if ( params.fasta.isEmpty () ){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer }
     
     lastPath = params.fasta.lastIndexOf(File.separator)
     bwa_base = params.fasta.substring(lastPath+1)
+    bt2_base = params.fasta.substring(lastPath+1)
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -285,20 +293,39 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
 }
 
 // Mapper sanity checking
-if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem'){
-    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper'. Default: 'bwaaln'. You gave: ${params.mapper}!"
+if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem' && !params.mapper == "bowtie2"){
+    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: 'bwaaln'. You gave: ${params.mapper}!"
+}
+
+if (params.mapper == 'bowtie2' && params.bt2_alignmode != 'local' && params.bt2_alignmode != 'end-to-end' ) {
+    exit 1, "[nf-core/eager] error: invalid bowtie2 alignment mode. Options: 'local', 'end-to-end'. You gave: ${params.bt2_alignmode}"
+}
+
+if (params.mapper == 'bowtie2' && params.bt2_sensitivity != 'no-preset' && params.bt2_sensitivity != 'very-fast' && params.bt2_sensitivity != 'fast' && params.bt2_sensitivity != 'sensitive' && params.bt2_sensitivity != 'very-sensitive' ) {
+    exit 1, "[nf-core/eager] error: invalid bowtie2 sensitivity mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Options are for both alignmodes You gave: ${params.bt2_sensitivity}"
 }
 
 // Index files provided? Then check whether they are correct and complete
-if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
+if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
     lastPath = params.bwa_index.lastIndexOf(File.separator)
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
     bwa_base = params.bwa_index.substring(lastPath+1)
 
     Channel
         .fromPath(bwa_dir, checkIfExists: true)
-        .ifEmpty { exit 1, "[nf-core/eager] error: bwa index directory not found: ${bwa_dir}" }
+        .ifEmpty { exit 1, "[nf-core/eager] error: bwa indicies not found in: ${bwa_dir}" }
         .into {bwa_index; bwa_index_bwamem}
+}
+
+if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
+    lastPath = params.bt2_index.lastIndexOf(File.separator)
+    bt2_dir =  params.bt2_index.substring(0,lastPath+1)
+    bt2_base = params.bt2_index.substring(lastPath+1)
+
+    Channel
+        .fromPath(bt2_dir, checkIfExists: true)
+        .ifEmpty { exit 1, "[nf-core/eager] error: bowtie2 indicies not found in: ${bt2_dir}" }
+        .into {bt2_index; bt2_index_bwamem}
 }
 
 // Validate BAM input isn't set to paired_end
@@ -698,8 +725,8 @@ Channel.from(summary.collect{ [it.key, it.value] })
 ///////////////////////////////////////////////////
 
 // BWA Index
-if(!params.bwa_index && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
-process makeBWAIndex {
+if( params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
+  process makeBWAIndex {
     label 'sc_medium'
     tag "${fasta}"
     publishDir path: "${params.outdir}/reference_genome/bwa_index", mode: 'copy', saveAs: { filename -> 
@@ -722,6 +749,38 @@ process makeBWAIndex {
     mkdir BWAIndex && mv ${fasta}* BWAIndex
     """
     }
+    bt2_index = 'none'
+}
+
+// bowtie2 Index
+if(params.bt2_index == '' && !params.fasta.isEmpty() && params.mapper == "bowtie2"){
+  process makeBT2Index {
+    label 'sc_medium'
+    tag "${fasta}"
+    publishDir path: "${params.outdir}/reference_genome/bt2_index", mode: 'copy', saveAs: { filename -> 
+            if (params.save_reference) filename 
+            else if(!params.save_reference && filename == "where_are_my_files.txt") filename
+            else null
+    }
+
+    input:
+    file fasta from ch_fasta_for_bt2index
+    file where_are_my_files
+
+    output:
+    file "BT2Index" into (bt2_index)
+    file "where_are_my_files.txt"
+
+    script:
+    """
+    bowtie2-build $fasta $fasta
+    mkdir BT2Index && mv ${fasta}* BT2Index
+    """
+    }
+
+  bwa_index = 'none'
+  bwa_index_bwamem = 'none'
+
 }
 
 // FASTA Index (FAI)
@@ -1152,7 +1211,7 @@ ch_lanemerge_for_mapping
 
   }
   .mix(ch_branched_for_lanemerge.skip_merge)
-  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem } 
+  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 } 
 
 // ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads stripping 
 
@@ -1361,8 +1420,76 @@ process circularmapper{
     
 }
 
+// bwa aln as standard aDNA mapper
+
+process bowtie2 {
+    label 'mc_medium'
+    tag "${libraryid}"
+    publishDir "${params.outdir}/mapping/bt2", mode: 'copy'
+
+    when: params.mapper == 'bowtie2'
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bt2
+    file index from bt2_index.collect()
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bt2
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_bt2.log") into ch_bt2_for_multiqc
+
+    script:
+    size = "${params.large_ref}" ? '-c' : ''
+    fasta = "${index}/${bt2_base}"
+    trim5 = "${params.bt2_trim5}" != 0 ? "--trim5 ${params.bt2_trim5}" : ""
+    trim3 = "${params.bt2_trim3}" != 0 ? "--trim3 ${params.bt2_trim3}" : ""
+    alignmode = "${params.bt2_alignmode}" == 'sensitive' ? '--sensitive' : '--end-to-end'
+    bt2n = "${params.bt2n}" != 0 ? "-N ${params.bt2n}" : ""
+    bt2l = "${params.bt2l}" != 0 ? "-L ${params.bt2l}" : ""
+
+    if ( "${params.bt2_alignmode}" == "end-to-end"  ) {
+      if ( "${params.bt2_sensitivity}" == 'no-preset' ) {
+        sensitivity = ""
+      } else if ( "${params.bt2_sensitivity}" == "very-fast" ) {
+        sensitivity = "--very-fast"
+      } else if ( "${params.bt2_sensitivity}" == "fast" ) {
+        sensitivity = "--fast"
+      } else if ( "${params.bt2_sensitivity}" == "sensitive" ) {
+        sensitivity = "--sensitive"
+      } else if ( "${params.bt2_sensitivity}" == "very-sensitive" ) {
+        sensitivity = "--very-sensitive"
+      }
+    } else if ( "${params.bt2_alignmode}" == "local" ) {
+      if ( "${params.bt2_sensitivity}" == 'no-preset' ) {
+        sensitivity = ""
+      } else if ( "${params.bt2_sensitivity}" == "very-fast" ) {
+        sensitivity = "--very-fast-local"
+      } else if ( "${params.bt2_sensitivity}" == "fast" ) {
+        sensitivity = "--fast-local"
+      } else if ( "${params.bt2_sensitivity}" == "sensitive" ) {
+        sensitivity = "--sensitive-local"
+      } else if ( "${params.bt2_sensitivity}" == "very-sensitive" ) {
+        sensitivity = "--sensitive-local"
+      }
+    }
+
+    //PE data without merging, PE data without any AR applied
+    if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
+    """
+    bowtie2 -x ${fasta} -1 ${r1} -2 ${r2} -p ${task.cpus} ${alignmode} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}".mapped.bam
+    samtools index "${size}" "${libraryid}".mapped.bam
+    """
+    } else {
+    //PE collapsed, or SE data 
+    """
+    bowtie2 -x ${fasta} -U ${r1} ${trim5} ${trim3} -p ${task.cpus} ${alignmode} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}".mapped.bam
+    samtools index "${size}" "${libraryid}".mapped.bam
+    """
+    }
+    
+}
+
 // Gather all mapped BAMs from all possible mappers into common channels to send downstream
-ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for_filtering)
+ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for_filtering, ch_output_from_bt2)
   .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
 
 // Post-mapping QC
@@ -2640,7 +2767,7 @@ process get_software_versions {
     circulargenerator --help | head -n 1 &> v_circulargenerator.txt 2>&1 || true
     samtools --version &> v_samtools.txt 2>&1 || true
     dedup -v &> v_dedup.txt 2>&1 || true
-    picard MarkDuplicates --version &> v_markduplicates.txt  2>&1 || true
+    picard MarkDuplicates --version 2&> v_markduplicates.txt  2>&1 || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
     preseq &> v_preseq.txt 2>&1 || true
     gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
@@ -2660,6 +2787,7 @@ process get_software_versions {
     kraken2 --version | head -n 1 &> v_kraken.txt || true
     endorS.py --version &> v_endorSpy.txt || true
     pileupCaller --version &> v_sequencetools.txt 2>&1 || true
+    bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -2679,6 +2807,7 @@ process multiqc {
     file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file software_versions_mqc from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
+    file ('mapping/bt2/*') from ch_bt2_for_multiqc.collect().ifEmpty([])
     file ('flagstat/*') from ch_flagstat_for_multiqc.collect().ifEmpty([])
     file ('flagstat_filtered/*') from ch_bam_filtered_flagstat_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_for_multiqc.collect().ifEmpty([])

@@ -9,6 +9,7 @@ report_comment: >
 
 run_modules:
     - adapterRemoval
+    - bowtie2
     - custom_content
     - damageprofiler
     - dedup
@@ -56,6 +57,7 @@ extra_fn_clean_exts:
     - '.unifiedgenotyper'
     - '.trimmed_stats'
     - '_libmerged'
+    - '_bt2'
 
  
 top_modules:
@@ -70,6 +72,7 @@ top_modules:
        path_filters:
            - '*.truncated_fastqc.zip'
            - '*.combined*_fastqc.zip'
+    - 'bowtie2'
     - 'malt'
     - 'hops'
     - 'kraken'
@@ -117,6 +120,8 @@ table_columns_visible:
         percent_duplicates: False
         total_sequences: True
         percent_gc: True
+    bowtie2:
+        overall_alignment_rate: True
     MALT:
         Taxonomic assignment success: False
         Assig. Taxonomy: False
@@ -167,6 +172,8 @@ table_columns_placement:
         total_sequences: 400
         avg_sequence_length: 410
         percent_gc: 420
+    Bowtie 2 / HiSAT2:
+        overall_alignment_rate: 450
     MALT:
         Num. of queries: 430
         Total reads: 440
