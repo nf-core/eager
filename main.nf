@@ -311,12 +311,12 @@ if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwa
     bwa_dir =  params.bwa_index.substring(0,lastPath+1)
     bwa_base = params.bwa_index.substring(lastPath+1)
 
+    // Note that we are using the same files for both channels, so the process input channel requirement for all (not-)run processes are satisfied
     Channel
         .fromPath(bwa_dir, checkIfExists: true)
         .ifEmpty { exit 1, "[nf-core/eager] error: bwa indicies not found in: ${bwa_dir}" }
-        .into {bwa_index; bwa_index_bwamem}
+        .into {bwa_index; bwa_index_bwamem; bt2_index; bt2_index_bwamem}
 
-    bt2_index = ''
 }
 
 if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
@@ -327,9 +327,8 @@ if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
     Channel
         .fromPath(bt2_dir, checkIfExists: true)
         .ifEmpty { exit 1, "[nf-core/eager] error: bowtie2 indicies not found in: ${bt2_dir}" }
-        .into {bt2_index; bt2_index_bwamem}
+        .into {bwa_index; bwa_index_bwamem; bt2_index; bt2_index_bwamem}
 
-    bwa_index = ''
 }
 
 // Validate BAM input isn't set to paired_end
@@ -742,8 +741,9 @@ if( params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaa
     file fasta from ch_fasta_for_bwaindex
     file where_are_my_files
 
+    // Note exporting to all mapper processes to ensure input channels for all processes is satifised
     output:
-    file "BWAIndex" into (bwa_index, bwa_index_bwamem)
+    path "BWAIndex" into (bwa_index, bwa_index_bwamem, bt2_index)
     file "where_are_my_files.txt"
 
     script:
@@ -752,7 +752,7 @@ if( params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaa
     mkdir BWAIndex && mv ${fasta}* BWAIndex
     """
     }
-    bt2_index = 'none'
+    
 }
 
 // bowtie2 Index
@@ -770,8 +770,9 @@ if(params.bt2_index == '' && !params.fasta.isEmpty() && params.mapper == "bowtie
     file fasta from ch_fasta_for_bt2index
     file where_are_my_files
 
+    // Note exporting to all mapper processes to ensure input channels for all processes is satifised
     output:
-    file "BT2Index" into (bt2_index)
+    path "BT2Index" into (bt2_index, bwa_index, bwa_index_bwamem)
     file "where_are_my_files.txt"
 
     script:
@@ -780,9 +781,6 @@ if(params.bt2_index == '' && !params.fasta.isEmpty() && params.mapper == "bowtie
     mkdir BT2Index && mv ${fasta}* BT2Index
     """
     }
-
-  bwa_index = 'none'
-  bwa_index_bwamem = 'none'
 
 }
 
@@ -1289,7 +1287,7 @@ process bwa {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwa
-    file index from bwa_index.collect()
+    path index from bwa_index.collect().dump()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwa   
@@ -1304,16 +1302,16 @@ process bwa {
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
     """
-    bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
-    bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${libraryid}.mapped.bam
+    bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
+    bwa aln -t ${task.cpus} ${fasta} ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
+    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" ${fasta} ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${libraryid}.mapped.bam
     samtools index "${size}" "${libraryid}".mapped.bam
     """
     } else {
     //PE collapsed, or SE data 
     """
     bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
-    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
+    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" ${fasta} ${libraryid}.sai ${r1} | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
     samtools index "${size}" "${libraryid}".mapped.bam
     """
     }
@@ -1329,7 +1327,7 @@ process bwamem {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwamem
-    file index from bwa_index_bwamem.collect()
+    path index from bwa_index_bwamem.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwamem
@@ -1343,12 +1341,12 @@ process bwamem {
 
     if (!params.single_end && params.skip_collapse){
     """
-    bwa mem -t ${task.cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
+    bwa mem -t ${task.cpus} ${fasta} ${r1} ${r2} -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
     samtools index "${size}" -@ ${task.cpus} "${libraryid}".mapped.bam
     """
     } else {
     """
-    bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
+    bwa mem -t ${task.cpus} ${fasta} ${r1} -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
     samtools index "${size}" -@ ${task.cpus} "${libraryid}".mapped.bam
     """
     }
@@ -1408,18 +1406,18 @@ process circularmapper{
 
     if (!params.single_end && params.skip_collapse ){
     """
-    bwa aln -t ${task.cpus} $elongated_root $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
-    bwa aln -t ${task.cpus} $elongated_root $r2 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $elongated_root ${libraryid}.r1.sai ${libraryid}.r2.sai $r1 $r2 > tmp.out
-    realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
+    bwa aln -t ${task.cpus} ${elongated_root} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
+    bwa aln -t ${task.cpus} ${elongated_root} ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
+    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" ${elongated_root} ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} > tmp.out
+    realignsamfile -e ${params.circularextension} -i tmp.out -r ${fasta} ${filter} 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${libraryid}.mapped.bam
     samtools index "${size}" ${libraryid}.mapped.bam
     """
     } else {
     """ 
-    bwa aln -t ${task.cpus} $elongated_root $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
-    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $elongated_root ${libraryid}.sai $r1 > tmp.out
-    realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
+    bwa aln -t ${task.cpus} ${elongated_root} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
+    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" ${elongated_root} ${libraryid}.sai ${r1} > tmp.out
+    realignsamfile -e ${params.circularextension} -i tmp.out -r ${fasta} ${filter} 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${libraryid}".mapped.bam
     samtools index "${size}" "${libraryid}".mapped.bam
     """
@@ -1434,7 +1432,7 @@ process bowtie2 {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bt2
-    file index from bt2_index.collect()
+    path index from bt2_index.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bt2
@@ -1519,7 +1517,7 @@ process samtools_flagstat {
 
     script:
     """
-    samtools flagstat $bam > ${libraryid}_flagstat.stats
+    samtools flagstat ${bam} > ${libraryid}_flagstat.stats
     """
 }
 
@@ -1552,33 +1550,33 @@ process samtools_filter {
     
     if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
         """
-        samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools view -h -b ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
         samtools index "${size}" ${libraryid}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools view -h ${bam} | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
+        samtools view -h ${bam} | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
         samtools index "${size}" ${libraryid}.filtered.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "fastq"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools view -h ${bam} | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
+        samtools view -h ${bam} | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
         samtools index "${size}" ${libraryid}.filtered.bam
         samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
         rm ${libraryid}.unmapped.bam
         """
     } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools view -h ${bam} | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
+        samtools view -h ${bam} | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
         samtools index "${size}" ${libraryid}.filtered.bam
         samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
         """
     } else { //Only apply quality filtering, default
         """
-        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools view -h -b ${bam} -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
         samtools index "${size}" ${libraryid}.filtered.bam
         """
     }  
