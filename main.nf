@@ -2434,7 +2434,7 @@ if (params.additional_vcf_files == '') {
 if (params.sexdeterrmine_bedfile == '') {
   ch_bed_for_sexdeterrmine = file('NO_FILE')
 } else {
-  ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
+  ch_bed_for_sexdeterrmine = file(params.sexdeterrmine_bedfile)
 }
 
 // As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
