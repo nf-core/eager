@@ -39,23 +39,23 @@ results/
 work/
 ```
 
-* The parent directory `<RUN_OUTPUT_DIRECTORY` is the parent directory of the run, either the directory the pipeline was run from or as specified by the `--outdir` flag. The default name of the output directory (unless otherwise specified) will be `./results/`.
+- The parent directory `<RUN_OUTPUT_DIRECTORY` is the parent directory of the run, either the directory the pipeline was run from or as specified by the `--outdir` flag. The default name of the output directory (unless otherwise specified) will be `./results/`.
 
 ### Primary Output Directories
 
 These directories are the ones you will use on a day-to-day basis and are those which you should familiarise yourself with.
 
-* The `MultiQC` directory is the most important directory and contains the main summary report of the run in HTML format, which can be viewed in a web-browser of your choice. The sub-diectory contains the MultiQC collected data used to build the HTML report. The Report allows you to get an overview of the sequencing and mapping quality as well as aDNA metrics (see the [MultiQC Report](#multiqc-report) section for more detail).
-* A `<MODULE>` directory contains the (cleaned-up) output from a particular software module. This is the second most important set of directories. This contains output files such as FASTQ, BAM, statistics, and/or plot files of a specific module (see the [Output Files](#output-files) section for more detail). The latter two are only needed when you need finer detail about that particular module.
+- The `MultiQC` directory is the most important directory and contains the main summary report of the run in HTML format, which can be viewed in a web-browser of your choice. The sub-diectory contains the MultiQC collected data used to build the HTML report. The Report allows you to get an overview of the sequencing and mapping quality as well as aDNA metrics (see the [MultiQC Report](#multiqc-report) section for more detail).
+- A `<MODULE>` directory contains the (cleaned-up) output from a particular software module. This is the second most important set of directories. This contains output files such as FASTQ, BAM, statistics, and/or plot files of a specific module (see the [Output Files](#output-files) section for more detail). The latter two are only needed when you need finer detail about that particular module.
 
 ### Secondary Output Directories
 
 These are less important directories which are used less often, normally in the context of bug-reporting.
 
-* `pipeline_info` contains back-end reporting of the pipeline itself such as run times and computational statistics. You rarely need this information other than for curiosity or when bug-reporting.
-* `reference_genome` contains either text files describing the location of specified reference genomes, and if not already supplied when running the pipeline, auxilary indexing files. This is often useful when re-running other samples using the same reference genome, but is otherwise often not otherwise important.
+- `pipeline_info` contains back-end reporting of the pipeline itself such as run times and computational statistics. You rarely need this information other than for curiosity or when bug-reporting.
+- `reference_genome` contains either text files describing the location of specified reference genomes, and if not already supplied when running the pipeline, auxilary indexing files. This is often useful when re-running other samples using the same reference genome, but is otherwise often not otherwise important.
 
-* The `work` directory contains all the `nextflow` processing directories. This is where `nextflow` actually does all the work, but in an efficient programmatic procedure that is not intuitive to human-readers. Due to this, the directory is often not important to a user as all the useful output files are linked to the module directories (see above). Otherwise, this directory maybe useful when a bug-reporting.
+- The `work` directory contains all the `nextflow` processing directories. This is where `nextflow` actually does all the work, but in an efficient programmatic procedure that is not intuitive to human-readers. Due to this, the directory is often not important to a user as all the useful output files are linked to the module directories (see above). Otherwise, this directory maybe useful when a bug-reporting.
 
 > :warning: Note that `work/` will be created wherever you are running the `nextflow run` command from, unless you specify the location with `-w`, i.e. it will not by default be in `outdir`!.
 
@@ -79,26 +79,26 @@ Each column name is supplied by the module, so you may see similar column names.
 
 The **default** columns are as follows:
 
-* **Sample Name** This is the log file name without file suffix(s). This will depend on the module outputs.
-* **Seqs** This is from Pre-AdapterRemoval FastQC. Represents the number of raw reads in your untrimmed and (paired end) unmerged FASTQ file. Each row should be approximately equal to the number of reads you requested to be sequenced, divided by the number of FASTQ files you received for that library.
-* **Length** This is from Pre-AdapterRemoval FastQC. This is the average read length in your untrimmed and (paired end) unmerged FASTQ file and should represent the number of cycles of your sequencing chemistry.
-* **%GC** This is from Pre-AdapterRemoval FastQC. This is the average GC content in percent of all the reads in your untrimmed and (paired end) unmerged FASTQ file.
-* **GC content** This is from FastP. This is the average GC of all reads in your untrimmed and unmerged FASTSQ file after poly-G tail trimming. If you have lots of tails, this value should drop from the pre-AadapterRemoval FastQC  %GC column.
-* **% Trimmed** This is from AdapterRemoval. It is the percentage of reads which had an adapter sequence removed from the end of the read.
-* **Seqs** This is from Post-AdapterRemoval FastQC. Represents the number of preprocessed reads in your adapter trimmed (paired end) merged FASTQ file. The loss between this number and the Pre-AdapterRemoval FastQC can give you an idea of the quality of trimming and merging.
-* **%GC** This is from Post-AdapterRemoval FastQC. Represents the average GC of all preprocessed reads in your adapter trimmed (paired end) merged FASTQ file.
-* **Length** This is from post-AdapterRemoval FastQC. This is the average read length in your trimmed and (paired end) merged FASTQ file and should represent the 'realistic' average lengths of your DNA molecules
-* **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _prior_ map quality filtering and deduplication.
-* **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _after_ map quality filtering and deduplication (note the column name does not distinguish itself from prior-map quality filtering, but the post-filter column is always second)
-* **Endogenous DNA (%)** This is from the endorS.py tool. It displays a percentage of mapped reads over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). Assuming a perfect ancient sample with no modern contamination, this would be the the amount of true ancient DNA in the sample. However this value _most likely_ include contamination and will not entirely be the true 'endogenous' content.
-* **Endogenous DNA Post (%)** This is from the endorS.py tool. It displays a percentage of mapped reads _after_ BAM filtering (e.g. for mapping quality) over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). This column will only be displayed if BAM filtering is turned on and is based on the original mapping for total reads, and mapped reads as calculated from the post-filtering BAM.
-* **ClusterFactor** This is from DeDup. This is a value representing the how many duplicates in the library exist for each unique read. A cluster factor close to one replicates a highly complex library and could be sequenced further. Generally with a value of more than 2 you will not be gaining much more information by sequencing deeper.
-* **X Prime Y>Z N base** These columns are from DamageProfiler. The prime numbers represent which end of the reads the damage is referring to. The Y>Z is the type of substitution (C>T is the true damage, G>A is the complementary). You should see for no- and half- UDG treatment a decrease in frequency from the 1st to 2nd base.
-* **Mean Read Length** This is from DamageProfiler. This is the mean length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
-* **Median Read Length** This is from DamageProfiler. This is the median length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
-* **Coverage** This is from Qualimap. This is the median number of times a base on your reference genome was covered by a read (i.e. depth coverage).. This average includes bases with 0 reads covering that position.
-* **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
-* **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
+- **Sample Name** This is the log file name without file suffix(s). This will depend on the module outputs.
+- **Seqs** This is from Pre-AdapterRemoval FastQC. Represents the number of raw reads in your untrimmed and (paired end) unmerged FASTQ file. Each row should be approximately equal to the number of reads you requested to be sequenced, divided by the number of FASTQ files you received for that library.
+- **Length** This is from Pre-AdapterRemoval FastQC. This is the average read length in your untrimmed and (paired end) unmerged FASTQ file and should represent the number of cycles of your sequencing chemistry.
+- **%GC** This is from Pre-AdapterRemoval FastQC. This is the average GC content in percent of all the reads in your untrimmed and (paired end) unmerged FASTQ file.
+- **GC content** This is from FastP. This is the average GC of all reads in your untrimmed and unmerged FASTSQ file after poly-G tail trimming. If you have lots of tails, this value should drop from the pre-AadapterRemoval FastQC  %GC column.
+- **% Trimmed** This is from AdapterRemoval. It is the percentage of reads which had an adapter sequence removed from the end of the read.
+- **Seqs** This is from Post-AdapterRemoval FastQC. Represents the number of preprocessed reads in your adapter trimmed (paired end) merged FASTQ file. The loss between this number and the Pre-AdapterRemoval FastQC can give you an idea of the quality of trimming and merging.
+- **%GC** This is from Post-AdapterRemoval FastQC. Represents the average GC of all preprocessed reads in your adapter trimmed (paired end) merged FASTQ file.
+- **Length** This is from post-AdapterRemoval FastQC. This is the average read length in your trimmed and (paired end) merged FASTQ file and should represent the 'realistic' average lengths of your DNA molecules
+- **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _prior_ map quality filtering and deduplication.
+- **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _after_ map quality filtering and deduplication (note the column name does not distinguish itself from prior-map quality filtering, but the post-filter column is always second)
+- **Endogenous DNA (%)** This is from the endorS.py tool. It displays a percentage of mapped reads over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). Assuming a perfect ancient sample with no modern contamination, this would be the amount of true ancient DNA in the sample. However this value _most likely_ include contamination and will not entirely be the true 'endogenous' content.
+- **Endogenous DNA Post (%)** This is from the endorS.py tool. It displays a percentage of mapped reads _after_ BAM filtering (e.g. for mapping quality) over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). This column will only be displayed if BAM filtering is turned on and is based on the original mapping for total reads, and mapped reads as calculated from the post-filtering BAM.
+- **ClusterFactor** This is from DeDup. This is a value representing the how many duplicates in the library exist for each unique read. A cluster factor close to one replicates a highly complex library and could be sequenced further. Generally with a value of more than 2 you will not be gaining much more information by sequencing deeper.
+- **X Prime Y>Z N base** These columns are from DamageProfiler. The prime numbers represent which end of the reads the damage is referring to. The Y>Z is the type of substitution (C>T is the true damage, G>A is the complementary). You should see for no- and half- UDG treatment a decrease in frequency from the 1st to 2nd base.
+- **Mean Read Length** This is from DamageProfiler. This is the mean length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
+- **Median Read Length** This is from DamageProfiler. This is the median length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
+- **Coverage** This is from Qualimap. This is the median number of times a base on your reference genome was covered by a read (i.e. depth coverage).. This average includes bases with 0 reads covering that position.
+- **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
+- **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
 
 For other non-default columns, hover over the column name for further descriptions.
 
@@ -116,7 +116,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 #### Sequence Counts
 
-This shows a barplot with the overall number of sequences (x axis) in your raw library after demultiplexing, **per file** (y-axis).  If you have paired end data, you will have one bar for Read 1 (or forward), and a second bar for Read 2 (or reverse). Each entire bar should represent approximately what you requested from the sequencer itself - unless you have your library sequenced over multiple lanes, where it should be what you request divided by the number of lanes it was split over.
+This shows a barplot with the overall number of sequences (x axis) in your raw library after demultiplexing, **per file** (y-axis). If you have paired end data, you will have one bar for Read 1 (or forward), and a second bar for Read 2 (or reverse). Each entire bar should represent approximately what you requested from the sequencer itself - unless you have your library sequenced over multiple lanes, where it should be what you request divided by the number of lanes it was split over.
 
 A section of the bar will also show an approximate estimation of the fraction of the total number of reads that are duplicates of another. This can derive from over-amplification of the library, or lots of single adapters. This can be later checked with the Deduplication check. A good library and sequencing run should have very low amounts of duplicates reads.
 
@@ -136,9 +136,9 @@ You will often see that the first 5 or so bases have slightly lower quality than
 
 Things to watch out for:
 
-* all positions having Phred scores less than 27
-* a sharp drop-off of quality early in the read
-* for paired-end data, if either R1 or R2 is significantly lower quality across the whole read compared to the complementary read.
+- all positions having Phred scores less than 27
+- a sharp drop-off of quality early in the read
+- for paired-end data, if either R1 or R2 is significantly lower quality across the whole read compared to the complementary read.
   
 #### Per Sequence Quality Scores
 
@@ -150,8 +150,8 @@ This is a further summary of the previous plot. This is a histogram of the _over
 
 Things to watch out for:
 
-* bi-modal peaks which suggests artefacts in some of the sequencing cycles
-* all peaks being in orange or red sections which suggests an overall bad sequencing run (possibly due to a faulty flow-cell).
+- bi-modal peaks which suggests artefacts in some of the sequencing cycles
+- all peaks being in orange or red sections which suggests an overall bad sequencing run (possibly due to a faulty flow-cell).
   
 #### Per Base Sequencing Content
 
@@ -165,7 +165,7 @@ You expect to see whole heatmap to be a relatively equal block of colour (normal
 
 Things to watch out for:
 
-* If you see a particular colour becoming more prominent this suggests there is an over-representation of those bases at that base-pair range across all reads (e.g. 20-24bp). This could happen if you have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no fluorescence can mean both G or 'no-call').
+- If you see a particular colour becoming more prominent this suggests there is an over-representation of those bases at that base-pair range across all reads (e.g. 20-24bp). This could happen if you have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no fluorescence can mean both G or 'no-call').
 
 > If you see Poly-G tails, we recommend to turn on FastP poly-G trimming with EAGER. See the 'running' documentation page for details.
 
@@ -179,7 +179,7 @@ This line graph shows the number percentage reads (y-axis) with an average perce
 
 Things to watch out for:
 
-* If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no fluorescence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
+- If you see particularly high percent GC content peak with NextSeq/NovaSeq data, you may have lots of PCR duplicates, or poly-G tails from Illumina NextSeq/NovaSeq 2-colour chemistry data (where no fluorescence can mean both G or 'no-call'). Consider re-running EAGER2 using the poly-G trimming option from `fastp` See the 'running' documentation page for details.
 
 #### Per Base N Content
 
@@ -253,7 +253,7 @@ After filtering, you should see that the average GC content along the reads is n
 
 Things to look out for:
 
-* If you see a distinct GC content increase at the end of the reads, but are not removed after filtering, check to see where along the read the increase seems to start. If it is less than 10 base pairs from the end, consider reducing the overlap parameter `--complexity_filter_poly_g_min`, which tells FastP how far in the read the Gs need to go before removing them.
+- If you see a distinct GC content increase at the end of the reads, but are not removed after filtering, check to see where along the read the increase seems to start. If it is less than 10 base pairs from the end, consider reducing the overlap parameter `--complexity_filter_poly_g_min`, which tells FastP how far in the read the Gs need to go before removing them.
 
 ### AdapterRemoval
 
@@ -261,14 +261,14 @@ Things to look out for:
 
 AdapterRemoval a tool that does the post-sequencing clean up of your sequencing reads. It performs the following functions
 
-* 'Merges' (or 'collapses') forward and reverse reads of Paired End data
-* Removes remaining library indexing adapters
-* Trims low quality base tails from ends of reads
-* Removes too-short reads
+- 'Merges' (or 'collapses') forward and reverse reads of Paired End data
+- Removes remaining library indexing adapters
+- Trims low quality base tails from ends of reads
+- Removes too-short reads
 
 In more detail merging is where the same read from the forward and reverse files of a single library (based on the flowcell coordinates), are compared to find a stretch of sequence that are the same. If this overlap reaches certain quality thresholds, the two reads are 'collapsed' into a single read, with the base quality scores are updated accordingly accounting for the increase quality call precision.
 
-Adapter removal involves finding overlaps at the 5' and 3' end of reads for the artificial NGS library adapters (which connect the DNA molecule insert, and the index), and stretches that match each other are then removed from the read itself.  Note, by default AdapterRemoval does _not_ remove 'internal barcodes' (between insert and the adapter), so these statistics are not considered.
+Adapter removal involves finding overlaps at the 5' and 3' end of reads for the artificial NGS library adapters (which connect the DNA molecule insert, and the index), and stretches that match each other are then removed from the read itself. Note, by default AdapterRemoval does _not_ remove 'internal barcodes' (between insert and the adapter), so these statistics are not considered.
 
 Quality trimming (or 'truncating') involves looking at ends of reads for low-confidence bases (i.e. where the FASTQ Phred score is below a certain threshold). These are then removed remove the read.
 
@@ -282,10 +282,10 @@ The most important value is the **Retained Read Pairs** which gives you the fina
 
 Other Categories:
 
-* If paired-end, the **Singleton [mate] R1(/R2)** categories represent reads which were unable to be collapsed, possibly due to the reads being too long to overlap.
-* If paired-end, **Full-length collapsed pairs** are reads which were collapsed and did not require low-quality bases at end of reads to be removed.
-* If paired-end, **Truncated collapsed pairs** are paired-end that were collapsed but did required the removal of low quality bases at the end of reads.
-* **Discarded [mate] R1/R2** represent reads which were a part of a pair, but one member of the pair did not reach other quality criteria and was discarded. However the other member of the pair is still retained in the output file as it still reached other quality criteria.
+- If paired-end, the **Singleton [mate] R1(/R2)** categories represent reads which were unable to be collapsed, possibly due to the reads being too long to overlap.
+- If paired-end, **Full-length collapsed pairs** are reads which were collapsed and did not require low-quality bases at end of reads to be removed.
+- If paired-end, **Truncated collapsed pairs** are paired-end that were collapsed but did required the removal of low quality bases at the end of reads.
+- **Discarded [mate] R1/R2** represent reads which were a part of a pair, but one member of the pair did not reach other quality criteria and was discarded. However the other member of the pair is still retained in the output file as it still reached other quality criteria.
 
 <p align="center">
   <img src="images/output/adapter_removal/adapter_removal_discarded_reads.png" width="75%" height = "75%">
@@ -299,11 +299,11 @@ If you see high numbers of discarded or truncated reads, you should check your F
 
 The length distribution plots show the number of reads at each read-length. You can change the plot to display different categories.
 
-* All represent the overall distribution of reads. In the case of paired-end sequencing You may see a peak at the turn around from forward to reverse cycles.
-* **Mate 1** and **Mate 2** represents the length of the forward and reverse read respectively prior collapsing
-* **Singleton** represent those reads that had a one member of a pair discarded
-* **Collapsed** and **Collapsed Truncated** represent reads that overlapped and able to merge into a single read, with the latter including base-quality trimming off ends of reads. These plots will start with a vertical rise representing where you are above the minimum-read threshold you set.
-* **Discarded** here represents the number of reads that did not each the read length filter. You will likely see a vertical drop at what your threshold was set to.
+- All represent the overall distribution of reads. In the case of paired-end sequencing You may see a peak at the turn around from forward to reverse cycles.
+- **Mate 1** and **Mate 2** represents the length of the forward and reverse read respectively prior collapsing
+- **Singleton** represent those reads that had a one member of a pair discarded
+- **Collapsed** and **Collapsed Truncated** represent reads that overlapped and able to merge into a single read, with the latter including base-quality trimming off ends of reads. These plots will start with a vertical rise representing where you are above the minimum-read threshold you set.
+- **Discarded** here represents the number of reads that did not each the read length filter. You will likely see a vertical drop at what your threshold was set to.
 
 <p align="center">
   <img src="images/output/adapter_removal/adapter_removal_length_distribution.png" width="75%" height = "75%">
@@ -343,15 +343,15 @@ DeDup is a duplicate removal tool which searches for PCR duplicates and removes 
 
 This stacked bar plot shows as a whole the total number of reads in the BAM file going into DeDup. The different sections of a given bar represents the following:
 
-* **Not Removed** - the overall number of reads remaining after duplicate removal. These may have had a duplicate (see below).
-* **Reverse Removed** - the number of reads that found to be a duplicate of another and removed that were un-collapsed reverse reads (from the earlier read merging step).
-* **Forward Removed** - the number of reads that found to be a duplicate of another and removed that were an un-collapsed forward reads (from the earlier read merging step).
-* **Merged Removed** - the number of reads that were found to be a duplicate and removed that were a collapsed read (from the earlier read merging step).
+- **Not Removed** - the overall number of reads remaining after duplicate removal. These may have had a duplicate (see below).
+- **Reverse Removed** - the number of reads that found to be a duplicate of another and removed that were un-collapsed reverse reads (from the earlier read merging step).
+- **Forward Removed** - the number of reads that found to be a duplicate of another and removed that were an un-collapsed forward reads (from the earlier read merging step).
+- **Merged Removed** - the number of reads that were found to be a duplicate and removed that were a collapsed read (from the earlier read merging step).
   
 Exceptions to the above:
 
-* If you do not have paired end data, you will not have sections for 'Merged removed' or 'Reverse removed'.
-* If you use the `--dedup_all_merged` flag, you will not have the 'Forward removed' or 'Reverse removed' sections.
+- If you do not have paired end data, you will not have sections for 'Merged removed' or 'Reverse removed'.
+- If you use the `--dedup_all_merged` flag, you will not have the 'Forward removed' or 'Reverse removed' sections.
 
 <p align="center">
   <img src="images/output/dedup/dedup_deduplicated_reads.png" width="75%" height = "75%">
@@ -359,8 +359,8 @@ Exceptions to the above:
 
 Things to look out for:
 
-* The smaller the number of the duplicates removed the better. If you have a smaller number of duplicates, and wish to sequence deeper, you can use the preseq module (see below) to make an estimate on how much deeper to sequence.
-* If you have a very large number of duplicates that were removed this may suggest you have an over amplified library, or a lot of left-over adapters that were able to map to your genome.
+- The smaller the number of the duplicates removed the better. If you have a smaller number of duplicates, and wish to sequence deeper, you can use the preseq module (see below) to make an estimate on how much deeper to sequence.
+- If you have a very large number of duplicates that were removed this may suggest you have an over amplified library, or a lot of left-over adapters that were able to map to your genome.
 
 ### Preseq
 
@@ -384,9 +384,9 @@ The dashed line represents a 'perfect' library containing only unique molecules 
 
 Plateauing can be caused by a number of reasons:
 
-* You have simply sequenced your library to exhaustion
-* You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio
-* You have a low quality library made up of mappable sequencing artefacts that were able to pass filtering (e.g. adapters)
+- You have simply sequenced your library to exhaustion
+- You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio
+- You have a low quality library made up of mappable sequencing artefacts that were able to pass filtering (e.g. adapters)
 
 ### DamageProfiler
 
@@ -396,9 +396,9 @@ DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics f
 
 Therefore, three main characteristics of ancient DNA are:
 
-* Short DNA fragments
-* Elevated G and As (purines) just before strand breaks
-* Increased C and Ts at ends of fragments
+- Short DNA fragments
+- Elevated G and As (purines) just before strand breaks
+- Increased C and Ts at ends of fragments
   
 #### Misincorporation Plots
 
@@ -406,12 +406,12 @@ The MultiQC DamageProfiler module misincorporation plots shows the percent frequ
 
 When looking at the misincorporation plots, keep the following in mind:
 
-* As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads.
-* If your library has been **partially-UDG treated**, only the first one or two bases will display the the misincorporation frequency.
-* If your library has been **UDG treated** you will expect to see extremely-low to no misincorporations at read ends.
-* If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
-* We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
-* The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
+- As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads.
+- If your library has been **partially-UDG treated**, only the first one or two bases will display the misincorporation frequency.
+- If your library has been **UDG treated** you will expect to see extremely-low to no misincorporations at read ends.
+- If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
+- We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
+- The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
 
 <p align="center">
   <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
@@ -425,9 +425,9 @@ The MultiQC DamageProfiler module length distribution plots show the frequency o
 
 When looking at the length distribution plots, keep in mind the following:
 
-* Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
-* You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
-* You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
+- Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
+- You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
+- You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
 
 ### QualiMap
 
@@ -435,7 +435,7 @@ When looking at the length distribution plots, keep in mind the following:
 
 Qualimap is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
 
-> NB: Neither fold coverage nor percent coverage on there own is sufficient enough to asssess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or unremoved-adapter-containing reference genomes can artifically inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
+> NB: Neither fold coverage nor percent coverage on there own is sufficient to assess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or un-removed-adapter-containing reference genomes can artificially inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
 
 Note that many of the statistics from this module are displayed in the General Stats table (see above), as they represent single values that are not plottable.
 
@@ -451,8 +451,8 @@ The greater the number of bases covered at as high as possible fold coverage, th
 
 Things to watch out for:
 
-* You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
-* If you have stacking of reads i.e. a small region with an abnormally large amount of reads despite the rest of the reference being quite shallowly covered, this will artificially increase your coverage. This would be represented by a small peak that is a much further along the X axis away from the main distribution of reads.
+- You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
+- If you have stacking of reads i.e. a small region with an abnormally large amount of reads despite the rest of the reference being quite shallowly covered, this will artificially increase your coverage. This would be represented by a small peak that is a much further along the X axis away from the main distribution of reads.
   
 #### Cumulative Genome Coverage
 
@@ -474,9 +474,9 @@ This plot shows the distirbution of th frequency of reads at different GC conten
 
 Things to watch out for:
 
-* This plot should normally show a normal distribution around the average GC content of your reference genome.
-* Binomial peaks may represent lab-based artefacts that should be further investigated.
-* Skews of the peak to a higher GC content that the reference in Illumina dual-colour chemistry data (e.g. NextSeq or NovaSeq), may suggest long poly-G tails that are mapping to poly-G stretches of your genome. The EAGER2 trimming option `--complexity_filter_poly_g` can be used to remove these tails by utilising the tool FastP for detection and trimming.
+- This plot should normally show a normal distribution around the average GC content of your reference genome.
+- Binomial peaks may represent lab-based artefacts that should be further investigated.
+- Skews of the peak to a higher GC content that the reference in Illumina dual-colour chemistry data (e.g. NextSeq or NovaSeq), may suggest long poly-G tails that are mapping to poly-G stretches of your genome. The EAGER2 trimming option `--complexity_filter_poly_g` can be used to remove these tails by utilising the tool FastP for detection and trimming.
   
 ## Output Files
 
@@ -484,26 +484,26 @@ This section gives a brief summary of where to look for what files for downstrea
 
 Each module has it's own output directory which sit alongside the `MultiQC/` directory from which you opened the report.
 
-* `reference_genome/` - this directory contains the indexing files  of your input reference genome (i.e. the various `bwa` indices, a `samtools`' `.fai` file, and a picard `.dict`), if you used the `--saveReference` flag.
-* `FastQC/` - this contains the original per-FASTQ FastQC reports that are summarised with MultiQC. These occur in both `html` (the report) and `.zip` format (raw data). The `after_clipping` folder contains the same but for after AdapterRemoval.
-* `AdapterRemoval/` - this contains the log files (ending with `.settings`) with raw trimming (and merging) statistics after AdapterRemoval. In the `output` sub-directory, are the output trimmed (and merged) FASTQ files. These you can use for downstream applications such as taxonomic binning for metagenomic studies.
-* `mapping/` - this contains a sub-directory corresponding to the mapping tool you used, inside of which will be the initial BAM files containing the reads that mapped to your reference genome with no modification (see below). You will also find a corresponding BAM index file (ending in `.csi` or `.bam`), and if running the `bowtie2` mapper - a log ending in `_bt2.log`. You can use these for downstream applications e.g. if you wish to use a different de-duplication tool not included in nf-core/eager (although please feel free to add a new module request on the Github repository's [issue page](https://github.com/nf-core/eager/issues)!).
-* `samtools/` - this contains two sub-directories. `stats/` contain the raw mapping statistics files (ending in `.stats`) from directly after mapping. `filter/` contains BAM files that have had a mapping quality filter applied (set by the `--bam_mapping_quality_threshold` flag) and a corresponding index file. Furthermore, if you selected `--bam_discard_unmapped`, you will find your separate file with only unmapped reads in the format you selected. Note unmapped read BAM files will _not_ have an index file.
-* `deduplication/` - this contains a sub-directory called `dedup/`, inside here are sample specific directories. Each directory contains a BAM file containing mapped reads but with PCR duplicates removed, a corresponding index file and two stats file. `.hist.` contains raw data for a deduplication histogram used for tools like preseq (see below), and the `.log` contains overall summary deduplication statistics.
-* `endorSpy/` - this contains all JSON files exported from the endorSpy endogenous DNA calculation tool. The JSON files are generated specifically for display in the MultiQC general statistics table and is otherwise very likely not useful for you.
-* `preseq/` - this contains a `.ccurve` file for every BAM file that had enough deduplication statistics to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced. You can use this file for plotting e.g. in `R` to find your sequencing target depth.
-* `qualimap/` - this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
-* `damageprofiler/` - this contains sample specific directories containing raw statistics and damage plots from DamageProfiler. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
-* `pmdtools/` this contains raw output statistics of pmdtools (estimates of frequencies of substitutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`. The BAM files do not have corresponding index files.
-* `trimmed_bam/` this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_left` and `--bamutils_clip_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read).
-* `genotyping/` this contains all the (gzipped) VCF files produced by your genotyping module. The file suffix will have the genotyping tool name. You will have VCF files corresponding to your deduplicated BAM files, as well as any turned-on downstream processes that create BAMs (e.g. trimmed bams or pmd tools). If `--gatk_ug_keep_realign_bam` supplied, this may also contain BAM files from InDel realignment when using GATK 3 and UnifiedGenotyping for variant calling.
-* `MultiVCFAnalyzer/` this contains all output from MultiVCFAnalyzer, including SNP calling statistics, various SNP table(s) and FASTA alignment files.
-* `sex_determination/` this contains the output for the sex determination run. This is a single `.tsv` file that includes a table with the Sample Name, the Nr of Autosomal SNPs, Nr of SNPs on the X/Y chromosome, the Nr of reads mapping to the Autosomes, the Nr of reads mapping to the X/Y chromosome, the relative coverage on the X/Y chromosomes, and the standard error associated with the relative coverages. These measures are provided for each bam file, one row per bam. If the `sexdeterrmine_bedfile` option has not been provided, the error bars cannot be trusted, and runtime will be considerably longer.
-* `nuclear_contamination/` this contains the output of the nuclear contamination processes. The directory contains one `*.X.contamination.out` file per individual, as well as `nuclear_contamination.txt` which is a summary table of the results for all individual. `nuclear_contamination.txt` contains a header, followed by one line per individual, comprised of the Method of Moments (MOM) and Maximum Likelihood (ML) contamination estimate (with their respective standard errors) for both Method1 and Method2.
-* `bedtools/` this contains two files as the output from bedtools coverage. One file contains the 'breadth' coverage (`*.breadth.gz`). This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature. The second file (`*.depth.gz`), contains the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
-* `metagenomic_classification/` This contains the output for a given metagenomic classifier.
-  * Malt will contain RMA6 files that can be loaded into MEGAN6 or MaltExtract for phylogenetic visualisation of read taxonomic assignments and aDNA characteristics respectively. Additional a `malt.log` file is provided which gives additional information such as run-time, memory usage and per-sample statistics of numbers of alignments with taxonomic assignment etc.
-  * Kraken will contain the Kraken output and report files, as well as a merged Taxon count table.
-* `MaltExtract/` this will contain a `results` directory in which contains the output from MaltExtract - typically one folder for each filter type, an error and a log file. The characteristics of each node (e.g. damage, read lengths, edit distances - each in different txt formats) can be seen in each sub-folder of the filter folders. Output can be visualised either with the [HOPS postprocessing script](https://github.com/rhuebler/HOPS) or [MEx-IPA](https://github.com/jfy133/MEx-IPA)
-* `consensus_sequence/` this contains three FASTA files from VCF2Genome, of a consensus sequence based on the reference FASTA with each sample's unique modifications. The main FASTA is a standard file with bases not passing the specified thresholds as Ns. The two other FASTAS (`_refmod.fasta.gz`) and (`_uncertainity.fasta.gz`) are IUPAC uncertainty codes (rather than Ns) and a special number-based uncertainty system used for other downstream tools, respectively.
-* `librarymerged_bams/` these contain the final BAM files that would go into genotyping (if genotyping is turned on). This means the BAM will contain all libraries of a given sample (including trimmed non-UDG or half-UDG treated libraries, if BAM trimming turned on)
+- `reference_genome/` - this directory contains the indexing files  of your input reference genome (i.e. the various `bwa` indices, a `samtools`' `.fai` file, and a picard `.dict`), if you used the `--saveReference` flag.
+- `FastQC/` - this contains the original per-FASTQ FastQC reports that are summarised with MultiQC. These occur in both `html` (the report) and `.zip` format (raw data). The `after_clipping` folder contains the same but for after AdapterRemoval.
+- `AdapterRemoval/` - this contains the log files (ending with `.settings`) with raw trimming (and merging) statistics after AdapterRemoval. In the `output` sub-directory, are the output trimmed (and merged) FASTQ files. These you can use for downstream applications such as taxonomic binning for metagenomic studies.
+- `mapping/` - this contains a sub-directory corresponding to the mapping tool you used, inside of which will be the initial BAM files containing the reads that mapped to your reference genome with no modification (see below). You will also find a corresponding BAM index file (ending in `.csi` or `.bam`), and if running the `bowtie2` mapper - a log ending in `_bt2.log`. You can use these for downstream applications e.g. if you wish to use a different de-duplication tool not included in nf-core/eager (although please feel free to add a new module request on the Github repository's [issue page](https://github.com/nf-core/eager/issues)!).
+- `samtools/` - this contains two sub-directories. `stats/` contain the raw mapping statistics files (ending in `.stats`) from directly after mapping. `filter/` contains BAM files that have had a mapping quality filter applied (set by the `--bam_mapping_quality_threshold` flag) and a corresponding index file. Furthermore, if you selected `--bam_discard_unmapped`, you will find your separate file with only unmapped reads in the format you selected. Note unmapped read BAM files will _not_ have an index file.
+- `deduplication/` - this contains a sub-directory called `dedup/`, inside here are sample specific directories. Each directory contains a BAM file containing mapped reads but with PCR duplicates removed, a corresponding index file and two stats file. `.hist.` contains raw data for a deduplication histogram used for tools like preseq (see below), and the `.log` contains overall summary deduplication statistics.
+- `endorSpy/` - this contains all JSON files exported from the endorSpy endogenous DNA calculation tool. The JSON files are generated specifically for display in the MultiQC general statistics table and is otherwise very likely not useful for you.
+- `preseq/` - this contains a `.ccurve` file for every BAM file that had enough deduplication statistics to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced. You can use this file for plotting e.g. in `R` to find your sequencing target depth.
+- `qualimap/` - this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
+- `damageprofiler/` - this contains sample specific directories containing raw statistics and damage plots from DamageProfiler. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
+- `pmdtools/` this contains raw output statistics of pmdtools (estimates of frequencies of substitutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`. The BAM files do not have corresponding index files.
+- `trimmed_bam/` this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_left` and `--bamutils_clip_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read).
+- `genotyping/` this contains all the (gzipped) VCF files produced by your genotyping module. The file suffix will have the genotyping tool name. You will have VCF files corresponding to your deduplicated BAM files, as well as any turned-on downstream processes that create BAMs (e.g. trimmed bams or pmd tools). If `--gatk_ug_keep_realign_bam` supplied, this may also contain BAM files from InDel realignment when using GATK 3 and UnifiedGenotyping for variant calling.
+- `MultiVCFAnalyzer/` this contains all output from MultiVCFAnalyzer, including SNP calling statistics, various SNP table(s) and FASTA alignment files.
+- `sex_determination/` this contains the output for the sex determination run. This is a single `.tsv` file that includes a table with the Sample Name, the Nr of Autosomal SNPs, Nr of SNPs on the X/Y chromosome, the Nr of reads mapping to the Autosomes, the Nr of reads mapping to the X/Y chromosome, the relative coverage on the X/Y chromosomes, and the standard error associated with the relative coverages. These measures are provided for each bam file, one row per bam. If the `sexdeterrmine_bedfile` option has not been provided, the error bars cannot be trusted, and runtime will be considerably longer.
+- `nuclear_contamination/` this contains the output of the nuclear contamination processes. The directory contains one `*.X.contamination.out` file per individual, as well as `nuclear_contamination.txt` which is a summary table of the results for all individual. `nuclear_contamination.txt` contains a header, followed by one line per individual, comprised of the Method of Moments (MOM) and Maximum Likelihood (ML) contamination estimate (with their respective standard errors) for both Method1 and Method2.
+- `bedtools/` this contains two files as the output from bedtools coverage. One file contains the 'breadth' coverage (`*.breadth.gz`). This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature. The second file (`*.depth.gz`), contains the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
+- `metagenomic_classification/` This contains the output for a given metagenomic classifier.
+  - Malt will contain RMA6 files that can be loaded into MEGAN6 or MaltExtract for phylogenetic visualisation of read taxonomic assignments and aDNA characteristics respectively. Additional a `malt.log` file is provided which gives additional information such as run-time, memory usage and per-sample statistics of numbers of alignments with taxonomic assignment etc.
+  - Kraken will contain the Kraken output and report files, as well as a merged Taxon count table.
+- `MaltExtract/` this will contain a `results` directory in which contains the output from MaltExtract - typically one folder for each filter type, an error and a log file. The characteristics of each node (e.g. damage, read lengths, edit distances - each in different txt formats) can be seen in each sub-folder of the filter folders. Output can be visualised either with the [HOPS postprocessing script](https://github.com/rhuebler/HOPS) or [MEx-IPA](https://github.com/jfy133/MEx-IPA)
+- `consensus_sequence/` this contains three FASTA files from VCF2Genome, of a consensus sequence based on the reference FASTA with each sample's unique modifications. The main FASTA is a standard file with bases not passing the specified thresholds as Ns. The two other FASTAS (`_refmod.fasta.gz`) and (`_uncertainity.fasta.gz`) are IUPAC uncertainty codes (rather than Ns) and a special number-based uncertainty system used for other downstream tools, respectively.
+- `librarymerged_bams/` these contain the final BAM files that would go into genotyping (if genotyping is turned on). This means the BAM will contain all libraries of a given sample (including trimmed non-UDG or half-UDG treated libraries, if BAM trimming turned on)
