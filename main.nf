@@ -315,6 +315,8 @@ if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwa
         .fromPath(bwa_dir, checkIfExists: true)
         .ifEmpty { exit 1, "[nf-core/eager] error: bwa indicies not found in: ${bwa_dir}" }
         .into {bwa_index; bwa_index_bwamem}
+
+    bt2_index = ''
 }
 
 if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
@@ -326,6 +328,8 @@ if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
         .fromPath(bt2_dir, checkIfExists: true)
         .ifEmpty { exit 1, "[nf-core/eager] error: bowtie2 indicies not found in: ${bt2_dir}" }
         .into {bt2_index; bt2_index_bwamem}
+
+    bwa_index = ''
 }
 
 // Validate BAM input isn't set to paired_end
