@@ -2431,10 +2431,10 @@ if (params.additional_vcf_files == '') {
 
 // Human biological sex estimation
 
-if (params.sexdeterrmine_bedfile == '') {
-  ch_bed_for_sexdeterrmine = file('NO_FILE')
-} else {
+if (params.sexdeterrmine_bedfile) {
   ch_bed_for_sexdeterrmine = file(params.sexdeterrmine_bedfile)
+} else {
+  ch_bed_for_sexdeterrmine = file('NO_FILE')
 }
 
 // As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
