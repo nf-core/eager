@@ -2291,7 +2291,7 @@ if (params.additional_vcf_files == '') {
   """
  }
 
-// Human biological sex esimtaiton
+// Human biological sex estimation
 
 if (params.sexdeterrmine_bedfile == '') {
   ch_bed_for_sexdeterrmine = file('NO_FILE')
@@ -2300,39 +2300,32 @@ if (params.sexdeterrmine_bedfile == '') {
 }
 
 // As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
- process sex_deterrmine {
+process sex_deterrmine {
     label 'sc_small'
     publishDir "${params.outdir}/sex_determination", mode:"copy"
-     when:
-     params.run_sexdeterrmine
-    
-     input:
-     file bam from ch_for_sexdeterrmine.map { it[7] }.collect()
-     file bed from ch_bed_for_sexdeterrmine
-
-     output:
-     file "SexDet.txt"
-     file "*.json" into ch_sexdet_for_multiqc
      
-     script:
-     if (params.sexdeterrmine_bedfile == '') {
-         """
-         for i in *.bam; do
-             echo \$i >> bamlist.txt
-         done
-        
-         samtools depth -aa -q30 -Q30 -f bamlist.txt| sexdeterrmine -f bamlist.txt >SexDet.txt
-         """
-         } else {
-         """
-         for i in *.bam; do
-             echo \$i >> bamlist.txt
-         done
-        
-         samtools depth -aa -q30 -Q30 -b ${bed} -f bamlist.txt | sexdeterrmine -f bamlist.txt >SexDet.txt
-         """
-     }
- }
+    input:
+    file bam from ch_for_sexdeterrmine.map { it[7] }.collect()
+    file bed from ch_bed_for_sexdeterrmine
+
+    output:
+    file "SexDet.txt"
+    file "*.json" into ch_sexdet_for_multiqc
+
+    when:
+    params.run_sexdeterrmine
+    
+    script:
+    def filter = bed.name != 'NO_FILE' ? "-b $bed" : ''
+    """
+    
+    for i in *.bam; do
+        echo \$i >> bamlist.txt
+    done
+  
+    samtools depth -aa -q30 -Q30 $filter -f bamlist.txt | sexdeterrmine -f bamlist.txt > SexDet.txt
+    """
+}
 
 // Human DNA nuclear contamination estimation
 
