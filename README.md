@@ -33,7 +33,7 @@ By default the pipeline currently performs the following:
 * Create reference genome indices for mapping (`bwa`, `samtools`, and `picard`)
 * Sequencing quality control (`FastQC`)
 * Sequencing adapter removal and for paired end data merging (`AdapterRemoval`)
-* Read mapping to reference using (`bwa aln`, `bwa mem` or `CircularMapper`)
+* Read mapping to reference using (`bwa aln`, `bwa mem`, `CircularMapper`, or `bowtie2`)
 * Post-mapping processing, statistics and conversion to bam (`samtools`)
 * Ancient DNA C-to-T damage pattern visualisation (`DamageProfiler`)
 * PCR duplicate removal (`DeDup` or `MarkDuplicates`)
@@ -66,7 +66,7 @@ Additional functionality contained by the pipeline currently includes:
 #### Biological Information
 
 * Mitochondrial to Nuclear read ratio calculation (`MtNucRatioCalculator`)
-* Statistical sex determination of human individuals (`SexDetErrmine`)
+* Statistical sex determination of human individuals (`Sex.DetERRmine`)
 
 #### Metagenomic Screening
 
@@ -178,8 +178,10 @@ If you've contributed and you're missing in here, please let us know and we will
   * Vågene, Å.J. et al., 2018. Salmonella enterica genomes from victims of a major sixteenth-century epidemic in Mexico. Nature ecology & evolution, 2(3), pp.520–528. Available at: [http://dx.doi.org/10.1038/s41559-017-0446-6](http://dx.doi.org/10.1038/s41559-017-0446-6).
   * Herbig, A. et al., 2016. MALT: Fast alignment and analysis of metagenomic DNA sequence data applied to the Tyrolean Iceman. bioRxiv, p.050559. Available at: [http://biorxiv.org/content/early/2016/04/27/050559](http://biorxiv.org/content/early/2016/04/27/050559).
 * **MaltExtract** Huebler, R. et al., 2019. HOPS: Automated detection and authentication of pathogen DNA in archaeological remains. bioRxiv, p.534198. Available at: [https://www.biorxiv.org/content/10.1101/534198v1?rss=1](https://www.biorxiv.org/content/10.1101/534198v1?rss=1). Download: [https://github.com/rhuebler/MaltExtract](https://github.com/rhuebler/MaltExtract)
-* **Kraken2**     Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. Available at: [https://doi.org/10.1186/s13059-019-1891-0](https://doi.org/10.1186/s13059-019-1891-0). Download: [https://ccb.jhu.edu/software/kraken2/](https://ccb.jhu.edu/software/kraken2/)
+* **Kraken2** Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. Available at: [https://doi.org/10.1186/s13059-019-1891-0](https://doi.org/10.1186/s13059-019-1891-0). Download: [https://ccb.jhu.edu/software/kraken2/](https://ccb.jhu.edu/software/kraken2/)
 * **endorS.py** Aida Andrades Valtueña (Unpublished). Download: [https://github.com/aidaanva/endorS.py](https://github.com/aidaanva/endorS.py)
+* **Bowtie2**  Langmead, B. and Salzberg, S. L. 2012 Fast gapped-read alignment with Bowtie 2. Nature methods, 9(4), p. 357–359. doi: [10.1038/nmeth.1923](https:/dx.doi.org/10.1038/nmeth.1923).
+* **sequenceTools** Stephan Schiffels (Unpublished). Download: [https://github.com/stschiff/sequenceTools](https://github.com/stschiff/sequenceTools)
 
 ## Data References
 
