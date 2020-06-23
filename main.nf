@@ -633,7 +633,7 @@ summary['Input']        = params.input
 summary['Convert input BAM?'] = params.run_convertinputbam ? 'Yes' : 'No'
 summary['Fasta Ref']    = params.fasta
 summary['BAM Index Type'] = (params.large_ref == "") ? 'BAI' : 'CSI'
-if(params.bwa_index) summary['BWA Index'] = params.bwa_index
+if(params.bwa_index || params.bt2_index ) summary['BWA Index'] = "Yes"
 summary['Skipping FASTQC?'] = params.skip_fastqc ? 'Yes' : 'No'
 summary['Skipping AdapterRemoval?'] = params.skip_adapterremoval ? 'Yes' : 'No'
 if (!params.skip_adapterremoval) {
@@ -1283,14 +1283,15 @@ process bwa {
     tag "${libraryid}"
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
-    when: params.mapper == 'bwaaln'
-
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwa
     file index from bwa_index.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwa   
+
+    when: 
+    params.mapper == 'bwaaln'
 
     script:
     size = "${params.large_ref}" ? '-c' : ''
@@ -1322,15 +1323,16 @@ process bwamem {
     tag "$libraryid"
     publishDir "${params.outdir}/mapping/bwamem", mode: 'copy'
 
-    when: params.mapper == 'bwamem'
-
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwamem
     file index from bwa_index_bwamem.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwamem
-    
+
+    when: 
+    params.mapper == 'bwamem'
+
     script:
     fasta = "${index}/${bwa_base}"
     size = "${params.large_ref}" ? '-c' : ''
@@ -1360,13 +1362,14 @@ process circulargenerator{
             else null
     }
 
-    when: params.mapper == 'circularmapper'
-
     input:
     file fasta from ch_fasta_for_circulargenerator
 
     output:
     file "${prefix}.{amb,ann,bwt,sa,pac}" into ch_circularmapper_indices
+
+    when: 
+    params.mapper == 'circularmapper'
 
     script:
     prefix = "${fasta.baseName}_${params.circularextension}.fasta"
@@ -1382,8 +1385,6 @@ process circularmapper{
     tag "$libraryid"
     publishDir "${params.outdir}/mapping/circularmapper", mode: 'copy'
 
-    when: params.mapper == 'circularmapper'
-
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_cm
     file index from ch_circularmapper_indices.collect()
@@ -1391,7 +1392,10 @@ process circularmapper{
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_cm, ch_outputindex_from_cm
-    
+
+    when: 
+    params.mapper == 'circularmapper'
+
     script:
     filter = "${params.circularfilter}" ? '' : '-f true -x false'
     elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
@@ -1424,8 +1428,6 @@ process bowtie2 {
     tag "${libraryid}"
     publishDir "${params.outdir}/mapping/bt2", mode: 'copy'
 
-    when: params.mapper == 'bowtie2'
-
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bt2
     file index from bt2_index.collect()
@@ -1433,6 +1435,9 @@ process bowtie2 {
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bt2
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_bt2.log") into ch_bt2_for_multiqc
+
+    when: 
+    params.mapper == 'bowtie2'
 
     script:
     size = "${params.large_ref}" ? '-c' : ''
@@ -1443,30 +1448,37 @@ process bowtie2 {
     bt2l = "${params.bt2l}" != 0 ? "-L ${params.bt2l}" : ""
 
     if ( "${params.bt2_alignmode}" == "end-to-end"  ) {
-      if ( "${params.bt2_sensitivity}" == 'no-preset' ) {
-        sensitivity = ""
-      } else if ( "${params.bt2_sensitivity}" == "very-fast" ) {
-        sensitivity = "--very-fast"
-      } else if ( "${params.bt2_sensitivity}" == "fast" ) {
-        sensitivity = "--fast"
-      } else if ( "${params.bt2_sensitivity}" == "sensitive" ) {
-        sensitivity = "--sensitive"
-      } else if ( "${params.bt2_sensitivity}" == "very-sensitive" ) {
-        sensitivity = "--very-sensitive"
+      switch ( "${params.bt2_sensitivity}" ) {
+        case "no-preset":
+        sensitivity = ""; break
+        case "very-fast":
+        sensitivity = "--very-fast"; break
+        case "fast":
+        sensitivity = "--fast"; break
+        case "sensitive":
+        sensitivity = "--sensitive"; break
+        case "very-sensitive":
+        sensitivity = "--very-sensitive"; break
+        default:
+        sensitivity = ""; break
+        }
+      } else if ("${params.bt2_alignmode}" == "local") {
+      switch ( "${params.bt2_sensitivity}" ) {
+        case "no-preset":
+        sensitivity = ""; break
+        case "very-fast":
+        sensitivity = "--very-fast-local"; break
+        case "fast":
+        sensitivity = "--fast-local"; break
+        case "sensitive":
+        sensitivity = "--sensitive-local"; break
+        case "very-sensitive":
+        sensitivity = "--very-sensitive-local"; break
+        default:
+        sensitivity = ""; break
+
+        }
       }
-    } else if ( "${params.bt2_alignmode}" == "local" ) {
-      if ( "${params.bt2_sensitivity}" == 'no-preset' ) {
-        sensitivity = ""
-      } else if ( "${params.bt2_sensitivity}" == "very-fast" ) {
-        sensitivity = "--very-fast-local"
-      } else if ( "${params.bt2_sensitivity}" == "fast" ) {
-        sensitivity = "--fast-local"
-      } else if ( "${params.bt2_sensitivity}" == "sensitive" ) {
-        sensitivity = "--sensitive-local"
-      } else if ( "${params.bt2_sensitivity}" == "very-sensitive" ) {
-        sensitivity = "--sensitive-local"
-      }
-    }
 
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
