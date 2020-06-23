@@ -10,176 +10,30 @@
   - [Running the pipeline](#running-the-pipeline)
     - [Updating the pipeline](#updating-the-pipeline)
     - [Mandatory Arguments](#mandatory-arguments)
-      - [`-profile`](#-profile)
-      - [`--input`](#--input)
-        - [Direct Input Method](#direct-input-method)
-        - [TSV Input Method](#tsv-input-method)
-      - [`--bam`](#--bam)
-      - [`--single_stranded`](#--single_stranded)
-      - [`--colour_chemistry`](#--colour_chemistry)
-      - [`--fasta`](#--fasta)
-      - [`--genome` (using iGenomes)](#--genome-using-igenomes)
     - [Output Directories](#output-directories)
-      - [`--outdir`](#--outdir)
-      - [`-w / -work-dir`](#-w---work-dir)
     - [Optional Reference Options](#optional-reference-options)
-      - [`--large_ref`](#--large_ref)
-      - [`--save_reference`](#--save_reference)
-      - [`--bwa_index`](#--bwa_index)
-      - [`--seq_dict`](#--seq_dict)
-      - [`--fasta_index`](#--fasta_index)
     - [Other run specific parameters](#other-run-specific-parameters)
-      - [`-r`](#-r)
-      - [`--max_memory`](#--max_memory)
-      - [`--max_time`](#--max_time)
-      - [`--max_cpus`](#--max_cpus)
-      - [`--email`](#--email)
-      - [`--plaintext_email`](#--plaintext_email)
-      - [`-name`](#-name)
-      - [`-resume`](#-resume)
-      - [`-c`](#-c)
-      - [`--monochrome_logs`](#--monochrome_logs)
-      - [`--multiqc_config`](#--multiqc_config)
-      - [`--custom_config_version`](#--custom_config_version)
   - [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
     - [Step skipping parameters](#step-skipping-parameters)
-      - [`--skip_fastqc`](#--skip_fastqc)
-      - [`--skip_adapterremoval`](#--skip_adapterremoval)
-      - [`--skip_preseq`](#--skip_preseq)
-      - [`--skip_deduplication`](#--skip_deduplication)
-      - [`--skip_damage_calculation`](#--skip_damage_calculation)
-      - [`--skip_qualimap`](#--skip_qualimap)
     - [BAM Conversion Options](#bam-conversion-options)
-      - [`--run_convertinputbam`](#--run_convertinputbam)
     - [Complexity Filtering Options](#complexity-filtering-options)
-      - [`--complexity_filter_poly_g`](#--complexity_filter_poly_g)
-      - [`--complexity_filter_poly_g_min`](#--complexity_filter_poly_g_min)
     - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
-      - [`--clip_forward_adaptor`](#--clip_forward_adaptor)
-      - [`--clip_reverse_adaptor`](#--clip_reverse_adaptor)
-      - [`--clip_readlength](#--clip_readlength)
-      - [`--clip_min_read_quality`](#--clip_min_read_quality)
-      - [`--clip_min_adap_overlap`](#--clip_min_adap_overlap)
-      - [`--skip_collapse`](#--skip_collapse)
-      - [`--skip_trim`](#--skip_trim)
-      - [`--preserve5p`](#--preserve5p)
-      - [`--mergedonly`](#--mergedonly)
     - [Read Mapping Parameters](#read-mapping-parameters)
-      - [`--mapper`](#--mapper)
-      - [BWA (default)](#bwa-default)
-        - [`--bwaalnn`](#--bwaalnn)
-        - [`--bwaalnk`](#--bwaalnk)
-        - [`--bwaalnl`](#--bwaalnl)
-      - [CircularMapper](#circularmapper)
-        - [`--circularextension`](#--circularextension)
-        - [`--circulartarget`](#--circulartarget)
-        - [`--circularfilter`](#--circularfilter)
     - [Mapped Reads Stripping](#mapped-reads-stripping)
-      - [`--strip_input_fastq`](#--strip_input_fastq)
-      - [`--strip_mode`](#--strip_mode)
     - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
-      - [`--run_bam_filtering`](#--run_bam_filtering)
-      - [`--bam_discard_unmapped`](#--bam_discard_unmapped)
-      - [`--bam_unmapped_type`](#--bam_unmapped_type)
-      - [`--bam_mapping_quality_threshold`](#--bam_mapping_quality_threshold)
     - [Read DeDuplication Parameters](#read-deduplication-parameters)
-      - [`--dedupper`](#--dedupper)
-      - [`--dedup_all_merged`](#--dedup_all_merged)
     - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
-      - [`--preseq_step_size`](#--preseq_step_size)
     - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
-      - [`--udg_type`](#--udg_type)
-      - [`--damageprofiler_length`](#--damageprofiler_length)
-      - [`--damageprofiler_threshold`](#--damageprofiler_threshold)
-      - [`--damageprofiler_yaxis`](#--damageprofiler_yaxis)
-      - [`--run_pmdtools`](#--run_pmdtools)
-      - [`--pmdtools_range`](#--pmdtools_range)
-      - [`--pmdtools_threshold`](#--pmdtools_threshold)
-      - [`--pmdtools_reference_mask`](#--pmdtools_reference_mask)
-      - [`--pmdtools_max_reads`](#--pmdtools_max_reads)
     - [BAM Trimming Parameters](#bam-trimming-parameters)
-      - [`--run_trim_bam`](#--run_trim_bam)
-      - [`--bamutils_clip_left` / `--bamutils_clip_right`](#--bamutils_clip_left----bamutils_clip_right)
-      - [`--bamutils_softclip`](#--bamutils_softclip)
     - [Captured Library Parameters](#captured-library-parameters)
-      - [`--snpcapture` false](#--snpcapture-false)
-      - [`--bedfile`](#--bedfile)
     - [Feature Annotation Statistics](#feature-annotation-statistics)
-      - [`--run_bedtools_coverage`](#--run_bedtools_coverage)
-      - [`--anno_file`](#--anno_file)
     - [Genotyping Parameters](#genotyping-parameters)
-      - [`--run_genotyping`](#--run_genotyping)
-      - [`--genotyping_tool`](#--genotyping_tool)
-      - [`--genotyping_source`](#--genotyping_source)
-      - [`--gatk_ug_jar`](#--gatk_ug_jar)
-      - [`--gatk_call_conf`](#--gatk_call_conf)
-      - [`--gatk_ploidy`](#--gatk_ploidy)
-      - [`--gatk_dbsnp`](#--gatk_dbsnp)
-      - [`--gatk_ug_out_mode`](#--gatk_ug_out_mode)
-      - [`--gatk_hc_out_mode`](#--gatk_hc_out_mode)
-      - [`--gatk_ug_genotype_model`](#--gatk_ug_genotype_model)
-      - [`--gatk_hc_emitrefconf`](#--gatk_hc_emitrefconf)
-      - [`--gatk_ug_keep_realign_bam`](#--gatk_ug_keep_realign_bam)
-      - [`--gatk_downsample`](#--gatk_downsample)
-      - [`--gatk_ug_gatk_ug_defaultbasequalities`](#--gatk_ug_gatk_ug_defaultbasequalities)
-      - [`--freebayes_C`](#--freebayes_c)
-      - [`--freebayes_g`](#--freebayes_g)
-      - [`--freebayes_p`](#--freebayes_p)
-      - [`--pileupcaller_bedfile`](#pileupcallerbedfile)
-      - [`--pileupcaller_snpfile`](#pileupcallersnpfile)
-      - [`--pileupcaller_method`](#pileupcallermethod)
     - [Consensus Sequence Generation](#consensus-sequence-generation)
-      - [`--run_vcf2genome`](#--run_vcf2genome)
-      - [`--vcf2genome_outfile`](#--vcf2genome_outfile)
-      - [`--vcf2genome_header`](#--vcf2genome_header)
-      - [`--vcf2genome_minc`](#--vcf2genome_minc)
-      - [`--vcf2genome_minq`](#--vcf2genome_minq)
-      - [`--vcf2genome_minfreq`](#--vcf2genome_minfreq)
     - [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
-      - [`--run_mtnucratio`](#--run_mtnucratio)
-      - [`--mtnucratio_header`](#--mtnucratio_header)
     - [SNP Table Generation](#snp-table-generation)
-      - [`--run_multivcfanalyzer`](#--run_multivcfanalyzer)
-      - [`--write_allele_frequencies`](#--write_allele_frequencies)
-      - [`--min_genotype_quality`](#--min_genotype_quality)
-      - [`--min_base_coverage`](#--min_base_coverage)
-      - [`--min_allele_freq_hom`](#--min_allele_freq_hom)
-      - [`--min_allele_freq_het`](#--min_allele_freq_het)
-      - [`--additional_vcf_files`](#--additional_vcf_files)
-      - [`--reference_gff_annotations`](#--reference_gff_annotations)
-      - [`--reference_gff_exclude`](#--reference_gff_exclude)
-      - [`--snp_eff_results`](#--snp_eff_results)
     - [Human Sex Determination](#human-sex-determination)
-      - [`--run_sexdeterrmine`](#--run_sexdeterrmine)
-      - [`--sexdeterrmine_bedfile`](#--sexdeterrmine_bedfile)
     - [Human Nuclear Contamination](#human-nuclear-contamination)
-      - [`--run_nuclear_contamination`](#--run_nuclear_contamination)
-      - [`--contamination_chrom_name`](#--contamination_chrom_name)
     - [Metagenomic Screening](#metagenomic-screening)
-      - [`--run_metagenomic_screening`](#--run_metagenomic_screening)
-      - [`--metagenomic_tool`](#--metagenomic_tool)
-      - [`--metagenomic_min_support_reads`](#--metagenomic_min_support_reads)
-      - [`--database`](#--database)
-      - [`--percent_identity`](#--percent_identity)
-      - [`--malt_mode`](#--malt_mode)
-      - [`--malt_alignment_mode`](#--malt_alignment_mode)
-      - [`--malt_top_percent`](#--malt_top_percent)
-      - [`--malt_min_support_mode`](#--malt_min_support_mode)
-      - [`--malt_min_support_percent`](#--malt_min_support_percent)
-      - [`--malt_max_queries`](#--malt_max_queries)
-      - [`--malt_memory_mode`](#--malt_memory_mode)
-      - [`--run_maltextract`](#--run_maltextract)
-      - [`--maltextract_taxon_list`](#--maltextract_taxon_list)
-      - [`--maltextract_ncbifiles`](#--maltextract_ncbifiles)
-      - [`--maltextract_filter`](#--maltextract_filter)
-      - [`--maltextract_toppercent`](#--maltextract_toppercent)
-      - [`--maltextract_destackingoff`](#--maltextract_destackingoff)
-      - [`--maltextract_downsamplingoff`](#--maltextract_downsamplingoff)
-      - [`--maltextract_duplicateremovaloff`](#--maltextract_duplicateremovaloff)
-      - [`--maltextract_matches`](#--maltextract_matches)
-      - [`--maltextract_megansummary`](#--maltextract_megansummary)
-      - [`--maltextract_percentidentity`](#--maltextract_percentidentity)
-      - [`--maltextract_topalignment`](#--maltextract_topalignment)
   - [Clean up](#clean-up)
 
 ## General Nextflow info
@@ -729,13 +583,14 @@ This flag means that only merged reads are sent downstream for analysis. Singlet
 
 #### `--mapper`
 
-Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`). bwa aln is the default and best for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Default is 'bwaaln'
+Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`), or bowtie2 (`bowtie2`). bwa aln is the default and highly suited for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to bwa aln, and has recently been suggested to provide slightly better results under certain conditions [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'
 
 More documentation can be seen for each tool under:
 
 - [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
 - [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
 - [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
+- [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)
 
 #### BWA (default)
 
@@ -768,6 +623,32 @@ The chromosome in your FastA reference that you'd like to be treated as circular
 ##### `--circularfilter`
 
 If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.
+
+#### Bowtie2
+
+##### `--bt2_alignmode`
+
+The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned.  Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
+
+##### `--bt2_sensitivity`
+
+The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both `--bt2_alignmode` options. See the Bowtie2 [manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line) for actual settings. Default is 'sensitive' (following [Poullet and Orlando (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data _without_ UDG treatment)
+
+##### `--bt2n`
+
+The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).
+
+##### `--bt2l`
+
+The length of the seed substring to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).
+
+##### `-bt2_trim5`
+
+Number of bases to trim of 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0
+
+##### `-bt2_trim3`
+
+Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.
 
 ### Mapped Reads Stripping
 
