@@ -2454,7 +2454,7 @@ process sex_deterrmine {
     params.run_sexdeterrmine
     
     script:
-    def filter = bed.name != 'NO_FILE' ? "-b $bed" : ''
+    def filter = "${params.sexdeterrmine_bedfile}" != '' ? "-b $bed" : ''
     """
     
     for i in *.bam; do
