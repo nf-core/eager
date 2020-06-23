@@ -2432,7 +2432,7 @@ if (params.additional_vcf_files == '') {
 // Human biological sex estimation
 
 if (params.sexdeterrmine_bedfile == '') {
-  ch_bed_for_sexdeterrmine = file('NO_FILE')
+  ch_bed_for_sexdeterrmine = path('NO_FILE')
 } else {
   ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
 }
@@ -2444,7 +2444,7 @@ process sex_deterrmine {
      
     input:
     file bam from ch_for_sexdeterrmine.map { it[7] }.collect()
-    file bed from ch_bed_for_sexdeterrmine
+    path bed from ch_bed_for_sexdeterrmine
 
     output:
     file "SexDet.txt"
