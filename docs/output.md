@@ -2,19 +2,23 @@
 
 ## Table of contents
 
-* [Introduction](#introduction)
-* [Directory Structure](#directory-structure)
-* [MultiQC Report](#multiqc-report)
-  * [General Stats Table](#general-stats-table)
-  * [FastQC](#fastqc)
-  * [FastP](#fastp)
-  * [AdapterRemoval](#adapterremoval)
-  * [Samtools](#samtools)
-  * [DeDup](#dedup)
-  * [Preseq](#preseq)
-  * [QualiMap](#qualimap)
-  * [DamageProfiler](#damageprofiler)
-* [Output Files](#output-files)
+- [nf-core/eager: Output](#nf-coreeager-output)
+  - [Table of contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Directory Structure](#directory-structure)
+    - [Primary Output Directories](#primary-output-directories)
+    - [Secondary Output Directories](#secondary-output-directories)
+  - [MultiQC Report](#multiqc-report)
+    - [General Stats Table](#general-stats-table)
+    - [FastQC](#fastqc)
+    - [FastP](#fastp)
+    - [AdapterRemoval](#adapterremoval)
+    - [Samtools](#samtools)
+    - [DeDup](#dedup)
+    - [Preseq](#preseq)
+    - [DamageProfiler](#damageprofiler)
+    - [QualiMap](#qualimap)
+  - [Output Files](#output-files)
 
 ## Introduction
 
@@ -57,7 +61,7 @@ These are less important directories which are used less often, normally in the 
 
 ## MultiQC Report
 
-In this section we will run through the output of each module as reported in a MultiQC output. This can be viewed by opening the HTML file in your `<RUN_OUTPUT_DIRECTORY>/MultiQC/` directory in a web browser. The section will also provide some basic tips on how to interpret the plots and values, although we highly recommend reading the READMEs or original papers of the tools used in the pipeline. A list of references can be seen on the [EAGER2 github repository](https://github.com/nf-core/eager/)
+In this section we will run through the output of each **default** module as reported in a MultiQC output. This can be viewed by opening the HTML file in your `<RUN_OUTPUT_DIRECTORY>/MultiQC/` directory in a web browser. The section will also provide some basic tips on how to interpret the plots and values, although we highly recommend reading the READMEs or original papers of the tools used in the pipeline. A list of references can be seen on the [EAGER2 github repository](https://github.com/nf-core/eager/)
 
 For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info)
 
@@ -69,13 +73,13 @@ This is the main summary table produced by MultiQC that the report begins with. 
 
 #### Table
 
-This table will report values per-file (or rather per module log-file). It will try to collapse as far as possible, if the log files have the same name - however particularly for pre-AdapterRemoval FastQC, you will likely get duplicate lines for the same sample - i.e. R1 and R2 for each library.
+This table will report values per-file (or rather per module log-file). It will try to collapse as far as possible, if the log files have the same name - however particularly for pre-AdapterRemoval FastQC, you will likely get duplicate lines for the same sample - i.e. R1 and R2 for each library. Accordingly, separate libraries will be displayed separately e.g. for DamageProfiler if using TSV input and perform merging of Samples (which would be reported at the qualimap level).
 
 Each column name is supplied by the module, so you may see similar column names. When unsure, hovering over the column name will allow you see which module it is derived from.
 
-The default columns are as follows:
+The **default** columns are as follows:
 
-* **Sample Name** This is the log file name without the file suffix. This will depend on the module outputs.
+* **Sample Name** This is the log file name without file suffix(s). This will depend on the module outputs.
 * **Seqs** This is from Pre-AdapterRemoval FastQC. Represents the number of raw reads in your untrimmed and (paired end) unmerged FASTQ file. Each row should be approximately equal to the number of reads you requested to be sequenced, divided by the number of FASTQ files you received for that library.
 * **Length** This is from Pre-AdapterRemoval FastQC. This is the average read length in your untrimmed and (paired end) unmerged FASTQ file and should represent the number of cycles of your sequencing chemistry.
 * **%GC** This is from Pre-AdapterRemoval FastQC. This is the average GC content in percent of all the reads in your untrimmed and (paired end) unmerged FASTQ file.
@@ -83,18 +87,20 @@ The default columns are as follows:
 * **% Trimmed** This is from AdapterRemoval. It is the percentage of reads which had an adapter sequence removed from the end of the read.
 * **Seqs** This is from Post-AdapterRemoval FastQC. Represents the number of preprocessed reads in your adapter trimmed (paired end) merged FASTQ file. The loss between this number and the Pre-AdapterRemoval FastQC can give you an idea of the quality of trimming and merging.
 * **%GC** This is from Post-AdapterRemoval FastQC. Represents the average GC of all preprocessed reads in your adapter trimmed (paired end) merged FASTQ file.
+* **Length** This is from post-AdapterRemoval FastQC. This is the average read length in your trimmed and (paired end) merged FASTQ file and should represent the 'realistic' average lengths of your DNA molecules
 * **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _prior_ map quality filtering and deduplication.
 * **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _after_ map quality filtering and deduplication (note the column name does not distinguish itself from prior-map quality filtering, but the post-filter column is always second)
 * **Endogenous DNA (%)** This is from the endorS.py tool. It displays a percentage of mapped reads over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). Assuming a perfect ancient sample with no modern contamination, this would be the the amount of true ancient DNA in the sample. However this value _most likely_ include contamination and will not entirely be the true 'endogenous' content.
 * **Endogenous DNA Post (%)** This is from the endorS.py tool. It displays a percentage of mapped reads _after_ BAM filtering (e.g. for mapping quality) over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). This column will only be displayed if BAM filtering is turned on and is based on the original mapping for total reads, and mapped reads as calculated from the post-filtering BAM.
-* **Duplication Rate** This is from DeDup. This is the percentage of overall number of mapped reads that were an exact duplicate of another read. The number of reads removed by DeDup can be calculating this number by mapped reads (if no map quality filtering was applied!)
-* **Coverage** This is from Qualimap. This is the median number of times a base on your reference genome was covered by a read (i.e. depth coverage).. This average includes bases with 0 reads covering that position.
-* **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
-* **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
-* **% MTNUC** This is actually a ratio of the number of mitochondrial reads to the number of reads hitting autosomal chromosomes.
+* **ClusterFactor** This is from DeDup. This is a value representing the how many duplicates in the library exist for each unique read. A cluster factor close to one replicates a highly complex library and could be sequenced further. Generally with a value of more than 2 you will not be gaining much more information by sequencing deeper.
 * **X Prime Y>Z N base** These columns are from DamageProfiler. The prime numbers represent which end of the reads the damage is referring to. The Y>Z is the type of substitution (C>T is the true damage, G>A is the complementary). You should see for no- and half- UDG treatment a decrease in frequency from the 1st to 2nd base.
 * **Mean Read Length** This is from DamageProfiler. This is the mean length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
 * **Median Read Length** This is from DamageProfiler. This is the median length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
+* **Coverage** This is from Qualimap. This is the median number of times a base on your reference genome was covered by a read (i.e. depth coverage).. This average includes bases with 0 reads covering that position.
+* **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
+* **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
+
+For other non-default columns, hover over the column name for further descriptions.
 
 ### FastQC
 
@@ -382,6 +388,47 @@ Plateauing can be caused by a number of reasons:
 * You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio
 * You have a low quality library made up of mappable sequencing artefacts that were able to pass filtering (e.g. adapters)
 
+### DamageProfiler
+
+#### Background
+
+DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
+
+Therefore, three main characteristics of ancient DNA are:
+
+* Short DNA fragments
+* Elevated G and As (purines) just before strand breaks
+* Increased C and Ts at ends of fragments
+  
+#### Misincorporation Plots
+
+The MultiQC DamageProfiler module misincorporation plots shows the percent frequency (Y axis) of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The X axis represents base pairs from the end of the molecule from the given prime end, going into the middle of the molecule i.e. 1st base of molecule, 2nd base of molecule etc until the 14th base pair. The mismatches are when compared to the base of the reference genome at that position.
+
+When looking at the misincorporation plots, keep the following in mind:
+
+* As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads.
+* If your library has been **partially-UDG treated**, only the first one or two bases will display the the misincorporation frequency.
+* If your library has been **UDG treated** you will expect to see extremely-low to no misincorporations at read ends.
+* If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
+* We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
+* The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
+
+<p align="center">
+  <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
+</p>
+
+> **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
+
+#### Length Distribution
+
+The MultiQC DamageProfiler module length distribution plots show the frequency of read lengths across forward and reverse reads respectively.
+
+When looking at the length distribution plots, keep in mind the following:
+
+* Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
+* You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
+* You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
+
 ### QualiMap
 
 #### QualiMap
@@ -431,57 +478,16 @@ Things to watch out for:
 * Binomial peaks may represent lab-based artefacts that should be further investigated.
 * Skews of the peak to a higher GC content that the reference in Illumina dual-colour chemistry data (e.g. NextSeq or NovaSeq), may suggest long poly-G tails that are mapping to poly-G stretches of your genome. The EAGER2 trimming option `--complexity_filter_poly_g` can be used to remove these tails by utilising the tool FastP for detection and trimming.
   
-### DamageProfiler
-
-#### Background
-
-DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
-
-Therefore, three main characteristics of ancient DNA are:
-
-* Short DNA fragments
-* Elevated G and As (purines) just before strand breaks
-* Increased C and Ts at ends of fragments
-  
-#### Misincorporation Plots
-
-The MultiQC DamageProfiler module misincorporation plots shows the percent frequency (Y axis) of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The X axis represents base pairs from the end of the molecule from the given prime end, going into the middle of the molecule i.e. 1st base of molecule, 2nd base of molecule etc until the 14th base pair. The mismatches are when compared to the base of the reference genome at that position.
-
-When looking at the misincorporation plots, keep the following in mind:
-
-* As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads.
-* If your library has been **partially-UDG treated**, only the first one or two bases will display the the misincorporation frequency.
-* If your library has been **UDG treated** you will expect to see extremely-low to no misincorporations at read ends.
-* If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
-* We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
-* The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
-
-<p align="center">
-  <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
-</p>
-
-> **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
-
-#### Length Distribution
-
-The MultiQC DamageProfiler module length distribution plots show the frequency of read lengths across forward and reverse reads respectively.
-
-When looking at the length distribution plots, keep in mind the following:
-
-* Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
-* You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
-* You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
-  
 ## Output Files
 
-This section gives a brief summary of where to look for what files for downstream analysis.
+This section gives a brief summary of where to look for what files for downstream analysis. This covers *all* modules.
 
 Each module has it's own output directory which sit alongside the `MultiQC/` directory from which you opened the report.
 
 * `reference_genome/` - this directory contains the indexing files  of your input reference genome (i.e. the various `bwa` indices, a `samtools`' `.fai` file, and a picard `.dict`), if you used the `--saveReference` flag.
 * `FastQC/` - this contains the original per-FASTQ FastQC reports that are summarised with MultiQC. These occur in both `html` (the report) and `.zip` format (raw data). The `after_clipping` folder contains the same but for after AdapterRemoval.
 * `AdapterRemoval/` - this contains the log files (ending with `.settings`) with raw trimming (and merging) statistics after AdapterRemoval. In the `output` sub-directory, are the output trimmed (and merged) FASTQ files. These you can use for downstream applications such as taxonomic binning for metagenomic studies.
-* `mapping/` - this contains a sub-directory corresponding to the mapping tool you used, inside of which will be the initial BAM files containing the reads that mapped to your reference genome with no modification (see below). You will also find a corresponding BAM index file (ending in `.csi` or `.bam`). You can use these for downstream applications e.g. if you wish to use a different de-duplication tool not included in EAGER2 (although please feel free to add a new module request on the Github repository's [issue page](https://github.com/nf-core/eager/issues)!).
+* `mapping/` - this contains a sub-directory corresponding to the mapping tool you used, inside of which will be the initial BAM files containing the reads that mapped to your reference genome with no modification (see below). You will also find a corresponding BAM index file (ending in `.csi` or `.bam`), and if running the `bowtie2` mapper - a log ending in `_bt2.log`. You can use these for downstream applications e.g. if you wish to use a different de-duplication tool not included in nf-core/eager (although please feel free to add a new module request on the Github repository's [issue page](https://github.com/nf-core/eager/issues)!).
 * `samtools/` - this contains two sub-directories. `stats/` contain the raw mapping statistics files (ending in `.stats`) from directly after mapping. `filter/` contains BAM files that have had a mapping quality filter applied (set by the `--bam_mapping_quality_threshold` flag) and a corresponding index file. Furthermore, if you selected `--bam_discard_unmapped`, you will find your separate file with only unmapped reads in the format you selected. Note unmapped read BAM files will _not_ have an index file.
 * `deduplication/` - this contains a sub-directory called `dedup/`, inside here are sample specific directories. Each directory contains a BAM file containing mapped reads but with PCR duplicates removed, a corresponding index file and two stats file. `.hist.` contains raw data for a deduplication histogram used for tools like preseq (see below), and the `.log` contains overall summary deduplication statistics.
 * `endorSpy/` - this contains all JSON files exported from the endorSpy endogenous DNA calculation tool. The JSON files are generated specifically for display in the MultiQC general statistics table and is otherwise very likely not useful for you.

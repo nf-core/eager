@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Added ability for automated emails using `mailutils` to also send MultiQC reports
 * General documentation additions and cleaning, updated figures with CC-BY license
 * Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
+* [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
 
 ### `Fixed`
 

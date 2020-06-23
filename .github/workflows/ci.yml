@@ -98,6 +98,9 @@ jobs:
       - name: MAPPER_BWAMEM Test running with BWA Mem
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'bwamem'
+     - name: MAPPER_BT2 Test running with BWA BowTie2
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'bowtie2' --bt2_alignmode 'local' --bt2_sensitivity 'sensitive' --bt2n 1 --bt2l 16 --bt2_trim5 1 --bt2_trim3 1
       - name: STRIP_FASTQ Run the basic pipeline with output unmapped reads as fastq
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --strip_input_fastq

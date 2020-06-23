@@ -70,9 +70,11 @@ top_modules:
     - 'fastqc':
        name: 'FastQC (post-AdapterRemoval)'
        path_filters:
-           - '*.truncated_fastqc.zip'
-           - '*.combined*_fastqc.zip'
-    - 'bowtie2'
+            - '*.truncated_fastqc.zip'
+            - '*.combined*_fastqc.zip'
+    - 'bowtie2':
+       path_filters:
+            - '*_bt2.log'
     - 'malt'
     - 'hops'
     - 'kraken'
@@ -188,14 +190,14 @@ table_columns_placement:
     Samtools Flagstat (post-samtools filter):
         flagstat_total: 553
         mapped_passed: 554
+    custom_content:
+        endogenous_dna: 600
+        endogenous_dna_post: 610
     DeDup:
-        mapped_after_dedup: 600
-        clusterfactor: 610
+        mapped_after_dedup: 620
+        clusterfactor: 630
     Picard:
         PERCENT_DUPLICATION: 650
-    custom_content:
-        endogenous_dna: 680
-        endogenous_dna_post: 690
     DamageProfiler:
         5 Prime1: 700
         5 Prime2: 710

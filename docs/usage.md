@@ -74,6 +74,13 @@
         - [`--circularextension`](#--circularextension)
         - [`--circulartarget`](#--circulartarget)
         - [`--circularfilter`](#--circularfilter)
+      - [Bowtie2](#bowtie2)
+        - [`--bt2_alignmode`](#--bt2_alignmode)
+        - [`--bt2_sensitivity`](#--bt2_sensitivity)
+        - [`--bt2n`](#--bt2n)
+        - [`--bt2l`](#--bt2l)
+        - [`-bt2_trim5`](#-bt2_trim5)
+        - [`-bt2_trim3`](#-bt2_trim3)
     - [Mapped Reads Stripping](#mapped-reads-stripping)
       - [`--strip_input_fastq`](#--strip_input_fastq)
       - [`--strip_mode`](#--strip_mode)
@@ -125,9 +132,9 @@
       - [`--freebayes_C`](#--freebayes_c)
       - [`--freebayes_g`](#--freebayes_g)
       - [`--freebayes_p`](#--freebayes_p)
-      - [`--pileupcaller_bedfile`](#pileupcallerbedfile)
-      - [`--pileupcaller_snpfile`](#pileupcallersnpfile)
-      - [`--pileupcaller_method`](#pileupcallermethod)
+      - [`--pileupcaller_bedfile`](#--pileupcaller_bedfile)
+      - [`--pileupcaller_snpfile`](#--pileupcaller_snpfile)
+      - [`--pileupcaller_method`](#--pileupcaller_method)
     - [Consensus Sequence Generation](#consensus-sequence-generation)
       - [`--run_vcf2genome`](#--run_vcf2genome)
       - [`--vcf2genome_outfile`](#--vcf2genome_outfile)
@@ -179,7 +186,7 @@
       - [`--maltextract_matches`](#--maltextract_matches)
       - [`--maltextract_megansummary`](#--maltextract_megansummary)
       - [`--maltextract_percentidentity`](#--maltextract_percentidentity)
-      - [`--maltextract_topalignment`](#--maltextract_topalignment)
+      - [`maltextract_topalignment`](#maltextract_topalignment)
   - [Clean up](#clean-up)
 
 ## General Nextflow info
@@ -729,13 +736,14 @@ This flag means that only merged reads are sent downstream for analysis. Singlet
 
 #### `--mapper`
 
-Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`). bwa aln is the default and best for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Default is 'bwaaln'
+Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`), or bowtie2 (`bowtie2`). bwa aln is the default and highly suited for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to bwa aln, and has recently been suggested to provide slightly better results under certain conditions [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'
 
 More documentation can be seen for each tool under:
 
 - [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
 - [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
 - [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
+- [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)
 
 #### BWA (default)
 
@@ -768,6 +776,32 @@ The chromosome in your FastA reference that you'd like to be treated as circular
 ##### `--circularfilter`
 
 If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.
+
+#### Bowtie2
+
+##### `--bt2_alignmode`
+
+The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads maybe 'soft-clipped', if provides best alignment score. End-to-end requires all nucleotides to align somehow.  Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
+
+##### `--bt2_sensitivity`
+
+The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both `--bt2_alignmode` options. See the Bowtie2 [manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line) for actual settings. Default is 'sensitive' (following [Poullet and Orlando (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data _without_ UDG treatment)
+
+##### `--bt2n`
+
+The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Default: 0.
+
+##### `--bt2l`
+
+The length of the seed substring to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0.
+
+##### `-bt2_trim5`
+
+Number of bases to trim of 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0
+
+##### `-bt2_trim3`
+
+Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.
 
 ### Mapped Reads Stripping
 

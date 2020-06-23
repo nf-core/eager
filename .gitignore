@@ -8,4 +8,4 @@ testing/
 *.pyc
 main_playground.nf
 .vscode
-.code-workspace
+*.code-workspace
