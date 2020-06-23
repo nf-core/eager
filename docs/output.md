@@ -475,7 +475,7 @@ This plot shows the distirbution of th frequency of reads at different GC conten
 Things to watch out for:
 
 - This plot should normally show a normal distribution around the average GC content of your reference genome.
-- Binomial peaks may represent lab-based artefacts that should be further investigated.
+- Bimodal peaks may represent lab-based artefacts that should be further investigated.
 - Skews of the peak to a higher GC content that the reference in Illumina dual-colour chemistry data (e.g. NextSeq or NovaSeq), may suggest long poly-G tails that are mapping to poly-G stretches of your genome. The EAGER2 trimming option `--complexity_filter_poly_g` can be used to remove these tails by utilising the tool FastP for detection and trimming.
   
 ## Output Files

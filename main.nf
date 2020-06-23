@@ -305,6 +305,11 @@ if (params.mapper == 'bowtie2' && params.bt2_sensitivity != 'no-preset' && param
     exit 1, "[nf-core/eager] error: invalid bowtie2 sensitivity mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Options are for both alignmodes You gave: ${params.bt2_sensitivity}"
 }
 
+if (params.bt2n != 0 && params.bt2n != 1) {
+    exit 1, "[nf-core/eager] error: invalid bowtie2 --bt2n (-N) parameter. Options: 0, 1. You gave: ${params.bt2n}"
+
+}
+
 // Index files provided? Then check whether they are correct and complete
 if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
     lastPath = params.bwa_index.lastIndexOf(File.separator)
