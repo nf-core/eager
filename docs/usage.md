@@ -628,7 +628,7 @@ If you want to filter out reads that don't map to a circular chromosome, turn th
 
 ##### `--bt2_alignmode`
 
-The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be align.  Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
+The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned.  Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
 
 ##### `--bt2_sensitivity`
 
