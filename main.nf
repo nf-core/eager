@@ -2432,7 +2432,7 @@ if (params.additional_vcf_files == '') {
 // Human biological sex estimation
 
 if (params.sexdeterrmine_bedfile == '') {
-  ch_bed_for_sexdeterrmine = path('NO_FILE')
+  ch_bed_for_sexdeterrmine = file('NO_FILE')
 } else {
   ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
 }
