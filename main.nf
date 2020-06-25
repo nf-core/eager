@@ -1775,7 +1775,7 @@ process dedup{
       mv ${bam} ${libraryid}.bam
     fi
     
-    dedup -i ${libraryid}.bam $treat_merged -o . -u 
+    dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
     samtools index "${size}" "${libraryid}"_rmdup.bam
@@ -1787,7 +1787,7 @@ process dedup{
       mv ${bam} ${libraryid}.bam
     fi
     
-    dedup -i ${libraryid}.bam $treat_merged -o . -u 
+    dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
     samtools index "${size}" "${libraryid}"_rmdup.bam
