@@ -628,7 +628,7 @@ If you want to filter out reads that don't map to a circular chromosome, turn th
 
 ##### `--bt2_alignmode`
 
-The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned.  Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
+The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
 
 ##### `--bt2_sensitivity`
 
@@ -797,13 +797,14 @@ Specify the path to a GFF/BED containing the feature coordinates (or any accepta
 
 ### Genotyping Parameters
 
-There are options for different genotypers to be used. We suggest you the documentation of each tool to find the ones that suit your needs.
+There are options for different genotypers (or genotype likelihood calculators) to be used. We suggest you the documentation of each tool to find the ones that suit your needs.
 
 Documentation for each tool:
 
 - [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
 - [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
 - [FreeBayes](https://github.com/ekg/freebayes)
+- [ANGSD](http://www.popgen.dk/angsd/index.php/Genotype_Likelihoods)
 
 #### `--run_genotyping`
 
@@ -811,7 +812,7 @@ Turns on genotyping to run on all post-dedup and downstream BAMs. For example if
 
 #### `--genotyping_tool`
 
-Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc' or 'freebayes' respectively.
+Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.
 
 > NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file.
 
@@ -889,7 +890,32 @@ Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/tree/master
 
 #### `--pileupcaller_method`
 
-Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: randomHaploid
+Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: `'randomHaploid'`
+
+#### `--angsd_glmodel`
+
+Specify which genotype likelihood model to use. Options: `'samtools`, `'gatk'`, `'soapsnp'`, `'syk'`. Default: `'samtools'`
+
+#### `--angsd_glformat`
+
+Specifies what type of genotyping likelihood file format will be output. Options: `'text'`, `'binary'`, `'binary_three'`, `'beagle_binary'`. Default: `'text'`.
+
+The options refer to the following descriptions respectively:
+
+- `text`: textoutput of all 10 log genotype likelihoods.
+- `binary`: binary all 10 log genotype likelihood
+- `binary_three`: binary 3 times likelihood
+- `beagle_binary`: beagle likelihood file
+
+See the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information on which to select for your downstream applications.
+
+#### `--angsd_createfasta`
+
+Turns on the ANGSD creation of a FASTA file from the BAM file.
+
+#### `--angsd_fastamethod`
+
+The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given positin, whereas 'random' will pick one at random. Default: `'random'`.
 
 ### Consensus Sequence Generation
 
