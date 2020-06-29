@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * General documentation additions and cleaning, updated figures with CC-BY license
 * Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
 * [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
+* [#451] Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
 
 ### `Fixed`
 
@@ -52,7 +53,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Latest version of Kraken2 (2.0.9beta)
 * Latest version of FreeBayes (1.3.2)
 * Latest version of xopen (0.9.0)
-* *Adding* in Bowtie 2 (2.4.1)
+* Added Bowtie 2 (2.4.1)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 
