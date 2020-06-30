@@ -2201,7 +2201,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   params.run_genotyping && params.genotyping_tool == 'pileupcaller'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_prepped_for_pileupcaller_double.mix(ch_prepped_for_pileupcaller_single)
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai from ch_prepped_for_pileupcaller_double.mix(ch_prepped_for_pileupcaller_single)
   file fasta from ch_fasta_for_genotyping_pileupcaller.collect()
   file fai from ch_fai_for_pileupcaller.collect()
   file dict from ch_dict_for_pileupcaller.collect()
@@ -2212,10 +2212,13 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${strandedness}.*")
 
   script:
+  transitions_mode = "${params.pileupcaller_transitions_mode}" == 'SkipTransitions' ? "--skipTransitions" : "${params.pileupcaller_transitions_mode}" == 'TransitionsMissing' ? "--transitionsMissing" : ""
   caller = "--${params.pileupcaller_method}"
   ssmode = strandedness == "single" ? "--singleStrandMode" : ""
+  bam_list = bam.flatten().join(" ")
+  sample_names = samplename.flatten().join(",")
   """
-  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam}.join(" ") | pileupCaller ${caller} ${ssmode} --transitionsMode ${params.pileupcaller_transitions_mode} --sampleNames ${samplename}.join(",") -f ${snp} -e pileupcaller.${strandedness}
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} -f ${snp} -e pileupcaller.${strandedness}
   """
  }
 
