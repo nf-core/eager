@@ -3034,6 +3034,9 @@ def extract_data(tsvFile) {
             def r2 = row.R2.matches('NA') ? 'NA' : return_file(row.R2)
             def bam = row.BAM.matches('NA') ? 'NA' : return_file(row.BAM)
 
+            // check no empty metadata fields
+            if (samplename == '' || libraryid == '' || lane == '' || colour == '' || seqtype == '' || seqtype == '' || udg == '' || r1 == '' || r2 == '') exit 1, "[nf-core/eager] error: a field does not contain any information. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+
             // Check no 'empty' rows
             if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "[nf-core/eager] error: A row in your TSV appears to have all files defined as NA. See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
