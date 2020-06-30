@@ -1775,7 +1775,7 @@ process dedup{
       mv ${bam} ${libraryid}.bam
     fi
     
-    dedup -i ${libraryid}.bam $treat_merged -o . -u 
+    dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
     samtools index "${size}" "${libraryid}"_rmdup.bam
@@ -1787,7 +1787,7 @@ process dedup{
       mv ${bam} ${libraryid}.bam
     fi
     
-    dedup -i ${libraryid}.bam $treat_merged -o . -u 
+    dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
     samtools index "${size}" "${libraryid}"_rmdup.bam
@@ -2929,11 +2929,12 @@ workflow.onComplete {
             log.info "[nf-core/eager] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
             // Catch failures and try with plaintext
-            if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
-              [ 'mail', '-s', subject, email_address, '-A', mqc_report ].execute() << email_txt 
-            } else {
-              [ 'mail', '-s', subject, email_address ].execute() << email_txt 
+              def mail_cmd = [ 'mail', '-s', subject, email_address ]
+              def mail_cmd = [ 'mail', '-s', subject, '--content-type=text', email_address ]
+              if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
+                mail_cmd += [ '-A', mqc_report ]
             }
+            mail_cmd.execute() << email_txt 
             log.info "[nf-core/eager] Sent summary e-mail to $email_address (mail)"
         }
     }
@@ -3033,6 +3034,9 @@ def extract_data(tsvFile) {
             def r1 = row.R1.matches('NA') ? 'NA' : return_file(row.R1)
             def r2 = row.R2.matches('NA') ? 'NA' : return_file(row.R2)
             def bam = row.BAM.matches('NA') ? 'NA' : return_file(row.BAM)
+
+            // check no empty metadata fields
+            if (samplename == '' || libraryid == '' || lane == '' || colour == '' || seqtype == '' || seqtype == '' || udg == '' || r1 == '' || r2 == '') exit 1, "[nf-core/eager] error: a field does not contain any information. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
 
             // Check no 'empty' rows
             if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "[nf-core/eager] error: A row in your TSV appears to have all files defined as NA. See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
