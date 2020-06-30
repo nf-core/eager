@@ -2479,9 +2479,6 @@ process sex_deterrmine {
     tag "${samplename}"
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
 
-    // ANGSD Xcontamination will exit with status 134 when the number of SNPs is too low
-    validExitStatus 0,134
-
     when:
     params.run_nuclear_contamination
 
