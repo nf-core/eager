@@ -9,16 +9,50 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+* **Major** Automated Cloud Tests with large-scale data on [AWS](https://aws.amazon.com/)
+* **Major** Re-wrote input logic to accept a TSV 'map' file in addition to direct paths to FASTQ
+* **Major** Lane and library merging implement
+  * When using TSV input, one libraries with the multiple _lane_ will be merged together, before mapping
+    * Strip FASTQ will also produce a lane merged 'raw' but 'stripped' FASTQ file
+  * When using TSV input, one sample with multiple (same treatment) libraries will be merged together.
+  * Important: direct FASTQ paths will not have this functionality. TSV is required.
+* [#40](https://github.com/nf-core/eager/issues/40) - Added the pileupCaller genotyper from [sequenceTools](https://github.com/stschiff/sequenceTools)
 * Added sanity check and clearer error message when `--fasta_index` is provided and filepath does not end in `.fai`.
+* Added basic json_schema
+* Improved error messages
+* Added ability for automated emails using `mailutils` to also send MultiQC reports
+* General documentation additions and cleaning, updated figures with CC-BY license
+* Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
+* [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
 
 ### `Fixed`
 
 * [#368](https://github.com/nf-core/eager/issues/368) - Fixed the profile `test` to contain a parameter for `--paired_end`.
 * Mini bugfix for typo in line 1260+1261
-* Added basic json_schema
+* [#374](https://github.com/nf-core/eager/issues/374) - Fixed output documentation rendering not containing images
 * [#379](https://github.com/nf-core/eager/issues/378) - Fixed insufficient memory requirements for FASTQC edge case
+* [#390](https://github.com/nf-core/eager/issues/390) - Renamed clipped/merged output directory to be more descriptive
+* [#398](https://github.com/nf-core/eager/issues/498) - Stopped incompatible FASTA indexes being accepted
+* [#400](https://github.com/nf-core/eager/issues/400) -  Set correct recommended bwa mapping parameters from [Schubert et al. 2012](https://doi.org/10.1186/1471-2164-13-178)
+* [#410](https://github.com/nf-core/eager/issues/410) - Fixed nf-core/configs not being loaded properly
+* [#473](https://github.com/nf-core/eager/issues/473) - Fixed bug in sexdet_process on AWS
+* Increase MultiQC process memory requirements to ensure enough memory for large runs
 
 ### `Dependencies`
+
+* Added Sequencetools (1.4.0.6) that adds the ability to do genotyping with the 'pileupCaller'
+* Latest version of DeDup (0.12.6) which now reports mapped reads after deduplication
+* Latest version of ANGSD (0.933) which doesn't seg fault when running contamination on BAMs with insufficient reads
+* Latest version of MultiQC (1.9) with support for lots of extra tools in the pipeline (MALT, SexDetERRmine, DamageProfiler, MultiVCFAnalyzer)
+* Latest versions of Pygments (7.1), Pymdown-Extensions (2.6.1) and Markdown (3.2.2) for documentation output
+* Latest version of Picard (2.22.9)
+* Latest version of GATK4 (4.1.7.0)
+* Latest version of Sequencetools (1.4.0.6)
+* Latest version of fastP (0.20.1)
+* Latest version of Kraken2 (2.0.9beta)
+* Latest version of FreeBayes (1.3.2)
+* Latest version of xopen (0.9.0)
+* *Adding* in Bowtie 2 (2.4.1)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 

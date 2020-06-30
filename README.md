@@ -20,6 +20,10 @@
 
 The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
+<p align="center">
+    <img src="docs/images/output/overview/eager2_workflow.png" alt="nf-core/eager schematic workflow" width="70%"
+</p>
+
 ## Pipeline steps
 
 ### Default Steps
@@ -29,7 +33,7 @@ By default the pipeline currently performs the following:
 * Create reference genome indices for mapping (`bwa`, `samtools`, and `picard`)
 * Sequencing quality control (`FastQC`)
 * Sequencing adapter removal and for paired end data merging (`AdapterRemoval`)
-* Read mapping to reference using (`bwa aln`, `bwa mem` or `CircularMapper`)
+* Read mapping to reference using (`bwa aln`, `bwa mem`, `CircularMapper`, or `bowtie2`)
 * Post-mapping processing, statistics and conversion to bam (`samtools`)
 * Ancient DNA C-to-T damage pattern visualisation (`DamageProfiler`)
 * PCR duplicate removal (`DeDup` or `MarkDuplicates`)
@@ -55,13 +59,14 @@ Additional functionality contained by the pipeline currently includes:
 #### Genotyping
 
 * Creation of VCF genotyping files (`GATK UnifiedGenotyper`, `GATK HaplotypeCaller` and `FreeBayes`)
+* Creation of EIGENSTRAT genotyping files (`pileupCaller`)
 * Consensus sequence FASTA creation (`VCF2Genome`)
 * SNP Table generation (`MultiVCFAnalyzer`)
 
 #### Biological Information
 
 * Mitochondrial to Nuclear read ratio calculation (`MtNucRatioCalculator`)
-* Statistical sex determination of human individuals (`SexDetErrmine`)
+* Statistical sex determination of human individuals (`Sex.DetERRmine`)
 
 #### Metagenomic Screening
 
@@ -85,7 +90,7 @@ Additional functionality contained by the pipeline currently includes:
 
 5. Start running your own ancient DNA analysis!
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda> --reads '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+        nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
 6. Once your run has completed successfully, clean up the intermediate files.
 
@@ -119,7 +124,7 @@ This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github
 
 * [Aida Andrades Valtueña](https://github.com/aidaanva)
 * [Alexander Peltzer](https://github.com/apeltzer)
-* [James A. Fellows-Yates](https://github.com/jfy133)
+* [James A. Fellows Yates](https://github.com/jfy133)
 * [Judith Neukamm](https://github.com/JudithNeukamm)
 * [Maxime Borry](https://github.com/maxibor)
 * [Maxime Garcia](https://github.com/MaxUlysse)
@@ -136,11 +141,14 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Irina Velsko](https://github.com/ivelsko)
 * [Katerine Eaton](https://github.com/ktmeaton)
 * [Luc Venturini](https://github.com/lucventurini)
-* Marcel Keller
+* [Marcel Keller](https://github.com/marcel-keller)
 * [Pierre Lindenbaum](https://github.com/lindenb)
 * [Pontus Skoglund](https://github.com/pontussk)
 * [Raphael Eisenhofer](https://github.com/EisenRa)
 * [Torsten Günter](https://bitbucket.org/tguenther/)
+* [Kevin Lord](https://github.com/lordkev)
+* [Irina Velsko](https://github.com/ivelsko)
+* [He Yu](https://github.com/paulayu)
 
 If you've contributed and you're missing in here, please let us know and we will add you in of course!
 
@@ -170,5 +178,32 @@ If you've contributed and you're missing in here, please let us know and we will
   * Vågene, Å.J. et al., 2018. Salmonella enterica genomes from victims of a major sixteenth-century epidemic in Mexico. Nature ecology & evolution, 2(3), pp.520–528. Available at: [http://dx.doi.org/10.1038/s41559-017-0446-6](http://dx.doi.org/10.1038/s41559-017-0446-6).
   * Herbig, A. et al., 2016. MALT: Fast alignment and analysis of metagenomic DNA sequence data applied to the Tyrolean Iceman. bioRxiv, p.050559. Available at: [http://biorxiv.org/content/early/2016/04/27/050559](http://biorxiv.org/content/early/2016/04/27/050559).
 * **MaltExtract** Huebler, R. et al., 2019. HOPS: Automated detection and authentication of pathogen DNA in archaeological remains. bioRxiv, p.534198. Available at: [https://www.biorxiv.org/content/10.1101/534198v1?rss=1](https://www.biorxiv.org/content/10.1101/534198v1?rss=1). Download: [https://github.com/rhuebler/MaltExtract](https://github.com/rhuebler/MaltExtract)
-* **Kraken2**     Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. Available at: [https://doi.org/10.1186/s13059-019-1891-0](https://doi.org/10.1186/s13059-019-1891-0). Download: [https://ccb.jhu.edu/software/kraken2/](https://ccb.jhu.edu/software/kraken2/)
+* **Kraken2** Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. Available at: [https://doi.org/10.1186/s13059-019-1891-0](https://doi.org/10.1186/s13059-019-1891-0). Download: [https://ccb.jhu.edu/software/kraken2/](https://ccb.jhu.edu/software/kraken2/)
 * **endorS.py** Aida Andrades Valtueña (Unpublished). Download: [https://github.com/aidaanva/endorS.py](https://github.com/aidaanva/endorS.py)
+* **Bowtie2**  Langmead, B. and Salzberg, S. L. 2012 Fast gapped-read alignment with Bowtie 2. Nature methods, 9(4), p. 357–359. doi: [10.1038/nmeth.1923](https:/dx.doi.org/10.1038/nmeth.1923).
+* **sequenceTools** Stephan Schiffels (Unpublished). Download: [https://github.com/stschiff/sequenceTools](https://github.com/stschiff/sequenceTools)
+
+## Data References
+
+This repository uses test data from the following studies:
+
+* Fellows Yates, J. A. et al. (2017) ‘Central European Woolly Mammoth Population Dynamics: Insights from Late Pleistocene Mitochondrial Genomes’, Scientific reports, 7(1), p. 17714. [doi: 10.1038/s41598-017-17723-1](https://doi.org/10.1038/s41598-017-17723-1).
+* Gamba, C. et al. (2014) ‘Genome flux and stasis in a five millennium transect of European prehistory’, Nature communications, 5, p. 5257. [doi: 10.1038/ncomms6257](https://doi.org/10.1038/ncomms6257).
+* Star, B. et al. (2017) ‘Ancient DNA reveals the Arctic origin of Viking Age cod from Haithabu, Germany’, Proceedings of the National Academy of Sciences of the United States of America, 114(34), pp. 9152–9157. [doi: 10.1073/pnas.1710186114](https://doi.org/10.1073/pnas.1710186114).
+* Andrades Valtueña, A. et al. (2017) ‘The Stone Age Plague and Its Persistence in Eurasia’, Current biology: CB, 27(23), pp. 3683–3691.e8. [doi: 10.1016/j.cub.2017.10.025](https://doi.org/10.1016/j.cub.2017.10.025).
+
+## Citation
+
+If you use `nf-core/eager` for your analysis, please cite the `eager` preprint as follows:
+> James A. Fellows Yates, Thiseas Christos Lamnidis, Maxime Borry, Aida Andrades Valtueña, Zandra Fagneräs, Stephen Clayton, Maxime U. Garcia, Judith Neukamm, Alexander Peltzer **Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager** bioRxiv 2020.06.11.145615; [doi: https://doi.org/10.1101/2020.06.11.145615](https://doi.org/10.1101/2020.06.11.145615)
+
+You can cite the eager zenodo record for a specific version using the following [doi: 10.5281/zenodo.3698082](https://zenodo.org/badge/latestdoi/135918251)
+
+You can cite the `nf-core` publication as follows:
+
+> **The nf-core framework for community-curated bioinformatics pipelines.**
+>
+> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
+>
+> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).  
+> ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
