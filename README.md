@@ -55,11 +55,13 @@ Additional functionality contained by the pipeline currently includes:
 
 * Damage removal/clipping for UDG+/UDG-half treatment protocols (`BamUtil`)
 * Damaged reads extraction and assessment (`PMDTools`)
+* Nuclear DNA contamination estimation of human samples (`angsd`)
 
 #### Genotyping
 
 * Creation of VCF genotyping files (`GATK UnifiedGenotyper`, `GATK HaplotypeCaller` and `FreeBayes`)
 * Creation of EIGENSTRAT genotyping files (`pileupCaller`)
+* Creation of Genotype Likelihood files (`angsd`)
 * Consensus sequence FASTA creation (`VCF2Genome`)
 * SNP Table generation (`MultiVCFAnalyzer`)
 
