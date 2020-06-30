@@ -14,11 +14,11 @@ The typical workflow for adding a new module is as follows:
 6. Add sanity checks for all relevant parameters.
 7. Add any new software to the `scrape_software_versions.py` script in `bin/` and the version command to the `scrape_software_versions` process in `main.nf`.
 8. Do local tests that the new code works properly and as expected.
-9.  Add a new test command in `.github/workflow/ci.yaml`.
-11. If applicable add a [MultiQC](https://https://multiqc.info/) module.
-12. Update MultiQC config `assests/multiqc_config.yaml` so relevant suffixes, name clean up, General Statistics Table column order, and module figures are in the right order. 
-13. Add new flags/options to 'usage' documentation under `docs/usage.md`.
-14. Add any descriptions of MultiQC report sections and output files to `docs/output.md`.
+9. Add a new test command in `.github/workflow/ci.yaml`.
+10. If applicable add a [MultiQC](https://https://multiqc.info/) module.
+11. Update MultiQC config `assests/multiqc_config.yaml` so relevant suffixes, name clean up, General Statistics Table column order, and module figures are in the right order.
+12. Add new flags/options to 'usage' documentation under `docs/usage.md`.
+13. Add any descriptions of MultiQC report sections and output files to `docs/output.md`.
 
 ## Default Values
 
