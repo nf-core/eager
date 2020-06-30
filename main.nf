@@ -250,7 +250,7 @@ if ( params.fasta.isEmpty () ){
     exit 1, "[nf-core/eager] error: please specify --fasta with the path to your reference"
 } else if("${params.fasta}".endsWith(".gz")){
     //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
-    zipped_fasta = file("${params.fasta}")
+    zipped_fasta = path("${params.fasta}")
 
     rm_gz = params.fasta - '.gz'
     lastPath = rm_gz.lastIndexOf(File.separator)
@@ -536,12 +536,12 @@ if (workflow.profile.contains('awsbatch')) {
 /* --          CONFIG FILES                    -- */
 ////////////////////////////////////////////////////
 
-ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_config = path("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-ch_eager_logo = file("$baseDir/docs/images/nf-core_eager_logo.png")
-ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
-ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
-where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
+ch_eager_logo = path("$baseDir/docs/images/nf-core_eager_logo.png")
+ch_output_docs = path("$baseDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = path("$baseDir/docs/images/", checkIfExists: true)
+where_are_my_files = path("$baseDir/assets/where_are_my_files.txt")
 
 ///////////////////////////////////////////////////
 /* --    INPUT FILE LOADING AND VALIDATING    -- */
@@ -559,7 +559,7 @@ if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.inpu
 ch_input_sample = Channel.empty()
 if (tsv_path) {
 
-    tsv_file = file(tsv_path)
+    tsv_file = path(tsv_path)
     ch_input_sample = extract_data(tsv_file)
 
 } else if (params.input && !has_extension(params.input, "tsv")) {
@@ -583,9 +583,9 @@ ch_input_sample
 ch_input_sample_check
     .map {
       it ->
-        def r1 = file(it[8]).getName()
-        def r2 = file(it[9]).getName()
-        def bam = file(it[10]).getName()
+        def r1 = path(it[8]).getName()
+        def r2 = path(it[9]).getName()
+        def bam = path(it[10]).getName()
 
       [r1, r2, bam]
 
@@ -1129,8 +1129,8 @@ if ( params.skip_collapse ){
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]
-        def r1 = file(it[7].sort()[0])
-        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : 'NA'
+        def r1 = path(it[7].sort()[0])
+        def r2 = seqtype == "PE" ? path(it[7].sort()[1]) : 'NA'
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1147,7 +1147,7 @@ if ( params.skip_collapse ){
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]
-        def r1 = file(it[7])
+        def r1 = path(it[7])
         def r2 = 'NA'
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
@@ -1710,8 +1710,8 @@ if (params.run_bam_filtering) {
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]     
-        def stats = file(it[7])
-        def poststats = file("$baseDir/assets/dummy_postfilterflagstat.stats")
+        def stats = path(it[7])
+        def poststats = path("$baseDir/assets/dummy_postfilterflagstat.stats")
 
       [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
@@ -2438,7 +2438,7 @@ if (params.additional_vcf_files == '') {
 // Human biological sex estimation
 
 if (params.sexdeterrmine_bedfile == '') {
-  ch_bed_for_sexdeterrmine = file('NO_FILE')
+  ch_bed_for_sexdeterrmine = path('NO_FILE')
 } else {
   ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
 }
@@ -2648,7 +2648,7 @@ process maltextract {
 // Kraken is offered as a replacement for MALT as MALT is _very_ resource hungry
 
 if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && params.metagenomic_tool == 'kraken'){
-  comp_kraken = file(params.database)
+  comp_kraken = path(params.database)
 
   process decomp_kraken {
     input:
@@ -2665,7 +2665,7 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
   }
 
 } else if (! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening && params.metagenomic_tool == 'kraken') {
-    ch_krakendb = file(params.database)
+    ch_krakendb = path(params.database)
 } else {
     ch_krakendb = Channel.empty()
 }
@@ -3064,8 +3064,8 @@ def checkNumberOfItem(row, number) {
 
 // Return file if it exists
 def return_file(it) {
-    if (!file(it).exists()) exit 1, "[nf-core/eager] error: Cannot find supplied FASTQ or BAM input file. If using input method TSV set to NA if no file required. See --help or documentation under 'running the pipeline' for more information. Check file: ${it}" 
-    return file(it)
+    if (!path(it).exists()) exit 1, "[nf-core/eager] error: Cannot find supplied FASTQ or BAM input file. If using input method TSV set to NA if no file required. See --help or documentation under 'running the pipeline' for more information. Check file: ${it}" 
+    return path(it)
 }
 
 // Check file extension
