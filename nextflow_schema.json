@@ -8,6 +8,11 @@
         "Input/output options": {
             "type": "object",
             "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "null",
+                    "description": "Path to input TSV file for running the pipeline."
+                },
                 "single_end": {
                     "type": "boolean",
                     "description": "Specifies that the input is single-end reads.",
@@ -30,7 +35,10 @@
                 }
             },
             "fa_icon": "fas fa-terminal",
-            "description": "Define where the pipeline should find input data and save output data."
+            "description": "Define where the pipeline should find input data and save output data.",
+            "required": [
+                "input"
+            ]
         },
         "Reference genome options": {
             "type": "object",
@@ -220,16 +228,14 @@
             "description": "Parameters used to describe centralised config profiles. These should not be edited.",
             "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline."
         },
-        "input": {
-            "type": "string",
-            "default": "null"
-        },
         "colour_chemistry": {
             "type": "integer",
-            "default": 4
+            "default": 4,
+            "description": "Define which colour chemistry to use."
         },
         "single_stranded": {
-            "type": "string"
+            "type": "boolean",
+            "default": false
         },
         "bam": {
             "type": "string"
@@ -267,35 +273,46 @@
         "seq_dict": {
             "type": "string"
         },
-        "skip_fastqc": {
-            "type": "boolean",
-            "default": false
-        },
-        "skip_preseq": {
-            "type": "boolean",
-            "default": false
-        },
-        "skip_damage_calculation": {
-            "type": "boolean",
-            "default": false
-        },
-        "skip_qualimap": {
-            "type": "boolean",
-            "default": false
-        },
-        "skip_deduplication": {
-            "type": "boolean",
-            "default": false
+        "Skip Steps": {
+            "type": "object",
+            "description": "Define which steps to skip when running the pipeline",
+            "default": "",
+            "properties": {
+                "skip_adapterremoval": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_trim": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_preseq": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_fastqc": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_damage_calculation": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_collapse": {
+                    "type": "string"
+                },
+                "skip_qualimap": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_deduplication": {
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "fa_icon": "fas fa-forward"
         },
         "run_convertinputbam": {
-            "type": "boolean",
-            "default": false
-        },
-        "skip_adapterremoval": {
-            "type": "boolean",
-            "default": false
-        },
-        "skip_trim": {
             "type": "boolean",
             "default": false
         },
@@ -328,9 +345,6 @@
         "min_adap_overlap": {
             "type": "integer",
             "default": 1
-        },
-        "skip_collapse": {
-            "type": "string"
         },
         "preserve5p": {
             "type": "string"
@@ -733,6 +747,21 @@
         "awsregion": {
             "type": "string",
             "default": "eu-west-1"
+        },
+        "angsd_glmodel": {
+            "type": "string",
+            "default": "samtools"
+        },
+        "angsd_glformat": {
+            "type": "string",
+            "default": "binary"
+        },
+        "angsd_createfasta": {
+            "type": "string"
+        },
+        "angsd_fastamethod": {
+            "type": "string",
+            "default": "random"
         }
     }
 }
