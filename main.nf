@@ -882,10 +882,10 @@ process convertBam {
     params.run_convertinputbam
 
     input: 
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path(bam) from ch_input_for_convertbam 
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_convertbam 
 
     output:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path("*fastq.gz"), val('NA') into ch_output_from_convertbam
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*fastq.gz"), val('NA') into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -903,10 +903,10 @@ process indexinputbam {
   bam != 'NA' && !params.run_convertinputbam
 
   input:
-  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path(bam) from ch_input_for_indexbam 
+  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_indexbam 
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path("*.{bai,csi}")  into ch_indexbam_for_filtering
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}")  into ch_indexbam_for_filtering
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -935,7 +935,7 @@ process fastqc {
     !params.skip_fastqc
 
     input:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_convertbam_for_fastqc
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_convertbam_for_fastqc
 
     output:
     file "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
@@ -981,11 +981,11 @@ process fastp {
     params.complexity_filter_poly_g
 
     input:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_input_for_fastp.twocol
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_fastp.twocol
 
     output:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path("*.pG.fq.gz") into ch_output_from_fastp
-    path("*.json") into ch_fastp_for_multiqc
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*.pG.fq.gz") into ch_output_from_fastp
+    file("*.json") into ch_fastp_for_multiqc
 
     script:
     if( seqtype == 'SE' ){
@@ -1045,12 +1045,12 @@ process adapter_removal {
     publishDir "${params.outdir}/AdapterRemoval", mode: 'copy'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_fastp_for_adapterremoval
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*pair2.truncated.gz") optional true into ch_output_from_adapterremoval_r2
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*.settings") into ch_adapterremoval_logs
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*pair2.truncated.gz") optional true into ch_output_from_adapterremoval_r2
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*.settings") into ch_adapterremoval_logs
 
     when: 
     !params.skip_adapterremoval
@@ -1180,7 +1180,7 @@ process lanemerge {
   publishDir "${params.outdir}/lanemerging", mode: 'copy'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), file(r2) from ch_branched_for_lanemerge.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_branched_for_lanemerge.merge_me
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_lanemerge_for_mapping
