@@ -527,8 +527,10 @@ if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.inpu
 ch_input_sample = Channel.empty()
 if (tsv_path) {
 
-  // TODO add check file exists here first
+
     tsv_file = file(tsv_path)
+    if (!tsv_file.exists()) exit 1, "[nf-core/eager] error: input TSV file could not be found. Does the file exist or in the right place? You gave the path: ${params.input}"
+
     ch_input_sample = extract_data(tsv_file)
 
 } else if (params.input && !has_extension(params.input, "tsv")) {
@@ -2194,7 +2196,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
 
  process genotyping_pileupcaller {
   label 'mc_small'
-  tag "${samplename}"
+  tag "${strandedness}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
 
   when:
