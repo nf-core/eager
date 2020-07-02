@@ -421,7 +421,7 @@ The MultiQC DamageProfiler module misincorporation plots shows the percent frequ
 When looking at the misincorporation plots, keep the following in mind:
 
 - As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads.
-- If your library has been **partially-UDG treated**, only the first one or two bases will display the the misincorporation frequency.
+- If your library has been **partially-UDG treated**, only the first one or two bases will display the misincorporation frequency.
 - If your library has been **UDG treated** you will expect to see extremely-low to no misincorporations at read ends.
 - If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
 - We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
