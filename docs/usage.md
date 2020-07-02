@@ -823,8 +823,9 @@ Documentation for each tool:
 - [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
 - [FreeBayes](https://github.com/ekg/freebayes)
 - [ANGSD](http://www.popgen.dk/angsd/index.php/Genotype_Likelihoods)
+- [sequenceTools pileupCaller](https://github.com/stschiff/sequenceTools)
 
-If using TSV input, genotyping is performed per sample (i.e. after all types of libraries are merged).
+If using TSV input, genotyping is performed per sample (i.e. after all types of libraries are merged), except pileupCaller which gathers all double-stranded and single-stranded (same-type merged) libraries respectively.
 
 #### `--run_genotyping`
 
