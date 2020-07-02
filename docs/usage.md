@@ -259,6 +259,8 @@ Note the following important points:
   - If you do not have different IDs nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
   - Please note this setup is **not** optimal, as you therefore cannot deduplicate PE and SE data of the same library together (and therefore may still have PCR duplicates at the library merging level).
 - Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
+- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on
+each unique library separately after deduplication (but prior same-treated library merging).
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
 - Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
 
@@ -513,6 +515,8 @@ If not turned on, BAMs will automatically be sent to post-mapping steps.
 
 More details on can be seen in the [fastp documentation](https://github.com/OpenGene/fastp)
 
+If using TSV input, this is performed per lane separately.
+
 #### `--complexity_filter_poly_g`
 
 Performs a poly-G tail removal step in the beginning of the pipeline using `fastp`, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
@@ -526,6 +530,8 @@ This option can be used to define the minimum length of a poly-G tail to begin l
 These options handle various parts of adapter clipping and read merging steps.
 
 More details can be seen in the [AdapterRemoval documentation](https://adapterremoval.readthedocs.io/en/latest/)
+
+If using TSV input, this is performed per lane separately.
 
 #### `--clip_forward_adaptor`
 
@@ -580,6 +586,8 @@ Turns off quality based trimming at the 5p end of reads when any of the --trimns
 This flag means that only merged reads are sent downstream for analysis. Singletons (i.e. reads missing a pair), or un-merged reads (where there wasn't sufficient overlap) are discarded. You may want to use this if you want ensure only the best quality reads for your analysis, but with the penalty of potentially losing still valid data (even if some reads have slightly lower quality).
 
 ### Read Mapping Parameters
+
+If using TSV input, mapping is performed library, i.e. after lane merging.
 
 #### `--mapper`
 
@@ -658,6 +666,8 @@ These flags will produce FASTQ files almost identical to your input files, excep
 
 This functionality allows you to provide other researchers who wish to re-use your data to apply their own adapter removal/read merging procedures, while maintaining anonyminity for sample donors - for example with microbiome research.
 
+If using TSV input, stripping is performed library, i.e. after lane merging.
+
 #### `--strip_input_fastq`
 
 Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
@@ -669,6 +679,8 @@ Read removal mode. Strip mapped reads completely (`'strip'`) or just replace map
 ### Read Filtering and Conversion Parameters
 
 Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline.
+
+If using TSV input, filtering is performed library, i.e. after lane merging.
 
 #### `--run_bam_filtering`
 
@@ -687,6 +699,8 @@ Defines how to proceed with unmapped reads: `'discard'` removes all unmapped rea
 Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).
 
 ### Read DeDuplication Parameters
+
+If using TSV input, deduplication is performed library, i.e. after lane merging.
 
 #### `--dedupper`
 
@@ -708,6 +722,8 @@ More documentation can be seen in the follow links for:
 
 - [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
 - [PMDTools documentation](https://github.com/pontussk/PMDtools)
+
+If using TSV input, DamageProfiler is performed library, i.e. after lane merging. PMDtools and  BAM Trimming is run after library merging of same-named library BAMs that have the same type of UDG treatment. BAM Trimming is only performed on non-UDG and half-UDG treated data.
 
 #### `--udg_type`
 
@@ -787,6 +803,8 @@ If you're interested in looking at coverage stats for certain features on your r
 
 More documentation on bedtools can be seen in the [bedtools documentation](https://bedtools.readthedocs.io/en/latest/)
 
+If using TSV input, bedtools is run after library merging of same-named library BAMs that have the same type of UDG treatment.
+
 #### `--run_bedtools_coverage`
 
 Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.
@@ -805,6 +823,8 @@ Documentation for each tool:
 - [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
 - [FreeBayes](https://github.com/ekg/freebayes)
 - [ANGSD](http://www.popgen.dk/angsd/index.php/Genotype_Likelihoods)
+
+If using TSV input, genotyping is performed per sample (i.e. after all types of libraries are merged).
 
 #### `--run_genotyping`
 
@@ -917,7 +937,13 @@ Turns on the ANGSD creation of a FASTA file from the BAM file.
 
 The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given positin, whereas 'random' will pick one at random. Default: `'random'`.
 
+#### `--pileupcaller_transitions_mode`
+
+Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: AllSites, TransitionsMissing, SkipTransitions. Default: AllSites
+
 ### Consensus Sequence Generation
+
+If using TSV input, consensus eneration is performed per sample (i.e. after all types of libraries are merged).
 
 #### `--run_vcf2genome`
 
@@ -945,6 +971,8 @@ In the case of two possible alleles, the frequency of the majority allele requir
 
 ### Mitochondrial to Nuclear Ratio
 
+If using TSV input, Mitochondrial to Nuclear Ratio calculation is calculated per deduplicated library (after lane merging)
+
 #### `--run_mtnucratio`
 
 Turn on the module to estimate the ratio of mitochondrial to nuclear reads.
@@ -957,7 +985,9 @@ Specify the FASTA entry in the reference file specified as `--fasta`, which acts
 
 SNP Table Generation here is performed by MultiVCFAnalyzer. The current version of MultiVCFAnalyzer version only accepts GATK UnifiedGenotyper 3.5 VCF files, and when the ploidy was set to 2 (this allows MultiVCFAnalyzer to look for report frequencies of polymorphic positions). A description of how the tool works can be seen in the Supplementary Information of [Bos et al. (2014)](https://doi.org/10.1038/nature13591) under "SNP Calling and Phylogenetic Analysis".
 
-More can be seen in the [MultiVCFAnalyzer documentation](https://github.com/alexherbig/MultiVCFAnalyzer)
+More can be seen in the [MultiVCFAnalyzer documentation](https://github.com/alexherbig/MultiVCFAnalyzer).
+
+If using TSV input, MultiVCFAnalyzer is performed on all samples gathered together.
 
 #### `--run_multivcfanalyzer`
 
@@ -1003,6 +1033,8 @@ If you wish to include results from SNPEff effect analysis, supply the output fr
 
 An optional process for human DNA. It can be used to calculate the relative coverage of X and Y chromosomes compared to the autosomes (X-/Y-rate). Standard errors for these measurements are also calculated, assuming a binomial distribution of reads across the SNPs.
 
+If using TSV input, SexDetERRmine is performed on all samples gathered together.
+
 #### `--run_sexdeterrmine`
 
 Specify to run the optional process of sex determination.
@@ -1032,6 +1064,8 @@ Please note the following:
 - MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
 > :warning: Running MALT on a server with less than 128GB of memory should be performed at your own risk.
+
+If using TSV input, metagenomic screening is performed on all samples gathered together.
 
 #### `--run_metagenomic_screening`
 

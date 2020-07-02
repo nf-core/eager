@@ -108,6 +108,8 @@ For other non-default columns, hover over the column name for further descriptio
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your raw reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C) as sequenced. You also get information about adapter contamination and other overrepresented sequences.
 
+You will receive output for each supplied FASTQ file.
+
 When dealing with ancient DNA data the MultiQC plots for FastQC will often show lots of 'warning' or 'failed' samples. You generally can discard this sort of information as we are dealing with very degraded and metagenomic samples which have artefacts that violate the FastQC 'quality definitions', while still being valid data for aDNA researchers. Instead you will _normally_ be looking for 'global' patterns across all samples of a sequencing run to check for library construction or sequencing failures. Decision on whether a individual sample has 'failed' or not should be made by the user after checking all the plots themselves (e.g. if the sample is consistently an outlier to all others in the run).
 
 For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
@@ -243,6 +245,8 @@ In the case of dual-indexed paired-end sequencing, it is likely poly-G tails are
 
 While the MultiQC report has multiple plots for FastP, we will only look at GC content as that's the functionality we use currently.
 
+You will receive output for each supplied FASTQ file.
+
 #### GC Content
 
 This line plot shows the average GC content (Y axis) across each nucleotide of the reads (X-axis). There are two buttons per read (i.e. 2 for single-end, and 4 for paired-end) representing before and after the poly-G tail trimming.
@@ -273,6 +277,8 @@ Adapter removal involves finding overlaps at the 5' and 3' end of reads for the 
 Quality trimming (or 'truncating') involves looking at ends of reads for low-confidence bases (i.e. where the FASTQ Phred score is below a certain threshold). These are then removed remove the read.
 
 Length filtering involves removing any read that does not reach the number of bases specified by a particular value.
+
+You will receive output for each FASTQ file supplied for single end data, or for each pair of merged FASTQ files for paired end data.
 
 #### Retained and Discarded Reads Plot
 
@@ -317,6 +323,8 @@ With paired-end ancient DNA sequencing runs You expect to see a slight increase 
 
 This module provides numbers in raw counts of the mapping of your DNA reads to your reference genome.
 
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes in one value. 
+
 #### Flagstat Plot
 
 This dot plot shows different statistics, and the number of reads (typically as an multiple e.g. million, or thousands), are represented by dots on the X axis.
@@ -334,6 +342,8 @@ The remaining rows will be 0 when running `bwa aln` as these characteristucs of 
 > **NB:** The Samtools (pre-samtools filter) plots displayed in the MultiQC report shows mapped reads without mapping quality filtering. This will contain reads that can map to multiple places on your reference genome with equal or slightly less mapping quality score. To see how your reads look after mapping quality, look at the FastQC reports in the Samtools (pre-samtools filter). You should expect after mapping quality filtering, that you will have less reads.
 
 ### DeDup
+
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value. 
 
 #### Background
 
@@ -363,6 +373,8 @@ Things to look out for:
 - If you have a very large number of duplicates that were removed this may suggest you have an over amplified library, or a lot of left-over adapters that were able to map to your genome.
 
 ### Preseq
+
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
@@ -429,15 +441,60 @@ When looking at the length distribution plots, keep in mind the following:
 - You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
 - You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
 
+### DamageProfiler
+
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value. 
+
+#### Background
+
+DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
+
+Therefore, three main characteristics of ancient DNA are:
+
+* Short DNA fragments
+* Elevated G and As (purines) just before strand breaks
+* Increased C and Ts at ends of fragments
+  
+#### Misincorporation Plots
+
+The MultiQC DamageProfiler module misincorporation plots shows the percent frequency (Y axis) of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The X axis represents base pairs from the end of the molecule from the given prime end, going into the middle of the molecule i.e. 1st base of molecule, 2nd base of molecule etc until the 14th base pair. The mismatches are when compared to the base of the reference genome at that position.
+
+When looking at the misincorporation plots, keep the following in mind:
+
+* As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads.
+* If your library has been **partially-UDG treated**, only the first one or two bases will display the the misincorporation frequency.
+* If your library has been **UDG treated** you will expect to see extremely-low to no misincorporations at read ends.
+* If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
+* We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
+* The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
+
+<p align="center">
+  <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
+</p>
+
+> **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
+
+#### Length Distribution
+
+The MultiQC DamageProfiler module length distribution plots show the frequency of read lengths across forward and reverse reads respectively.
+
+When looking at the length distribution plots, keep in mind the following:
+
+* Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
+* You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
+* You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
+
 ### QualiMap
 
-#### QualiMap
+#### Background
 
 Qualimap is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
 
 > NB: Neither fold coverage nor percent coverage on there own is sufficient to assess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or un-removed-adapter-containing reference genomes can artificially inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
 
 Note that many of the statistics from this module are displayed in the General Stats table (see above), as they represent single values that are not plottable.
+
+You will receive output for each _sample_. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
 
 #### Coverage Histogram
 
