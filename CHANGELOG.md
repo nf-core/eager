@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Improved error messages
 * Added ability for automated emails using `mailutils` to also send MultiQC reports
 * General documentation additions and cleaning, updated figures with CC-BY license
+* Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
+* [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
+* [#451] Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
 
 ### `Fixed`
 
@@ -33,6 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#398](https://github.com/nf-core/eager/issues/498) - Stopped incompatible FASTA indexes being accepted
 * [#400](https://github.com/nf-core/eager/issues/400) -  Set correct recommended bwa mapping parameters from [Schubert et al. 2012](https://doi.org/10.1186/1471-2164-13-178)
 * [#410](https://github.com/nf-core/eager/issues/410) - Fixed nf-core/configs not being loaded properly
+* [#473](https://github.com/nf-core/eager/issues/473) - Fixed bug in sexdet_process on AWS
 * Increase MultiQC process memory requirements to ensure enough memory for large runs
 
 ### `Dependencies`
@@ -49,7 +53,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Latest version of Kraken2 (2.0.9beta)
 * Latest version of FreeBayes (1.3.2)
 * Latest version of xopen (0.9.0)
-* *Adding* in Bowtie 2 (2.4.1)
+* Added Bowtie 2 (2.4.1)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 

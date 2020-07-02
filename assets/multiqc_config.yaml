@@ -9,6 +9,7 @@ report_comment: >
 
 run_modules:
     - adapterRemoval
+    - bowtie2
     - custom_content
     - damageprofiler
     - dedup
@@ -56,6 +57,7 @@ extra_fn_clean_exts:
     - '.unifiedgenotyper'
     - '.trimmed_stats'
     - '_libmerged'
+    - '_bt2'
 
  
 top_modules:
@@ -68,8 +70,11 @@ top_modules:
     - 'fastqc':
        name: 'FastQC (post-AdapterRemoval)'
        path_filters:
-           - '*.truncated_fastqc.zip'
-           - '*.combined*_fastqc.zip'
+            - '*.truncated_fastqc.zip'
+            - '*.combined*_fastqc.zip'
+    - 'bowtie2':
+       path_filters:
+            - '*_bt2.log'
     - 'malt'
     - 'hops'
     - 'kraken'
@@ -117,6 +122,8 @@ table_columns_visible:
         percent_duplicates: False
         total_sequences: True
         percent_gc: True
+    bowtie2:
+        overall_alignment_rate: True
     MALT:
         Taxonomic assignment success: False
         Assig. Taxonomy: False
@@ -167,6 +174,8 @@ table_columns_placement:
         total_sequences: 400
         avg_sequence_length: 410
         percent_gc: 420
+    Bowtie 2 / HiSAT2:
+        overall_alignment_rate: 450
     MALT:
         Num. of queries: 430
         Total reads: 440
@@ -181,14 +190,14 @@ table_columns_placement:
     Samtools Flagstat (post-samtools filter):
         flagstat_total: 553
         mapped_passed: 554
+    custom_content:
+        endogenous_dna: 600
+        endogenous_dna_post: 610
     DeDup:
-        mapped_after_dedup: 600
-        clusterfactor: 610
+        mapped_after_dedup: 620
+        clusterfactor: 630
     Picard:
         PERCENT_DUPLICATION: 650
-    custom_content:
-        endogenous_dna: 680
-        endogenous_dna_post: 690
     DamageProfiler:
         5 Prime1: 700
         5 Prime2: 710
