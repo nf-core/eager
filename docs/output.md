@@ -323,7 +323,7 @@ With paired-end ancient DNA sequencing runs You expect to see a slight increase 
 
 This module provides numbers in raw counts of the mapping of your DNA reads to your reference genome.
 
-You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes in one value. 
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes in one value.
 
 #### Flagstat Plot
 
@@ -343,7 +343,7 @@ The remaining rows will be 0 when running `bwa aln` as these characteristucs of 
 
 ### DeDup
 
-You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value. 
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
@@ -402,6 +402,8 @@ Plateauing can be caused by a number of reasons:
 
 ### DamageProfiler
 
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
+
 #### Background
 
 DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
@@ -419,7 +421,7 @@ The MultiQC DamageProfiler module misincorporation plots shows the percent frequ
 When looking at the misincorporation plots, keep the following in mind:
 
 - As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads.
-- If your library has been **partially-UDG treated**, only the first one or two bases will display the misincorporation frequency.
+- If your library has been **partially-UDG treated**, only the first one or two bases will display the the misincorporation frequency.
 - If your library has been **UDG treated** you will expect to see extremely-low to no misincorporations at read ends.
 - If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
 - We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
@@ -440,49 +442,6 @@ When looking at the length distribution plots, keep in mind the following:
 - Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
 - You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
 - You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
-
-### DamageProfiler
-
-You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value. 
-
-#### Background
-
-DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
-
-Therefore, three main characteristics of ancient DNA are:
-
-* Short DNA fragments
-* Elevated G and As (purines) just before strand breaks
-* Increased C and Ts at ends of fragments
-  
-#### Misincorporation Plots
-
-The MultiQC DamageProfiler module misincorporation plots shows the percent frequency (Y axis) of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The X axis represents base pairs from the end of the molecule from the given prime end, going into the middle of the molecule i.e. 1st base of molecule, 2nd base of molecule etc until the 14th base pair. The mismatches are when compared to the base of the reference genome at that position.
-
-When looking at the misincorporation plots, keep the following in mind:
-
-* As few-base single-stranded overhangs are more likely to occur than long overhangs, we expect to see a gradual decrease in the frequency of the modifications from position 1 to the inside of the reads.
-* If your library has been **partially-UDG treated**, only the first one or two bases will display the the misincorporation frequency.
-* If your library has been **UDG treated** you will expect to see extremely-low to no misincorporations at read ends.
-* If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
-* We generally expect that the older the sample, or the less-ideal preservational environtment (hot/wet) the greater the frequency of C to T/G to A.
-* The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
-
-<p align="center">
-  <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
-</p>
-
-> **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
-
-#### Length Distribution
-
-The MultiQC DamageProfiler module length distribution plots show the frequency of read lengths across forward and reverse reads respectively.
-
-When looking at the length distribution plots, keep in mind the following:
-
-* Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
-* You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
-* You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
 
 ### QualiMap
 
