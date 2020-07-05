@@ -51,7 +51,7 @@
                 "input"
             ]
         },
-        "New Group 1": {
+        "Output options": {
             "type": "object",
             "description": "",
             "default": "",
