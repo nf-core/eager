@@ -586,8 +586,9 @@
                     "description": "Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'."
                 },
                 "run_pmdtools": {
-                    "type": "string",
-                    "description": "Turn on PMDtools"
+                    "type": "boolean",
+                    "description": "Turn on PMDtools",
+                    "default": false
                 },
                 "udg_type": {
                     "type": "string",
@@ -622,8 +623,9 @@
             "default": "",
             "properties": {
                 "run_bedtools_coverage": {
-                    "type": "string",
-                    "description": "Turn on ability to calculate no. reads, depth and breadth coverage of features in reference."
+                    "type": "boolean",
+                    "description": "Turn on ability to calculate no. reads, depth and breadth coverage of features in reference.",
+                    "default": false
                 },
                 "anno_file": {
                     "type": "string",
@@ -768,8 +770,9 @@
                     "description": "Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'."
                 },
                 "angsd_createfasta": {
-                    "type": "string",
-                    "description": "Turn on creation of FASTA from ANGSD genotyping likelhoood."
+                    "type": "boolean",
+                    "description": "Turn on creation of FASTA from ANGSD genotyping likelhoood.",
+                    "default": false
                 },
                 "angsd_fastamethod": {
                     "type": "string",
