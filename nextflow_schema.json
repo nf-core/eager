@@ -616,7 +616,7 @@
             },
             "fa_icon": "fas fa-quidditch"
         },
-        "New Group 11": {
+        "Annotation Statistics": {
             "type": "object",
             "description": "",
             "default": "",
