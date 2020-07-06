@@ -2379,7 +2379,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${strandedness}.*")
 
   script:
-  transitions_mode = "${params.pileupcaller_transitions_mode}" == 'SkipTransitions' ? "--skipTransitions" : "${params.pileupcaller_transitions_mode}" == 'TransitionsMissing' ? "--transitionsMissing" : ""
+  transitions_mode = strandedness == "single" ? "" : "${params.pileupcaller_transitions_mode}" == 'SkipTransitions' ? "--skipTransitions" : "${params.pileupcaller_transitions_mode}" == 'TransitionsMissing' ? "--transitionsMissing" : ""
   caller = "--${params.pileupcaller_method}"
   ssmode = strandedness == "single" ? "--singleStrandMode" : ""
   bam_list = bam.flatten().join(" ")
