@@ -90,7 +90,7 @@ Additional functionality contained by the pipeline currently includes:
 
         nextflow run nf-core/eager -profile <docker/singularity/conda>,test
 
-5. Start running your own ancient DNA analysis!
+5. Start running your own ancient DNA analysis either via the command-line or [GUI](https://nf-co.re/launch)! Command line example:
 
         nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
