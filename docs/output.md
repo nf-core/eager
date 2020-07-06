@@ -23,6 +23,7 @@
     - [DamageProfiler](#damageprofiler)
     - [QualiMap](#qualimap)
     - [Sex.DetERRmine](#sexdeterrmine)
+    - [MultiVCFAnalyzer](#multivcfanalyzer)
   - [Output Files](#output-files)
 
 ## Introduction
@@ -527,10 +528,28 @@ Things to watch out for:
 
 ### Sex.DetERRmine
 
-#### BackgroundTO
+#### Background
+
+#### Relative Coverage
 
 TODO
+
+#### Read/SNP Counts
+
+### MultiVCFAnalyzer
+
+#### Background
+
+TODO
+
+#### Summary metrics
+
+TODO
+
+#### Call statistics barplot
   
+TODO
+
 ## Output Files
 
 This section gives a brief summary of where to look for what files for downstream analysis. This covers *all* modules.
