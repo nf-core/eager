@@ -2791,7 +2791,7 @@ process kraken_merge {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
   input:
-  tuple val(name), file(csv_count) from ch_kraken_parsed.collect()
+  file csv_count from ch_kraken_parsed.map{ it[1] }.collect().dump()
 
   output:
   file('kraken_count_table.csv')
