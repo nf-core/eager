@@ -91,7 +91,7 @@ To see the the EAGER pipeline help message run: `nextflow run nf-core/eager --he
 
 > By default, if a pipeline step fails, nf-core/eager will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
 
-If you want to configure your pipeline interactively using a graphical user interface, please visit [https://nf-co.re/launch](https://nf-co.re/launch), select the `eager` pipeline and the version you intend to run and follow the on-screen instructions to create a config for your pipeline run. 
+If you want to configure your pipeline interactively using a graphical user interface, please visit [https://nf-co.re/launch](https://nf-co.re/launch), select the `eager` pipeline and the version you intend to run and follow the on-screen instructions to create a config for your pipeline run.
 
 ### Updating the pipeline
 
