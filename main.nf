@@ -2753,7 +2753,7 @@ process kraken {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
-  file(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }.collect()
+  file(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }
   file(krakendb) from ch_krakendb
 
   output:
