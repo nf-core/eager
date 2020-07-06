@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * **Major** Automated Cloud Tests with large-scale data on [AWS](https://aws.amazon.com/)
 * **Major** Re-wrote input logic to accept a TSV 'map' file in addition to direct paths to FASTQ
+* **Major** Added JSON Schema, enabling web GUI for configuration of pipeline
 * **Major** Lane and library merging implement
   * When using TSV input, one libraries with the multiple _lane_ will be merged together, before mapping
     * Strip FASTQ will also produce a lane merged 'raw' but 'stripped' FASTQ file
@@ -18,7 +19,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   * Important: direct FASTQ paths will not have this functionality. TSV is required.
 * [#40](https://github.com/nf-core/eager/issues/40) - Added the pileupCaller genotyper from [sequenceTools](https://github.com/stschiff/sequenceTools)
 * Added sanity check and clearer error message when `--fasta_index` is provided and filepath does not end in `.fai`.
-* Added basic json_schema
 * Improved error messages
 * Added ability for automated emails using `mailutils` to also send MultiQC reports
 * General documentation additions and cleaning, updated figures with CC-BY license

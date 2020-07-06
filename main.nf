@@ -27,18 +27,20 @@ def helpMessage() {
         -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
 
       Direct Input
-        --input                       Either paths to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
+        --input                       Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
                                       OR 
                                       A path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
 
         --single_end                  Specifies that the input is single end reads. Not required for TSV input.
+        --udg_type                    Specify here if you have UDG treated libraries, Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Default: ${params.udg_type}
         --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
         --single_stranded             Specifies whether libraries are single stranded. Always affects MALTExtract but will be ignored by pileupCaller with TSV input. Default: ${params.single_stranded}
         --bam                         Specifies that the input is in BAM format. Not required for TSV input.
 
+
       Reference
-        --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
-        --genome                      Name of iGenomes reference (required if not fasta reference).
+        --fasta                       Path or URL to a FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
+        --genome                      Name of iGenomes reference (required if not FASTA reference).
 
     Output options:     
       --outdir                      The output directory where the results will be saved. Default: ${params.outdir}
@@ -69,23 +71,23 @@ def helpMessage() {
       --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed. Default: ${params.complexity_filter_poly_g_min}
 
     Clipping / Merging
-      --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward). Default: '${params.clip_forward_adaptor}'
-      --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse). Default: '${params.clip_reverse_adaptor}'
+      --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward strand). Default: '${params.clip_forward_adaptor}'
+      --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse strand). Default: '${params.clip_reverse_adaptor}'
       --clip_readlength             Specify read minimum length to be kept for downstream analysis. Default: ${params.clip_readlength}
       --clip_min_read_quality       Specify minimum base quality for trimming off bases. Default: ${params.clip_min_read_quality}
       --min_adap_overlap            Specify minimum adapter overlap: Default: ${params.min_adap_overlap}
-      --skip_collapse               Turn on skipping of merging forward and reverse reads together. Only applicable for PE libraries.
+      --skip_collapse               Turn on skipping of merging forward and reverse reads together. Only applicable for paired-end libraries.
       --skip_trim                   Turn on skipping of adapter and quality trimming
       --preserve5p                  Turn on skipping 5p quality base trimming (n, score, window) at 5p end.
       --mergedonly                  Turn on sending downstream only merged reads (un-merged reads and singletons are discarded).
 
     Mapping
       --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: '${params.mapper}'
-      --bwaalnn                     Specify the -n parameter for BWA aln. Default: ${params.bwaalnn}
-      --bwaalnk                     Specify the -k parameter for BWA aln. Default: ${params.bwaalnk}
-      --bwaalnl                     Specify the -l parameter for BWA aln. Default: ${params.bwaalnl}
+      --bwaalnn                     Specify the -n parameter for BWA aln, i.e. amount of allowed mismatches in alignments. Default: ${params.bwaalnn}
+      --bwaalnk                     Specify the -k parameter for BWA aln, i.e. maximum edit distance allowed in a seed. Default: ${params.bwaalnk}
+      --bwaalnl                     Specify the -l parameter for BWA aln, i.e. length of seeds to be used. Set to 1024 for whole read. Default: ${params.bwaalnl}
       --circularextension           Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
-      --circulartarget              Specify the target chromosome for CM (circularmapper only). Default: '${params.circulartarget}'
+      --circulartarget              Specify the FASTA header of the target chromosome to extend(circularmapper only). Default: '${params.circulartarget}'
       --circularfilter              Turn on to filter off-target reads (circularmapper only).
       --bt2_alignmode               Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: '${params.bt2_alignmode}'
       --bt2_sensitivity             Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: '${params.bt2_sensitivity}'
@@ -116,7 +118,6 @@ def helpMessage() {
       --damageprofiler_threshold    Specify number of bases to consider for damageProfiler (e.g. on damage plot). Default: ${params.damageprofiler_threshold}
       --damageprofiler_yaxis        Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: ${params.damageprofiler_yaxis} 
       --run_pmdtools                Turn on PMDtools
-      --udg_type                    Specify here if you have UDG treated libraries, Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Default: ${params.udg_type}
       --pmdtools_range              Specify range of bases for PMDTools. Default: ${params.pmdtools_range} 
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools. Default: ${params.pmdtools_threshold} 
       --pmdtools_reference_mask     Specify a path to reference mask for PMDTools.
@@ -188,7 +189,7 @@ def helpMessage() {
 
     Nuclear Contamination for Human DNA
       --run_nuclear_contamination   Turn on nuclear contamination estimation for human reference genomes.
-      --contamination_chrom_name    The name of the chromosome in your bam. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
+      --contamination_chrom_name    The name of the X chromosome in your bam or FASTA header. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
 
     Metagenomic Screening
       --run_metagenomic_screening      Turn on metagenomic screening module for reference-unmapped reads
@@ -202,7 +203,7 @@ def helpMessage() {
       --malt_min_support_mode          Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'. Default: '${params.malt_min_support_mode}'
       --malt_min_support_percent       Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
       --malt_max_queries               Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
-      --malt_memory_mode               Specify the memory load method. Do not use 'map' with GTFS file system for MALT. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
+      --malt_memory_mode               Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
 
     Metagenomic Authentication
       --run_maltextract                  Turn on MaltExtract for MALT aDNA characteristics authentication
@@ -221,7 +222,7 @@ def helpMessage() {
     Other options:     
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
       --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'. Default: '${params.max_memory}'
-      --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'. Default: '${params.max_time}'
+      --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_time '2.h'. Default: '${params.max_time}'
       --max_cpus                    Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. Default: '${params.max_cpus}'
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       --plaintext_email             Receive plain text emails rather than HTML
@@ -2467,7 +2468,7 @@ if (params.additional_vcf_files == '') {
   file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
   file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
   file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
-  file('MultiVFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
+  file('MultiVCFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
@@ -2742,7 +2743,6 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
     ch_krakendb = Channel.empty()
 }
 
-// TODO Check this works with collected input
 process kraken {
   tag "$prefix"
   label 'mc_huge'
@@ -2752,7 +2752,7 @@ process kraken {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
-  file(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }.collect()
+  file(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }
   file(krakendb) from ch_krakendb
 
   output:
@@ -2790,7 +2790,7 @@ process kraken_merge {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
   input:
-  tuple val(name), file(csv_count) from ch_kraken_parsed.collect()
+  file csv_count from ch_kraken_parsed.map{ it[1] }.collect().dump()
 
   output:
   file('kraken_count_table.csv')

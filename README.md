@@ -90,7 +90,7 @@ Additional functionality contained by the pipeline currently includes:
 
         nextflow run nf-core/eager -profile <docker/singularity/conda>,test
 
-5. Start running your own ancient DNA analysis!
+5. Start running your own ancient DNA analysis either via the command-line or [GUI](https://nf-co.re/launch)! Command line example:
 
         nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
@@ -107,20 +107,20 @@ as described in the documentation.
 
 The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory or on the main homepage of the nf-core project:
 
-1. [Nextflow Installation](https://nf-co.re/usage/installation)
+1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
     * [Pipeline installation](https://nf-co.re/usage/local_installation)
     * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
-5. [EAGER2 Code Contribution Guidelines](code_contribution.md)
-6. [nf-core/nextflow Troubleshooting](https://nf-co.re/usage/troubleshooting)
-7. [EAGER Troubleshooting](docs/troubleshooting.md)
+5. [nf-core/eager code contribution checklist and guidelines](docs/code_contribution.md)
+6. [nf-core and Nextflow troubleshooting](https://nf-co.re/usage/troubleshooting)
+7. [nf-core/eager troubleshooting](docs/troubleshooting.md)
 
 ## Credits
 
-This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [James A. Fellows Yates](https://github.com/jfy133), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas), [Aida Andrades Valtueña](https://github.com/aidaanva) and [Maxime Garcia](https://github.com/MaxUlysse). If you want to contribute, please open an issue (or even better, a pull request!) and ask to be added to the project - everyone is welcome to contribute here!
+This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)) and [James A. Fellows Yates](https://github.com/jfy133), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas), [Aida Andrades Valtueña](https://github.com/aidaanva) and [Maxime Garcia](https://github.com/MaxUlysse). If you want to contribute, please open an issue (or even better, a pull request!) and ask to be added to the project - everyone is welcome to contribute here!
 
 ## Authors (alphabetical)
 
