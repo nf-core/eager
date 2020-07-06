@@ -10,236 +10,18 @@
  For a list of authors and contributors, see: https://github.com/nf-core/eager/tree/dev#authors-alphabetical
 ============================================================================================================
 */
-
-def helpMessage() {
-    log.info nfcoreHeader()
-    log.info"""
-    =========================================
-    eager v${workflow.manifest.version}
-    =========================================
-    Usage:
-
-    The typical command for running the pipeline is as follows:
-
-    nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
-
-    Mandatory arguments:
-        -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
-
-      Direct Input
-        --input                       Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
-                                      OR 
-                                      A path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
-
-        --single_end                  Specifies that the input is single end reads. Not required for TSV input.
-        --udg_type                    Specify here if you have UDG treated libraries, Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Default: ${params.udg_type}
-        --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
-        --single_stranded             Specifies whether libraries are single stranded. Always affects MALTExtract but will be ignored by pileupCaller with TSV input. Default: ${params.single_stranded}
-        --bam                         Specifies that the input is in BAM format. Not required for TSV input.
-
-
-      Reference
-        --fasta                       Path or URL to a FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
-        --genome                      Name of iGenomes reference (required if not FASTA reference).
-
-    Output options:     
-      --outdir                      The output directory where the results will be saved. Default: ${params.outdir}
-      -w                            The directory where intermediate files will be stored. Recommended: '<outdir>/work/'
-
-    Input Data Additional Options:
-      --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!).
-      --run_convertinputbam         Turns on convertion of an input BAM file into FASTQ format before pre-processing (e.g. AdapterRemoval etc.).
-
-    References                      Optional additional pre-made indices, or you wish to overwrite any of the references.
-      --bwa_index                   Path and name of a bwa indexed FASTA reference file without index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value as --fasta)
-      --bt2_index                   Path and name of a bowtie2 indexed FASTA reference file without index index suffixes (i.e. everything before the endings e.g. '.1.bt2', '.2.bt2', '.rev.1.bt2'. Most likely the same value as --fasta)
-      --bedfile                     Path to BED file for SNPCapture methods.
-      --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict').
-      --fasta_index                 Path to samtools FASTA index (typically ending in '.fai').
-      --save_reference              Turns on saving reference genome indices for later re-usage.
-
-    Skipping                        Skip any of the mentioned steps.
-      --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
-      --skip_adapterremoval         
-      --skip_preseq
-      --skip_damage_calculation
-      --skip_qualimap
-      --skip_deduplication
-
-    Complexity Filtering 
-      --complexity_filter_poly_g        Turn on running poly-G removal on FASTQ files. Will only be performed on 2 colour chemistry.
-      --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed. Default: ${params.complexity_filter_poly_g_min}
-
-    Clipping / Merging
-      --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward strand). Default: '${params.clip_forward_adaptor}'
-      --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse strand). Default: '${params.clip_reverse_adaptor}'
-      --clip_readlength             Specify read minimum length to be kept for downstream analysis. Default: ${params.clip_readlength}
-      --clip_min_read_quality       Specify minimum base quality for trimming off bases. Default: ${params.clip_min_read_quality}
-      --min_adap_overlap            Specify minimum adapter overlap: Default: ${params.min_adap_overlap}
-      --skip_collapse               Turn on skipping of merging forward and reverse reads together. Only applicable for paired-end libraries.
-      --skip_trim                   Turn on skipping of adapter and quality trimming
-      --preserve5p                  Turn on skipping 5p quality base trimming (n, score, window) at 5p end.
-      --mergedonly                  Turn on sending downstream only merged reads (un-merged reads and singletons are discarded).
-
-    Mapping
-      --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: '${params.mapper}'
-      --bwaalnn                     Specify the -n parameter for BWA aln, i.e. amount of allowed mismatches in alignments. Default: ${params.bwaalnn}
-      --bwaalnk                     Specify the -k parameter for BWA aln, i.e. maximum edit distance allowed in a seed. Default: ${params.bwaalnk}
-      --bwaalnl                     Specify the -l parameter for BWA aln, i.e. length of seeds to be used. Set to 1024 for whole read. Default: ${params.bwaalnl}
-      --circularextension           Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
-      --circulartarget              Specify the FASTA header of the target chromosome to extend(circularmapper only). Default: '${params.circulartarget}'
-      --circularfilter              Turn on to filter off-target reads (circularmapper only).
-      --bt2_alignmode               Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: '${params.bt2_alignmode}'
-      --bt2_sensitivity             Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: '${params.bt2_sensitivity}'
-      --bt2n                        Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity. Default: ${params.bt2n}
-      --bt2l                        Specify the -L parameter for bowtie2 (length of seed substrings). Default: ${params.bt2l}
-      --bt2_trim5                   Specify number of bases to trim off from 5' (left) end of read before alignment. Default: ${params.bt2_trim5}
-      --bt2_trim3                   Specify number of bases to trim off from 3' (right) end of read before alignment. Default: ${params.bt2_trim3}
-
-    Stripping
-      --strip_input_fastq           Turn on creating pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
-      --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace). Default: '${params.strip_mode}'
-      
-    BAM Filtering
-      --run_bam_filtering                Turn on samtools filter for mapping quality or unmapped reads of BAM files.
-      --bam_mapping_quality_threshold    Minimum mapping quality for reads filter. Default: ${params.bam_mapping_quality_threshold}
-      --bam_discard_unmapped             Turns on discarding of unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
-      --bam_unmapped_type                Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'. Default: ${params.bam_unmapped_type}
-    
-    DeDuplication
-      --dedupper                    Deduplication method to use. Options: 'dedup', 'markduplicates'. Default: '${params.dedupper}'
-      --dedup_all_merged            Turn on treating all reads as merged reads.
-
-    Library Complexity Estimation
-      --preseq_step_size            Specify the step size of Preseq. Default: ${params.preseq_step_size}
-
-    (aDNA) Damage Analysis
-      --damageprofiler_length       Specify length filter for DamageProfiler. Default: ${params.damageprofiler_length}
-      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler (e.g. on damage plot). Default: ${params.damageprofiler_threshold}
-      --damageprofiler_yaxis        Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: ${params.damageprofiler_yaxis} 
-      --run_pmdtools                Turn on PMDtools
-      --pmdtools_range              Specify range of bases for PMDTools. Default: ${params.pmdtools_range} 
-      --pmdtools_threshold          Specify PMDScore threshold for PMDTools. Default: ${params.pmdtools_threshold} 
-      --pmdtools_reference_mask     Specify a path to reference mask for PMDTools.
-      --pmdtools_max_reads          Specify the maximum number of reads to consider for metrics generation. Default: ${params.pmdtools_max_reads}
-      
-    Annotation Statistics
-      --run_bedtools_coverage       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference.
-      --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.
-
-    BAM Trimming
-      --run_trim_bam                Turn on BAM trimming, for example for for full-UDG or half-UDG protocols.
-      --bamutils_clip_left          Specify the number of bases to clip off reads from 'left' end of read. Default: ${params.bamutils_clip_left}
-      --bamutils_clip_right         Specify the number of bases to clip off reads from 'right' end of read. Default: ${params.bamutils_clip_right}
-      --bamutils_softclip           Turn on using softclip instead of hard masking.
-
-    Genotyping
-      --run_genotyping                Turn on genotyping of BAM files.
-      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.
-      --genotyping_source             Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'. Default: '${params.genotyping_source}'
-      --gatk_ug_jar                   When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.
-      --gatk_call_conf                Specify GATK phred-scaled confidence threshold. Default: ${params.gatk_call_conf}
-      --gatk_ploidy                   Specify GATK organism ploidy. Default: ${params.gatk_ploidy}
-      --gatk_dbsnp                    Specify VCF file for output VCF SNP annotation. Optional. Gzip not accepted.
-      --gatk_ug_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: '${params.gatk_ug_out_mode}'
-      --gatk_hc_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'. Default: '${params.gatk_hc_out_mode}'
-      --gatk_ug_genotype_model        Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. Default: '${params.gatk_ug_genotype_model}'
-      --gatk_hc_emitrefconf           Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: '${params.gatk_hc_emitrefconf}'
-      --gatk_downsample               Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
-      --gatk_ug_defaultbasequalities  Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.
-      --gatk_ug_keep_realign_bam      Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.
-      --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
-      --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
-      --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
-      --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller.
-      --pileupcaller_snpfile          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
-      --pileupcaller_method           Specify calling method to use. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. Default: '${params.pileupcaller_method}'
-      --angsd_glmodel                 Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'. Default: '${params.angsd_glmodel}'
-      --angsd_glformat                Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'. Default: '${params.angsd_glformat}' 
-      --angsd_createfasta             Turn on creation of FASTA from ANGSD genotyping likelhoood.
-      --angsd_fastamethod             Specify which genotype type of 'base calling' to use for ANGSD FASTA generation. Options: 'random', 'common'. Default: '${params.angsd_fastamethod}'
-
-    Consensus Sequence Generation
-      --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
-      --vcf2genome_outfile          Specify name of the output FASTA file containing the consensus sequence. Do not include `.vcf` in the file name. Default: '<input_vcf>'
-      --vcf2genome_header           Specify the header name of the consensus sequence entry within the FASTA file. Default: '<input_vcf>'
-      --vcf2genome_minc             Minimum depth coverage required for a call to be included (else N will be called). Default: ${params.vcf2genome_minc}
-      --vcf2genome_minq             Minimum genotyping quality of a call to be called. Else N will be called. Default: ${params.vcf2genome_minq}
-      --vcf2genome_minfreq          Minimum fraction of reads supporting a call to be included. Else N will be called. Default: ${params.vcf2genome_minfreq}
-
-    SNP Table Generation
-      --run_multivcfanalyzer        Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input.
-      --write_allele_frequencies    Turn on writing write allele frequencies in the SNP table.
-      --min_genotype_quality        Specify the minimum genotyping quality threshold for a SNP to be called. Default: ${params.min_genotype_quality}
-      --min_base_coverage           Specify the minimum number of reads a position needs to be covered to be considered for base calling. Default: ${params.min_base_coverage}
-      --min_allele_freq_hom         Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call. Default: ${params.min_allele_freq_hom}
-      --min_allele_freq_het         Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Default: ${params.min_allele_freq_het}
-      --additional_vcf_files        Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files. Optional.
-      --reference_gff_annotations   Specify path to the reference genome annotations in '.gff' format. Optional.
-      --reference_gff_exclude       Specify path to the positions to be excluded in '.gff' format. Optional.
-      --snp_eff_results             Specify path to the output file from SNP effect analysis in '.txt' format. Optional.
-
-    Mitochondrial to Nuclear Ratio
-      --run_mtnucratio              Turn on mitochondrial to nuclear ratio calculation.
-      --mtnucratio_header           Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space). Default: '${params.mtnucratio_header}'
-
-    Sex Determination
-      --run_sexdeterrmine           Turn on sex determination for human reference genomes.
-      --sexdeterrmine_bedfile       Specify path to SNP panel in bed format for error bar calculation. Optional (see documentation).
-
-    Nuclear Contamination for Human DNA
-      --run_nuclear_contamination   Turn on nuclear contamination estimation for human reference genomes.
-      --contamination_chrom_name    The name of the X chromosome in your bam or FASTA header. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
-
-    Metagenomic Screening
-      --run_metagenomic_screening      Turn on metagenomic screening module for reference-unmapped reads
-      --metagenomic_tool               Specify which classifier to use. Options: 'malt', 'kraken'. Default: '${params.contamination_chrom_name}'
-      --database                       Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory.
-      --metagenomic_min_support_reads  Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: ${params.metagenomic_min_support_reads}
-      --percent_identity               Percent identity value threshold for MALT. Default: ${params.percent_identity}
-      --malt_mode                      Specify which alignment method to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: '${params.malt_mode}'
-      --malt_alignment_mode            Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'. Default: '${params.malt_alignment_mode}'
-      --malt_top_percent               Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual). Default: ${params.malt_top_percent}
-      --malt_min_support_mode          Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'. Default: '${params.malt_min_support_mode}'
-      --malt_min_support_percent       Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
-      --malt_max_queries               Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
-      --malt_memory_mode               Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
-
-    Metagenomic Authentication
-      --run_maltextract                  Turn on MaltExtract for MALT aDNA characteristics authentication
-      --maltextract_taxon_list           Path to a txt file with taxa of interest (one taxon per row, NCBI taxonomy name format)
-      --maltextract_ncbifiles            Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; avaliable: https://github.com/rhuebler/HOPS/)
-      --maltextract_filter               Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: '${params.maltextract_filter}'
-      --maltextract_toppercent           Specify percent of top alignments to use. Default: ${params.maltextract_toppercent}
-      --maltextract_destackingoff        Turn off destacking.
-      --maltextract_downsamplingoff      Turn off downsampling.
-      --maltextract_duplicateremovaloff  Turn off duplicate removal.
-      --maltextract_matches              Turn on exporting alignments of hits in BLAST format.
-      --maltextract_megansummary         Turn on export of MEGAN summary files.
-      --maltextract_percentidentity      Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter. Default: ${params.maltextract_percentidentity}
-      --maltextract_topalignment         Turn on using top alignments per read after filtering.
-
-    Other options:     
-      -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
-      --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'. Default: '${params.max_memory}'
-      --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_time '2.h'. Default: '${params.max_time}'
-      --max_cpus                    Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. Default: '${params.max_cpus}'
-      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      --plaintext_email             Receive plain text emails rather than HTML
-      --max_multiqc_email_size      Threshold size for MultiQC report to be attached in notification email. If file generated by pipeline exceeds the threshold, it will not be attached (Default: 25MB)
-      
-    For a full list and more information of available parameters, consider the documentation (https://github.com/nf-core/eager/).
-    """.stripIndent()
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 /* --                SET UP CONFIGURATION VARIABLES                       -- */
 ///////////////////////////////////////////////////////////////////////////////
 
+//Parse JSON schema and provide params with usage
+def paramsWithUsage = CommonFunctions.readParamsFromJsonSettings("$baseDir/nextflow_schema.json")
+
 // Show help message
 params.help = false
 if (params.help){
-    helpMessage()
+    log.info CommonFunctions.nfcoreHeader(params, workflow)
+    log.info CommonFunctions.helpMessage(paramsWithUsage, workflow)
     exit 0
 }
 
@@ -544,13 +326,7 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 }
 
 if (workflow.profile.contains('awsbatch')) {
-    // AWSBatch sanity checking
-    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch."
-    // Check outdir paths to be S3 buckets if running on AWSBatch
-    // related: https://github.com/nextflow-io/nextflow/issues/813
-    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch."
-    // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-    if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+    CommonFunctions.checkAWSbatch(params, workflow)
 }
 
 ////////////////////////////////////////////////////
@@ -580,7 +356,6 @@ if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.inpu
 ch_input_sample = Channel.empty()
 if (tsv_path) {
 
-  // TODO add check file exists here first
     tsv_file = file(tsv_path)
     ch_input_sample = extract_data(tsv_file)
 
@@ -654,7 +429,7 @@ ch_fastq_channel
 /* --             HEADER LOG INFO             -- */
 ///////////////////////////////////////////////////
 
-log.info nfcoreHeader()
+log.info CommonFunctions.nfcoreHeader(params, workflow)
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/eager'
 summary['Pipeline Version'] = workflow.manifest.version
@@ -731,7 +506,7 @@ log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 // Check the hostnames against configured profiles
-checkHostname()
+CommonFunctions.checkHostname(params)
 
 Channel.from(summary.collect{ [it.key, it.value] })
     .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
@@ -2923,35 +2698,7 @@ process multiqc {
 
 workflow.onComplete {
 
-    // Set up the e-mail variables
-    def subject = "[nf-core/eager] Successful: $workflow.runName"
-    if (!workflow.success) {
-        subject = "[nf-core/eager] FAILED: $workflow.runName"
-    }
-    def email_fields = [:]
-    email_fields['version'] = workflow.manifest.version
-    email_fields['runName'] = custom_runName ?: workflow.runName
-    email_fields['success'] = workflow.success
-    email_fields['dateComplete'] = workflow.complete
-    email_fields['duration'] = workflow.duration
-    email_fields['exitStatus'] = workflow.exitStatus
-    email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
-    email_fields['errorReport'] = (workflow.errorReport ?: 'None')
-    email_fields['commandLine'] = workflow.commandLine
-    email_fields['projectDir'] = workflow.projectDir
-    email_fields['summary'] = summary
-    email_fields['summary']['Date Started'] = workflow.start
-    email_fields['summary']['Date Completed'] = workflow.complete
-    email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
-    email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
-    if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
-    if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
-    if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-    email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
-    email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
-    email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
-
-    // On success try attach the multiqc report
+    // On success try attach the multiqc report to a variable
     def mqc_report = null
     try {
         if (workflow.success) {
@@ -2965,122 +2712,14 @@ workflow.onComplete {
         log.warn "[nf-core/eager] Could not attach MultiQC report to summary email"
     }
 
+    //TODO ALEX P: Not sure we need this? and for what?
     // Check if we are only sending emails on failure
-    email_address = params.email
-    if (!params.email && params.email_on_fail && !workflow.success) {
-        email_address = params.email_on_fail
-    }
+    //email_address = params.email
+    //if (!params.email && params.email_on_fail && !workflow.success) {
+    //    email_address = params.email_on_fail
+    //}
 
-    // Render the TXT template
-    def engine = new groovy.text.GStringTemplateEngine()
-    def tf = new File("$baseDir/assets/email_template.txt")
-    def txt_template = engine.createTemplate(tf).make(email_fields)
-    def email_txt = txt_template.toString()
-
-    // Render the HTML template
-    def hf = new File("$baseDir/assets/email_template.html")
-    def html_template = engine.createTemplate(hf).make(email_fields)
-    def email_html = html_template.toString()
-
-    // Render the sendmail template
-    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
-    def sf = new File("$baseDir/assets/sendmail_template.txt")
-    def sendmail_template = engine.createTemplate(sf).make(smail_fields)
-    def sendmail_html = sendmail_template.toString()
-
-    // Send the HTML e-mail
-    if (email_address) {
-        try {
-            if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
-            // Try to send HTML e-mail using sendmail
-            [ 'sendmail', '-t' ].execute() << sendmail_html
-            log.info "[nf-core/eager] Sent summary e-mail to $email_address (sendmail)"
-        } catch (all) {
-            // Catch failures and try with plaintext
-            if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
-              [ 'mail', '-s', subject, email_address, '-A', mqc_report ].execute() << email_txt 
-            } else {
-              [ 'mail', '-s', subject, email_address ].execute() << email_txt 
-            }
-            log.info "[nf-core/eager] Sent summary e-mail to $email_address (mail)"
-        }
-    }
-
-    // Write summary e-mail HTML to a file
-    def output_d = new File("${params.outdir}/pipeline_info/")
-    if (!output_d.exists()) {
-        output_d.mkdirs()
-    }
-    def output_hf = new File(output_d, "pipeline_report.html")
-    output_hf.withWriter { w -> w << email_html }
-    def output_tf = new File(output_d, "pipeline_report.txt")
-    output_tf.withWriter { w -> w << email_txt }
-
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
-    c_red = params.monochrome_logs ? '' : "\033[0;31m";
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-
-    if (workflow.stats.ignoredCount > 0 && workflow.success) {
-        log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
-        log.info "-${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}-"
-        log.info "-${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}-"
-    }
-
-    if (workflow.success) {
-        log.info "-${c_purple}[nf-core/eager]${c_green} Pipeline completed successfully${c_reset}-"
-    } else {
-        checkHostname()
-        log.info "-${c_purple}[nf-core/eager]${c_red} Pipeline completed with errors${c_reset}-"
-    }
-}
-
-/////////////////////////////////////
-/* --    AUXILARY FUNCTIONS     -- */
-/////////////////////////////////////
-
-def nfcoreHeader() {
-    // Log colours ANSI codes
-    c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_white = params.monochrome_logs ? '' : "\033[0;37m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
-
-    return """    -${c_dim}--------------------------------------------------${c_reset}-
-                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
-    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
-    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
-    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
-                                            ${c_green}`._,._,\'${c_reset}
-    ${c_purple}  nf-core/eager v${workflow.manifest.version}${c_reset}
-    -${c_dim}--------------------------------------------------${c_reset}-
-    """.stripIndent()
-}
-
-def checkHostname() {
-    def c_reset = params.monochrome_logs ? '' : "\033[0m"
-    def c_white = params.monochrome_logs ? '' : "\033[0;37m"
-    def c_red = params.monochrome_logs ? '' : "\033[1;91m"
-    def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
-    if (params.hostnames) {
-        def hostname = "hostname".execute().text.trim()
-        params.hostnames.each { prof, hnames ->
-            hnames.each { hname ->
-                if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
-                    log.error "====================================================\n" +
-                            "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
-                            "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
-                            "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
-                            "============================================================"
-                }
-            }
-        }
-    }
+    CommonFunctions.workflowReport(summary, workflow, params, baseDir, mqc_report)
 }
 
 // Channelling the TSV file containing FASTQ or BAM 
