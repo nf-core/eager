@@ -107,16 +107,16 @@ as described in the documentation.
 
 The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory or on the main homepage of the nf-core project:
 
-1. [Nextflow Installation](https://nf-co.re/usage/installation)
+1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
     * [Pipeline installation](https://nf-co.re/usage/local_installation)
     * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
-5. [nf-core/eager Code Contribution Checklist and Guidelines](docs/code_contribution.md)
-6. [nf-core and Nextflow Troubleshooting](https://nf-co.re/usage/troubleshooting)
-7. [EAGER Troubleshooting](docs/troubleshooting.md)
+5. [nf-core/eager code contribution checklist and guidelines](docs/code_contribution.md)
+6. [nf-core and Nextflow troubleshooting](https://nf-co.re/usage/troubleshooting)
+7. [nf-core/eager troubleshooting](docs/troubleshooting.md)
 
 ## Credits
 
