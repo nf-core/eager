@@ -114,13 +114,13 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
-5. [EAGER2 Code Contribution Guidelines](code_contribution.md)
-6. [nf-core/nextflow Troubleshooting](https://nf-co.re/usage/troubleshooting)
+5. [nf-core/eager Code Contribution Checklist and Guidelines](docs/code_contribution.md)
+6. [nf-core and Nextflow Troubleshooting](https://nf-co.re/usage/troubleshooting)
 7. [EAGER Troubleshooting](docs/troubleshooting.md)
 
 ## Credits
 
-This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [James A. Fellows Yates](https://github.com/jfy133), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas), [Aida Andrades Valtueña](https://github.com/aidaanva) and [Maxime Garcia](https://github.com/MaxUlysse). If you want to contribute, please open an issue (or even better, a pull request!) and ask to be added to the project - everyone is welcome to contribute here!
+This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)) and [James A. Fellows Yates](https://github.com/jfy133), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas), [Aida Andrades Valtueña](https://github.com/aidaanva) and [Maxime Garcia](https://github.com/MaxUlysse). If you want to contribute, please open an issue (or even better, a pull request!) and ask to be added to the project - everyone is welcome to contribute here!
 
 ## Authors (alphabetical)
 
