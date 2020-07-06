@@ -88,10 +88,10 @@ top_modules:
             - '*_postfilterflagstat.stats'
     - 'dedup'
     - 'picard'
+    - 'preseq'
     - 'damageprofiler'
     - 'qualimap'
     - 'mtnucratio'
-    - 'preseq'
     - 'sexdeterrmine'
     - 'gatk'
     - 'multivcfanalyzer':
