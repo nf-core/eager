@@ -2468,7 +2468,7 @@ if (params.additional_vcf_files == '') {
   file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
   file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
   file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
-  file('MultiVFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
+  file('MultiVCFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
