@@ -2743,7 +2743,6 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
     ch_krakendb = Channel.empty()
 }
 
-// TODO Check this works with collected input
 process kraken {
   tag "$prefix"
   label 'mc_huge'
