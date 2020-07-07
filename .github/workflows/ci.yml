@@ -98,7 +98,7 @@ jobs:
       - name: MAPPER_BWAMEM Test running with BWA Mem
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'bwamem'
-      - name: MAPPER_BT2 Test running with BWA BowTie2
+      - name: MAPPER_BT2 Test running with BowTie2
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'bowtie2' --bt2_alignmode 'local' --bt2_sensitivity 'sensitive' --bt2n 1 --bt2l 16 --bt2_trim5 1 --bt2_trim3 1
       - name: STRIP_FASTQ Run the basic pipeline with output unmapped reads as fastq
@@ -119,6 +119,9 @@ jobs:
       - name: GENOTYPING_PC Test running pileupCaller
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --dedupper 'dedup' --run_genotyping --genotyping_tool 'pileupcaller'
+      - name: GENOTYPING_ANGSD Test running ANGSD genotype likelihood calculation
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --dedupper 'dedup' --run_genotyping --genotyping_tool 'angsd'
       - name: SKIPPING Test checking all skip steps work i.e. input bam, skipping straight to genotyping
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --skip_fastqc --skip_adapterremoval --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
