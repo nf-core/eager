@@ -1,4 +1,4 @@
-/** This file holds several functions that can be used across many nf-core pipelines arbitrarily without having the main code in the pipelines specific repository in the future. Based on work by Philipp Huether (@phue), some updates by (@apeltzer).
+/** This file holds several functions that can be used across many nf-core pipelines arbitrarily without having the main code in the pipelines specific repository in the future. Based on work by Patrick Huether (@phue), some updates and cleanup by (@apeltzer).
 **/
 
 @Grab('ch.qos.logback:logback-classic:1.2.3') 
@@ -26,14 +26,38 @@ class CommonFunctions {
         return colorcodes
     }
 
+    /*
+    * This method tries to read the params file from JSON settings file given a path to a schema.
+    * Can be directly used in the main.nf file to read in JSON schema and have a LinkedHashMap then with contents
+    e.g. def paramsWithUsage = CommonFunctions.readParamsFromJsonSettings("$baseDir/nextflow_schema.json")
+    */
+    private static LinkedHashMap readParamsFromJsonSettings(String path) {
+        def paramsWithUsage = new LinkedHashMap()
+        try {
+            paramsWithUsage = tryReadParamsFromJsonSettings(path)
+        } catch (Exception e) {
+            println "Could not read parameters settings from JSON. $e"
+            paramsWithUsage = new LinkedHashMap()
+        }
+        return paramsWithUsage
+    }
 
-    private static List tryReadParamsFromJsonSettings(String path) throws Exception {
+    /*
+    Method to actually read in JSON file using Groovy. 
+    Group (as Key), values are all parameters
+        - Parameter1 as Key, Description as Value
+        - Parameter2 as Key, Description as Value
+        ....
+    Group 
+        - 
+    */
+    private static LinkedHashMap tryReadParamsFromJsonSettings(String path) throws Exception {
     
         def paramsContent = new File(path).text
         def Map paramsWithUsage = (Map) new JsonSlurper().parseText(paramsContent).get('properties')
         
         /* Tree looks like this in nf-core schema
-        *  properties <- this is what the first get('properties')
+        *  properties <- this is what the first get('properties') gets us
              group 1
                properties
                description
@@ -44,67 +68,22 @@ class CommonFunctions {
                properties
                description
         */
+        def output_map = new LinkedHashMap()
         
         //Lets go deeper
         paramsWithUsage.each { key, val ->
-            println "Group: $key\n" //Gets the Group names
+            //println "Group: $key\n" //Gets the Group names
             def Map submap = paramsWithUsage."$key".properties //Gets the property object of the group
-            println "Parameters:\n" //nested access to the Parameters
+            //println "Parameters:\n" //nested access to the Parameters
+            def sub_params = new LinkedHashMap()
             submap.each { innerkey, value -> 
-                println "$innerkey\t$value.description"
+                //println "$innerkey\t$value.description"
+                sub_params.put("$innerkey", "$value.description")
             }
-            println "\n"
+            output_map.put("$key", sub_params)
+            //println "\n"
         }
-
-        
-        
-        return paramsWithUsage
-    }
-
-
-
-    private static Map readParamsFromJsonSettings(String path) {
-
-        def paramsWithUsage = [:]
-        try {
-            def tmp_params = tryReadParamsFromJsonSettings(path)
-        } catch (Exception e) {
-            println "Could not read parameters settings from JSON. $e"
-            paramsWithUsage = Collections.emptyMap()
-        }
-        return paramsWithUsage
-    }
-
-    private static Map formatParameterHelpData(param) {
-        Map result = [ name: param.name, value: '', usage: param.usage ]
-        // value describes the expected input for the param
-        result.value = (param.type == boolean.toString()) ? '' : param.choices ?: param.type ?: ''
-        return result
-    }
-
-    private static String prettyFormatParamGroupWithPaddingAndIndent (List paramGroup, String groupName, Integer padding=2, Integer indent=4) {
-        def maxParamNameLength = paramGroup.collect { it.name.size() }.max()
-        def paramChoices = paramGroup.findAll{ it.choices }.collect { it.choices }
-        def maxChoiceStringLength = paramChoices.collect { it.toString().size()}.max()
-        def maxTypeLength = paramGroup.collect { (it.type as String).size() }.max()
-
-        def paramsFormattedList = paramGroup.sort { it.name }.collect {
-                Map param ->
-                    def paramHelpData = formatParameterHelpData(param)
-                    sprintf("%${indent}s%-${maxParamNameLength + padding}s%-${maxChoiceStringLength + padding}s %s\n", "", "--${paramHelpData.name}","${paramHelpData.value}", "${paramHelpData.usage}")
-        }
-        String.format("%s:\n%s", groupName.toUpperCase(), paramsFormattedList.join()).stripIndent()
-    }
-
-    // choose the indent depending on the spacing in this file
-    // in this example there are 4 spaces for every intendation so we choose 4
-    private static String prettyFormatParamsWithPaddingAndIndent(List paramsWithUsage, Integer padding=2, Integer indent=4) {
-
-            def groupedParamsWithUsage = paramsWithUsage.groupBy { it.group }
-            def formattedParamsGroups = groupedParamsWithUsage.collect {
-                prettyFormatParamGroupWithPaddingAndIndent ( it.value, it.key, padding, indent)
-            }
-            return formattedParamsGroups.join('\n')
+        return output_map
     }
 
     static String helpMessage(paramsWithUsage, workflow) {
@@ -115,8 +94,22 @@ class CommonFunctions {
         The typical command for running the pipeline is as follows:
         nextflow run ${workflow.manifest.name} v${workflow.manifest.version} --input 'input.tsv' -profile docker
         Options:
-        %s
-        """.stripIndent(), prettyFormatParamsWithPaddingAndIndent(paramsWithUsage, 2, 4))
+        """.stripIndent(), println(prettyFormatJSON(paramsWithUsage)))
+    }
+
+    static String prettyFormatJSON(paramsWithUsage){
+    //Todo make this really nicer ... this is just experimental code
+        String output = ""
+        for(group in paramsWithUsage.keySet()) {
+            output += "Group: " + group + "\n"
+            def params = paramsWithUsage.get(group) //This gets the parameters of that particular group
+            for(par in params.keySet()) {
+                output+= par + "\t" + params.get(par) + "\n"
+            }
+            output += "\n" //Extra newline after parameter block
+        }
+    
+        return output
     }
 
     static String nfcoreHeader(params, workflow) {
