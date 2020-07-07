@@ -94,7 +94,6 @@ Parameter       | Resolved Parameters    | my_paper | cluster | institution
 You can see that `my_paper` inherited the `0.1` parameter over the `0.01`
 defined in the `cluster` profile.
 
-
 > :warning: You must always check if parameters are defined in any 'upstream'
 > profiles that have been set by profile administrators that you may be unaware
 > of. This is make sure there are no unwanted or unreported 'defaults' away from
@@ -107,7 +106,6 @@ defined in the `cluster` profile.
 
 <details><summary>Expand to view</summary>
 <p>
-
 
 In actuality, a nf-core/eager run already contains many configs and profiles,
 and will normally use _multiple_ profiles in a single run. Multiple profiles can
