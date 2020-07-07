@@ -79,7 +79,7 @@ This is the main summary table produced by MultiQC that the report begins with. 
 
 #### Table
 
-This table will report values per-file, library, or sample statistics depending on which stage along the pipeline you have gone through. MultiQC will try and collapse the rows as far as possible, if the log files have the same name. However, separate libraries will be displayed separately for example when using DamageProfiler if using TSV input and perform merging of Samples (which would be reported at the qualimap level). If you're only interested in a single part of the results (e.g. qualimap) you can use the `Configure Columns` to remove columns and the corresponding rows will be not displayed, resulting in a more compact table. 
+This table will report values per-file, library, or sample statistics depending on which stage along the pipeline you have gone through. MultiQC will try and collapse the rows as far as possible, if the log files have the same name. However, separate libraries will be displayed separately for example when using DamageProfiler if using TSV input and perform merging of Samples (which would be reported at the qualimap level). If you're only interested in a single part of the results (e.g. qualimap) you can use the `Configure Columns` to remove columns and the corresponding rows will be not displayed, resulting in a more compact table.
 
 Each column name is supplied by the module, so you may see similar column names. When unsure, hovering over the column name will allow you see which module it is derived from.
 
