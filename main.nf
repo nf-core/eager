@@ -151,10 +151,11 @@ def helpMessage() {
       --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
       --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
-      --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller.
-      --pileupcaller_snpfile          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
-      --pileupcaller_method           Specify calling method to use. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. Default: '${params.pileupcaller_method}'
-      --angsd_glmodel                 Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'. Default: '${params.angsd_glmodel}'
+      --pileupcaller_bedfile            Specify path to SNP panel in bed format for pileupCaller.
+      --pileupcaller_snpfile            Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
+      --pileupcaller_method             Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: ${params.pileupcaller_method}
+      --pileupcaller_transitions_mode   Specify the calling mode for transitions. Options: AllSites, TransitionsMissing, SkipTransitions. Default: ${params.pileupcaller_transitions_mode}
+     --angsd_glmodel                 Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'. Default: '${params.angsd_glmodel}'
       --angsd_glformat                Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'. Default: '${params.angsd_glformat}' 
       --angsd_createfasta             Turn on creation of FASTA from ANGSD genotyping likelhoood.
       --angsd_fastamethod             Specify which genotype type of 'base calling' to use for ANGSD FASTA generation. Options: 'random', 'common'. Default: '${params.angsd_fastamethod}'
@@ -421,7 +422,7 @@ if (params.run_genotyping){
   }
 
   if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_method == 'randomHaploid' || params.pileupcaller_method == 'randomDiploid' || params.pileupcaller_method == 'majorityCall' ) ) {
-	exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. You gave: --pileupcaller_method '${params.pileupcaller_method}'."
+  	exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. You gave: --pileupcaller_method '${params.pileupcaller_method}'."
   }
 
   if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile == '' ) ) {
@@ -443,7 +444,10 @@ if (params.run_genotyping){
   if ( params.angsd_createfasta && !( params.angsd_fastamethod == 'random' || params.angsd_fastamethod == 'common' ) ) {
     exit 1, "[nf-core/eager] error: please check your ANGSD FASTA file creation method. Options: 'random', 'common'. You gave: --angsd_fastamethod '${params.angsd_fastamethod}'."
   }
-
+ 
+  if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_transitions_mode == 'AllSites' || params.pileupcaller_transitions_mode == 'TransitionsMissing' || params.pileupcaller_transitions_mode == 'SkipTransitions') ) {
+    exit 1, "[nf-core/eager] error: please check your pileupCaller transitions mode parameter. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'. You gave: ${params.pileupcaller_transitions_mode}"
+  }
 }
 
 // Consensus sequence generation sanity checking
@@ -580,8 +584,10 @@ if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.inpu
 ch_input_sample = Channel.empty()
 if (tsv_path) {
 
-  // TODO add check file exists here first
+
     tsv_file = file(tsv_path)
+    if (!tsv_file.exists()) exit 1, "[nf-core/eager] error: input TSV file could not be found. Does the file exist or in the right place? You gave the path: ${params.input}"
+
     ch_input_sample = extract_data(tsv_file)
 
 } else if (params.input && !has_extension(params.input, "tsv")) {
@@ -1614,11 +1620,11 @@ process samtools_filter {
 if (params.run_bam_filtering) {
     ch_mapping_for_skipfiltering.mix(ch_output_from_filtering)
         .filter { it =~/.*filtered.bam/ }
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
 
 } else {
     ch_mapping_for_skipfiltering
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
 
 }
 
@@ -1782,7 +1788,7 @@ process dedup{
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.hist") into ch_hist_for_preseq
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_dedup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup, ch_dedup_for_libeval
 
     script:
     outname = "${bam.baseName}"
@@ -1830,7 +1836,7 @@ process markDup{
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.metrics") into ch_markdup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup, ch_markdup_for_libeval
 
     script:
     outname = "${bam.baseName}"
@@ -1840,6 +1846,12 @@ process markDup{
     samtools index "${size}" ${libraryid}_rmdup.bam
     """
 }
+
+// This is for post-deduplcation per-library evaluation steps _without_ any 
+// form of library merging. 
+ch_skiprmdup_for_libeval.mix(ch_dedup_for_libeval, ch_markdup_for_libeval)
+  .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
+
 
 // Merge independent libraries sequenced but with same treatment (often done to improve complexity). Different strand/UDG libs not merged because bamtrim/pmdtools needs UDG info
 
@@ -1887,7 +1899,8 @@ process library_merge {
   size = "${params.large_ref}" ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
-  picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged"
+  ## Have to set validation as lenient because of BWA issue: "I see a read stands out the end of a chromosome and is flagged as unmapped (flag 0x4). [...]" http://bio-bwa.sourceforge.net/
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged" VALIDATION_STRINGENCY=LENIENT
   samtools index "${size}" ${samplename}_libmerged_rg_rmdup.bam
   """
 }
@@ -1896,11 +1909,11 @@ process library_merge {
 if (!params.skip_deduplication) {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
+        .into { ch_rmdup_for_skipdamagemanipulation;  ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
 
 } else {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
 }
 
 //////////////////////////////////////////////////
@@ -2122,14 +2135,15 @@ process additional_library_merge {
   size = "${params.large_ref}" ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_add.bam ${bam}
-  picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_additionalmerged"
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 
+RGSM="${samplename}_additionalmerged" VALIDATION_STRINGENCY=LENIENT
   samtools index "${size}" ${samplename}_libmerged_rg_add.bam
   """
 }
 
 ch_trimmed_formerge.skip_merging
   .mix(ch_output_from_trimmerge)
-  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap }
+  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap; ch_for_sexdeterrmine }
 
   // General mapping quality statistics for whole reference sequence - e.g. X and % coverage
 
@@ -2329,7 +2343,54 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
 }
 
+ // Branch channel by strandedness
+ ch_damagemanipulation_for_genotyping_pileupcaller
+   .branch{
+       singleStranded: it[5] == "single"
+       doubleStranded: it[5] == "double"
+   }
+   .set{ch_input_for_genotyping_pileupcaller}
+ 
+ // Create pileupcaller input tuples
+ ch_input_for_genotyping_pileupcaller.singleStranded
+   .groupTuple(by:[5])
+   .set {ch_prepped_for_pileupcaller_single}
+
+ ch_input_for_genotyping_pileupcaller.doubleStranded
+   .groupTuple(by:[5])
+   .set {ch_prepped_for_pileupcaller_double}
+
  process genotyping_pileupcaller {
+  label 'mc_small'
+  tag "${strandedness}"
+  publishDir "${params.outdir}/genotyping", mode: 'copy'
+
+  when:
+  params.run_genotyping && params.genotyping_tool == 'pileupcaller'
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai from ch_prepped_for_pileupcaller_double.mix(ch_prepped_for_pileupcaller_single)
+  file fasta from ch_fasta_for_genotyping_pileupcaller.collect()
+  file fai from ch_fai_for_pileupcaller.collect()
+  file dict from ch_dict_for_pileupcaller.collect()
+  file bed from ch_bed_for_pileupcaller.collect()
+  file snp from ch_snp_for_pileupcaller.collect()
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${strandedness}.*")
+
+  script:
+  transitions_mode = strandedness == "single" ? "" : "${params.pileupcaller_transitions_mode}" == 'SkipTransitions' ? "--skipTransitions" : "${params.pileupcaller_transitions_mode}" == 'TransitionsMissing' ? "--transitionsMissing" : ""
+  caller = "--${params.pileupcaller_method}"
+  ssmode = strandedness == "single" ? "--singleStrandMode" : ""
+  bam_list = bam.flatten().join(" ")
+  sample_names = samplename.flatten().join(",")
+  """
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} -f ${snp} -e pileupcaller.${strandedness}
+  """
+ }
+
+/* process genotyping_pileupcaller {
   label 'mc_small'
   tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
@@ -2354,7 +2415,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   """
   samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}
   """
- }
+ }*/
 
  process genotyping_angsd {
   label 'mc_small'
