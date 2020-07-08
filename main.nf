@@ -2241,7 +2241,7 @@ if ( params.gatk_ug_jar != '' ) {
   script:
   defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
   def keep_realign = params.gatk_ug_keep_realign_bam ? "rm ${samplename}.realign.bam" : ""
-  def index_realign = params.gatk_ug_keep_realign_Bam ? "samtools index ${samplename}.realign.bam" : ""
+  def index_realign = params.gatk_ug_keep_realign_bam ? "samtools index ${samplename}.realign.bam" : ""
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
