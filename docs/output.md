@@ -108,6 +108,8 @@ For other non-default columns, hover over the column name for further descriptio
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your raw reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C) as sequenced. You also get information about adapter contamination and other overrepresented sequences.
 
+You will receive output for each supplied FASTQ file.
+
 When dealing with ancient DNA data the MultiQC plots for FastQC will often show lots of 'warning' or 'failed' samples. You generally can discard this sort of information as we are dealing with very degraded and metagenomic samples which have artefacts that violate the FastQC 'quality definitions', while still being valid data for aDNA researchers. Instead you will _normally_ be looking for 'global' patterns across all samples of a sequencing run to check for library construction or sequencing failures. Decision on whether a individual sample has 'failed' or not should be made by the user after checking all the plots themselves (e.g. if the sample is consistently an outlier to all others in the run).
 
 For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
@@ -243,6 +245,8 @@ In the case of dual-indexed paired-end sequencing, it is likely poly-G tails are
 
 While the MultiQC report has multiple plots for FastP, we will only look at GC content as that's the functionality we use currently.
 
+You will receive output for each supplied FASTQ file.
+
 #### GC Content
 
 This line plot shows the average GC content (Y axis) across each nucleotide of the reads (X-axis). There are two buttons per read (i.e. 2 for single-end, and 4 for paired-end) representing before and after the poly-G tail trimming.
@@ -273,6 +277,8 @@ Adapter removal involves finding overlaps at the 5' and 3' end of reads for the 
 Quality trimming (or 'truncating') involves looking at ends of reads for low-confidence bases (i.e. where the FASTQ Phred score is below a certain threshold). These are then removed remove the read.
 
 Length filtering involves removing any read that does not reach the number of bases specified by a particular value.
+
+You will receive output for each FASTQ file supplied for single end data, or for each pair of merged FASTQ files for paired end data.
 
 #### Retained and Discarded Reads Plot
 
@@ -317,6 +323,8 @@ With paired-end ancient DNA sequencing runs You expect to see a slight increase 
 
 This module provides numbers in raw counts of the mapping of your DNA reads to your reference genome.
 
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes in one value.
+
 #### Flagstat Plot
 
 This dot plot shows different statistics, and the number of reads (typically as an multiple e.g. million, or thousands), are represented by dots on the X axis.
@@ -334,6 +342,8 @@ The remaining rows will be 0 when running `bwa aln` as these characteristucs of 
 > **NB:** The Samtools (pre-samtools filter) plots displayed in the MultiQC report shows mapped reads without mapping quality filtering. This will contain reads that can map to multiple places on your reference genome with equal or slightly less mapping quality score. To see how your reads look after mapping quality, look at the FastQC reports in the Samtools (pre-samtools filter). You should expect after mapping quality filtering, that you will have less reads.
 
 ### DeDup
+
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
@@ -364,6 +374,8 @@ Things to look out for:
 
 ### Preseq
 
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
+
 #### Background
 
 Preseq is a collection of tools that allow assessment of the complexity of the library, where complexity means the number of unique molecules in your library (i.e. not molecules with the exact same length and sequence).
@@ -389,6 +401,8 @@ Plateauing can be caused by a number of reasons:
 - You have a low quality library made up of mappable sequencing artefacts that were able to pass filtering (e.g. adapters)
 
 ### DamageProfiler
+
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
@@ -431,13 +445,15 @@ When looking at the length distribution plots, keep in mind the following:
 
 ### QualiMap
 
-#### QualiMap
+#### Background
 
 Qualimap is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
 
 > NB: Neither fold coverage nor percent coverage on there own is sufficient to assess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or un-removed-adapter-containing reference genomes can artificially inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
 
 Note that many of the statistics from this module are displayed in the General Stats table (see above), as they represent single values that are not plottable.
+
+You will receive output for each _sample_. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
 
 #### Coverage Histogram
 
@@ -496,7 +512,7 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 - `damageprofiler/` - this contains sample specific directories containing raw statistics and damage plots from DamageProfiler. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
 - `pmdtools/` this contains raw output statistics of pmdtools (estimates of frequencies of substitutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`. The BAM files do not have corresponding index files.
 - `trimmed_bam/` this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_left` and `--bamutils_clip_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read).
-- `genotyping/` this contains all the (gzipped) VCF files produced by your genotyping module. The file suffix will have the genotyping tool name. You will have VCF files corresponding to your deduplicated BAM files, as well as any turned-on downstream processes that create BAMs (e.g. trimmed bams or pmd tools). If `--gatk_ug_keep_realign_bam` supplied, this may also contain BAM files from InDel realignment when using GATK 3 and UnifiedGenotyping for variant calling.
+- `genotyping/` this contains all the (gzipped) genotyping files produced by your genotyping module. The file suffix will have the genotyping tool name. You will have files corresponding to each of your deduplicated BAM files (except pileupcaller), or any turned-on downstream processes that create BAMs (e.g. trimmed bams or pmd tools). If `--gatk_ug_keep_realign_bam` supplied, this may also contain BAM files from InDel realignment when using GATK 3 and UnifiedGenotyping for variant calling.
 - `MultiVCFAnalyzer/` this contains all output from MultiVCFAnalyzer, including SNP calling statistics, various SNP table(s) and FASTA alignment files.
 - `sex_determination/` this contains the output for the sex determination run. This is a single `.tsv` file that includes a table with the Sample Name, the Nr of Autosomal SNPs, Nr of SNPs on the X/Y chromosome, the Nr of reads mapping to the Autosomes, the Nr of reads mapping to the X/Y chromosome, the relative coverage on the X/Y chromosomes, and the standard error associated with the relative coverages. These measures are provided for each bam file, one row per bam. If the `sexdeterrmine_bedfile` option has not been provided, the error bars cannot be trusted, and runtime will be considerably longer.
 - `nuclear_contamination/` this contains the output of the nuclear contamination processes. The directory contains one `*.X.contamination.out` file per individual, as well as `nuclear_contamination.txt` which is a summary table of the results for all individual. `nuclear_contamination.txt` contains a header, followed by one line per individual, comprised of the Method of Moments (MOM) and Maximum Likelihood (ML) contamination estimate (with their respective standard errors) for both Method1 and Method2.

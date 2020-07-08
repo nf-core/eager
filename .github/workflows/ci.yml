@@ -119,6 +119,9 @@ jobs:
       - name: GENOTYPING_PC Test running pileupCaller
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --dedupper 'dedup' --run_genotyping --genotyping_tool 'pileupcaller'
+      - name: GENOTYPING_ANGSD Test running ANGSD genotype likelihood calculation
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --dedupper 'dedup' --run_genotyping --genotyping_tool 'angsd'
       - name: SKIPPING Test checking all skip steps work i.e. input bam, skipping straight to genotyping
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --skip_fastqc --skip_adapterremoval --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'

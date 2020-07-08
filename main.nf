@@ -27,18 +27,20 @@ def helpMessage() {
         -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
 
       Direct Input
-        --input                       Either paths to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
+        --input                       Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
                                       OR 
                                       A path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
 
         --single_end                  Specifies that the input is single end reads. Not required for TSV input.
+        --udg_type                    Specify here if you have UDG treated libraries, Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Default: ${params.udg_type}
         --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
         --single_stranded             Specifies whether libraries are single stranded. Always affects MALTExtract but will be ignored by pileupCaller with TSV input. Default: ${params.single_stranded}
         --bam                         Specifies that the input is in BAM format. Not required for TSV input.
 
+
       Reference
-        --fasta                       Path and name of FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
-        --genome                      Name of iGenomes reference (required if not fasta reference).
+        --fasta                       Path or URL to a FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
+        --genome                      Name of iGenomes reference (required if not FASTA reference).
 
     Output options:     
       --outdir                      The output directory where the results will be saved. Default: ${params.outdir}
@@ -69,23 +71,23 @@ def helpMessage() {
       --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed. Default: ${params.complexity_filter_poly_g_min}
 
     Clipping / Merging
-      --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward). Default: '${params.clip_forward_adaptor}'
-      --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse). Default: '${params.clip_reverse_adaptor}'
+      --clip_forward_adaptor        Specify adapter sequence to be clipped off (forward strand). Default: '${params.clip_forward_adaptor}'
+      --clip_reverse_adaptor        Specify adapter sequence to be clipped off (reverse strand). Default: '${params.clip_reverse_adaptor}'
       --clip_readlength             Specify read minimum length to be kept for downstream analysis. Default: ${params.clip_readlength}
       --clip_min_read_quality       Specify minimum base quality for trimming off bases. Default: ${params.clip_min_read_quality}
       --min_adap_overlap            Specify minimum adapter overlap: Default: ${params.min_adap_overlap}
-      --skip_collapse               Turn on skipping of merging forward and reverse reads together. Only applicable for PE libraries.
+      --skip_collapse               Turn on skipping of merging forward and reverse reads together. Only applicable for paired-end libraries.
       --skip_trim                   Turn on skipping of adapter and quality trimming
       --preserve5p                  Turn on skipping 5p quality base trimming (n, score, window) at 5p end.
       --mergedonly                  Turn on sending downstream only merged reads (un-merged reads and singletons are discarded).
 
     Mapping
       --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: '${params.mapper}'
-      --bwaalnn                     Specify the -n parameter for BWA aln. Default: ${params.bwaalnn}
-      --bwaalnk                     Specify the -k parameter for BWA aln. Default: ${params.bwaalnk}
-      --bwaalnl                     Specify the -l parameter for BWA aln. Default: ${params.bwaalnl}
+      --bwaalnn                     Specify the -n parameter for BWA aln, i.e. amount of allowed mismatches in alignments. Default: ${params.bwaalnn}
+      --bwaalnk                     Specify the -k parameter for BWA aln, i.e. maximum edit distance allowed in a seed. Default: ${params.bwaalnk}
+      --bwaalnl                     Specify the -l parameter for BWA aln, i.e. length of seeds to be used. Set to 1024 for whole read. Default: ${params.bwaalnl}
       --circularextension           Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
-      --circulartarget              Specify the target chromosome for CM (circularmapper only). Default: '${params.circulartarget}'
+      --circulartarget              Specify the FASTA header of the target chromosome to extend(circularmapper only). Default: '${params.circulartarget}'
       --circularfilter              Turn on to filter off-target reads (circularmapper only).
       --bt2_alignmode               Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: '${params.bt2_alignmode}'
       --bt2_sensitivity             Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: '${params.bt2_sensitivity}'
@@ -116,7 +118,6 @@ def helpMessage() {
       --damageprofiler_threshold    Specify number of bases to consider for damageProfiler (e.g. on damage plot). Default: ${params.damageprofiler_threshold}
       --damageprofiler_yaxis        Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: ${params.damageprofiler_yaxis} 
       --run_pmdtools                Turn on PMDtools
-      --udg_type                    Specify here if you have UDG treated libraries, Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Default: ${params.udg_type}
       --pmdtools_range              Specify range of bases for PMDTools. Default: ${params.pmdtools_range} 
       --pmdtools_threshold          Specify PMDScore threshold for PMDTools. Default: ${params.pmdtools_threshold} 
       --pmdtools_reference_mask     Specify a path to reference mask for PMDTools.
@@ -134,7 +135,7 @@ def helpMessage() {
 
     Genotyping
       --run_genotyping                Turn on genotyping of BAM files.
-      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'.
+      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.
       --genotyping_source             Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'. Default: '${params.genotyping_source}'
       --gatk_ug_jar                   When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.
       --gatk_call_conf                Specify GATK phred-scaled confidence threshold. Default: ${params.gatk_call_conf}
@@ -142,7 +143,7 @@ def helpMessage() {
       --gatk_dbsnp                    Specify VCF file for output VCF SNP annotation. Optional. Gzip not accepted.
       --gatk_ug_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: '${params.gatk_ug_out_mode}'
       --gatk_hc_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'. Default: '${params.gatk_hc_out_mode}'
-      --gatk_ug_genotype_model        Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.  Default: '${params.gatk_ug_genotype_model}'
+      --gatk_ug_genotype_model        Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. Default: '${params.gatk_ug_genotype_model}'
       --gatk_hc_emitrefconf           Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: '${params.gatk_hc_emitrefconf}'
       --gatk_downsample               Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
       --gatk_ug_defaultbasequalities  Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.
@@ -150,9 +151,14 @@ def helpMessage() {
       --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
       --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
       --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
-      --pileupcaller_bedfile          Specify path to SNP panel in bed format for pileupCaller.
-      --pileupcaller_snpfile          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
-      --pileupcaller_method           Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: ${params.pileupcaller_method}
+      --pileupcaller_bedfile            Specify path to SNP panel in bed format for pileupCaller.
+      --pileupcaller_snpfile            Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
+      --pileupcaller_method             Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: ${params.pileupcaller_method}
+      --pileupcaller_transitions_mode   Specify the calling mode for transitions. Options: AllSites, TransitionsMissing, SkipTransitions. Default: ${params.pileupcaller_transitions_mode}
+     --angsd_glmodel                 Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'. Default: '${params.angsd_glmodel}'
+      --angsd_glformat                Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'. Default: '${params.angsd_glformat}' 
+      --angsd_createfasta             Turn on creation of FASTA from ANGSD genotyping likelhoood.
+      --angsd_fastamethod             Specify which genotype type of 'base calling' to use for ANGSD FASTA generation. Options: 'random', 'common'. Default: '${params.angsd_fastamethod}'
 
     Consensus Sequence Generation
       --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
@@ -184,7 +190,7 @@ def helpMessage() {
 
     Nuclear Contamination for Human DNA
       --run_nuclear_contamination   Turn on nuclear contamination estimation for human reference genomes.
-      --contamination_chrom_name    The name of the chromosome in your bam. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
+      --contamination_chrom_name    The name of the X chromosome in your bam or FASTA header. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
 
     Metagenomic Screening
       --run_metagenomic_screening      Turn on metagenomic screening module for reference-unmapped reads
@@ -198,7 +204,7 @@ def helpMessage() {
       --malt_min_support_mode          Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'. Default: '${params.malt_min_support_mode}'
       --malt_min_support_percent       Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
       --malt_max_queries               Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
-      --malt_memory_mode               Specify the memory load method. Do not use 'map' with GTFS file system for MALT. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
+      --malt_memory_mode               Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
 
     Metagenomic Authentication
       --run_maltextract                  Turn on MaltExtract for MALT aDNA characteristics authentication
@@ -217,7 +223,7 @@ def helpMessage() {
     Other options:     
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
       --max_memory                  Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'. Default: '${params.max_memory}'
-      --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_memory '2.h'. Default: '${params.max_time}'
+      --max_time                    Time limit for each step of the pipeline. Should be in form e.g. --max_time '2.h'. Default: '${params.max_time}'
       --max_cpus                    Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. Default: '${params.max_cpus}'
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       --plaintext_email             Receive plain text emails rather than HTML
@@ -263,7 +269,7 @@ if ( params.fasta.isEmpty () ){
         file zipped_fasta
 
         output:
-        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer
+        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd
 
         script:
         rm_zip = zipped_fasta - '.gz'
@@ -275,7 +281,7 @@ if ( params.fasta.isEmpty () ){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd }
     
     lastPath = params.fasta.lastIndexOf(File.separator)
     bwa_base = params.fasta.substring(lastPath+1)
@@ -289,24 +295,24 @@ if (params.fasta_index && !params.fasta_index.endsWith(".fai")) {
 
 // Check if genome exists in the config file. params.genomes is from igenomes.conf, params.genome specified by user
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-    exit 1, "[nf-core/eager] error: the provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
+    exit 1, "[nf-core/eager] error: the provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}."
 }
 
 // Mapper validation
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem' && !params.mapper == "bowtie2"){
-    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: 'bwaaln'. You gave: ${params.mapper}!"
+    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: 'bwaaln'. You gave: --mapper '${params.mapper}'."
 }
 
 if (params.mapper == 'bowtie2' && params.bt2_alignmode != 'local' && params.bt2_alignmode != 'end-to-end' ) {
-    exit 1, "[nf-core/eager] error: invalid bowtie2 alignment mode. Options: 'local', 'end-to-end'. You gave: ${params.bt2_alignmode}"
+    exit 1, "[nf-core/eager] error: invalid bowtie2 alignment mode. Options: 'local', 'end-to-end'. You gave: -bt2_alignmode '${params.bt2_alignmode}'"
 }
 
 if (params.mapper == 'bowtie2' && params.bt2_sensitivity != 'no-preset' && params.bt2_sensitivity != 'very-fast' && params.bt2_sensitivity != 'fast' && params.bt2_sensitivity != 'sensitive' && params.bt2_sensitivity != 'very-sensitive' ) {
-    exit 1, "[nf-core/eager] error: invalid bowtie2 sensitivity mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Options are for both alignmodes You gave: ${params.bt2_sensitivity}"
+    exit 1, "[nf-core/eager] error: invalid bowtie2 sensitivity mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Options are for both alignmodes You gave: --bt2_sensitivity '${params.bt2_sensitivity}'."
 }
 
 if (params.bt2n != 0 && params.bt2n != 1) {
-    exit 1, "[nf-core/eager] error: invalid bowtie2 --bt2n (-N) parameter. Options: 0, 1. You gave: ${params.bt2n}"
+    exit 1, "[nf-core/eager] error: invalid bowtie2 --bt2n (-N) parameter. Options: 0, 1. You gave: --bt2n ${params.bt2n}."
 
 }
 
@@ -318,7 +324,7 @@ if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwa
 
     Channel
         .fromPath(bwa_dir, checkIfExists: true)
-        .ifEmpty { exit 1, "[nf-core/eager] error: bwa indicies not found in: ${bwa_dir}" }
+        .ifEmpty { exit 1, "[nf-core/eager] error: bwa indicies not found in: ${bwa_dir}." }
         .into {bwa_index; bwa_index_bwamem}
 
     bt2_index = ''
@@ -331,7 +337,7 @@ if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
 
     Channel
         .fromPath(bt2_dir, checkIfExists: true)
-        .ifEmpty { exit 1, "[nf-core/eager] error: bowtie2 indicies not found in: ${bt2_dir}" }
+        .ifEmpty { exit 1, "[nf-core/eager] error: bowtie2 indicies not found in: ${bt2_dir}." }
         .into {bt2_index; bt2_index_bwamem}
 
     bwa_index = ''
@@ -344,51 +350,51 @@ if ( params.bam && !params.single_end ) {
 
 // Validate that skip_collapse is only set to True for paired_end reads!
 if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.single_end){
-    exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples!"
+    exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
 }
 
 // Strip mode validation
 if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
-        exit 1, "[nf-core/eager] error: --strip_mode can only be set to strip or replace!"
+        exit 1, "[nf-core/eager] error: --strip_mode can only be set to strip or replace."
     }
 }
 
 if (params.bam_discard_unmapped && params.bam_unmapped_type == '') {
-    exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
+    exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'. You gave --bam_unmapped_type '${params.bam_unmapped_type}'."
 }
 
 // Bedtools validation
 if(params.run_bedtools_coverage && params.anno_file == ''){
-  exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
+  exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
 }
 
 // BAM filtering validation
 if (!params.run_bam_filtering && params.bam_mapping_quality_threshold != 0) {
-  exit 1, "[nf-core/eager] error: please turn on BAM filtering if you want to perform mapping quality filtering! Give --run_bam_filtering"
+  exit 1, "[nf-core/eager] error: please turn on BAM filtering if you want to perform mapping quality filtering! Give --run_bam_filtering."
 }
 
 if (!params.run_bam_filtering && params.bam_discard_unmapped) {
-  exit 1, "[nf-core/eager] error: please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering"
+  exit 1, "[nf-core/eager] error: please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering."
 }
 
 if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == '') {
-  exit 1, "[nf-core/eager] error: please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'"
+  exit 1, "[nf-core/eager] error: please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'."
 }
 
 if (params.run_bam_filtering && !params.bam_discard_unmapped && params.bam_unmapped_type != 'discard') {
-  exit 1, "[nf-core/eager] error: Please turned on unmapped read discarding, if you have specifed a different unmapped type. Give: --bam_discard_unmapped"
+  exit 1, "[nf-core/eager] error: Please turned on unmapped read discarding, if you have specifed a different unmapped type. Give: --bam_discard_unmapped."
 }
 
 // Deduplication validation
 if (params.dedupper != 'dedup' && params.dedupper != 'markduplicates') {
-  exit 1, "[nf-core/eager] error: Selected deduplication tool is not recognised. Options: 'dedup' or 'markduplicates'. You gave: ${params.dedupper}"
+  exit 1, "[nf-core/eager] error: Selected deduplication tool is not recognised. Options: 'dedup' or 'markduplicates'. You gave: --dedupper '${params.dedupper}'."
 }
 
 // Genotyping validation
 if (params.run_genotyping){
-  if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' ) {
-  exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. You gave: ${params.genotyping_tool}!"
+  if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' && params.genotyping_tool != 'angsd' ) {
+  exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. You gave: --genotyping_tool '${params.genotyping_tool}'."
   }
 
   if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
@@ -396,73 +402,92 @@ if (params.run_genotyping){
   }
 
   if (params.genotyping_tool == 'ug' && !params.gatk_ug_jar.endsWith('.jar') ) {
-    exit 1, "[nf-core/eager] error: please specify path with --gatk_ug_jar to a valid GATK 3.5 binary that ends with .jar!. You gave: ${params.gatk_ug_jar}"
+    exit 1, "[nf-core/eager] error: please specify path with --gatk_ug_jar to a valid GATK 3.5 binary that ends with .jar!. You gave: --gatk_ug_jar '${params.gatk_ug_jar}'."
   }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
-  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
+  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: --gatk_ug_out_mode '${params.gatk_out_mode}'."
   }
 
   if (params.gatk_hc_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_hc_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_hc_out_mode != 'EMIT_ALL_ACTIVE_SITES') {
-  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: ${params.gatk_out_mode}!"
+  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: --gatk_out_mode '${params.gatk_out_mode}'."
   }
   
   if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "[nf-core/eager] error: please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: ${params.gatk_ug_genotype_model}!"
+    exit 1, "[nf-core/eager] error: please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: --gatk_ug_genotype_model '${params.gatk_ug_genotype_model}'."
   }
 
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "[nf-core/eager] error: please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: ${params.gatk_hc_emitrefconf}!"
+    exit 1, "[nf-core/eager] error: please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: --gatk_hc_emitrefconf '${params.gatk_hc_emitrefconf}'."
   }
 
   if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_method == 'randomHaploid' || params.pileupcaller_method == 'randomDiploid' || params.pileupcaller_method == 'majorityCall' ) ) {
-	exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. You gave: ${params.pileupcaller_method}"
+  	exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. You gave: --pileupcaller_method '${params.pileupcaller_method}'."
   }
 
   if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile == '' ) ) {
-    exit 1, "[nf-core/eager] error: please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file!"
+    exit 1, "[nf-core/eager] error: please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file."
   }
 
+  if (params.genotyping_tool == 'angsd' && ! ( params.angsd_glmodel == 'samtools' || params.angsd_glmodel == 'gatk' || params.angsd_glmodel == 'soapsnp' || params.angsd_glmodel == 'syk' ) ) {
+    exit 1, "[nf-core/eager] error: please check your ANGSD genotyping model! Options: 'samtools', 'gatk', 'soapsnp', 'syk'. You gave: --angsd_glmodel' ${params.angsd_glmodel}'."
+  }
+
+  if (params.genotyping_tool == 'angsd' && ! ( params.angsd_glformat == 'text' || params.angsd_glformat == 'binary' || params.angsd_glformat == 'binary_three' || params.angsd_glformat == 'beagle' ) ) {
+    exit 1, "[nf-core/eager] error: please check your ANGSD genotyping model! Options: 'text', 'binary', 'binary_three', 'beagle'. You gave: --angsd_glmodel '${params.angsd_glmodel}'."
+  }
+
+  if ( !params.angsd_createfasta && params.angsd_fastamethod != 'random' ) {
+    exit 1, "[nf-core/eager] error: to output a ANGSD FASTA file, please turn on FASTA creation with --angsd_createfasta."
+  }
+
+  if ( params.angsd_createfasta && !( params.angsd_fastamethod == 'random' || params.angsd_fastamethod == 'common' ) ) {
+    exit 1, "[nf-core/eager] error: please check your ANGSD FASTA file creation method. Options: 'random', 'common'. You gave: --angsd_fastamethod '${params.angsd_fastamethod}'."
+  }
+ 
+  if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_transitions_mode == 'AllSites' || params.pileupcaller_transitions_mode == 'TransitionsMissing' || params.pileupcaller_transitions_mode == 'SkipTransitions') ) {
+    exit 1, "[nf-core/eager] error: please check your pileupCaller transitions mode parameter. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'. You gave: ${params.pileupcaller_transitions_mode}"
+  }
 }
 
 // Consensus sequence generation validation
 if (params.run_vcf2genome) {
     if (!params.run_genotyping) {
-      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
+      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters."
     }
 
     if (params.genotyping_tool != 'ug') {
-      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
+      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters."
     }
 }
 
 // MultiVCFAnalyzer validation
 if (params.run_multivcfanalyzer) {
   if (!params.run_genotyping) {
-    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters."
   }
 
   if (params.genotyping_tool != "ug") {
-    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters"
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters."
   }
 
   if (params.gatk_ploidy != '2') {
-    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters"
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters."
   }
 }
 
 // Metagenomic validation
 if (params.run_metagenomic_screening) {
   if ( !params.bam_discard_unmapped ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'."
   }
 
   if (params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave: '${params.bam_unmapped_type}'!"
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave: --bam_unmapped_type '${params.bam_unmapped_type}'."
   }
 
   if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
-    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave: '${params.metagenomic_tool}'!"
+    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave: --metagenomic_tool '${params.metagenomic_tool}'."
   }
 
   if (params.database == '' ) {
@@ -470,27 +495,27 @@ if (params.run_metagenomic_screening) {
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
-    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave: '${params.malt_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave: --malt_mode '${params.malt_mode}'."
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
-    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave: '${params.malt_alignment_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave: --malt_alignment_mode '${params.malt_alignment_mode}'."
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
-    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --metagenomic_min_support_reads!"
+    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified --metagenomic_min_support_reads."
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
-    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent!"
+    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified --malt_min_support_percent."
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
-    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave: '${params.malt_memory_mode}'!"
+    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave: --malt_memory_mode '${params.malt_memory_mode}'."
   }
 
   if (!params.metagenomic_min_support_reads.toString().isInteger()){
-    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. You gave: ${metagenomic_min_support_reads}!"
+    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. --metagenomic_min_support_reads You gave: ${params.metagenomic_min_support_reads}."
   }
 }
 
@@ -498,19 +523,19 @@ if (params.run_metagenomic_screening) {
 if (params.run_maltextract) {
 
   if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
-    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'."
   }
 
   if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
-    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'!"
+    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'."
   }
 
   if (params.maltextract_taxon_list == '') {
-    exit 1, "[nf-core/eager] error: MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list!"
+    exit 1, "[nf-core/eager] error: MaltExtract requires a taxon list specify target taxa of interest. Specify the file with --params.maltextract_taxon_list."
   }
 
   if (params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
-    exit 1, "[nf-core/eager] error: unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: ${params.maltextract_filter}!"
+    exit 1, "[nf-core/eager] error: unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: --maltextract_filter '${params.maltextract_filter}'."
   }
 
 }
@@ -524,10 +549,10 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 
 if (workflow.profile.contains('awsbatch')) {
     // AWSBatch validation
-    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch."
     // Check outdir paths to be S3 buckets if running on AWSBatch
     // related: https://github.com/nextflow-io/nextflow/issues/813
-    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch."
     // Prevent trace files to be stored on S3 since S3 does not support rolling files.
     if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
@@ -559,8 +584,10 @@ if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.inpu
 ch_input_sample = Channel.empty()
 if (tsv_path) {
 
-  // TODO add check file exists here first
+
     tsv_file = file(tsv_path)
+    if (!tsv_file.exists()) exit 1, "[nf-core/eager] error: input TSV file could not be found. Does the file exist or in the right place? You gave the path: ${params.input}"
+
     ch_input_sample = extract_data(tsv_file)
 
 } else if (params.input && !has_extension(params.input, "tsv")) {
@@ -828,7 +855,7 @@ process makeFastaIndex {
 }
 
 ch_fai_for_skipfastaindexing.mix(ch_fasta_faidx_index) 
-  .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes; ch_fai_for_pileupcaller }
+  .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes; ch_fai_for_pileupcaller; ch_fai_for_angsd }
 
 // Stage dict index file if supplied, else load it into the channel
 
@@ -868,7 +895,7 @@ process makeSeqDict {
 }
 
 ch_dict_for_skipdict.mix(ch_seq_dict)
-  .into { ch_dict_for_ug; ch_dict_for_hc; ch_dict_for_freebayes; ch_dict_for_pileupcaller }
+  .into { ch_dict_for_ug; ch_dict_for_hc; ch_dict_for_freebayes; ch_dict_for_pileupcaller; ch_dict_for_angsd }
 
 //////////////////////////////////////////////////
 /* --         BAM INPUT PREPROCESSING        -- */
@@ -1593,11 +1620,11 @@ process samtools_filter {
 if (params.run_bam_filtering) {
     ch_mapping_for_skipfiltering.mix(ch_output_from_filtering)
         .filter { it =~/.*filtered.bam/ }
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
 
 } else {
     ch_mapping_for_skipfiltering
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
 
 }
 
@@ -1761,7 +1788,7 @@ process dedup{
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.hist") into ch_hist_for_preseq
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_dedup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup, ch_dedup_for_libeval
 
     script:
     outname = "${bam.baseName}"
@@ -1809,7 +1836,7 @@ process markDup{
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.metrics") into ch_markdup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup, ch_markdup_for_libeval
 
     script:
     outname = "${bam.baseName}"
@@ -1819,6 +1846,12 @@ process markDup{
     samtools index "${size}" ${libraryid}_rmdup.bam
     """
 }
+
+// This is for post-deduplcation per-library evaluation steps _without_ any 
+// form of library merging. 
+ch_skiprmdup_for_libeval.mix(ch_dedup_for_libeval, ch_markdup_for_libeval)
+  .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
+
 
 // Merge independent libraries sequenced but with same treatment (often done to improve complexity). Different strand/UDG libs not merged because bamtrim/pmdtools needs UDG info
 
@@ -1866,7 +1899,8 @@ process library_merge {
   size = "${params.large_ref}" ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
-  picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged"
+  ## Have to set validation as lenient because of BWA issue: "I see a read stands out the end of a chromosome and is flagged as unmapped (flag 0x4). [...]" http://bio-bwa.sourceforge.net/
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged" VALIDATION_STRINGENCY=LENIENT
   samtools index "${size}" ${samplename}_libmerged_rg_rmdup.bam
   """
 }
@@ -1875,11 +1909,11 @@ process library_merge {
 if (!params.skip_deduplication) {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
+        .into { ch_rmdup_for_skipdamagemanipulation;  ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
 
 } else {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_for_sexdeterrmine; ch_for_nuclear_contamination; ch_rmdup_for_bedtools; ch_rmdup_formtnucratio } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
 }
 
 //////////////////////////////////////////////////
@@ -2101,14 +2135,15 @@ process additional_library_merge {
   size = "${params.large_ref}" ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_add.bam ${bam}
-  picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_additionalmerged"
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 
+RGSM="${samplename}_additionalmerged" VALIDATION_STRINGENCY=LENIENT
   samtools index "${size}" ${samplename}_libmerged_rg_add.bam
   """
 }
 
 ch_trimmed_formerge.skip_merging
   .mix(ch_output_from_trimmerge)
-  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap }
+  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap; ch_for_sexdeterrmine }
 
   // General mapping quality statistics for whole reference sequence - e.g. X and % coverage
 
@@ -2142,33 +2177,33 @@ process qualimap {
 // Reroute files for genotyping; we have to ensure to select lib-merged BAMs, as input channel will also contain the un-merged ones resulting in unwanted multi-sample VCFs
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_output_from_bamutils
-      .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
+      .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" && !params.run_trim_bam )  {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'trimmed' source without running BAM trimming (--run_trim_bam)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" && params.run_trim_bam )  {
     ch_output_from_bamutils
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_run_pmdtools )  {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
    ch_output_from_pmdtools
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( !params.run_genotyping && params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller }
+     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 }
 
@@ -2308,7 +2343,54 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
 }
 
+ // Branch channel by strandedness
+ ch_damagemanipulation_for_genotyping_pileupcaller
+   .branch{
+       singleStranded: it[5] == "single"
+       doubleStranded: it[5] == "double"
+   }
+   .set{ch_input_for_genotyping_pileupcaller}
+ 
+ // Create pileupcaller input tuples
+ ch_input_for_genotyping_pileupcaller.singleStranded
+   .groupTuple(by:[5])
+   .set {ch_prepped_for_pileupcaller_single}
+
+ ch_input_for_genotyping_pileupcaller.doubleStranded
+   .groupTuple(by:[5])
+   .set {ch_prepped_for_pileupcaller_double}
+
  process genotyping_pileupcaller {
+  label 'mc_small'
+  tag "${strandedness}"
+  publishDir "${params.outdir}/genotyping", mode: 'copy'
+
+  when:
+  params.run_genotyping && params.genotyping_tool == 'pileupcaller'
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai from ch_prepped_for_pileupcaller_double.mix(ch_prepped_for_pileupcaller_single)
+  file fasta from ch_fasta_for_genotyping_pileupcaller.collect()
+  file fai from ch_fai_for_pileupcaller.collect()
+  file dict from ch_dict_for_pileupcaller.collect()
+  file bed from ch_bed_for_pileupcaller.collect()
+  file snp from ch_snp_for_pileupcaller.collect()
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${strandedness}.*")
+
+  script:
+  transitions_mode = strandedness == "single" ? "" : "${params.pileupcaller_transitions_mode}" == 'SkipTransitions' ? "--skipTransitions" : "${params.pileupcaller_transitions_mode}" == 'TransitionsMissing' ? "--transitionsMissing" : ""
+  caller = "--${params.pileupcaller_method}"
+  ssmode = strandedness == "single" ? "--singleStrandMode" : ""
+  bam_list = bam.flatten().join(" ")
+  sample_names = samplename.flatten().join(",")
+  """
+  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} -f ${snp} -e pileupcaller.${strandedness}
+  """
+ }
+
+/* process genotyping_pileupcaller {
   label 'mc_small'
   tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: 'copy'
@@ -2332,6 +2414,54 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   ssmode = strandedness == "single" ? "--singleStrandMode" : ""
   """
   samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}
+  """
+ }*/
+
+ process genotyping_angsd {
+  label 'mc_small'
+  tag "${samplename}"
+  publishDir "${params.outdir}/genotyping", mode: 'copy'
+
+  when:
+  params.run_genotyping && params.genotyping_tool == 'angsd'
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_angsd
+  file fasta from ch_fasta_for_genotyping_angsd.collect()
+  file fai from ch_fai_for_angsd.collect()
+  file dict from ch_dict_for_angsd.collect()
+
+  output: 
+  path("${samplename}*")
+  
+  script:
+  switch ( "${params.angsd_glmodel}" ) {
+    case "samtools":
+    angsd_glmodel = "1"; break
+    case "gatk":
+    angsd_glmodel = "2"; break
+    case "soapsnp":
+    angsd_glmodel = "3"; break
+    case "syk":
+    angsd_glmodel = "4"; break
+  }
+
+  switch ( "${params.angsd_glformat}" ) {
+    case "text":
+    angsd_glformat = "4"; break
+    case "binary":
+    angsd_glformat = "1"; break
+    case "beagle":
+    angsd_glformat = "2"; break
+    case "binary_three":
+    angsd_glformat = "3"; break
+  }
+  
+  angsd_fasta = !params.angsd_createfasta ? '' : params.angsd_fastamethod == 'random' ? '-doFasta 1 -doCounts 1' : '-doFasta 2 -doCounts 1' 
+  """
+  echo ${bam} > bam.filelist
+  mkdir angsd
+  angsd -bam bam.filelist -nThreads ${task.cpus} -GL ${angsd_glmodel} -doGlF ${angsd_glformat} ${angsd_fasta} -out ${samplename}.angsd
   """
  }
 
@@ -2399,7 +2529,7 @@ if (params.additional_vcf_files == '') {
   file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
   file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
   file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
-  file('MultiVFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
+  file('MultiVCFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
@@ -2674,7 +2804,6 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
     ch_krakendb = Channel.empty()
 }
 
-// TODO Check this works with collected input
 process kraken {
   tag "$prefix"
   label 'mc_huge'
@@ -2684,7 +2813,7 @@ process kraken {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
-  file(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }.collect()
+  file(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }
   file(krakendb) from ch_krakendb
 
   output:
@@ -2722,7 +2851,7 @@ process kraken_merge {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
   input:
-  tuple val(name), file(csv_count) from ch_kraken_parsed.collect()
+  file csv_count from ch_kraken_parsed.map{ it[1] }.collect().dump()
 
   output:
   file('kraken_count_table.csv')

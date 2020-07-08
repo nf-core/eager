@@ -91,6 +91,8 @@ To see the the EAGER pipeline help message run: `nextflow run nf-core/eager --he
 
 > By default, if a pipeline step fails, nf-core/eager will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
 
+If you want to configure your pipeline interactively using a graphical user interface, please visit [https://nf-co.re/launch](https://nf-co.re/launch), select the `eager` pipeline and the version you intend to run and follow the on-screen instructions to create a config for your pipeline run.
+
 ### Updating the pipeline
 
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
@@ -212,8 +214,7 @@ A template can be taken from [here](https://raw.githubusercontent.com/nf-core/te
 
 > :warning: Cells **must not** contain spaces before or after strings, as this will make the TSV unreadable by nextflow. Strings containing spaces should be wrapped in quotes.
 
-When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging), assuming all other metadata columns are the same.
-It will also merge BAM files with the `Sample_Lane` but different `Library_ID` after duplicate removal, but prior to genotyping.
+When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging), assuming all other metadata columns are the same. It will also merge BAM files with the same `Sample_ID` but different `Library_ID` after duplicate removal, but prior to genotyping. Please see caveats to this below.
 
 Column descriptions are as follows:
 
@@ -244,7 +245,7 @@ After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _
   <img src="images/usage/tsvinput_merging_names.png" width="75%" height = "75%">
 </p>
 
-Note the following important points:
+Note the following important points and limitations for setting up:
 
 - The TSV must use actual tabs (not spaces) between cells.
 - _File_ names must be unique irregardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
@@ -259,8 +260,11 @@ Note the following important points:
   - If you do not have different IDs nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
   - Please note this setup is **not** optimal, as you therefore cannot deduplicate PE and SE data of the same library together (and therefore may still have PCR duplicates at the library merging level).
 - Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
+- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on
+each unique library separately after deduplication (but prior same-treated library merging).
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
 - Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
+- Genotyping will typically be performed on each `sample` independently as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs` otherwise you will recieve a `file collision` error in steps such as `sexdeterrmine`, and merge these yourself. We will consider changing this behaviour in the future if there is enough interest.  
 
 #### `--bam`
 
@@ -513,6 +517,8 @@ If not turned on, BAMs will automatically be sent to post-mapping steps.
 
 More details on can be seen in the [fastp documentation](https://github.com/OpenGene/fastp)
 
+If using TSV input, this is performed per lane separately.
+
 #### `--complexity_filter_poly_g`
 
 Performs a poly-G tail removal step in the beginning of the pipeline using `fastp`, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.
@@ -526,6 +532,8 @@ This option can be used to define the minimum length of a poly-G tail to begin l
 These options handle various parts of adapter clipping and read merging steps.
 
 More details can be seen in the [AdapterRemoval documentation](https://adapterremoval.readthedocs.io/en/latest/)
+
+If using TSV input, this is performed per lane separately.
 
 #### `--clip_forward_adaptor`
 
@@ -581,6 +589,8 @@ This flag means that only merged reads are sent downstream for analysis. Singlet
 
 ### Read Mapping Parameters
 
+If using TSV input, mapping is performed library, i.e. after lane merging.
+
 #### `--mapper`
 
 Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`), or bowtie2 (`bowtie2`). bwa aln is the default and highly suited for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to bwa aln, and has recently been suggested to provide slightly better results under certain conditions [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'
@@ -628,7 +638,7 @@ If you want to filter out reads that don't map to a circular chromosome, turn th
 
 ##### `--bt2_alignmode`
 
-The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned.  Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
+The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
 
 ##### `--bt2_sensitivity`
 
@@ -658,6 +668,8 @@ These flags will produce FASTQ files almost identical to your input files, excep
 
 This functionality allows you to provide other researchers who wish to re-use your data to apply their own adapter removal/read merging procedures, while maintaining anonyminity for sample donors - for example with microbiome research.
 
+If using TSV input, stripping is performed library, i.e. after lane merging.
+
 #### `--strip_input_fastq`
 
 Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
@@ -669,6 +681,8 @@ Read removal mode. Strip mapped reads completely (`'strip'`) or just replace map
 ### Read Filtering and Conversion Parameters
 
 Users can configure to keep/discard/extract certain groups of reads efficiently in the nf-core/eager pipeline.
+
+If using TSV input, filtering is performed library, i.e. after lane merging.
 
 #### `--run_bam_filtering`
 
@@ -687,6 +701,8 @@ Defines how to proceed with unmapped reads: `'discard'` removes all unmapped rea
 Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).
 
 ### Read DeDuplication Parameters
+
+If using TSV input, deduplication is performed library, i.e. after lane merging.
 
 #### `--dedupper`
 
@@ -708,6 +724,8 @@ More documentation can be seen in the follow links for:
 
 - [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
 - [PMDTools documentation](https://github.com/pontussk/PMDtools)
+
+If using TSV input, DamageProfiler is performed library, i.e. after lane merging. PMDtools and  BAM Trimming is run after library merging of same-named library BAMs that have the same type of UDG treatment. BAM Trimming is only performed on non-UDG and half-UDG treated data.
 
 #### `--udg_type`
 
@@ -787,6 +805,8 @@ If you're interested in looking at coverage stats for certain features on your r
 
 More documentation on bedtools can be seen in the [bedtools documentation](https://bedtools.readthedocs.io/en/latest/)
 
+If using TSV input, bedtools is run after library merging of same-named library BAMs that have the same type of UDG treatment.
+
 #### `--run_bedtools_coverage`
 
 Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.
@@ -797,13 +817,17 @@ Specify the path to a GFF/BED containing the feature coordinates (or any accepta
 
 ### Genotyping Parameters
 
-There are options for different genotypers to be used. We suggest you the documentation of each tool to find the ones that suit your needs.
+There are options for different genotypers (or genotype likelihood calculators) to be used. We suggest you the documentation of each tool to find the ones that suit your needs.
 
 Documentation for each tool:
 
 - [GATK UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)
 - [GATK HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)
 - [FreeBayes](https://github.com/ekg/freebayes)
+- [ANGSD](http://www.popgen.dk/angsd/index.php/Genotype_Likelihoods)
+- [sequenceTools pileupCaller](https://github.com/stschiff/sequenceTools)
+
+If using TSV input, genotyping is performed per sample (i.e. after all types of libraries are merged), except pileupCaller which gathers all double-stranded and single-stranded (same-type merged) libraries respectively.
 
 #### `--run_genotyping`
 
@@ -811,7 +835,7 @@ Turns on genotyping to run on all post-dedup and downstream BAMs. For example if
 
 #### `--genotyping_tool`
 
-Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc' or 'freebayes' respectively.
+Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.
 
 > NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file.
 
@@ -889,9 +913,40 @@ Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/tree/master
 
 #### `--pileupcaller_method`
 
-Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: randomHaploid
+Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: `'randomHaploid'`
+
+#### `--angsd_glmodel`
+
+Specify which genotype likelihood model to use. Options: `'samtools`, `'gatk'`, `'soapsnp'`, `'syk'`. Default: `'samtools'`
+
+#### `--angsd_glformat`
+
+Specifies what type of genotyping likelihood file format will be output. Options: `'text'`, `'binary'`, `'binary_three'`, `'beagle_binary'`. Default: `'text'`.
+
+The options refer to the following descriptions respectively:
+
+- `text`: textoutput of all 10 log genotype likelihoods.
+- `binary`: binary all 10 log genotype likelihood
+- `binary_three`: binary 3 times likelihood
+- `beagle_binary`: beagle likelihood file
+
+See the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information on which to select for your downstream applications.
+
+#### `--angsd_createfasta`
+
+Turns on the ANGSD creation of a FASTA file from the BAM file.
+
+#### `--angsd_fastamethod`
+
+The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given positin, whereas 'random' will pick one at random. Default: `'random'`.
+
+#### `--pileupcaller_transitions_mode`
+
+Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: AllSites, TransitionsMissing, SkipTransitions. Default: AllSites
 
 ### Consensus Sequence Generation
+
+If using TSV input, consensus eneration is performed per sample (i.e. after all types of libraries are merged).
 
 #### `--run_vcf2genome`
 
@@ -919,6 +974,8 @@ In the case of two possible alleles, the frequency of the majority allele requir
 
 ### Mitochondrial to Nuclear Ratio
 
+If using TSV input, Mitochondrial to Nuclear Ratio calculation is calculated per deduplicated library (after lane merging)
+
 #### `--run_mtnucratio`
 
 Turn on the module to estimate the ratio of mitochondrial to nuclear reads.
@@ -931,7 +988,9 @@ Specify the FASTA entry in the reference file specified as `--fasta`, which acts
 
 SNP Table Generation here is performed by MultiVCFAnalyzer. The current version of MultiVCFAnalyzer version only accepts GATK UnifiedGenotyper 3.5 VCF files, and when the ploidy was set to 2 (this allows MultiVCFAnalyzer to look for report frequencies of polymorphic positions). A description of how the tool works can be seen in the Supplementary Information of [Bos et al. (2014)](https://doi.org/10.1038/nature13591) under "SNP Calling and Phylogenetic Analysis".
 
-More can be seen in the [MultiVCFAnalyzer documentation](https://github.com/alexherbig/MultiVCFAnalyzer)
+More can be seen in the [MultiVCFAnalyzer documentation](https://github.com/alexherbig/MultiVCFAnalyzer).
+
+If using TSV input, MultiVCFAnalyzer is performed on all samples gathered together.
 
 #### `--run_multivcfanalyzer`
 
@@ -977,6 +1036,8 @@ If you wish to include results from SNPEff effect analysis, supply the output fr
 
 An optional process for human DNA. It can be used to calculate the relative coverage of X and Y chromosomes compared to the autosomes (X-/Y-rate). Standard errors for these measurements are also calculated, assuming a binomial distribution of reads across the SNPs.
 
+If using TSV input, SexDetERRmine is performed on all samples gathered together.
+
 #### `--run_sexdeterrmine`
 
 Specify to run the optional process of sex determination.
@@ -1006,6 +1067,8 @@ Please note the following:
 - MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
 > :warning: Running MALT on a server with less than 128GB of memory should be performed at your own risk.
+
+If using TSV input, metagenomic screening is performed on all samples gathered together.
 
 #### `--run_metagenomic_screening`
 
