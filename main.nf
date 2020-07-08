@@ -245,12 +245,6 @@ println ""
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
 
-// Common parameter typos
-
-if ( params.single-end ) {
-  "[nf-core/eager] error: Please check your input parameters. --single-end should be --single_end (with underscore)?"
-}
-
 // Validate reference inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "[nf-core/eager] error: please specify --fasta with the path to your reference"
@@ -3119,7 +3113,7 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
             Channel
                 .fromFilePairs( input )
                 .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-                .ifEmpty { exit 1, "[nf-core/eager] error: Files could not be found. Do the specified FASTQ read files end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq'? Did you forget `--single_end?" }
+                .ifEmpty { exit 1, "[nf-core/eager] error: Files could not be found. Do the specified FASTQ read files end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq'? Did you forget --single_end?" }
                 .map { row -> [ row[0], [ row[1][0], row[1][1] ] ] }
                 .ifEmpty { exit 1, "[nf-core/eager] error: --input was empty - no input files supplied!" }
                 .into { ch_reads_for_faketsv; ch_reads_for_validate }
