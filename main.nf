@@ -2240,7 +2240,8 @@ if ( params.gatk_ug_jar != '' ) {
 
   script:
   defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
-  keep_realign = params.gatk_ug_keep_realign_bam ? "T" : "F"
+  def keep_realign = params.gatk_ug_keep_realign_bam ? "rm ${samplename}.realign.bam" : ""
+  def index_realign = params.gatk_ug_keep_realign_Bam ? "samtools index ${samplename}.realign.bam" : ""
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
@@ -2248,9 +2249,8 @@ if ( params.gatk_ug_jar != '' ) {
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
-    if [[ ${keep_realign} == 'F' ]]; then
-      rm ${samplename}.realign.bam
-    fi
+    $keep_realign
+    $index_realign
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
@@ -2261,9 +2261,8 @@ if ( params.gatk_ug_jar != '' ) {
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
-    if [[ ${keep_realign} == 'F' ]]; then
-      rm ${samplename}.realign.bam
-    fi
+    $keep_realign
+    $index_realign
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
