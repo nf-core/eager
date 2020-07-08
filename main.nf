@@ -245,6 +245,12 @@ println ""
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
 
+// Common parameter typos
+
+if ( params.single-end ) {
+  "[nf-core/eager] error: Please check your input parameters. --single-end should be --single_end (with underscore)?"
+}
+
 // Validate reference inputs
 if ( params.fasta.isEmpty () ){
     exit 1, "[nf-core/eager] error: please specify --fasta with the path to your reference"
@@ -292,7 +298,7 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
     exit 1, "[nf-core/eager] error: the provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
 }
 
-// Mapper sanity checking
+// Mapper validation
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem' && !params.mapper == "bowtie2"){
     exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: 'bwaaln'. You gave: ${params.mapper}!"
 }
@@ -347,7 +353,7 @@ if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.singl
     exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples!"
 }
 
-// Strip mode sanity checking
+// Strip mode validation
 if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
         exit 1, "[nf-core/eager] error: --strip_mode can only be set to strip or replace!"
@@ -358,12 +364,12 @@ if (params.bam_discard_unmapped && params.bam_unmapped_type == '') {
     exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'!"
 }
 
-// Bedtools sanity checking
+// Bedtools validation
 if(params.run_bedtools_coverage && params.anno_file == ''){
   exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters!"
 }
 
-// BAM filtering sanity checking
+// BAM filtering validation
 if (!params.run_bam_filtering && params.bam_mapping_quality_threshold != 0) {
   exit 1, "[nf-core/eager] error: please turn on BAM filtering if you want to perform mapping quality filtering! Give --run_bam_filtering"
 }
@@ -380,12 +386,12 @@ if (params.run_bam_filtering && !params.bam_discard_unmapped && params.bam_unmap
   exit 1, "[nf-core/eager] error: Please turned on unmapped read discarding, if you have specifed a different unmapped type. Give: --bam_discard_unmapped"
 }
 
-// Deduplication sanity checking
+// Deduplication validation
 if (params.dedupper != 'dedup' && params.dedupper != 'markduplicates') {
   exit 1, "[nf-core/eager] error: Selected deduplication tool is not recognised. Options: 'dedup' or 'markduplicates'. You gave: ${params.dedupper}"
 }
 
-// Genotyping sanity checking
+// Genotyping validation
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' ) {
   exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. You gave: ${params.genotyping_tool}!"
@@ -425,7 +431,7 @@ if (params.run_genotyping){
 
 }
 
-// Consensus sequence generation sanity checking
+// Consensus sequence generation validation
 if (params.run_vcf2genome) {
     if (!params.run_genotyping) {
       exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters"
@@ -436,7 +442,7 @@ if (params.run_vcf2genome) {
     }
 }
 
-// MultiVCFAnalyzer sanity checking
+// MultiVCFAnalyzer validation
 if (params.run_multivcfanalyzer) {
   if (!params.run_genotyping) {
     exit 1, "[nf-core/eager] error: MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters"
@@ -451,7 +457,7 @@ if (params.run_multivcfanalyzer) {
   }
 }
 
-// Metagenomic sanity checking
+// Metagenomic validation
 if (params.run_metagenomic_screening) {
   if ( !params.bam_discard_unmapped ) {
   exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'"
@@ -494,7 +500,7 @@ if (params.run_metagenomic_screening) {
   }
 }
 
-// MaltExtract Sanity checking
+// MaltExtract validation
 if (params.run_maltextract) {
 
   if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
@@ -523,7 +529,7 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 }
 
 if (workflow.profile.contains('awsbatch')) {
-    // AWSBatch sanity checking
+    // AWSBatch validation
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
     // Check outdir paths to be S3 buckets if running on AWSBatch
     // related: https://github.com/nextflow-io/nextflow/issues/813
@@ -3113,7 +3119,7 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
             Channel
                 .fromFilePairs( input )
                 .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-                .ifEmpty { exit 1, "[nf-core/eager] error: Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
+                .ifEmpty { exit 1, "[nf-core/eager] error: Files could not be found. Do the specified FASTQ read files end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq'? Did you forget `--single_end?" }
                 .map { row -> [ row[0], [ row[1][0], row[1][1] ] ] }
                 .ifEmpty { exit 1, "[nf-core/eager] error: --input was empty - no input files supplied!" }
                 .into { ch_reads_for_faketsv; ch_reads_for_validate }
