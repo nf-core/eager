@@ -2236,11 +2236,11 @@ if ( params.gatk_ug_jar != '' ) {
 
   output: 
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*realign.bam") optional true
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*realign.bam"), file("*.bai) optional true
 
   script:
   defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
-  def keep_realign = params.gatk_ug_keep_realign_bam ? "rm ${samplename}.realign.bam" : ""
+  def keep_realign = params.gatk_ug_keep_realign_bam ? "" : "rm ${samplename}.realign.bam"
   def index_realign = params.gatk_ug_keep_realign_bam ? "samtools index ${samplename}.realign.bam" : ""
   if (params.gatk_dbsnp == '')
     """
