@@ -322,8 +322,8 @@ if (params.bt2n != 0 && params.bt2n != 1) {
 // Index files provided? Then check whether they are correct and complete
 if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
     Channel
-        .fromPath(index_base, checkIfExists: true)
-        .ifEmpty { exit 1, "[nf-core/eager] error: bwa indicies not found in: ${index_base}." }
+        .fromPath(params.bwa_index, checkIfExists: true)
+        .ifEmpty { exit 1, "[nf-core/eager] error: bwa indices not found in: ${index_base}." }
         .into {bwa_index; bwa_index_bwamem}
 
     bt2_index = ''
@@ -335,7 +335,7 @@ if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
     bt2_base = params.bt2_index.substring(lastPath+1)
 
     Channel
-        .fromPath(bt2_dir, checkIfExists: true)
+        .fromPath(params.bt2_index, checkIfExists: true)
         .ifEmpty { exit 1, "[nf-core/eager] error: bowtie2 indices not found in: ${bt2_dir}." }
         .into {bt2_index; bt2_index_bwamem}
 
