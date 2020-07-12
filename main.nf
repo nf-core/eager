@@ -280,7 +280,7 @@ if("${params.fasta}".endsWith(".gz")){
         path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd
 
         script:
-        unzip = fasta.toString() - '.gz'
+        unzip = zipped_fasta.toString() - '.gz'
         """
         pigz -f -d -p ${task.cpus} $zipped_fasta
         """
