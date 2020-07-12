@@ -1,554 +1,1086 @@
 {
     "$schema": "https://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/'nf-core/eager'/master/nextflow_schema.json",
-    "title": "'nf-core/eager' pipeline parameters",
-    "description": "'A fully reproducible ancient and modern DNA pipeline in Nextflow and with cloud support.'",
+    "$id": "https://raw.githubusercontent.com/nf-core/eager/master/nextflow_schema.json",
+    "title": "nf-core/eager pipeline parameters",
+    "description": "A fully reproducible ancient and modern DNA pipeline in Nextflow and with cloud support.",
     "type": "object",
     "properties": {
-        "reads": {
-            "type": "string",
-            "default": "data/*{1,2}.fastq.gz"
-        },
-        "single_end": {
-            "type": "string"
-        },
-        "paired_end": {
-            "type": "string",
-            "hidden": true
-        },
-        "readPaths": {
-            "type": "string",
-            "hidden": true
-        },
-        "bam": {
-            "type": "string"
-        },
-        "fasta": {
-            "type": "string"
-        },
-        "large_ref": {
-            "type": "string"
-        },
-        "save_reference": {
-            "type": "string",
-            "description": "Use this if you want to save your reference indices that were created.",
-            "default": "false"
-        },
-        "saveTrimmed": {
-            "type": "string",
-            "default": "true"
-        },
-        "saveAlignedIntermediates": {
-            "type": "string"
-        },
-        "genome": {
-            "type": "string"
-        },
-        "fasta_index": {
-            "type": "string"
-        },
-        "bwa_index": {
-            "type": "string"
-        },
-        "snpcapture": {
-            "type": "string"
-        },
-        "bedfile": {
-            "type": "string"
-        },
-        "seq_dict": {
-            "type": "string"
-        },
-        "outdir": {
-            "type": "string",
-            "default": "./results"
-        },
-        "skip_fastqc": {
-            "type": "string"
-        },
-        "skip_mapping": {
-            "type": "string"
-        },
-        "skip_preseq": {
-            "type": "string"
-        },
-        "skip_damage_calculation": {
-            "type": "string"
-        },
-        "skip_qualimap": {
-            "type": "string"
-        },
-        "skip_deduplication": {
-            "type": "string"
-        },
-        "run_convertbam": {
-            "type": "string"
-        },
-        "skip_adapterremoval": {
-            "type": "string"
-        },
-        "skip_trim": {
-            "type": "string"
-        },
-        "complexity_filter_poly_g": {
-            "type": "string"
-        },
-        "complexity_filter_poly_g_min": {
-            "type": "integer",
-            "default": 10
-        },
-        "trim_bam": {
-            "type": "string"
-        },
-        "clip_forward_adaptor": {
-            "type": "string",
-            "default": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
-        },
-        "clip_reverse_adaptor": {
-            "type": "string",
-            "default": "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA"
-        },
-        "clip_readlength": {
-            "type": "integer",
-            "default": 30
-        },
-        "clip_min_read_quality": {
-            "type": "integer",
-            "default": 20
-        },
-        "min_adap_overlap": {
-            "type": "integer",
-            "default": 1
-        },
-        "skip_collapse": {
-            "type": "string"
-        },
-        "preserve5p": {
-            "type": "string"
-        },
-        "mergedonly": {
-            "type": "string"
-        },
-        "mapper": {
-            "type": "string",
-            "default": "bwaaln"
-        },
-        "bwaalnn": {
-            "type": "number",
-            "default": 0.03
-        },
-        "bwaalnk": {
-            "type": "integer",
-            "default": 2
-        },
-        "bwaalnl": {
-            "type": "integer",
-            "default": 32
-        },
-        "circularextension": {
-            "type": "integer",
-            "default": 500
-        },
-        "circulartarget": {
-            "type": "string",
-            "default": "MT"
-        },
-        "circularfilter": {
-            "type": "string"
-        },
-        "run_bam_filtering": {
-            "type": "string"
-        },
-        "bam_discard_unmapped": {
-            "type": "string"
-        },
-        "bam_unmapped_type": {
-            "type": "string",
-            "default": "discard"
-        },
-        "bam_mapping_quality_threshold": {
-            "type": "integer",
-            "default": 0
-        },
-        "damageprofiler_length": {
-            "type": "integer",
-            "default": 100
-        },
-        "damageprofiler_threshold": {
-            "type": "integer",
-            "default": 15
-        },
-        "damageprofiler_yaxis": {
-            "type": "number",
-            "default": 0.3
-        },
-        "dedupper": {
-            "type": "string",
-            "default": "dedup"
-        },
-        "dedup_all_merged": {
-            "type": "string"
-        },
-        "preseq_step_size": {
-            "type": "integer",
-            "default": 1000
-        },
-        "run_bedtools_coverage": {
-            "type": "string"
-        },
-        "anno_file": {
-            "type": "string"
-        },
-        "run_pmdtools": {
-            "type": "string"
-        },
-        "pmd_udg_type": {
-            "type": "string",
-            "default": "half"
-        },
-        "pmdtools_range": {
-            "type": "integer",
-            "default": 10
-        },
-        "pmdtools_threshold": {
-            "type": "integer",
-            "default": 3
-        },
-        "pmdtools_reference_mask": {
-            "type": "string"
-        },
-        "pmdtools_max_reads": {
-            "type": "integer",
-            "default": 10000
-        },
-        "run_trim_bam": {
-            "type": "string"
-        },
-        "bamutils_clip_left": {
-            "type": "integer",
-            "default": 1
-        },
-        "bamutils_clip_right": {
-            "type": "integer",
-            "default": 1
-        },
-        "bamutils_softclip": {
-            "type": "string"
-        },
-        "strip_input_fastq": {
-            "type": "string"
-        },
-        "strip_mode": {
-            "type": "string",
-            "default": "strip"
-        },
-        "run_genotyping": {
-            "type": "string"
-        },
-        "genotyping_tool": {
-            "type": "string"
-        },
-        "genotyping_source": {
-            "type": "string",
-            "default": "raw"
-        },
-        "gatk_ug_jar": {
-            "type": "string"
-        },
-        "gatk_ug_genotype_model": {
-            "type": "string",
-            "default": "SNP"
-        },
-        "gatk_hc_emitrefconf": {
-            "type": "string",
-            "default": "GVCF"
-        },
-        "gatk_call_conf": {
-            "type": "integer",
-            "default": 30
-        },
-        "gatk_ploidy": {
-            "type": "integer",
-            "default": 2
-        },
-        "gatk_downsample": {
-            "type": "integer",
-            "default": 250
-        },
-        "gatk_ug_out_mode": {
-            "type": "string",
-            "default": "EMIT_VARIANTS_ONLY"
-        },
-        "gatk_hc_out_mode": {
-            "type": "string",
-            "default": "EMIT_VARIANTS_ONLY"
-        },
-        "gatk_dbsnp": {
-            "type": "string"
-        },
-        "gatk_ug_defaultbasequalities": {
-            "type": "string"
-        },
-        "freebayes_C": {
-            "type": "integer",
-            "default": 1
-        },
-        "freebayes_g": {
-            "type": "integer",
-            "default": 0
-        },
-        "freebayes_p": {
-            "type": "integer",
-            "default": 2
-        },
-        "run_vcf2genome": {
-            "type": "string"
-        },
-        "vcf2genome_outfile": {
-            "type": "string"
-        },
-        "vcf2genome_header": {
-            "type": "string"
-        },
-        "vcf2genome_minc": {
-            "type": "integer",
-            "default": 5
-        },
-        "vcf2genome_minq": {
-            "type": "integer",
-            "default": 30
-        },
-        "vcf2genome_minfreq": {
-            "type": "number",
-            "default": 0.8
-        },
-        "run_multivcfanalyzer": {
-            "type": "string"
-        },
-        "write_allele_frequencies": {
-            "type": "string"
-        },
-        "min_genotype_quality": {
-            "type": "integer",
-            "default": 30
-        },
-        "min_base_coverage": {
-            "type": "integer",
-            "default": 5
-        },
-        "min_allele_freq_hom": {
-            "type": "number",
-            "default": 0.9
-        },
-        "min_allele_freq_het": {
-            "type": "number",
-            "default": 0.9
-        },
-        "additional_vcf_files": {
-            "type": "string"
-        },
-        "reference_gff_annotations": {
-            "type": "string",
-            "default": "NA"
-        },
-        "reference_gff_exclude": {
-            "type": "string",
-            "default": "NA"
-        },
-        "snp_eff_results": {
-            "type": "string",
-            "default": "NA"
-        },
-        "run_mtnucratio": {
-            "type": "string"
-        },
-        "mtnucratio_header": {
-            "type": "string",
-            "default": "MT"
-        },
-        "run_sexdeterrmine": {
-            "type": "string"
-        },
-        "sexdeterrmine_bedfile": {
-            "type": "string"
-        },
-        "run_nuclear_contamination": {
-            "type": "string"
-        },
-        "contamination_chrom_name": {
-            "type": "string",
-            "default": "X"
-        },
-        "run_metagenomic_screening": {
-            "type": "string"
-        },
-        "metagenomic_tool": {
-            "type": "string",
-            "default": "malt"
-        },
-        "metagenomic_min_support_reads": {
-            "type": "integer",
-            "default": 1
-        },
-        "database": {
-            "type": "string"
-        },
-        "percent_identity": {
-            "type": "integer",
-            "default": 85
-        },
-        "malt_mode": {
-            "type": "string",
-            "default": "BlastN"
-        },
-        "malt_alignment_mode": {
-            "type": "string",
-            "default": "SemiGlobal"
-        },
-        "malt_top_percent": {
-            "type": "integer",
-            "default": 1
-        },
-        "malt_min_support_mode": {
-            "type": "string",
-            "default": "percent"
-        },
-        "malt_min_support_percent": {
-            "type": "number",
-            "default": 0.01
-        },
-        "malt_max_queries": {
-            "type": "integer",
-            "default": 100
-        },
-        "malt_memory_mode": {
-            "type": "string",
-            "default": "load"
-        },
-        "malt_weighted_lca": {
-            "type": "string"
-        },
-        "run_maltextract": {
-            "type": "string"
-        },
-        "maltextract_taxon_list": {
-            "type": "string"
-        },
-        "maltextract_ncbifiles": {
-            "type": "string"
-        },
-        "maltextract_filter": {
-            "type": "string",
-            "default": "def_anc"
-        },
-        "maltextract_toppercent": {
-            "type": "number",
-            "default": 0.01
-        },
-        "maltextract_destackingoff": {
-            "type": "string"
-        },
-        "maltextract_downsamplingoff": {
-            "type": "string"
-        },
-        "maltextract_duplicateremovaloff": {
-            "type": "string"
-        },
-        "maltextract_matches": {
-            "type": "string"
-        },
-        "maltextract_megansummary": {
-            "type": "string"
-        },
-        "maltextract_percentidentity": {
-            "type": "integer",
-            "default": 85
-        },
-        "maltextract_topalignment": {
-            "type": "string"
-        },
-        "maltextract_singlestranded": {
-            "type": "string"
-        },
-        "name": {
-            "type": "string"
-        },
-        "multiqc_config": {
-            "type": "string"
-        },
-        "email": {
-            "type": "string"
-        },
-        "email_on_fail": {
-            "type": "string"
-        },
-        "max_multiqc_email_size": {
-            "type": "string",
-            "default": "25 MB"
-        },
-        "plaintext_email": {
-            "type": "string"
-        },
-        "monochrome_logs": {
-            "type": "string"
-        },
-        "help": {
-            "type": "string"
-        },
-        "igenomes_base": {
-            "type": "string",
-            "default": "s3://ngi-igenomes/igenomes/"
-        },
-        "tracedir": {
-            "type": "string",
-            "default": "./results/pipeline_info"
-        },
-        "awsqueue": {
-            "type": "string"
-        },
-        "awsregion": {
-            "type": "string",
-            "default": "eu-west-1"
-        },
-        "igenomes_ignore": {
-            "type": "string"
-        },
-        "custom_config_version": {
-            "type": "string",
-            "default": "master"
-        },
-        "custom_config_base": {
-            "type": "string",
-            "default": "https://raw.githubusercontent.com/nf-core/configs/master"
-        },
-        "hostnames": {
-            "type": "string",
-            "default": "[binac:['.binac.uni-tuebingen.de'], cbe:['.cbe.vbc.ac.at'], cfc:['.hpc.uni-tuebingen.de'], crick:['.thecrick.org'], genotoul:['.genologin1.toulouse.inra.fr', '.genologin2.toulouse.inra.fr'], genouest:['.genouest.org'], uppmax:['.uppmax.uu.se'], utd_ganymede:['ganymede.utdallas.edu']]"
-        },
-        "config_profile_description": {
-            "type": "string"
-        },
-        "config_profile_contact": {
-            "type": "string"
-        },
-        "config_profile_url": {
-            "type": "string"
-        },
-        "max_memory": {
-            "type": "string",
-            "default": "128 GB"
-        },
-        "max_cpus": {
-            "type": "integer",
-            "default": 16
-        },
-        "max_time": {
-            "type": "string",
-            "default": "10d"
+        "Input options": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "null",
+                    "description": "Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs. Alternatively, a path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.",
+                    "fa_icon": "fas fa-file-csv"
+                },
+                "single_end": {
+                    "type": "boolean",
+                    "description": "Specifies that the input is single end reads. Not required for TSV input.",
+                    "fa_icon": "fas fa-align-center",
+                    "default": false,
+                    "help_text": "By default, the pipeline expects paired-end data. If you have single-end data, specify this parameter on the command line when you launch the pipeline. It is not possible to run a mixture of single-end and paired-end files in one run."
+                },
+                "email": {
+                    "type": "string",
+                    "description": "Email address for completion summary.",
+                    "fa_icon": "fas fa-envelope",
+                    "help_text": "An email address to send a summary email to when the pipeline is completed.",
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                },
+                "colour_chemistry": {
+                    "type": "integer",
+                    "default": 4,
+                    "description": "Define which Illumina colour chemistry to use. For four-colour (e.g. HiSeq/MiSeq) give '4', for two-colour give '2'.",
+                    "fa_icon": "fas fa-palette"
+                },
+                "udg_type": {
+                    "type": "string",
+                    "default": "none",
+                    "description": "Specify here if you have UDG treated libraries, Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none').",
+                    "fa_icon": "fas fa-vial"
+                },
+                "single_stranded": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Define whether to treat input data as single end (SE) data. Not required for TSV input.",
+                    "fa_icon": "fas fa-minus"
+                },
+                "bam": {
+                    "type": "boolean",
+                    "description": "Specifies that the input is in BAM format. Not required for TSV input.",
+                    "default": false,
+                    "fa_icon": "fas fa-align-center"
+                }
+            },
+            "fa_icon": "fas fa-terminal",
+            "description": "Define where the pipeline should find input data, and additional metadata.",
+            "required": [
+                "input"
+            ]
+        },
+        "Output options": {
+            "type": "object",
+            "description": "Specify where to put output files and optional saving of intermediate files",
+            "default": "",
+            "properties": {
+                "outdir": {
+                    "type": "string",
+                    "description": "The output directory where the results will be saved.",
+                    "default": "./results",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "save_reference": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turns on saving reference genome indices for later re-usage."
+                },
+                "saveTrimmed": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Turn this on if you want to keep trimmed reads.",
+                    "hidden": true
+                },
+                "saveAlignedIntermediates": {
+                    "type": "boolean",
+                    "description": "Turn this on if you want to keep intermediate alignment files (SAM, BAM, non-deduped BAM)",
+                    "default": false,
+                    "hidden": true
+                }
+            },
+            "fa_icon": "fas fa-cloud-download-alt"
+        },
+        "Input Data Additional Options": {
+            "type": "object",
+            "description": "Additional options regarding input data.",
+            "default": "",
+            "properties": {
+                "snpcapture": {
+                    "type": "boolean",
+                    "description": "Runs in SNPCapture mode (specify a BED file if you do this!).",
+                    "default": false
+                },
+                "run_convertinputbam": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turns on convertion of an input BAM file into FASTQ format before pre-processing (e.g. AdapterRemoval etc.)."
+                }
+            },
+            "fa_icon": "far fa-plus-square"
+        },
+        "References": {
+            "type": "object",
+            "properties": {
+                "fasta": {
+                    "type": "string",
+                    "fa_icon": "fas fa-font",
+                    "description": "Path or URL to a FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'",
+                    "help_text": "If you have no genome reference available, the pipeline can build one using a FASTA file. This requires additional time and resources, so it's better to use a pre-build index if possible."
+                },
+                "genome": {
+                    "type": "string",
+                    "description": "Name of iGenomes reference (required if not FASTA reference).",
+                    "fa_icon": "fas fa-book",
+                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`."
+                },
+                "igenomes_base": {
+                    "type": "string",
+                    "description": "Directory / URL base for iGenomes references.",
+                    "default": "s3://ngi-igenomes/igenomes/",
+                    "fa_icon": "fas fa-cloud-download-alt",
+                    "hidden": true,
+                    "help_text": ""
+                },
+                "igenomes_ignore": {
+                    "type": "boolean",
+                    "description": "Do not load the iGenomes reference config.",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "default": false,
+                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                },
+                "bwa_index": {
+                    "type": "string",
+                    "description": "Path and name of a bwa indexed FASTA reference file without index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value as --fasta)"
+                },
+                "bt2_index": {
+                    "type": "string",
+                    "description": "Path and name of a bowtie2 indexed FASTA reference file without index index suffixes (i.e. everything before the endings e.g. '.1.bt2', '.2.bt2', '.rev.1.bt2'. Most likely the same value as --fasta)"
+                },
+                "bedfile": {
+                    "type": "string",
+                    "description": "Path to BED file for SNPCapture methods."
+                },
+                "seq_dict": {
+                    "type": "string",
+                    "description": "Path to picard sequence dictionary file (typically ending in '.dict')."
+                },
+                "fasta_index": {
+                    "type": "string",
+                    "description": "Path to samtools FASTA index (typically ending in '.fai')."
+                },
+                "large_ref": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn this on if you have large reference genomes (e.g. plant genomes)."
+                }
+            },
+            "fa_icon": "fas fa-dna",
+            "description": "Specify locations of references and otionally additional pre-made indicies"
+        },
+        "Generic options": {
+            "type": "object",
+            "properties": {
+                "help": {
+                    "type": "boolean",
+                    "description": "Display help text.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-question-circle",
+                    "default": false
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Workflow name of run, for future reference.",
+                    "fa_icon": "fas fa-fingerprint",
+                    "hidden": true,
+                    "help_text": "A custom name for the pipeline run. Unlike the core nextflow `-name` option with one hyphen this parameter can be reused multiple times, for example if using `-resume`. Passed through to steps such as MultiQC and used for things like report filenames and titles."
+                },
+                "email_on_fail": {
+                    "type": "string",
+                    "description": "Email address for completion summary, only when pipeline fails.",
+                    "fa_icon": "fas fa-exclamation-triangle",
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+                    "hidden": true,
+                    "help_text": "An email address to send a summary email to when the pipeline is completed - ONLY sent if the pipeline does not exit successfully."
+                },
+                "plaintext_email": {
+                    "type": "boolean",
+                    "description": "Send plain-text email instead of HTML.",
+                    "fa_icon": "fas fa-remove-format",
+                    "hidden": true,
+                    "default": false,
+                    "help_text": ""
+                },
+                "max_multiqc_email_size": {
+                    "type": "string",
+                    "description": "File size limit when attaching MultiQC reports to summary emails.",
+                    "default": "25.MB",
+                    "fa_icon": "fas fa-file-upload",
+                    "hidden": true,
+                    "help_text": ""
+                },
+                "monochrome_logs": {
+                    "type": "boolean",
+                    "description": "Do not use coloured log outputs.",
+                    "fa_icon": "fas fa-palette",
+                    "hidden": true,
+                    "default": false,
+                    "help_text": ""
+                },
+                "multiqc_config": {
+                    "type": "string",
+                    "description": "Custom config file to supply to MultiQC.",
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true,
+                    "help_text": ""
+                },
+                "tracedir": {
+                    "type": "string",
+                    "description": "Directory to keep pipeline Nextflow logs and reports.",
+                    "default": "${params.outdir}/pipeline_info",
+                    "fa_icon": "fas fa-cogs",
+                    "hidden": true,
+                    "help_text": ""
+                }
+            },
+            "fa_icon": "fas fa-file-import",
+            "description": "Less common options for the pipeline, typically set in a config file.",
+            "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`."
+        },
+        "Max job request options": {
+            "type": "object",
+            "properties": {
+                "max_cpus": {
+                    "type": "integer",
+                    "description": "Maximum number of CPUs that can be requested  for any single job.",
+                    "default": 16,
+                    "fa_icon": "fas fa-microchip",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
+                },
+                "max_memory": {
+                    "type": "string",
+                    "description": "Maximum amount of memory that can be requested for any single job.",
+                    "default": "128.GB",
+                    "fa_icon": "fas fa-memory",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
+                },
+                "max_time": {
+                    "type": "string",
+                    "description": "Maximum amount of time that can be requested for any single job.",
+                    "default": "240.h",
+                    "fa_icon": "far fa-clock",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
+                }
+            },
+            "fa_icon": "fab fa-acquisitions-incorporated",
+            "description": "Set the top limit for requested resources for any single job.",
+            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details."
+        },
+        "Institutional config options": {
+            "type": "object",
+            "properties": {
+                "custom_config_version": {
+                    "type": "string",
+                    "description": "Git commit id for Institutional configs.",
+                    "default": "master",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog",
+                    "help_text": ""
+                },
+                "custom_config_base": {
+                    "type": "string",
+                    "description": "Base directory for Institutional configs.",
+                    "default": "https://raw.githubusercontent.com/nf-core/configs/master",
+                    "hidden": true,
+                    "help_text": "If you're running offline, Nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell Nextflow where to find them with this parameter.",
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "hostnames": {
+                    "type": "string",
+                    "description": "Institutional configs hostname.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog",
+                    "help_text": ""
+                },
+                "config_profile_description": {
+                    "type": "string",
+                    "description": "Institutional config description.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog",
+                    "help_text": ""
+                },
+                "config_profile_contact": {
+                    "type": "string",
+                    "description": "Institutional config contact information.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog",
+                    "help_text": ""
+                },
+                "config_profile_url": {
+                    "type": "string",
+                    "description": "Institutional config URL link.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog",
+                    "help_text": ""
+                },
+                "awsqueue": {
+                    "type": "string",
+                    "description": "The AWS Queue to use.",
+                    "fa_icon": "fab fa-aws"
+                },
+                "awsregion": {
+                    "type": "string",
+                    "default": "eu-west-1",
+                    "description": "The AWS region to use.",
+                    "fa_icon": "fab fa-aws"
+                }
+            },
+            "fa_icon": "fas fa-university",
+            "description": "Parameters used to describe centralised config profiles. These generally should not be edited.",
+            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline."
+        },
+        "Skip Steps": {
+            "type": "object",
+            "description": "Skip any of the mentioned steps.",
+            "default": "",
+            "properties": {
+                "skip_fastqc": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_adapterremoval": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_preseq": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_deduplication": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_damage_calculation": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "skip_qualimap": {
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "fa_icon": "fas fa-forward"
+        },
+        "Complexity Filtering": {
+            "type": "object",
+            "description": "Processing of Illumina two-colour chemistry data.",
+            "default": "",
+            "properties": {
+                "complexity_filter_poly_g": {
+                    "type": "boolean",
+                    "description": "Turn on running poly-G removal on FASTQ files. Will only be performed on 2 colour chemistry.",
+                    "default": false
+                },
+                "complexity_filter_poly_g_min": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Specify length of poly-g min for clipping to be performed."
+                }
+            },
+            "fa_icon": "fas fa-sort-amount-down"
+        },
+        "Read Clipping and Adapter Removal": {
+            "type": "object",
+            "description": "Options for adapter clipping and paired-end merging.",
+            "default": "",
+            "properties": {
+                "clip_forward_adaptor": {
+                    "type": "string",
+                    "default": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC",
+                    "description": "Specify adapter sequence to be clipped off (forward strand)."
+                },
+                "clip_reverse_adaptor": {
+                    "type": "string",
+                    "default": "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA",
+                    "description": "Specify adapter sequence to be clipped off (reverse strand)."
+                },
+                "clip_readlength": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "Specify read minimum length to be kept for downstream analysis."
+                },
+                "clip_min_read_quality": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "Specify minimum base quality for trimming off bases."
+                },
+                "min_adap_overlap": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify minimum adapter overlap."
+                },
+                "skip_collapse": {
+                    "type": "boolean",
+                    "description": "Turn on skipping of merging forward and reverse reads together. Only applicable for paired-end libraries.",
+                    "default": false
+                },
+                "skip_trim": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on skipping of adapter and quality trimming"
+                },
+                "preserve5p": {
+                    "type": "boolean",
+                    "description": "Turn on skipping 5p quality base trimming (n, score, window) at 5p end.",
+                    "default": false
+                },
+                "mergedonly": {
+                    "type": "boolean",
+                    "description": "Turn on sending downstream only merged reads (un-merged reads and singletons are discarded).",
+                    "default": false
+                }
+            },
+            "fa_icon": "fas fa-cut"
+        },
+        "Mapper": {
+            "type": "object",
+            "description": "Options for alignment of processed reads against the reference genome.",
+            "default": "",
+            "properties": {
+                "mapper": {
+                    "type": "string",
+                    "description": "Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'.",
+                    "default": "bwaaln"
+                },
+                "bwaalnn": {
+                    "type": "number",
+                    "default": 0.04,
+                    "description": "Specify the -n parameter for BWA aln, i.e. amount of allowed mismatches in the alignment."
+                },
+                "bwaalnk": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Specify the -k parameter for BWA aln, i.e. maximum edit distance allowed in a seed."
+                },
+                "bwaalnl": {
+                    "type": "integer",
+                    "default": 1024,
+                    "description": "Specify the -l parameter for BWA aln i.e. the length of seeds to be used."
+                },
+                "circularextension": {
+                    "type": "integer",
+                    "default": 500,
+                    "description": "Specify the number of bases to extend reference by (circularmapper only)."
+                },
+                "circulartarget": {
+                    "type": "string",
+                    "default": "MT",
+                    "description": "Specify the FASTA header of the target chromosome to extend (circularmapper only)."
+                },
+                "circularfilter": {
+                    "type": "boolean",
+                    "description": "Turn on to filter off-target reads (circularmapper only).",
+                    "default": false
+                },
+                "bt2_alignmode": {
+                    "type": "string",
+                    "default": "local",
+                    "description": "Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'."
+                },
+                "bt2_sensitivity": {
+                    "type": "string",
+                    "default": "sensitive",
+                    "description": "Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'."
+                },
+                "bt2n": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity."
+                },
+                "bt2l": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify the -L parameter for bowtie2 (length of seed substrings)."
+                },
+                "bt2_trim5": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify number of bases to trim off from 5' (left) end of read before alignment."
+                },
+                "bt2_trim3": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify number of bases to trim off from 3' (right) end of read before alignment."
+                }
+            },
+            "fa_icon": "fas fa-layer-group"
+        },
+        "Stripping": {
+            "type": "object",
+            "description": "Options for production of host-read removed FASTQ files for privacy reasons.",
+            "default": "",
+            "properties": {
+                "strip_input_fastq": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on creating pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)"
+                },
+                "strip_mode": {
+                    "type": "string",
+                    "default": "strip",
+                    "description": "Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace)."
+                }
+            },
+            "fa_icon": "fas fa-user-shield"
+        },
+        "BAM Filtering": {
+            "type": "object",
+            "description": "Options for quality filtering and how to deal with off-target unmapped reads.",
+            "default": "",
+            "properties": {
+                "run_bam_filtering": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on samtools filter for mapping quality or unmapped reads of BAM files."
+                },
+                "bam_mapping_quality_threshold": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Minimum mapping quality for reads filter."
+                },
+                "bam_discard_unmapped": {
+                    "type": "boolean",
+                    "description": "Turns on discarding of unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).",
+                    "default": false
+                },
+                "bam_unmapped_type": {
+                    "type": "string",
+                    "default": "discard",
+                    "description": "Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'."
+                }
+            },
+            "fa_icon": "fas fa-filter"
+        },
+        "DeDuplication": {
+            "type": "object",
+            "description": "Options for removal of PCR amplicon duplciates that can artificially inflate coverage.",
+            "default": "",
+            "properties": {
+                "dedupper": {
+                    "type": "string",
+                    "default": "dedup",
+                    "description": "Deduplication method to use. Options: 'dedup', 'markduplicates'."
+                },
+                "dedup_all_merged": {
+                    "type": "boolean",
+                    "description": "Turn on treating all reads as merged reads.",
+                    "default": false
+                }
+            },
+            "fa_icon": "fas fa-clone"
+        },
+        "Library Complexity Analysis": {
+            "type": "object",
+            "description": "Options for calculating library complexity (i.e. how many unique reads are present).",
+            "default": "",
+            "properties": {
+                "preseq_step_size": {
+                    "type": "integer",
+                    "default": 1000,
+                    "description": "Specify the step size of Preseq."
+                }
+            },
+            "fa_icon": "fas fa-bezier-curve"
+        },
+        "(aDNA) Damage Analysis": {
+            "type": "object",
+            "description": "Options for calculating and filtering for characteristic ancient DNA damage patterns.",
+            "default": "",
+            "properties": {
+                "damageprofiler_length": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Specify length filter for DamageProfiler."
+                },
+                "damageprofiler_threshold": {
+                    "type": "integer",
+                    "default": 15,
+                    "description": "Specify number of bases to consider for damageProfiler (e.g. on damage plot)."
+                },
+                "damageprofiler_yaxis": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'."
+                },
+                "run_pmdtools": {
+                    "type": "boolean",
+                    "description": "Turn on PMDtools",
+                    "default": false
+                },
+                "pmdtools_range": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Specify range of bases for PMDTools to scan for damage."
+                },
+                "pmdtools_threshold": {
+                    "type": "integer",
+                    "default": 3,
+                    "description": "Specify PMDScore threshold for PMDTools."
+                },
+                "pmdtools_reference_mask": {
+                    "type": "string",
+                    "description": "Specify a path to reference mask for PMDTools."
+                },
+                "pmdtools_max_reads": {
+                    "type": "integer",
+                    "default": 10000,
+                    "description": "Specify the maximum number of reads to consider for metrics generation."
+                }
+            },
+            "fa_icon": "fas fa-chart-line"
+        },
+        "Annotation Statistics": {
+            "type": "object",
+            "description": "Options for getting reference annotation statistics (e.g. gene coverages)",
+            "default": "",
+            "properties": {
+                "run_bedtools_coverage": {
+                    "type": "boolean",
+                    "description": "Turn on ability to calculate no. reads, depth and breadth coverage of features in reference.",
+                    "default": false
+                },
+                "anno_file": {
+                    "type": "string",
+                    "description": "Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes."
+                }
+            },
+            "fa_icon": "fas fa-scroll"
+        },
+        "BAM Trimming": {
+            "type": "object",
+            "description": "Options for trimming of aligned reads (e.g. to remove damage prior genotyping).",
+            "default": "",
+            "properties": {
+                "run_trim_bam": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on BAM trimming, for example for for full-UDG or half-UDG protocols."
+                },
+                "bamutils_clip_left": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read."
+                },
+                "bamutils_clip_right": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read."
+                },
+                "bamutils_softclip": {
+                    "type": "boolean",
+                    "description": "Turn on using softclip instead of hard masking.",
+                    "default": false
+                }
+            },
+            "fa_icon": "fas fa-eraser"
+        },
+        "Genotyping": {
+            "type": "object",
+            "description": "Options for variant calling.",
+            "default": "",
+            "properties": {
+                "run_genotyping": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on genotyping of BAM files."
+                },
+                "genotyping_tool": {
+                    "type": "string",
+                    "description": "Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'."
+                },
+                "genotyping_source": {
+                    "type": "string",
+                    "default": "raw",
+                    "description": "Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'."
+                },
+                "gatk_ug_jar": {
+                    "type": "string",
+                    "description": "When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar."
+                },
+                "gatk_call_conf": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "Specify GATK phred-scaled confidence threshold."
+                },
+                "gatk_ploidy": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Specify GATK organism ploidy."
+                },
+                "gatk_dbsnp": {
+                    "type": "string",
+                    "description": "Specify VCF file for output VCF SNP annotation. Optional. Gzip not accepted."
+                },
+                "gatk_ug_out_mode": {
+                    "type": "string",
+                    "default": "EMIT_VARIANTS_ONLY",
+                    "description": "Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'."
+                },
+                "gatk_hc_out_mode": {
+                    "type": "string",
+                    "default": "EMIT_VARIANTS_ONLY",
+                    "description": "Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'."
+                },
+                "gatk_ug_genotype_model": {
+                    "type": "string",
+                    "default": "SNP",
+                    "description": "Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'."
+                },
+                "gatk_hc_emitrefconf": {
+                    "type": "string",
+                    "default": "GVCF",
+                    "description": "Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'."
+                },
+                "gatk_downsample": {
+                    "type": "integer",
+                    "default": 250,
+                    "description": "Maximum depth coverage allowed for genotyping before down-sampling is turned on."
+                },
+                "gatk_ug_defaultbasequalities": {
+                    "type": "string",
+                    "description": "Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off."
+                },
+                "gatk_ug_keep_realign_bam": {
+                    "type": "string",
+                    "description": "Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper."
+                },
+                "freebayes_C": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify minimum required supporting observations to consider a variant."
+                },
+                "freebayes_g": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C."
+                },
+                "freebayes_p": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Specify ploidy of sample in FreeBayes."
+                },
+                "pileupcaller_bedfile": {
+                    "type": "string",
+                    "description": "Specify path to SNP panel in bed format for pileupCaller."
+                },
+                "pileupcaller_snpfile": {
+                    "type": "string",
+                    "description": "Specify path to SNP panel in EIGENSTRAT format for pileupCaller."
+                },
+                "pileupcaller_method": {
+                    "type": "string",
+                    "default": "randomHaploid",
+                    "description": "Specify calling method to use. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'."
+                },
+                "angsd_glmodel": {
+                    "type": "string",
+                    "default": "samtools",
+                    "description": "Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'."
+                },
+                "angsd_glformat": {
+                    "type": "string",
+                    "default": "binary",
+                    "description": "Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'."
+                },
+                "angsd_createfasta": {
+                    "type": "boolean",
+                    "description": "Turn on creation of FASTA from ANGSD genotyping likelhoood.",
+                    "default": false
+                },
+                "angsd_fastamethod": {
+                    "type": "string",
+                    "default": "random",
+                    "description": "Specify which genotype type of 'base calling' to use for ANGSD FASTA generation. Options: 'random', 'common'."
+                }
+            },
+            "fa_icon": "fas fa-sliders-h"
+        },
+        "Consensus Sequence Generation": {
+            "type": "object",
+            "description": "Options for creation of a per-sample FASTA sequence useful for downstream analysis (e.g. multi sequence alignment)",
+            "default": "",
+            "properties": {
+                "run_vcf2genome": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs)."
+                },
+                "vcf2genome_outfile": {
+                    "type": "string",
+                    "description": "Specify name of the output FASTA file containing the consensus sequence. Do not include `.vcf` in the file name."
+                },
+                "vcf2genome_header": {
+                    "type": "string",
+                    "description": "Specify the header name of the consensus sequence entry within the FASTA file."
+                },
+                "vcf2genome_minc": {
+                    "type": "integer",
+                    "default": 5,
+                    "description": "Minimum depth coverage required for a call to be included (else N will be called)."
+                },
+                "vcf2genome_minq": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "Minimum genotyping quality of a call to be called. Else N will be called."
+                },
+                "vcf2genome_minfreq": {
+                    "type": "number",
+                    "default": 0.8,
+                    "description": "Minimum fraction of reads supporting a call to be included. Else N will be called."
+                }
+            },
+            "fa_icon": "fas fa-handshake"
+        },
+        "SNP Table Generation": {
+            "type": "object",
+            "description": "Options for creation of a SNP table useful for downstream analysis (e.g. estimation of cross-mapping of different sepecies and multi-sequence alignment)",
+            "default": "",
+            "properties": {
+                "run_multivcfanalyzer": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on MultiVCFAnalyzer. Note: This currently only supports diploid GATK UnifiedGenotyper input."
+                },
+                "write_allele_frequencies": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on writing write allele frequencies in the SNP table."
+                },
+                "min_genotype_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "Specify the minimum genotyping quality threshold for a SNP to be called."
+                },
+                "min_base_coverage": {
+                    "type": "integer",
+                    "default": 5,
+                    "description": "Specify the minimum number of reads a position needs to be covered to be considered for base calling."
+                },
+                "min_allele_freq_hom": {
+                    "type": "number",
+                    "default": 0.9,
+                    "description": "Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call."
+                },
+                "min_allele_freq_het": {
+                    "type": "number",
+                    "default": 0.9,
+                    "description": "Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call."
+                },
+                "additional_vcf_files": {
+                    "type": "string",
+                    "description": "Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files."
+                },
+                "reference_gff_annotations": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "Specify path to the reference genome annotations in '.gff' format. Optional."
+                },
+                "reference_gff_exclude": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "Specify path to the positions to be excluded in '.gff' format. Optional."
+                },
+                "snp_eff_results": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "Specify path to the output file from SNP effect analysis in '.txt' format. Optional."
+                }
+            },
+            "fa_icon": "fas fa-table"
+        },
+        "Mitochondrial to Nuclear Ratio": {
+            "type": "object",
+            "description": "Options for the calculation of ratio of reads to one chromosome/FASTA entry against all others.",
+            "default": "",
+            "properties": {
+                "run_mtnucratio": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on mitochondrial to nuclear ratio calculation."
+                },
+                "mtnucratio_header": {
+                    "type": "string",
+                    "default": "MT",
+                    "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space)."
+                }
+            },
+            "fa_icon": "fas fa-balance-scale-left"
+        },
+        "Sex Determination": {
+            "type": "object",
+            "description": "Options for the calculation of biological sex of human individuals.",
+            "default": "",
+            "properties": {
+                "run_sexdeterrmine": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on sex determination for human reference genomes."
+                },
+                "sexdeterrmine_bedfile": {
+                    "type": "string",
+                    "description": "Specify path to SNP panel in bed format for error bar calculation. Optional (see documentation)."
+                }
+            },
+            "fa_icon": "fas fa-transgender"
+        },
+        "Nuclear Contamination for Human DNA": {
+            "type": "object",
+            "description": "Options for the estimation of contamination of human DNA.",
+            "default": "",
+            "properties": {
+                "run_nuclear_contamination": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on nuclear contamination estimation for human reference genomes."
+                },
+                "contamination_chrom_name": {
+                    "type": "string",
+                    "default": "X",
+                    "description": "The name of the X chromosome in your bam/FASTA header. 'X' for hs37d5, 'chrX' for HG19."
+                }
+            },
+            "fa_icon": "fas fa-radiation-alt"
+        },
+        "Metagenomic Screening": {
+            "type": "object",
+            "description": "Options for metagenomic screening of off-target reads.",
+            "default": "",
+            "properties": {
+                "run_metagenomic_screening": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on metagenomic screening module for reference-unmapped reads"
+                },
+                "metagenomic_tool": {
+                    "type": "string",
+                    "default": "malt",
+                    "description": "Specify which classifier to use. Options: 'malt', 'kraken'."
+                },
+                "database": {
+                    "type": "string",
+                    "description": "Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory."
+                },
+                "metagenomic_min_support_reads": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify a minimum number of reads  a taxon of sample total is required to have to be retained."
+                },
+                "percent_identity": {
+                    "type": "integer",
+                    "default": 85,
+                    "description": "Percent identity value threshold for MALT."
+                },
+                "malt_mode": {
+                    "type": "string",
+                    "default": "BlastN",
+                    "description": "Specify which alignment method to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'."
+                },
+                "malt_alignment_mode": {
+                    "type": "string",
+                    "default": "SemiGlobal",
+                    "description": "Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'."
+                },
+                "malt_top_percent": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual)."
+                },
+                "malt_min_support_mode": {
+                    "type": "string",
+                    "default": "percent",
+                    "description": "Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'."
+                },
+                "malt_min_support_percent": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT."
+                },
+                "malt_max_queries": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Specify the maximium number of queries a read can have for MALT."
+                },
+                "malt_memory_mode": {
+                    "type": "string",
+                    "default": "load",
+                    "description": "Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'."
+                }
+            },
+            "fa_icon": "fas fa-search"
+        },
+        "Metagenomic Authentication": {
+            "type": "object",
+            "description": "Options for authentication of metagenomic screening performed by MALT.",
+            "default": "",
+            "properties": {
+                "run_maltextract": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on MaltExtract for MALT aDNA characteristics authentication"
+                },
+                "maltextract_taxon_list": {
+                    "type": "string",
+                    "description": "Path to a txt file with taxa of interest (one taxon per row, NCBI taxonomy name format)"
+                },
+                "maltextract_ncbifiles": {
+                    "type": "string",
+                    "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; avaliable: https://github.com/rhuebler/HOPS/)"
+                },
+                "maltextract_filter": {
+                    "type": "string",
+                    "default": "def_anc",
+                    "description": "Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'."
+                },
+                "maltextract_toppercent": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Specify percent of top alignments to use."
+                },
+                "maltextract_destackingoff": {
+                    "type": "boolean",
+                    "description": "Turn off destacking.",
+                    "default": false
+                },
+                "maltextract_downsamplingoff": {
+                    "type": "boolean",
+                    "description": "Turn off downsampling.",
+                    "default": false
+                },
+                "maltextract_duplicateremovaloff": {
+                    "type": "boolean",
+                    "description": "Turn off duplicate removal.",
+                    "default": false
+                },
+                "maltextract_matches": {
+                    "type": "boolean",
+                    "description": "Turn on exporting alignments of hits in BLAST format.",
+                    "default": false
+                },
+                "maltextract_megansummary": {
+                    "type": "boolean",
+                    "description": "Turn on export of MEGAN summary files.",
+                    "default": false
+                },
+                "maltextract_percentidentity": {
+                    "type": "number",
+                    "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
+                    "default": 85
+                },
+                "maltextract_topalignment": {
+                    "type": "boolean",
+                    "description": "Turn on using top alignments per read after filtering.",
+                    "default": false
+                },
+                "maltextract_singlestranded": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Set this to true if single stranded data is analyzed."
+                }
+            },
+            "fa_icon": "fas fa-tasks"
         }
-    },
-    "required": [
-        "reads",
-        "single_end"
-    ]
+    }
 }

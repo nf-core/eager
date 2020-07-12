@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * **Major** Automated Cloud Tests with large-scale data on [AWS](https://aws.amazon.com/)
 * **Major** Re-wrote input logic to accept a TSV 'map' file in addition to direct paths to FASTQ
+* **Major** Added JSON Schema, enabling web GUI for configuration of pipeline
 * **Major** Lane and library merging implement
   * When using TSV input, one libraries with the multiple _lane_ will be merged together, before mapping
     * Strip FASTQ will also produce a lane merged 'raw' but 'stripped' FASTQ file
@@ -18,12 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   * Important: direct FASTQ paths will not have this functionality. TSV is required.
 * [#40](https://github.com/nf-core/eager/issues/40) - Added the pileupCaller genotyper from [sequenceTools](https://github.com/stschiff/sequenceTools)
 * Added sanity check and clearer error message when `--fasta_index` is provided and filepath does not end in `.fai`.
-* Added basic json_schema
 * Improved error messages
 * Added ability for automated emails using `mailutils` to also send MultiQC reports
 * General documentation additions and cleaning, updated figures with CC-BY license
 * Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
 * [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
+* [#451] Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
 
 ### `Fixed`
 
@@ -52,7 +53,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Latest version of Kraken2 (2.0.9beta)
 * Latest version of FreeBayes (1.3.2)
 * Latest version of xopen (0.9.0)
-* *Adding* in Bowtie 2 (2.4.1)
+* Added Bowtie 2 (2.4.1)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 
