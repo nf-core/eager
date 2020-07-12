@@ -1158,7 +1158,7 @@ if ( params.skip_collapse ){
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]
-        def r1 = path(it[7].sort()[0])
+        def r1 = file(it[7].sort()[0])
         def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : 'NA'
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
