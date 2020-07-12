@@ -1209,7 +1209,7 @@ process lanemerge {
   publishDir "${params.outdir}/lanemerging", mode: 'copy'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_branched_for_lanemerge.merge_me
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fq.gz") into ch_lanemerge_for_mapping
@@ -2229,7 +2229,7 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_damagemanipulation_for_genotyping_ug
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_ug
   file fasta from ch_fasta_for_genotyping_ug.collect()
   file jar from ch_unifiedgenotyper_jar.collect()
   file fai from ch_fai_for_ug.collect()
@@ -2281,7 +2281,7 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'hc'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_damagemanipulation_for_genotyping_hc
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_hc
   file fasta from ch_fasta_for_genotyping_hc.collect()
   file fai from ch_fai_for_hc.collect()
   file dict from ch_dict_for_hc.collect()
@@ -2314,7 +2314,7 @@ if ( params.gatk_ug_jar != '' ) {
   params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_damagemanipulation_for_genotyping_freebayes
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_freebayes
   file fasta from ch_fasta_for_genotyping_freebayes.collect()
   file fai from ch_fai_for_freebayes.collect()
   file dict from ch_dict_for_freebayes.collect()
@@ -2427,7 +2427,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   params.run_genotyping && params.genotyping_tool == 'angsd'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_damagemanipulation_for_genotyping_angsd
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_angsd
   file fasta from ch_fasta_for_genotyping_angsd.collect()
   file fai from ch_fai_for_angsd.collect()
   file dict from ch_dict_for_angsd.collect()
