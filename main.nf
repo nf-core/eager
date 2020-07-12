@@ -1678,7 +1678,7 @@ process strip_input_fastq {
     params.strip_input_fastq
 
     input: 
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, path(r1), path(r2), path(bam), path(bai) from ch_synced_for_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
 
     output:
     tuple samplename, libraryid, seqtype, organism, strandedness, udg, path("*.fq.gz") into ch_output_from_stripfastq
