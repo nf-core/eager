@@ -105,6 +105,9 @@ qualimap_config:
         - 4
         - 5
 
+remove_sections:
+  - sexdeterrmine-snps
+
 table_columns_visible:
     FastQC (pre-AdapterRemoval):
         percent_duplicates: False
