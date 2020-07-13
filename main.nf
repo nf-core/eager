@@ -1192,10 +1192,29 @@ if (!params.skip_adapterremoval) {
         .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
 }
 
-// Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
-
+// Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq) and sequencing chemistries
+// Mixtures of same library sequenced with both PE/SE will be merged and considered 'SE' 
 ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
-  .groupTuple(by: [0,1,3,4,5,6])
+  .groupTuple(by: [0,1,4,5,6])
+  .map {
+    it ->
+      def samplename = it[0]
+      def libraryid  = it[1]
+      def lane = it[2]
+      def seqtype = it[3]
+      def organism = it[4]
+      def strandedness = it[5]
+      def udg = it[6]
+      def r1 = it[7]
+      def r2 = it[8]
+
+      def new_seqtype = seqtype.flatten().unique().size() > 1 ? 'SE' : seqtype
+
+      if ( seqtype.flatten().unique().size() > 1 && params.skip_collapse ) exit 1, "[nf-core/eager] error: Merging of PE and SE-end data while mapping PE data without merging is not currently supported. Please see input documentation under 'running the pipeline' for more information"
+
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+  }
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -1240,6 +1259,8 @@ ch_lanemerge_for_mapping
       def reads = arrayify(it[7])
       def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : "NA"      
+
+
 
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
