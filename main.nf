@@ -298,7 +298,7 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
     exit 1, "[nf-core/eager] error: the provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}."
 }
 
-// Mapper sanity checking
+// Mapper validation
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem' && !params.mapper == "bowtie2"){
     exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: 'bwaaln'. You gave: --mapper '${params.mapper}'."
 }
@@ -353,7 +353,7 @@ if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.singl
     exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
 }
 
-// Strip mode sanity checking
+// Strip mode validation
 if (params.strip_input_fastq){
     if (!(['strip','replace'].contains(params.strip_mode))) {
         exit 1, "[nf-core/eager] error: --strip_mode can only be set to strip or replace."
@@ -364,12 +364,12 @@ if (params.bam_discard_unmapped && params.bam_unmapped_type == '') {
     exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'. You gave --bam_unmapped_type '${params.bam_unmapped_type}'."
 }
 
-// Bedtools sanity checking
+// Bedtools validation
 if(params.run_bedtools_coverage && params.anno_file == ''){
   exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
 }
 
-// BAM filtering sanity checking
+// BAM filtering validation
 if (!params.run_bam_filtering && params.bam_mapping_quality_threshold != 0) {
   exit 1, "[nf-core/eager] error: please turn on BAM filtering if you want to perform mapping quality filtering! Give --run_bam_filtering."
 }
@@ -386,12 +386,12 @@ if (params.run_bam_filtering && !params.bam_discard_unmapped && params.bam_unmap
   exit 1, "[nf-core/eager] error: Please turned on unmapped read discarding, if you have specifed a different unmapped type. Give: --bam_discard_unmapped."
 }
 
-// Deduplication sanity checking
+// Deduplication validation
 if (params.dedupper != 'dedup' && params.dedupper != 'markduplicates') {
   exit 1, "[nf-core/eager] error: Selected deduplication tool is not recognised. Options: 'dedup' or 'markduplicates'. You gave: --dedupper '${params.dedupper}'."
 }
 
-// Genotyping sanity checking
+// Genotyping validation
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' && params.genotyping_tool != 'angsd' ) {
   exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. You gave: --genotyping_tool '${params.genotyping_tool}'."
@@ -450,7 +450,7 @@ if (params.run_genotyping){
   }
 }
 
-// Consensus sequence generation sanity checking
+// Consensus sequence generation validation
 if (params.run_vcf2genome) {
     if (!params.run_genotyping) {
       exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters."
@@ -461,7 +461,7 @@ if (params.run_vcf2genome) {
     }
 }
 
-// MultiVCFAnalyzer sanity checking
+// MultiVCFAnalyzer validation
 if (params.run_multivcfanalyzer) {
   if (!params.run_genotyping) {
     exit 1, "[nf-core/eager] error: MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters."
@@ -476,7 +476,7 @@ if (params.run_multivcfanalyzer) {
   }
 }
 
-// Metagenomic sanity checking
+// Metagenomic validation
 if (params.run_metagenomic_screening) {
   if ( !params.bam_discard_unmapped ) {
   exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'."
@@ -519,7 +519,7 @@ if (params.run_metagenomic_screening) {
   }
 }
 
-// MaltExtract Sanity checking
+// MaltExtract validation
 if (params.run_maltextract) {
 
   if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
@@ -548,7 +548,7 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 }
 
 if (workflow.profile.contains('awsbatch')) {
-    // AWSBatch sanity checking
+    // AWSBatch validation
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch."
     // Check outdir paths to be S3 buckets if running on AWSBatch
     // related: https://github.com/nextflow-io/nextflow/issues/813
@@ -1802,7 +1802,7 @@ process dedup{
       mv ${bam} ${libraryid}.bam
     fi
     
-    dedup -i ${libraryid}.bam $treat_merged -o . -u 
+    dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
     samtools index "${size}" "${libraryid}"_rmdup.bam
@@ -1814,7 +1814,7 @@ process dedup{
       mv ${bam} ${libraryid}.bam
     fi
     
-    dedup -i ${libraryid}.bam $treat_merged -o . -u 
+    dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
     samtools index "${size}" "${libraryid}"_rmdup.bam
@@ -3058,11 +3058,11 @@ workflow.onComplete {
             log.info "[nf-core/eager] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
             // Catch failures and try with plaintext
-            if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
-              [ 'mail', '-s', subject, email_address, '-A', mqc_report ].execute() << email_txt 
-            } else {
-              [ 'mail', '-s', subject, email_address ].execute() << email_txt 
+              def mail_cmd = [ 'mail', '-s', subject, '--content-type=text', email_address ]
+              if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
+                mail_cmd += [ '-A', mqc_report ]
             }
+            mail_cmd.execute() << email_txt 
             log.info "[nf-core/eager] Sent summary e-mail to $email_address (mail)"
         }
     }
@@ -3163,6 +3163,9 @@ def extract_data(tsvFile) {
             def r2 = row.R2.matches('NA') ? 'NA' : return_file(row.R2)
             def bam = row.BAM.matches('NA') ? 'NA' : return_file(row.BAM)
 
+            // check no empty metadata fields
+            if (samplename == '' || libraryid == '' || lane == '' || colour == '' || seqtype == '' || seqtype == '' || udg == '' || r1 == '' || r2 == '') exit 1, "[nf-core/eager] error: a field does not contain any information. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+
             // Check no 'empty' rows
             if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "[nf-core/eager] error: A row in your TSV appears to have all files defined as NA. See --help or documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
@@ -3239,7 +3242,7 @@ def retrieve_input_paths(input, colour_chem, pe_se, ds_ss, udg_treat, bam_in) {
             Channel
                 .fromFilePairs( input )
                 .filter { it =~/.*.fastq.gz|.*.fq.gz|.*.fastq|.*.fq/ }
-                .ifEmpty { exit 1, "[nf-core/eager] error: Your specified FASTQ read files did not end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq' " }
+                .ifEmpty { exit 1, "[nf-core/eager] error: Files could not be found. Do the specified FASTQ read files end in: '.fastq.gz', '.fq.gz', '.fastq', or '.fq'? Did you forget --single_end?" }
                 .map { row -> [ row[0], [ row[1][0], row[1][1] ] ] }
                 .ifEmpty { exit 1, "[nf-core/eager] error: --input was empty - no input files supplied!" }
                 .into { ch_reads_for_faketsv; ch_reads_for_validate }
