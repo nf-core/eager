@@ -258,7 +258,7 @@ Note the following important points and limitations for setting up:
   - `DeDup` utilises both 5' and 3' ends of reads to remove duplicates, and thus will only work correctly on Paired-End data and Single-End data separately.
 - Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged at the same time as lane merging and will  _always_ be considered 'single-end' during mapping.
   - **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore possibly will not remove all duplicates.
-  - An error will therefore be thrown if you try to merge both and supply `--skip_merging`. 
+  - An error will therefore be thrown if you try to merge both and supply `--skip_merging`.
   - If truly you want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
   - If you _regularly_ want to run the situation above, please leave an feature request on github.
 - Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
