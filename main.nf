@@ -583,7 +583,6 @@ if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.inpu
 ch_input_sample = Channel.empty()
 if (tsv_path) {
 
-
     tsv_file = file(tsv_path)
     if (!tsv_file.exists()) exit 1, "[nf-core/eager] error: input TSV file could not be found. Does the file exist or in the right place? You gave the path: ${params.input}"
 
@@ -2236,12 +2235,13 @@ if ( params.gatk_ug_jar != '' ) {
   file dict from ch_dict_for_ug.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*realign.bam") optional true
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*realign.{bam,bai}") optional true
 
   script:
   defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
-  keep_realign = params.gatk_ug_keep_realign_bam ? "T" : "F"
+  def keep_realign = params.gatk_ug_keep_realign_bam ? "" : "rm ${samplename}.realign.bam"
+  def index_realign = params.gatk_ug_keep_realign_bam ? "samtools index ${samplename}.realign.bam" : ""
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
@@ -2249,9 +2249,8 @@ if ( params.gatk_ug_jar != '' ) {
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
-    if [[ ${keep_realign} == 'F' ]]; then
-      rm ${samplename}.realign.bam
-    fi
+    $keep_realign
+    $index_realign
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
@@ -2262,9 +2261,8 @@ if ( params.gatk_ug_jar != '' ) {
     java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
-    if [[ ${keep_realign} == 'F' ]]; then
-      rm ${samplename}.realign.bam
-    fi
+    $keep_realign
+    $index_realign
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
@@ -2609,9 +2607,6 @@ process sex_deterrmine {
     label 'sc_small'
     tag "${samplename}"
     publishDir "${params.outdir}/nuclear_contamination", mode:"copy"
-
-    // ANGSD Xcontamination will exit with status 134 when the number of SNPs is too low
-    validExitStatus 0,134
 
     when:
     params.run_nuclear_contamination
@@ -3059,11 +3054,13 @@ workflow.onComplete {
             log.info "[nf-core/eager] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
             // Catch failures and try with plaintext
-              def mail_cmd = [ 'mail', '-s', subject, '--content-type=text', email_address ]
-              if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
+            def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
+            if (mqc_report == NULL) {
+                log.warn "[nf-core/eager] Could not attach MultiQC report to summary email"
+            } else if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
                 mail_cmd += [ '-A', mqc_report ]
             }
-            mail_cmd.execute() << email_txt 
+            mail_cmd.execute() << email_html 
             log.info "[nf-core/eager] Sent summary e-mail to $email_address (mail)"
         }
     }
