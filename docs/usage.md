@@ -688,13 +688,11 @@ If using TSV input, filtering is performed library, i.e. after lane merging.
 
 Turns on the bam filtering module for either mapping quality filtering or unmapped read treatment.
 
-#### `--bam_discard_unmapped`
-
-Defines whether unmapped reads should be discarded and stored in FastQ and/or BAM format separately. The behaviour depends on the choice of the `--bam_unmapped_type`.
-
 #### `--bam_unmapped_type`
 
-Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, "both" keeps both BAM and FastQ files. Only effective when option `--bam_discard_unmapped` is turned on.
+Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `keep` keeps both unmapped and mapped reads in the same BAM file, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, `both` keeps both BAM and FASTQ files. Default is `discard`.
+
+Note that in all cases, if `--bam_mapping_quality_threshold` is also supplied, mapping quality filtering will still occur on the mapped reads.
 
 #### `--bam_mapping_quality_threshold`
 
