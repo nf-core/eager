@@ -2637,6 +2637,7 @@ process print_nuclear_contamination{
 
     output:
     file 'nuclear_contamination.txt'
+    file 'nuclear_contamination.json'
 
     script:
     """
