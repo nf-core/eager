@@ -1728,7 +1728,7 @@ if (params.run_bam_filtering) {
         def strandedness = it[5]
         def udg = it[6]     
         def stats = file(it[7])
-        def poststats = file("$baseDir/assets/dummy_postfilterflagstat.stats")
+        def poststats = file("$baseDir/assets/dummy.txt")
 
       [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
@@ -2656,7 +2656,7 @@ if (params.metagenomic_tool == 'malt') {
 // Stage database files
 // Create input channel for MaltExtract taxon list, to allow downloading of taxon list
 if ( params.database == '') {
-    cch_db_for_malt = Channel.empty()
+    ch_db_for_malt = Channel.empty()
 } else {
     ch_db_for_malt = Channel.fromPath(params.database, checkIfExists: true)
 }
@@ -2702,14 +2702,14 @@ process malt {
 }
 
 // Create input channel for MaltExtract taxon list, to allow downloading of taxon list
-if (params.maltextract_taxon_list== '') {
+if ( params.maltextract_taxon_list== '' ) {
     ch_taxonlist_for_maltextract = Channel.empty()
 } else {
     ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list, checkIfExists: true)
 }
 
 // Create input channel for MaltExtract NCBI files
-if (params.maltextract_taxon_list== '') {
+if ( params.maltextract_ncbifiles == '' ) {
     ch_ncbifiles_for_maltextract = Channel.empty()
 } else {
     ch_ncbifies_for_maltextract = Channel.fromPath(params.maltextract_ncbifiles, checkIfExists: true)
@@ -2728,7 +2728,7 @@ process maltextract {
   input:
   file rma6 from ch_rma_for_maltExtract.collect()
   file taxon_list from ch_taxonlist_for_maltextract
-  file ncbifiles from ch_ncbifies_for_maltextract
+  file ncbifiles from ch_ncbifiles_for_maltextract
   
   output:
   path "results/" type('dir')

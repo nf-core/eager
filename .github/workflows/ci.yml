@@ -52,13 +52,13 @@ jobs:
           git clone --single-branch --branch eager https://github.com/nf-core/test-datasets.git data
       - name: BASIC Run the basic pipeline with directly supplied single-end FASTQ
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input 'data/testdata/Mammoth/fastq/*_R1_*.fq.gz' --single_end
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --input 'data/testdata/Mammoth/fastq/*_R1_*.fq.gz' --single_end
       - name: BASIC Run the basic pipeline with directly supplied paired-end FASTQ
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input 'data/testdata/Mammoth/fastq/*_{R1,R2}_*tengrand.fq.gz'
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --input 'data/testdata/Mammoth/fastq/*_{R1,R2}_*tengrand.fq.gz'
       - name: BASIC Run the basic pipeline with supplied --input BAM
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --input 'data/testdata/Mammoth/bam/*_R1_*.bam' --bam --single_end
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --input 'data/testdata/Mammoth/bam/*_R1_*.bam' --bam --single_end
       - name: BASIC Run the basic pipeline with the test profile with, PE/SE, bwa aln
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --save_reference
