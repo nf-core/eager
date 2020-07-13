@@ -2712,7 +2712,7 @@ if ( params.maltextract_taxon_list== '' ) {
 if ( params.maltextract_ncbifiles == '' ) {
     ch_ncbifiles_for_maltextract = Channel.empty()
 } else {
-    ch_ncbifies_for_maltextract = Channel.fromPath(params.maltextract_ncbifiles, checkIfExists: true)
+    ch_ncbifiles_for_maltextract = Channel.fromPath(params.maltextract_ncbifiles, checkIfExists: true)
 }
 
 // MaltExtract performs aDNA evaluation from the output of MALT (damage patterns, read lengths etc.)
