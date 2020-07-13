@@ -333,13 +333,21 @@ With paired-end ancient DNA sequencing runs You expect to see a slight increase 
 
 #### Background
 
+This module provides information on mapping when running the Bowtie2 aligner. While this is somewhat redundant with the [Samtools](#samtools) and the endorSp.y endogenous DNA value in the general statistics table, it does provide some details that could be useful in certain contexts.
+
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
+
 #### Single/Paired-end alignments
 
-TODO
+This bar plot shows the number of different categories of reads that Bowtie2 was able to align to the reference genome. You will get slightly different plots for Paired-End (PE) and Single-End (SE) data, but they are basically the same.
+
+Ancient DNA samples typically have low endogenous DNA values, as in most of the DNA from the sample is from taphonomic sources (burial environment, modern handling etc), so it is normal to get low numbers of mapping reads.
 
 <p align="center">
   <img src="images/output/bowtie2/bowtie2_alignment_scores.png" width="75%" height = "75%">
 </p>
+
+The main additional useful information compared to [Samtools](#samtools) is that these plots can inform you how many reads had mutiple places on the reference the read could align to. This can occur with low complexity reads or reads derived from e.g. repeititive regions on the genome. If you have large amounts of multi-mapping reads, this can be a warning flag that there is an issue either with the reference genome or library itself (e.g. overamplification of low-complexity regions or library construction artefacts). You should investigate cases like this more closely before using the data downstream.
 
 ### MALT
 
@@ -365,7 +373,7 @@ TODO
 
 This module provides numbers in raw counts of the mapping of your DNA reads to your reference genome.
 
-You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes in one value.
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
 
 #### Flagstat Plot
 
@@ -375,7 +383,7 @@ In most cases the first two rows, 'Total Reads' and 'Total Passed QC' will be th
 
 The third row 'Mapped' represents the number of reads that found a place that could be aligned on your reference genome. This is the raw number of mapped reads, prior PCR duplication.
 
-The remaining rows will be 0 when running `bwa aln` as these characteristucs of the data are not considered by the algorithm by default.
+The remaining rows will be 0 when running `bwa aln` as these characteristics of the data are not considered by the algorithm by default.
 
 <p align="center">
   <img src="images/output/samtools_flagstat/samtools_flagstat.png" width="75%" height = "75%">
@@ -385,7 +393,7 @@ The remaining rows will be 0 when running `bwa aln` as these characteristucs of 
 
 ### DeDup
 
-You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
@@ -430,7 +438,7 @@ TODO
 
 ### Preseq
 
-You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
@@ -458,7 +466,7 @@ Plateauing can be caused by a number of reasons:
 
 ### DamageProfiler
 
-You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes merging, you will get mapping statistics of all lanes of the library in one value.
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
