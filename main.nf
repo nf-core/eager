@@ -1330,8 +1330,8 @@ process bwa {
     params.mapper == 'bwaaln'
 
     script:
-    size = "${params.large_ref}" ? '-c' : ''
-    fasta = "${index}/${fasta_base}"
+    def size = "${params.large_ref}" ? '-c' : ''
+    def fasta = "${index}/${fasta_base}"
 
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
@@ -1370,8 +1370,8 @@ process bwamem {
     params.mapper == 'bwamem'
 
     script:
-    fasta = "${index}/${fasta_base}"
-    size = "${params.large_ref}" ? '-c' : ''
+    def fasta = "${index}/${fasta_base}"
+    def size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
     """
@@ -1476,12 +1476,12 @@ process bowtie2 {
     params.mapper == 'bowtie2'
 
     script:
-    size = "${params.large_ref}" ? '-c' : ''
-    fasta = "${index}/${fasta_base}"
-    trim5 = "${params.bt2_trim5}" != 0 ? "--trim5 ${params.bt2_trim5}" : ""
-    trim3 = "${params.bt2_trim3}" != 0 ? "--trim3 ${params.bt2_trim3}" : ""
-    bt2n = "${params.bt2n}" != 0 ? "-N ${params.bt2n}" : ""
-    bt2l = "${params.bt2l}" != 0 ? "-L ${params.bt2l}" : ""
+    def size = "${params.large_ref}" ? '-c' : ''
+    def fasta = "${index}/${fasta_base}"
+    def trim5 = "${params.bt2_trim5}" != 0 ? "--trim5 ${params.bt2_trim5}" : ""
+    def trim3 = "${params.bt2_trim3}" != 0 ? "--trim3 ${params.bt2_trim3}" : ""
+    def bt2n = "${params.bt2n}" != 0 ? "-N ${params.bt2n}" : ""
+    def bt2l = "${params.bt2l}" != 0 ? "-L ${params.bt2l}" : ""
 
     if ( "${params.bt2_alignmode}" == "end-to-end"  ) {
       switch ( "${params.bt2_sensitivity}" ) {
