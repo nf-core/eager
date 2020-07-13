@@ -2783,7 +2783,7 @@ process maltextract {
 // Kraken is offered as a replacement for MALT as MALT is _very_ resource hungry
 
 if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && params.metagenomic_tool == 'kraken'){
-  comp_kraken = path(params.database)
+  comp_kraken = file(params.database)
 
   process decomp_kraken {
     input:
