@@ -326,7 +326,7 @@ if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwa
         .ifEmpty { exit 1, "[nf-core/eager] error: bwa indices not found in: ${index_base}." }
         .into {bwa_index; bwa_index_bwamem}
 
-    bt2_index = ''
+    bt2_index = Channel.empty()
 }
 
 if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
@@ -339,7 +339,7 @@ if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
         .ifEmpty { exit 1, "[nf-core/eager] error: bowtie2 indices not found in: ${bt2_dir}." }
         .into {bt2_index; bt2_index_bwamem}
 
-    bwa_index = ''
+    bwa_index = Channel.empty()
 }
 
 // Validate BAM input isn't set to paired_end
@@ -785,7 +785,7 @@ if( params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaa
     mkdir BWAIndex && mv ${fasta}* BWAIndex
     """
     }
-    bt2_index = 'none'
+    bt2_index = Channel.empty()
 }
 
 // bowtie2 Index
@@ -1322,7 +1322,7 @@ process bwa {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwa
-    file index from bwa_index.collect()
+    path index from bwa_index
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bwa   
@@ -1362,7 +1362,7 @@ process bwamem {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwamem
-    file index from bwa_index_bwamem.collect()
+    path index from bwa_index_bwamem
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bwamem
@@ -1467,7 +1467,7 @@ process bowtie2 {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bt2
-    file index from bt2_index.collect()
+    path index from bt2_index
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bt2
