@@ -51,7 +51,7 @@ jsonOut = {"plot_type": "generalstats",
         "Method2_ML_estimate" : {"title": "Contamination Estimate (M2_ML)"},
         "Method2_ML_SE" : {"title": "Estimate Error (M2_ML)"}
     }, 
-    "data" = data
+    "data" : data
 }
 with open('nuclear_contamination.json', 'w') as outfile:
     json.dump(jsonOut, outfile)
