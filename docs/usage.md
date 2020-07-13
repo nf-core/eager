@@ -220,7 +220,7 @@ Column descriptions are as follows:
 
 - **Sample_Name:** A text string containing the name of a given sample of which there can be multiple libraries. All libraries with the same sample name and same SeqType will be merged after deduplication.
 - **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).
-- **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (with same SeqType) will be concatenated after read clipping and merging.
+- **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (and different SeqType) will be concatenated after read clipping and merging.
 - **Colour Chemistry** A number indicating whether the Illumina sequencing machine the library was sequenced on was 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq). This informs whether poly-G trimming (if turned on) should be performed.
 - **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [forward], or BAM). This will affect lane merging if different per library.
 - **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
@@ -252,13 +252,15 @@ Note the following important points and limitations for setting up:
   - If it is 'too late' and already have duplicate file names, a work around is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
 - Lane IDs must be unique for each sequencing of each library.
   - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
+  - This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
 - nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
   - `DeDup` utilises both 5' and 3' ends of reads to remove duplicates, and thus will only work correctly on Paired-End data and Single-End data separately.
-- You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (i.e. PE/SE)
-  - e.g. by specifying `_SE` and `_PE` as in the example table above.
-  - If you do not have different IDs nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
-  - Please note this setup is **not** optimal, as you therefore cannot deduplicate PE and SE data of the same library together (and therefore may still have PCR duplicates at the library merging level).
+- Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged at the same time as lane merging and will  _always_ be considered 'single-end' during mapping.
+  - **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore possibly will not remove all duplicates.
+  - An error will therefore be thrown if you try to merge both and supply `--skip_merging`. 
+  - If truly you want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
+  - If you _regularly_ want to run the situation above, please leave an feature request on github.
 - Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 - DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on
 each unique library separately after deduplication (but prior same-treated library merging).
