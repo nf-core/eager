@@ -337,6 +337,10 @@ With paired-end ancient DNA sequencing runs You expect to see a slight increase 
 
 TODO
 
+<p align="center">
+  <img src="images/output/bowtie2/bowtie2_alignment_scores.png" width="75%" height = "75%">
+</p>
+
 ### MALT
 
 #### Background
@@ -418,7 +422,11 @@ TODO
 
 #### Mark Duplicates
 
-TODO
+
+<p align="center">
+  <img src="images/output/picard/picard_deduplication_stats.png" width="75%" height = "75%">
+</p>
+
 
 ### Preseq
 
@@ -548,9 +556,10 @@ Things to watch out for:
 
 #### Relative Coverage
 
-TODO
 
-#### Read/SNP Counts
+<p align="center">
+  <img src="images/output/sexdeterrmine/sexdeterrmine_relative_coverage.png" width="75%" height = "75%">
+</p>
 
 ### MultiVCFAnalyzer
 
@@ -563,8 +572,12 @@ TODO
 TODO
 
 #### Call statistics barplot
-  
+
 TODO
+
+<p align="center">
+  <img src="images/output/multivcfanalyzer/multivcfanalyzer_call_categories.png" width="75%" height = "75%">
+</p>
 
 ## Output Files
 
