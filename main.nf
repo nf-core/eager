@@ -813,8 +813,8 @@ if(params.bt2_index == '' && !params.fasta.isEmpty() && params.mapper == "bowtie
     """
     }
 
-  bwa_index = 'none'
-  bwa_index_bwamem = 'none'
+  bwa_index = Channel.empty()
+  bwa_index_bwamem = Channel.empty()
 
 }
 
@@ -1321,7 +1321,7 @@ process bwa {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwa
-    path index from bwa_index
+    path index from bwa_index.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bwa   
@@ -1361,7 +1361,7 @@ process bwamem {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwamem
-    path index from bwa_index_bwamem
+    path index from bwa_index_bwamem.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bwamem
@@ -1466,7 +1466,7 @@ process bowtie2 {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bt2
-    path index from bt2_index
+    path index from bt2_index.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bt2
