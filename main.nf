@@ -1238,7 +1238,7 @@ ch_lanemerge_for_mapping
       def udg = it[6]
       def reads = arrayify(it[7])
       def r1 = it[7] instanceof ArrayList ? reads[0] : it[7]
-      def r2 = reads[1] ? reads[1] : "NA"      
+      def r2 = reads[1] ? reads[1] : file("$baseDir/assets/nf-core_eager_dummy.txt")
 
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
