@@ -1218,8 +1218,6 @@ ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
   }
-  .view()
-
 
 process lanemerge {
   label 'mc_tiny'
@@ -2866,7 +2864,7 @@ process kraken_merge {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
   input:
-  file csv_count from ch_kraken_parsed.map{ it[1] }.collect().dump()
+  file csv_count from ch_kraken_parsed.map{ it[1] }.collect()
 
   output:
   path('kraken_count_table.csv')
