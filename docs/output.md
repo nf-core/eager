@@ -333,7 +333,7 @@ With paired-end ancient DNA sequencing runs You expect to see a slight increase 
 
 #### Background
 
-This module provides information on mapping when running the Bowtie2 aligner. While this is somewhat redundant with the [Samtools](#samtools) and the endorSp.y endogenous DNA value in the general statistics table, it does provide some details that could be useful in certain contexts.
+This module provides information on mapping when running the Bowtie2 aligner. Bowtie2, like bwa, takes raw FASTQ reads and finds the most likely place on the reference genome it derived from. While this module is somewhat redundant with the [Samtools](#samtools) (which reports mapping statistics for bwa) and the endorSp.y endogenous DNA value in the general statistics table, it does provide some details that could be useful in certain contexts.
 
 You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
 
@@ -341,31 +341,47 @@ You will receive output for each _library_. This means that if you use TSV input
 
 This bar plot shows the number of different categories of reads that Bowtie2 was able to align to the reference genome. You will get slightly different plots for Paired-End (PE) and Single-End (SE) data, but they are basically the same.
 
-Ancient DNA samples typically have low endogenous DNA values, as in most of the DNA from the sample is from taphonomic sources (burial environment, modern handling etc), so it is normal to get low numbers of mapping reads.
+Ancient DNA samples typically have low endogenous DNA values, as most of the DNA from the sample is from taphonomic sources (burial environment, modern handling etc), so it is normal to get low numbers of mapping reads.
 
 <p align="center">
   <img src="images/output/bowtie2/bowtie2_alignment_scores.png" width="75%" height = "75%">
 </p>
 
-The main additional useful information compared to [Samtools](#samtools) is that these plots can inform you how many reads had mutiple places on the reference the read could align to. This can occur with low complexity reads or reads derived from e.g. repeititive regions on the genome. If you have large amounts of multi-mapping reads, this can be a warning flag that there is an issue either with the reference genome or library itself (e.g. overamplification of low-complexity regions or library construction artefacts). You should investigate cases like this more closely before using the data downstream.
+The main additional useful information compared to [Samtools](#samtools) is that these plots can inform you how many reads had mutiple places on the reference the read could align to. This can occur with low complexity reads or reads derived from e.g. repeititive regions on the genome. If you have large amounts of multi-mapping reads, this can be a warning flag that there is an issue either with the reference genome or library itself (e.g. over-amplification of low-complexity regions or library construction artefacts). You should investigate cases like this more closely before using the data downstream.
 
 ### MALT
 
 #### Background
 
-TODO
+MALT is a metagenomic aligner (equivalent to BLAST, but much faster). It produces direct alignments of sequencing reads in a reference genome. It is often used for metagenomic profiling or pathogen screening, and specifically in nf-core/eager, of off-target reads from genome mapping.
+
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
 
 #### Metagenomic Mappability
 
-TODO
+This bar plot gives an approximation many reads in your off-target FASTQ file was able to align to your metagenomic database. Due to low 'endogenous' content of aDNA, and the high biodiversity of modern or environmental microbes that normally exists in archaeological and museum samples, you often will get relatively low mappability percentages. This can also be influenced by the type of database you supplied - many databases have an overabundance of taxa of clinical or economic interest, so when you have a large amount of uncharacterised environmental taxa, this may also result in low mappability.
 
 #### Taxonomic assignment success
 
-TODO
+In addition to actually being able to align to a genome, MALT can also allow sequences without a 'taxonomic' ID and also utilises a 'lowest common ancestor' algorithm (LCA), that can result in a read getting no taxonomic identification (because it can align to multiple reference sequences with equal probability). Because of this, MultiQC also produces a bar plot indicating of the successfully aligned reads (see Metagenomic Mappability above), how many could be assigned a taxon ID.
+
+For the same reasons above, you can often get not very many reads being taxonomically assigned when working with aDNA. This can also occur when many of your reads are from conservative regions of genomes and can map onto multiple references. At this point LCA pushes the possible taxon identification so high up the tree, it cannot give a taxonomic assignment.
 
 ### Kraken
 
-TODO
+#### Background
+
+Kraken is another metagenomic classifer, but takes a different approach to alignment as with [MALT](#malt). It uses K-mer similiarity to very effiicently find similar patterns in sequences between input reads and reference genomes. It does not however, do alignment - meaning you cannot screen for authentication criteria such as damage patterns and fragment lengths.
+
+It is useful when you do not have large computing power or you want very rapid and rough approximation of the metagenomic profile of your sample.
+
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
+
+#### Top Taxa
+
+This plot gives you an approximation of the abundance of the five top taxa identified. Typically for ancient DNA, this will be quite a small fraction of taxa, as archaeological and museum samples have large biodiversity from environmental microbes - therefore a large fraction of 'unclassifed' can be quite normal.
+
+However for screening for specific metagenomic profiles, such as ancient microbiomes, if the top taxa are from your specific microbiome of interest (e.g. looking at calculus for oral microbiomes, or paleofaeces for gut microbiome), this can be a good indicator that you have a well preserved sample.
 
 ### Samtools
 
@@ -424,21 +440,26 @@ Things to look out for:
 
 ### Picard
 
-#### BackgroundTODO
+#### Background
 
-TODO
+Picard is a toolkit for general BAM file manipulation with many different functions. nf-core/eager most visibily uses the 'markduplicates' tool, for the removal of exact PCR duplicates that can occur during library amplifcation and results in false inflated coverages (and overly-confident genotyping calls).
 
 #### Mark Duplicates
 
+The deduplication stats plot shows you how many reads were detected and then removed during deduplication of a mapped BAM file. Well- preserved and constructed libraries will typically have many unique reads and few duplicates. These libraries are often good candidates for deeper sequencing (if required), but low-endogenous DNA libraries that have been over-amplified will have few unique reads and many copies of each read. For better calculations you can see the [Preseq](#preseq) module below.
 
 <p align="center">
   <img src="images/output/picard/picard_deduplication_stats.png" width="75%" height = "75%">
 </p>
 
+The amount of unmapped reads will depend on whether you have filtered out unmapped reads out not (see the [usage/running the pipeline documentation](usage.md) for more information.
+
+Things to look out for:
+
+- The smaller the number of the duplicates removed the better. If you have a smaller number of duplicates, and wish to sequence deeper, you can use the preseq module (see below) to make an estimate on how much deeper to sequence.
+- If you have a very large number of duplicates that were removed this may suggest you have an over amplified library, a badly preserved sample with a very low yield, or a lot of left-over adapters that were able to map to your genome.
 
 ### Preseq
-
-You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
@@ -446,7 +467,9 @@ Preseq is a collection of tools that allow assessment of the complexity of the l
 
 There are two algorithms from the tools we use: `c_curve` and `lc_extrap`. The former gives you the expected number of unique reads if you were to repeated sequencing but with fewer reads than your first sequencing run. The latter tries to extrapolate the decay in the number of unique reads you would get with re-sequencing but with more reads than your initial sequencing run.
 
-Due to endogenous DNA being so low when doing initial screening, the maths behind `lc_extrap` often fails as there is not enough data. Therefore nf-core/eager sticks with `c_curve` which gives a similar approximation of the library complexity, but is more robust to smaller datasets..
+Due to endogenous DNA being so low when doing initial screening, the maths behind `lc_extrap` often fails as there is not enough data. Therefore nf-core/eager sticks with `c_curve` which gives a similar approximation of the library complexity, but is more robust to smaller datasets.
+
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Complexity Curve
 
@@ -466,8 +489,6 @@ Plateauing can be caused by a number of reasons:
 
 ### DamageProfiler
 
-You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
-
 #### Background
 
 DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
@@ -477,6 +498,8 @@ Therefore, three main characteristics of ancient DNA are:
 - Short DNA fragments
 - Elevated G and As (purines) just before strand breaks
 - Increased C and Ts at ends of fragments
+
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
   
 #### Misincorporation Plots
 
@@ -562,8 +585,11 @@ Things to watch out for:
 
 #### Background
 
+TODO
+
 #### Relative Coverage
 
+TODO
 
 <p align="center">
   <img src="images/output/sexdeterrmine/sexdeterrmine_relative_coverage.png" width="75%" height = "75%">
@@ -573,19 +599,23 @@ Things to watch out for:
 
 #### Background
 
-TODO
+MultiVCFanalyzer is a SNP alignment generation tool, that allows further evaluation and filtering of SNP calls made by the GATK UnifiedGenotyper. More specifically it takes one or more VCF files as well as a reference genome, and will allow filtering of SNPs via a variety of metrics and produces a FASTA file with each sample as an entry containing 'consensus calls' at each position.
 
 #### Summary metrics
 
-TODO
+This table shows the contents of the `snpStatistics.tsv` file produced by MultiVCFAnalyzer. Descriptions of each column can be seen at the MultiVCFAnalyzer page [here](https://github.com/alexherbig/MultiVCFAnalyzer#snpstatisticstsv).
 
 #### Call statistics barplot
 
-TODO
+You can get different variants of the Call statistics bar plot, depending on how you configured  the MultiVCFAnalyzer options. 
+
+If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to the same value, you will have three sections to your bars: SNP Cals (hom), Reference Calls and Discard SNP Call. The overall size of the bars will generally depend on the percentage of the genome covered, meaning less well preserved samples likely will have small bars than well-preserved samples. Typically you wish to have a low number of discarded SNP calls, but this can be quite high when you have low coverage data (as many positions may not reach that threshold). The number of SNP calls to reference calls can vary depending on the mutation rate of your target organism.
 
 <p align="center">
   <img src="images/output/multivcfanalyzer/multivcfanalyzer_call_categories.png" width="75%" height = "75%">
 </p>
+
+If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to two different values, this allows you to assess the number of multi-allelic positions that were called in your genome. Typically MultiVCFAnalyzer is run on 
 
 ## Output Files
 
