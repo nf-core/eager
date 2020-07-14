@@ -648,12 +648,10 @@ ch_bam_channel = ch_branched_input.bam.map {
 ch_input_for_convertbam = Channel.empty()
 
 ch_bam_channel
-  .dump()
   .into { ch_input_for_convertbam; ch_input_for_indexbam; }
 
 // Also need to send raw files for lane merging, if we want to strip fastq
 ch_fastq_channel
-  .dump()
   .into { ch_input_for_skipconvertbam; ch_input_for_lanemerge_stripfastq }
 
 ///////////////////////////////////////////////////
@@ -1038,7 +1036,7 @@ ch_input_for_fastp.fourcol
       def strandedness = it[6]
       def udg = it[7]
       def r1 = it[8]
-      def r2 = seqtype == "PE" ? it[9] : 'NA'
+      def r2 = seqtype == "PE" ? it[9] : file("$baseDir/assets/nf-core_eager_dummy.txt")
       
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1054,8 +1052,8 @@ ch_output_from_fastp
     def organism = it[5]
     def strandedness = it[6]
     def udg = it[7]
-    def r1 = it[8].getClass() == ArrayList ? it[8].sort()[0] : it[8]
-    def r2 = seqtype == "PE" ? it[8].sort()[1] : 'NA'
+    def r1 = it[8] instanceof ArrayList ? it[8].sort()[0] : it[8]
+    def r2 = seqtype == "PE" ? it[8].sort()[1] : file("$baseDir/assets/nf-core_eager_dummy.txt")
 
     [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1158,7 +1156,7 @@ if ( params.skip_collapse ){
         def strandedness = it[5]
         def udg = it[6]
         def r1 = file(it[7].sort()[0])
-        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : 'NA'
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$baseDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1176,7 +1174,7 @@ if ( params.skip_collapse ){
         def strandedness = it[5]
         def udg = it[6]
         def r1 = file(it[7])
-        def r2 = 'NA'
+        def r2 = file("$baseDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
     }
@@ -1239,7 +1237,7 @@ ch_lanemerge_for_mapping
       def strandedness = it[5]
       def udg = it[6]
       def reads = arrayify(it[7])
-      def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
+      def r1 = it[7] instanceof ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : "NA"      
 
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
@@ -1639,8 +1637,8 @@ ch_fastqlanemerge_for_stripfastq
         def strandedness = it[5]
         def udg = it[6]
         def reads = arrayify(it[7])
-        def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
-        def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
+        def r1 = it[7] instanceof ArrayList ? reads[0] : it[7]
+        def r2 = it[7] instanceof ArrayList ? reads[1] : "NA"      
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1739,7 +1737,7 @@ if (params.run_bam_filtering) {
         def strandedness = it[5]
         def udg = it[6]     
         def stats = file(it[7])
-        def poststats = file("$baseDir/assets/dummy_postfilterflagstat.stats")
+        def poststats = file("$baseDir/assets/nf-core_eager_dummy.txt")
 
       [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
@@ -3013,7 +3011,7 @@ workflow.onComplete {
     try {
         if (workflow.success) {
             mqc_report = ch_multiqc_report.getVal()
-            if (mqc_report.getClass() == ArrayList) {
+            if (mqc_report instanceof ArrayList) {
                 log.warn "[nf-core/eager] Found multiple reports from process 'multiqc', will use only one"
                 mqc_report = mqc_report[0]
             }
