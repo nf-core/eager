@@ -122,11 +122,11 @@ For other non-default columns (activated under 'Configure Columns'), hover over 
 
 You will receive output for each supplied FASTQ file.
 
-When dealing with ancient DNA data the MultiQC plots for FastQC will often show lots of 'warning' or 'failed' samples. You generally can discard this sort of information as we are dealing with very degraded and metagenomic samples which have artefacts that violate the FastQC 'quality definitions', while still being valid data for aDNA researchers. Instead you will _normally_ be looking for 'global' patterns across all samples of a sequencing run to check for library construction or sequencing failures. Decision on whether a individual sample has 'failed' or not should be made by the user after checking all the plots themselves (e.g. if the sample is consistently an outlier to all others in the run).
+When dealing with ancient DNA data the MultiQC plots for FastQC will often show lots of 'warning' or 'failed' samples. You generally can discard this sort of information as we are dealing with very degraded and metagenomic samples which have artefacts that violate the FastQC 'quality definitions', while still being valid data for aDNA researchers. Instead you will *normally* be looking for 'global' patterns across all samples of a sequencing run to check for library construction or sequencing failures. Decision on whether a individual sample has 'failed' or not should be made by the user after checking all the plots themselves (e.g. if the sample is consistently an outlier to all others in the run).
 
 For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
-> **NB:** The FastQC (pre-AdapterRemoval) plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the FastQC (post-AdapterRemoval). You should expect after AdapterRemoval, that most of the artefacts are removed.
+> **NB:** The FastQC (pre-AdapterRemoval) plots displayed in the MultiQC report shows *untrimmed* reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the FastQC (post-AdapterRemoval). You should expect after AdapterRemoval, that most of the artefacts are removed.
 
 #### Sequence Counts
 
@@ -296,7 +296,7 @@ You will receive output for each FASTQ file supplied for single end data, or for
 
 These stacked bars plots are unfortunately a little confusing, when displayed in MultiQC. However are relatively straight-forward once you understand each category. They can be displayed as counts of reads per AdapterRemoval read-category, or as percentages of the same values. Each forward(/reverse) file combination are displayed once.
 
-The most important value is the **Retained Read Pairs** which gives you the final number of reads output into the file that goes into mapping. Note, however, this section of the stack bar _includes_ the other categories displayed (see below) in the calculation.
+The most important value is the **Retained Read Pairs** which gives you the final number of reads output into the file that goes into mapping. Note, however, this section of the stack bar *includes* the other categories displayed (see below) in the calculation.
 
 Other Categories:
 
@@ -335,7 +335,7 @@ With paired-end ancient DNA sequencing runs You expect to see a slight increase 
 
 This module provides information on mapping when running the Bowtie2 aligner. Bowtie2, like bwa, takes raw FASTQ reads and finds the most likely place on the reference genome it derived from. While this module is somewhat redundant with the [Samtools](#samtools) (which reports mapping statistics for bwa) and the endorSp.y endogenous DNA value in the general statistics table, it does provide some details that could be useful in certain contexts.
 
-You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
+You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
 
 #### Single/Paired-end alignments
 
@@ -355,33 +355,52 @@ The main additional useful information compared to [Samtools](#samtools) is that
 
 MALT is a metagenomic aligner (equivalent to BLAST, but much faster). It produces direct alignments of sequencing reads in a reference genome. It is often used for metagenomic profiling or pathogen screening, and specifically in nf-core/eager, of off-target reads from genome mapping.
 
-You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
+You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
 
 #### Metagenomic Mappability
 
-This bar plot gives an approximation many reads in your off-target FASTQ file was able to align to your metagenomic database. Due to low 'endogenous' content of aDNA, and the high biodiversity of modern or environmental microbes that normally exists in archaeological and museum samples, you often will get relatively low mappability percentages. This can also be influenced by the type of database you supplied - many databases have an overabundance of taxa of clinical or economic interest, so when you have a large amount of uncharacterised environmental taxa, this may also result in low mappability.
+This bar plot gives an approximation many reads in your off-target FASTQ file was able to align to your metagenomic database.
+
+Due to low 'endogenous' content of aDNA, and the high biodiversity of modern or environmental microbes that normally exists in archaeological and museum samples, you often will get relatively low mappability percentages.
+
+<p align="center">
+  <img src="images/output/malt/malt_metagenomic_mappability.png" width="75%" height = "75%">
+</p>
+
+ This can also be influenced by the type of database you supplied - many databases have an overabundance of taxa of clinical or economic interest, so when you have a large amount of uncharacterised environmental taxa, this may also result in low mappability.
 
 #### Taxonomic assignment success
 
-In addition to actually being able to align to a genome, MALT can also allow sequences without a 'taxonomic' ID and also utilises a 'lowest common ancestor' algorithm (LCA), that can result in a read getting no taxonomic identification (because it can align to multiple reference sequences with equal probability). Because of this, MultiQC also produces a bar plot indicating of the successfully aligned reads (see Metagenomic Mappability above), how many could be assigned a taxon ID.
+In addition to actually being able to align to a given reference sequence, MALT can also allow sequences without a 'taxonomic' ID to be included in a database. Furthermore, it utilises a 'lowest common ancestor' algorithm (LCA), that can result in a read getting no taxonomic identification (because it can align to multiple reference sequences with equal probability). Because of this, MultiQC also produces a bar plot indicating of the successfully aligned reads (see Metagenomic Mappability above), how many could be assigned a taxon ID.
+
+<p align="center">
+  <img src="images/output/malt/malt_taxonomic_assignment_success.png" width="75%" height = "75%">
+</p>
 
 For the same reasons above, you can often get not very many reads being taxonomically assigned when working with aDNA. This can also occur when many of your reads are from conservative regions of genomes and can map onto multiple references. At this point LCA pushes the possible taxon identification so high up the tree, it cannot give a taxonomic assignment.
+
+If you have multiple samples of a similar level of preservation, but one with unusually low numbers of taxonomically asisgned reads, it maybe worth investigating what the alignments look like in case
+there is some sequencing artefact (although it could just be badly preserved and little DNA).
 
 ### Kraken
 
 #### Background
 
-Kraken is another metagenomic classifer, but takes a different approach to alignment as with [MALT](#malt). It uses K-mer similiarity to very effiicently find similar patterns in sequences between input reads and reference genomes. It does not however, do alignment - meaning you cannot screen for authentication criteria such as damage patterns and fragment lengths.
+Kraken is another metagenomic classifer, but takes a different approach to alignment as with [MALT](#malt). It uses 'K-mer similiarity' between reads and references to very efficiently find similar patterns in sequences. It does not however, do alignment - meaning you cannot screen for authentication criteria such as damage patterns and fragment lengths.
 
-It is useful when you do not have large computing power or you want very rapid and rough approximation of the metagenomic profile of your sample.
+It is useful when you do not have large computing power or you want very rapid and want rough approximation of the metagenomic profile of your sample.
 
-You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
+You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
 
 #### Top Taxa
 
-This plot gives you an approximation of the abundance of the five top taxa identified. Typically for ancient DNA, this will be quite a small fraction of taxa, as archaeological and museum samples have large biodiversity from environmental microbes - therefore a large fraction of 'unclassifed' can be quite normal.
+This plot gives you an approximation of the abundance of the five top taxa identified. Typically for ancient DNA, this will be quite a small fraction of taxa, as archaeological and museum samples have a large biodiversity from environmental microbes - therefore a large fraction of 'unclassifed' can be quite normal.
 
-However for screening for specific metagenomic profiles, such as ancient microbiomes, if the top taxa are from your specific microbiome of interest (e.g. looking at calculus for oral microbiomes, or paleofaeces for gut microbiome), this can be a good indicator that you have a well preserved sample.
+<p align="center">
+  <img src="images/output/kraken/kraken_top_taxa.png" width="75%" height = "75%">
+</p>
+
+However for screening for specific metagenomic profiles, such as ancient microbiomes, if the top taxa are from your specific microbiome of interest (e.g. looking at calculus for oral microbiomes, or paleofaeces for gut microbiome), this can be a good indicator that you have a well preserved sample. But of course, you must do further downstream (manual!) authentication of these taxa to ensure they are not from modern contamination.
 
 ### Samtools
 
@@ -389,27 +408,27 @@ However for screening for specific metagenomic profiles, such as ancient microbi
 
 This module provides numbers in raw counts of the mapping of your DNA reads to your reference genome.
 
-You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
+You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
 
 #### Flagstat Plot
 
 This dot plot shows different statistics, and the number of reads (typically as an multiple e.g. million, or thousands), are represented by dots on the X axis.
 
-In most cases the first two rows, 'Total Reads' and 'Total Passed QC' will be the same as EAGER does not do quality control of reads with samtools. This number should normally be the same the number of (clipped, and if paired-end, merged) retained reads coming out of AdapterRemoval.
+In most cases the first two rows, 'Total Reads' and 'Total Passed QC' will be the same as EAGER (v1) does not do quality control of reads with samtools. This number should normally be the same the number of (clipped, and if paired-end, merged) retained reads coming out of AdapterRemoval.
 
 The third row 'Mapped' represents the number of reads that found a place that could be aligned on your reference genome. This is the raw number of mapped reads, prior PCR duplication.
 
 The remaining rows will be 0 when running `bwa aln` as these characteristics of the data are not considered by the algorithm by default.
 
 <p align="center">
-  <img src="images/output/samtools_flagstat/samtools_flagstat.png" width="75%" height = "75%">
+  <img src="images/output/samtools_flagstat/samtools_flagstat.png" width="80%" height = "80%">
 </p>
 
 > **NB:** The Samtools (pre-samtools filter) plots displayed in the MultiQC report shows mapped reads without mapping quality filtering. This will contain reads that can map to multiple places on your reference genome with equal or slightly less mapping quality score. To see how your reads look after mapping quality, look at the FastQC reports in the Samtools (pre-samtools filter). You should expect after mapping quality filtering, that you will have less reads.
 
 ### DeDup
 
-You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
+You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
@@ -452,7 +471,7 @@ The deduplication stats plot shows you how many reads were detected and then rem
   <img src="images/output/picard/picard_deduplication_stats.png" width="75%" height = "75%">
 </p>
 
-The amount of unmapped reads will depend on whether you have filtered out unmapped reads out not (see the [usage/running the pipeline documentation](usage.md) for more information.
+The amount of unmapped reads will depend on whether you have filtered out unmapped reads out not (see the [usage/running the pipeline](usage.md) documentation for more information.
 
 Things to look out for:
 
@@ -469,7 +488,7 @@ There are two algorithms from the tools we use: `c_curve` and `lc_extrap`. The f
 
 Due to endogenous DNA being so low when doing initial screening, the maths behind `lc_extrap` often fails as there is not enough data. Therefore nf-core/eager sticks with `c_curve` which gives a similar approximation of the library complexity, but is more robust to smaller datasets.
 
-You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
+You will receive output for each deduplicated *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Complexity Curve
 
@@ -499,7 +518,7 @@ Therefore, three main characteristics of ancient DNA are:
 - Elevated G and As (purines) just before strand breaks
 - Increased C and Ts at ends of fragments
 
-You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
+You will receive output for each deduplicated *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
   
 #### Misincorporation Plots
 
@@ -609,13 +628,14 @@ This table shows the contents of the `snpStatistics.tsv` file produced by MultiV
 
 You can get different variants of the Call statistics bar plot, depending on how you configured  the MultiVCFAnalyzer options. 
 
-If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to the same value, you will have three sections to your bars: SNP Cals (hom), Reference Calls and Discard SNP Call. The overall size of the bars will generally depend on the percentage of the genome covered, meaning less well preserved samples likely will have small bars than well-preserved samples. Typically you wish to have a low number of discarded SNP calls, but this can be quite high when you have low coverage data (as many positions may not reach that threshold). The number of SNP calls to reference calls can vary depending on the mutation rate of your target organism.
+If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to two different values (left panel A in the figure below), this allows you to assess the number of multi-allelic positions that were called in your genome. Typically MultiVCFAnalyzer is used for analysing smallish on haploid genomes (such as bacteria), therefore a position with multiple possible 'alleles' suggests some form of cross-mapping from other taxa. If this is the case, you will need to be careful with downstream analysis of the consensus sequence (e.g. for phylogenetic tree analysis) as you may accidently pick up SNPs from other taxa - particularly when dealing with low coverage data. Therefore, if you have a high level of 'het'
+
 
 <p align="center">
   <img src="images/output/multivcfanalyzer/multivcfanalyzer_call_categories.png" width="75%" height = "75%">
 </p>
 
-If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to two different values, this allows you to assess the number of multi-allelic positions that were called in your genome. Typically MultiVCFAnalyzer is run on 
+If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to the same value, you will have three sections to your bars: SNP Cals (hom), Reference Calls and Discard SNP Call. The overall size of the bars will generally depend on the percentage of the genome covered, meaning less well preserved samples likely will have small bars than well-preserved samples. Typically you wish to have a low number of discarded SNP calls, but this can be quite high when you have low coverage data (as many positions may not reach that threshold). The number of SNP calls to reference calls can vary depending on the mutation rate of your target organism.
 
 ## Output Files
 
