@@ -559,7 +559,7 @@ Qualimap is a tool which provides statistics on the quality of the mapping of yo
 
 Note that many of the statistics from this module are displayed in the General Stats table (see above), as they represent single values that are not plottable.
 
-You will receive output for each _sample_. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
+You will receive output for each *sample*. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
 
 #### Coverage Histogram
 
@@ -626,10 +626,9 @@ This table shows the contents of the `snpStatistics.tsv` file produced by MultiV
 
 #### Call statistics barplot
 
-You can get different variants of the Call statistics bar plot, depending on how you configured  the MultiVCFAnalyzer options. 
+You can get different variants of the Call statistics bar plot, depending on how you configured  the MultiVCFAnalyzer options.
 
-If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to two different values (left panel A in the figure below), this allows you to assess the number of multi-allelic positions that were called in your genome. Typically MultiVCFAnalyzer is used for analysing smallish on haploid genomes (such as bacteria), therefore a position with multiple possible 'alleles' suggests some form of cross-mapping from other taxa. If this is the case, you will need to be careful with downstream analysis of the consensus sequence (e.g. for phylogenetic tree analysis) as you may accidently pick up SNPs from other taxa - particularly when dealing with low coverage data. Therefore, if you have a high level of 'het'
-
+If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to two different values (left panel A in the figure below), this allows you to assess the number of multi-allelic positions that were called in your genome. Typically MultiVCFAnalyzer is used for analysing smallish on haploid genomes (such as bacteria), therefore a position with multiple possible 'alleles' suggests some form of cross-mapping from other taxa. If this is the case, you will need to be careful with downstream analysis of the consensus sequence (e.g. for phylogenetic tree analysis) as you may accidently pick up SNPs from other taxa - particularly when dealing with low coverage data. Therefore, if you have a high level of 'het' values, you should carefully check your alignments manually to see how clean your genomes are, or whether you can do some form of strain separation (e.g. by majority/minor calling).
 
 <p align="center">
   <img src="images/output/multivcfanalyzer/multivcfanalyzer_call_categories.png" width="75%" height = "75%">
