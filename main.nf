@@ -1245,7 +1245,6 @@ process lanemerge {
 
 }
 
-// TODO check lane merged skipped non-collapse'd R2
 ch_lanemerge_for_mapping
   .map {
       def samplename = it[0]
