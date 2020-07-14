@@ -1200,13 +1200,34 @@ ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
     merge_me: it[7].size() > 1
   }
 
+ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
+  .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = it[7]
+
+        // find and remove duplicate dummies to prevent file collision error
+        def r2 = it[8]*.toString()
+        r2.removeAll{ it == "$baseDir/assets/nf-core_eager_dummy.txt" }
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+  }
+  .view()
+
+
 process lanemerge {
   label 'mc_tiny'
   tag "${libraryid}"
   publishDir "${params.outdir}/lanemerging", mode: 'copy'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_branched_for_lanemerge.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge_ready
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fq.gz") into ch_lanemerge_for_mapping
