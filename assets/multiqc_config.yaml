@@ -163,6 +163,18 @@ table_columns_visible:
         percentage_aligned: False
     MultiVCFAnalyzer:
         Heterozygous SNP alleles (percent): True
+    custom_content:
+        endogenous_dna: true
+        endogenous_dna_post: true
+        Num_SNPs: true
+        Method1_MOM_estimate: false
+        Method1_MOM_SE: false
+        Method1_ML_estimate: true
+        Method1_ML_SE: true
+        Method2_MOM_estimate: false
+        Method2_MOM_SE: false
+        Method2_ML_estimate: false
+        Method2_ML_SE: false
 
 table_columns_placement:
     FastQC (pre-AdapterRemoval):
