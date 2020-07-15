@@ -5,6 +5,23 @@ from collections import OrderedDict
 jsonOut=OrderedDict()
 data=OrderedDict()
 
+## Function to convert a set of elements into floating point numbers, when possible, else leave them be.
+def make_float(x):
+    print (x)
+    output=[None for i in range(len(x))]
+    ## If value for an estimate/error is -nan, replace with "NA". JSON does not accept NaN as a valid field.
+    for i in range(len(x)):
+        if x[i] == "-nan":
+            output[i]="N/A"
+            continue
+        try:
+            output[i]=float(x[i])
+        except:
+            output[i]=x[i]
+    
+    return(tuple(output))
+
+
 Input_files=sys.argv[1:]
 
 output = open("nuclear_contamination.txt", 'w')
@@ -17,7 +34,7 @@ for fn in Input_files:
     ml2, err_ml2="N/A","N/A"
     with open(fn, 'r') as f:
         Estimates={}
-        Ind=re.sub('\.X.contamination.out$', '', fn)
+        Ind=re.sub('\.X.contamination.out$', '', fn).split("/")[-1]
         for line in f:
             fields=line.strip().split()
             if line.strip()[0:19] == "We have nSNP sites:":
@@ -35,23 +52,25 @@ for fn in Input_files:
                 err_mom2=fields[4].split(":")[1]
                 ml2=fields[5].split(":")[1]
                 err_ml2=fields[6].split(":")[1]
-        data[Ind]={ "Number_of_SNPs" : nSNPs, "Method1_MOM_estimate" : mom1, "Method1_MOM_SE" : err_mom1, "Method1_ML_estimate" : ml1, "Method1_ML_SE" : err_ml1, "Method2_MOM_estimate" : mom2, "Method2_MOM_SE" : err_mom2, "Method2_ML_estimate" : ml2, "Method2_ML_SE" : err_ml2 }
+        ## Convert estimates and errors to floating point numbers
+        (ml1, err_ml1, mom1, err_mom1, ml2, err_ml2, mom2, err_mom2) = make_float((ml1, err_ml1, mom1, err_mom1, ml2, err_ml2, mom2, err_mom2))
+        data[Ind]={ "Num_SNPs" : int(nSNPs), "Method1_MOM_estimate" : mom1, "Method1_MOM_SE" : err_mom1, "Method1_ML_estimate" : ml1, "Method1_ML_SE" : err_ml1, "Method2_MOM_estimate" : mom2, "Method2_MOM_SE" : err_mom2, "Method2_ML_estimate" : ml2, "Method2_ML_SE" : err_ml2 }
         print (Ind, nSNPs, mom1, err_mom1, ml1, err_ml1, mom2, err_mom2, ml2, err_ml2, sep="\t", file=output)
 
 
 jsonOut = {"plot_type": "generalstats", 
     "pconfig": {
         "Num_SNPs" : {"title" : "Number of SNPs"},
-        "Method1_MOM_estimate" : {"title": "Contamination Estimate (M1_MOM)"},
-        "Method1_MOM_SE" : {"title": "Estimate Error (M1_MOM)"},
-        "Method1_ML_estimate" : {"title": "Contamination Estimate (M1_ML)"},
-        "Method1_ML_SE" : {"title": "Estimate Error (M1_ML)"},
-        "Method2_MOM_estimate" : {"title": "Contamination Estimate (M2_MOM)"},
-        "Method2_MOM_SE" : {"title": "Estimate Error (M2_MOM)"},
-        "Method2_ML_estimate" : {"title": "Contamination Estimate (M2_ML)"},
-        "Method2_ML_SE" : {"title": "Estimate Error (M2_ML)"}
+        "Method1_MOM_estimate" : {"title": "Contamination Estimate (Method1_MOM)"},
+        "Method1_MOM_SE" : {"title": "Estimate Error (Method1_MOM)"},
+        "Method1_ML_estimate" : {"title": "Contamination Estimate (Method1_ML)"},
+        "Method1_ML_SE" : {"title": "Estimate Error (Method1_ML)"},
+        "Method2_MOM_estimate" : {"title": "Contamination Estimate (Method2_MOM)"},
+        "Method2_MOM_SE" : {"title": "Estimate Error (Method2_MOM)"},
+        "Method2_ML_estimate" : {"title": "Contamination Estimate (Method2_ML)"},
+        "Method2_ML_SE" : {"title": "Estimate Error (Method2_ML)"}
     }, 
     "data" : data
 }
-with open('nuclear_contamination.json', 'w') as outfile:
+with open('nuclear_contamination_mqc.json', 'w') as outfile:
     json.dump(jsonOut, outfile)
