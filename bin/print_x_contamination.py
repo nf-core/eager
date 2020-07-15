@@ -58,7 +58,7 @@ for fn in Input_files:
         print (Ind, nSNPs, mom1, err_mom1, ml1, err_ml1, mom2, err_mom2, ml2, err_ml2, sep="\t", file=output)
 
 
-jsonOut = {"plot_type": "generalstats", 
+jsonOut = {"plot_type": "generalstats", "id": "nuclear_contamination",
     "pconfig": {
         "Num_SNPs" : {"title" : "Number of SNPs"},
         "Method1_MOM_estimate" : {"title": "Contamination Estimate (Method1_MOM)"},
