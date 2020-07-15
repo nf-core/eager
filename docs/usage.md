@@ -239,9 +239,9 @@ For example, with the following:
 | JK2802      | JK2802  | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |
 | JK2802      | JK2802  | 8    | 4                | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  |
 
-In this context the following will occur: 
+In this context the following will occur:
 
-- After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**. 
+- After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**.
 - After mapping, and prior BAM filtering, BAM files with the same with different `SeqType` (but with all other metadata columns th esame) will be merged together for each **Library**.
 - After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` and the same `UDG_Treatment` will be merged together.
 - If BAM trimming is turned, all post-trimming BAMs (i.e. non-UDG and half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the same `Sample_Name`.
@@ -262,7 +262,7 @@ Note the following important points and limitations for setting up:
 - nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
 - Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 - Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes
-  - **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed. 
+  - **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.
   - When you wish to run PE/SE data together `-dedupper markduplicates` is therefore prefered.
   - An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
   - If truly you want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
