@@ -1192,10 +1192,9 @@ if (!params.skip_adapterremoval) {
         .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
 }
 
-// Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq) and sequencing chemistries
-// Mixtures of same library sequenced with both PE/SE will be merged and considered 'SE' 
+// Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
 ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
-  .groupTuple(by: [0,1,4,5,6])
+  .groupTuple(by: [0,1,3,4,5,6])
   .map {
     it ->
       def samplename = it[0]
@@ -1246,7 +1245,6 @@ process lanemerge {
 
 }
 
-// TODO check lane merged skipped non-collapse'd R2
 ch_lanemerge_for_mapping
   .map {
       def samplename = it[0]
@@ -1554,7 +1552,108 @@ process bowtie2 {
 
 // Gather all mapped BAMs from all possible mappers into common channels to send downstream
 ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for_filtering, ch_output_from_bt2)
-  .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
+  .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering; ch_mapping_for_stripfastq;   ch_mapping_for_samtools_flagstat }
+
+// Synchronise the mapped input FASTQ and input non-remapped BAM channels
+ch_fastqlanemerge_for_stripfastq
+    .map {
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def reads = arrayify(it[7])
+        def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
+        def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+    }
+    .mix(ch_mapping_for_stripfastq)
+    .groupTuple(by: [0,1,3,4,5,6])
+    .map {
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = it[7][0]
+        def r2 = it[8][0]
+        def bam = it[7][1]
+        def bai = it[8][1]
+
+       [ samplename, libraryid, seqtype, organism, strandedness, udg, r1, r2, bam, bai ]
+
+    }
+    .filter{ it[8] != null }
+    .set { ch_synced_for_stripfastq }
+
+// Remove mapped reads from original (lane merged) input FASTQ e.g. for sensitive host data when running metagenomic data
+
+process strip_input_fastq {
+    label 'mc_medium'
+    tag "${libraryid}"
+    publishDir "${params.outdir}/stripped_fastq", mode: 'copy'
+
+    when: 
+    params.strip_input_fastq
+
+    input: 
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
+
+    output:
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_stripfastq
+
+    script:
+    if ( seqtype == 'SE' ) {
+        out_fwd = bam.baseName+'.stripped.fq.gz'
+        """
+        samtools index $bam
+        extract_map_reads.py $bam ${r1} -m ${params.strip_mode} -of $out_fwd -p ${task.cpus}
+        """
+    } else {
+        out_fwd = bam.baseName+'.stripped.fwd.fq.gz'
+        out_rev = bam.baseName+'.stripped.rev.fq.gz'
+        """
+        samtools index $bam
+        extract_map_reads.py $bam ${r1} -rev ${r2} -m  ${params.strip_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
+        """ 
+    }
+    
+}
+
+// Seqtype merging to combine paired end with single end  sequenceing data of the same libraries
+// goes here, goes into flagstat, filter etc. Important: This type of merge of this isn't technically valid for DeDup!
+// and should only be used with markduplicates!
+ch_branched_for_seqtypemerge = ch_XXXXX
+  .groupTuple(by: [0,1,4,5,6])
+  .map {
+    it ->
+      def samplename = it[0]
+      def libraryid  = it[1]
+      def lane = it[2]
+      def seqtype = it[3] // How to deal with this?
+      def organism = it[4]
+      def strandedness = it[5]
+      def udg = it[6]
+      def r1 = it[7]
+      def r2 = it[8]
+
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+  }
+  .branch {
+    skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
+    merge_me: it[7].size() > 1
+  }
+
+  process seqtype_merge {
+    
+  }
 
 // Post-mapping QC
 
@@ -1640,84 +1739,12 @@ process samtools_filter {
 if (params.run_bam_filtering) {
     ch_mapping_for_skipfiltering.mix(ch_output_from_filtering)
         .filter { it =~/.*filtered.bam/ }
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
 
 } else {
     ch_mapping_for_skipfiltering
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
 
-}
-
-// Synchronise the mapped input FASTQ and input non-remapped BAM channels
-ch_fastqlanemerge_for_stripfastq
-    .map {
-        def samplename = it[0]
-        def libraryid  = it[1]
-        def lane = it[2]
-        def seqtype = it[3]
-        def organism = it[4]
-        def strandedness = it[5]
-        def udg = it[6]
-        def reads = arrayify(it[7])
-        def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
-        def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
-
-        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
-
-    }
-    .mix(ch_filtering_for_stripfastq)
-    .groupTuple(by: [0,1,3,4,5,6])
-    .map {
-        def samplename = it[0]
-        def libraryid  = it[1]
-        def lane = it[2]
-        def seqtype = it[3]
-        def organism = it[4]
-        def strandedness = it[5]
-        def udg = it[6]
-        def r1 = it[7][0]
-        def r2 = it[8][0]
-        def bam = it[7][1]
-        def bai = it[8][1]
-
-       [ samplename, libraryid, seqtype, organism, strandedness, udg, r1, r2, bam, bai ]
-
-    }
-    .filter{ it[8] != null }
-    .set { ch_synced_for_stripfastq }
-
-// Remove mapped reads from original (lane merged) input FASTQ e.g. for sensitive host data when running metagenomic data
-
-process strip_input_fastq {
-    label 'mc_medium'
-    tag "${libraryid}"
-    publishDir "${params.outdir}/stripped_fastq", mode: 'copy'
-
-    when: 
-    params.strip_input_fastq
-
-    input: 
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
-
-    output:
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_stripfastq
-
-    script:
-    if ( seqtype == 'SE' ) {
-        out_fwd = bam.baseName+'.stripped.fq.gz'
-        """
-        samtools index $bam
-        extract_map_reads.py $bam ${r1} -m ${params.strip_mode} -of $out_fwd -p ${task.cpus}
-        """
-    } else {
-        out_fwd = bam.baseName+'.stripped.fwd.fq.gz'
-        out_rev = bam.baseName+'.stripped.rev.fq.gz'
-        """
-        samtools index $bam
-        extract_map_reads.py $bam ${r1} -rev ${r2} -m  ${params.strip_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
-        """ 
-    }
-    
 }
 
 // Post filtering mapping QC - particularly to help see how much was removed from mapping quality filtering
