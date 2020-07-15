@@ -1027,7 +1027,7 @@ ch_input_for_fastp.fourcol
       def strandedness = it[6]
       def udg = it[7]
       def r1 = it[8]
-      def r2 = seqtype == "PE" ? it[9] : 'NA'
+      def r2 = seqtype == 'PE' ? it[9] : 'NA'
       
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1044,7 +1044,7 @@ ch_output_from_fastp
     def strandedness = it[6]
     def udg = it[7]
     def r1 = it[8].getClass() == ArrayList ? it[8].sort()[0] : it[8]
-    def r2 = seqtype == "PE" ? it[8].sort()[1] : 'NA'
+    def r2 = seqtype == 'PE' ? it[8].sort()[1] : 'NA'
 
     [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1147,7 +1147,7 @@ if ( params.skip_collapse ){
         def strandedness = it[5]
         def udg = it[6]
         def r1 = file(it[7].sort()[0])
-        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : 'NA'
+        def r2 = seqtype == 'PE' ? file(it[7].sort()[1]) : 'NA'
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1183,9 +1183,23 @@ if (!params.skip_adapterremoval) {
 }
 
 // Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
-
 ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
   .groupTuple(by: [0,1,3,4,5,6])
+  .map {
+    it ->
+      def samplename = it[0]
+      def libraryid  = it[1]
+      def lane = it[2]
+      def seqtype = it[3]
+      def organism = it[4]
+      def strandedness = it[5]
+      def udg = it[6]
+      def r1 = it[7]
+      def r2 = it[8]
+
+      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+  }
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -1217,7 +1231,6 @@ process lanemerge {
 
 }
 
-// TODO check lane merged skipped non-collapse'd R2
 ch_lanemerge_for_mapping
   .map {
       def samplename = it[0]
@@ -1230,6 +1243,8 @@ ch_lanemerge_for_mapping
       def reads = arrayify(it[7])
       def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : "NA"      
+
+
 
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1285,7 +1300,7 @@ process fastqc_after_clipping {
     file("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
 
     script:
-    if ( params.skip_collapse && seqtype == "PE" ) {
+    if ( params.skip_collapse && seqtype == 'PE' ) {
     """
     fastqc -t ${task.cpus} -q ${r1} ${r2}
     """
@@ -1327,15 +1342,15 @@ process bwa {
     """
     bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${libraryid}.mapped.bam
-    samtools index "${size}" "${libraryid}".mapped.bam
+    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${libraryid}_"${seqtype}".mapped.bam
+    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
     """
     } else {
     //PE collapsed, or SE data 
     """
     bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
-    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
-    samtools index "${size}" "${libraryid}".mapped.bam
+    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
     """
     }
     
@@ -1364,13 +1379,13 @@ process bwamem {
 
     if (!params.single_end && params.skip_collapse){
     """
-    bwa mem -t ${task.cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
+    bwa mem -t ${task.cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index "${size}" -@ ${task.cpus} "${libraryid}".mapped.bam
     """
     } else {
     """
-    bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}".mapped.bam
-    samtools index "${size}" -@ ${task.cpus} "${libraryid}".mapped.bam
+    bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${size}" -@ ${task.cpus} "${libraryid}"_"${seqtype}".mapped.bam
     """
     }
     
@@ -1433,16 +1448,16 @@ process circularmapper{
     bwa aln -t ${task.cpus} $elongated_root $r2 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
     bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $elongated_root ${libraryid}.r1.sai ${libraryid}.r2.sai $r1 $r2 > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
-    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${libraryid}.mapped.bam
-    samtools index "${size}" ${libraryid}.mapped.bam
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${libraryid}_"${seqtype}".mapped.bam
+    samtools index "${size}" ${libraryid}_"${seqtype}".mapped.bam
     """
     } else {
     """ 
     bwa aln -t ${task.cpus} $elongated_root $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $elongated_root ${libraryid}.sai $r1 > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
-    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${libraryid}".mapped.bam
-    samtools index "${size}" "${libraryid}".mapped.bam
+    samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
     """
     }
     
@@ -1508,14 +1523,14 @@ process bowtie2 {
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
     """
-    bowtie2 -x ${fasta} -1 ${r1} -2 ${r2} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}".mapped.bam
-    samtools index "${size}" "${libraryid}".mapped.bam
+    bowtie2 -x ${fasta} -1 ${r1} -2 ${r2} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
     """
     } else {
     //PE collapsed, or SE data 
     """
-    bowtie2 -x ${fasta} -U ${r1} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}".mapped.bam
-    samtools index "${size}" "${libraryid}".mapped.bam
+    bowtie2 -x ${fasta} -U ${r1} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
     """
     }
     
@@ -1523,99 +1538,7 @@ process bowtie2 {
 
 // Gather all mapped BAMs from all possible mappers into common channels to send downstream
 ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for_filtering, ch_output_from_bt2)
-  .into { ch_mapping_for_skipfiltering; ch_mapping_for_filtering;  ch_mapping_for_samtools_flagstat }
-
-// Post-mapping QC
-
-process samtools_flagstat {
-    label 'sc_tiny'
-    tag "$libraryid"
-    publishDir "${params.outdir}/samtools/stats", mode: 'copy'
-
-    input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_mapping_for_samtools_flagstat
-
-    output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*stats") into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
-
-    script:
-    """
-    samtools flagstat $bam > ${libraryid}_flagstat.stats
-    """
-}
-
-// BAM filtering e.g. to extract unmapped reads for downstream or stricter mapping quality
-
-process samtools_filter {
-    label 'mc_medium'
-    tag "$libraryid"
-    publishDir "${params.outdir}/samtools/filter", mode: 'copy',
-    saveAs: {filename ->
-            if (filename.indexOf(".fq.gz") > 0) "unmapped/$filename"
-            else if (filename.indexOf(".unmapped.bam") > 0) "unmapped/$filename"
-            else if (filename.indexOf(".filtered.bam")) filename
-            else null
-    }
-
-    when: 
-    params.run_bam_filtering
-
-    input: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_mapping_for_filtering
-
-    output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering,ch_outputindex_from_filtering
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
-
-    script:
-    size = "${params.large_ref}" ? '-c' : ''
-    
-    if ( "${params.bam_unmapped_type}" == "keep" ) {
-        """
-        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        """
-    } else if("${params.bam_unmapped_type}" == "discard"){
-        """
-        samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        """
-    } else if("${params.bam_unmapped_type}" == "bam"){
-        """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        """
-    } else if("${params.bam_unmapped_type}" == "fastq"){
-        """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
-        rm ${libraryid}.unmapped.bam
-        """
-    } else if("${params.bam_unmapped_type}" == "both"){
-        """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
-        """
-    }
-}
-
-// samtools_filter bypass in case not run
-if (params.run_bam_filtering) {
-    ch_mapping_for_skipfiltering.mix(ch_output_from_filtering)
-        .filter { it =~/.*filtered.bam/ }
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
-
-} else {
-    ch_mapping_for_skipfiltering
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_stripfastq; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
-
-}
+  .into { ch_mapping_for_stripfastq; ch_mapping_for_seqtype_merging }
 
 // Synchronise the mapped input FASTQ and input non-remapped BAM channels
 ch_fastqlanemerge_for_stripfastq
@@ -1634,7 +1557,7 @@ ch_fastqlanemerge_for_stripfastq
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
     }
-    .mix(ch_filtering_for_stripfastq)
+    .mix(ch_mapping_for_stripfastq)
     .groupTuple(by: [0,1,3,4,5,6])
     .map {
         def samplename = it[0]
@@ -1687,6 +1610,158 @@ process strip_input_fastq {
         """ 
     }
     
+}
+
+// Seqtype merging to combine paired end with single end  sequenceing data of the same libraries
+// goes here, goes into flagstat, filter etc. Important: This type of merge of this isn't technically valid for DeDup!
+// and should only be used with markduplicates!
+ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
+  .groupTuple(by: [0,1,4,5,6])
+  .map {
+    it ->
+      def samplename = it[0]
+      def libraryid  = it[1]
+      def lane = it[2]
+      def seqtype = it[3].unique() // How to deal with this?
+      def organism = it[4]
+      def strandedness = it[5]
+      def udg = it[6]
+      def r1 = it[7]
+      def r2 = it[8]
+
+      // We will assume if mixing it is better to set as PE as this is informative
+      // for DeDup (and markduplicates doesn't care), but will throw a warning!
+      def seqtype_new = seqtype.flatten().size() > 1 ? 'PE' : seqtype 
+                      
+      if ( seqtype.flatten().size() > 1 &&  params.dedupper == 'dedup' ) {
+        log.warn "[nf-core/eager] Warning: you are running DeDup on BAMs with a mixture of PE/SE data for library: ${libraryid}. DeDup is designed for PE data only, deduplication maybe suboptimal!"
+      }
+      
+      [ samplename, libraryid, lane, seqtype_new, organism, strandedness, udg, r1, r2 ]
+
+  }
+  .branch {
+    skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
+    merge_me: it[7].size() > 1
+  }
+
+  process seqtype_merge {
+
+    label 'sc_tiny'
+    tag "$libraryid"
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_branched_for_seqtypemerge.merge_me
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_seqtypemerged_rg.bam"), file("*_seqtypemerged_rg*.{bai,csi}")  into ch_seqtypemerge_for_filtering
+
+    script:
+    size = "${params.large_ref}" ? '-c' : ''
+    """
+    samtools merge ${libraryid}_seqtypemerged.bam ${bam}
+    ## Have to set validation as lenient because of BWA issue: "I see a read stands out the end of a chromosome and is flagged as unmapped (flag 0x4). [...]" http://bio-bwa.sourceforge.net/
+    picard AddOrReplaceReadGroups I=${libraryid}_seqtypemerged.bam O=${libraryid}_seqtypemerged_rg.bam RGID=1 RGLB="${libraryid}_seqtypemerged" RGPL=illumina RGPU=4410 RGSM="${libraryid}_seqtypemerged" VALIDATION_STRINGENCY=LENIENT
+    samtools index "${size}" ${libraryid}_seqtypemerged_rg.bam
+    """
+    
+  }
+
+ch_seqtypemerge_for_filtering
+  .mix(ch_branched_for_seqtypemerge.skip_merge)
+  .into { ch_seqtypemerged_for_skipfiltering; ch_seqtypemerged_for_samtools_filter; ch_seqtypemerged_for_samtools_flagstat } 
+
+// Post-mapping QC
+
+process samtools_flagstat {
+    label 'sc_tiny'
+    tag "$libraryid"
+    publishDir "${params.outdir}/samtools/stats", mode: 'copy'
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_seqtypemerged_for_samtools_flagstat
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*stats") into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
+
+    script:
+    """
+    samtools flagstat $bam > ${libraryid}_flagstat.stats
+    """
+}
+
+
+// BAM filtering e.g. to extract unmapped reads for downstream or stricter mapping quality
+
+process samtools_filter {
+    label 'mc_medium'
+    tag "$libraryid"
+    publishDir "${params.outdir}/samtools/filter", mode: 'copy',
+    saveAs: {filename ->
+            if (filename.indexOf(".fq.gz") > 0) "unmapped/$filename"
+            else if (filename.indexOf(".unmapped.bam") > 0) "unmapped/$filename"
+            else if (filename.indexOf(".filtered.bam")) filename
+            else null
+    }
+
+    when: 
+    params.run_bam_filtering
+
+    input: 
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_seqtypemerged_for_samtools_filter
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering,ch_outputindex_from_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
+
+    script:
+    size = "${params.large_ref}" ? '-c' : ''
+    
+    if ( "${params.bam_unmapped_type}" == "keep" ) {
+        """
+        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
+        """
+    } else if("${params.bam_unmapped_type}" == "discard"){
+        """
+        samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
+        """
+    } else if("${params.bam_unmapped_type}" == "bam"){
+        """
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
+        """
+    } else if("${params.bam_unmapped_type}" == "fastq"){
+        """
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
+        rm ${libraryid}.unmapped.bam
+        """
+    } else if("${params.bam_unmapped_type}" == "both"){
+        """
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
+        """
+    }
+}
+
+// samtools_filter bypass in case not run
+if (params.run_bam_filtering) {
+    ch_seqtypemerged_for_skipfiltering.mix(ch_output_from_filtering)
+        .filter { it =~/.*filtered.bam/ }
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
+
+} else {
+    ch_seqtypemerged_for_skipfiltering
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
+
 }
 
 // Post filtering mapping QC - particularly to help see how much was removed from mapping quality filtering
@@ -1784,7 +1859,6 @@ process dedup{
     treat_merged="${params.dedup_all_merged}" ? '-m' : ''
     size = "${params.large_ref}" ? '-c' : ''
     
-    if(seqtype == 'SE') {
     """
     ## To make sure direct BAMs have a clean name
     if [[ "${bam}" != "${libraryid}.bam" ]]; then
@@ -1795,20 +1869,7 @@ process dedup{
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
     samtools index "${size}" "${libraryid}"_rmdup.bam
-    """  
-    } else {
     """
-    ## To make sure direct BAMs have a clean name
-    if [[ "${bam}" != "${libraryid}.bam" ]]; then 
-      mv ${bam} ${libraryid}.bam
-    fi
-    
-    dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
-    mv *.log dedup.log
-    samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
-    samtools index "${size}" "${libraryid}"_rmdup.bam
-    """  
-    }
 }
 
 process markDup{
@@ -2376,33 +2437,6 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} -f ${snp} -e pileupcaller.${strandedness}
   """
  }
-
-/* process genotyping_pileupcaller {
-  label 'mc_small'
-  tag "${samplename}"
-  publishDir "${params.outdir}/genotyping", mode: 'copy'
-
-  when:
-  params.run_genotyping && params.genotyping_tool == 'pileupcaller'
-
-  input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_pileupcaller
-  file fasta from ch_fasta_for_genotyping_pileupcaller.collect()
-  file fai from ch_fai_for_pileupcaller.collect()
-  file dict from ch_dict_for_pileupcaller.collect()
-  file bed from ch_bed_for_pileupcaller.collect()
-  file snp from ch_snp_for_pileupcaller.collect()
-
-  output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${samplename}.*")
-
-  script:
-  caller = "--${params.pileupcaller_method}"
-  ssmode = strandedness == "single" ? "--singleStrandMode" : ""
-  """
-  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam} | pileupCaller ${caller} ${ssmode} --sampleNames ${samplename} -f ${snp} -e pileupcaller.${samplename}
-  """
- }*/
 
  process genotyping_angsd {
   label 'mc_small'
