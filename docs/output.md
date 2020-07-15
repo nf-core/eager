@@ -110,6 +110,8 @@ The possible columns displayed by default are as follows:
 - **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
 - **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
 - **MT to Nuclear Ratio** This from MTtoNucRatio. This reports the number of reads aligned to a mitochondrial entry in your reference FASTA to all other entries. This will typically be high but will vary depending on tissue type.
+- **XRate** This is from Sex.DetERRmine. This is the relative coverage on the X-chromosome.
+- **YRate** This is from Sex.DetERRmine. This is the relative coverage on the Y-chromosome.
 - **% Hets** This is from MultiVCFAnalyzer. This reports the number of SNPs on an assumed haploid organism that have two possible alleles. A high percentage may indicate cross-mapping from a related species.
 
 For other non-default columns (activated under 'Configure Columns'), hover over the column name for further descriptions.
