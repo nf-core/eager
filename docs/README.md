@@ -14,3 +14,5 @@ The nf-core/eager documentation is split into the following files:
    1. This covers common nf-core errors
 7. [Frequently Asked Questions](faq.md)
    1. This covers more specific nf-core/eager errors
+8. Tutorials
+   1. [How to write and use profiles for sharing your settings and reproducible science!](tutorial_profiles.md)

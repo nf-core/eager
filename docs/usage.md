@@ -253,7 +253,7 @@ In this context the following will occur:
 Note the following important points and limitations for setting up:
 
 - The TSV must use actual tabs (not spaces) between cells.
-- _File_ names must be unique irregardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
+- *File* names must be unique irregardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
   - If it is 'too late' and already have duplicate file names, a work around is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
 - Lane IDs must be unique for each sequencing of each library.
   - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
@@ -549,7 +549,7 @@ Defines the adapter sequence to be used for the forward read. By default, this i
 
 Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.
 
-#### `--clip_readlength
+#### `--clip_readlength`
 
 Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.
 
@@ -572,6 +572,7 @@ For example
 ```
 
 > It is important to use the paired-end wildcard globbing as `--skip_collapse` can only be used on paired-end data!
+> :warning: If you run this and also with `--clip_readlength` set to something (as is by default), you may end up removing single reads from either the pair1 or pair2 file. These will be NOT be mapped when aligning with either `bwa` or `bowtie`, as both can only accept one (forward) or two (forward and reverse) FASTQs as input.
 
 #### `--skip_trim`
 
@@ -694,13 +695,11 @@ If using TSV input, filtering is performed library, i.e. after lane merging.
 
 Turns on the bam filtering module for either mapping quality filtering or unmapped read treatment.
 
-#### `--bam_discard_unmapped`
-
-Defines whether unmapped reads should be discarded and stored in FastQ and/or BAM format separately. The behaviour depends on the choice of the `--bam_unmapped_type`.
-
 #### `--bam_unmapped_type`
 
-Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, "both" keeps both BAM and FastQ files. Only effective when option `--bam_discard_unmapped` is turned on.
+Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `keep` keeps both unmapped and mapped reads in the same BAM file, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, `both` keeps both BAM and FASTQ files. Default is `discard`.  `keep` is what would happen if `--run_bam_filtering` was _not_ supplied.
+
+Note that in all cases, if `--bam_mapping_quality_threshold` is also supplied, mapping quality filtering will still occur on the mapped reads.
 
 #### `--bam_mapping_quality_threshold`
 
