@@ -37,7 +37,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#400](https://github.com/nf-core/eager/issues/400) -  Set correct recommended bwa mapping parameters from [Schubert et al. 2012](https://doi.org/10.1186/1471-2164-13-178)
 * [#410](https://github.com/nf-core/eager/issues/410) - Fixed nf-core/configs not being loaded properly
 * [#473](https://github.com/nf-core/eager/issues/473) - Fixed bug in sexdet_process on AWS
+* [#444](https://github.com/nf-core/eager/issues/444) - Provide option for preserving realigned bam + index
 * Increase MultiQC process memory requirements to ensure enough memory for large runs
+* [#497](https://github.com/nf-core/eager/issues/497) - Simplifies number of parameters required to run bam filtering
+* [#501](https://github.com/nf-core/eager/issues/501) - Adds additional validation checks for MALT/MaltExtract database input files
 
 ### `Dependencies`
 
