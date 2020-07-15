@@ -103,8 +103,7 @@ def helpMessage() {
     BAM Filtering
       --run_bam_filtering                Turn on samtools filter for mapping quality or unmapped reads of BAM files.
       --bam_mapping_quality_threshold    Minimum mapping quality for reads filter. Default: ${params.bam_mapping_quality_threshold}
-      --bam_discard_unmapped             Turns on discarding of unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).
-      --bam_unmapped_type                Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'. Default: ${params.bam_unmapped_type}
+      --bam_unmapped_type                Defines whether to discard all unmapped reads, keep both mapped and unmapped together, or save as bam and/or only fastq format Options: 'discard', 'bam', 'keep', 'fastq', 'both'. Default: ${params.bam_unmapped_type}
     
     DeDuplication
       --dedupper                    Deduplication method to use. Options: 'dedup', 'markduplicates'. Default: '${params.dedupper}'
@@ -360,8 +359,8 @@ if (params.strip_input_fastq){
     }
 }
 
-if (params.bam_discard_unmapped && params.bam_unmapped_type == '') {
-    exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'bam', 'fastq', 'both'. You gave --bam_unmapped_type '${params.bam_unmapped_type}'."
+if (params.bam_unmapped_type == '') {
+    exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'keep', 'bam', 'fastq', 'both'. You gave --bam_unmapped_type '${params.bam_unmapped_type}'."
 }
 
 // Bedtools validation
@@ -374,16 +373,8 @@ if (!params.run_bam_filtering && params.bam_mapping_quality_threshold != 0) {
   exit 1, "[nf-core/eager] error: please turn on BAM filtering if you want to perform mapping quality filtering! Give --run_bam_filtering."
 }
 
-if (!params.run_bam_filtering && params.bam_discard_unmapped) {
-  exit 1, "[nf-core/eager] error: please turn on BAM filtering before trying to indicate how to deal with unmapped reads! Give --run_bam_filtering."
-}
-
-if (params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == '') {
-  exit 1, "[nf-core/eager] error: please specify how to deal with unmapped reads. Options: 'discard', 'bam', 'fastq', 'both'."
-}
-
-if (params.run_bam_filtering && !params.bam_discard_unmapped && params.bam_unmapped_type != 'discard') {
-  exit 1, "[nf-core/eager] error: Please turned on unmapped read discarding, if you have specifed a different unmapped type. Give: --bam_discard_unmapped."
+if (params.run_bam_filtering && params.bam_unmapped_type != 'discard' && params.bam_unmapped_type != 'keep' && params.bam_unmapped_type != 'bam' && params.bam_unmapped_type != 'fastq' && params.bam_unmapped_type != 'both' ) {
+  exit 1, "[nf-core/eager] error: please specify how to deal with unmapped reads. Options: 'discard', 'keep', 'bam', 'fastq', 'both'."
 }
 
 // Deduplication validation
@@ -478,12 +469,12 @@ if (params.run_multivcfanalyzer) {
 
 // Metagenomic validation
 if (params.run_metagenomic_screening) {
-  if ( !params.bam_discard_unmapped ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_discard_unmapped and --bam_unmapped_type 'fastq'."
+  if ( params.bam_unmapped_type == "discard" ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'."
   }
 
-  if (params.bam_discard_unmapped && params.bam_unmapped_type != 'fastq' ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTSQ format. Please supply --bam_unmapped_type 'fastq'. You gave: --bam_unmapped_type '${params.bam_unmapped_type}'."
+  if (params.bam_unmapped_type != 'fastq' ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTQ format. Please supply --bam_unmapped_type 'fastq'. You gave: --bam_unmapped_type '${params.bam_unmapped_type}'."
   }
 
   if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
@@ -677,7 +668,6 @@ if (!params.skip_adapterremoval) {
 }
 summary['Running BAM filtering'] = params.run_bam_filtering ? 'Yes' : 'No'
 if (params.run_bam_filtering) {
-  summary['Skip Read Merging'] = params.bam_discard_unmapped ? 'Yes' : 'No'
   summary['Skip Read Merging'] = params.bam_unmapped_type
 }
 summary['Run Fastq Stripping'] = params.strip_input_fastq ? 'Yes' : 'No'
@@ -1581,38 +1571,38 @@ process samtools_filter {
     script:
     size = "${params.large_ref}" ? '-c' : ''
     
-    if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "discard"){
+    if ( "${params.bam_unmapped_type}" == "keep" ) {
+        """
+        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools index "${size}" ${libraryid}.filtered.bam
+        """
+    } else if("${params.bam_unmapped_type}" == "discard"){
         """
         samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
         samtools index "${size}" ${libraryid}.filtered.bam
         """
-    } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "bam"){
+    } else if("${params.bam_unmapped_type}" == "bam"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
         samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
         samtools index "${size}" ${libraryid}.filtered.bam
         """
-    } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "fastq"){
+    } else if("${params.bam_unmapped_type}" == "fastq"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
         samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
         samtools index "${size}" ${libraryid}.filtered.bam
         samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
         rm ${libraryid}.unmapped.bam
         """
-    } else if("${params.bam_discard_unmapped}" && "${params.bam_unmapped_type}" == "both"){
+    } else if("${params.bam_unmapped_type}" == "both"){
         """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.unmapped.bam
+        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
         samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
         samtools index "${size}" ${libraryid}.filtered.bam
         samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
         """
-    } else { //Only apply quality filtering, default
-        """
-        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        """
-    }  
+    }
 }
 
 // samtools_filter bypass in case not run
@@ -1738,7 +1728,7 @@ if (params.run_bam_filtering) {
         def strandedness = it[5]
         def udg = it[6]     
         def stats = file(it[7])
-        def poststats = file("$baseDir/assets/dummy_postfilterflagstat.stats")
+        def poststats = file("$baseDir/assets/dummy.txt")
 
       [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
@@ -2134,8 +2124,7 @@ process additional_library_merge {
   size = "${params.large_ref}" ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_add.bam ${bam}
-  picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 
-RGSM="${samplename}_additionalmerged" VALIDATION_STRINGENCY=LENIENT
+  picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_additionalmerged" VALIDATION_STRINGENCY=LENIENT
   samtools index "${size}" ${samplename}_libmerged_rg_add.bam
   """
 }
@@ -2663,72 +2652,74 @@ if (params.metagenomic_tool == 'malt') {
   ch_bam_filtering_for_metagenomic_malt = Channel.empty()
 }
 
+
+// Stage database files
+// Create input channel for MaltExtract taxon list, to allow downloading of taxon list
+if ( params.database == '') {
+    ch_db_for_malt = Channel.empty()
+} else {
+    ch_db_for_malt = Channel.fromPath(params.database, checkIfExists: true)
+}
+
 // As we collect all files for a single MALT run, we DO NOT use the normal input/output tuple
 process malt {
   label 'mc_small'
   publishDir "${params.outdir}/metagenomic_classification/malt", mode:"copy"
 
   when:
-  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
+  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
 
   input:
   file fastqs from ch_bam_filtering_for_metagenomic_malt.map { it[7] }.collect()
+  file db from ch_db_for_malt
 
   output:
   file "*.rma6" into ch_rma_for_maltExtract
   file "malt.log" into ch_malt_for_multiqc
 
   script:
-  if ("${params.malt_min_support_mode}" == "percent") {
-  """
-  malt-run \
-  -J-Xmx${task.memory.toGiga()}g \
-  -t ${task.cpus} \
-  -v \
-  -o . \
-  -d ${params.database} \
-  -id ${params.percent_identity} \
-  -m ${params.malt_mode} \
-  -at ${params.malt_alignment_mode} \
-  -top ${params.malt_top_percent} \
-  -supp ${params.malt_min_support_percent} \
-  -mq ${params.malt_max_queries} \
-  --memoryMode ${params.malt_memory_mode} \
-  -i ${fastqs.join(' ')} |&tee malt.log
-  """
-  } else if ("${params.malt_min_support_mode}" == "reads") {
-  """
-  malt-run \
-  -J-Xmx${task.memory.toGiga()}g \
-  -t ${task.cpus} \
-  -v \
-  -o . \
-  -d ${params.database} \
-  -id ${params.percent_identity} \
-  -m ${params.malt_mode} \
-  -at ${params.malt_alignment_mode} \
-  -top ${params.malt_top_percent} \
-  -sup ${params.metagenomic_min_support_reads} \
-  -mq ${params.malt_max_queries} \
-  --memoryMode ${params.malt_memory_mode} \
-  -i ${fastqs.join(' ')} |&tee malt.log
-  """
+  if ( "${params.malt_min_support_mode}" == "percent" ) {
+    min_supp = "-supp ${params.malt_min_support_percent}" 
+  } else if ( "${params.malt_min_support_mode}" == "reads" ) {
+    min_supp = "-sup ${params.metagenomic_min_support_reads}"
   }
-
+  """
+  malt-run \
+  -J-Xmx${task.memory.toGiga()}g \
+  -t ${task.cpus} \
+  -v \
+  -o . \
+  -d ${db} \
+  -id ${params.percent_identity} \
+  -m ${params.malt_mode} \
+  -at ${params.malt_alignment_mode} \
+  -top ${params.malt_top_percent} \
+  ${min_supp} \
+  -mq ${params.malt_max_queries} \
+  --memoryMode ${params.malt_memory_mode} \
+  -i ${fastqs.join(' ')} |&tee malt.log
+  """
 }
 
 // Create input channel for MaltExtract taxon list, to allow downloading of taxon list
-if (params.maltextract_taxon_list== '') {
+if ( params.maltextract_taxon_list== '' ) {
     ch_taxonlist_for_maltextract = Channel.empty()
 } else {
-    ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list)
+    ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list, checkIfExists: true)
+}
+
+// Create input channel for MaltExtract NCBI files
+if ( params.maltextract_ncbifiles == '' ) {
+    ch_ncbifiles_for_maltextract = Channel.empty()
+} else {
+    ch_ncbifiles_for_maltextract = Channel.fromPath(params.maltextract_ncbifiles, checkIfExists: true)
 }
 
 // MaltExtract performs aDNA evaluation from the output of MALT (damage patterns, read lengths etc.)
 
 // As we collect all files for a single MALT extract run, we DO NOT use the normal input/output tuple
 process maltextract {
-  label 'mc_large'
+  label 'mc_medium'
   publishDir "${params.outdir}/MaltExtract/", mode:"copy"
 
   when: 
@@ -2737,13 +2728,13 @@ process maltextract {
   input:
   file rma6 from ch_rma_for_maltExtract.collect()
   file taxon_list from ch_taxonlist_for_maltextract
+  file ncbifiles from ch_ncbifiles_for_maltextract
   
   output:
   path "results/" type('dir')
   file "results/*_Wevid.json" optional true into ch_hops_for_multiqc 
 
   script:
-  ncbifiles = params.maltextract_ncbifiles == '' ? "" : "-r ${params.maltextract_ncbifiles}"
   destack = params.maltextract_destackingoff ? "--destackingOff" : ""
   downsam = params.maltextract_downsamplingoff ? "--downSampOff" : ""
   dupremo = params.maltextract_duplicateremovaloff ? "--dupRemOff" : ""
@@ -2757,7 +2748,7 @@ process maltextract {
   -t ${taxon_list} \
   -i ${rma6.join(' ')} \
   -o results/ \
-  ${ncbifiles} \
+  -r ${ncbifiles} \
   -p ${task.cpus} \
   -f ${params.maltextract_filter} \
   -a ${params.maltextract_toppercent} \
@@ -2805,7 +2796,7 @@ process kraken {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
   when:
-  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_discard_unmapped && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
+  params.run_metagenomic_screening && params.run_bam_filtering && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
   file(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }
