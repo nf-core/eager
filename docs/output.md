@@ -618,6 +618,16 @@ Aneuploidy of the sex chromosomes can also be identified with this approach when
   <img src="images/output/sexdeterrmine/sexdeterrmine_relative_coverage.png" width="75%" height = "75%">
 </p>
 
+#### Read Counts
+
+This plot gives you the number of reads mapped onto the Autosomes, X or Y chromosomes. When the total number of mapped reads is low, the estimates are more likely to be dominated by random effects, and hence untrustworthy. 
+For well-covered data without any skews, you should see long bars that are comprised mostly of Autosomal reads. The edge of the bars in female individuals should be mostly X (some small amounts of Y reads are expected and are usually caused by random mapping on the Y chromosome). In males, the number of X-reads will still be higher (since the X chromosome is longer), but the Y reads should be clearly visible on the rightmost end of the bars. The ratio between the number of sites in each bin should roughly correlate with the difference in length in base pairs of each chromosome type.
+If this correlation is not observed, your data is skewed towards higher coverage on some chromosomes. This can be expected if you have enriched for a specific set of markers (e.g. Y-chromosome capture), or if the number of reads is too low. 
+
+<p align="center">
+  <img src="images/output/sexdeterrmine/sexdeterrmine_read_counts.png" width="75%" height = "75%">
+</p>
+
 ### MultiVCFAnalyzer
 
 #### Background
