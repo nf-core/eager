@@ -115,7 +115,6 @@ will then overwrite any that have been changed from the original.
 
 This can be visualised here
 
-
 <p align="center">
   <img src="images/tutorials/profiles/config_profile_inheritence.png" width="75%" height = "75%">
 </p>
@@ -147,7 +146,7 @@ nextflow run nf-core/eager -c old_dna_profile.config -profile old_dna,hpc_blue <
 
 In the background, any parameters in the pipeline's `nextflow.config` (containing
 default parameters) will be overwritten by the `old_dna_profile.config`, but
-in addition, *profile* will overwrite any parameters set in the config but 
+in addition, *profile* will overwrite any parameters set in the config but
 outside the profile.
 
 Therefore, the final profile used by your given run would look like:
