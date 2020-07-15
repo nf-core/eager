@@ -196,6 +196,15 @@ table_columns_placement:
     custom_content:
         endogenous_dna: 600
         endogenous_dna_post: 610
+        Num_SNPs: 1100
+        Method1_MOM_estimate: 1110
+        Method1_MOM_SE: 1120
+        Method1_ML_estimate: 1130
+        Method1_ML_SE: 1140
+        Method2_MOM_estimate: 1150
+        Method2_MOM_SE: 1160
+        Method2_ML_estimate: 1170
+        Method2_ML_SE: 1180
     DeDup:
         mapped_after_dedup: 620
         clusterfactor: 630
@@ -222,7 +231,7 @@ table_columns_placement:
         5_x_pc: 860
         avg_gc: 870
     sexdeterrmine:
-        RateX: 100
+        RateX: 1000
         RateY: 1010
     MultiVCFAnalyzer:
         Heterozygous SNP alleles (percent): 1100
