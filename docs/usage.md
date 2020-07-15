@@ -248,18 +248,18 @@ After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _
 Note the following important points and limitations for setting up:
 
 - The TSV must use actual tabs (not spaces) between cells.
-- _File_ names must be unique irregardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
+- *File* names must be unique irregardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
   - If it is 'too late' and already have duplicate file names, a work around is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
 - Lane IDs must be unique for each sequencing of each library.
   - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
-- All _BAM_ files must be specified as `SE` under `SeqType`.
-- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
+- All *BAM* files must be specified as `SE` under `SeqType`.
+- nf-core/eager will only merge multiple *lanes* of sequencing runs with the same single-end or paired-end configuration
   - `DeDup` utilises both 5' and 3' ends of reads to remove duplicates, and thus will only work correctly on Paired-End data and Single-End data separately.
 - You **must** specify different `Library_ID` names for same libraries but with different sequencing configurations (i.e. PE/SE)
   - e.g. by specifying `_SE` and `_PE` as in the example table above.
   - If you do not have different IDs nf-core/eager will crash with a `file name collision` error when trying to merge after DeDup.
   - Please note this setup is **not** optimal, as you therefore cannot deduplicate PE and SE data of the same library together (and therefore may still have PCR duplicates at the library merging level).
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
+- Accordingly nf-core/eager will not merge *lanes* of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 - DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on
 each unique library separately after deduplication (but prior same-treated library merging).
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
@@ -543,7 +543,7 @@ Defines the adapter sequence to be used for the forward read. By default, this i
 
 Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.
 
-#### `--clip_readlength
+#### `--clip_readlength`
 
 Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.
 
@@ -566,6 +566,7 @@ For example
 ```
 
 > It is important to use the paired-end wildcard globbing as `--skip_collapse` can only be used on paired-end data!
+> :warning: If you run this and also with `--clip_readlength` set to something (as is by default), you may end up removing single reads from either the pair1 or pair2 file. These will be NOT be mapped when aligning with either `bwa` or `bowtie`, as both can only accept one (forward) or two (forward and reverse) FASTQs as input.
 
 #### `--skip_trim`
 

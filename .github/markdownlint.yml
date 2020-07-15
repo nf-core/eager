@@ -8,3 +8,5 @@ no-inline-html:
         - img
         - p
         - kbd
+        - details
+        - summary

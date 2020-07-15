@@ -20,6 +20,30 @@ Specifying the version of the run you are using is highly recommended, as it hel
 
 You can see more information on the nextflow documentation [here](https://www.nextflow.io/docs/latest/sharing.html?highlight=revision#handling-revisions).
 
+## I am only getting output for a single sample although I specified multiple with wildcards
+
+You must specify paths to files in quotes, otherwise your shell will evaluate any wildcards (\*) rather than Nextflow.
+
+For example
+
+```bash
+nextflow run nf-core/eager --input /path/to/sample_*/*.fq.gz
+```
+
+Would be evaluated by your shell as  
+
+```bash
+nextflow run nf-core/eager --input /path/to/sample_1/sample_1.fq.gz /path/to/sample_1/sample_1.fq.gz /path/to/sample_1/sample_1.fq.gz
+```
+
+And Nextflow will only take the first path after `--input`, ignoring the others.
+
+On the otherhand encapsulating the path in quotes will allow Nextflow to evaluate the paths.
+
+```bash
+nextflow run nf-core/eager --input "/path/to/sample_*/*.fq.gz"
+```
+
 ## I specified a module and it didn't produce the expected output
 
 Possible options:
