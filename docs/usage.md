@@ -711,7 +711,7 @@ If using TSV input, deduplication is performed library, i.e. after lane merging.
 
 #### `--dedupper`
 
-Sets the duplicate read removal tool. By default uses `'dedup'` an ancient DNA specific read deduplication tool. Users can also specify `'markdup'` and use Picard MarkDuplicates instead, which is advised when working with paired end data that is *not- merged beforehand. In all other cases, it is advised to use `'dedup'`.
+Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool 'dedup' ([Pelter et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered. This utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.
 
 #### `--dedup_all_merged`
 
