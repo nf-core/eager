@@ -107,30 +107,30 @@ jobs:
       - name: BAM_FILTERING Run basic mapping pipeline with mapping quality filtering, and unmapped export
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_mapping_quality_threshold 37 --bam_discard_unmapped --bam_unmapped_type 'fastq'
-      - name: DEDUPLICATION Test with markduplicates
+      - name: DEDUPLICATION Test with dedup
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'markduplicates'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'dedup'
       - name: GENOTYPING_HC Test running GATK HaplotypeCaller
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker  --dedupper 'dedup' --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
       - name: GENOTYPING_FB Test running FreeBayes
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker  --dedupper 'dedup' --run_genotyping --genotyping_tool 'freebayes'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --genotyping_tool 'freebayes'
       - name: GENOTYPING_PC Test running pileupCaller
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --dedupper 'dedup' --run_genotyping --genotyping_tool 'pileupcaller'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --run_genotyping --genotyping_tool 'pileupcaller'
       - name: GENOTYPING_ANGSD Test running ANGSD genotype likelihood calculation
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --dedupper 'dedup' --run_genotyping --genotyping_tool 'angsd'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --run_genotyping --genotyping_tool 'angsd'
       - name: SKIPPING Test checking all skip steps work i.e. input bam, skipping straight to genotyping
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --skip_fastqc --skip_adapterremoval --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_genotyping --genotyping_tool 'freebayes'
       - name: TRIMBAM Test bamutils works alone
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker  --dedupper 'dedup' --run_trim_bam
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_trim_bam
       - name: TRIMBAM Test PMDtools works alone
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker  --dedupper 'dedup' --run_pmdtools
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_pmdtools
       - name: GATK 3.5 Download resource files
         run: |
             mkdir -p jars/gatk_3_5
@@ -140,13 +140,13 @@ jobs:
             GATK_JAR=$(readlink -f jars/gatk_3_5/GenomeAnalysisTK.jar)
       - name: GENOTYPING_UG AND MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker  --dedupper 'dedup' --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
       - name: COMPLEX LANE/LIBRARY MERGING Test running lane and library merging prior to GATK UnifiedGenotyper and running MultiVCFAnalyzer
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker  --dedupper 'dedup' --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker--run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
       - name: GENOTYPING_UG ON TRIMMED BAM Test
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker  --dedupper 'dedup' --run_genotyping --run_trim_bam --genotyping_source 'trimmed' --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --run_trim_bam --genotyping_source 'trimmed' --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
       - name: BAM_INPUT Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
         run: |
          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --skip_adapterremoval --run_convertinputbam
