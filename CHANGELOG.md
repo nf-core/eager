@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#451] Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
 * [#504] Removed sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination results are now shown in the MultiQC report.
+* Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
 
 ### `Fixed`
 
