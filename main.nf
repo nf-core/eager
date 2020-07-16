@@ -1342,7 +1342,7 @@ process bwa {
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwa
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_lanemerge_for_bwa
     path index from bwa_index.collect()
 
     output:
