@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Increase MultiQC process memory requirements to ensure enough memory for large runs
 * [#497](https://github.com/nf-core/eager/issues/497) - Simplifies number of parameters required to run bam filtering
 * [#501](https://github.com/nf-core/eager/issues/501) - Adds additional validation checks for MALT/MaltExtract database input files
+* [#508](https://github.com/nf-core/eager/issues/508) - Made Markduplicates default dedupper due to narrower context specificity of dedup
 
 ### `Dependencies`
 
