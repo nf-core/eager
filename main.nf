@@ -249,42 +249,45 @@ println ""
 ////////////////////////////////////////////////////
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
+/**FASTA input handling
+**/ 
+
+if (params.fasta) {
+    file(params.fasta, checkIfExists: true)
+
+    lastPath = params.fasta.lastIndexOf(File.separator)
+    lastExt = params.fasta.lastIndexOf(".")
+    fasta_base = params.fasta.substring(lastPath+1)
+    index_base = params.fasta.substring(lastPath+1,lastExt)
+    if (params.fasta.endsWith('.gz')) {
+        fasta_base = params.fasta.substring(lastPath+1,lastExt)
+        index_base = fasta_base.substring(0,fasta_base.lastIndexOf("."))
+    }
+} else {
+    exit 1, "[nf-core/eager] error: please specify --fasta with the path to your reference"
+}
 
 // Validate reference inputs
-if ( params.fasta.isEmpty () ){
-    exit 1, "[nf-core/eager] error: please specify --fasta with the path to your reference"
-} else if("${params.fasta}".endsWith(".gz")){
-    //Put the zip into a channel, then unzip it and forward to downstream processes. DONT unzip in all steps, this is inefficient as NXF links the files anyways from work to work dir
-    zipped_fasta = file("${params.fasta}")
-
-    rm_gz = params.fasta - '.gz'
-    lastPath = rm_gz.lastIndexOf(File.separator)
-    bwa_base = rm_gz.substring(lastPath+1)
-
+if("${params.fasta}".endsWith(".gz")){
     process unzip_reference{
         tag "${zipped_fasta}"
 
         input:
-        file zipped_fasta
+        path zipped_fasta from params.fasta
 
         output:
-        file "*.{fa,fn,fna,fasta}" into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd
+        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd
 
         script:
-        rm_zip = zipped_fasta - '.gz'
+        unzip = zipped_fasta.toString() - '.gz'
         """
         pigz -f -d -p ${task.cpus} $zipped_fasta
         """
         }
-       
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
     .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd }
-    
-    lastPath = params.fasta.lastIndexOf(File.separator)
-    bwa_base = params.fasta.substring(lastPath+1)
-    bt2_base = params.fasta.substring(lastPath+1)
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -317,16 +320,12 @@ if (params.bt2n != 0 && params.bt2n != 1) {
 
 // Index files provided? Then check whether they are correct and complete
 if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
-    lastPath = params.bwa_index.lastIndexOf(File.separator)
-    bwa_dir =  params.bwa_index.substring(0,lastPath+1)
-    bwa_base = params.bwa_index.substring(lastPath+1)
-
     Channel
-        .fromPath(bwa_dir, checkIfExists: true)
-        .ifEmpty { exit 1, "[nf-core/eager] error: bwa indicies not found in: ${bwa_dir}." }
+        .fromPath(params.bwa_index, checkIfExists: true)
+        .ifEmpty { exit 1, "[nf-core/eager] error: bwa indices not found in: ${index_base}." }
         .into {bwa_index; bwa_index_bwamem}
 
-    bt2_index = ''
+    bt2_index = Channel.empty()
 }
 
 if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
@@ -335,11 +334,11 @@ if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
     bt2_base = params.bt2_index.substring(lastPath+1)
 
     Channel
-        .fromPath(bt2_dir, checkIfExists: true)
-        .ifEmpty { exit 1, "[nf-core/eager] error: bowtie2 indicies not found in: ${bt2_dir}." }
+        .fromPath(params.bt2_index, checkIfExists: true)
+        .ifEmpty { exit 1, "[nf-core/eager] error: bowtie2 indices not found in: ${bt2_dir}." }
         .into {bt2_index; bt2_index_bwamem}
 
-    bwa_index = ''
+    bwa_index = Channel.empty()
 }
 
 // Validate BAM input isn't set to paired_end
@@ -760,12 +759,12 @@ if( params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaa
     }
 
     input:
-    file fasta from ch_fasta_for_bwaindex
-    file where_are_my_files
+    path fasta from ch_fasta_for_bwaindex
+    path where_are_my_files
 
     output:
-    file "BWAIndex" into (bwa_index, bwa_index_bwamem)
-    file "where_are_my_files.txt"
+    path "BWAIndex" into (bwa_index, bwa_index_bwamem)
+    path "where_are_my_files.txt"
 
     script:
     """
@@ -773,7 +772,7 @@ if( params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaa
     mkdir BWAIndex && mv ${fasta}* BWAIndex
     """
     }
-    bt2_index = 'none'
+    bt2_index = Channel.empty()
 }
 
 // bowtie2 Index
@@ -788,12 +787,12 @@ if(params.bt2_index == '' && !params.fasta.isEmpty() && params.mapper == "bowtie
     }
 
     input:
-    file fasta from ch_fasta_for_bt2index
-    file where_are_my_files
+    path fasta from ch_fasta_for_bt2index
+    path where_are_my_files
 
     output:
-    file "BT2Index" into (bt2_index)
-    file "where_are_my_files.txt"
+    path "BT2Index" into (bt2_index)
+    path "where_are_my_files.txt"
 
     script:
     """
@@ -802,8 +801,8 @@ if(params.bt2_index == '' && !params.fasta.isEmpty() && params.mapper == "bowtie
     """
     }
 
-  bwa_index = 'none'
-  bwa_index_bwamem = 'none'
+  bwa_index = Channel.empty()
+  bwa_index_bwamem = Channel.empty()
 
 }
 
@@ -830,12 +829,12 @@ process makeFastaIndex {
     when: params.fasta_index == '' && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
 
     input:
-    file fasta from ch_fasta_for_faidx
-    file where_are_my_files
+    path fasta from ch_fasta_for_faidx
+    path where_are_my_files
 
     output:
-    file "*.fai" into ch_fasta_faidx_index
-    file "where_are_my_files.txt"
+    path "*.fai" into ch_fasta_faidx_index
+    path "where_are_my_files.txt"
 
     script:
     """
@@ -870,12 +869,12 @@ process makeSeqDict {
     when: params.seq_dict == '' && !params.fasta.isEmpty()
 
     input:
-    file fasta from ch_fasta_for_seqdict
-    file where_are_my_files
+    path fasta from ch_fasta_for_seqdict
+    path where_are_my_files
 
     output:
-    file "*.dict" into ch_seq_dict
-    file "where_are_my_files.txt"
+    path "*.dict" into ch_seq_dict
+    path "where_are_my_files.txt"
 
     script:
     """
@@ -899,10 +898,10 @@ process convertBam {
     params.run_convertinputbam
 
     input: 
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_convertbam 
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path(bam) from ch_input_for_convertbam 
 
     output:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*fastq.gz"), val('NA') into ch_output_from_convertbam
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path("*fastq.gz"), val('NA') into ch_output_from_convertbam
 
     script:
     base = "${bam.baseName}"
@@ -920,10 +919,10 @@ process indexinputbam {
   bam != 'NA' && !params.run_convertinputbam
 
   input:
-  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(bam) from ch_input_for_indexbam 
+  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path(bam) from ch_input_for_indexbam 
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}")  into ch_indexbam_for_filtering
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), file("*.{bai,csi}")  into ch_indexbam_for_filtering
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -948,14 +947,14 @@ process fastqc {
     publishDir "${params.outdir}/FastQC/input_fastq", mode: 'copy',
         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
-    when: 
-    !params.skip_fastqc
-
     input:
     tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_convertbam_for_fastqc
 
     output:
-    file "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
+    path "*_fastqc.{zip,html}" into ch_prefastqc_for_multiqc
+
+    when: 
+    !params.skip_fastqc
 
     script:
     if ( seqtype == 'PE' ) {
@@ -1001,8 +1000,8 @@ process fastp {
     tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_fastp.twocol
 
     output:
-    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file("*.pG.fq.gz") into ch_output_from_fastp
-    file("*.json") into ch_fastp_for_multiqc
+    tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, path("*.pG.fq.gz") into ch_output_from_fastp
+    path("*.json") into ch_fastp_for_multiqc
 
     script:
     if( seqtype == 'SE' ){
@@ -1027,7 +1026,7 @@ ch_input_for_fastp.fourcol
       def strandedness = it[6]
       def udg = it[7]
       def r1 = it[8]
-      def r2 = seqtype == 'PE' ? it[9] : 'NA'
+      def r2 = seqtype == "PE" ? it[9] : file("$baseDir/assets/nf-core_eager_dummy.txt")
       
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1043,8 +1042,8 @@ ch_output_from_fastp
     def organism = it[5]
     def strandedness = it[6]
     def udg = it[7]
-    def r1 = it[8].getClass() == ArrayList ? it[8].sort()[0] : it[8]
-    def r2 = seqtype == 'PE' ? it[8].sort()[1] : 'NA'
+    def r1 = it[8] instanceof ArrayList ? it[8].sort()[0] : it[8]
+    def r2 = seqtype == "PE" ? it[8].sort()[1] : file("$baseDir/assets/nf-core_eager_dummy.txt")
 
     [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1065,9 +1064,9 @@ process adapter_removal {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*pair2.truncated.gz") optional true into ch_output_from_adapterremoval_r2
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("output/*.settings") into ch_adapterremoval_logs
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*pair2.truncated.gz") optional true into ch_output_from_adapterremoval_r2
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*.settings") into ch_adapterremoval_logs
 
     when: 
     !params.skip_adapterremoval
@@ -1147,7 +1146,7 @@ if ( params.skip_collapse ){
         def strandedness = it[5]
         def udg = it[6]
         def r1 = file(it[7].sort()[0])
-        def r2 = seqtype == 'PE' ? file(it[7].sort()[1]) : 'NA'
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$baseDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1165,7 +1164,7 @@ if ( params.skip_collapse ){
         def strandedness = it[5]
         def udg = it[6]
         def r1 = file(it[7])
-        def r2 = 'NA'
+        def r2 = file("$baseDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
     }
@@ -1205,16 +1204,35 @@ ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
     merge_me: it[7].size() > 1
   }
 
+ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
+  .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = it[7]
+
+        // find and remove duplicate dummies to prevent file collision error
+        def r2 = it[8]*.toString()
+        r2.removeAll{ it == "$baseDir/assets/nf-core_eager_dummy.txt" }
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+  }
+
 process lanemerge {
   label 'mc_tiny'
   tag "${libraryid}"
   publishDir "${params.outdir}/lanemerging", mode: 'copy'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_branched_for_lanemerge.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge_ready
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_lanemerge_for_mapping
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fq.gz") into ch_lanemerge_for_mapping
 
   script:
   if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
@@ -1241,8 +1259,8 @@ ch_lanemerge_for_mapping
       def strandedness = it[5]
       def udg = it[6]
       def reads = arrayify(it[7])
-      def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
-      def r2 = reads[1] ? reads[1] : "NA"      
+      def r1 = it[7] instanceof ArrayList ? reads[0] : it[7]
+      def r2 = reads[1] ? reads[1] : file("$baseDir/assets/nf-core_eager_dummy.txt")
 
 
 
@@ -1266,7 +1284,7 @@ process lanemerge_stripfastq {
   tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_lanemerge_stripfastq.groupTuple(by: [0,1,3,4,5,6,7])
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
 
   script:
   if ( seqtype == 'PE' ){
@@ -1297,7 +1315,7 @@ process fastqc_after_clipping {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_adapterremoval_for_fastqc_after_clipping
 
     output:
-    file("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
+    path("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
 
     script:
     if ( params.skip_collapse && seqtype == 'PE' ) {
@@ -1325,17 +1343,17 @@ process bwa {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwa
-    file index from bwa_index.collect()
+    path index from bwa_index.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwa   
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bwa   
 
     when: 
     params.mapper == 'bwaaln'
 
     script:
-    size = "${params.large_ref}" ? '-c' : ''
-    fasta = "${index}/${bwa_base}"
+    def size = "${params.large_ref}" ? '-c' : ''
+    def fasta = "${index}/${fasta_base}"
 
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
@@ -1365,17 +1383,17 @@ process bwamem {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bwamem
-    file index from bwa_index_bwamem.collect()
+    path index from bwa_index_bwamem.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bwamem
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bwamem
 
     when: 
     params.mapper == 'bwamem'
 
     script:
-    fasta = "${index}/${bwa_base}"
-    size = "${params.large_ref}" ? '-c' : ''
+    def fasta = "${index}/${fasta_base}"
+    def size = "${params.large_ref}" ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
     """
@@ -1431,7 +1449,7 @@ process circularmapper{
     file fasta from ch_fasta_for_circularmapper.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_cm, ch_outputindex_from_cm
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_cm, ch_outputindex_from_cm
 
     when: 
     params.mapper == 'circularmapper'
@@ -1470,22 +1488,22 @@ process bowtie2 {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_bt2
-    file index from bt2_index.collect()
+    path index from bt2_index.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_bt2
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_bt2.log") into ch_bt2_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bt2
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_bt2.log") into ch_bt2_for_multiqc
 
     when: 
     params.mapper == 'bowtie2'
 
     script:
-    size = "${params.large_ref}" ? '-c' : ''
-    fasta = "${index}/${bt2_base}"
-    trim5 = "${params.bt2_trim5}" != 0 ? "--trim5 ${params.bt2_trim5}" : ""
-    trim3 = "${params.bt2_trim3}" != 0 ? "--trim3 ${params.bt2_trim3}" : ""
-    bt2n = "${params.bt2n}" != 0 ? "-N ${params.bt2n}" : ""
-    bt2l = "${params.bt2l}" != 0 ? "-L ${params.bt2l}" : ""
+    def size = "${params.large_ref}" ? '-c' : ''
+    def fasta = "${index}/${fasta_base}"
+    def trim5 = "${params.bt2_trim5}" != 0 ? "--trim5 ${params.bt2_trim5}" : ""
+    def trim3 = "${params.bt2_trim3}" != 0 ? "--trim3 ${params.bt2_trim3}" : ""
+    def bt2n = "${params.bt2n}" != 0 ? "-N ${params.bt2n}" : ""
+    def bt2l = "${params.bt2l}" != 0 ? "-L ${params.bt2l}" : ""
 
     if ( "${params.bt2_alignmode}" == "end-to-end"  ) {
       switch ( "${params.bt2_sensitivity}" ) {
@@ -1681,8 +1699,9 @@ process samtools_flagstat {
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_seqtypemerged_for_samtools_flagstat
 
+
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*stats") into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*stats") into ch_flagstat_for_multiqc,ch_flagstat_for_endorspy
 
     script:
     """
@@ -1711,9 +1730,9 @@ process samtools_filter {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_seqtypemerged_for_samtools_filter
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering,ch_outputindex_from_filtering
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*filtered.bam"), path("*.{bai,csi}") into ch_output_from_filtering,ch_outputindex_from_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.unmapped.bam") optional true
 
     script:
     size = "${params.large_ref}" ? '-c' : ''
@@ -1764,6 +1783,78 @@ if (params.run_bam_filtering) {
 
 }
 
+// Synchronise the mapped input FASTQ and input non-remapped BAM channels
+ch_fastqlanemerge_for_stripfastq
+    .map {
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def reads = arrayify(it[7])
+        def r1 = it[7] instanceof ArrayList ? reads[0] : it[7]
+        def r2 = it[7] instanceof ArrayList ? reads[1] : "NA"      
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+    }
+    .mix(ch_filtering_for_stripfastq)
+    .groupTuple(by: [0,1,3,4,5,6])
+    .map {
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = it[7][0]
+        def r2 = it[8][0]
+        def bam = it[7][1]
+        def bai = it[8][1]
+
+       [ samplename, libraryid, seqtype, organism, strandedness, udg, r1, r2, bam, bai ]
+
+    }
+    .filter{ it[8] != null }
+    .set { ch_synced_for_stripfastq }
+
+// Remove mapped reads from original (lane merged) input FASTQ e.g. for sensitive host data when running metagenomic data
+
+process strip_input_fastq {
+    label 'mc_medium'
+    tag "${libraryid}"
+    publishDir "${params.outdir}/stripped_fastq", mode: 'copy'
+
+    when: 
+    params.strip_input_fastq
+
+    input: 
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
+
+    output:
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, path("*.fq.gz") into ch_output_from_stripfastq
+
+    script:
+    if ( seqtype == 'SE' ) {
+        out_fwd = bam.baseName+'.stripped.fq.gz'
+        """
+        samtools index $bam
+        extract_map_reads.py $bam ${r1} -m ${params.strip_mode} -of $out_fwd -p ${task.cpus}
+        """
+    } else {
+        out_fwd = bam.baseName+'.stripped.fwd.fq.gz'
+        out_rev = bam.baseName+'.stripped.rev.fq.gz'
+        """
+        samtools index $bam
+        extract_map_reads.py $bam ${r1} -rev ${r2} -m  ${params.strip_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
+        """ 
+    }
+    
+}
+
 // Post filtering mapping QC - particularly to help see how much was removed from mapping quality filtering
 
 process samtools_flagstat_after_filter {
@@ -1775,10 +1866,10 @@ process samtools_flagstat_after_filter {
     params.run_bam_filtering
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_filtering_for_flagstat
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_filtering_for_flagstat
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.stats") into ch_bam_filtered_flagstat_for_multiqc, ch_bam_filtered_flagstat_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.stats") into ch_bam_filtered_flagstat_for_multiqc, ch_bam_filtered_flagstat_for_endorspy
 
     script:
     """
@@ -1803,7 +1894,7 @@ if (params.run_bam_filtering) {
         def strandedness = it[5]
         def udg = it[6]     
         def stats = file(it[7])
-        def poststats = file("$baseDir/assets/dummy.txt")
+        def poststats = file("$baseDir/assets/nf-core_eager_dummy.txt")
 
       [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
@@ -1817,10 +1908,10 @@ process endorSpy {
     publishDir "${params.outdir}/endorSpy", mode: 'copy'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(stats), file(poststats) from ch_allflagstats_for_endorspy
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(stats), path(poststats) from ch_allflagstats_for_endorspy
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_endorspy_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.json") into ch_endorspy_for_multiqc
 
     script:
 
@@ -1847,12 +1938,12 @@ process dedup{
     !params.skip_deduplication && params.dedupper == 'dedup'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_filtering_for_dedup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_filtering_for_dedup
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.hist") into ch_hist_for_preseq
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_dedup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup, ch_dedup_for_libeval
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.hist") into ch_hist_for_preseq
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.json") into ch_dedup_results_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${libraryid}_rmdup.bam"), path("*.{bai,csi}") into ch_output_from_dedup, ch_dedup_for_libeval
 
     script:
     outname = "${bam.baseName}"
@@ -1882,11 +1973,11 @@ process markDup{
     !params.skip_deduplication && params.dedupper == 'markduplicates'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_filtering_for_markdup
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_filtering_for_markdup
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.metrics") into ch_markdup_results_for_multiqc
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup, ch_markdup_for_libeval
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.metrics") into ch_markdup_results_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${libraryid}_rmdup.bam"), path("*.{bai,csi}") into ch_output_from_markdup, ch_markdup_for_libeval
 
     script:
     outname = "${bam.baseName}"
@@ -1940,10 +2031,10 @@ process library_merge {
   publishDir "${params.outdir}/merged_bams/initial", mode: 'copy'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_input_for_librarymerging.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_input_for_librarymerging.merge_me
 
   output:
-  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_rmdup.bam"), path("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -1981,10 +2072,10 @@ process preseq {
     !params.skip_preseq
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input) from (params.skip_deduplication ? ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7] } : ch_hist_for_preseq )
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(input) from (params.skip_deduplication ? ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7] } : ch_hist_for_preseq )
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${input.baseName}.ccurve") into ch_preseq_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${input.baseName}.ccurve") into ch_preseq_for_multiqc
 
     script:
     if(!params.skip_deduplication){
@@ -2018,11 +2109,11 @@ process bedtools {
   params.run_bedtools_coverage
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_bedtools
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_bedtools
   file anno_file from ch_anno_for_bedtools.collect()
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*")
 
   script:
   """
@@ -2047,14 +2138,14 @@ process damageprofiler {
     !params.skip_damage_calculation
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_damageprofiler
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_damageprofiler
     file fasta from ch_fasta_for_damageprofiler.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.txt") optional true
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.log")
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.pdf") optional true
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${base}/*.json") optional true into ch_damageprofiler_results
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${base}/*.txt") optional true
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${base}/*.log")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${base}/*.pdf") optional true
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${base}/*.json") optional true into ch_damageprofiler_results
 
     script:
     base = "${bam.baseName}"
@@ -2073,11 +2164,11 @@ process pmdtools {
     when: params.run_pmdtools
 
     input: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_for_pmdtools
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_pmdtools
     file fasta from ch_fasta_for_pmdtools.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.bam"), file("*.{bai,csi}") into ch_output_from_pmdtools
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.bam"), path("*.{bai,csi}") into ch_output_from_pmdtools
     file "*.cpg.range*.txt"
 
     script:
@@ -2128,10 +2219,10 @@ process bam_trim {
     when: params.run_trim_bam
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_bamutils_decision.totrim
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_bamutils_decision.totrim
 
     output: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}") into ch_trimmed_from_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.trimmed.bam"), path("*.{bai,csi}") into ch_trimmed_from_bamutils
 
     script:
     softclip = "${params.bamutils_softclip}" ? '-c' : '' 
@@ -2176,10 +2267,10 @@ process additional_library_merge {
   publishDir "${params.outdir}/merged_bams/additional", mode: 'copy'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_trimmed_formerge.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_trimmed_formerge.merge_me
 
   output:
-  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_add.bam"), file("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_add.bam"), path("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
 
   script:
   size = "${params.large_ref}" ? '-c' : ''
@@ -2205,11 +2296,11 @@ process qualimap {
     !params.skip_qualimap
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_addlibmerge_for_qualimap
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_addlibmerge_for_qualimap
     file fasta from ch_fasta_for_qualimap.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*") into ch_qualimap_results
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") into ch_qualimap_results
 
     script:
     snpcap = ''
@@ -2334,7 +2425,7 @@ if ( params.gatk_ug_jar != '' ) {
   file dict from ch_dict_for_hc.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz")
 
   script:
   if (params.gatk_dbsnp == '')
@@ -2367,7 +2458,7 @@ if ( params.gatk_ug_jar != '' ) {
   file dict from ch_dict_for_freebayes.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz")
   
   script:
   skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
@@ -2425,7 +2516,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   file snp from ch_snp_for_pileupcaller.collect()
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${strandedness}.*")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("pileupcaller.${strandedness}.*")
 
   script:
   transitions_mode = strandedness == "single" ? "" : "${params.pileupcaller_transitions_mode}" == 'SkipTransitions' ? "--skipTransitions" : "${params.pileupcaller_transitions_mode}" == 'TransitionsMissing' ? "--transitionsMissing" : ""
@@ -2501,11 +2592,11 @@ process vcf2genome {
   params.run_vcf2genome
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(vcf) from ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(vcf) from ch_ug_for_vcf2genome
   file fasta from ch_fasta_for_vcf2genome.collect()
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fasta.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fasta.gz")
 
   script:
   out = "${params.vcf2genome_outfile}" == '' ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
@@ -2540,17 +2631,17 @@ if (params.additional_vcf_files == '') {
   file fasta from ch_fasta_for_multivcfanalyzer.collect()
 
   output:
-  file('fullAlignment.fasta.gz') into ch_output_multivcfanalyzer_fullalignment
-  file('info.txt.gz') into ch_output_multivcfanalyzer_info
-  file('snpAlignment.fasta.gz') into ch_output_multivcfanalyzer_snpalignment
-  file('snpAlignmentIncludingRefGenome.fasta.gz') into ch_output_multivcfanalyzer_snpalignmentref
-  file('snpStatistics.tsv.gz') into ch_output_multivcfanalyzer_snpstatistics
-  file('snpTable.tsv.gz') into ch_output_multivcfanalyzer_snptable
-  file('snpTableForSnpEff.tsv.gz') into ch_output_multivcfanalyzer_snptablesnpeff
-  file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
-  file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
-  file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
-  file('MultiVCFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
+  path('fullAlignment.fasta.gz') into ch_output_multivcfanalyzer_fullalignment
+  path('info.txt.gz') into ch_output_multivcfanalyzer_info
+  path('snpAlignment.fasta.gz') into ch_output_multivcfanalyzer_snpalignment
+  path('snpAlignmentIncludingRefGenome.fasta.gz') into ch_output_multivcfanalyzer_snpalignmentref
+  path('snpStatistics.tsv.gz') into ch_output_multivcfanalyzer_snpstatistics
+  path('snpTable.tsv.gz') into ch_output_multivcfanalyzer_snptable
+  path('snpTableForSnpEff.tsv.gz') into ch_output_multivcfanalyzer_snptablesnpeff
+  path('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
+  path('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
+  path('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
+  path('MultiVCFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
   write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
@@ -2575,11 +2666,11 @@ if (params.additional_vcf_files == '') {
   params.run_mtnucratio
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_rmdup_formtnucratio
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_formtnucratio
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mtnucratio")
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_mtnucratio_for_multiqc
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mtnucratio")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.json") into ch_mtnucratio_for_multiqc
 
   script:
   """
@@ -2634,10 +2725,10 @@ process sex_deterrmine {
     params.run_nuclear_contamination
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input), file(bai) from ch_for_nuclear_contamination
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(input), path(bai) from ch_for_nuclear_contamination
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file('*.X.contamination.out') into ch_from_nuclear_contamination
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path('*.X.contamination.out') into ch_from_nuclear_contamination
 
     script:
     """
@@ -2806,10 +2897,10 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
 
   process decomp_kraken {
     input:
-    file(ckdb) from comp_kraken
+    path(ckdb) from comp_kraken
     
     output:
-    file(dbname) into ch_krakendb
+    path(dbname) into ch_krakendb
     
     script:
     dbname = params.database.tokenize("/")[-1].tokenize(".")[0]
@@ -2819,7 +2910,7 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
   }
 
 } else if (! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening && params.metagenomic_tool == 'kraken') {
-    ch_krakendb = file(params.database)
+    ch_krakendb = path(params.database)
 } else {
     ch_krakendb = Channel.empty()
 }
@@ -2833,12 +2924,12 @@ process kraken {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
-  file(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }
-  file(krakendb) from ch_krakendb
+  path(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }
+  path(krakendb) from ch_krakendb
 
   output:
   file "*.kraken.out" into ch_kraken_out
-  tuple prefix, file("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
+  tuple prefix, path("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
 
   script:
   prefix = fastq.toString().tokenize('.')[0]
@@ -2855,10 +2946,10 @@ process kraken_parse {
   errorStrategy 'ignore'
 
   input:
-  tuple val(name), file(kraken_r) from ch_kraken_report
+  tuple val(name), path(kraken_r) from ch_kraken_report
 
   output:
-  tuple val(name), file('*.kraken_parsed.csv') into ch_kraken_parsed
+  tuple val(name), path('*.kraken_parsed.csv') into ch_kraken_parsed
 
   script:
   out = name+".kraken_parsed.csv"
@@ -2871,10 +2962,10 @@ process kraken_merge {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
   input:
-  file csv_count from ch_kraken_parsed.map{ it[1] }.collect().dump()
+  file csv_count from ch_kraken_parsed.map{ it[1] }.collect()
 
   output:
-  file('kraken_count_table.csv')
+  path('kraken_count_table.csv')
 
   script:
   out = "kraken_count_table.csv"
@@ -2964,7 +3055,7 @@ process multiqc {
     file multiqc_config from ch_multiqc_config
     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
     file ('fastqc_raw/*') from ch_prefastqc_for_multiqc.collect().ifEmpty([])
-    file('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
+    path('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
     file software_versions_mqc from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('mapping/bt2/*') from ch_bt2_for_multiqc.collect().ifEmpty([])
@@ -3037,7 +3128,7 @@ workflow.onComplete {
     try {
         if (workflow.success) {
             mqc_report = ch_multiqc_report.getVal()
-            if (mqc_report.getClass() == ArrayList) {
+            if (mqc_report instanceof ArrayList) {
                 log.warn "[nf-core/eager] Found multiple reports from process 'multiqc', will use only one"
                 mqc_report = mqc_report[0]
             }
