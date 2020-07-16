@@ -45,6 +45,10 @@ By default the pipeline currently performs the following:
 
 Additional functionality contained by the pipeline currently includes:
 
+#### Input
+
+* Automatic merging of complex sequencing setups (e.g. multiple lanes, sequencing configurations, library types)
+
 #### Preprocessing
 
 * Illumina two-coloured sequencer poly-G tail removal (`fastp`)
