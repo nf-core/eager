@@ -2401,7 +2401,7 @@ if ( params.gatk_ug_jar != '' ) {
  // pileupCaller for 'random sampling' genotyping
 
 if (params.pileupcaller_bedfile.isEmpty()) {
-  ch_bed_for_pileupcaller = 'NO_FILE_BED'
+  ch_bed_for_pileupcaller = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy.txt")
 } else {
   ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile)
 }
