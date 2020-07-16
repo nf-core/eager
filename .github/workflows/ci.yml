@@ -143,7 +143,7 @@ jobs:
          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
       - name: COMPLEX LANE/LIBRARY MERGING Test running lane and library merging prior to GATK UnifiedGenotyper and running MultiVCFAnalyzer
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker--run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
       - name: GENOTYPING_UG ON TRIMMED BAM Test
         run: |
          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --run_trim_bam --genotyping_source 'trimmed' --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
