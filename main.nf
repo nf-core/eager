@@ -1945,13 +1945,11 @@ if ( params.skip_deduplication ) {
 // This is a bit hacky as theoretically could have different, but this should
 // rarely be the case.
 ch_input_for_librarymerging.clean_libraryid
-  .view()
   .map{
     it ->
       def libraryid = it[1][0]
       [it[0], libraryid, it[2], it[3], it[4], it[5], it[6], it[7][0], it[8][0] ]
     }
-    .view()
   .set { ch_input_for_skiplibrarymerging }
 
 process library_merge {
