@@ -241,10 +241,6 @@ For example, with the following:
 
 After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**. After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` will be merged together. If BAM trimming is turned, all post-trimming BAMs (i.e. non-UDG and half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the same `Sample_Name`.
 
-<p align="center">
-  <img src="images/usage/tsvinput_merging_names.png" width="75%" height = "75%">
-</p>
-
 Note the following important points and limitations for setting up:
 
 - The TSV must use actual tabs (not spaces) between cells.
