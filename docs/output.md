@@ -110,10 +110,10 @@ The possible columns displayed by default are as follows:
 - **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
 - **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
 - **MT to Nuclear Ratio** This from MTtoNucRatio. This reports the number of reads aligned to a mitochondrial entry in your reference FASTA to all other entries. This will typically be high but will vary depending on tissue type.
-- **XRate** This is from Sex.DetERRmine. This is the relative coverage on the X-chromosome.
-- **YRate** This is from Sex.DetERRmine. This is the relative coverage on the Y-chromosome.
+- **XRate** This is from Sex.DetERRmine. This is the relative depth of coverage on the X-chromosome.
+- **YRate** This is from Sex.DetERRmine. This is the relative depth of coverage on the Y-chromosome.
 - **Number of SNPs** This is from ANGSD. The number of SNPs left after removing sites with no data in a 5 base pair surrounding region.
-- **Contamination Estimate (Method1_ML)** This is from ANGSD. The Maximum Likelihood contamination estimate according to Method 1. The estimates using Method of Moments and/or those based on Method 2 can be unhidden through the "Configure Columns" button.
+- **Contamination Estimate (Method1_ML)** This is from the nuclear contamination function of ANGSD. The Maximum Likelihood contamination estimate according to Method 1. The estimates using Method of Moments and/or those based on Method 2 can be unhidden through the "Configure Columns" button.
 - **Estimate Error (Method1_ML)** This is from ANGSD. The standard error of the Method1 Maximum likelihood estimate. The errors associated with Method of Moments and/or Method2 estimates can be unhidden through the "Configure Columns" button.
 - **% Hets** This is from MultiVCFAnalyzer. This reports the number of SNPs on an assumed haploid organism that have two possible alleles. A high percentage may indicate cross-mapping from a related species.
 
