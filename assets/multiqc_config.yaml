@@ -104,6 +104,9 @@ qualimap_config:
         - 4
         - 5
 
+remove_sections:
+  - sexdeterrmine-snps
+
 table_columns_visible:
     FastQC (pre-AdapterRemoval):
         percent_duplicates: False
@@ -159,6 +162,19 @@ table_columns_visible:
         percentage_aligned: False
     MultiVCFAnalyzer:
         Heterozygous SNP alleles (percent): True
+    custom_content:
+        endogenous_dna: True
+        endogenous_dna_post: True
+    nuclear_contamination:
+        Num_SNPs: True
+        Method1_MOM_estimate: False
+        Method1_MOM_SE: False
+        Method1_ML_estimate: True
+        Method1_ML_SE: True
+        Method2_MOM_estimate: False
+        Method2_MOM_SE: False
+        Method2_ML_estimate: False
+        Method2_ML_SE: False
 
 table_columns_placement:
     FastQC (pre-AdapterRemoval):
@@ -192,6 +208,15 @@ table_columns_placement:
     custom_content:
         endogenous_dna: 600
         endogenous_dna_post: 610
+        Num_SNPs: 1100
+        Method1_MOM_estimate: 1110
+        Method1_MOM_SE: 1120
+        Method1_ML_estimate: 1130
+        Method1_ML_SE: 1140
+        Method2_MOM_estimate: 1150
+        Method2_MOM_SE: 1160
+        Method2_ML_estimate: 1170
+        Method2_ML_SE: 1180
     DeDup:
         mapped_after_dedup: 620
         clusterfactor: 630
@@ -218,10 +243,10 @@ table_columns_placement:
         5_x_pc: 860
         avg_gc: 870
     sexdeterrmine:
-        RateX: 100
+        RateX: 1000
         RateY: 1010
     MultiVCFAnalyzer:
-        Heterozygous SNP alleles (percent): 1100
+        Heterozygous SNP alleles (percent): 1200
 read_count_multiplier: 1
 read_count_prefix: ''
 read_count_desc: ''

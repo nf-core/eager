@@ -246,10 +246,6 @@ In this context the following will occur:
 - After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` and the same `UDG_Treatment` will be merged together.
 - If BAM trimming is turned, all post-trimming BAMs (i.e. non-UDG and half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the same `Sample_Name`.
 
-<p align="center">
-  <img src="images/usage/tsvinput_merging_names.png" width="75%" height = "75%">
-</p>
-
 Note the following important points and limitations for setting up:
 
 - The TSV must use actual tabs (not spaces) between cells.

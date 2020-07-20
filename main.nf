@@ -2660,6 +2660,7 @@ process print_nuclear_contamination{
 
     output:
     file 'nuclear_contamination.txt'
+    file 'nuclear_contamination_mqc.json' into ch_nuclear_contamination_for_multiqc
 
     script:
     """
@@ -2983,6 +2984,7 @@ process multiqc {
     file ('malt/*') from ch_malt_for_multiqc.collect().ifEmpty([])
     file ('kraken/*') from ch_kraken_for_multiqc.collect().ifEmpty([])
     file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
+    file ('nuclear_contamination/*') from ch_nuclear_contamination_for_multiqc.collect().ifEmpty([])
     file logo from ch_eager_logo
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")

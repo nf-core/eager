@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
 * [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
 * [#451] Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
+* [#504] Removed sexdeterrmine-snps plot from MultiQC report.
+* Nuclear contamination results are now shown in the MultiQC report.
+* Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
 
 ### `Fixed`
 
@@ -58,6 +61,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Latest version of FreeBayes (1.3.2)
 * Latest version of xopen (0.9.0)
 * Added Bowtie 2 (2.4.1)
+* Latest version of Sex.DetERRmine (1.1.2)
 * Latest version of endorS.py (0.3)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
