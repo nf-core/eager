@@ -128,8 +128,10 @@ def helpMessage() {
 
     BAM Trimming
       --run_trim_bam                Turn on BAM trimming, for example for for full-UDG or half-UDG protocols.
-      --bamutils_clip_left          Specify the number of bases to clip off reads from 'left' end of read. Default: ${params.bamutils_clip_left}
-      --bamutils_clip_right         Specify the number of bases to clip off reads from 'right' end of read. Default: ${params.bamutils_clip_right}
+      --bamutils_clip_half_udg_left   Specify the number of bases to clip off reads from 'left' end of read for UDG half libaries. Default: ${params.bamutils_clip_half_udg_left}
+      --bamutils_clip_half_udg_right  Specify the number of bases to clip off reads from 'right' end of read for UDG half libaries. Default: ${params.bamutils_clip_half_udg_right}
+      --bamutils_clip_non_udg_left    Specify the number of bases to clip off reads from 'left' end of read for non-UDG libaries. Default: ${params.bamutils_clip_non_udg_left}
+      --bamutils_clip_non_udg_right   Specify the number of bases to clip off reads from 'right' end of read for non-UDG libaries. Default: ${params.bamutils_clip_non_udg_right}
       --bamutils_softclip           Turn on using softclip instead of hard masking.
 
     Genotyping
@@ -2131,13 +2133,15 @@ process bam_trim {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_bamutils_decision.totrim
 
     output: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.{bai,csi}") into ch_trimmed_from_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.trimmed.bam.{bai,csi}") into ch_trimmed_from_bamutils
 
     script:
     softclip = "${params.bamutils_softclip}" ? '-c' : '' 
     size = "${params.large_ref}" ? '-c' : ''
+    left_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_left}" : "${params.bamutils_clip_non_udg_left}"
+    right_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_right}" : "${params.bamutils_clip_non_udg_right}"
     """
-    bam trimBam $bam tmp.bam -L ${params.bamutils_clip_left} -R ${params.bamutils_clip_right} ${softclip}
+    bam trimBam $bam tmp.bam -L ${left_clipping} -R ${right_clipping} ${softclip}
     samtools sort -@ ${task.cpus} tmp.bam -o ${libraryid}.trimmed.bam 
     samtools index "${size}" ${libraryid}.trimmed.bam
     """
