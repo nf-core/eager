@@ -16,3 +16,4 @@ The nf-core/eager documentation is split into the following files:
    1. This covers more specific nf-core/eager errors
 8. Tutorials
    1. [How to write and use profiles for sharing your settings and reproducible science!](tutorial_profiles.md)
+   2. [Example nf-core/eager set-up for metagenomic screening](tutorials_metagenomic.md)
