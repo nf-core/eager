@@ -41,6 +41,7 @@ def helpMessage() {
       Reference
         --fasta                       Path or URL to a FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
         --genome                      Name of iGenomes reference (required if not FASTA reference).
+        --large_ref                   Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficent data handling with the '.csi' format over the older '.bai'.
 
     Output options:     
       --outdir                      The output directory where the results will be saved. Default: ${params.outdir}
@@ -928,9 +929,9 @@ process indexinputbam {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file("*.{bai,csi}")  into ch_indexbam_for_filtering
 
   script:
-  size = "${params.large_ref}" ? '-c' : ''
+  def size = params.large_ref ? '-c' : ''
   """
-  samtools index "${size}" ${bam}
+  samtools index ${bam} ${size}
   """
 }
 
@@ -1077,10 +1078,10 @@ process adapter_removal {
     script:
     base = "${r1.baseName}_L${lane}"
     //This checks whether we skip trimming and defines a variable respectively
-    trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
-    collapse_me = params.skip_collapse ? '' : '--collapse'
-    preserve5p = params.preserve5p ? '--preserve5p' : ''
-    mergedonly = params.mergedonly ? "Y" : "N"
+    def trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
+    def collapse_me = params.skip_collapse ? '' : '--collapse'
+    def preserve5p = params.preserve5p ? '--preserve5p' : ''
+    def mergedonly = params.mergedonly ? "Y" : "N"
     
     //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
     if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim ){
@@ -1336,7 +1337,7 @@ process bwa {
     params.mapper == 'bwaaln'
 
     script:
-    size = "${params.large_ref}" ? '-c' : ''
+    def size = params.large_ref ? '-c' : ''
     fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
@@ -1345,14 +1346,14 @@ process bwa {
     bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
     bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${libraryid}_"${seqtype}".mapped.bam
-    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     } else {
     //PE collapsed, or SE data 
     """
     bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $fasta ${libraryid}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
-    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     }
     
@@ -1377,17 +1378,17 @@ process bwamem {
 
     script:
     fasta = "${index}/${bwa_base}"
-    size = "${params.large_ref}" ? '-c' : ''
+    def size = params.large_ref ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
     """
     bwa mem -t ${task.cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
-    samtools index "${size}" -@ ${task.cpus} "${libraryid}".mapped.bam
+    samtools index ${size} -@ ${task.cpus} "${libraryid}".mapped.bam
     """
     } else {
     """
     bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
-    samtools index "${size}" -@ ${task.cpus} "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index -@ ${task.cpus} "${libraryid}"_"${seqtype}".mapped.bam ${size} 
     """
     }
     
@@ -1439,10 +1440,9 @@ process circularmapper{
     params.mapper == 'circularmapper'
 
     script:
-    filter = "${params.circularfilter}" ? '' : '-f true -x false'
+    def filter = params.circularfilter ? '' : '-f true -x false'
     elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
-
-    size = "${params.large_ref}" ? '-c' : ''
+    def size = params.large_ref ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse ){
     """
@@ -1451,7 +1451,7 @@ process circularmapper{
     bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $elongated_root ${libraryid}.r1.sai ${libraryid}.r2.sai $r1 $r2 > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${libraryid}_"${seqtype}".mapped.bam
-    samtools index "${size}" ${libraryid}_"${seqtype}".mapped.bam
+    samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size} 
     """
     } else {
     """ 
@@ -1459,7 +1459,7 @@ process circularmapper{
     bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina" $elongated_root ${libraryid}.sai $r1 > tmp.out
     realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${libraryid}"_"${seqtype}".mapped.bam
-    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     }
     
@@ -1482,7 +1482,7 @@ process bowtie2 {
     params.mapper == 'bowtie2'
 
     script:
-    size = "${params.large_ref}" ? '-c' : ''
+    def size = params.large_ref ? '-c' : ''
     fasta = "${index}/${bt2_base}"
     trim5 = "${params.bt2_trim5}" != 0 ? "--trim5 ${params.bt2_trim5}" : ""
     trim3 = "${params.bt2_trim3}" != 0 ? "--trim3 ${params.bt2_trim3}" : ""
@@ -1526,13 +1526,13 @@ process bowtie2 {
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
     """
     bowtie2 -x ${fasta} -1 ${r1} -2 ${r2} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
-    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     } else {
     //PE collapsed, or SE data 
     """
     bowtie2 -x ${fasta} -U ${r1} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
-    samtools index "${size}" "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     }
     
@@ -1659,12 +1659,12 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_seqtypemerged_rg.bam"), file("*_seqtypemerged_rg*.{bai,csi}")  into ch_seqtypemerge_for_filtering
 
     script:
-    size = "${params.large_ref}" ? '-c' : ''
+    def size = params.large_ref ? '-c' : ''
     """
     samtools merge ${libraryid}_seqtypemerged.bam ${bam}
     ## Have to set validation as lenient because of BWA issue: "I see a read stands out the end of a chromosome and is flagged as unmapped (flag 0x4). [...]" http://bio-bwa.sourceforge.net/
     picard AddOrReplaceReadGroups I=${libraryid}_seqtypemerged.bam O=${libraryid}_seqtypemerged_rg.bam RGID=1 RGLB="${libraryid}_seqtypemerged" RGPL=illumina RGPU=4410 RGSM="${libraryid}_seqtypemerged" VALIDATION_STRINGENCY=LENIENT
-    samtools index "${size}" ${libraryid}_seqtypemerged_rg.bam
+    samtools index ${libraryid}_seqtypemerged_rg.bam ${size}
     """
     
   }
@@ -1718,29 +1718,29 @@ process samtools_filter {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
     script:
-    size = "${params.large_ref}" ? '-c' : ''
+    def size = params.large_ref ? '-c' : ''
     
     if ( "${params.bam_unmapped_type}" == "keep" ) {
         """
         samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size} 
         """
     } else if("${params.bam_unmapped_type}" == "discard"){
         """
         samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size}
         """
     } else if("${params.bam_unmapped_type}" == "bam"){
         """
         samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
         samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size}
         """
     } else if("${params.bam_unmapped_type}" == "fastq"){
         """
         samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
         samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size}
         samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
         rm ${libraryid}.unmapped.bam
         """
@@ -1748,7 +1748,7 @@ process samtools_filter {
         """
         samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
         samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size}
         samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
         """
     }
@@ -1858,8 +1858,8 @@ process dedup{
 
     script:
     outname = "${bam.baseName}"
-    treat_merged="${params.dedup_all_merged}" ? '-m' : ''
-    size = "${params.large_ref}" ? '-c' : ''
+    def treat_merged = params.dedup_all_merged ? '-m' : ''
+    def size = params.large_ref ? '-c' : ''
     
     """
     ## To make sure direct BAMs have a clean name
@@ -1870,11 +1870,11 @@ process dedup{
     dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
-    samtools index "${size}" "${libraryid}"_rmdup.bam
+    samtools index "${libraryid}"_rmdup.bam ${size}
     """
 }
 
-process markDup{
+process markduplicates{
     label 'mc_small'
     tag "${outname}"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
@@ -1892,10 +1892,10 @@ process markDup{
 
     script:
     outname = "${bam.baseName}"
-    size = "${params.large_ref}" ? '-c' : ''
+    def size = params.large_ref ? '-c' : ''
     """
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
-    samtools index "${size}" ${libraryid}_rmdup.bam
+    samtools index ${libraryid}_rmdup.bam ${size}
     """
 }
 
@@ -1948,12 +1948,12 @@ process library_merge {
   tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
 
   script:
-  size = "${params.large_ref}" ? '-c' : ''
+  def size = params.large_ref ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
   ## Have to set validation as lenient because of BWA issue: "I see a read stands out the end of a chromosome and is flagged as unmapped (flag 0x4). [...]" http://bio-bwa.sourceforge.net/
   picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged" VALIDATION_STRINGENCY=LENIENT
-  samtools index "${size}" ${samplename}_libmerged_rg_rmdup.bam
+  samtools index ${samplename}_libmerged_rg_rmdup.bam ${size}
   """
 }
 
@@ -2091,13 +2091,13 @@ process pmdtools {
     } else {
         snpcap = ''
     }
-    size = "${params.large_ref}" ? '-c' : ''
+    def size = params.large_ref ? '-c' : ''
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${libraryid}".pmd.bam
     #Run Calc Range step
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt 
-    samtools index "${size}" ${libraryid}.pmd.bam
+    samtools index ${libraryid}.pmd.bam ${size}
     """
 }
 
@@ -2136,14 +2136,14 @@ process bam_trim {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.trimmed.bam.{bai,csi}") into ch_trimmed_from_bamutils
 
     script:
-    softclip = "${params.bamutils_softclip}" ? '-c' : '' 
-    size = "${params.large_ref}" ? '-c' : ''
+    def softclip = params.bamutils_softclip ? '-c' : '' 
+    def size = params.large_ref ? '-c' : ''
     left_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_left}" : "${params.bamutils_clip_non_udg_left}"
     right_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_right}" : "${params.bamutils_clip_non_udg_right}"
     """
     bam trimBam $bam tmp.bam -L ${left_clipping} -R ${right_clipping} ${softclip}
     samtools sort -@ ${task.cpus} tmp.bam -o ${libraryid}.trimmed.bam 
-    samtools index "${size}" ${libraryid}.trimmed.bam
+    samtools index ${libraryid}.trimmed.bam ${size}
     """
 }
 
@@ -2186,11 +2186,11 @@ process additional_library_merge {
   tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_add.bam"), file("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
 
   script:
-  size = "${params.large_ref}" ? '-c' : ''
+  def size = params.large_ref ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_add.bam ${bam}
   picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_additionalmerged" VALIDATION_STRINGENCY=LENIENT
-  samtools index "${size}" ${samplename}_libmerged_rg_add.bam
+  samtools index ${samplename}_libmerged_rg_add.bam ${size}
   """
 }
 
@@ -2216,8 +2216,7 @@ process qualimap {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*") into ch_qualimap_results
 
     script:
-    snpcap = ''
-    if(params.snpcapture) snpcap = "-gff ${params.bedfile}"
+    def snpcap = params.snpcapture ? "-gff ${params.bedfile}" : ''
     """
     qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
     """
@@ -2482,7 +2481,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
     angsd_glformat = "3"; break
   }
   
-  angsd_fasta = !params.angsd_createfasta ? '' : params.angsd_fastamethod == 'random' ? '-doFasta 1 -doCounts 1' : '-doFasta 2 -doCounts 1' 
+  def angsd_fasta = !params.angsd_createfasta ? '' : params.angsd_fastamethod == 'random' ? '-doFasta 1 -doCounts 1' : '-doFasta 2 -doCounts 1' 
   """
   echo ${bam} > bam.filelist
   mkdir angsd
@@ -2557,7 +2556,7 @@ if (params.additional_vcf_files == '') {
   file('MultiVCFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
-  write_freqs = "$params.write_allele_frequencies" ? "T" : "F"
+  def write_freqs = params.write_allele_frequencies ? "T" : "F"
   """
   gunzip -f *.vcf.gz
   multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
@@ -2616,7 +2615,7 @@ process sex_deterrmine {
     params.run_sexdeterrmine
     
     script:
-    def filter = bed.name != 'NO_FILE' ? "-b $bed" : ''
+    filter = bed.name != 'NO_FILE' ? "-b $bed" : ''
     """
     
     for i in *.bam; do
@@ -2773,13 +2772,13 @@ process maltextract {
   file "results/*_Wevid.json" optional true into ch_hops_for_multiqc 
 
   script:
-  destack = params.maltextract_destackingoff ? "--destackingOff" : ""
-  downsam = params.maltextract_downsamplingoff ? "--downSampOff" : ""
-  dupremo = params.maltextract_duplicateremovaloff ? "--dupRemOff" : ""
-  matches = params.maltextract_matches ? "--matches" : ""
-  megsum = params.maltextract_megansummary ? "--meganSummary" : ""
-  topaln = params.maltextract_topalignment ?  "--useTopAlignment" : ""
-  ss = params.single_stranded ? "--singleStranded" : ""
+  def destack = params.maltextract_destackingoff ? "--destackingOff" : ""
+  def downsam = params.maltextract_downsamplingoff ? "--downSampOff" : ""
+  def dupremo = params.maltextract_duplicateremovaloff ? "--dupRemOff" : ""
+  def matches = params.maltextract_matches ? "--matches" : ""
+  def megsum = params.maltextract_megansummary ? "--meganSummary" : ""
+  def topaln = params.maltextract_topalignment ?  "--useTopAlignment" : ""
+  def ss = params.single_stranded ? "--singleStranded" : ""
   """
   MaltExtract \
   -Xmx${task.memory.toGiga()}g \

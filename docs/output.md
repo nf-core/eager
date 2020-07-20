@@ -110,6 +110,11 @@ The possible columns displayed by default are as follows:
 - **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
 - **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
 - **MT to Nuclear Ratio** This from MTtoNucRatio. This reports the number of reads aligned to a mitochondrial entry in your reference FASTA to all other entries. This will typically be high but will vary depending on tissue type.
+- **XRate** This is from Sex.DetERRmine. This is the relative depth of coverage on the X-chromosome.
+- **YRate** This is from Sex.DetERRmine. This is the relative depth of coverage on the Y-chromosome.
+- **Number of SNPs** This is from ANGSD. The number of SNPs left after removing sites with no data in a 5 base pair surrounding region.
+- **Contamination Estimate (Method1_ML)** This is from the nuclear contamination function of ANGSD. The Maximum Likelihood contamination estimate according to Method 1. The estimates using Method of Moments and/or those based on Method 2 can be unhidden through the "Configure Columns" button.
+- **Estimate Error (Method1_ML)** This is from ANGSD. The standard error of the Method1 Maximum likelihood estimate. The errors associated with Method of Moments and/or Method2 estimates can be unhidden through the "Configure Columns" button.
 - **% Hets** This is from MultiVCFAnalyzer. This reports the number of SNPs on an assumed haploid organism that have two possible alleles. A high percentage may indicate cross-mapping from a related species.
 
 For other non-default columns (activated under 'Configure Columns'), hover over the column name for further descriptions.
@@ -616,6 +621,16 @@ Aneuploidy of the sex chromosomes can also be identified with this approach when
 
 <p align="center">
   <img src="images/output/sexdeterrmine/sexdeterrmine_relative_coverage.png" width="75%" height = "75%">
+</p>
+
+#### Read Counts
+
+This plot gives you the number of reads mapped onto the Autosomes, X or Y chromosomes. When the total number of mapped reads is low, the estimates are more likely to be dominated by random effects, and hence untrustworthy.
+For well-covered data without any skews, you should see long bars that are comprised mostly of Autosomal reads. The edge of the bars in female individuals should be mostly X (some small amounts of Y reads are expected and are usually caused by random mapping on the Y chromosome). In males, the number of X-reads will still be higher (since the X chromosome is longer), but the Y reads should be clearly visible on the rightmost end of the bars. The ratio between the number of sites in each bin should roughly correlate with the difference in length in base pairs of each chromosome type.
+If this correlation is not observed, your data is skewed towards higher coverage on some chromosomes. This can be expected if you have enriched for a specific set of markers (e.g. Y-chromosome capture), or if the number of reads is too low.
+
+<p align="center">
+  <img src="images/output/sexdeterrmine/sexdeterrmine_read_counts.png" width="75%" height = "75%">
 </p>
 
 ### MultiVCFAnalyzer
