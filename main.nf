@@ -128,12 +128,12 @@ def helpMessage() {
       --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.
 
     BAM Trimming
-      --run_trim_bam                Turn on BAM trimming, for example for for full-UDG or half-UDG protocols.
-      --bamutils_clip_half_udg_left   Specify the number of bases to clip off reads from 'left' end of read for UDG half libaries. Default: ${params.bamutils_clip_half_udg_left}
-      --bamutils_clip_half_udg_right  Specify the number of bases to clip off reads from 'right' end of read for UDG half libaries. Default: ${params.bamutils_clip_half_udg_right}
-      --bamutils_clip_non_udg_left    Specify the number of bases to clip off reads from 'left' end of read for non-UDG libaries. Default: ${params.bamutils_clip_non_udg_left}
-      --bamutils_clip_non_udg_right   Specify the number of bases to clip off reads from 'right' end of read for non-UDG libaries. Default: ${params.bamutils_clip_non_udg_right}
-      --bamutils_softclip           Turn on using softclip instead of hard masking.
+      --run_trim_bam                   Turn on BAM trimming, for example for for full-UDG or half-UDG protocols.
+      --bamutils_clip_half_udg_left    Specify the number of bases to clip off reads from 'left' end of read for UDG half libaries. Default: ${params.bamutils_clip_half_udg_left}
+      --bamutils_clip_half_udg_right   Specify the number of bases to clip off reads from 'right' end of read for UDG half libaries. Default: ${params.bamutils_clip_half_udg_right}
+      --bamutils_clip_none_udg_left    Specify the number of bases to clip off reads from 'left' end of read for non-UDG libaries. Default: ${params.bamutils_clip_none_udg_left}
+      --bamutils_clip_none_udg_right   Specify the number of bases to clip off reads from 'right' end of read for non-UDG libaries. Default: ${params.bamutils_clip_none_udg_right}
+      --bamutils_softclip              Turn on using softclip instead of hard masking.
 
     Genotyping
       --run_genotyping                Turn on genotyping of BAM files.
@@ -2138,8 +2138,8 @@ process bam_trim {
     script:
     def softclip = params.bamutils_softclip ? '-c' : '' 
     def size = params.large_ref ? '-c' : ''
-    def left_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_left}" : "${params.bamutils_clip_non_udg_left}"
-    def right_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_right}" : "${params.bamutils_clip_non_udg_right}"
+    def left_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_left}" : "${params.bamutils_clip_none_udg_left}"
+    def right_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_right}" : "${params.bamutils_clip_none_udg_right}"
     """
     bam trimBam $bam tmp.bam -L ${left_clipping} -R ${right_clipping} ${softclip}
     samtools sort -@ ${task.cpus} tmp.bam -o ${libraryid}.trimmed.bam 
