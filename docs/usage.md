@@ -711,9 +711,9 @@ If using TSV input, deduplication is performed library, i.e. after lane merging.
 
 #### `--dedupper`
 
-Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool 'dedup' ([Pelter et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered. 
+Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool 'dedup' ([Pelter et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered.
 
-This utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data. 
+This utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.
 
 Note that if you run without the `--mergedonly` flag for AdapterRemoval, DeDup will
 likely fail. If you absolutely want to use both PE and SE data, you can supply the
