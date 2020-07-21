@@ -1204,6 +1204,22 @@ ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
     merge_me: it[7].size() > 1
   }
 
+ch_branched_for_lanemerge_skipme = ch_branched_for_lanemerge.skip_merge
+  .map{
+    it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = it[7][0]
+        def r2 = it[8][0]
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+  }
+
 ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
   .map{
       it -> 
@@ -1262,12 +1278,11 @@ ch_lanemerge_for_mapping
       def r1 = it[7] instanceof ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : file("$baseDir/assets/nf-core_eager_dummy.txt")
 
-
-
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
   }
-  .mix(ch_branched_for_lanemerge.skip_merge)
+  .mix(ch_branched_for_lanemerge_skipme)
+  .dump()
   .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 } 
 
 // ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads stripping 
