@@ -776,13 +776,17 @@ More documentation can be seen in the [bamUtil documentation](https://genome.sph
 
 Turns on the BAM trimming method. Trims off `[n]` bases from reads in the deduplicated BAM file  Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming os typically performed to reduce errors during genotyping that can be caused by aDNA damage.
 
-BAM trimming will only be performed on libraries indicated as `--udg_type 'none'` or `--udg_type 'half'`. Complete UDG treatment ('full') should already have all damage removed. The amount of bases that will be trimmed off (see `--bamutils_clip_left` / `--bamutils_clip_right`) will be the same regardless whether `'none'` of `'half'`.
+BAM trimming will only be performed on libraries indicated as `--udg_type 'none'` or `--udg_type 'half'`. Complete UDG treatment ('full') should have removed all damage. The amount of bases that will be trimmed off can be set separately for libraries with `--udg_type` `'none'` and `'half'`  (see `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right` / `--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`).
 
 > Note: additional artefacts such as bar-codes or adapters that could potentially also be trimmed should be removed prior mapping.
 
-#### `--bamutils_clip_left` / `--bamutils_clip_right`
+#### `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right`
 
-Default set to `1` and clips off one base of the left or right side of reads. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).
+Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).
+
+#### `--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`
+
+Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).
 
 #### `--bamutils_softclip`
 
