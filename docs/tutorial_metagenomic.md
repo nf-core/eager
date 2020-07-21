@@ -9,7 +9,7 @@ dental calculus (oral). This tutorial will give a basic example on how to set up
 nf-core/eager to perform initial screening of samples in the context of ancient
 microbiome research.
 
-> :important: this tutorial does not describe how to install and setup
+> :warning: this tutorial does not describe how to install and setup
 > nf-core/eager For this please see other documentation on the
 > [nf-co.re](https://nf-co.re/usage/installation) website.
 
