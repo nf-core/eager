@@ -128,7 +128,7 @@ jobs:
       - name: TRIMBAM Test bamutils works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_trim_bam
-      - name: TRIMBAM Test PMDtools works alone
+      - name: PMDTOOLS Test PMDtools works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_pmdtools
       - name: GATK 3.5 Download resource files
