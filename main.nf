@@ -1282,7 +1282,7 @@ ch_lanemerge_for_mapping
 
   }
   .mix(ch_branched_for_lanemerge_skipme)
-  .dump()
+  .dump(tag: "Merge Lane Map Content")
   .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 } 
 
 // ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads stripping 
@@ -1673,6 +1673,7 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
       [ samplename, libraryid, lane, seqtype_new, organism, strandedness, udg, r1, r2 ]
 
   }
+  .dump(tag: "Seqtype")
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -2414,7 +2415,7 @@ if ( params.gatk_ug_jar != '' ) {
  // pileupCaller for 'random sampling' genotyping
 
 if (params.pileupcaller_bedfile.isEmpty()) {
-  ch_bed_for_pileupcaller = 'NO_FILE_BED'
+  ch_bed_for_pileupcaller = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy.txt")
 } else {
   ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile)
 }
