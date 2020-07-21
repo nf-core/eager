@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
 * [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
 * [#451](https://github.com/nf-core/eager/issues/451) Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
-* [#566](https://github.com/nf-core/eager/issues/466) Adds tutorials on how to set up nf-core/eager for different contexts 
+* [#566](https://github.com/nf-core/eager/issues/466) Adds tutorials on how to set up nf-core/eager for different contexts
 
 ### `Fixed`
 
