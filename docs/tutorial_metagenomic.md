@@ -303,6 +303,8 @@ Assuming the run completed without any crashes (if problems do occur, check all
 against [#usage](usage.md) all parameters are as expected, or check the
 [FAQ](../faq.md)), we can now check our results in `results/`.
 
+### MultiQC Report
+
 In here there are many different directories containing different output files.
 The first directory to check is the `MultiQC/` directory. In here you should
 find a `multiqc_report.html` file. You will need to view this in a web browser,
@@ -311,35 +313,110 @@ it to your own local machine (PC/Laptop etc.).
 
 Once you've opened this you can go through each section and evaluate all the
 results. You will likely not want to concern yourself too much with anything
-after MALT - however you should check these for other artefacts (e.g. wierd
-damage patterns on the human DNA, or wierdly skewed coverage distributions).
+after MALT - however you should check these for other artefacts (e.g. weird
+damage patterns on the human DNA, or weirdly skewed coverage distributions).
+
+For example, I normally look for things like:
+
+General Stats Table:
+
+- Do I see the expected number of raw sequencing reads (summed across each set
+  of FASTQ files per library) that was requested for sequencing?
+- Does the percentage of trimmed reads look normal for aDNA, and do lengths
+  after trimming look short as expected of aDNA?
+- Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively - however
+  given this is on the human reads this is just a rule of thumb and may not
+  reflect the quality of the metagenomic profile)?suggesting over-amplified or
+  badly preserved samples?
+- Does the human DNA show increased frequency of C>Ts on the 5' end of molecules
+  (you may need to un-hide the 2nd base columns with 'configure columns'
+  button)?
+
+FastQC (pre-AdapterRemoval):
+
+- Do I see any very early drop off of sequence quality scores suggesting
+  problematic sequencing run?
+- Do I see outlier GC content distributions?
+- Do I see high sequence duplication levels?
+
+AdapterRemoval:
+
+- Do I see high numbers of singletons or discarded read pairs?
+
+FastQC (post-AdapterRemoval):
+
+- Do I see improved sequence quality scores along the length of reads?
+- Do I see reduced adapter content levels?
+
+MALT:
+
+- Do I have a reasonable level of mappability?
+  - Somewhere between 10-30% can be pretty normal for aDNA, whereas e.g. <1%
+    requires careful manual assessment
+- Do I have a reasonable taxonomic assignment success?
+  - You hope a large number of the mapped reads (from the mappability plot) also
+    have taxonomic assignment.
+
+Samtools Flagstat (pre/post Filter):
+
+- Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
+  of contamination) that require downstream closer assessment?
+
+DeDup/Picard MarkDuplicates):
+
+- Do I see large numbers of duplicates being removed, possibly indicating
+  over-amplified or badly preserved samples?
+
+DamageProfiler:
+
+- Do I see evidence of damage on human DNA? Note this is just a
+  rule-of-thumb/corroboration of any signals you might find in the metagenomic
+  screening and not essential.
+  - If high numbers of human DNA reads but no damage may indicate significant
+    modern contamination.
+
+> Detailed documentation and descriptions for all MultiQC modules can be seen in
+> the the 'Documentation' folder of the results directory or here in the [output
+> documentation](output.md)
 
 If you're happy everything looks good in terms of sequencing, we then look at
 specific directories to find any files you might want to do for downstream
 processing.
 
-For example, if you wanted to re-run the taxonomic classification with a new
-datbase or tool, to find the raw `fastq/` files containing only unmapped reads
-that went into MALT, you should go into `samtools/filter`. In here you will find
-files ending in `unmapped.fastq.gz` for each library.
+Note that when you get back to writing up your publication, all the versions of
+the tools can be found under the 'nf-core/eager Software Versions` section of
+the MultiQC report. Note that all tools in the container are listed, so you may
+have to remove some of them that you didn't actually use in the set up.
+
+For example, in this example, we have used: Nextflow, nf-core/eager, FastQC,
+AdapterRemoval, fastP, BWA, Samtools, endorS.py, Picard Markduplicates,
+Qualimap, PreSeq, DamageProfiler, MALT, Maltextract and MultiQC.
+
+### Files for Downstream Analysis
 
 If you wanted to look at the output of MALT more closely, such as in the GUI
 based tool
 [MEGAN6](https://software-ab.informatik.uni-tuebingen.de/download/megan6/welcome.html),
 you can find the `.rma6` files that is accepted by MEGAN under
-`metagenomic_classification/malt/`. The log file ocntaining the information
-printed to screen while MALT is running can also be found in this directory.
+`metagenomic_classification/malt/`. The log file containing the information
+printed to screen while MALT is running can also be found in this directory. The
 
-Finally, as we ran the HOPS pipeline (primarily with the MaltExtract tool), we
-can look in `MaltExtract/results/` to find all the corresponding output files
-for the authentication validation of the metagenomic screening (against the taxa
-you specified in your `--maltextract_taxon_list `). First you can check the
+As we ran the HOPS pipeline (primarily with the MaltExtract tool), we can look
+in `MaltExtract/results/` to find all the corresponding output files for the
+authentication validation of the metagenomic screening (against the taxa you
+specified in your `--maltextract_taxon_list`). First you can check the
 `heatmap_overview_Wevid.pdf` summary PDF from HOPS (again you will need to
 either mount the server or download), but to get the actual per-sample/taxon
 damage patterns etc., you can look in `pdf_candidate_profiles`. In some cases
-there maybe valid results that the HOPS 'postprocessing' script doesn't pick up
-- in those cases you can go into the `default` directory to find all the raw
-  text files which you can use to visualise and assess the results yourself.
+there maybe valid results that the HOPS 'postprocessing' script doesn't pick up.
+In these cases you can go into the `default` directory to find all the raw text
+files which you can use to visualise and assess the authentication results
+yourself.
+
+Finally, if you want to re-run the taxonomic classification with a new
+database or tool, to find the raw `fastq/` files containing only unmapped reads
+that went into MALT, you should go into `samtools/filter`. In here you will find
+files ending in `unmapped.fastq.gz` for each library.
 
 ## Clean up
 
@@ -358,3 +435,11 @@ nextflow clean -f -k
 ```
 
 ## Summary
+
+In this this tutorial we have described an example on how to set up a metagnomic
+screening run of ancient microbiome samples. We have covered how set up
+nf-core/eager to extract off-target in a form that can be used for MALT, and how
+to additional run HOPS to authenticate expected taxa to be found in the
+microbiome. Finally we have also described what to look for in the MultiQC run
+summary report and where to find output files that can be used for downstream
+analysis.
