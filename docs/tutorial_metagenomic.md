@@ -224,7 +224,12 @@ file back to FASTQ, which can be accepted by MALT. But of course, we also then
 need to tell nf-core/eager we actually want to run MALT. We will also specify
 the location of the [pre-built database](#preparation) and which 'min support'
 method we want to use (this specifies the minimum number of alignments is needed
-to a particular taxonomic node to be 'kept' in the MALT output files).
+to a particular taxonomic node to be 'kept' in the MALT output files). Otherwise
+we will keep all other parameters as default. For example using BlastN mode, 
+requiring a minimum of 85% identity, requiring at least 0.01% alignments for
+a taxon to be saved (as specified with the `--malt_min_support_mode`). More
+documentation describing each parameters can be seen in the usage 
+[documentation](usage.md)
 
 ```bash
 nextflow run nf-core/eager \
