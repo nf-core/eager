@@ -1206,7 +1206,7 @@ ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
   }
 
 process lanemerge {
-  label 'mc_tiny'
+  label 'sc_tiny'
   tag "${libraryid}"
   publishDir "${params.outdir}/lanemerging", mode: 'copy'
 
@@ -1256,7 +1256,7 @@ ch_lanemerge_for_mapping
 
 // Per-library lane grouping done within process
 process lanemerge_stripfastq {
-  label 'mc_tiny'
+  label 'sc_tiny'
   tag "${libraryid}"
 
   when: 
@@ -1935,7 +1935,7 @@ ch_input_for_librarymerging.clean_libraryid
   .set { ch_input_for_skiplibrarymerging }
 
 process library_merge {
-  label 'mc_tiny'
+  label 'sc_tiny'
   tag "${samplename}"
   publishDir "${params.outdir}/merged_bams/initial", mode: 'copy'
 
@@ -2171,7 +2171,7 @@ ch_trimmed_formerge = ch_bamutils_decision.notrim
 //////////////////////////////////////////////////////////////////////////
 
 process additional_library_merge {
-  label 'mc_tiny'
+  label 'sc_tiny'
   tag "${samplename}"
   publishDir "${params.outdir}/merged_bams/additional", mode: 'copy'
 
