@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#504] Removed sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination results are now shown in the MultiQC report.
 * Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
+* Added flexible trimming of bams by library type. 'half' and 'none' UDG libraries can now be trimmed differentially within a single eager run.
 
 ### `Fixed`
 
