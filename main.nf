@@ -1338,7 +1338,7 @@ process bwa {
 
     script:
     def size = params.large_ref ? '-c' : ''
-    fasta = "${index}/${bwa_base}"
+    def fasta = "${index}/${bwa_base}"
 
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
@@ -1377,7 +1377,7 @@ process bwamem {
     params.mapper == 'bwamem'
 
     script:
-    fasta = "${index}/${bwa_base}"
+    def fasta = "${index}/${bwa_base}"
     def size = params.large_ref ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
@@ -1441,7 +1441,7 @@ process circularmapper{
 
     script:
     def filter = params.circularfilter ? '' : '-f true -x false'
-    elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
+    def elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
     def size = params.large_ref ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse ){
@@ -1483,11 +1483,11 @@ process bowtie2 {
 
     script:
     def size = params.large_ref ? '-c' : ''
-    fasta = "${index}/${bt2_base}"
-    trim5 = "${params.bt2_trim5}" != 0 ? "--trim5 ${params.bt2_trim5}" : ""
-    trim3 = "${params.bt2_trim3}" != 0 ? "--trim3 ${params.bt2_trim3}" : ""
-    bt2n = "${params.bt2n}" != 0 ? "-N ${params.bt2n}" : ""
-    bt2l = "${params.bt2l}" != 0 ? "-L ${params.bt2l}" : ""
+    def fasta = "${index}/${bt2_base}"
+    def trim5 = params.bt2_trim5 != 0 ? "--trim5 ${params.bt2_trim5}" : ""
+    def trim3 = params.bt2_trim3 != 0 ? "--trim3 ${params.bt2_trim3}" : ""
+    def bt2n = params.bt2n != 0 ? "-N ${params.bt2n}" : ""
+    def bt2l = params.bt2l != 0 ? "-L ${params.bt2l}" : ""
 
     if ( "${params.bt2_alignmode}" == "end-to-end"  ) {
       switch ( "${params.bt2_sensitivity}" ) {
@@ -1857,7 +1857,7 @@ process dedup{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_dedup, ch_dedup_for_libeval
 
     script:
-    outname = "${bam.baseName}"
+    def outname = "${bam.baseName}"
     def treat_merged = params.dedup_all_merged ? '-m' : ''
     def size = params.large_ref ? '-c' : ''
     
@@ -1891,7 +1891,7 @@ process markduplicates{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${libraryid}_rmdup.bam"), file("*.{bai,csi}") into ch_output_from_markdup, ch_markdup_for_libeval
 
     script:
-    outname = "${bam.baseName}"
+    def outname = "${bam.baseName}"
     def size = params.large_ref ? '-c' : ''
     """
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
@@ -2138,8 +2138,8 @@ process bam_trim {
     script:
     def softclip = params.bamutils_softclip ? '-c' : '' 
     def size = params.large_ref ? '-c' : ''
-    left_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_left}" : "${params.bamutils_clip_non_udg_left}"
-    right_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_right}" : "${params.bamutils_clip_non_udg_right}"
+    def left_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_left}" : "${params.bamutils_clip_non_udg_left}"
+    def right_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_right}" : "${params.bamutils_clip_non_udg_right}"
     """
     bam trimBam $bam tmp.bam -L ${left_clipping} -R ${right_clipping} ${softclip}
     samtools sort -@ ${task.cpus} tmp.bam -o ${libraryid}.trimmed.bam 
@@ -2291,7 +2291,7 @@ if ( params.gatk_ug_jar != '' ) {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*realign.{bam,bai}") optional true
 
   script:
-  defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
+  def defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
   def keep_realign = params.gatk_ug_keep_realign_bam ? "" : "rm ${samplename}.realign.bam"
   def index_realign = params.gatk_ug_keep_realign_bam ? "samtools index ${samplename}.realign.bam" : ""
   if (params.gatk_dbsnp == '')
@@ -2373,7 +2373,7 @@ if ( params.gatk_ug_jar != '' ) {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz")
   
   script:
-  skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
+  def skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
   """
   freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${samplename}.freebayes.vcf
   pigz -p ${task.cpus} ${samplename}.freebayes.vcf
@@ -2431,11 +2431,11 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("pileupcaller.${strandedness}.*")
 
   script:
-  transitions_mode = strandedness == "single" ? "" : "${params.pileupcaller_transitions_mode}" == 'SkipTransitions' ? "--skipTransitions" : "${params.pileupcaller_transitions_mode}" == 'TransitionsMissing' ? "--transitionsMissing" : ""
-  caller = "--${params.pileupcaller_method}"
-  ssmode = strandedness == "single" ? "--singleStrandMode" : ""
-  bam_list = bam.flatten().join(" ")
-  sample_names = samplename.flatten().join(",")
+  def transitions_mode = strandedness == "single" ? "" : "${params.pileupcaller_transitions_mode}" == 'SkipTransitions' ? "--skipTransitions" : "${params.pileupcaller_transitions_mode}" == 'TransitionsMissing' ? "--transitionsMissing" : ""
+  def caller = "--${params.pileupcaller_method}"
+  def ssmode = strandedness == "single" ? "--singleStrandMode" : ""
+  def bam_list = bam.flatten().join(" ")
+  def sample_names = samplename.flatten().join(",")
   """
   samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} -f ${snp} -e pileupcaller.${strandedness}
   """
@@ -2511,8 +2511,8 @@ process vcf2genome {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fasta.gz")
 
   script:
-  out = "${params.vcf2genome_outfile}" == '' ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
-  fasta_head = "${params.vcf2genome_header}" == '' ? "${samplename}" : "${params.vcf2genome_header}"
+  def out = "${params.vcf2genome_outfile}" == '' ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
+  def fasta_head = "${params.vcf2genome_header}" == '' ? "${samplename}" : "${params.vcf2genome_header}"
   """
   pigz -f -d -p ${task.cpus} *.vcf.gz
   vcf2genome -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
@@ -2615,7 +2615,7 @@ process sex_deterrmine {
     params.run_sexdeterrmine
     
     script:
-    filter = bed.name != 'NO_FILE' ? "-b $bed" : ''
+    def filter = bed.name != 'NO_FILE' ? "-b $bed" : ''
     """
     
     for i in *.bam; do
@@ -2995,9 +2995,9 @@ process multiqc {
     file "*_data"
 
     script:
-    rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
-    rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
-    custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
+    def rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
+    def rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
+    def custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
     multiqc -f $rtitle $rfilename $multiqc_config $custom_config_file .
     """
