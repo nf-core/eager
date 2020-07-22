@@ -1738,7 +1738,7 @@ process samtools_filter {
     } else if("${params.bam_unmapped_type}" == "discard"){
         '''
         ## Unmapped and MAPQ filtering
-        samtools view -h -b !{bam} -@ ${task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
 
         ## Mapped LEN filtering
         if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
@@ -1753,8 +1753,8 @@ process samtools_filter {
     } else if("${params.bam_unmapped_type}" == "bam"){
         '''
         ## Unmapped and MAPQ filtering
-        samtools view -h ${bam} | samtools view - -@ !{task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h ${bam} | samtools view - -@ !{task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
 
         ## Mapped LEN filtering
         if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
