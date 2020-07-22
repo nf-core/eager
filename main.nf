@@ -1848,9 +1848,13 @@ process markDup{
 
 // This is for post-deduplcation per-library evaluation steps _without_ any 
 // form of library merging. 
-ch_skiprmdup_for_libeval.mix(ch_dedup_for_libeval, ch_markdup_for_libeval)
-  .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
-
+if ( params.skip_deduplication ) {
+  ch_skiprmdup_for_libeval.mix(ch_dedup_for_libeval, ch_markdup_for_libeval)
+    .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
+} else {
+  ch_dedup_for_libeval.mix(ch_markdup_for_libeval)
+    .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
+}
 
 // Merge independent libraries sequenced but with same treatment (often done to improve complexity). Different strand/UDG libs not merged because bamtrim/pmdtools needs UDG info
 
