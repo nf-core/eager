@@ -2521,16 +2521,16 @@ if (params.additional_vcf_files == '') {
   file fasta from ch_fasta_for_multivcfanalyzer.collect()
 
   output:
-  file('fullAlignment.fasta.gz') into ch_output_multivcfanalyzer_fullalignment
-  file('info.txt.gz') into ch_output_multivcfanalyzer_info
-  file('snpAlignment.fasta.gz') into ch_output_multivcfanalyzer_snpalignment
-  file('snpAlignmentIncludingRefGenome.fasta.gz') into ch_output_multivcfanalyzer_snpalignmentref
-  file('snpStatistics.tsv.gz') into ch_output_multivcfanalyzer_snpstatistics
-  file('snpTable.tsv.gz') into ch_output_multivcfanalyzer_snptable
-  file('snpTableForSnpEff.tsv.gz') into ch_output_multivcfanalyzer_snptablesnpeff
-  file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
-  file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
-  file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
+  file('fullAlignment.fasta.gz')
+  file('info.txt.gz')
+  file('snpAlignment.fasta.gz')
+  file('snpAlignmentIncludingRefGenome.fasta.gz')
+  file('snpStatistics.tsv.gz')
+  file('snpTable.tsv.gz')
+  file('snpTableForSnpEff.tsv.gz')
+  file('snpTableWithUncertaintyCalls.tsv.gz')
+  file('structureGenotypes.tsv.gz')
+  file('structureGenotypes_noMissingData-Columns.tsv.gz')
   file('MultiVCFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
