@@ -93,7 +93,6 @@ top_modules:
     - 'mtnucratio'
     - 'qualimap'
     - 'sexdeterrmine'
-    - 'gatk'
     - 'multivcfanalyzer':
        path_filters:
            - '*MultiVCFAnalyzer.json'

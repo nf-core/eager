@@ -141,3 +141,11 @@ You then need to edit the script `bin/scrape_software_versions.py` to
 2. add a HTML block entry to the `OrderedDict` for formatting in MultiQC.
 
 > If a tool does not unfortunately offer any printing of version data, you may add this 'manually' e.g. with `echo "v1.1" > v_<YOUR_TOOL>.txt`
+
+## Images and Figures
+
+For all internal nf-core/eager documentation images we are using the 'Kalam' font by the Indian Type Foundry and licensed under the Open Font License.
+
+For the overview image we follow the nf-core [style and guidelines](https://nf-co.re/developers/design_guidelines).
+
+These can be found for download [here](https://fonts.google.com/specimen/Kalam)

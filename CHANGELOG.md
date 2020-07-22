@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#504] Removed sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination results are now shown in the MultiQC report.
 * Nuclear contamination is now reported with the correct library names.
+* Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
 
 ### `Fixed`
 
@@ -43,6 +44,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#444](https://github.com/nf-core/eager/issues/444) - Provide option for preserving realigned bam + index
 * Increase MultiQC process memory requirements to ensure enough memory for large runs
 * Fixed deduplication output logic. Will now pass along only the post-rmdup bams if duplicate removal is not skipped, instead of both the post-rmdup and pre-rmdup bams.
+* [#497](https://github.com/nf-core/eager/issues/497) - Simplifies number of parameters required to run bam filtering
+* [#501](https://github.com/nf-core/eager/issues/501) - Adds additional validation checks for MALT/MaltExtract database input files
+* [#508](https://github.com/nf-core/eager/issues/508) - Made Markduplicates default dedupper due to narrower context specificity of dedup
+* [#516](https://github.com/nf-core/eager/issues/516) - Made bedtools not report out of memory exit code when warning of inconsistant FASTA/Bed entry names
 
 ### `Dependencies`
 
@@ -60,6 +65,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Latest version of xopen (0.9.0)
 * Added Bowtie 2 (2.4.1)
 * Latest version of Sex.DetERRmine (1.1.2)
+* Latest version of endorS.py (0.3)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 
