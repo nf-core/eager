@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#451] Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
 * [#504] Removed sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination results are now shown in the MultiQC report.
+* Nuclear contamination is now reported with the correct library names.
 
 ### `Fixed`
 
@@ -41,6 +42,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#473](https://github.com/nf-core/eager/issues/473) - Fixed bug in sexdet_process on AWS
 * [#444](https://github.com/nf-core/eager/issues/444) - Provide option for preserving realigned bam + index
 * Increase MultiQC process memory requirements to ensure enough memory for large runs
+* Fixed deduplication output logic. Will now pass along only the post-rmdup bams if duplicate removal is not skipped, instead of both the post-rmdup and pre-rmdup bams.
 
 ### `Dependencies`
 
