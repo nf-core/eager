@@ -588,7 +588,11 @@ Turns off quality based trimming at the 5p end of reads when any of the --trimns
 
 #### `--mergedonly`
 
-This flag means that only merged reads are sent downstream for analysis. Singletons (i.e. reads missing a pair), or un-merged reads (where there wasn't sufficient overlap) are discarded. You may want to use this if you want ensure only the best quality reads for your analysis, but with the penalty of potentially losing still valid data (even if some reads have slightly lower quality).
+Specify that only merged reads are sent downstream for analysis.
+
+Singletons (i.e. reads missing a pair), or un-merged reads (where there wasn't sufficient overlap) are discarded.
+
+You may want to use this if you want ensure only the best quality reads for your analysis, but with the penalty of potentially losing still valid data (even if some reads have slightly lower quality). It is highly recommended when using `--dedupper 'dedup'` (see below).
 
 ### Read Mapping Parameters
 
@@ -707,11 +711,18 @@ If using TSV input, deduplication is performed library, i.e. after lane merging.
 
 #### `--dedupper`
 
-Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool 'dedup' ([Pelter et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered. This utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.
+Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool 'dedup' ([Pelter et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered.
+
+This utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.
+
+Note that if you run without the `--mergedonly` flag for AdapterRemoval, DeDup will
+likely fail. If you absolutely want to use both PE and SE data, you can supply the
+`--dedup_all_merged` flag to consider singletons to also be merged paired-end reads. This
+may result in over-zealous deduplication.
 
 #### `--dedup_all_merged`
 
-Sets DeDup to treat all reads as merged reads. This is useful if reads are for example not prefixed with `M_` in all cases.
+Sets DeDup to treat all reads as merged reads. This is useful if reads are for example not prefixed with `M_` in all cases. Therefore, this can be used as a workaround when also using a mixture of paired-end and single-end data, however this is not recommended (see above).
 
 ### Library Complexity Estimation Parameters
 
