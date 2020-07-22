@@ -1738,7 +1738,7 @@ process samtools_filter {
     } else if("${params.bam_unmapped_type}" == "discard"){
         '''
         ## Unmapped and MAPQ filtering
-        samtools view -h -b !{bam} -@ ${task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
 
         ## Mapped LEN filtering
         if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
@@ -1753,8 +1753,8 @@ process samtools_filter {
     } else if("${params.bam_unmapped_type}" == "bam"){
         '''
         ## Unmapped and MAPQ filtering
-        samtools view -h ${bam} | samtools view - -@ !{task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h ${bam} | samtools view - -@ !{task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
 
         ## Mapped LEN filtering
         if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
@@ -1843,6 +1843,7 @@ process samtools_flagstat_after_filter {
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
     .join(ch_bam_filtered_flagstat_for_endorspy, by: [0,1,2,3,4,5,6])
+    .dump(tag: "Joined")
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
