@@ -37,8 +37,8 @@ for fn in Input_files:
         Ind=re.sub('\.X.contamination.out$', '', fn).split("/")[-1]
         for line in f:
             fields=line.strip().split()
-            if line.strip()[0:19] == "We have nSNP sites:":
-                nSNPs=fields[4][:-1]
+            if line.strip()[0:21] == "[readicnts] Has read:":
+                nSNPs=fields[4]
             elif line.strip()[0:7] == "Method1" and line.strip()[9:16] == 'new_llh':
                 mom1=fields[3].split(":")[1]
                 err_mom1=fields[4].split(":")[1]
