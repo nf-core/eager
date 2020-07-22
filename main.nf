@@ -104,7 +104,8 @@ def helpMessage() {
       --run_bam_filtering                Turn on samtools filter for mapping quality or unmapped reads of BAM files.
       --bam_mapping_quality_threshold    Minimum mapping quality for reads filter. Default: ${params.bam_mapping_quality_threshold}
       --bam_unmapped_type                Defines whether to discard all unmapped reads, keep both mapped and unmapped together, or save as bam and/or only fastq format Options: 'discard', 'bam', 'keep', 'fastq', 'both'. Default: ${params.bam_unmapped_type}
-    
+      --bam_filter_minreadlength         Specify minimum read length to be kept after mapping.
+
     DeDuplication
       --dedupper                    Deduplication method to use. Options: 'dedup', 'markduplicates'. Default: '${params.dedupper}'
       --dedup_all_merged            Turn on treating all reads as merged reads.
@@ -1715,40 +1716,93 @@ process samtools_filter {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
-    script:
-    size = "${params.large_ref}" ? '-c' : ''
+    // Using shell block rather than script because we are playing with awk
+    shell:
+    size = !{params.large_ref} ? '-c' : ''
     
     if ( "${params.bam_unmapped_type}" == "keep" ) {
-        """
-        samtools view -h -b $bam -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        """
+        '''
+        ## Unmapped and MAPQ filtering
+        samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+
+        ## Mapped LEN filtering
+        if [[ !{minlength} -eq 0 ]]; then
+            mv tmp_mapped.bam !{libraryid}.filtered.bam
+        else
+            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
+            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{minlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+        fi
+
+        samtools index !{libraryid}.filtered.bam !{size}
+        '''
     } else if("${params.bam_unmapped_type}" == "discard"){
-        """
-        samtools view -h -b $bam -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        """
+        '''
+        ## Unmapped and MAPQ filtering
+        samtools view -h -b !{bam} -@ ${task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+
+        ## Mapped LEN filtering
+        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
+            mv tmp_mapped.bam !{libraryid}.filtered.bam
+        else
+            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
+            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{params.bam_filter_minreadlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+        fi
+
+        samtools index !{libraryid}.filtered.bam !{size}
+        '''
     } else if("${params.bam_unmapped_type}" == "bam"){
-        """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        """
+        '''
+        ## Unmapped and MAPQ filtering
+        samtools view -h ${bam} | samtools view - -@ !{task.cpus} -f4 -o ${libraryid}.unmapped.bam
+        samtools view -h ${bam} | samtools view - -@ !{task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+
+        ## Mapped LEN filtering
+        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
+            mv tmp_mapped.bam !{libraryid}.filtered.bam
+        else
+            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
+            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{params.bam_filter_minreadlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+        fi
+
+        samtools index !{libraryid}.filtered.bam !{size}
+        '''
     } else if("${params.bam_unmapped_type}" == "fastq"){
-        """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
-        rm ${libraryid}.unmapped.bam
-        """
+        '''
+        ## Unmapped and MAPQ filtering
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+
+        ## Mapped LEN filtering
+        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
+            mv tmp_mapped.bam !{libraryid}.filtered.bam
+        else
+            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
+            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{params.bam_filter_minreadlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+        fi
+
+        samtools index !{libraryid}.filtered.bam !{size}
+
+        ## FASTQ
+        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
+        rm !{libraryid}.unmapped.bam
+        '''
     } else if("${params.bam_unmapped_type}" == "both"){
-        """
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h $bam | samtools view - -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
-        samtools index "${size}" ${libraryid}.filtered.bam
-        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
-        """
+        '''
+        ## Unmapped and MAPQ filtering
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+
+        ## Mapped LEN filtering
+        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
+            mv tmp_mapped.bam !{libraryid}.filtered.bam
+        else
+            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
+            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{params.bam_filter_minreadlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+        fi
+
+        samtools index !{libraryid}.filtered.bam !{size}
+        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
+        '''
     }
 }
 
