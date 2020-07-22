@@ -1426,7 +1426,7 @@ process circularmapper{
     file fasta from ch_fasta_for_circularmapper.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_cm, ch_outputindex_from_cm
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_cm
 
     when: 
     params.mapper == 'circularmapper'
@@ -1574,7 +1574,7 @@ process samtools_filter {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_mapping_for_filtering
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering,ch_outputindex_from_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
@@ -1679,7 +1679,7 @@ process strip_input_fastq {
     tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
 
     output:
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz")
 
     script:
     if ( seqtype == 'SE' ) {
