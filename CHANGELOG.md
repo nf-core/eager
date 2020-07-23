@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Nuclear contamination results are now shown in the MultiQC report.
 * Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
 * [#522](https://github.com/nf-core/eager/issues/522)  Added post-mapping length filter to asisst in more realistic endogenous DNA calculations
+* [#512](https://github.com/nf-core/eager/issues/512) Added flexible trimming of bams by library type. 'half' and 'none' UDG libraries can now be trimmed differentially within a single eager run.
 
 ### `Fixed`
 
@@ -42,11 +43,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#473](https://github.com/nf-core/eager/issues/473) - Fixed bug in sexdet_process on AWS
 * [#444](https://github.com/nf-core/eager/issues/444) - Provide option for preserving realigned bam + index
 * Increase MultiQC process memory requirements to ensure enough memory for large runs
+* Fixed deduplication output logic. Will now pass along only the post-rmdup bams if duplicate removal is not skipped, instead of both the post-rmdup and pre-rmdup bams.
 * [#497](https://github.com/nf-core/eager/issues/497) - Simplifies number of parameters required to run bam filtering
 * [#501](https://github.com/nf-core/eager/issues/501) - Adds additional validation checks for MALT/MaltExtract database input files
 * [#508](https://github.com/nf-core/eager/issues/508) - Made Markduplicates default dedupper due to narrower context specificity of dedup
 * [#516](https://github.com/nf-core/eager/issues/516) - Made bedtools not report out of memory exit code when warning of inconsistant FASTA/Bed entry names
 * [#504](https://github.com/nf-core/eager/issues/504) - Removed uninformative sexdeterrmine-snps plot from MultiQC report.
+* Nuclear contamination is now reported with the correct library names.
+
 
 ### `Dependencies`
 
