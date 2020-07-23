@@ -1438,7 +1438,7 @@ process circularmapper{
     file fasta from ch_fasta_for_circularmapper.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_cm, ch_outputindex_from_cm
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_cm
 
     when: 
     params.mapper == 'circularmapper'
@@ -1717,7 +1717,7 @@ process samtools_filter {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_seqtypemerged_for_samtools_filter
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering,ch_outputindex_from_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
@@ -1905,9 +1905,13 @@ process markduplicates{
 
 // This is for post-deduplcation per-library evaluation steps _without_ any 
 // form of library merging. 
-ch_skiprmdup_for_libeval.mix(ch_dedup_for_libeval, ch_markdup_for_libeval)
-  .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
-
+if ( params.skip_deduplication ) {
+  ch_skiprmdup_for_libeval.mix(ch_dedup_for_libeval, ch_markdup_for_libeval)
+    .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
+} else {
+  ch_dedup_for_libeval.mix(ch_markdup_for_libeval)
+    .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
+}
 
 // Merge independent libraries sequenced but with same treatment (often done to improve complexity). Different strand/UDG libs not merged because bamtrim/pmdtools needs UDG info
 
@@ -2547,16 +2551,16 @@ if (params.additional_vcf_files == '') {
   file fasta from ch_fasta_for_multivcfanalyzer.collect()
 
   output:
-  file('fullAlignment.fasta.gz') into ch_output_multivcfanalyzer_fullalignment
-  file('info.txt.gz') into ch_output_multivcfanalyzer_info
-  file('snpAlignment.fasta.gz') into ch_output_multivcfanalyzer_snpalignment
-  file('snpAlignmentIncludingRefGenome.fasta.gz') into ch_output_multivcfanalyzer_snpalignmentref
-  file('snpStatistics.tsv.gz') into ch_output_multivcfanalyzer_snpstatistics
-  file('snpTable.tsv.gz') into ch_output_multivcfanalyzer_snptable
-  file('snpTableForSnpEff.tsv.gz') into ch_output_multivcfanalyzer_snptablesnpeff
-  file('snpTableWithUncertaintyCalls.tsv.gz') into ch_output_multivcfanalyzer_snptableuncertainty
-  file('structureGenotypes.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypes
-  file('structureGenotypes_noMissingData-Columns.tsv.gz') into ch_output_multivcfanalyzer_structuregenotypesclean
+  file('fullAlignment.fasta.gz')
+  file('info.txt.gz')
+  file('snpAlignment.fasta.gz')
+  file('snpAlignmentIncludingRefGenome.fasta.gz')
+  file('snpStatistics.tsv.gz')
+  file('snpTable.tsv.gz')
+  file('snpTableForSnpEff.tsv.gz')
+  file('snpTableWithUncertaintyCalls.tsv.gz')
+  file('structureGenotypes.tsv.gz')
+  file('structureGenotypes_noMissingData-Columns.tsv.gz')
   file('MultiVCFAnalyzer.json') optional true into ch_multivcfanalyzer_for_multiqc
 
   script:
@@ -2649,8 +2653,8 @@ process sex_deterrmine {
     script:
     """
     samtools index ${input}
-    angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${input.baseName}.doCounts
-    contamination -a ${input.baseName}.doCounts.icnts.gz -h ${baseDir}/assets/angsd_resources/HapMapChrX.gz 2> ${input.baseName}.X.contamination.out
+    angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${libraryid}.doCounts
+    contamination -a ${libraryid}.doCounts.icnts.gz -h ${baseDir}/assets/angsd_resources/HapMapChrX.gz 2> ${libraryid}.X.contamination.out
     """
  }
  
