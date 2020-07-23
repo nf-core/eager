@@ -51,7 +51,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#504](https://github.com/nf-core/eager/issues/504) - Removed uninformative sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination is now reported with the correct library names.
 
-
 ### `Dependencies`
 
 * Added Sequencetools (1.4.0.6) that adds the ability to do genotyping with the 'pileupCaller'
