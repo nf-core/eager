@@ -2667,6 +2667,7 @@ process print_nuclear_contamination{
 
     output:
     file 'nuclear_contamination.txt'
+    file 'nuclear_contamination_mqc.json' into ch_nuclear_contamination_for_multiqc
 
     script:
     """
