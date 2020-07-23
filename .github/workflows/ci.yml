@@ -109,7 +109,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_mapping_quality_threshold 37 --bam_discard_unmapped --bam_unmapped_type 'fastq'
       - name: DEDUPLICATION Test with dedup
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'dedup'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'dedup' --dedup_all_merged
       - name: GENOTYPING_HC Test running GATK HaplotypeCaller
         run: |
          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
@@ -128,7 +128,7 @@ jobs:
       - name: TRIMBAM Test bamutils works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_trim_bam
-      - name: TRIMBAM Test PMDtools works alone
+      - name: PMDTOOLS Test PMDtools works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_pmdtools
       - name: GATK 3.5 Download resource files
