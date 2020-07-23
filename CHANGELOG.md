@@ -27,7 +27,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#451] Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
 * [#504] Removed sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination results are now shown in the MultiQC report.
-* Nuclear contamination is now reported with the correct library names.
 * Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
 
 ### `Fixed`
@@ -48,6 +47,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#501](https://github.com/nf-core/eager/issues/501) - Adds additional validation checks for MALT/MaltExtract database input files
 * [#508](https://github.com/nf-core/eager/issues/508) - Made Markduplicates default dedupper due to narrower context specificity of dedup
 * [#516](https://github.com/nf-core/eager/issues/516) - Made bedtools not report out of memory exit code when warning of inconsistant FASTA/Bed entry names
+* Nuclear contamination is now reported with the correct library names.
 
 ### `Dependencies`
 
