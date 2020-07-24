@@ -549,7 +549,7 @@ Defines the adapter sequence to be used for the reverse read in paired end seque
 
 Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.
 
-Note that performing read length filtering at this step is not reliable for correct endogenous DNA calculation, when you have a large percentage of very short reads in your library. When you have very few reads passing this length filter, it will artificially inflate your endogenous DNA by creating a very small denominator. In these cases it is recommended to set this to 0, and use `--bam_filter_minreadlength` to instead, to filter out 'unusuable' short reads after mapping.
+Note that performing read length filtering at this step is not reliable for correct endogenous DNA calculation, when you have a large percentage of very short reads in your library - such retrieved in single-stranded library protocols. When you have very few reads passing this length filter, it will artificially inflate your endogenous DNA by creating a very small denominator. In these cases it is recommended to set this to 0, and use `--bam_filter_minreadlength` to instead, to filter out 'unusuable' short reads after mapping.
 
 #### `--clip_min_read_quality`
 
@@ -711,7 +711,7 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream a
 
 Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.
 
-If used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short and would otherwise be discarded by AdapterRemoval (thus making an artifically small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct 'denominator' of 'all reads', for the Endogenous DNA calculation.
+If used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artifically small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct 'denominator' of 'all reads', for the Endogenous DNA calculation.
 
 ### Read DeDuplication Parameters
 
