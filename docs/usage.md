@@ -709,7 +709,7 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream a
 
 #### `bam_filter_minreadlength`
 
-Specify minimum length of mapped reads. This filtering will happy at the same time as mapping quality filtering.
+Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.
 
 If used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short and would otherwise be discarded by AdapterRemoval (thus making an artifically small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct 'denominator' of 'all reads', for the Endogenous DNA calculation.
 
