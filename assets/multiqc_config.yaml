@@ -162,7 +162,7 @@ table_columns_visible:
         percentage_aligned: False
     MultiVCFAnalyzer:
         Heterozygous SNP alleles (percent): True
-    custom_content:
+    endorS.py :
         endogenous_dna: True
         endogenous_dna_post: True
     nuclear_contamination:
@@ -205,9 +205,10 @@ table_columns_placement:
     Samtools Flagstat (post-samtools filter):
         flagstat_total: 553
         mapped_passed: 554
-    custom_content:
+    endorS.py :
         endogenous_dna: 600
         endogenous_dna_post: 610
+    nuclear_contamination:
         Num_SNPs: 1100
         Method1_MOM_estimate: 1110
         Method1_MOM_SE: 1120

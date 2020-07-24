@@ -24,11 +24,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * General documentation additions and cleaning, updated figures with CC-BY license
 * Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
 * [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
-* [#451] Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
-* [#504] Removed sexdeterrmine-snps plot from MultiQC report.
+* [#451](https://github.com/nf-core/eager/issues/451) Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
 * Nuclear contamination results are now shown in the MultiQC report.
 * Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
-* Added flexible trimming of bams by library type. 'half' and 'none' UDG libraries can now be trimmed differentially within a single eager run.
+* [#522](https://github.com/nf-core/eager/issues/522)  Added post-mapping length filter to asisst in more realistic endogenous DNA calculations
+* [#512](https://github.com/nf-core/eager/issues/512) Added flexible trimming of bams by library type. 'half' and 'none' UDG libraries can now be trimmed differentially within a single eager run.
 
 ### `Fixed`
 
@@ -48,6 +48,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#501](https://github.com/nf-core/eager/issues/501) - Adds additional validation checks for MALT/MaltExtract database input files
 * [#508](https://github.com/nf-core/eager/issues/508) - Made Markduplicates default dedupper due to narrower context specificity of dedup
 * [#516](https://github.com/nf-core/eager/issues/516) - Made bedtools not report out of memory exit code when warning of inconsistant FASTA/Bed entry names
+* [#504](https://github.com/nf-core/eager/issues/504) - Removed uninformative sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination is now reported with the correct library names.
 
 ### `Dependencies`

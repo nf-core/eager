@@ -549,6 +549,8 @@ Defines the adapter sequence to be used for the reverse read in paired end seque
 
 Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.
 
+Note that performing read length filtering at this step is not reliable for correct endogenous DNA calculation, when you have a large percentage of very short reads in your library - such retrieved in single-stranded library protocols. When you have very few reads passing this length filter, it will artificially inflate your endogenous DNA by creating a very small denominator. In these cases it is recommended to set this to 0, and use `--bam_filter_minreadlength` to instead, to filter out 'unusuable' short reads after mapping.
+
 #### `--clip_min_read_quality`
 
 Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off. Default is set to `20`.
@@ -704,6 +706,12 @@ Note that in all cases, if `--bam_mapping_quality_threshold` is also supplied, m
 #### `--bam_mapping_quality_threshold`
 
 Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).
+
+#### `bam_filter_minreadlength`
+
+Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.
+
+If used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artifically small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct 'denominator' of 'all reads', for the Endogenous DNA calculation.
 
 ### Read DeDuplication Parameters
 
