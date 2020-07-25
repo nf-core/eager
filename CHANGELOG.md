@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
 * [#522](https://github.com/nf-core/eager/issues/522)  Added post-mapping length filter to asisst in more realistic endogenous DNA calculations
 * [#512](https://github.com/nf-core/eager/issues/512) Added flexible trimming of bams by library type. 'half' and 'none' UDG libraries can now be trimmed differentially within a single eager run.
+ * Added a `.dockstore.yml` config file for automatic workflow registration with [dockstore.org](https://dockstore.org/)
 
 ### `Fixed`
 
