@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['19.10.0', '']
+        nxf_ver: ['20.04.0', '']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -106,10 +106,13 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --strip_input_fastq
       - name: BAM_FILTERING Run basic mapping pipeline with mapping quality filtering, and unmapped export
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_mapping_quality_threshold 37 --bam_discard_unmapped --bam_unmapped_type 'fastq'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_mapping_quality_threshold 37  --bam_unmapped_type 'fastq'
+      - name: BAM_FILTERING Run basic mapping pipeline with post-mapping length filtering
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --clip_readlength 0 --run_bam_filtering --bam_filter_minreadlength 50
       - name: DEDUPLICATION Test with dedup
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'dedup'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'dedup' --dedup_all_merged
       - name: GENOTYPING_HC Test running GATK HaplotypeCaller
         run: |
          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
@@ -128,7 +131,7 @@ jobs:
       - name: TRIMBAM Test bamutils works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_trim_bam
-      - name: TRIMBAM Test PMDtools works alone
+      - name: PMDTOOLS Test PMDtools works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_pmdtools
       - name: GATK 3.5 Download resource files
@@ -160,17 +163,17 @@ jobs:
           for i in index0.idx ref.db ref.idx ref.inf table0.db table0.idx taxonomy.idx taxonomy.map taxonomy.tre; do wget https://github.com/nf-core/test-datasets/raw/eager/databases/malt/"$i" -P databases/malt/; done
       - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into MALT
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --database "/home/runner/work/eager/eager/databases/malt/"
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering  --bam_unmapped_type 'fastq' --run_metagenomic_screening --database "/home/runner/work/eager/eager/databases/malt/"
       - name: MALTEXTRACT Download resource files
         run: |
             mkdir -p databases/maltextract
             for i in ncbi.tre ncbi.map; do wget https://github.com/rhuebler/HOPS/raw/0.33/Resources/"$i" -P databases/maltextract/; done
       - name: MALTEXTRACT Basic with MALT plus MaltExtract
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles "/home/runner/work/eager/eager/databases/maltextract/" --maltextract_taxon_list 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering  --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles "/home/runner/work/eager/eager/databases/maltextract/" --maltextract_taxon_list 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
       - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into Kraken
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_kraken,docker --run_bam_filtering --bam_discard_unmapped --bam_unmapped_type 'fastq'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_kraken,docker --run_bam_filtering  --bam_unmapped_type 'fastq'
       - name: SEXDETERMINATION Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --skip_fastqc --skip_adapterremoval --skip_deduplication --skip_qualimap --run_sexdeterrmine

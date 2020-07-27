@@ -62,7 +62,7 @@ or from other researchers.
 
 ### Profiles
 
-An important thing to understand before you start  writing your own profile is
+An important thing to understand before you start writing your own profile is
 understanding 'inheritance' of profiles when specifying multiple when using
 `nextflow run`.
 
@@ -108,10 +108,16 @@ defined in the `cluster` profile.
 <p>
 
 In actuality, a nf-core/eager run already contains many configs and profiles,
-and will normally use _multiple_ profiles in a single run. Multiple profiles can
-be used, and each new one selected will inherit all the previous profiles
-parameters, and the parameters in the new one will then overwrite any that have
-been changed from the original.
+and will normally use *multiple* configs profiles in a single run. Multiple
+configuration and profiles files can be used, and each new one selected will
+inherit all the previous one's parameters, and the parameters in the new one
+will then overwrite any that have been changed from the original.
+
+This can be visualised here
+
+<p align="center">
+  <img src="images/tutorials/profiles/config_profile_inheritence.png" width="75%" height = "75%">
+</p>
 
 Using the example given in the [background](#background), if the `hpc_blue`
 profile has the following pipeline parameters set
@@ -138,7 +144,11 @@ command:
 nextflow run nf-core/eager -c old_dna_profile.config -profile old_dna,hpc_blue <...>
 ```
 
-Then the final profile used by your given run would look like:
+In the background, any parameters in the pipeline's `nextflow.config` (containing
+default parameters) will be overwritten by the `old_dna_profile.config`. In addition, the `old_dna` *profile* will overwrite any parameters set in the config but
+outside the profile definition of `old_dna_profile.config`.
+
+Therefore, the final profile used by your given run would look like:
 
 ```txt
 <...>
@@ -155,8 +165,8 @@ The order of loading of different configuration files can be seen here:
 
 Loading Order | Configuration File
 -------------:|:-------------------
-1             | `nextflow.config` in your current directory
-2             | (if using a script for `nextflow run`) a `nextflow.config` in the directory the script is in
+1             | `nextflow.config` in your current directory,
+2             | (if using a script for `nextflow run`) a `nextflow.config` in the directory the script is located
 3             | `config` stored in your human directory under `~/.nextflow/`
 4             | `<your_file>.config` if you specify in the `nextflow run` command with `-c`
 5             | general nf-core institutional configurations stored at [nf-core/configs](https://github.com/nf-core/configs)
@@ -171,10 +181,10 @@ if your run does not use the parameters you expect.
 > specifying a custom `.config` file by using `-C` (capital C) instead of `-c`
 > (which inherits previously specify parameters)
 
-Another thing that is important to note is that if a specific `profile` is
+Another thing that is important to note is that if a specific *profile* is
 specified in `nextflow run`, this replaces any 'global' parameter that is
 specified within the config file (but outside a profile) itself - **regardless**
-of profile order.
+of profile order (see above).
 
 For example, see the example adapted from the SHH nf-core/eager
 pipeline-specific
@@ -184,7 +194,7 @@ This pipeline-specific profile is automatically loaded if nf-core/eager detects
 we are running eager and specified the profile as `shh`.
 
 ```txt
-// global 'fall back' parameters
+// global 'fallback' parameters
 params {
   // Specific nf-core/configs params
   config_profile_contact = 'James Fellows Yates (@jfy133)'
