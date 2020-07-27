@@ -1934,7 +1934,7 @@ process dedup{
 
 process markduplicates{
     label 'mc_small'
-    tag "${outname}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${libraryid}/$filename"}
 
