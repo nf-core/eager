@@ -1884,7 +1884,6 @@ process endorSpy {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.json") into ch_endorspy_for_multiqc
 
     script:
-
     if (params.run_bam_filtering) {
       """
       endorS.py -o json -n ${libraryid} ${stats} ${poststats}

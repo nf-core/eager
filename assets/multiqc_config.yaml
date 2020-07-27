@@ -156,6 +156,7 @@ table_columns_visible:
     mtnucratio: 
         mt_nuc_ratio: True
     QualiMap:
+        mapped_reads: True
         mean_coverage: True
         1_x_pc: True
         5_x_pc: True
@@ -235,7 +236,8 @@ table_columns_placement:
         mt_cov_avg: 770
         mt_nuc_ratio: 780
     QualiMap:
-        mean_coverage: 800
+        mapped_reads: 800
+        mean_coverage: 805
         median_coverage: 810
         1_x_pc: 820
         2_x_pc: 830
