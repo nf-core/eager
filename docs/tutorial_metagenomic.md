@@ -44,8 +44,8 @@ nextflow pull nf-core/eager -r 2.2.0
 ```
 
 It is important to note that if you are planning on running multiple runs of
-nf-core/eager for a given project, that the version should **kept the same** for
-all runs to ensure consistency in settings for all of your libraries.
+nf-core/eager for a given project, that the version should be **kept the same**
+for all runs to ensure consistency in settings for all of your libraries.
 
 ## Inputs and Outputs
 
@@ -149,7 +149,7 @@ indices instead.
 > represent nextflow flags, while double are nf-core/eager specific flags.
 
 Finally, we can also specify the output directory and the Nextflow `work/`
-directory (that contains 'intermediate' working files and directories).
+directory (that contains "intermediate" working files and directories).
 
 ```bash
 nextflow run nf-core/eager \
@@ -168,7 +168,7 @@ nextflow run nf-core/eager \
 
 ## Pipeline Configuration
 
-Now we we have specified the input data, we can start moving onto specifying
+Now that we have specified the input data, we can start moving onto specifying
 settings for each different module we will be running. As mentioned above, we
 are pretending to run with NextSeq data, which is generated with a two-colour
 imaging technique. What this means is when you have shorter molecules than the
@@ -331,7 +331,7 @@ General Stats Table:
   after trimming look short as expected of aDNA?
 - Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively - however
   given this is on the human reads this is just a rule of thumb and may not
-  reflect the quality of the metagenomic profile)?suggesting over-amplified or
+  reflect the quality of the metagenomic profile) suggesting over-amplified or
   badly preserved samples?
 - Does the human DNA show increased frequency of C>Ts on the 5' end of molecules
   (you may need to un-hide the 2nd base columns with 'configure columns'
@@ -385,7 +385,7 @@ DamageProfiler:
 > documentation](output.md)
 
 If you're happy everything looks good in terms of sequencing, we then look at
-specific directories to find any files you might want to do for downstream
+specific directories to find any files you might want to use for downstream
 processing.
 
 Note that when you get back to writing up your publication, all the versions of
