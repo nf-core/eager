@@ -707,7 +707,7 @@ Note that in all cases, if `--bam_mapping_quality_threshold` is also supplied, m
 
 Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).
 
-#### `bam_filter_minreadlength`
+#### `--bam_filter_minreadlength`
 
 Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.
 
