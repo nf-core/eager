@@ -205,11 +205,11 @@ table_columns_placement:
         flagstat_total: 551
         mapped_passed: 552
     Samtools Flagstat (post-samtools filter):
-        flagstat_total: 553
-        mapped_passed: 554
+        flagstat_total: 600
+        mapped_passed: 620
     endorSpy:
-        endogenous_dna: 600
-        endogenous_dna_post: 610
+        endogenous_dna: 610
+        endogenous_dna_post: 640
     nuclear_contamination:
         Num_SNPs: 1100
         Method1_MOM_estimate: 1110
