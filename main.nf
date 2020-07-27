@@ -1952,7 +1952,12 @@ process markduplicates{
     def outname = "${bam.baseName}"
     def size = params.large_ref ? '-c' : ''
     """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    ## To make sure direct BAMs have a clean name
+    if [[ "${bam}" != "${libraryid}.bam" ]]; then
+      mv ${bam} ${libraryid}.bam
+    fi
+
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=${libraryid}.bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
     samtools index ${libraryid}_rmdup.bam ${size}
     """
 }
@@ -1968,7 +1973,6 @@ if ( params.skip_deduplication ) {
 }
 
 // Merge independent libraries sequenced but with same treatment (often done to improve complexity). Different strand/UDG libs not merged because bamtrim/pmdtools needs UDG info
-
 // Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
 if ( params.skip_deduplication ) {
   ch_input_for_librarymerging = ch_filtering_for_skiprmdup
