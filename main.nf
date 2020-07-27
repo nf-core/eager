@@ -1415,6 +1415,7 @@ process circulargenerator{
 
     output:
     file "${prefix}.{amb,ann,bwt,sa,pac}" into ch_circularmapper_indices
+    file "*_elongated" into ch_circularmapper_elongatedfasta
 
     when: 
     params.mapper == 'circularmapper'
@@ -1437,6 +1438,7 @@ process circularmapper{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from ch_fasta_for_circularmapper.collect()
+    file elongated from ch_circularmapper_elongatedfasta.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_cm
@@ -1849,7 +1851,6 @@ process samtools_flagstat_after_filter {
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
     .join(ch_bam_filtered_flagstat_for_endorspy, by: [0,1,2,3,4,5,6])
-    .dump(tag: "Joined")
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
@@ -2941,7 +2942,7 @@ process kraken_merge {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode:"copy"
 
   input:
-  file csv_count from ch_kraken_parsed.map{ it[1] }.collect().dump()
+  file csv_count from ch_kraken_parsed.map{ it[1] }.collect()
 
   output:
   file('kraken_count_table.csv')
