@@ -391,8 +391,8 @@
             },
             "fa_icon": "fas fa-sort-amount-down"
         },
-        "read_clipping_and_adapter_removal": {
-            "title": "Read Clipping and Adapter Removal",
+        "read_merging_and_adapter_removal": {
+            "title": "Read merging and adapter removal",
             "type": "object",
             "description": "Options for adapter clipping and paired-end merging.",
             "default": "",
@@ -1138,7 +1138,7 @@
             "$ref": "#/definitions/complexity_filtering"
         },
         {
-            "$ref": "#/definitions/read_clipping_and_adapter_removal"
+            "$ref": "#/definitions/read_merging_and_adapter_removal"
         },
         {
             "$ref": "#/definitions/mapper"
