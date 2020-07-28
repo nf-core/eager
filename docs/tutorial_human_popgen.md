@@ -16,9 +16,7 @@ estimation of nuclear contamination, genetic sex determination, and
 production of random draw genotypes in eigenstrat format for a specific set of
 sites, to be used in further analysis. For this example, I will be using the
 1240k SNP set. This SNP set was first described in
-[Mathieson et al. 2015](https://www.nature.com/articles/nature16152) and probes
-targeting these SNPs can be used to enrich ancient DNA libraries for fragments
-of DNA overlapping these SNPs.
+[Mathieson et al. 2015](https://www.nature.com/articles/nature16152) and contains various positions along the genome that have been extensively genotyped in present-day and ancient populations, and are therefore useful for ancient population genetic analysis. Capture techniques are often used to enrich DNA libraries for fragments, that overlap these SNPs, as is being assumed has been performed in this example.
 
 ## Preparation
 
