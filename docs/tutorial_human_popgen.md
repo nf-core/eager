@@ -50,8 +50,8 @@ To start, lets make a directory where all your nf-core/eager related files for
 this run will go, and change into it.
 
 ```bash
-mkdir projectX_screening20200727
-cd projectX_screening20200727
+mkdir projectX_preprossessing20200727
+cd projectX_preprossessing20200727
 ```
 
 The first part of constructing any nf-core/eager run is specifying a few generic
@@ -64,7 +64,7 @@ running.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
+-name 'projectX_preprossessing20200727' \
 <...>
 ```
 
@@ -128,8 +128,8 @@ FASTA file and the corresponding indices.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -153,8 +153,8 @@ directory (which contains "intermediate" working files and directories).
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -182,8 +182,8 @@ be clipped.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -200,8 +200,8 @@ Since our input data is paired-end, we will be using `DeDup` for duplicate remov
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -223,8 +223,8 @@ aligned sequences and the reference.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -243,8 +243,8 @@ Next, we will set up trimming of the mapped reads to allevite the effects of DNA
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -271,8 +271,8 @@ relative coverage on the X and Y chromosomes.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -296,8 +296,8 @@ Similarly, we will activate nuclear contamination estimation with `--run_nuclear
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -331,8 +331,8 @@ Within hs37d5, the mitochondrial contig is named 'MT'.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -360,8 +360,8 @@ Finally, we need to specify genotyping parameters. First, we need to activate ge
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200727' \
---input 'screening20200727.tsv' \
+-name 'projectX_preprossessing20200727' \
+--input 'preprossessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -505,7 +505,7 @@ intermediate files (if your `-profile` does not already do so). You can do this
 by going to above your `results/` and `work/` directory, e.g.
 
 ```bash
-cd /<path>/<to>/projectX_screening20200727
+cd /<path>/<to>/projectX_preprossessing20200727
 ```
 
 and running
