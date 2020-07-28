@@ -482,6 +482,9 @@ AdapterRemoval, fastP, BWA, Samtools, endorS.py, DeDup, Qualimap, PreSeq,
 DamageProfiler, bamUtil, sexdeterrmine, angsd, MTNucRatioCalculator,
 sequenceTools, and MultiQC.
 
+Citations to all used tools can be seen
+[here](https://nf-co.re/eager#tool-references)
+
 ### Files for Downstream Analysis
 
 You will find the eigenstrat dataset containing the random draw genotypes of
