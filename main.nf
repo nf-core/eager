@@ -1818,11 +1818,11 @@ process samtools_filter {
 if (params.run_bam_filtering) {
     ch_seqtypemerged_for_skipfiltering.mix(ch_output_from_filtering)
         .filter { it =~/.*filtered.bam/ }
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval; ch_mapped_for_preseq } 
 
 } else {
     ch_seqtypemerged_for_skipfiltering
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval; ch_mapped_for_preseq } 
 
 }
 
@@ -2040,6 +2040,16 @@ if (!params.skip_deduplication) {
 //////////////////////////////////////////////////
 
 // Library complexity calculation from mapped reads - could a user cost-effectively sequence deeper for more unique information?
+if ( params.skip_deduplication ) {
+  ch_input_for_preseq = ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7] }
+
+} else if ( !params.skip_deduplication && params.dedupper == "markduplicates" ) {
+  ch_input_for_preseq = ch_mapped_for_preseq.map{ it[0,1,2,3,4,5,6,7] }
+
+} else if ( !params.skip_deduplication && params.dedupper == "dedup" ) {
+  ch_input_for_preseq = ch_hist_for_preseq
+
+}
 
 process preseq {
     label 'sc_tiny'
@@ -2050,23 +2060,24 @@ process preseq {
     !params.skip_preseq
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input) from (params.skip_deduplication ? ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7] } : ch_hist_for_preseq )
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input) from ch_input_for_preseq
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${input.baseName}.ccurve") into ch_preseq_for_multiqc
 
     script:
-    if(!params.skip_deduplication && dedupper == "dedup"){
+    pe_mode = params.skip_collapse && seqtype == "PE" ? '-P' : ''
+    if(!params.skip_deduplication && params.dedupper == "dedup"){
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -H $input
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -H ${input}
     """
-    } else if( !params.skip_deduplication && dedupper == "markduplicates"){
+    } else if( !params.skip_deduplication && params.dedupper == "markduplicates"){
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B $input
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B ${input} ${pe_mode}
     """
-    } else {
+    } else if ( params.skip_deduplication ) {
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B $input
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B ${input} ${pe_mode}
     """
     }
 }
