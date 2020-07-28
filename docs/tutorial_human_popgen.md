@@ -337,7 +337,7 @@ possible that we will need to get mitchondrial DNA contamination estimates for
 any females in our dataset. This cannot be done within nf-core/eager (v2.2.0) and we
 will need to do this manually at a later time. However, mtDNA contamination
 estimates have been shown to only be reliable for nuclear contamination when
-the ratio of mitochondrial to nuclear reads is low. We can have nf-core/eager calculate
+the ratio of mitochondrial to nuclear reads is low ([Furtwängler et al. 2018](https://doi.org/10.1038/s41598-018-32083-0)). We can have nf-core/eager calculate
 that ratio for us with `--run_mtnucratio`, and providing the name of the
 mitochondrial DNA contig in our reference genome with `--mtnucratio_header`.
 Within hs37d5, the mitochondrial contig is named 'MT'.
