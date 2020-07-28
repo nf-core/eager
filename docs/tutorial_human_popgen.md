@@ -474,7 +474,7 @@ processing.
 
 Note that when you get back to writing up your publication, all the versions of
 the tools can be found under the 'nf-core/eager Software Versions' section of
-the MultiQC report. Note that all tools in the container are listed, so you may
+the MultiQC report. But be careful! All tools in the container are listed, so you may
 have to remove some of them that you didn't actually use in the set up.
 
 For example, in this example, we have used: Nextflow, nf-core/eager, FastQC,
