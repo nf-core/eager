@@ -2340,7 +2340,7 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_output_from_bamutils
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
-} else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_run_pmdtools )  {
+} else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_pmdtools )  {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
