@@ -1256,7 +1256,8 @@ process lanemerge {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge_ready
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fq.gz") into ch_lanemerge_for_mapping
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R1_lanemerged.fq.gz") into ch_lanemerge_for_mapping_r1
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R2_lanemerged.fq.gz") optional true into ch_lanemerge_for_mapping_r2
 
   script:
   if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
@@ -1267,12 +1268,54 @@ process lanemerge {
   """
   } else {
   """
-  cat ${r1} > "${libraryid}"_lanemerged.fq.gz
+  cat ${r1} > "${libraryid}"_R1_lanemerged.fq.gz
   """
   }
 
 }
 
+// Ensuring always valid R2 file even if doesn't exist for AWS
+if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
+  ch_lanemerge_for_mapping_r1
+    .mix(ch_lanemerge_for_mapping_r2)
+    .groupTuple(by: [0,1,2,3,4,5,6])
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7].sort()[0])
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$baseDir/assets/nf-core_eager_dummy.txt")
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+    }
+    .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 }
+} else {
+  ch_lanemerge_for_mapping_r1
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7])
+        def r2 = file("$baseDir/assets/nf-core_eager_dummy.txt")
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+    }
+    .mix(ch_branched_for_lanemerge_skipme)
+    .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 }
+}
+
+/*
 ch_lanemerge_for_mapping
   .map {
       def samplename = it[0]
@@ -1285,13 +1328,19 @@ ch_lanemerge_for_mapping
       def reads = arrayify(it[7])
       def r1 = it[7] instanceof ArrayList ? reads[0] : it[7]
       def r2 = reads[1] ? reads[1] : file("$baseDir/assets/nf-core_eager_dummy.txt")
+      
+      println("########################################")
+      println(reads)
+      println("")
+      println(r2)
+      println("########################################")
 
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
   }
-  .mix(ch_branched_for_lanemerge_skipme)
   .dump(tag: "Merge Lane Map Content")
   .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 } 
+*/
 
 // ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads stripping 
 
@@ -1365,8 +1414,8 @@ process bwa {
     publishDir "${params.outdir}/mapping/bwa", mode: 'copy'
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_lanemerge_for_bwa
-    path index from bwa_index.collect()
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_lanemerge_for_bwa.dump(tag: "input_tuple")
+    path index from bwa_index.collect().dump(tag: "input_index")
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bwa   
@@ -1376,7 +1425,7 @@ process bwa {
 
     script:
     def size = params.large_ref ? '-c' : ''
-    def fasta = "${index}/${bwa_base}"
+    def fasta = "${index}/${fasta_base}"
 
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
@@ -1415,7 +1464,7 @@ process bwamem {
     params.mapper == 'bwamem'
 
     script:
-    def fasta = "${index}/${bwa_base}"
+    def fasta = "${index}/${bwa_index}"
     def size = params.large_ref ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
@@ -1521,7 +1570,7 @@ process bowtie2 {
 
     script:
     def size = params.large_ref ? '-c' : ''
-    def fasta = "${index}/${bt2_base}"
+    def fasta = "${index}/${bt2_index}"
     def trim5 = params.bt2_trim5 != 0 ? "--trim5 ${params.bt2_trim5}" : ""
     def trim3 = params.bt2_trim3 != 0 ? "--trim3 ${params.bt2_trim3}" : ""
     def bt2n = params.bt2n != 0 ? "-N ${params.bt2n}" : ""
