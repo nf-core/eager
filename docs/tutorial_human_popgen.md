@@ -115,7 +115,8 @@ them together accordingly. Secondly, as we have NextSeq data, we have specified
 we have two `Colour_Chemistry`, which is important for downstream processing
 (see below). The other columns are less important for this particular context of
 metagenomic screening. See the nf-core/eager [usage](../usage.md) documentation
-for more specifications on how to set up a TSV file.
+for more specifications on how to set up a TSV file (e.g. why despite NextSeqs
+only having 4 lanes, we go up to 8 in the example above).
 
 Alongside our input TSV file, we will also specify the paths to our reference
 FASTA file and the corresponding indices.
