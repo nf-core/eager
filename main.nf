@@ -2355,7 +2355,7 @@ if ( params.gatk_ug_jar != '' ) {
  process genotyping_ug {
   label 'mc_small'
   tag "${samplename}"
-  publishDir "${params.outdir}/genotyping", mode: 'copy'
+  publishDir "${params.outdir}/genotyping", mode: 'copy', pattern: '*{.vcf.gz,.realign.bam,realign.bai}'
 
   when:
   params.run_genotyping && params.genotyping_tool == 'ug'
@@ -2369,12 +2369,11 @@ if ( params.gatk_ug_jar != '' ) {
 
   output: 
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*realign.{bam,bai}") optional true
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.realign.{bam,bai}") optional true
 
   script:
   def defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
-  def keep_realign = params.gatk_ug_keep_realign_bam ? "" : "rm ${samplename}.realign.bam"
-  def index_realign = params.gatk_ug_keep_realign_bam ? "samtools index ${samplename}.realign.bam" : ""
+  def keep_realign = params.gatk_ug_keep_realign_bam ? "samtools index ${samplename}.realign.bam" : "rm ${samplename}.realign.{bam,bai}"
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
@@ -2383,7 +2382,6 @@ if ( params.gatk_ug_jar != '' ) {
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
     $keep_realign
-    $index_realign
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
@@ -2395,7 +2393,6 @@ if ( params.gatk_ug_jar != '' ) {
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
     $keep_realign
-    $index_realign
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
