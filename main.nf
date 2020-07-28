@@ -2056,11 +2056,14 @@ process preseq {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("${input.baseName}.ccurve") into ch_preseq_for_multiqc
 
     script:
-    if(!params.skip_deduplication){
+    if(!params.skip_deduplication && dedupper == "dedup"){
     """
     preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -H $input
     """
-
+    } else if( !params.skip_deduplication && dedupper == "markduplicates"){
+    """
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B $input
+    """
     } else {
     """
     preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B $input
