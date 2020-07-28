@@ -17,5 +17,4 @@ The nf-core/eager documentation is split into the following files:
 8. Tutorials
    1. [How to write and use profiles for sharing your settings and reproducible science!](tutorial_profiles.md)
    2. [Example nf-core/eager set-up for metagenomic screening](tutorials_metagenomic.md)
-   3. [Example nf-core/eager set-up for human population
-      genetics preprocessing](tutorial_human_popgen.md)
+   3. [Example nf-core/eager set-up for human population genetics preprocessing](tutorial_human_popgen.md)
