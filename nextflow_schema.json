@@ -4,8 +4,9 @@
     "title": "nf-core/eager pipeline parameters",
     "description": "A fully reproducible ancient and modern DNA pipeline in Nextflow and with cloud support.",
     "type": "object",
-    "properties": {
-        "Input options": {
+    "definitions": {
+        "input_options": {
+            "title": "Input options",
             "type": "object",
             "properties": {
                 "input": {
@@ -59,7 +60,8 @@
                 "input"
             ]
         },
-        "Output options": {
+        "output_options": {
+            "title": "Output options",
             "type": "object",
             "description": "Specify where to put output files and optional saving of intermediate files",
             "default": "",
@@ -90,7 +92,8 @@
             },
             "fa_icon": "fas fa-cloud-download-alt"
         },
-        "Input Data Additional Options": {
+        "input_data_additional_options": {
+            "title": "Input Data Additional Options",
             "type": "object",
             "description": "Additional options regarding input data.",
             "default": "",
@@ -108,7 +111,8 @@
             },
             "fa_icon": "far fa-plus-square"
         },
-        "References": {
+        "references": {
+            "title": "References",
             "type": "object",
             "properties": {
                 "fasta": {
@@ -168,7 +172,8 @@
             "fa_icon": "fas fa-dna",
             "description": "Specify locations of references and otionally additional pre-made indicies"
         },
-        "Generic options": {
+        "generic_options": {
+            "title": "Generic options",
             "type": "object",
             "properties": {
                 "help": {
@@ -237,7 +242,8 @@
             "description": "Less common options for the pipeline, typically set in a config file.",
             "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`."
         },
-        "Max job request options": {
+        "max_job_request_options": {
+            "title": "Max job request options",
             "type": "object",
             "properties": {
                 "max_cpus": {
@@ -269,7 +275,8 @@
             "description": "Set the top limit for requested resources for any single job.",
             "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details."
         },
-        "Institutional config options": {
+        "institutional_config_options": {
+            "title": "Institutional config options",
             "type": "object",
             "properties": {
                 "custom_config_version": {
@@ -332,7 +339,8 @@
             "description": "Parameters used to describe centralised config profiles. These generally should not be edited.",
             "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline."
         },
-        "Skip Steps": {
+        "skip_steps": {
+            "title": "Skip steps",
             "type": "object",
             "description": "Skip any of the mentioned steps.",
             "default": "",
@@ -364,7 +372,8 @@
             },
             "fa_icon": "fas fa-forward"
         },
-        "Complexity Filtering": {
+        "complexity_filtering": {
+            "title": "Complexity filtering",
             "type": "object",
             "description": "Processing of Illumina two-colour chemistry data.",
             "default": "",
@@ -382,7 +391,8 @@
             },
             "fa_icon": "fas fa-sort-amount-down"
         },
-        "Read Clipping and Adapter Removal": {
+        "read_clipping_and_adapter_removal": {
+            "title": "Read Clipping and Adapter Removal",
             "type": "object",
             "description": "Options for adapter clipping and paired-end merging.",
             "default": "",
@@ -435,7 +445,8 @@
             },
             "fa_icon": "fas fa-cut"
         },
-        "Mapper": {
+        "mapper": {
+            "title": "Mapper",
             "type": "object",
             "description": "Options for alignment of processed reads against the reference genome.",
             "default": "",
@@ -508,7 +519,8 @@
             },
             "fa_icon": "fas fa-layer-group"
         },
-        "Stripping": {
+        "stripping": {
+            "title": "Stripping",
             "type": "object",
             "description": "Options for production of host-read removed FASTQ files for privacy reasons.",
             "default": "",
@@ -526,7 +538,8 @@
             },
             "fa_icon": "fas fa-user-shield"
         },
-        "BAM Filtering": {
+        "bam_filtering": {
+            "title": "BAM Filtering",
             "type": "object",
             "description": "Options for quality filtering and how to deal with off-target unmapped reads.",
             "default": "",
@@ -554,7 +567,8 @@
             },
             "fa_icon": "fas fa-filter"
         },
-        "DeDuplication": {
+        "deduplication": {
+            "title": "DeDuplication",
             "type": "object",
             "description": "Options for removal of PCR amplicon duplciates that can artificially inflate coverage.",
             "default": "",
@@ -572,7 +586,8 @@
             },
             "fa_icon": "fas fa-clone"
         },
-        "Library Complexity Analysis": {
+        "library_complexity_analysis": {
+            "title": "Library Complexity Analysis",
             "type": "object",
             "description": "Options for calculating library complexity (i.e. how many unique reads are present).",
             "default": "",
@@ -585,7 +600,8 @@
             },
             "fa_icon": "fas fa-bezier-curve"
         },
-        "(aDNA) Damage Analysis": {
+        "adna_damage_analysis": {
+            "title": "(aDNA) Damage Analysis",
             "type": "object",
             "description": "Options for calculating and filtering for characteristic ancient DNA damage patterns.",
             "default": "",
@@ -632,7 +648,8 @@
             },
             "fa_icon": "fas fa-chart-line"
         },
-        "Annotation Statistics": {
+        "annotation_statistics": {
+            "title": "Annotation Statistics",
             "type": "object",
             "description": "Options for getting reference annotation statistics (e.g. gene coverages)",
             "default": "",
@@ -649,7 +666,8 @@
             },
             "fa_icon": "fas fa-scroll"
         },
-        "BAM Trimming": {
+        "bam_trimming": {
+            "title": "BAM Trimming",
             "type": "object",
             "description": "Options for trimming of aligned reads (e.g. to remove damage prior genotyping).",
             "default": "",
@@ -677,7 +695,8 @@
             },
             "fa_icon": "fas fa-eraser"
         },
-        "Genotyping": {
+        "genotyping": {
+            "title": "Genotyping",
             "type": "object",
             "description": "Options for variant calling.",
             "default": "",
@@ -798,7 +817,8 @@
             },
             "fa_icon": "fas fa-sliders-h"
         },
-        "Consensus Sequence Generation": {
+        "consensus_sequence_generation": {
+            "title": "Consensus Sequence Generation",
             "type": "object",
             "description": "Options for creation of a per-sample FASTA sequence useful for downstream analysis (e.g. multi sequence alignment)",
             "default": "",
@@ -834,7 +854,8 @@
             },
             "fa_icon": "fas fa-handshake"
         },
-        "SNP Table Generation": {
+        "snp_table_generation": {
+            "title": "SNP Table Generation",
             "type": "object",
             "description": "Options for creation of a SNP table useful for downstream analysis (e.g. estimation of cross-mapping of different sepecies and multi-sequence alignment)",
             "default": "",
@@ -891,7 +912,8 @@
             },
             "fa_icon": "fas fa-table"
         },
-        "Mitochondrial to Nuclear Ratio": {
+        "mitochondrial_to_nuclear_ratio": {
+            "title": "Mitochondrial to Nuclear Ratio",
             "type": "object",
             "description": "Options for the calculation of ratio of reads to one chromosome/FASTA entry against all others.",
             "default": "",
@@ -909,7 +931,8 @@
             },
             "fa_icon": "fas fa-balance-scale-left"
         },
-        "Sex Determination": {
+        "sex_determination": {
+            "title": "Sex Determination",
             "type": "object",
             "description": "Options for the calculation of biological sex of human individuals.",
             "default": "",
@@ -926,7 +949,8 @@
             },
             "fa_icon": "fas fa-transgender"
         },
-        "Nuclear Contamination for Human DNA": {
+        "nuclear_contamination_for_human_dna": {
+            "title": "Nuclear Contamination for Human DNA",
             "type": "object",
             "description": "Options for the estimation of contamination of human DNA.",
             "default": "",
@@ -944,7 +968,8 @@
             },
             "fa_icon": "fas fa-radiation-alt"
         },
-        "Metagenomic Screening": {
+        "metagenomic_screening": {
+            "title": "Metagenomic Screening",
             "type": "object",
             "description": "Options for metagenomic screening of off-target reads.",
             "default": "",
@@ -1011,7 +1036,8 @@
             },
             "fa_icon": "fas fa-search"
         },
-        "Metagenomic Authentication": {
+        "metagenomic_authentication": {
+            "title": "Metagenomic Authentication",
             "type": "object",
             "description": "Options for authentication of metagenomic screening performed by MALT.",
             "default": "",
@@ -1082,5 +1108,85 @@
             },
             "fa_icon": "fas fa-tasks"
         }
-    }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/input_options"
+        },
+        {
+            "$ref": "#/definitions/output_options"
+        },
+        {
+            "$ref": "#/definitions/input_data_additional_options"
+        },
+        {
+            "$ref": "#/definitions/references"
+        },
+        {
+            "$ref": "#/definitions/generic_options"
+        },
+        {
+            "$ref": "#/definitions/max_job_request_options"
+        },
+        {
+            "$ref": "#/definitions/institutional_config_options"
+        },
+        {
+            "$ref": "#/definitions/skip_steps"
+        },
+        {
+            "$ref": "#/definitions/complexity_filtering"
+        },
+        {
+            "$ref": "#/definitions/read_clipping_and_adapter_removal"
+        },
+        {
+            "$ref": "#/definitions/mapper"
+        },
+        {
+            "$ref": "#/definitions/stripping"
+        },
+        {
+            "$ref": "#/definitions/bam_filtering"
+        },
+        {
+            "$ref": "#/definitions/deduplication"
+        },
+        {
+            "$ref": "#/definitions/library_complexity_analysis"
+        },
+        {
+            "$ref": "#/definitions/adna_damage_analysis"
+        },
+        {
+            "$ref": "#/definitions/annotation_statistics"
+        },
+        {
+            "$ref": "#/definitions/bam_trimming"
+        },
+        {
+            "$ref": "#/definitions/genotyping"
+        },
+        {
+            "$ref": "#/definitions/consensus_sequence_generation"
+        },
+        {
+            "$ref": "#/definitions/snp_table_generation"
+        },
+        {
+            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
+        },
+        {
+            "$ref": "#/definitions/sex_determination"
+        },
+        {
+            "$ref": "#/definitions/nuclear_contamination_for_human_dna"
+        },
+        {
+            "$ref": "#/definitions/metagenomic_screening"
+        },
+        {
+            "$ref": "#/definitions/metagenomic_authentication"
+        }
+    ]
 }
