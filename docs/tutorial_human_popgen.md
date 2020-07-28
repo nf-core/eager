@@ -1,4 +1,4 @@
-# Tutorial on how to set up nf-core/eager for metagenomic screening
+# Tutorial on how to set up nf-core/eager for human population genetics
 
 ## Introduction
 
@@ -25,7 +25,7 @@ Prior setting up the nf-core/eager run, we will need:
 2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools`
    and `picard SequenceDictionary` indices
 3. A BED file with the positions of the sites of interest.
-4. An eigenstrat formatted `.snp` file for the positions of interest. 
+4. An eigenstrat formatted `.snp` file for the positions of interest.
 
 We should also ensure we have the very latest version of the nf-core/eager
 pipeline so we have all latest bugfixes etc. In this case we will be using
@@ -350,7 +350,7 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-Finally, we need to specify genotyping parameters. First, we need to activate genotyping with `--run_genotyping`. It is also important to specify we wish to use the **trimmed** data for genotyping, to avoid the effects of DNA damage. To do this, we will specify the `--genotyping_source` is `'trimmed'`. Then we can specify the genotyping tool to use with `--genotyping_tool`. We will be using `'pileupCaller'` to produce random draw genotypes in eigenstrat format. For this process we will need to specify a BED file of the sites of interest (the same as before) with `--pileupcaller_bedfile`, as well as an eigenstrat formatted `.snp` file of these sites that is specified with `--pileupcaller_snpfile`. 
+Finally, we need to specify genotyping parameters. First, we need to activate genotyping with `--run_genotyping`. It is also important to specify we wish to use the **trimmed** data for genotyping, to avoid the effects of DNA damage. To do this, we will specify the `--genotyping_source` is `'trimmed'`. Then we can specify the genotyping tool to use with `--genotyping_tool`. We will be using `'pileupCaller'` to produce random draw genotypes in eigenstrat format. For this process we will need to specify a BED file of the sites of interest (the same as before) with `--pileupcaller_bedfile`, as well as an eigenstrat formatted `.snp` file of these sites that is specified with `--pileupcaller_snpfile`.
 
 ```bash
 nextflow run nf-core/eager \
@@ -450,7 +450,7 @@ DeDup/Picard MarkDuplicates):
 
 DamageProfiler:
 
-- Do I see evidence of damage on human DNA? 
+- Do I see evidence of damage on human DNA?
   - If high numbers of human DNA reads but no damage may indicate significant
     modern contamination.
   - Was the read trimming I specified enough to overcome damage effects?
@@ -461,7 +461,7 @@ SexDetERRmine:
 - Do all individuals have enough data for accurate sex determination?
 - Do the proportions of autosomal/X/Y reads make sense? If there is an
   overrepresentation of reads within one bin, is the data enriched for that
-  bin? 
+  bin?
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
 > the the 'Documentation' folder of the results directory or here in the [output
