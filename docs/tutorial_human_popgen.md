@@ -14,8 +14,11 @@ We will describe how to set up mapping of ancient sequences against
 the human reference genome to allow sequencing and library quality-control,
 estimation of nuclear contamination, genetic sex determination, and
 production of random draw genotypes in eigenstrat format for a specific set of
-sites, to be used in further analysis. For this example, I will be using the 1240k
-SNP set
+sites, to be used in further analysis. For this example, I will be using the
+1240k SNP set. This SNP set was first described in 
+[Mathieson et al. 2015](https://www.nature.com/articles/nature16152) and probes
+targeting these SNPs can be used to enrich ancient DNA libraries for fragments
+of DNA overlapping these SNPs.
 
 ## Preparation
 
@@ -442,7 +445,9 @@ FastQC (post-AdapterRemoval):
 Samtools Flagstat (pre/post Filter):
 
 - Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
-  of contamination) that require downstream closer assessment?
+  of contamination) that require downstream closer assessment? Are your samples
+  exceptionally preserved? If not, a value higher than e.g. 50% might require
+  your attention. 
 
 DeDup/Picard MarkDuplicates):
 
