@@ -1464,11 +1464,7 @@ process bwamem {
     params.mapper == 'bwamem'
 
     script:
-<<<<<<< HEAD
-    def fasta = "${index}/${bwa_index}"
-=======
     def fasta = "${index}/${fasta_base}"
->>>>>>> 424651e5df6803b6e6af5f29444faf8fefcf02b2
     def size = params.large_ref ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
@@ -1574,11 +1570,7 @@ process bowtie2 {
 
     script:
     def size = params.large_ref ? '-c' : ''
-<<<<<<< HEAD
-    def fasta = "${index}/${bt2_index}"
-=======
     def fasta = "${index}/${fasta_base}"
->>>>>>> 424651e5df6803b6e6af5f29444faf8fefcf02b2
     def trim5 = params.bt2_trim5 != 0 ? "--trim5 ${params.bt2_trim5}" : ""
     def trim3 = params.bt2_trim3 != 0 ? "--trim3 ${params.bt2_trim3}" : ""
     def bt2n = params.bt2n != 0 ? "-N ${params.bt2n}" : ""
