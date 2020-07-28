@@ -452,7 +452,7 @@ DeDup/Picard MarkDuplicates):
 DamageProfiler:
 
 - Do I see evidence of damage on human DNA?
-  - If high numbers of human DNA reads but no damage may indicate significant
+  - If high numbers of mapped reads but no damage may indicate significant
     modern contamination.
   - Was the read trimming I specified enough to overcome damage effects?
 
