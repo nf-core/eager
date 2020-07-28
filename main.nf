@@ -1973,7 +1973,10 @@ if ( params.skip_deduplication ) {
     .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
 }
 
-// Merge independent libraries sequenced but with same treatment (often done to improve complexity). Different strand/UDG libs not merged because bamtrim/pmdtools needs UDG info
+// Merge independent libraries sequenced but with same treatment (often done to 
+// improve complexity) with the same _sample_ name. Different strand/UDG libs 
+// not merged because bamtrim/pmdtools/genotyping needs that info.
+
 // Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
 if ( params.skip_deduplication ) {
   ch_input_for_librarymerging = ch_filtering_for_skiprmdup
@@ -1999,9 +2002,24 @@ ch_input_for_librarymerging.clean_libraryid
   .map{
     it ->
       def libraryid = it[1][0]
-      [it[0], libraryid, it[2], it[3], it[4], it[5], it[6], it[7], it[8] ]
+      def bam = it[7].flatten()
+      def bai = it[8].flatten()
+
+      [it[0], libraryid, it[2], it[3], it[4], it[5], it[6], bam, bai ]
     }
   .set { ch_input_for_skiplibrarymerging }
+
+ch_input_for_librarymerging.merge_me
+  .map{
+    it ->
+      def libraryid = it[1][0]
+      def seqtype = "merged"
+      def bam = it[7].flatten()
+      def bai = it[8].flatten()
+
+      [it[0], libraryid, it[2], seqtype, it[4], it[5], it[6], bam, bai ]
+    }
+  .set { ch_fixedinput_for_librarymerging }
 
 process library_merge {
   label 'sc_tiny'
@@ -2009,7 +2027,7 @@ process library_merge {
   publishDir "${params.outdir}/merged_bams/initial", mode: 'copy'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_input_for_librarymerging.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump()
 
   output:
   tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, file("*_libmerged_rg_rmdup.bam"), file("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
@@ -2228,7 +2246,10 @@ process bam_trim {
     """
 }
 
-// Post trimming merging, because we will presume that if trimming is turned on, 'lab-removed' libraries can be combined with merged with 'in-silico damage removed' libraries to improve genotyping
+// Post trimming merging of libraries to single samples, except for SS/DS 
+// libraries as they should be genotyped separately, because we will assume 
+// that if trimming is turned on, 'lab-removed' libraries can be combined with 
+// merged with 'in-silico damage removed' libraries to improve genotyping
 
 ch_trimmed_formerge = ch_bamutils_decision.notrim
   .mix(ch_trimmed_from_bamutils)
