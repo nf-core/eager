@@ -1376,7 +1376,7 @@ process bwa {
 
     script:
     def size = params.large_ref ? '-c' : ''
-    def fasta = "${index}/${bwa_base}"
+    def fasta = "${index}/${fasta_base}"
 
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
@@ -1415,7 +1415,7 @@ process bwamem {
     params.mapper == 'bwamem'
 
     script:
-    def fasta = "${index}/${bwa_base}"
+    def fasta = "${index}/${fasta_base}"
     def size = params.large_ref ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
@@ -1521,7 +1521,7 @@ process bowtie2 {
 
     script:
     def size = params.large_ref ? '-c' : ''
-    def fasta = "${index}/${bt2_base}"
+    def fasta = "${index}/${fasta_base}"
     def trim5 = params.bt2_trim5 != 0 ? "--trim5 ${params.bt2_trim5}" : ""
     def trim3 = params.bt2_trim3 != 0 ? "--trim3 ${params.bt2_trim3}" : ""
     def bt2n = params.bt2n != 0 ? "-N ${params.bt2n}" : ""
