@@ -121,7 +121,8 @@ them together accordingly. Secondly, as we have NextSeq data, we have specified
 we have two `Colour_Chemistry`, which is important for downstream processing
 (see below). The other columns are less important for this particular context of
 metagenomic screening. See the nf-core/eager [usage](../usage.md) documentation
-for more specifications on how to set up a TSV file.
+for more specifications on how to set up a TSV file (e.g. why despite NextSeqs
+only having 4 lanes, we go up to 8 in the example above).
 
 Alongside our input TSV file, we will also specify the paths to our reference
 FASTA file and the corresponding indices.
@@ -149,7 +150,7 @@ indices instead.
 > represent nextflow flags, while double are nf-core/eager specific flags.
 
 Finally, we can also specify the output directory and the Nextflow `work/`
-directory (that contains "intermediate" working files and directories).
+directory (which contains "intermediate" working files and directories).
 
 ```bash
 nextflow run nf-core/eager \
@@ -173,12 +174,12 @@ settings for each different module we will be running. As mentioned above, we
 are pretending to run with NextSeq data, which is generated with a two-colour
 imaging technique. What this means is when you have shorter molecules than the
 number of cycles of the sequencing chemistry, the sequencer will repeatedly see
-'G' calls (no colour), and you get long poly-G 'tails' on your reads. We
-therefore will turn on the poly-G clipping functionality offered by
-[`fastp`](https://github.com/OpenGene/fastp), and any pairs of files indicated
-in the TSV file has having `2` in the `Colour_Chemistry` column will be passed
-to `fastp`. We will not change the default minimum length of a poly-G string to
-be clipped.
+'G' calls (no colour) at the last few cycles, and you get long poly-G 'tails' on
+your reads. We therefore will turn on the poly-G clipping functionality offered
+by [`fastp`](https://github.com/OpenGene/fastp), and any pairs of files
+indicated in the TSV file as having `2` in the `Colour_Chemistry` column will be
+passed to `fastp`. We will not change the default minimum length of a poly-G
+string to be clipped.
 
 ```bash
 nextflow run nf-core/eager \
@@ -226,8 +227,8 @@ the location of the [pre-built database](#preparation) and which 'min support'
 method we want to use (this specifies the minimum number of alignments is needed
 to a particular taxonomic node to be 'kept' in the MALT output files). Otherwise
 we will keep all other parameters as default. For example using BlastN mode,
-requiring a minimum of 85% identity, requiring at least 0.01% alignments for
-a taxon to be saved (as specified with the `--malt_min_support_mode`). More
+requiring a minimum of 85% identity, requiring at least 0.01% alignments for a
+taxon to be saved (as specified with the `--malt_min_support_mode`). More
 documentation describing each parameters can be seen in the usage
 [documentation](usage.md)
 
@@ -397,6 +398,9 @@ For example, in this example, we have used: Nextflow, nf-core/eager, FastQC,
 AdapterRemoval, fastP, BWA, Samtools, endorS.py, Picard Markduplicates,
 Qualimap, PreSeq, DamageProfiler, MALT, Maltextract and MultiQC.
 
+Citations to all used tools can be seen
+[here](https://nf-co.re/eager#tool-references)
+
 ### Files for Downstream Analysis
 
 If you wanted to look at the output of MALT more closely, such as in the GUI
@@ -418,10 +422,10 @@ In these cases you can go into the `default` directory to find all the raw text
 files which you can use to visualise and assess the authentication results
 yourself.
 
-Finally, if you want to re-run the taxonomic classification with a new
-database or tool, to find the raw `fastq/` files containing only unmapped reads
-that went into MALT, you should go into `samtools/filter`. In here you will find
-files ending in `unmapped.fastq.gz` for each library.
+Finally, if you want to re-run the taxonomic classification with a new database
+or tool, to find the raw `fastq/` files containing only unmapped reads that went
+into MALT, you should go into `samtools/filter`. In here you will find files
+ending in `unmapped.fastq.gz` for each library.
 
 ## Clean up
 
