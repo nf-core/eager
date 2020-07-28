@@ -171,7 +171,7 @@ number of cycles of the sequencing chemistry, the sequencer will repeatedly see
 'G' calls (no colour) at the last few cycles, and you get long poly-G 'tails' on your reads. We
 therefore will turn on the poly-G clipping functionality offered by
 [`fastp`](https://github.com/OpenGene/fastp), and any pairs of files indicated
-in the TSV file has having `2` in the `Colour_Chemistry` column will be passed
+in the TSV file as having `2` in the `Colour_Chemistry` column will be passed
 to `fastp`. We will not change the default minimum length of a poly-G string to
 be clipped.
 
