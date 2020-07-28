@@ -192,7 +192,14 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-Since our input data is paired-end, we will be using `DeDup` for duplicate removal, which takes into account both the start and end of a merged read before flagging it as a duplicate. To ensure this happens works properly we first need to diable base quality trimming of collapsed reads within Adapter Removal. To do this, we will provide the option `--preserve5p`.
+Since our input data is paired-end, we will be using `DeDup` for duplicate
+removal, which takes into account both the start and end of a merged read
+before flagging it as a duplicate. To ensure this happens works properly we
+first need to diable base quality trimming of collapsed reads within Adapter
+Removal. To do this, we will provide the option `--preserve5p`. Additionally,
+Dedup should only be provided with merged reads, so we will need to provide the
+ooption `--mergedonly` here as well. We can then specify which dedupper we want
+to use with `--dedupper`.
 
 ```bash
 nextflow run nf-core/eager \
@@ -208,6 +215,8 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
 <...>
 ```
 
@@ -231,6 +240,8 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
 --bwaalnn 0.01 \
 <...>
 ```
@@ -251,6 +262,8 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
 --bwaalnn 0.01 \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
@@ -258,7 +271,7 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-To activate sex determination (using Sex.DetERRmine.py) we will provide the
+To activate sex determination (using [Sex.DetERRmine.py](https://github.com/TCLamnidis/Sex.DetERRmine)) we will provide the
 option `--run_sexdeterrmine`. Additionally, we will provide sexdeterrmine with
 the BED file of our SNPs of interest using the `--sexdeterrmine_bedfile` flag.
 Here I will use the 1240k SNP set as an example. This will cut down on
@@ -279,6 +292,8 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
 --bwaalnn 0.01 \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
@@ -304,6 +319,8 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
 --bwaalnn 0.01 \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
@@ -317,10 +334,10 @@ nextflow run nf-core/eager \
 
 Because nuclear contamination estimates can only be provided for males, it is
 possible that we will need to get mitchondrial DNA contamination estimates for
-any females in our dataset. This cannot be done within eager (v2.2.0) and we
+any females in our dataset. This cannot be done within nf-core/eager (v2.2.0) and we
 will need to do this manually at a later time. However, mtDNA contamination
 estimates have been shown to only be reliable for nuclear contamination when
-the ratio of mitochondrial to nuclear reads is low. We can have eager calculate
+the ratio of mitochondrial to nuclear reads is low. We can have nf-core/eager calculate
 that ratio for us with `--run_mtnucratio`, and providing the name of the
 mitochondrial DNA contig in our reference genome with `--mtnucratio_header`.
 Within hs37d5, the mitochondrial contig is named 'MT'.
@@ -339,6 +356,8 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
 --bwaalnn 0.01 \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
@@ -368,6 +387,8 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
 --bwaalnn 0.01 \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
@@ -418,7 +439,7 @@ General Stats Table:
 - Does ClusterFactor or 'Dups' look high (e.g. >2 or >10%
   respectively) suggesting over-amplified or
   badly preserved samples?
-- Does the human DNA show increased frequency of C>Ts on the 5' end of molecules
+- Do the mapped reads show increased frequency of C>Ts on the 5' end of molecules
   (you may need to un-hide the 2nd base columns with 'configure columns'
   button)?
 - Is the number of SNPs used for nuclear contamination really low for any
