@@ -24,7 +24,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * General documentation additions and cleaning, updated figures with CC-BY license
 * Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
 * [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
-* [#451] Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
+* [#451](https://github.com/nf-core/eager/issues/451) Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
+* Nuclear contamination results are now shown in the MultiQC report.
+* Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
+* [#522](https://github.com/nf-core/eager/issues/522)  Added post-mapping length filter to asisst in more realistic endogenous DNA calculations
+* [#512](https://github.com/nf-core/eager/issues/512) Added flexible trimming of bams by library type. 'half' and 'none' UDG libraries can now be trimmed differentially within a single eager run.
+* Added a `.dockstore.yml` config file for automatic workflow registration with [dockstore.org](https://dockstore.org/)
 
 ### `Fixed`
 
@@ -39,8 +44,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#473](https://github.com/nf-core/eager/issues/473) - Fixed bug in sexdet_process on AWS
 * [#444](https://github.com/nf-core/eager/issues/444) - Provide option for preserving realigned bam + index
 * Increase MultiQC process memory requirements to ensure enough memory for large runs
+* Fixed deduplication output logic. Will now pass along only the post-rmdup bams if duplicate removal is not skipped, instead of both the post-rmdup and pre-rmdup bams.
 * [#497](https://github.com/nf-core/eager/issues/497) - Simplifies number of parameters required to run bam filtering
 * [#501](https://github.com/nf-core/eager/issues/501) - Adds additional validation checks for MALT/MaltExtract database input files
+* [#508](https://github.com/nf-core/eager/issues/508) - Made Markduplicates default dedupper due to narrower context specificity of dedup
+* [#516](https://github.com/nf-core/eager/issues/516) - Made bedtools not report out of memory exit code when warning of inconsistant FASTA/Bed entry names
+* [#504](https://github.com/nf-core/eager/issues/504) - Removed uninformative sexdeterrmine-snps plot from MultiQC report.
+* Nuclear contamination is now reported with the correct library names.
 
 ### `Dependencies`
 
@@ -57,6 +67,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Latest version of FreeBayes (1.3.2)
 * Latest version of xopen (0.9.0)
 * Added Bowtie 2 (2.4.1)
+* Latest version of Sex.DetERRmine (1.1.2)
+* Latest version of endorS.py (0.3)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 

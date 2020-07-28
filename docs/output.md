@@ -110,6 +110,11 @@ The possible columns displayed by default are as follows:
 - **>= 1X** to **>= 5X** These are from Qualimap. This is the percentage of the genome covered at that particular depth coverage.
 - **% GC** This is the mean GC content in percent of all mapped reads post-deduplication. This should normally be close to the GC content of your reference genome.
 - **MT to Nuclear Ratio** This from MTtoNucRatio. This reports the number of reads aligned to a mitochondrial entry in your reference FASTA to all other entries. This will typically be high but will vary depending on tissue type.
+- **XRate** This is from Sex.DetERRmine. This is the relative depth of coverage on the X-chromosome.
+- **YRate** This is from Sex.DetERRmine. This is the relative depth of coverage on the Y-chromosome.
+- **Number of SNPs** This is from ANGSD. The number of SNPs left after removing sites with no data in a 5 base pair surrounding region.
+- **Contamination Estimate (Method1_ML)** This is from the nuclear contamination function of ANGSD. The Maximum Likelihood contamination estimate according to Method 1. The estimates using Method of Moments and/or those based on Method 2 can be unhidden through the "Configure Columns" button.
+- **Estimate Error (Method1_ML)** This is from ANGSD. The standard error of the Method1 Maximum likelihood estimate. The errors associated with Method of Moments and/or Method2 estimates can be unhidden through the "Configure Columns" button.
 - **% Hets** This is from MultiVCFAnalyzer. This reports the number of SNPs on an assumed haploid organism that have two possible alleles. A high percentage may indicate cross-mapping from a related species.
 
 For other non-default columns (activated under 'Configure Columns'), hover over the column name for further descriptions.
@@ -618,6 +623,16 @@ Aneuploidy of the sex chromosomes can also be identified with this approach when
   <img src="images/output/sexdeterrmine/sexdeterrmine_relative_coverage.png" width="75%" height = "75%">
 </p>
 
+#### Read Counts
+
+This plot gives you the number of reads mapped onto the Autosomes, X or Y chromosomes. When the total number of mapped reads is low, the estimates are more likely to be dominated by random effects, and hence untrustworthy.
+For well-covered data without any skews, you should see long bars that are comprised mostly of Autosomal reads. The edge of the bars in female individuals should be mostly X (some small amounts of Y reads are expected and are usually caused by random mapping on the Y chromosome). In males, the number of X-reads will still be higher (since the X chromosome is longer), but the Y reads should be clearly visible on the rightmost end of the bars. The ratio between the number of sites in each bin should roughly correlate with the difference in length in base pairs of each chromosome type.
+If this correlation is not observed, your data is skewed towards higher coverage on some chromosomes. This can be expected if you have enriched for a specific set of markers (e.g. Y-chromosome capture), or if the number of reads is too low.
+
+<p align="center">
+  <img src="images/output/sexdeterrmine/sexdeterrmine_read_counts.png" width="75%" height = "75%">
+</p>
+
 ### MultiVCFAnalyzer
 
 #### Background
@@ -657,7 +672,7 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 - `qualimap/` - this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
 - `damageprofiler/` - this contains sample specific directories containing raw statistics and damage plots from DamageProfiler. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
 - `pmdtools/` this contains raw output statistics of pmdtools (estimates of frequencies of substitutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`. The BAM files do not have corresponding index files.
-- `trimmed_bam/` this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_left` and `--bamutils_clip_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read).
+- `trimmed_bam/` this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_half_udg_left`, `--bamutils_clip_half_udg_right`, `--bamutils_clip_none_udg_left`, and `--bamutils_clip_none_udg_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read).
 - `genotyping/` this contains all the (gzipped) genotyping files produced by your genotyping module. The file suffix will have the genotyping tool name. You will have files corresponding to each of your deduplicated BAM files (except pileupcaller), or any turned-on downstream processes that create BAMs (e.g. trimmed bams or pmd tools). If `--gatk_ug_keep_realign_bam` supplied, this may also contain BAM files from InDel realignment when using GATK 3 and UnifiedGenotyping for variant calling.
 - `MultiVCFAnalyzer/` this contains all output from MultiVCFAnalyzer, including SNP calling statistics, various SNP table(s) and FASTA alignment files.
 - `sex_determination/` this contains the output for the sex determination run. This is a single `.tsv` file that includes a table with the Sample Name, the Nr of Autosomal SNPs, Nr of SNPs on the X/Y chromosome, the Nr of reads mapping to the Autosomes, the Nr of reads mapping to the X/Y chromosome, the relative coverage on the X/Y chromosomes, and the standard error associated with the relative coverages. These measures are provided for each bam file, one row per bam. If the `sexdeterrmine_bedfile` option has not been provided, the error bars cannot be trusted, and runtime will be considerably longer.
