@@ -168,7 +168,7 @@ settings for each different module we will be running. As mentioned above, we
 are pretending to run with NextSeq data, which is generated with a two-colour
 imaging technique. What this means is when you have shorter molecules than the
 number of cycles of the sequencing chemistry, the sequencer will repeatedly see
-'G' calls (no colour), and you get long poly-G 'tails' on your reads. We
+'G' calls (no colour) at the last few cycles, and you get long poly-G 'tails' on your reads. We
 therefore will turn on the poly-G clipping functionality offered by
 [`fastp`](https://github.com/OpenGene/fastp), and any pairs of files indicated
 in the TSV file has having `2` in the `Colour_Chemistry` column will be passed
