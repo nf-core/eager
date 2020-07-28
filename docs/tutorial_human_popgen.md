@@ -144,7 +144,7 @@ indices instead.
 > represent nextflow flags, while the latter are nf-core/eager specific flags.
 
 Finally, we can also specify the output directory and the Nextflow `work/`
-directory (that contains "intermediate" working files and directories).
+directory (which contains "intermediate" working files and directories).
 
 ```bash
 nextflow run nf-core/eager \
