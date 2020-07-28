@@ -235,7 +235,7 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-Next, we will set up trimming of the mapped reads to allevite the effects of DNA damage. To do this we will activate trimming with `--run_trim_bam`. The libraries in this underwent 'half' UDG treatment. This will generally restrict all remaining DNA damage to the first 2 base pairs of a fragment. We will therefore use `--bamutils_clip_half_udg_left` and `--bamutils_clip_half_udg_right` to trim 2bp on either side of each fragment.
+Next, we will set up trimming of the mapped reads to allevite the effects of DNA damage during genotyping. To do this we will activate trimming with `--run_trim_bam`. The libraries in this underwent 'half' UDG treatment. This will generally restrict all remaining DNA damage to the first 2 base pairs of a fragment. We will therefore use `--bamutils_clip_half_udg_left` and `--bamutils_clip_half_udg_right` to trim 2bp on either side of each fragment.
 
 ```bash
 nextflow run nf-core/eager \
