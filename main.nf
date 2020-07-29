@@ -2535,7 +2535,7 @@ if (params.pileupcaller_bedfile.isEmpty()) {
 }
 
 if (params.pileupcaller_snpfile.isEmpty ()) {
-  ch_snp_for_pileupcaller = 'NO_FILE'
+  ch_snp_for_pileupcaller = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy2.txt")
 } else {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
 }
@@ -2570,20 +2570,23 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   file fasta from ch_fasta_for_genotyping_pileupcaller.collect()
   file fai from ch_fai_for_pileupcaller.collect()
   file dict from ch_dict_for_pileupcaller.collect()
-  file bed from ch_bed_for_pileupcaller.collect()
-  file snp from ch_snp_for_pileupcaller.collect()
+  path(bed) from ch_bed_for_pileupcaller.collect()
+  path(snp) from ch_snp_for_pileupcaller.collect()
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("pileupcaller.${strandedness}.*")
 
   script:
+  def use_bed = bed.getName() != 'nf-core_eager_dummy.txt' ? "-l ${bed}" : ''
+  def use_snp = snp.getName() != 'nf-core_eager_dummy2.txt' ? "-f ${snp}" : ''
+
   def transitions_mode = strandedness == "single" ? "" : "${params.pileupcaller_transitions_mode}" == 'SkipTransitions' ? "--skipTransitions" : "${params.pileupcaller_transitions_mode}" == 'TransitionsMissing' ? "--transitionsMissing" : ""
   def caller = "--${params.pileupcaller_method}"
   def ssmode = strandedness == "single" ? "--singleStrandMode" : ""
   def bam_list = bam.flatten().join(" ")
   def sample_names = samplename.flatten().join(",")
   """
-  samtools mpileup -B -q 30 -Q 30 -l ${bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} -f ${snp} -e pileupcaller.${strandedness}
+  samtools mpileup -B -q 30 -Q 30 ${use_bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} "${use_snp}" -e pileupcaller.${strandedness}
   """
  }
 
@@ -2739,7 +2742,7 @@ if (params.additional_vcf_files == '') {
 // Human biological sex estimation
 
 if (params.sexdeterrmine_bedfile == '') {
-  ch_bed_for_sexdeterrmine = file('NO_FILE')
+  ch_bed_for_sexdeterrmine = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy.txt")
 } else {
   ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
 }
@@ -2750,8 +2753,8 @@ process sex_deterrmine {
     publishDir "${params.outdir}/sex_determination", mode:"copy"
      
     input:
-    file bam from ch_for_sexdeterrmine.map { it[7] }.collect()
-    file bed from ch_bed_for_sexdeterrmine
+    path bam from ch_for_sexdeterrmine.map { it[7] }.collect()
+    path(bed) from ch_bed_for_sexdeterrmine
 
     output:
     file "SexDet.txt"
@@ -2761,7 +2764,7 @@ process sex_deterrmine {
     params.run_sexdeterrmine
     
     script:
-    def filter = bed.name != 'NO_FILE' ? "-b $bed" : ''
+    def filter = bed.getName() != 'nf-core_eager_dummy.txt' ? "-b $bed" : ''
     """
     
     for i in *.bam; do
@@ -3376,12 +3379,6 @@ def return_file(it) {
 // Check file extension
 def has_extension(it, extension) {
     it.toString().toLowerCase().endsWith(extension.toLowerCase())
-}
-
-// To convert a string to an array when not an array already
-// From: https://stackoverflow.com/a/55453674/11502856
-def arrayify(it) {
-  [] + it ?: [it]
 }
 
 // Extract FastQs from Path
