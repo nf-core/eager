@@ -519,8 +519,8 @@
             },
             "fa_icon": "fas fa-layer-group"
         },
-        "stripping": {
-            "title": "Stripping",
+        "host_removal": {
+            "title": "Host Removal",
             "type": "object",
             "description": "Options for production of host-read removed FASTQ files for privacy reasons.",
             "default": "",
