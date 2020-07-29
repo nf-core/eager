@@ -2544,7 +2544,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   file fai from ch_fai_for_pileupcaller.collect()
   file dict from ch_dict_for_pileupcaller.collect()
   path(bed) from ch_bed_for_pileupcaller.collect()
-  path(snp) from ch_snp_for_pileupcaller.collect()
+  path(snp) from ch_snp_for_pileupcaller.collect().dump(tag: "Pileupcaller SNP file")
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("pileupcaller.${strandedness}.*")
@@ -2559,7 +2559,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   def bam_list = bam.flatten().join(" ")
   def sample_names = samplename.flatten().join(",")
   """
-  samtools mpileup -B -q 30 -Q 30 ${use_bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} "${use_snp}" -e pileupcaller.${strandedness}
+  samtools mpileup -B -q 30 -Q 30 ${use_bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} ${use_snp} -e pileupcaller.${strandedness}
   """
  }
 
