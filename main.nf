@@ -1315,33 +1315,6 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
     .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 }
 }
 
-/*
-ch_lanemerge_for_mapping
-  .map {
-      def samplename = it[0]
-      def libraryid  = it[1]
-      def lane = it[2]
-      def seqtype = it[3]
-      def organism = it[4]
-      def strandedness = it[5]
-      def udg = it[6]
-      def reads = arrayify(it[7])
-      def r1 = it[7] instanceof ArrayList ? reads[0] : it[7]
-      def r2 = reads[1] ? reads[1] : file("$baseDir/assets/nf-core_eager_dummy.txt")
-      
-      println("########################################")
-      println(reads)
-      println("")
-      println(r2)
-      println("########################################")
-
-      [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
-
-  }
-  .dump(tag: "Merge Lane Map Content")
-  .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 } 
-*/
-
 // ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads stripping 
 
 // Per-library lane grouping done within process
@@ -1639,9 +1612,8 @@ ch_fastqlanemerge_for_stripfastq
         def organism = it[4]
         def strandedness = it[5]
         def udg = it[6]
-        def reads = arrayify(it[7])
-        def r1 = it[7].getClass() == ArrayList ? reads[0] : it[7]
-        def r2 = it[7].getClass() == ArrayList ? reads[1] : "NA"      
+        def r1 = seqtype == "PE" ? file(it[7].sort()[0]) : file(it[7])
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$baseDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1665,6 +1637,7 @@ ch_fastqlanemerge_for_stripfastq
 
     }
     .filter{ it[8] != null }
+    .dump(tag: "StripFastq Input")
     .set { ch_synced_for_stripfastq }
 
 // Remove mapped reads from original (lane merged) input FASTQ e.g. for sensitive host data when running metagenomic data
@@ -1678,7 +1651,7 @@ process strip_input_fastq {
     params.strip_input_fastq
 
     input: 
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, path(r1), path(r2), file(bam), file(bai) from ch_synced_for_stripfastq
 
     output:
     tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_stripfastq
