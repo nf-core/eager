@@ -20,7 +20,8 @@ Prior setting up an nf-core/eager run for pathogen reconstruction, we will need:
 1. Raw sequencing data in FASTQ format
 2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools`
    and `picard SequenceDictionary` indices**
-   **Note: This files are not required per se. nf-core/eager will generate those for the reference fasta if they are not present, however they will be removed after the run if not specified otherwise. If your reference genome is large, is best to generate this files once and keep them in a separate folder.
+   
+**Note: This files are not required per se. nf-core/eager will generate those for the reference fasta if they are not present, however they will be removed after the run if not specified otherwise. If your reference genome is large, is best to generate this files once and keep them in a separate folder.
 
 We should also ensure we have the very latest version of the nf-core/eager
 pipeline so we have all latest bugfixes etc. In this case we will be using
@@ -75,14 +76,7 @@ Next we need to specify our input data. nf-core/eager can accept input FASTQs
 files in two main ways, either with direct paths to files (with wildcards), or
 with a Tab-Separate-Value (TSV) file which contains the paths and extra
 metadata. In this example, we will use the TSV method, as to simulate a
-realistic use-case. 
-
-, such as receiving paired-end data from an Illumina NextSeq
-of double-stranded libraries. Illumina NextSeqs sequence a given library across
-four different 'lanes', so for each library you will receive four FASTQ files.
-The TSV input method is more useful for this context, as it allows 'merging' of
-these lanes after preprocessing prior mapping (whereas direct paths will
-consider each pair of FASTQ files as independent libraries/samples).
+realistic use-case. DESCRIPTION DATA
 
 Our TSV file will look something like the following:
 
@@ -122,12 +116,12 @@ FASTA file and the corresponding indices.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200720' \
---input 'screening20200720.tsv' \
---fasta '../Reference/genome/GRCh38.fa' \
---bwa_index '../Reference/genome/GRCh38/' \
---fasta_index '../Reference/genome/GRCh38.fa.fai' \
---seq_dict '../Reference/genome/GRCh38.dict' \
+-name 'projectX_pestis20200720' \
+--input 'pestis20200720.tsv' \
+--fasta '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta' \
+--bwa_index '../Reference/Y_pestis_CO92_NC_003143/' \
+--fasta_index '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta.fai' \
+--seq_dict '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.dict' \
 <...>
 ```
 
@@ -147,12 +141,12 @@ directory (which contains "intermediate" working files and directories).
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200720' \
---input 'screening20200720.tsv' \
---fasta '../Reference/genome/GRCh38.fa' \
---bwa_index '../Reference/genome/GRCh38/' \
---fasta_index '../Reference/genome/GRCh38.fa.fai' \
---seq_dict '../Reference/genome/GRCh38.dict' \
+-name 'projectX_pestis20200720' \
+--input 'pestis20200720.tsv' \
+--fasta '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta' \
+--bwa_index '../Reference/Y_pestis_CO92_NC_003143/' \
+--fasta_index '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta.fai' \
+--seq_dict '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.dict' \
 --outdir './results/' \
 - w './work/' \
 <...>
@@ -176,121 +170,53 @@ string to be clipped.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200720' \
---input 'screening20200720.tsv' \
---fasta '../Reference/genome/GRCh38.fa' \
---bwa_index '../Reference/genome/GRCh38/' \
---fasta_index '../Reference/genome/GRCh38.fa.fai' \
---seq_dict '../Reference/genome/GRCh38.dict' \
+-name 'projectX_pestis20200720' \
+--input 'pestis20200720.tsv' \
+--fasta '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta' \
+--bwa_index '../Reference/Y_pestis_CO92_NC_003143/' \
+--fasta_index '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta.fai' \
+--seq_dict '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.dict' \
 --outdir './results/' \
 - w './work/' \
 --complexity_filter_poly_g \
 <...>
 ```
 
-We will keep the default settings for mapping etc. against the reference genome
-as we will only use this for sequencing quality control, however we now need to
-specify that we want to run metagenomic screening. To do this we firstly need to
-tell nf-core/eager what to do with the off target reads from the mapping.
+We will now specify the mapping parameters and we will filter all unmapped reads in order to reduce the size of the files. 
 
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200720' \
---input 'screening20200720.tsv' \
---fasta '../Reference/genome/GRCh38.fa' \
---bwa_index '../Reference/genome/GRCh38/' \
---fasta_index '../Reference/genome/GRCh38.fa.fai' \
---seq_dict '../Reference/genome/GRCh38.dict' \
+-name 'projectX_pestis20200720' \
+--input 'pestis20200720.tsv' \
+--fasta '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta' \
+--bwa_index '../Reference/Y_pestis_CO92_NC_003143/' \
+--fasta_index '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta.fai' \
+--seq_dict '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.dict' \
 --outdir './results/' \
 - w './work/' \
---complexity_filter_poly_g \
---run_bam_filtering \
---bam_unmapped_type 'fastq' \
-<...>
+
 ```
 
-nf-core/eager will now take all unmapped reads after mapping and convert the BAM
-file back to FASTQ, which can be accepted by MALT. But of course, we also then
-need to tell nf-core/eager we actually want to run MALT. We will also specify
-the location of the [pre-built database](#preparation) and which 'min support'
-method we want to use (this specifies the minimum number of alignments is needed
-to a particular taxonomic node to be 'kept' in the MALT output files). Otherwise
-we will keep all other parameters as default. For example using BlastN mode,
-requiring a minimum of 85% identity, requiring at least 0.01% alignments for a
-taxon to be saved (as specified with the `--malt_min_support_mode`). More
-documentation describing each parameters can be seen in the usage
-[documentation](usage.md)
+Finally, multiVCFAnalyzer
 
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_screening20200720' \
---input 'screening20200720.tsv' \
---fasta '../Reference/genome/GRCh38.fa' \
---bwa_index '../Reference/genome/GRCh38/' \
---fasta_index '../Reference/genome/GRCh38.fa.fai' \
---seq_dict '../Reference/genome/GRCh38.dict' \
+-name 'projectX_pestis20200720' \
+--input 'pestis20200720.tsv' \
+--fasta '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta' \
+--bwa_index '../Reference/Y_pestis_CO92_NC_003143/' \
+--fasta_index '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.fasta.fai' \
+--seq_dict '../Reference/Y_pestis_CO92_NC_003143/Y_pestis_CO92_NC_003143.dict' \
 --outdir './results/' \
 - w './work/' \
---complexity_filter_poly_g \
---run_bam_filtering \
---bam_unmapped_type 'fastq' \
---run_metagenomic_screening \
---metagenomic_tool 'malt' \
---database '../Reference/database/refseq-bac-arch-homo-2018_11' \
---malt_min_support_mode 'percent' \
-<...>
+
 ```
 
-Finally, to help quickly assess whether we our sample has taxa that are known to
-exist in (modern samples of) our expected microbiome, and that these alignments
-have indicators of true aDNA, we will run 'maltExtract' of the
-[HOPS](https://github.com/rhuebler/HOPS) pipeline.
-
-```bash
-nextflow run nf-core/eager \
--r 2.2.0 \
--profile sdag,shh,singularity \
--name 'projectX_screening20200720' \
---input 'screening20200720.tsv' \
---fasta '../Reference/genome/GRCh38.fa' \
---bwa_index '../Reference/genome/GRCh38/' \
---fasta_index '../Reference/genome/GRCh38.fa.fai' \
---seq_dict '../Reference/genome/GRCh38.dict' \
---outdir './results/' \
-- w './work/' \
---complexity_filter_poly_g \
---run_bam_filtering \
---bam_unmapped_type 'fastq' \
---run_metagenomic_screening \
---metagenomic_tool 'malt' \
---database '../Reference/database/refseq-bac-arch-homo-2018_11' \
---malt_min_support_mode 'percent' \
---run_maltextract \
---maltextract_taxon_list '../Reference/taxa_list/core_genera-anthropoids_hominids_panhomo-20180131.txt' \
---maltextract_ncbifiles '../Reference/hops' \
---maltextract_destackingoff
-```
-
-In the last parameters above we've specified the path to  our list of taxa. This
-contains something like (for oral microbiomes):
-
-```text
-Actinomyces
-Streptococcus
-Tannerella
-Porphyromonas
-```
-
-The path to the HOPS resources [downloaded earlier](#preparation), and that I
-want to turn off 'destacking' (removal of any read that overlaps the positions
-of another - something only recommended to keep on when you have high coverage
-data).
-
-With this, we are ready to submit! If running on a remote cluster/server, Make
+With this, we are ready to submit! If running on a remote cluster/server, make
 sure to run this in `screen` session or similar, so that if you get a `ssh`
 signal drop or want to log off, Nextflow will not crash.
 
@@ -309,9 +235,7 @@ so I recommend either mounting your server to your file browser, or downloading
 it to your own local machine (PC/Laptop etc.).
 
 Once you've opened this you can go through each section and evaluate all the
-results. You will likely not want to concern yourself too much with anything
-after MALT - however you should check these for other artefacts (e.g. weird
-damage patterns on the human DNA, or weirdly skewed coverage distributions).
+results. Now we can evaluate the quality of the sequencing data and how well preserve the pathogen genome is.
 
 For example, I normally look for things like:
 
@@ -321,13 +245,8 @@ General Stats Table:
   of FASTQ files per library) that was requested for sequencing?
 - Does the percentage of trimmed reads look normal for aDNA, and do lengths
   after trimming look short as expected of aDNA?
-- Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively - however
-  given this is on the human reads this is just a rule of thumb and may not
-  reflect the quality of the metagenomic profile) suggesting over-amplified or
+- Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively) suggesting over-amplified or
   badly preserved samples?
-- Does the human DNA show increased frequency of C>Ts on the 5' end of molecules
-  (you may need to un-hide the 2nd base columns with 'configure columns'
-  button)?
 
 FastQC (pre-AdapterRemoval):
 
@@ -345,19 +264,18 @@ FastQC (post-AdapterRemoval):
 - Do I see improved sequence quality scores along the length of reads?
 - Do I see reduced adapter content levels?
 
-MALT:
+General Genome Stats:
 
-- Do I have a reasonable level of mappability?
-  - Somewhere between 10-30% can be pretty normal for aDNA, whereas e.g. <1%
-    requires careful manual assessment
-- Do I have a reasonable taxonomic assignment success?
-  - You hope a large number of the mapped reads (from the mappability plot) also
-    have taxonomic assignment.
+- Do you have a reasonable Mean Coverage (depth)?
+  - To perform phylogenetic analysis, I would like to see a mean coverage >=3X 
+- How well do the reads cover the reference genome (breath of coverage)?
+  - The percent of the reference coverage should be the closest possible to 100%. However, we do not expect to cover the entire chromosome, since we remove reads that map equally well to more than 1 locations, thus excluding repetitive or duplicated regions.
+  - We want to observe a gradually lost or no change in the percent of the reference covered. If a drastic drop in the percent of coverage is observed this may indicate cross-mapping from a related species.
 
 Samtools Flagstat (pre/post Filter):
 
-- Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
-  of contamination) that require downstream closer assessment?
+- Do I see outliers, e.g. with unusually high levels of pathogen DNA, (indicative
+  of cross-mapping with a closer microorganism) that require downstream closer assessment?
 
 DeDup/Picard MarkDuplicates):
 
@@ -366,11 +284,8 @@ DeDup/Picard MarkDuplicates):
 
 DamageProfiler:
 
-- Do I see evidence of damage on human DNA? Note this is just a
-  rule-of-thumb/corroboration of any signals you might find in the metagenomic
-  screening and not essential.
-  - If high numbers of human DNA reads but no damage may indicate significant
-    modern contamination.
+- Do I see evidence of damage on pathogen DNA? 
+  - If high numbers of reads mapped to the pathogen reference but no damage may indicate missmapping from a related modern microorganism.
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
 > the the 'Documentation' folder of the results directory or here in the [output
@@ -394,29 +309,13 @@ Citations to all used tools can be seen
 
 ### Files for Downstream Analysis
 
-If you wanted to look at the output of MALT more closely, such as in the GUI
-based tool
-[MEGAN6](https://software-ab.informatik.uni-tuebingen.de/download/megan6/welcome.html),
-you can find the `.rma6` files that is accepted by MEGAN under
-`metagenomic_classification/malt/`. The log file containing the information
-printed to screen while MALT is running can also be found in this directory. The
+IGV --> visualise the bam files
 
-As we ran the HOPS pipeline (primarily with the MaltExtract tool), we can look
-in `MaltExtract/results/` to find all the corresponding output files for the
-authentication validation of the metagenomic screening (against the taxa you
-specified in your `--maltextract_taxon_list`). First you can check the
-`heatmap_overview_Wevid.pdf` summary PDF from HOPS (again you will need to
-either mount the server or download), but to get the actual per-sample/taxon
-damage patterns etc., you can look in `pdf_candidate_profiles`. In some cases
-there maybe valid results that the HOPS 'postprocessing' script doesn't pick up.
-In these cases you can go into the `default` directory to find all the raw text
-files which you can use to visualise and assess the authentication results
-yourself.
-
-Finally, if you want to re-run the taxonomic classification with a new database
-or tool, to find the raw `fastq/` files containing only unmapped reads that went
-into MALT, you should go into `samtools/filter`. In here you will find files
-ending in `unmapped.fastq.gz` for each library.
+MultiVCFAnalyze results:
+-SNP alignment --> phylogeny
+-Genotype/blabla --> structure
+-SNP table --> filter for unique snps of the samples analysed 
+-SNP table for snpEff --> to obtain the effects of the identified snps 
 
 ## Clean up
 
@@ -436,10 +335,6 @@ nextflow clean -f -k
 
 ## Summary
 
-In this this tutorial we have described an example on how to set up a metagnomic
-screening run of ancient microbiome samples. We have covered how set up
-nf-core/eager to extract off-target in a form that can be used for MALT, and how
-to additional run HOPS to authenticate expected taxa to be found in the
-microbiome. Finally we have also described what to look for in the MultiQC run
-summary report and where to find output files that can be used for downstream
+In this this tutorial we have described an example on how to set up a pathogen genome reconstruction run of ancient human samples where we have an indication of a specific pathogen. We have covered how set up
+nf-core/eager to reconstruct the pathogen genome, check for its ancient authenticity and set up an initial multiVCFAnalyser run to contruct a phylogenetic tree and check for unique SNPs and their effect. Finally we have also described what to look for in the MultiQC run summary report and where to find output files that can be used for downstream
 analysis.
