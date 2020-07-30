@@ -68,7 +68,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Latest version of xopen (0.9.0)
 * Added Bowtie 2 (2.4.1)
 * Latest version of Sex.DetERRmine (1.1.2)
-* Latest version of endorS.py (0.3)
+* Latest version of endorS.py (0.4)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 
