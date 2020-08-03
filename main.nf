@@ -1183,6 +1183,7 @@ if ( params.skip_collapse ){
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
+        .dump(tag: "AR Bypass")
         .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
 } else {
     ch_fastp_for_skipadapterremoval
@@ -1207,6 +1208,7 @@ ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
   }
+  .dump(tag: "LaneMerge Bypass")
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -1227,6 +1229,8 @@ ch_branched_for_lanemerge_skipme = ch_branched_for_lanemerge.skip_merge
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
   }
+  .dump(tag: "LaneMerge Reconfigure")
+
 
 ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
   .map{
@@ -1277,6 +1281,7 @@ process lanemerge {
 // Ensuring always valid R2 file even if doesn't exist for AWS
 if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
   ch_lanemerge_for_mapping_r1
+    .dump(tag: "Post LaneMerge Reconfigure")
     .mix(ch_lanemerge_for_mapping_r2)
     .groupTuple(by: [0,1,2,3,4,5,6])
     .map{
@@ -1294,6 +1299,7 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
     }
+    .mix(ch_branched_for_lanemerge_skipme)
     .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 }
 } else {
   ch_lanemerge_for_mapping_r1
@@ -2083,7 +2089,7 @@ process library_merge {
   publishDir "${params.outdir}/merged_bams/initial", mode: 'copy'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump("Input Tuple Library Merge")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump(tag: "Input Tuple Library Merge")
 
   output:
   tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_rmdup.bam"), path("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
