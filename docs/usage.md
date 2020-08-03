@@ -734,6 +734,8 @@ Sets DeDup to treat all reads as merged reads. This is useful if reads are for e
 
 ### Library Complexity Estimation Parameters
 
+nf-core/eager uses Preseq on map reads as one method to calculate library complexity. If DeDup is used, Preseq uses the historigram output of DeDup, otherwise the sored non-duplicated BAM file is supplied. Furthermore, if paired-end read collapsing is not performed, the `-P` flag is used.
+
 #### `--preseq_step_size`
 
 Can be used to configure the step size of Preseqs `c_curve` method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.

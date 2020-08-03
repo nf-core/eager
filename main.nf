@@ -1470,6 +1470,7 @@ process circulargenerator{
 
     output:
     file "${prefix}.{amb,ann,bwt,sa,pac}" into ch_circularmapper_indices
+    file "*_elongated" into ch_circularmapper_elongatedfasta
 
     when: 
     params.mapper == 'circularmapper'
@@ -1492,6 +1493,7 @@ process circularmapper{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_lanemerge_for_cm
     file index from ch_circularmapper_indices.collect()
     file fasta from ch_fasta_for_circularmapper.collect()
+    file elongated from ch_circularmapper_elongatedfasta.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.mapped.bam"), file("*.{bai,csi}") into ch_output_from_cm
@@ -1873,11 +1875,11 @@ process samtools_filter {
 if (params.run_bam_filtering) {
     ch_seqtypemerged_for_skipfiltering.mix(ch_output_from_filtering)
         .filter { it =~/.*filtered.bam/ }
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval; ch_mapped_for_preseq } 
 
 } else {
     ch_seqtypemerged_for_skipfiltering
-        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval } 
+        .into { ch_filtering_for_skiprmdup; ch_filtering_for_dedup; ch_filtering_for_markdup; ch_filtering_for_flagstat; ch_skiprmdup_for_libeval; ch_mapped_for_preseq } 
 
 }
 
@@ -1906,7 +1908,6 @@ process samtools_flagstat_after_filter {
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
     .join(ch_bam_filtered_flagstat_for_endorspy, by: [0,1,2,3,4,5,6])
-    .dump(tag: "Joined")
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
@@ -1991,7 +1992,7 @@ process dedup{
 
 process markduplicates{
     label 'mc_small'
-    tag "${outname}"
+    tag "${libraryid}"
     publishDir "${params.outdir}/deduplication/", mode: 'copy',
         saveAs: {filename -> "${libraryid}/$filename"}
 
@@ -2009,7 +2010,12 @@ process markduplicates{
     def outname = "${bam.baseName}"
     def size = params.large_ref ? '-c' : ''
     """
-    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=$bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    ## To make sure direct BAMs have a clean name
+    if [[ "${bam}" != "${libraryid}.bam" ]]; then
+      mv ${bam} ${libraryid}.bam
+    fi
+
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=${libraryid}.bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
     samtools index ${libraryid}_rmdup.bam ${size}
     """
 }
@@ -2024,7 +2030,9 @@ if ( params.skip_deduplication ) {
     .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
 }
 
-// Merge independent libraries sequenced but with same treatment (often done to improve complexity). Different strand/UDG libs not merged because bamtrim/pmdtools needs UDG info
+// Merge independent libraries sequenced but with same treatment (often done to 
+// improve complexity) with the same _sample_ name. Different strand/UDG libs 
+// not merged because bamtrim/pmdtools/genotyping needs that info.
 
 // Step one: work out which are single libraries (from skipping rmdup and both dedups) that do not need merging and pass to a skipping
 if ( params.skip_deduplication ) {
@@ -2050,9 +2058,24 @@ ch_input_for_librarymerging.clean_libraryid
   .map{
     it ->
       def libraryid = it[1][0]
-      [it[0], libraryid, it[2], it[3], it[4], it[5], it[6], it[7][0], it[8][0] ]
+      def bam = it[7].flatten()
+      def bai = it[8].flatten()
+
+      [it[0], libraryid, it[2], it[3], it[4], it[5], it[6], bam, bai ]
     }
   .set { ch_input_for_skiplibrarymerging }
+
+ch_input_for_librarymerging.merge_me
+  .map{
+    it ->
+      def libraryid = it[1][0]
+      def seqtype = "merged"
+      def bam = it[7].flatten()
+      def bai = it[8].flatten()
+
+      [it[0], libraryid, it[2], seqtype, it[4], it[5], it[6], bam, bai ]
+    }
+  .set { ch_fixedinput_for_librarymerging }
 
 process library_merge {
   label 'sc_tiny'
@@ -2060,7 +2083,7 @@ process library_merge {
   publishDir "${params.outdir}/merged_bams/initial", mode: 'copy'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_input_for_librarymerging.merge_me
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump("Input Tuple Library Merge")
 
   output:
   tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_rmdup.bam"), path("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
@@ -2092,6 +2115,16 @@ if (!params.skip_deduplication) {
 //////////////////////////////////////////////////
 
 // Library complexity calculation from mapped reads - could a user cost-effectively sequence deeper for more unique information?
+if ( params.skip_deduplication ) {
+  ch_input_for_preseq = ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7] }
+
+} else if ( !params.skip_deduplication && params.dedupper == "markduplicates" ) {
+  ch_input_for_preseq = ch_mapped_for_preseq.map{ it[0,1,2,3,4,5,6,7] }
+
+} else if ( !params.skip_deduplication && params.dedupper == "dedup" ) {
+  ch_input_for_preseq = ch_hist_for_preseq
+
+}
 
 process preseq {
     label 'sc_tiny'
@@ -2102,20 +2135,24 @@ process preseq {
     !params.skip_preseq
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(input) from (params.skip_deduplication ? ch_rmdup_for_preseq.map{ it[0,1,2,3,4,5,6,7] } : ch_hist_for_preseq )
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input) from ch_input_for_preseq
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${input.baseName}.ccurve") into ch_preseq_for_multiqc
 
     script:
-    if(!params.skip_deduplication){
+    pe_mode = params.skip_collapse && seqtype == "PE" ? '-P' : ''
+    if(!params.skip_deduplication && params.dedupper == "dedup"){
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -H $input
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -H ${input}
     """
-
-    } else {
+    } else if( !params.skip_deduplication && params.dedupper == "markduplicates"){
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B $input
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B ${input} ${pe_mode}
+    """
+    } else if ( params.skip_deduplication ) {
+    """
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B ${input} ${pe_mode}
     """
     }
 }
@@ -2266,7 +2303,10 @@ process bam_trim {
     """
 }
 
-// Post trimming merging, because we will presume that if trimming is turned on, 'lab-removed' libraries can be combined with merged with 'in-silico damage removed' libraries to improve genotyping
+// Post trimming merging of libraries to single samples, except for SS/DS 
+// libraries as they should be genotyped separately, because we will assume 
+// that if trimming is turned on, 'lab-removed' libraries can be combined with 
+// merged with 'in-silico damage removed' libraries to improve genotyping
 
 ch_trimmed_formerge = ch_bamutils_decision.notrim
   .mix(ch_trimmed_from_bamutils)
@@ -2357,7 +2397,7 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_output_from_bamutils
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
-} else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_run_pmdtools )  {
+} else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_pmdtools )  {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
@@ -2393,7 +2433,7 @@ if ( params.gatk_ug_jar != '' ) {
  process genotyping_ug {
   label 'mc_small'
   tag "${samplename}"
-  publishDir "${params.outdir}/genotyping", mode: 'copy'
+  publishDir "${params.outdir}/genotyping", mode: 'copy', pattern: '*{.vcf.gz,.realign.bam,realign.bai}'
 
   when:
   params.run_genotyping && params.genotyping_tool == 'ug'
@@ -2407,12 +2447,11 @@ if ( params.gatk_ug_jar != '' ) {
 
   output: 
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*realign.{bam,bai}") optional true
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.realign.{bam,bai}") optional true
 
   script:
   def defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
-  def keep_realign = params.gatk_ug_keep_realign_bam ? "" : "rm ${samplename}.realign.bam"
-  def index_realign = params.gatk_ug_keep_realign_bam ? "samtools index ${samplename}.realign.bam" : ""
+  def keep_realign = params.gatk_ug_keep_realign_bam ? "samtools index ${samplename}.realign.bam" : "rm ${samplename}.realign.{bam,bai}"
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
@@ -2421,7 +2460,6 @@ if ( params.gatk_ug_jar != '' ) {
     java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
     $keep_realign
-    $index_realign
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
@@ -2433,7 +2471,6 @@ if ( params.gatk_ug_jar != '' ) {
     java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
     $keep_realign
-    $index_realign
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
