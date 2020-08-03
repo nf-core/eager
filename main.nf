@@ -2112,7 +2112,6 @@ if (!params.skip_deduplication) {
 
 } else {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
-        .view()
         .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
 }
 
