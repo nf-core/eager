@@ -3131,9 +3131,10 @@ process multiqc {
     input:
     file multiqc_config from ch_multiqc_config
     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
+    file software_versions_mqc from software_versions_yaml.collect().ifEmpty([])
+    file logo from ch_eager_logo
     file ('fastqc_raw/*') from ch_prefastqc_for_multiqc.collect().ifEmpty([])
     path('fastqc/*') from ch_fastqc_after_clipping.collect().ifEmpty([])
-    file software_versions_mqc from software_versions_yaml.collect().ifEmpty([])
     file ('adapter_removal/*') from ch_adapterremoval_logs.collect().ifEmpty([])
     file ('mapping/bt2/*') from ch_bt2_for_multiqc.collect().ifEmpty([])
     file ('flagstat/*') from ch_flagstat_for_multiqc.collect().ifEmpty([])
@@ -3151,7 +3152,7 @@ process multiqc {
     file ('malt/*') from ch_malt_for_multiqc.collect().ifEmpty([])
     file ('kraken/*') from ch_kraken_for_multiqc.collect().ifEmpty([])
     file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
-    file logo from ch_eager_logo
+    file ('nuclear_contamination/*') from ch_nuclear_contamination_for_multiqc.collect().ifEmpty([])
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
