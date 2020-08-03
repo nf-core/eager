@@ -194,7 +194,6 @@ If you have multiple files in different directories, you can use additional wild
    - This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
 6. Due to limitations of downstream tools (e.g. FastQC), sample IDs maybe truncated after the first `.` in the name, Ensure file names are unique prior to this!
 
-
 ##### TSV Input Method
 
 Alternatively to the [direct input method](#direct-input-method), you can supply to `--input` a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata. This allows for more complex procedures such as merging of sequencing data across lanes, sequencing runs, sequencing configuration types, and samples.
