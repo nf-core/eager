@@ -2847,6 +2847,11 @@ if (params.metagenomic_tool == 'malt') {
     .set {ch_bam_filtering_for_metagenomic_kraken}
 
   ch_bam_filtering_for_metagenomic_malt = Channel.empty()
+
+} else if ( params.metagenomic_tool == '' ) {
+  ch_bam_filtering_for_metagenomic_malt = Channel.empty()
+  ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
+
 }
 
 
