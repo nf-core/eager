@@ -26,49 +26,44 @@ def helpMessage() {
     Mandatory arguments:
         -profile                      Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
 
-      Direct Input
-        --input                       Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
-                                      OR 
-                                      A path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
+    Input
+      --input                       Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs.
+                                    OR 
+                                    A path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
+      --udg_type                    Specifies whether you have UDG treated libraries. Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Not required for TSV input. Default: ${params.udg_type}
+      --single_stranded             Specifies whether libraries are single stranded. Always affects MALTExtract but will be ignored by pileupCaller with TSV input. Default: ${params.single_stranded}
+      --single_end                  Specifies that the input is single end reads. Not required for TSV input.
+      --colour_chemistry            Specifies which Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
+      --bam                         Specifies that the input is in BAM format. Not required for TSV input.
+    
+    Additional Input Options:
+      --snpcapture_bed              If library result of SNP capture, path to BED file containing SNPS positions on reference genome.
+      --run_convertinputbam         Turns on convertion of an input BAM file into FASTQ format to allow re-preprocessing (e.g. AdapterRemoval etc.).
 
-        --single_end                  Specifies that the input is single end reads. Not required for TSV input.
-        --udg_type                    Specify here if you have UDG treated libraries, Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Default: ${params.udg_type}
-        --colour_chemistry            Specifies what Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4. Default: ${params.colour_chemistry}
-        --single_stranded             Specifies whether libraries are single stranded. Always affects MALTExtract but will be ignored by pileupCaller with TSV input. Default: ${params.single_stranded}
-        --bam                         Specifies that the input is in BAM format. Not required for TSV input.
-
-
-      Reference
-        --fasta                       Path or URL to a FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'
-        --genome                      Name of iGenomes reference (required if not FASTA reference).
-        --large_ref                   Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficent data handling with the '.csi' format over the older '.bai'.
+    References                      Optional additional pre-made indices, or you wish to overwrite any of the references.
+      --fasta                       Path or URL to a FASTA reference file (required if not iGenome reference). File suffixes can be: '.fa', '.fn', '.fna', '.fasta'.
+      --genome                      Name of iGenomes reference (required if not FASTA reference).
+      --bwa_index                   Path to directory containing pre-made BWA indices (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same path as --fasta). If not supplied will be made for you.
+      --bt2_index                   Path to directory containing pre-made Bowtie2 indices (i.e. everything before the endings e.g. '.1.bt2', '.2.bt2', '.rev.1.bt2'. Most likely the same value as --fasta). If not supplied will be made for you.
+      --fasta_index                 Path to samtools FASTA index (typically ending in '.fai'). If not supplied will be made for you.
+      --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict'). If not supplied will be made for you.
+      --large_ref                   Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficent data handling with the '.csi' format over the older '.bai'.
+      --save_reference              If not already supplied by user, turns on saving of generated reference genome indices for later re-usage.
 
     Output options:     
       --outdir                      The output directory where the results will be saved. Default: ${params.outdir}
       -w                            The directory where intermediate files will be stored. Recommended: '<outdir>/work/'
 
-    Input Data Additional Options:
-      --snpcapture                  Runs in SNPCapture mode (specify a BED file if you do this!).
-      --run_convertinputbam         Turns on convertion of an input BAM file into FASTQ format before pre-processing (e.g. AdapterRemoval etc.).
-
-    References                      Optional additional pre-made indices, or you wish to overwrite any of the references.
-      --bwa_index                   Path and name of a bwa indexed FASTA reference file without index suffixes (i.e. everything before the endings '.amb' '.ann' '.bwt'. Most likely the same value as --fasta)
-      --bt2_index                   Path and name of a bowtie2 indexed FASTA reference file without index index suffixes (i.e. everything before the endings e.g. '.1.bt2', '.2.bt2', '.rev.1.bt2'. Most likely the same value as --fasta)
-      --bedfile                     Path to BED file for SNPCapture methods.
-      --seq_dict                    Path to picard sequence dictionary file (typically ending in '.dict').
-      --fasta_index                 Path to samtools FASTA index (typically ending in '.fai').
-      --save_reference              Turns on saving reference genome indices for later re-usage.
-
     Skipping                        Skip any of the mentioned steps.
       --skip_fastqc                 Skips both pre- and post-Adapter Removal FastQC steps.
       --skip_adapterremoval         
       --skip_preseq
+      --skip_deduplication
       --skip_damage_calculation
       --skip_qualimap
-      --skip_deduplication
 
     Complexity Filtering 
-      --complexity_filter_poly_g        Turn on running poly-G removal on FASTQ files. Will only be performed on 2 colour chemistry.
+      --complexity_filter_poly_g        Turn on running poly-G removal on FASTQ files. Will only be performed on 2 colour chemistry libraries.
       --complexity_filter_poly_g_min    Specify length of poly-g min for clipping to be performed. Default: ${params.complexity_filter_poly_g_min}
 
     Clipping / Merging
@@ -77,10 +72,10 @@ def helpMessage() {
       --clip_readlength             Specify read minimum length to be kept for downstream analysis. Default: ${params.clip_readlength}
       --clip_min_read_quality       Specify minimum base quality for trimming off bases. Default: ${params.clip_min_read_quality}
       --min_adap_overlap            Specify minimum adapter overlap: Default: ${params.min_adap_overlap}
-      --skip_collapse               Turn on skipping of merging forward and reverse reads together. Only applicable for paired-end libraries.
-      --skip_trim                   Turn on skipping of adapter and quality trimming
-      --preserve5p                  Turn on skipping 5p quality base trimming (n, score, window) at 5p end.
-      --mergedonly                  Turn on sending downstream only merged reads (un-merged reads and singletons are discarded).
+      --skip_collapse               Skip merging forward and reverse reads together. Only applicable for paired-end libraries.
+      --skip_trim                   Skip adapter and quality trimming.
+      --preserve5p                  Skip quality base trimming (n, score, window) of 5 prime end.
+      --mergedonly                  Only use merged reads downstream (un-merged reads and singletons are discarded).
 
     Mapping
       --mapper                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: '${params.mapper}'
@@ -93,22 +88,22 @@ def helpMessage() {
       --bt2_alignmode               Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: '${params.bt2_alignmode}'
       --bt2_sensitivity             Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: '${params.bt2_sensitivity}'
       --bt2n                        Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity. Default: ${params.bt2n}
-      --bt2l                        Specify the -L parameter for bowtie2 (length of seed substrings). Default: ${params.bt2l}
+      --bt2l                        Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity. Default: ${params.bt2l}
       --bt2_trim5                   Specify number of bases to trim off from 5' (left) end of read before alignment. Default: ${params.bt2_trim5}
       --bt2_trim3                   Specify number of bases to trim off from 3' (right) end of read before alignment. Default: ${params.bt2_trim3}
 
     Stripping
-      --strip_input_fastq           Turn on creating pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+      --strip_input_fastq           Turn on creating per-library pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
       --strip_mode                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace). Default: '${params.strip_mode}'
       
     BAM Filtering
-      --run_bam_filtering                Turn on samtools filter for mapping quality or unmapped reads of BAM files.
+      --run_bam_filtering                Turn on filtering of mapping quality, read legnths, or unmapped reads of BAM files.
       --bam_mapping_quality_threshold    Minimum mapping quality for reads filter. Default: ${params.bam_mapping_quality_threshold}
-      --bam_unmapped_type                Defines whether to discard all unmapped reads, keep both mapped and unmapped together, or save as bam and/or only fastq format Options: 'discard', 'bam', 'keep', 'fastq', 'both'. Default: ${params.bam_unmapped_type}
       --bam_filter_minreadlength         Specify minimum read length to be kept after mapping.
+      --bam_unmapped_type                Defines whether to discard all unmapped reads, keep both mapped and unmapped together, or save as bam and/or only fastq format Options: 'discard', 'bam', 'keep', 'fastq', 'both'. Default: ${params.bam_unmapped_type}
 
     DeDuplication
-      --dedupper                    Deduplication method to use. Options: 'dedup', 'markduplicates'. Default: '${params.dedupper}'
+      --dedupper                    Deduplication method to use. Options: 'markduplicates', 'dedup'. Default: '${params.dedupper}'
       --dedup_all_merged            Turn on treating all reads as merged reads.
 
     Library Complexity Estimation
@@ -116,7 +111,7 @@ def helpMessage() {
 
     (aDNA) Damage Analysis
       --damageprofiler_length       Specify length filter for DamageProfiler. Default: ${params.damageprofiler_length}
-      --damageprofiler_threshold    Specify number of bases to consider for damageProfiler (e.g. on damage plot). Default: ${params.damageprofiler_threshold}
+      --damageprofiler_threshold    Specify number of bases of reads to consider for DamageProfiler calculations. Default: ${params.damageprofiler_threshold}
       --damageprofiler_yaxis        Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: ${params.damageprofiler_yaxis} 
       --run_pmdtools                Turn on PMDtools
       --pmdtools_range              Specify range of bases for PMDTools. Default: ${params.pmdtools_range} 
@@ -129,39 +124,39 @@ def helpMessage() {
       --anno_file                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.
 
     BAM Trimming
-      --run_trim_bam                   Turn on BAM trimming, for example for for full-UDG or half-UDG protocols.
-      --bamutils_clip_half_udg_left    Specify the number of bases to clip off reads from 'left' end of read for UDG half libaries. Default: ${params.bamutils_clip_half_udg_left}
-      --bamutils_clip_half_udg_right   Specify the number of bases to clip off reads from 'right' end of read for UDG half libaries. Default: ${params.bamutils_clip_half_udg_right}
+      --run_trim_bam                   Turn on BAM trimming. Will only run on non-UDG or half-UDG libraries.
+      --bamutils_clip_half_udg_left    Specify the number of bases to clip off reads from 'left' end of read for half-UDG libaries. Default: ${params.bamutils_clip_half_udg_left}
+      --bamutils_clip_half_udg_right   Specify the number of bases to clip off reads from 'right' end of read for half-UDG libaries. Default: ${params.bamutils_clip_half_udg_right}
       --bamutils_clip_none_udg_left    Specify the number of bases to clip off reads from 'left' end of read for non-UDG libaries. Default: ${params.bamutils_clip_none_udg_left}
       --bamutils_clip_none_udg_right   Specify the number of bases to clip off reads from 'right' end of read for non-UDG libaries. Default: ${params.bamutils_clip_none_udg_right}
       --bamutils_softclip              Turn on using softclip instead of hard masking.
 
     Genotyping
-      --run_genotyping                Turn on genotyping of BAM files.
-      --genotyping_tool               Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.
-      --genotyping_source             Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'. Default: '${params.genotyping_source}'
-      --gatk_ug_jar                   When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.
-      --gatk_call_conf                Specify GATK phred-scaled confidence threshold. Default: ${params.gatk_call_conf}
-      --gatk_ploidy                   Specify GATK organism ploidy. Default: ${params.gatk_ploidy}
-      --gatk_dbsnp                    Specify VCF file for output VCF SNP annotation. Optional. Gzip not accepted.
-      --gatk_ug_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: '${params.gatk_ug_out_mode}'
-      --gatk_hc_out_mode              Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'. Default: '${params.gatk_hc_out_mode}'
-      --gatk_ug_genotype_model        Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. Default: '${params.gatk_ug_genotype_model}'
-      --gatk_hc_emitrefconf           Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: '${params.gatk_hc_emitrefconf}'
-      --gatk_downsample               Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
-      --gatk_ug_defaultbasequalities  Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.
-      --gatk_ug_keep_realign_bam      Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.
-      --freebayes_C                   Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
-      --freebayes_g                   Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
-      --freebayes_p                   Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
+      --run_genotyping                  Turn on genotyping of BAM files.
+      --genotyping_tool                 Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.
+      --genotyping_source               Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'. Default: '${params.genotyping_source}'
+      --gatk_ug_jar                     When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.
+      --gatk_call_conf                  Specify GATK phred-scaled confidence threshold. Default: ${params.gatk_call_conf}
+      --gatk_ploidy                     Specify GATK organism ploidy. Default: ${params.gatk_ploidy}
+      --gatk_downsample                 Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
+      --gatk_dbsnp                      Specify VCF file for output VCF SNP annotation. Optional. Gzip not accepted.
+      --gatk_hc_out_mode                Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'. Default: '${params.gatk_hc_out_mode}'
+      --gatk_hc_emitrefconf             Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'. Default: '${params.gatk_hc_emitrefconf}'
+      --gatk_ug_out_mode                Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Default: '${params.gatk_ug_out_mode}'
+      --gatk_ug_genotype_model          Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. Default: '${params.gatk_ug_genotype_model}'
+      --gatk_ug_keep_realign_bam        Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.
+      --gatk_ug_defaultbasequalities    Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.
+      --freebayes_C                     Specify minimum required supporting observations to consider a variant. Default: ${params.freebayes_C}
+      --freebayes_g                     Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C. Default: ${params.freebayes_g}
+      --freebayes_p                     Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
       --pileupcaller_bedfile            Specify path to SNP panel in bed format for pileupCaller.
       --pileupcaller_snpfile            Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
       --pileupcaller_method             Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: ${params.pileupcaller_method}
-      --pileupcaller_transitions_mode   Specify the calling mode for transitions. Options: AllSites, TransitionsMissing, SkipTransitions. Default: ${params.pileupcaller_transitions_mode}
-     --angsd_glmodel                 Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'. Default: '${params.angsd_glmodel}'
-      --angsd_glformat                Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'. Default: '${params.angsd_glformat}' 
-      --angsd_createfasta             Turn on creation of FASTA from ANGSD genotyping likelhoood.
-      --angsd_fastamethod             Specify which genotype type of 'base calling' to use for ANGSD FASTA generation. Options: 'random', 'common'. Default: '${params.angsd_fastamethod}'
+      --pileupcaller_transitions_mode   Specify the calling mode for transitions. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'. Default: ${params.pileupcaller_transitions_mode}
+      --angsd_glmodel                    Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'. Default: '${params.angsd_glmodel}'
+      --angsd_glformat                  Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'. Default: '${params.angsd_glformat}' 
+      --angsd_createfasta               Turn on creation of FASTA from ANGSD genotyping likelhoood.
+      --angsd_fastamethod               Specify which genotype type of 'base calling' to use for ANGSD FASTA generation. Options: 'random', 'common'. Default: '${params.angsd_fastamethod}'
 
     Consensus Sequence Generation
       --run_vcf2genome              Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).
@@ -196,22 +191,22 @@ def helpMessage() {
       --contamination_chrom_name    The name of the X chromosome in your bam or FASTA header. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
 
     Metagenomic Screening
-      --run_metagenomic_screening      Turn on metagenomic screening module for reference-unmapped reads
-      --metagenomic_tool               Specify which classifier to use. Options: 'malt', 'kraken'. Default: '${params.contamination_chrom_name}'
+      --run_metagenomic_screening      Turn on metagenomic screening module for reference-unmapped reads.
+      --metagenomic_tool               Specify which classifier to use. Options: 'malt', 'kraken'.
       --database                       Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory.
-      --metagenomic_min_support_reads  Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: ${params.metagenomic_min_support_reads}
+      --metagenomic_min_support_reads  Specify a minimum number of reads a taxon of sample total is required to have to be retained. Not compatible with --malt_min_support_mode 'percent'. Default: ${params.metagenomic_min_support_reads}
       --percent_identity               Percent identity value threshold for MALT. Default: ${params.percent_identity}
-      --malt_mode                      Specify which alignment method to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: '${params.malt_mode}'
+      --malt_mode                      Specify which alignment mode to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: '${params.malt_mode}'
       --malt_alignment_mode            Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'. Default: '${params.malt_alignment_mode}'
       --malt_top_percent               Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual). Default: ${params.malt_top_percent}
       --malt_min_support_mode          Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'. Default: '${params.malt_min_support_mode}'
       --malt_min_support_percent       Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
-      --malt_max_queries               Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
+      --malt_max_queries               Specify the maximum number of queries a read can have for MALT. Default: ${params.malt_max_queries}
       --malt_memory_mode               Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
 
     Metagenomic Authentication
-      --run_maltextract                  Turn on MaltExtract for MALT aDNA characteristics authentication
-      --maltextract_taxon_list           Path to a txt file with taxa of interest (one taxon per row, NCBI taxonomy name format)
+      --run_maltextract                  Turn on MaltExtract for MALT aDNA characteristics authentication.
+      --maltextract_taxon_list           Path to a text file with taxa of interest (one taxon per row, NCBI taxonomy name format)
       --maltextract_ncbifiles            Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; avaliable: https://github.com/rhuebler/HOPS/)
       --maltextract_filter               Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: '${params.maltextract_filter}'
       --maltextract_toppercent           Specify percent of top alignments to use. Default: ${params.maltextract_toppercent}
@@ -300,7 +295,7 @@ if (params.fasta_index && !params.fasta_index.endsWith(".fai")) {
 }
 
 // Check if genome exists in the config file. params.genomes is from igenomes.conf, params.genome specified by user
-if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
+if (params.genome != '' && !params.genomes.containsKey(params.genome)) {
     exit 1, "[nf-core/eager] error: the provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}."
 }
 
@@ -2246,7 +2241,7 @@ process pmdtools {
     script:
     //Check which treatment for the libraries was used
     def treatment = udg ? (udg == 'half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
-    if(params.snpcapture){
+    if(params.snpcapture_bed != ''){
         snpcap = (params.pmdtools_reference_mask != '') ? "--refseq ${params.pmdtools_reference_mask}" : ''
         log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
     } else {
@@ -2380,7 +2375,7 @@ process qualimap {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") into ch_qualimap_results
 
     script:
-    def snpcap = params.snpcapture ? "-gff ${params.bedfile}" : ''
+    def snpcap = params.snpcapture_bed != '' ? "-gff ${params.snpcapture_bed}" : ''
     """
     qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
     """

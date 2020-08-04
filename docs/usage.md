@@ -10,12 +10,12 @@
   - [Running the pipeline](#running-the-pipeline)
     - [Updating the pipeline](#updating-the-pipeline)
     - [Mandatory Arguments](#mandatory-arguments)
+    - [Additional Input Options](#additional-input-options)
+    - [Reference](#reference)
     - [Output Directories](#output-directories)
-    - [Optional Reference Options](#optional-reference-options)
     - [Other run specific parameters](#other-run-specific-parameters)
   - [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
     - [Step skipping parameters](#step-skipping-parameters)
-    - [BAM Conversion Options](#bam-conversion-options)
     - [Complexity Filtering Options](#complexity-filtering-options)
     - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
     - [Read Mapping Parameters](#read-mapping-parameters)
@@ -25,7 +25,6 @@
     - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
     - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
     - [BAM Trimming Parameters](#bam-trimming-parameters)
-    - [Captured Library Parameters](#captured-library-parameters)
     - [Feature Annotation Statistics](#feature-annotation-statistics)
     - [Genotyping Parameters](#genotyping-parameters)
     - [Consensus Sequence Generation](#consensus-sequence-generation)
@@ -34,6 +33,7 @@
     - [Human Sex Determination](#human-sex-determination)
     - [Human Nuclear Contamination](#human-nuclear-contamination)
     - [Metagenomic Screening](#metagenomic-screening)
+    - [Metagenomic Authentication](#metagenomic-authentication)
   - [Clean up](#clean-up)
 
 ## General Nextflow info
@@ -43,7 +43,7 @@ Nextflow handles job submissions on SLURM or other environments, and supervises 
 To create a screen session:
 
 ```bash
-screen -R eager2
+screen -R nf-core/eager
 ```
 
 To disconnect, press `ctrl+a` then `d`.
@@ -51,14 +51,14 @@ To disconnect, press `ctrl+a` then `d`.
 To reconnect, type :
 
 ```bash
-screen -r eager2
+screen -r nf-core/eager
 ```
 
 to end the screen session while in it type `exit`.
 
 ### Automatic Resubmission
 
-By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
+By default, if a pipeline step fails, nf-core/eager will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
 
 ### Help Message
 
@@ -87,7 +87,7 @@ results         # Finished results (configurable, see below)
                \# Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-To see the the EAGER pipeline help message run: `nextflow run nf-core/eager --help`
+To see the the nf-core/eager pipeline help message run: `nextflow run nf-core/eager --help`
 
 > By default, if a pipeline step fails, nf-core/eager will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
 
@@ -101,7 +101,7 @@ When you run the above command, Nextflow automatically pulls the pipeline code f
 nextflow pull nf-core/eager
 ```
 
-See [below](#other-command-line-parameters) for more details about EAGER2 versioning.
+See [below](#other-command-line-parameters) for more details about nf-core/eager versioning.
 
 ### Mandatory Arguments
 
@@ -109,7 +109,7 @@ See [below](#other-command-line-parameters) for more details about EAGER2 versio
 
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments (e.g. schedulers, software environments, memory limits etc). Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important! The first entry takes precendence over the others, e.g. if a setting is set by both the first and second profile, the first entry will be used and the second entry ignored.
 
-> *Important*: If running EAGER2 on a cluster - ask your system administrator what profile to use.
+> *Important*: If running nf-core/eager on a cluster - ask your system administrator what profile to use.
 
 For more details on how to set up your own private profile, please see [installation](../configuration/adding_your_own.md).
 
@@ -135,7 +135,7 @@ These are basic profiles which primarily define where you derive the pipeline's 
   - No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
 **Institution Specific Profiles**
-These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
+These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of nf-core/eager, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
 - `uzh`
   - A profile for the University of Zurich Research Cloud
@@ -150,7 +150,7 @@ These are profiles specific to certain **HPC clusters**, and are centrally maint
 **Pipeline Specific Institution Profiles**
 There are also pipeline-specific institution profiles. I.e., we can also offer a profile which sets special resource settings to specific steps of the pipeline, which may not apply to all pipelines. This can be seen at [nf-core/configs](https://github.com/nf-core/configs) under [conf/pipelines/eager/](https://github.com/nf-core/configs/tree/master/conf/pipeline/eager).
 
-We currently offer a EAGER specific profile for
+We currently offer a nf-core/eager specific profile for
 
 - `shh`
   - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
@@ -269,23 +269,53 @@ Note the following important points and limitations for setting up:
 - Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
 - Genotyping will typically be performed on each `sample` independently as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs` otherwise you will recieve a `file collision` error in steps such as `sexdeterrmine`, and merge these yourself. We will consider changing this behaviour in the future if there is enough interest.  
 
+#### `--udg_type`
+
+Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries.
+
+Specify `'none'` if no treatment was performed. If you have partial UDG treated data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify `'half'`. If you have complete UDG treated data ([Briggs et al. 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using PMDtools `'half'` will use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage assessment will use CpG context only. Default: `'none'`.
+
+Not required when using TSV input.
+
+#### `--single_stranded`
+
+Indicates libraries were made with a single stranded protocol.
+
+Currently only affects MALTExtract, where it will switch on damage patterns calculation mode to single-stranded. Default: false.
+
+Not required when using TSV input.
+
+#### `--single_end`
+
+Indicates that the input reads were sequenced with Illumina single-end sequencing chemistries. If specified, AdapterRemoval 'collapsing' will not be performed.
+
+Not required when using TSV input.
+
+#### `--colour_chemistry`
+
+Specifies which Illumina colour chemistry was a library was sequenced with. This informs  whether to perform poly-G trimming (if `--complexity_filter_poly_g` is also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can generate uncertain poly-G tails (due to 'G' being indicated via a no-colour detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do not require poly-G trimming. Options: 2, 4.
+
+Not required when using TSV input.
+
 #### `--bam`
 
 Specifies the input file type to `--input` is in BAM format. This will automatically also apply `--single_end`.
 
-Only required when using the 'Path' method of [`--input`](#--input).
+Not required when using TSV input.
 
-#### `--single_stranded`
+### Additional Input Options
 
-Indicates libraries are single stranded.
+#### `--snpcapture_bed`
 
-Currently only affects MALTExtract, where it will switch on damage patterns calculation mode to single-stranded. Default: false.
+If your data is from a library that has undergone SNP capture or enrichment (e.g. human 390K,1240K panels), supply a BED file (3/6 column format) containing the positions of the SNPs on the genome that was in the SNP set of the capture. Supplying this bed file will mean on-target metrics  will be calculated automatically for you.
 
-#### `--colour_chemistry`
+#### `--run_convertinputbam`
 
-Specifies which Illumina colour chemistry was a library was sequenced with. This informs  whether to perform poly-G trimming (if `--complexity_filter_poly_g` is also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can generate uncertain poly-G tails (due to 'G' being indicated via a no-colour detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do not require poly-G trimming. Options: 2, 4. Default: 4
+Allows you to convert a input BAM file back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
 
-Only required when using the 'Path' method of [`--input`](#--input).
+If not turned on, BAMs will automatically be sent to post-mapping steps.
+
+### Reference
 
 #### `--fasta`
 
@@ -337,33 +367,13 @@ params {
 
 > You must select either a `--fasta` or `--genome`
 
-### Output Directories
-
-#### `--outdir`
-
-The output directory where the results will be saved.
-
-#### `-w / -work-dir`
-
-The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
-
-### Optional Reference Options
-
-We provide various options for indexing of different types of reference genomes. EAGER can index reference genomes for you (with options to save these for other analysis), but you can also supply your pre-made indices.
+We provide various options for indexing of different types of reference genomes. nf-core/eager can index reference genomes for you (with options to save these for other analysis), but you can also supply your pre-made indices.
 
 Supplying pre-made indices saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource [specific profile](#profile) that sets paths to pre-computed reference genomes, saving even time when specifying these.
 
-#### `--large_ref`
-
-This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. Default: off
-
-#### `--save_reference`
-
-Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices EAGER2 generates for you will be stored in the `<your_output_dir>/results/reference_genomes` for you.
-
 #### `--bwa_index`
 
-If you want to use pre-existing `bwa index` indices, please supply the **directory** to the FASTA you also specified in `--fasta` (see above). EAGER2 will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa` index file suffixes.
+If you want to use pre-existing `bwa index` indices, please supply the **directory** to the FASTA you also specified in `--fasta` (see above). nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa` index file suffixes.
 
 For example:
 
@@ -375,7 +385,34 @@ nextflow run nf-core/eager \
 --bwa_index 'results/reference_genome/bwa_index/BWAIndex/'
 ```
 
-> `bwa index` does not give you an option to supply alternative suffixes/names for these indices. Thus, the file names generated by this command _must not_ be changed, otherwise EAGER2 will not be able to find them.
+> `bwa index` does not give you an option to supply alternative suffixes/names for these indices. Thus, the file names generated by this command _must not_ be changed, otherwise nf-core/eager will not be able to find them.
+
+#### `--bt2_index`
+
+If you want to use pre-existing `bowtie-build` indices, please supply the **directory** to the FASTA you also specified in `--fasta` (see above). nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bowtie2` index file suffixes.
+
+For example:
+
+```bash
+nextflow run nf-core/eager \
+-profile test,docker \
+--input '*{R1,R2}*.fq.gz'
+--fasta 'results/reference_genome/bt2_index/bt2_index/Mammoth_MT_Krause.fasta' \
+--bt2_index 'results/reference_genome/bt2_index/bt2_index/'
+```
+
+> `bowtie-build` does not give you an option to supply alternative suffixes/names for these indices. Thus, the file names generated by this command _must not_ be changed, otherwise nf-core/eager will not be able to find them.
+
+#### `--fasta_index`
+
+If you want to use a pre-existing `samtools faidx` index, Use this to specify the required FASTA index file for the selected reference genome. This should be generated by `samtools faidx` and has a file suffix of `.fai`
+
+For example:
+
+```bash
+--fasta_index 'Mammoth_MT_Krause.fasta.fai'
+
+```
 
 #### `--seq_dict`
 
@@ -387,27 +424,37 @@ For example:
 --seq_dict 'Mammoth_MT_Krause.dict'
 ```
 
-#### `--fasta_index`
+#### `--large_ref`
 
-If you want to use a pre-existing `samtools faidx` index, Use this to specify the required FASTA index file for the selected reference genome. This should be generated by `samtools faidx` and has a file suffix of `.fai`
+This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. Default: off
 
-For example:
+#### `--save_reference`
 
-```bash
---fasta_index 'Mammoth_MT_Krause.fasta.fai'
-```
+Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices nf-core/eager generates for you will be stored in the `<your_output_dir>/results/reference_genomes` for you.
+
+### Output Directories
+
+#### `--outdir`
+
+The output directory where the results will be saved.
+
+#### `-w / -work-dir`
+
+The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run nf-core/eager from.
+
+> :important: this is a **Nextflow** parameter
 
 ### Other run specific parameters
 
 #### `-r`
 
-By default, EAGER2 will use the latest version of the pipeline that is downloaded on your system. However, it's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
+By default, nf-core/eager will use the latest version of the pipeline that is downloaded on your system. However, it's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
 First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0`.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
-Additionally, EAGER pipeline releases are named after Swabian German Cities. The first release V2.0 is named "Kaufbeuren". Future releases are named after cities named in the [Swabian league of Cities](https://en.wikipedia.org/wiki/Swabian_League_of_Cities).
+Additionally, nf-core/eager pipeline releases are named after Swabian German Cities. The first release V2.0 is named "Kaufbeuren". Future releases are named after cities named in the [Swabian league of Cities](https://en.wikipedia.org/wiki/Swabian_League_of_Cities).
 
 #### `--max_memory`
 
@@ -508,14 +555,6 @@ Turns off the DamageProfiler module to compute DNA damage profiles.
 
 Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
-### BAM Conversion Options
-
-#### `--run_convertinputbam`
-
-Allows you to convert a input BAM file back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
-
-If not turned on, BAMs will automatically be sent to post-mapping steps.
-
 ### Complexity Filtering Options
 
 More details on can be seen in the [fastp documentation](https://github.com/OpenGene/fastp)
@@ -612,63 +651,81 @@ More documentation can be seen for each tool under:
 - [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
 - [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)
 
-#### BWA (default)
-
 These parameters configure mapping algorithm parameters.
 
-##### `--bwaalnn`
+#### `--bwaalnn`
 
-Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
+For bwa aln.
 
-##### `--bwaalnk`
+Configures the `-n` parameter, defining how many mismatches are allowed in a read. By default set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.
 
-Configures the `bwa aln -k` parameter for the seeding phase in the mapping algorithm. Default is set to `2`.
+#### `--bwaalnk`
 
-##### `--bwaalnl`
+For bwa aln.
+
+Configures the `-k` parameter for the seeding phase in the mapping algorithm. Default is set to `2`.
+
+#### `--bwaalnl`
+
+For bwa aln.
 
 Configures the length of the seed used in `bwa aln -l`. Default is set to be 'turned off' at recommendation the of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with `1024`.
 
 > Note: Despite being recommended, turning off seeding can result in long runtimes!
 
-#### CircularMapper
+#### `--circularextension`
 
-##### `--circularextension`
+For circularmapper.
 
 The number of bases to extend the reference genome with. By default this is set to `500` if not specified otherwise.
 
-##### `--circulartarget`
+#### `--circulartarget`
+
+For circularmapper.
 
 The chromosome in your FastA reference that you'd like to be treated as circular. By default this is set to `MT` but can be configured to match any other chromosome.
 
-##### `--circularfilter`
+#### `--circularfilter`
+
+For circularmapper.
 
 If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.
 
-#### Bowtie2
+#### `--bt2_alignmode`
 
-##### `--bt2_alignmode`
+For Bowtie2.
 
-The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
+The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. Default is '`local`', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [(Poullet and Orlando 2020)](https://doi.org/10.3389/fevo.2020.00105).
 
-##### `--bt2_sensitivity`
+#### `--bt2_sensitivity`
 
-The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both `--bt2_alignmode` options. See the Bowtie2 [manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line) for actual settings. Default is 'sensitive' (following [Poullet and Orlando (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data _without_ UDG treatment)
+For Bowtie2.
 
-##### `--bt2n`
+The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both `--bt2_alignmode` options. See the Bowtie2 [manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line) for actual settings. Default is '`sensitive`' (following [Poullet and Orlando (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data _without_ UDG treatment)
 
-The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).
+#### `--bt2n`
 
-##### `--bt2l`
+For Bowtie2.
 
-The length of the seed substring to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).
+The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: `0` (i.e. use`--bt2_sensitivity` defaults).
 
-##### `-bt2_trim5`
+#### `--bt2l`
 
-Number of bases to trim of 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0
+For Bowtie2.
 
-##### `-bt2_trim3`
+The length of the seed substring to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: `0` (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).
 
-Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.
+#### `-bt2_trim5`
+
+For Bowtie2.
+
+Number of bases to trim of 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: `0`
+
+#### `-bt2_trim3`
+
+For Bowtie2.
+
+Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: `0`.
 
 ### Mapped Reads Stripping
 
@@ -698,12 +755,6 @@ If using TSV input, filtering is performed library, i.e. after lane merging.
 
 Turns on the bam filtering module for either mapping quality filtering or unmapped read treatment.
 
-#### `--bam_unmapped_type`
-
-Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `keep` keeps both unmapped and mapped reads in the same BAM file, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, `both` keeps both BAM and FASTQ files. Default is `discard`.  `keep` is what would happen if `--run_bam_filtering` was _not_ supplied.
-
-Note that in all cases, if `--bam_mapping_quality_threshold` is also supplied, mapping quality filtering will still occur on the mapped reads.
-
 #### `--bam_mapping_quality_threshold`
 
 Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).
@@ -713,6 +764,14 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream a
 Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.
 
 If used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artifically small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct 'denominator' of 'all reads', for the Endogenous DNA calculation.
+
+Default: `0` (no filtering)
+
+#### `--bam_unmapped_type`
+
+Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `keep` keeps both unmapped and mapped reads in the same BAM file, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, `both` keeps both BAM and FASTQ files. Default is `discard`.  `keep` is what would happen if `--run_bam_filtering` was _not_ supplied. Default: '`discard`'.
+
+Note that in all cases, if `--bam_mapping_quality_threshold` is also supplied, mapping quality filtering will still occur on the mapped reads.
 
 ### Read DeDuplication Parameters
 
@@ -739,7 +798,7 @@ nf-core/eager uses Preseq on map reads as one method to calculate library comple
 
 #### `--preseq_step_size`
 
-Can be used to configure the step size of Preseqs `c_curve` method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.
+Can be used to configure the step size of Preseqs `c_curve` method. Can be useful when only few and thus shallow sequencing results are used for extrapolation. Default: `1000`
 
 ### DNA Damage Assessment Parameters
 
@@ -749,12 +808,6 @@ More documentation can be seen in the follow links for:
 - [PMDTools documentation](https://github.com/pontussk/PMDtools)
 
 If using TSV input, DamageProfiler is performed library, i.e. after lane merging. PMDtools and  BAM Trimming is run after library merging of same-named library BAMs that have the same type of UDG treatment. BAM Trimming is only performed on non-UDG and half-UDG treated data.
-
-#### `--udg_type`
-
-Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries.
-
-Specify `'none'` if no treatment was performed. If you have partial UDG treated data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify `'half'`. If you have complete UDG treated data ([Briggs et al. 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using PMDtools `'half'` will use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage assessment will use CpG context only. Default: `'none'`.
 
 #### `--damageprofiler_length`
 
@@ -786,7 +839,7 @@ Can be used to set a path to a reference genome mask for PMDTools.
 
 #### `--pmdtools_max_reads`
 
-The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results.
+The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results. Default: `10000`
 
 ### BAM Trimming Parameters
 
@@ -796,9 +849,9 @@ More documentation can be seen in the [bamUtil documentation](https://genome.sph
 
 #### `--run_trim_bam`
 
-Turns on the BAM trimming method. Trims off `[n]` bases from reads in the deduplicated BAM file  Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming os typically performed to reduce errors during genotyping that can be caused by aDNA damage.
+Turns on the BAM trimming method. Trims off `[n]` bases from reads in the deduplicated BAM file Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming os typically performed to reduce errors during genotyping that can be caused by aDNA damage.
 
-BAM trimming will only be performed on libraries indicated as `--udg_type 'none'` or `--udg_type 'half'`. Complete UDG treatment ('full') should have removed all damage. The amount of bases that will be trimmed off can be set separately for libraries with `--udg_type` `'none'` and `'half'`  (see `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right` / `--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`).
+BAM trimming will only be performed on libraries indicated as `--udg_type 'none'` or `--udg_type 'half'`. Complete UDG treatment (`full`) should already have all damage removed and is therefore not applicable. The amount of bases that will be trimmed off can be set separately for libraries with `--udg_type` `'none'` and `'half'`  (see `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right` / `--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`).
 
 > Note: additional artefacts such as bar-codes or adapters that could potentially also be trimmed should be removed prior mapping.
 
@@ -813,18 +866,6 @@ Default set to `1` and clips off one base of the left or right side of reads fro
 #### `--bamutils_softclip`
 
 By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string.
-
-### Captured Library Parameters
-
-These parameters are required in some cases, e.g. when performing in-solution SNP capture protocols (390K,1240K, ...) for population genetics for example. Make sure to specify the required parameters in such cases.
-
-#### `--snpcapture` false
-
-This is by default set to `false`, but can be turned on to calculate on target metrics automatically for you. Note, that this requires setting `--bedfile` with the target SNPs simultaneously.
-
-#### `--bedfile`
-
-Can be used to set a path to a BED file (3/6 column format) to calculate capture target efficiency on the fly. Will not be used without `--bedfile` set as parameter.
 
 ### Feature Annotation Statistics
 
@@ -878,31 +919,35 @@ Specify a path to a local copy of a GATK 3.5 `.jar` file, preferably version '3.
 
 #### `--gatk_call_conf`
 
-If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: 30
+If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: `30`
 
 #### `--gatk_ploidy`
 
-If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid organisms. Default: 2
+If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid organisms. Default: `2`
+
+#### `--gatk_downsample`
+
+Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to 250 reads. Default: `250`
 
 #### `--gatk_dbsnp`
 
-(Optional)Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
-
-#### `--gatk_ug_out_mode`
-
-If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`
+(Optional) Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
 
 #### `--gatk_hc_out_mode`
 
 If selected the GATK genotyper HaplotypeCaller, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`
 
-#### `--gatk_ug_genotype_model`
-
-If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`, `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`
-
 #### `--gatk_hc_emitrefconf`
 
 If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`
+
+#### `--gatk_ug_out_mode`
+
+If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`
+
+#### `--gatk_ug_genotype_model`
+
+If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`, `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`
 
 #### `--gatk_ug_keep_realign_bam`
 
@@ -910,17 +955,13 @@ If provided, this will put into the output folder the BAMs that have realigned r
 
 These BAMs will be stored in the same folder as the corresponding VCF files.
 
-#### `--gatk_downsample`
-
-Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to 250 reads. Default: 250
-
 #### `--gatk_ug_gatk_ug_defaultbasequalities`
 
 Specify a value to set base quality scores, if reads are missing this information. Maybe useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to -1  which is do not set any default quality (turned off). Default: -1
 
 #### `--freebayes_C`
 
-Specify minimum required supporting observations to consider a variant. Default: 1
+Specify minimum required supporting observations to consider a variant. Default: `1`
 
 #### `--freebayes_g`
 
@@ -928,7 +969,7 @@ Specify to skip over regions of high depth by discarding alignments overlapping 
 
 #### `--freebayes_p`
 
-Specify ploidy of sample in FreeBayes. Default is diploid. Default: 2
+Specify ploidy of sample in FreeBayes. Default is diploid. Default: `2`
 
 #### `--pileupcaller_bedfile`
 
@@ -942,13 +983,17 @@ Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/tree/master
 
 Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: `'randomHaploid'`
 
+#### `--pileupcaller_transitions_mode`
+
+Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: AllSites, TransitionsMissing, SkipTransitions. Default: '`AllSites`'
+
 #### `--angsd_glmodel`
 
 Specify which genotype likelihood model to use. Options: `'samtools`, `'gatk'`, `'soapsnp'`, `'syk'`. Default: `'samtools'`
 
 #### `--angsd_glformat`
 
-Specifies what type of genotyping likelihood file format will be output. Options: `'text'`, `'binary'`, `'binary_three'`, `'beagle_binary'`. Default: `'text'`.
+Specifies what type of genotyping likelihood file format will be output. Options: `'text'`, `'binary'`, `'binary_three'`, `'beagle_binary'`. Default: `'binary'`.
 
 The options refer to the following descriptions respectively:
 
@@ -966,10 +1011,6 @@ Turns on the ANGSD creation of a FASTA file from the BAM file.
 #### `--angsd_fastamethod`
 
 The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given positin, whereas 'random' will pick one at random. Default: `'random'`.
-
-#### `--pileupcaller_transitions_mode`
-
-Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: AllSites, TransitionsMissing, SkipTransitions. Default: AllSites
 
 ### Consensus Sequence Generation
 
@@ -989,15 +1030,15 @@ The name of the FASTA entry you would like in your FASTA file.
 
 #### `--vcf2genome_minc`
 
-Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: 5
+Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: `5`
 
 #### `--vcf2genome_minq`
 
-Minimum genotyping quality of a call to be called. Else N will be called. Default: 30
+Minimum genotyping quality of a call to be called. Else N will be called. Default: `30`
 
 #### `--vcf2genome_minfreq`
 
-In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: 0.8
+In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: `0.8`
 
 ### Mitochondrial to Nuclear Ratio
 
@@ -1029,19 +1070,19 @@ Specify whether to tell MultiVCFAnalyzer to write within the SNP table the frequ
 
 #### `--min_genotype_quality`
 
-The minimal genotyping quality for a SNP to be considered for processing by MultiVCFAnalyzer. The default threshold is 30.
+The minimal genotyping quality for a SNP to be considered for processing by MultiVCFAnalyzer. The default threshold is `30`.
 
 #### `--min_base_coverage`
 
-The minimal number of reads covering a base for a SNP at that position to be considered for processing by MultiVCFAnalyzer. The default depth is 5.
+The minimal number of reads covering a base for a SNP at that position to be considered for processing by MultiVCFAnalyzer. The default depth is `5`.
 
 #### `--min_allele_freq_hom`
 
-The minimal frequency of a nucleotide for a 'homozygous' SNP to be called. In other words, e.g. 90% of the reads covering that position must have that SNP to be called. If the threshold is not reached, and the previous two parameters are matched, a reference call is made (displayed as . in the SNP table). If the above two parameters are not met, an 'N' is called. The default allele frequency is 0.9.
+The minimal frequency of a nucleotide for a 'homozygous' SNP to be called. In other words, e.g. 90% of the reads covering that position must have that SNP to be called. If the threshold is not reached, and the previous two parameters are matched, a reference call is made (displayed as . in the SNP table). If the above two parameters are not met, an 'N' is called. The default allele frequency is `0.9`.
 
 #### `--min_allele_freq_het`
 
-The minimum frequency of a nucleotide for a 'heterozygous' SNP to be called. If this parameter is set to the same as `--min_allele_freq_hom`, then only homozygous calls are made. If this value is less than the previous parameter, then a SNP call will be made if it is between this and the previous parameter and displayed as a IUPAC uncertainty call. Default is 0.9.
+The minimum frequency of a nucleotide for a 'heterozygous' SNP to be called. If this parameter is set to the same as `--min_allele_freq_hom`, then only homozygous calls are made. If this value is less than the previous parameter, then a SNP call will be made if it is between this and the previous parameter and displayed as a IUPAC uncertainty call. Default is `0.9`.
 
 #### `--additional_vcf_files`
 
@@ -1089,7 +1130,7 @@ An increasingly common line of analysis in high-throughput aDNA analysis today i
 
 Please note the following:
 
-- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
+- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the nf-core/eager run.
   - To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
 - MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
@@ -1110,33 +1151,33 @@ Specify which taxonomic classifier to use. There are two options available:
   
 :warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!
 
-#### `--metagenomic_min_support_reads`
-
-Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.  
-For malt, this only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 .
-
 #### `--database`
 
 Specify the path to the _directory_ containing your taxonomic classifer's database (malt or kraken).
 
 For Kraken2, it can be either the path to the _directory_ or the path to the `.tar.gz` compressed directory of the Kraken2 database.
 
+#### `--metagenomic_min_support_reads`
+
+Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.  
+For malt, this only applies when `--malt_min_support_mode` is set to 'reads'. Default: `1`.
+
 #### `--percent_identity`
 
-Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85
+Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is `85`
 
 Only used when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_mode`
 
 Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.
-respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'  
+respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: '`BlastN`'  
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_alignment_mode`
 
-Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: 'SemiGlobal'
+Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: '`SemiGlobal`'
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1144,7 +1185,7 @@ Only when `--metagenomic_tool malt` is also supplied
 
 Specify the top percent value of the LCA algorthim. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): "For each
 read, only those matches are used for taxonomic placement whose bit disjointScore is within
-10% of the best disjointScore for that read.". Default: 1.
+10% of the best disjointScore for that read.". Default: `1`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1156,21 +1197,25 @@ Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_min_support_percent`
 
-Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.
+Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default `0.01`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_max_queries`
 
-Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: 100
+Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: `100`
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_memory_mode`
 
-How to load the database into memory. Options are 'load', 'page' or 'map'. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. 'page' and 'map' perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is 'load'.
+How to load the database into memory. Options are 'load', 'page' or 'map'. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. 'page' and 'map' perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is '`load`'.
 
 Only when `--metagenomic_tool malt` is also supplied
+
+### Metagenomic Authentication
+
+The [HOPS pipeline](https://github.com/rhuebler/HOPS) allows screening of aDNA characteristics of librares screened via MALT. This has been integrated into HOPS here.
 
 #### `--run_maltextract`
 
@@ -1194,13 +1239,13 @@ Only when `--metagenomic_tool malt` is also supplied
 
 #### `--maltextract_filter`
 
-Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc'.
+Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: '`def_anc`'.
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--maltextract_toppercent`
 
-Specify percent of top alignments for each read to be considered for each node. Default: 0.01.
+Specify percent of top alignments for each read to be considered for each node. Default: `0.01`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
