@@ -163,7 +163,7 @@ jobs:
           for i in index0.idx ref.db ref.idx ref.inf table0.db table0.idx taxonomy.idx taxonomy.map taxonomy.tre; do wget https://github.com/nf-core/test-datasets/raw/eager/databases/malt/"$i" -P databases/malt/; done
       - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into MALT
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering  --bam_unmapped_type 'fastq' --run_metagenomic_screening --database "/home/runner/work/eager/eager/databases/malt/"
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering  --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt/"
       - name: MALTEXTRACT Download resource files
         run: |
             mkdir -p databases/maltextract
