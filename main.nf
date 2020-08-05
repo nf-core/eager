@@ -66,48 +66,48 @@ def helpMessage() {
       --skip_qualimap [bool]
 
     Complexity Filtering 
-      --complexity_filter_poly_g [bool]       Turn on running poly-G removal on FASTQ files. Will only be performed on 2 colour chemistry machine sequenced libraries.
-      --complexity_filter_poly_g_min [num]    Specify length of poly-g min for clipping to be performed. Default: ${params.complexity_filter_poly_g_min}
+      --complexity_filter_poly_g [bool]     Turn on running poly-G removal on FASTQ files. Will only be performed on 2 colour chemistry machine sequenced libraries.
+      --complexity_filter_poly_g_min [num]  Specify length of poly-g min for clipping to be performed. Default: ${params.complexity_filter_poly_g_min}
 
     Clipping / Merging
-      --clip_forward_adaptor [str]        Specify adapter sequence to be clipped off (forward strand). Default: '${params.clip_forward_adaptor}'
-      --clip_reverse_adaptor [str]        Specify adapter sequence to be clipped off (reverse strand). Default: '${params.clip_reverse_adaptor}'
-      --clip_readlength [num]             Specify read minimum length to be kept for downstream analysis. Default: ${params.clip_readlength}
-      --clip_min_read_quality [num]       Specify minimum base quality for trimming off bases. Default: ${params.clip_min_read_quality}
-      --min_adap_overlap [num]            Specify minimum adapter overlap: Default: ${params.min_adap_overlap}
-      --skip_collapse [bool]              Skip merging forward and reverse reads together. Only applicable for paired-end libraries.
-      --skip_trim [bool]                  Skip adapter and quality trimming
-      --preserve5p [bool]                 Skip 5p quality base trimming (n, score, window) of 5 prime end.
-      --mergedonly [bool]                 Only use merged reads downstream (un-merged reads and singletons are discarded).
+      --clip_forward_adaptor [str]  Specify adapter sequence to be clipped off (forward strand). Default: '${params.clip_forward_adaptor}'
+      --clip_reverse_adaptor [str]  Specify adapter sequence to be clipped off (reverse strand). Default: '${params.clip_reverse_adaptor}'
+      --clip_readlength [num]       Specify read minimum length to be kept for downstream analysis. Default: ${params.clip_readlength}
+      --clip_min_read_quality [num] Specify minimum base quality for trimming off bases. Default: ${params.clip_min_read_quality}
+      --min_adap_overlap [num]      Specify minimum adapter overlap: Default: ${params.min_adap_overlap}
+      --skip_collapse [bool]        Skip merging forward and reverse reads together. Only applicable for paired-end libraries.
+      --skip_trim [bool]            Skip adapter and quality trimming
+      --preserve5p [bool]           Skip 5p quality base trimming (n, score, window) of 5 prime end.
+      --mergedonly [bool]           Only use merged reads downstream (un-merged reads and singletons are discarded).
 
     Mapping
-      --mapper [str]                      Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: '${params.mapper}'
-      --bwaalnn [num]                     Specify the -n parameter for BWA aln, i.e. amount of allowed mismatches in alignments. Default: ${params.bwaalnn}
-      --bwaalnk [num]                     Specify the -k parameter for BWA aln, i.e. maximum edit distance allowed in a seed. Default: ${params.bwaalnk}
-      --bwaalnl [num]                     Specify the -l parameter for BWA aln, i.e. length of seeds to be used. Set to 1024 for whole read. Default: ${params.bwaalnl}
-      --circularextension [num]           Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
-      --circulartarget [chr]              Specify the FASTA header of the target chromosome to extend(circularmapper only). Default: '${params.circulartarget}'
-      --circularfilter [bool]             Turn on to filter off-target reads (circularmapper only).
-      --bt2_alignmode [str]               Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: '${params.bt2_alignmode}'
-      --bt2_sensitivity [str]             Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: '${params.bt2_sensitivity}'
-      --bt2n [num]                        Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity. Default: ${params.bt2n}
-      --bt2l [num]                        Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity. Default: ${params.bt2l}
-      --bt2_trim5 [num]                   Specify number of bases to trim off from 5' (left) end of read before alignment. Default: ${params.bt2_trim5}
-      --bt2_trim3 [num]                   Specify number of bases to trim off from 3' (right) end of read before alignment. Default: ${params.bt2_trim3}
+      --mapper [str]             Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: '${params.mapper}'
+      --bwaalnn [num]            Specify the -n parameter for BWA aln, i.e. amount of allowed mismatches in alignments. Default: ${params.bwaalnn}
+      --bwaalnk [num]            Specify the -k parameter for BWA aln, i.e. maximum edit distance allowed in a seed. Default: ${params.bwaalnk}
+      --bwaalnl [num]            Specify the -l parameter for BWA aln, i.e. length of seeds to be used. Set to 1024 for whole read. Default: ${params.bwaalnl}
+      --circularextension [num]  Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
+      --circulartarget [chr]     Specify the FASTA header of the target chromosome to extend(circularmapper only). Default: '${params.circulartarget}'
+      --circularfilter [bool]    Turn on to filter off-target reads (circularmapper only).
+      --bt2_alignmode [str]      Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: '${params.bt2_alignmode}'
+      --bt2_sensitivity [str]    Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: '${params.bt2_sensitivity}'
+      --bt2n [num]               Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity. Default: ${params.bt2n}
+      --bt2l [num]               Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity. Default: ${params.bt2l}
+      --bt2_trim5 [num]          Specify number of bases to trim off from 5' (left) end of read before alignment. Default: ${params.bt2_trim5}
+      --bt2_trim3 [num]          Specify number of bases to trim off from 3' (right) end of read before alignment. Default: ${params.bt2_trim3}
 
     Stripping
-      --strip_input_fastq [bool]          Turn on creating per-library pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data).
-      --strip_mode [str]                  Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace). Default: '${params.strip_mode}'
+      --strip_input_fastq [bool]  Turn on creation of per-library pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data).
+      --strip_mode [str]          Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace). Default: '${params.strip_mode}'
       
     BAM Filtering
-      --run_bam_filtering [bool]               Turn on filtering of mapping quality, read legnths, or unmapped reads of BAM files.
+      --run_bam_filtering [bool]               Turn on filtering of mapping quality, read lengths, or unmapped reads of BAM files.
       --bam_mapping_quality_threshold [num]    Minimum mapping quality for reads filter. Default: ${params.bam_mapping_quality_threshold}
       --bam_filter_minreadlength [num]         Specify minimum read length to be kept after mapping.
       --bam_unmapped_type [str]                Defines whether to discard all unmapped reads, keep both mapped and unmapped together, or save as bam and/or only fastq format Options: 'discard', 'bam', 'keep', 'fastq', 'both'. Default: '${params.bam_unmapped_type}'
 
     DeDuplication
       --dedupper [str]                    Deduplication method to use. Options: 'markduplicates', 'dedup'. Default: '${params.dedupper}'
-      --dedup_all_merged [bool]            Turn on treating all reads as merged reads.
+      --dedup_all_merged [bool]           Turn on treating all reads as merged reads.
 
     Library Complexity Estimation
       --preseq_step_size [num]            Specify the step size of Preseq. Default: ${params.preseq_step_size}
@@ -154,8 +154,8 @@ def helpMessage() {
       --freebayes_p [num]                    Specify ploidy of sample in FreeBayes. Default: ${params.freebayes_p}
       --pileupcaller_bedfile [file]          Specify path to SNP panel in bed format for pileupCaller.
       --pileupcaller_snpfile [file]          Specify path to SNP panel in EIGENSTRAT format for pileupCaller.
-      --pileupcaller_method [str]            Specify calling method to use. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. Default: '${params.pileupcaller_method}''
-      --pileupcaller_transitions_mode [str]  Specify the calling mode for transitions. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'. Default: '${params.pileupcaller_transitions_mode}''
+      --pileupcaller_method [str]            Specify calling method to use. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. Default: '${params.pileupcaller_method}'
+      --pileupcaller_transitions_mode [str]  Specify the calling mode for transitions. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'. Default: '${params.pileupcaller_transitions_mode}'
       --angsd_glmodel [str]                  Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'. Default: '${params.angsd_glmodel}'
       --angsd_glformat [str]                 Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'. Default: '${params.angsd_glformat}' 
       --angsd_createfasta [bool]             Turn on creation of FASTA from ANGSD genotyping likelhoood.
@@ -194,10 +194,10 @@ def helpMessage() {
       --contamination_chrom_name [str]    The name of the X chromosome in your bam or FASTA header. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
 
     Metagenomic Screening
-      --run_metagenomic_screening [bool]      Turn on metagenomic screening module for reference-unmapped reads
+      --run_metagenomic_screening [bool]     Turn on metagenomic screening module for reference-unmapped reads
       --metagenomic_tool [str]               Specify which classifier to use. Options: 'malt', 'kraken'. Default: '${params.contamination_chrom_name}'
       --database [dir]                       Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory.
-      --metagenomic_min_support_reads [num]  Specify a minimum number of reads  a taxon of sample total is required to have to be retained. Not compatible with . Default: ${params.metagenomic_min_support_reads}
+      --metagenomic_min_support_reads [num]  Specify a minimum number of reads a taxon of sample total is required to have to be retained. Not compatible with . Default: ${params.metagenomic_min_support_reads}
       --percent_identity [num]               Percent identity value threshold for MALT. Default: ${params.percent_identity}
       --malt_mode [str]                      Specify which alignment method to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: '${params.malt_mode}'
       --malt_alignment_mode [str]            Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'. Default: '${params.malt_alignment_mode}'
