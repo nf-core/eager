@@ -21,7 +21,6 @@ jobs:
       - name: Install awscli
         run: conda install -c conda-forge awscli
       - name: Start AWS batch job
-        # TODO nf-core: You can customise CI pipeline run tests as required
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         env:
@@ -37,4 +36,4 @@ jobs:
           --job-name nf-core-eager \
           --job-queue $AWS_JOB_QUEUE \
           --job-definition $AWS_JOB_DEFINITION \
-          --container-overrides '{"command": ["nf-core/eager", "-r '"${GITHUB_SHA}"' -profile test --outdir s3://'"${AWS_S3_BUCKET}"'/eager/results-'"${GITHUB_SHA}"' -w s3://'"${AWS_S3_BUCKET}"'/eager/work-'"${GITHUB_SHA}"' -with-tower"], "environment": [{"name": "TOWER_ACCESS_TOKEN", "value": "'"$TOWER_ACCESS_TOKEN"'"}]}'eager/work-'"${GITHUB_SHA}"' -with-tower"], "environment": [{"name": "TOWER_ACCESS_TOKEN", "value": "'"$TOWER_ACCESS_TOKEN"'"}]}'
+          --container-overrides '{"command": ["nf-core/eager", "-r '"${GITHUB_SHA}"' -profile test_tsv_complex --outdir s3://'"${AWS_S3_BUCKET}"'/eager/results-'"${GITHUB_SHA}"' -w s3://'"${AWS_S3_BUCKET}"'/eager/work-'"${GITHUB_SHA}"' -with-tower"], "environment": [{"name": "TOWER_ACCESS_TOKEN", "value": "'"$TOWER_ACCESS_TOKEN"'"}]}'eager/work-'"${GITHUB_SHA}"' -with-tower"], "environment": [{"name": "TOWER_ACCESS_TOKEN", "value": "'"$TOWER_ACCESS_TOKEN"'"}]}'
