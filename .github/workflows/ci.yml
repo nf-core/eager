@@ -1,20 +1,22 @@
-name: nf-core eager CI
-#This workflow is triggered on pushes and PRs to the repository.
-on: [push, pull_request]  
+name: nf-core CI
+# This workflow runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+  release:
+    types: [published]
 
 jobs:
-  conda_build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Try Creating Conda env
-        run: |
-          conda env create --prefix nf-core-eager --file environment.yml
   test:
+    name: Run workflow tests
+    # Only run on push if this is the nf-core dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/eager') }}
+    runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
