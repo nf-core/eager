@@ -475,7 +475,6 @@ For example:
 
 ### Other run specific parameters
 
-
 #### `--max_memory`
 
 Use to set a top-limit for the default memory requirement for each process.
