@@ -98,11 +98,6 @@
             "description": "Additional options regarding input data.",
             "default": "",
             "properties": {
-                "snpcapture": {
-                    "type": "boolean",
-                    "description": "Runs in SNPCapture mode (specify a BED file if you do this!).",
-                    "default": false
-                },
                 "run_convertinputbam": {
                     "type": "boolean",
                     "default": false,
@@ -149,10 +144,6 @@
                 "bt2_index": {
                     "type": "string",
                     "description": "Path and name of a bowtie2 indexed FASTA reference file without index index suffixes (i.e. everything before the endings e.g. '.1.bt2', '.2.bt2', '.rev.1.bt2'. Most likely the same value as --fasta)"
-                },
-                "bedfile": {
-                    "type": "string",
-                    "description": "Path to BED file for SNPCapture methods."
                 },
                 "seq_dict": {
                     "type": "string",
@@ -289,7 +280,7 @@
             "title": "Institutional config options",
             "type": "object",
             "fa_icon": "fas fa-university",
-            "description": "Parameters used to describe centralised config profiles. These should not be edited.",
+            "description": "Parameters used to describe centralised config profiles. These generally should not be edited.",
             "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline.",
             "properties": {
                 "custom_config_version": {
@@ -344,10 +335,7 @@
                     "description": "The AWS region to use.",
                     "fa_icon": "fab fa-aws"
                 }
-            },
-            "fa_icon": "fas fa-university",
-            "description": "Parameters used to describe centralised config profiles. These generally should not be edited.",
-            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline."
+            }
         },
         "skip_steps": {
             "title": "Skip steps",
@@ -564,11 +552,6 @@
                     "default": 0,
                     "description": "Minimum mapping quality for reads filter."
                 },
-                "bam_discard_unmapped": {
-                    "type": "boolean",
-                    "description": "Turns on discarding of unmapped reads in either FASTQ or BAM format, depending on choice (see --bam_unmapped_type).",
-                    "default": false
-                },
                 "bam_unmapped_type": {
                     "type": "string",
                     "default": "discard",
@@ -686,16 +669,6 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Turn on BAM trimming, for example for for full-UDG or half-UDG protocols."
-                },
-                "bamutils_clip_left": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "Specify the number of bases to clip off reads from 'left' end of read."
-                },
-                "bamutils_clip_right": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "Specify the number of bases to clip off reads from 'right' end of read."
                 },
                 "bamutils_softclip": {
                     "type": "boolean",
@@ -1109,11 +1082,6 @@
                     "type": "boolean",
                     "description": "Turn on using top alignments per read after filtering.",
                     "default": false
-                },
-                "maltextract_singlestranded": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Set this to true if single stranded data is analyzed."
                 }
             },
             "fa_icon": "fas fa-tasks"
@@ -1198,5 +1166,34 @@
         {
             "$ref": "#/definitions/metagenomic_authentication"
         }
-    ]
+    ],
+    "properties": {
+        "bam_filter_minreadlength": {
+            "type": "integer",
+            "default": 0
+        },
+        "bamutils_clip_half_udg_left": {
+            "type": "integer",
+            "default": 1
+        },
+        "bamutils_clip_half_udg_right": {
+            "type": "integer",
+            "default": 1
+        },
+        "bamutils_clip_none_udg_left": {
+            "type": "integer",
+            "default": 1
+        },
+        "bamutils_clip_none_udg_right": {
+            "type": "integer",
+            "default": 1
+        },
+        "pileupcaller_transitions_mode": {
+            "type": "string",
+            "default": "AllSites"
+        },
+        "snpcapture_bed": {
+            "type": "string"
+        }
+    }
 }

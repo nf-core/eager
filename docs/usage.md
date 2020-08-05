@@ -202,7 +202,7 @@ Nextflow handles job submissions on SLURM or other environments, and supervises 
 To create a screen session:
 
 ```bash
-screen -R eager2
+screen -R nf-core/eager
 ```
 
 To disconnect, press `ctrl+a` then `d`.
@@ -210,7 +210,7 @@ To disconnect, press `ctrl+a` then `d`.
 To reconnect, type:
 
 ```bash
-screen -r eager2
+screen -r nf-core/eager
 ```
 
 to end the screen session while in it type `exit`.
@@ -351,7 +351,7 @@ Only required when using the 'Path' method of [`--input`](#--input).
 
 Indicates libraries are single stranded.
 
-Currently only affects MALTExtract, where it will switch on damage patterns calculation mode to single-stranded. Default: false.
+Currently only affects MALTExtract where it will switch on damage patterns calculation mode to single-stranded, and genotyping with pileupcaller where a different method is used. Default: false.
 
 #### `--colour_chemistry`
 
@@ -427,11 +427,11 @@ Nextflow mode for 'publishing' final results files i.e. how to move final files 
 
 We provide various options for indexing of different types of reference genomes. nf-core/eager can index reference genomes for you (with options to save these for other analysis), but you can also supply your pre-made indices.
 
-Supplying pre-made indices saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource [specific profile](#profile) that sets paths to pre-computed reference genomes, saving even time when specifying these.
+Supplying pre-made indices saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource [specific profile](#profile) that sets paths to pre-computed reference genomes, saving time when specifying these.
 
 #### `--large_ref`
 
-This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. Default: off
+This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to compensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. Default: off
 
 #### `--save_reference`
 
@@ -554,13 +554,13 @@ Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
 #### `--run_convertinputbam`
 
-Allows you to convert a input BAM file back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
+Allows you to convert an input BAM file back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
 
 If not turned on, BAMs will automatically be sent to post-mapping steps.
 
 ### Complexity Filtering Options
 
-More details on can be seen in the [fastp documentation](https://github.com/OpenGene/fastp)
+More details can be seen in the [fastp documentation](https://github.com/OpenGene/fastp)
 
 If using TSV input, this is performed per lane separately.
 
@@ -794,7 +794,7 @@ If using TSV input, DamageProfiler is performed library, i.e. after lane merging
 
 #### `--udg_type`
 
-Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries.
+Defines whether Uracil-DNA glycosylase (UDG) treatment was used to remove DNA damage on the sequencing libraries.
 
 Specify `'none'` if no treatment was performed. If you have partial UDG treated data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify `'half'`. If you have complete UDG treated data ([Briggs et al. 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using PMDtools `'half'` will use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage assessment will use CpG context only. Default: `'none'`.
 
@@ -832,7 +832,7 @@ The maximum number of reads used for damage assessment in PMDtools. Can be used 
 
 ### BAM Trimming Parameters
 
-For some library preparation protocols, users might want to clip off damaged bases before applying genotyping methods. This can be done in nf-core/eager automatically by turning on the `--trim_bam` parameter.
+For some library preparation protocols, users might want to clip off damaged bases before applying genotyping methods. This can be done in nf-core/eager automatically by turning on the `--run_trim_bam` parameter.
 
 More documentation can be seen in the [bamUtil documentation](https://genome.sph.umich.edu/wiki/BamUtil:_trimBam)
 
@@ -920,15 +920,15 @@ Specify a path to a local copy of a GATK 3.5 `.jar` file, preferably version '3.
 
 #### `--gatk_call_conf`
 
-If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: 30
+If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: `30`
 
 #### `--gatk_ploidy`
 
-If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid organisms. Default: 2
+If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid organisms. Default: `2
 
 #### `--gatk_dbsnp`
 
-(Optional)Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
+(Optional) Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
 
 #### `--gatk_ug_out_mode`
 
@@ -954,15 +954,15 @@ These BAMs will be stored in the same folder as the corresponding VCF files.
 
 #### `--gatk_downsample`
 
-Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to 250 reads. Default: 250
+Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to 250 reads. Default: `250`
 
 #### `--gatk_ug_gatk_ug_defaultbasequalities`
 
-Specify a value to set base quality scores, if reads are missing this information. Maybe useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to -1  which is do not set any default quality (turned off). Default: -1
+Specify a value to set base quality scores, if reads are missing this information. Maybe useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to -1  which is do not set any default quality (turned off). Default: `-1`
 
 #### `--freebayes_C`
 
-Specify minimum required supporting observations to consider a variant. Default: 1
+Specify minimum required supporting observations to consider a variant. Default: `1`
 
 #### `--freebayes_g`
 
@@ -970,7 +970,7 @@ Specify to skip over regions of high depth by discarding alignments overlapping 
 
 #### `--freebayes_p`
 
-Specify ploidy of sample in FreeBayes. Default is diploid. Default: 2
+Specify ploidy of sample in FreeBayes. Default is diploid. Default: `2`
 
 #### `--pileupcaller_bedfile`
 
@@ -1007,11 +1007,11 @@ Turns on the ANGSD creation of a FASTA file from the BAM file.
 
 #### `--angsd_fastamethod`
 
-The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given positin, whereas 'random' will pick one at random. Default: `'random'`.
+The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given position, whereas 'random' will pick one at random. Default: `'random'`.
 
 #### `--pileupcaller_transitions_mode`
 
-Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: AllSites, TransitionsMissing, SkipTransitions. Default: AllSites
+Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: `'AllSites'`, `'TransitionsMissing'`, `'SkipTransitions'`. Default: `'AllSites'`
 
 ### Consensus Sequence Generation
 
@@ -1031,15 +1031,15 @@ The name of the FASTA entry you would like in your FASTA file.
 
 #### `--vcf2genome_minc`
 
-Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: 5
+Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: `5`
 
 #### `--vcf2genome_minq`
 
-Minimum genotyping quality of a call to be called. Else N will be called. Default: 30
+Minimum genotyping quality of a call to be called. Else N will be called. Default: `30`
 
 #### `--vcf2genome_minfreq`
 
-In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: 0.8
+In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: `0.8`
 
 ### Mitochondrial to Nuclear Ratio
 
@@ -1071,19 +1071,19 @@ Specify whether to tell MultiVCFAnalyzer to write within the SNP table the frequ
 
 #### `--min_genotype_quality`
 
-The minimal genotyping quality for a SNP to be considered for processing by MultiVCFAnalyzer. The default threshold is 30.
+The minimal genotyping quality for a SNP to be considered for processing by MultiVCFAnalyzer. The default threshold is `30`.
 
 #### `--min_base_coverage`
 
-The minimal number of reads covering a base for a SNP at that position to be considered for processing by MultiVCFAnalyzer. The default depth is 5.
+The minimal number of reads covering a base for a SNP at that position to be considered for processing by MultiVCFAnalyzer. The default depth is `5`.
 
 #### `--min_allele_freq_hom`
 
-The minimal frequency of a nucleotide for a 'homozygous' SNP to be called. In other words, e.g. 90% of the reads covering that position must have that SNP to be called. If the threshold is not reached, and the previous two parameters are matched, a reference call is made (displayed as . in the SNP table). If the above two parameters are not met, an 'N' is called. The default allele frequency is 0.9.
+The minimal frequency of a nucleotide for a 'homozygous' SNP to be called. In other words, e.g. 90% of the reads covering that position must have that SNP to be called. If the threshold is not reached, and the previous two parameters are matched, a reference call is made (displayed as . in the SNP table). If the above two parameters are not met, an 'N' is called. The default allele frequency is `0.9`.
 
 #### `--min_allele_freq_het`
 
-The minimum frequency of a nucleotide for a 'heterozygous' SNP to be called. If this parameter is set to the same as `--min_allele_freq_hom`, then only homozygous calls are made. If this value is less than the previous parameter, then a SNP call will be made if it is between this and the previous parameter and displayed as a IUPAC uncertainty call. Default is 0.9.
+The minimum frequency of a nucleotide for a 'heterozygous' SNP to be called. If this parameter is set to the same as `--min_allele_freq_hom`, then only homozygous calls are made. If this value is less than the previous parameter, then a SNP call will be made if it is between this and the previous parameter and displayed as a IUPAC uncertainty call. Default is `0.9`.
 
 #### `--additional_vcf_files`
 
@@ -1165,20 +1165,20 @@ For Kraken2, it can be either the path to the _directory_ or the path to the `.t
 
 #### `--percent_identity`
 
-Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85
+Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is `85`
 
 Only used when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_mode`
 
 Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.
-respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'  
+respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: `'BlastN'`
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_alignment_mode`
 
-Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: 'SemiGlobal'
+Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1186,7 +1186,7 @@ Only when `--metagenomic_tool malt` is also supplied
 
 Specify the top percent value of the LCA algorthim. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): "For each
 read, only those matches are used for taxonomic placement whose bit disjointScore is within
-10% of the best disjointScore for that read.". Default: 1.
+10% of the best disjointScore for that read.". Default: `1`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1204,13 +1204,13 @@ Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_max_queries`
 
-Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: 100
+Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: `100`
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_memory_mode`
 
-How to load the database into memory. Options are 'load', 'page' or 'map'. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. 'page' and 'map' perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is 'load'.
+How to load the database into memory. Options are `'load'`, `'page'` or `'map'`. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. `'page'` and `'map'` perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is `'load'`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1236,13 +1236,13 @@ Only when `--metagenomic_tool malt` is also supplied
 
 #### `--maltextract_filter`
 
-Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc'.
+Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`, 'assignment'. Default: `'def_anc'`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--maltextract_toppercent`
 
-Specify percent of top alignments for each read to be considered for each node. Default: 0.01.
+Specify percent of top alignments for each read to be considered for each node. Default: `0.01`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1278,7 +1278,7 @@ Only when `--metagenomic_tool malt` is also supplied
 
 #### `--maltextract_percentidentity`
 
-Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: 85.0.
+Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
