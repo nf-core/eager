@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [dev]
+## v2.2.0dev - [date]
 
 ### `Added`
 
@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#522](https://github.com/nf-core/eager/issues/522)  Added post-mapping length filter to asisst in more realistic endogenous DNA calculations
 * [#512](https://github.com/nf-core/eager/issues/512) Added flexible trimming of bams by library type. 'half' and 'none' UDG libraries can now be trimmed differentially within a single eager run.
 * Added a `.dockstore.yml` config file for automatic workflow registration with [dockstore.org](https://dockstore.org/)
+* Updated template to nf-core/tools 1.10.2
 
 ### `Fixed`
 

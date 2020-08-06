@@ -5,12 +5,19 @@
 - [nf-core/eager: Usage](#nf-coreeager-usage)
   - [Table of contents](#table-of-contents)
   - [General Nextflow info](#general-nextflow-info)
-    - [Automatic Resubmission](#automatic-resubmission)
-    - [Help Message](#help-message)
   - [Running the pipeline](#running-the-pipeline)
+    - [Quick Start](#quick-start)
     - [Updating the pipeline](#updating-the-pipeline)
-    - [Mandatory Arguments](#mandatory-arguments)
-    - [Output Directories](#output-directories)
+    - [Reproducibility](#reproducibility)
+    - [Automatic Resubmission](#automatic-resubmission)
+  - [Core Nextflow arguments](#core-nextflow-arguments)
+    - [`-profile`](#-profile)
+    - [`-resume`](#-resume)
+    - [`-c`](#-c)
+    - [Running in the background](#running-in-the-background)
+  - [Pipeline Options](#pipeline-options)
+    - [Input](#input)
+    - [Output](#output)
     - [Optional Reference Options](#optional-reference-options)
     - [Other run specific parameters](#other-run-specific-parameters)
   - [Adjustable parameters for nf-core/eager](#adjustable-parameters-for-nf-coreeager)
@@ -38,33 +45,9 @@
 
 ## General Nextflow info
 
-Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
-
-To create a screen session:
-
-```bash
-screen -R eager2
-```
-
-To disconnect, press `ctrl+a` then `d`.
-
-To reconnect, type :
-
-```bash
-screen -r eager2
-```
-
-to end the screen session while in it type `exit`.
-
-### Automatic Resubmission
-
-By default, if a pipeline step fails, EAGER2 will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
-
-### Help Message
-
-To access the nextflow help message run: `nextflow run -help`
-
 ## Running the pipeline
+
+### Quick Start
 
 > Before you start you should change into the output directory you wish your results to go in. When you start the nextflow job, it will place all the log files and 'working' folders in the current directory and NOT necessarily the directory the output files will be in.
 
@@ -87,9 +70,7 @@ results         # Finished results (configurable, see below)
                \# Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-To see the the EAGER pipeline help message run: `nextflow run nf-core/eager --help`
-
-> By default, if a pipeline step fails, nf-core/eager will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
+To see the the nf-core/eager pipeline help message run: `nextflow run nf-core/eager --help`
 
 If you want to configure your pipeline interactively using a graphical user interface, please visit [https://nf-co.re/launch](https://nf-co.re/launch), select the `eager` pipeline and the version you intend to run and follow the on-screen instructions to create a config for your pipeline run.
 
@@ -101,41 +82,57 @@ When you run the above command, Nextflow automatically pulls the pipeline code f
 nextflow pull nf-core/eager
 ```
 
-See [below](#other-command-line-parameters) for more details about EAGER2 versioning.
+### Reproducibility
 
-### Mandatory Arguments
+It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-#### `-profile`
+First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.2.0`.
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different computing environments (e.g. schedulers, software environments, memory limits etc). Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important! The first entry takes precendence over the others, e.g. if a setting is set by both the first and second profile, the first entry will be used and the second entry ignored.
+This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
-> *Important*: If running EAGER2 on a cluster - ask your system administrator what profile to use.
+Additionally, nf-core/eager pipeline releases are named after Swabian German Cities. The first release V2.0 is named "Kaufbeuren". Future releases are named after cities named in the [Swabian league of Cities](https://en.wikipedia.org/wiki/Swabian_League_of_Cities).
 
-For more details on how to set up your own private profile, please see [installation](../configuration/adding_your_own.md).
+### Automatic Resubmission
 
-**Basic profiles**
-These are basic profiles which primarily define where you derive the pipeline's software packages from. These are typically the profiles you would use if you are running the pipeline on your **own PC** (vs. a HPC cluster - see below).
+By default, if a pipeline step fails, nf-core/eager will resubmit the job with twice the amount of CPU and memory. This will occur two times before failing.
 
-- `awsbatch`
-  - A generic configuration profile to be used with AWS Batch.
+## Core Nextflow arguments
+
+> **NB:** These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
+
+### `-profile`
+
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
+
+Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Conda) - see below.
+
+> We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
+
+The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
+
+Note that multiple profiles can be loaded, for example: `-profile test,docker` - the order of arguments is important!
+They are loaded in sequence, so later profiles can overwrite earlier profiles.
+
+If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
+
+> *Important*: If running nf-core/eager on a cluster - ask your system administrator what profile to use.
+
+- `docker`
+  - A generic configuration profile to be used with [Docker](https://docker.com/)
+  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+- `singularity`
+  - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
 - `conda`
   - Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
-  - A generic configuration profile to be used with [conda](https://conda.io/docs/)
+  - A generic configuration profile to be used with [Conda](https://conda.io/docs/)
   - Pulls most software from [Bioconda](https://bioconda.github.io/)
-- `docker`
-  - A generic configuration profile to be used with [Docker](http://docker.com/)
-  - Pulls software from dockerhub: [`nfcore/eager`](http://hub.docker.com/r/nfcore/eager/)
-- `singularity`
-  - A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-  - Pulls software from singularity-hub
 - `test`
   - A profile with a complete configuration for automated testing
   - Includes links to test data so needs no other parameters
-- `none`
-  - No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
 **Institution Specific Profiles**
-These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of EAGER2, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
+These are profiles specific to certain **HPC clusters**, and are centrally maintained at [nf-core/configs](https://github.com/nf-core/configs). Those listed below are regular users of nf-core/eager, if you don't see your own institution here check the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
 - `uzh`
   - A profile for the University of Zurich Research Cloud
@@ -150,13 +147,88 @@ These are profiles specific to certain **HPC clusters**, and are centrally maint
 **Pipeline Specific Institution Profiles**
 There are also pipeline-specific institution profiles. I.e., we can also offer a profile which sets special resource settings to specific steps of the pipeline, which may not apply to all pipelines. This can be seen at [nf-core/configs](https://github.com/nf-core/configs) under [conf/pipelines/eager/](https://github.com/nf-core/configs/tree/master/conf/pipeline/eager).
 
-We currently offer a EAGER specific profile for
+We currently offer a nf-core/eager specific profile for
 
 - `shh`
   - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of the Max Planck Institute for the Science of Human History
   - In addition to the nf-core wide profile, this also sets the MALT resources to match our commonly used databases
 
 Further institutions can be added at [nf-core/configs](https://github.com/nf-core/configs). Please ask the eager developers to add your institution to the list above, if you add one!
+
+### `-resume`
+
+Specify this when restarting a pipeline. Nextflow will used cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously.
+
+You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
+
+### `-c`
+
+Specify the path to a specific config file (this is a core Nextflow command). See the [nf-core website documentation](https://nf-co.re/usage/configuration) for more information.
+
+#### Custom resource requests
+
+Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
+
+Whilst these default requirements will hopefully work for most people with most data, you may find that you want to customise the compute resources that the pipeline requests. You can do this by creating a custom config file. For example, to give the workflow process `star` 32GB of memory, you could use the following config:
+
+```nextflow
+process {
+  withName: bwa {
+    memory = 32.GB
+  }
+}
+```
+
+See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information.
+
+If you are likely to be running `nf-core` pipelines regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter (see definition below). You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
+
+If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
+
+#### `-name`
+
+Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+
+This is used in the MultiQC report (if not default) and in the summary HTML / e-mail (always).
+
+**NB:** Single hyphen (core Nextflow option)
+
+### Running in the background
+
+Nextflow handles job submissions and supervises the running jobs. The Nextflow process must run until the pipeline is finished.
+
+Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
+
+To create a screen session:
+
+```bash
+screen -R nf-core/eager
+```
+
+To disconnect, press `ctrl+a` then `d`.
+
+To reconnect, type:
+
+```bash
+screen -r nf-core/eager
+```
+
+to end the screen session while in it type `exit`.
+
+Alternatively, the Nextflow `-bg` flag launches Nextflow in the background, detached from your terminal so that the workflow does not stop if you log out of your session. The logs are saved to a file.
+
+#### Nextflow memory requirements
+
+In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
+We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
+
+```bash
+NXF_OPTS='-Xms1g -Xmx4g'
+```
+
+## Pipeline Options
+
+### Input
 
 #### `--input`
 
@@ -279,7 +351,7 @@ Only required when using the 'Path' method of [`--input`](#--input).
 
 Indicates libraries are single stranded.
 
-Currently only affects MALTExtract, where it will switch on damage patterns calculation mode to single-stranded. Default: false.
+Currently only affects MALTExtract where it will switch on damage patterns calculation mode to single-stranded, and genotyping with pileupcaller where a different method is used. Default: false.
 
 #### `--colour_chemistry`
 
@@ -337,7 +409,7 @@ params {
 
 > You must select either a `--fasta` or `--genome`
 
-### Output Directories
+### Output
 
 #### `--outdir`
 
@@ -345,25 +417,29 @@ The output directory where the results will be saved.
 
 #### `-w / -work-dir`
 
-The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run EAGER from.
+The output directory where _intermediate_ files will be saved. It is **highly recommended** that this is the same path as `--outdir`, otherwise you may 'lose' your intermediate files if you need to re-run a pipeline. By default, if this flag is not given, the intermediate files will be saved in a `work/` and `.nextflow/` directory from wherever you have run nf-core/eager from.
+
+#### `--publish_dir_mode`
+
+Nextflow mode for 'publishing' final results files i.e. how to move final files into your `--outdir` from working directories. Options: 'symlink', 'rellink', 'link', 'copy', 'copyNoFollow', 'move'.
 
 ### Optional Reference Options
 
-We provide various options for indexing of different types of reference genomes. EAGER can index reference genomes for you (with options to save these for other analysis), but you can also supply your pre-made indices.
+We provide various options for indexing of different types of reference genomes. nf-core/eager can index reference genomes for you (with options to save these for other analysis), but you can also supply your pre-made indices.
 
-Supplying pre-made indices saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource [specific profile](#profile) that sets paths to pre-computed reference genomes, saving even time when specifying these.
+Supplying pre-made indices saves time in pipeline execution and is especially advised when running multiple times on the same cluster system for example. You can even add a resource [specific profile](#profile) that sets paths to pre-computed reference genomes, saving time when specifying these.
 
 #### `--large_ref`
 
-This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to accompensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. Default: off
+This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to compensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. Default: off
 
 #### `--save_reference`
 
-Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices EAGER2 generates for you will be stored in the `<your_output_dir>/results/reference_genomes` for you.
+Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices nf-core/eager generates for you will be stored in the `<your_output_dir>/results/reference_genomes` for you.
 
 #### `--bwa_index`
 
-If you want to use pre-existing `bwa index` indices, please supply the **directory** to the FASTA you also specified in `--fasta` (see above). EAGER2 will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa` index file suffixes.
+If you want to use pre-existing `bwa index` indices, please supply the **directory** to the FASTA you also specified in `--fasta` (see above). nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa` index file suffixes.
 
 For example:
 
@@ -375,7 +451,7 @@ nextflow run nf-core/eager \
 --bwa_index 'results/reference_genome/bwa_index/BWAIndex/'
 ```
 
-> `bwa index` does not give you an option to supply alternative suffixes/names for these indices. Thus, the file names generated by this command _must not_ be changed, otherwise EAGER2 will not be able to find them.
+> `bwa index` does not give you an option to supply alternative suffixes/names for these indices. Thus, the file names generated by this command _must not_ be changed, otherwise nf-core/eager will not be able to find them.
 
 #### `--seq_dict`
 
@@ -398,16 +474,6 @@ For example:
 ```
 
 ### Other run specific parameters
-
-#### `-r`
-
-By default, EAGER2 will use the latest version of the pipeline that is downloaded on your system. However, it's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
-
-First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `2.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0`.
-
-This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
-
-Additionally, EAGER pipeline releases are named after Swabian German Cities. The first release V2.0 is named "Kaufbeuren". Future releases are named after cities named in the [Swabian league of Cities](https://en.wikipedia.org/wiki/Swabian_League_of_Cities).
 
 #### `--max_memory`
 
@@ -434,30 +500,6 @@ Note that this functionality requires either `mail` or `sendmail` to be installe
 #### `--plaintext_email`
 
 Set to receive plain-text e-mails instead of HTML formatted.
-
-#### `-name`
-
-Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
-
-This is used in the MultiQC report (if not default) and in the summary HTML / e-mail (always).
-
-**NB:** Single hyphen (core Nextflow option)
-
-#### `-resume`
-
-Specify this when restarting a pipeline. Nextflow will used cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously.
-
-You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
-
-**NB:** Single hyphen (core Nextflow option)
-
-#### `-c`
-
-Specify the path to a specific nextflow config file (this is a core NextFlow command).
-
-**NB:** Single hyphen (core Nextflow option)
-
-Note - you can use this to override pipeline defaults.
 
 #### `--monochrome_logs`
 
@@ -512,13 +554,13 @@ Turns off QualiMap and thus does not compute coverage and other mapping metrics.
 
 #### `--run_convertinputbam`
 
-Allows you to convert a input BAM file back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
+Allows you to convert an input BAM file back to FASTQ for downstream processing. Note this is required if you need to perform AdapterRemoval and/or polyG clipping.
 
 If not turned on, BAMs will automatically be sent to post-mapping steps.
 
 ### Complexity Filtering Options
 
-More details on can be seen in the [fastp documentation](https://github.com/OpenGene/fastp)
+More details can be seen in the [fastp documentation](https://github.com/OpenGene/fastp)
 
 If using TSV input, this is performed per lane separately.
 
@@ -752,7 +794,7 @@ If using TSV input, DamageProfiler is performed library, i.e. after lane merging
 
 #### `--udg_type`
 
-Defines whether Uracil-DNA glycosylase (UDG) treatment was used to repair DNA damage on the sequencing libraries.
+Defines whether Uracil-DNA glycosylase (UDG) treatment was used to remove DNA damage on the sequencing libraries.
 
 Specify `'none'` if no treatment was performed. If you have partial UDG treated data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify `'half'`. If you have complete UDG treated data ([Briggs et al. 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using PMDtools `'half'` will use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage assessment will use CpG context only. Default: `'none'`.
 
@@ -790,7 +832,7 @@ The maximum number of reads used for damage assessment in PMDtools. Can be used 
 
 ### BAM Trimming Parameters
 
-For some library preparation protocols, users might want to clip off damaged bases before applying genotyping methods. This can be done in nf-core/eager automatically by turning on the `--trim_bam` parameter.
+For some library preparation protocols, users might want to clip off damaged bases before applying genotyping methods. This can be done in nf-core/eager automatically by turning on the `--run_trim_bam` parameter.
 
 More documentation can be seen in the [bamUtil documentation](https://genome.sph.umich.edu/wiki/BamUtil:_trimBam)
 
@@ -878,15 +920,15 @@ Specify a path to a local copy of a GATK 3.5 `.jar` file, preferably version '3.
 
 #### `--gatk_call_conf`
 
-If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: 30
+If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: `30`
 
 #### `--gatk_ploidy`
 
-If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid organisms. Default: 2
+If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid organisms. Default: `2
 
 #### `--gatk_dbsnp`
 
-(Optional)Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
+(Optional) Specify VCF file for output VCF SNP annotation e.g. if you want annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.
 
 #### `--gatk_ug_out_mode`
 
@@ -912,15 +954,15 @@ These BAMs will be stored in the same folder as the corresponding VCF files.
 
 #### `--gatk_downsample`
 
-Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to 250 reads. Default: 250
+Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to 250 reads. Default: `250`
 
 #### `--gatk_ug_gatk_ug_defaultbasequalities`
 
-Specify a value to set base quality scores, if reads are missing this information. Maybe useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to -1  which is do not set any default quality (turned off). Default: -1
+Specify a value to set base quality scores, if reads are missing this information. Maybe useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to -1  which is do not set any default quality (turned off). Default: `-1`
 
 #### `--freebayes_C`
 
-Specify minimum required supporting observations to consider a variant. Default: 1
+Specify minimum required supporting observations to consider a variant. Default: `1`
 
 #### `--freebayes_g`
 
@@ -928,7 +970,7 @@ Specify to skip over regions of high depth by discarding alignments overlapping 
 
 #### `--freebayes_p`
 
-Specify ploidy of sample in FreeBayes. Default is diploid. Default: 2
+Specify ploidy of sample in FreeBayes. Default is diploid. Default: `2`
 
 #### `--pileupcaller_bedfile`
 
@@ -965,11 +1007,11 @@ Turns on the ANGSD creation of a FASTA file from the BAM file.
 
 #### `--angsd_fastamethod`
 
-The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given positin, whereas 'random' will pick one at random. Default: `'random'`.
+The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given position, whereas 'random' will pick one at random. Default: `'random'`.
 
 #### `--pileupcaller_transitions_mode`
 
-Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: AllSites, TransitionsMissing, SkipTransitions. Default: AllSites
+Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: `'AllSites'`, `'TransitionsMissing'`, `'SkipTransitions'`. Default: `'AllSites'`
 
 ### Consensus Sequence Generation
 
@@ -989,15 +1031,15 @@ The name of the FASTA entry you would like in your FASTA file.
 
 #### `--vcf2genome_minc`
 
-Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: 5
+Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: `5`
 
 #### `--vcf2genome_minq`
 
-Minimum genotyping quality of a call to be called. Else N will be called. Default: 30
+Minimum genotyping quality of a call to be called. Else N will be called. Default: `30`
 
 #### `--vcf2genome_minfreq`
 
-In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: 0.8
+In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: `0.8`
 
 ### Mitochondrial to Nuclear Ratio
 
@@ -1029,19 +1071,19 @@ Specify whether to tell MultiVCFAnalyzer to write within the SNP table the frequ
 
 #### `--min_genotype_quality`
 
-The minimal genotyping quality for a SNP to be considered for processing by MultiVCFAnalyzer. The default threshold is 30.
+The minimal genotyping quality for a SNP to be considered for processing by MultiVCFAnalyzer. The default threshold is `30`.
 
 #### `--min_base_coverage`
 
-The minimal number of reads covering a base for a SNP at that position to be considered for processing by MultiVCFAnalyzer. The default depth is 5.
+The minimal number of reads covering a base for a SNP at that position to be considered for processing by MultiVCFAnalyzer. The default depth is `5`.
 
 #### `--min_allele_freq_hom`
 
-The minimal frequency of a nucleotide for a 'homozygous' SNP to be called. In other words, e.g. 90% of the reads covering that position must have that SNP to be called. If the threshold is not reached, and the previous two parameters are matched, a reference call is made (displayed as . in the SNP table). If the above two parameters are not met, an 'N' is called. The default allele frequency is 0.9.
+The minimal frequency of a nucleotide for a 'homozygous' SNP to be called. In other words, e.g. 90% of the reads covering that position must have that SNP to be called. If the threshold is not reached, and the previous two parameters are matched, a reference call is made (displayed as . in the SNP table). If the above two parameters are not met, an 'N' is called. The default allele frequency is `0.9`.
 
 #### `--min_allele_freq_het`
 
-The minimum frequency of a nucleotide for a 'heterozygous' SNP to be called. If this parameter is set to the same as `--min_allele_freq_hom`, then only homozygous calls are made. If this value is less than the previous parameter, then a SNP call will be made if it is between this and the previous parameter and displayed as a IUPAC uncertainty call. Default is 0.9.
+The minimum frequency of a nucleotide for a 'heterozygous' SNP to be called. If this parameter is set to the same as `--min_allele_freq_hom`, then only homozygous calls are made. If this value is less than the previous parameter, then a SNP call will be made if it is between this and the previous parameter and displayed as a IUPAC uncertainty call. Default is `0.9`.
 
 #### `--additional_vcf_files`
 
@@ -1089,7 +1131,7 @@ An increasingly common line of analysis in high-throughput aDNA analysis today i
 
 Please note the following:
 
-- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the EAGER run.
+- MALT database construction functionality is _not_ included within the pipeline - this should be done independently, **prior** the nf-core/eager run.
   - To use `malt-build` from the same version as `malt-run`, load either the docker, singularity or conda environment.
 - MALT can often require very large computing resources depending on your database. We set a absolute minimum of 16 cores and 128GB of memory (which is 1/4 of the recommendation from the developer). Please leave an issue on the [nf-core github](https://github.com/nf-core/eager/issues) if you would like to see this changed.
 
@@ -1123,20 +1165,20 @@ For Kraken2, it can be either the path to the _directory_ or the path to the `.t
 
 #### `--percent_identity`
 
-Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is 85
+Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is `85`
 
 Only used when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_mode`
 
 Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.
-respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: 'BlastN'  
+respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: `'BlastN'`
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_alignment_mode`
 
-Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: 'SemiGlobal'
+Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1144,7 +1186,7 @@ Only when `--metagenomic_tool malt` is also supplied
 
 Specify the top percent value of the LCA algorthim. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): "For each
 read, only those matches are used for taxonomic placement whose bit disjointScore is within
-10% of the best disjointScore for that read.". Default: 1.
+10% of the best disjointScore for that read.". Default: `1`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1162,13 +1204,13 @@ Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_max_queries`
 
-Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: 100
+Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: `100`
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--malt_memory_mode`
 
-How to load the database into memory. Options are 'load', 'page' or 'map'. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. 'page' and 'map' perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is 'load'.
+How to load the database into memory. Options are `'load'`, `'page'` or `'map'`. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. `'page'` and `'map'` perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is `'load'`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1194,13 +1236,13 @@ Only when `--metagenomic_tool malt` is also supplied
 
 #### `--maltextract_filter`
 
-Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'. Default: 'def_anc'.
+Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`, 'assignment'. Default: `'def_anc'`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
 #### `--maltextract_toppercent`
 
-Specify percent of top alignments for each read to be considered for each node. Default: 0.01.
+Specify percent of top alignments for each read to be considered for each node. Default: `0.01`.
 
 Only when `--metagenomic_tool malt` is also supplied
 
@@ -1236,7 +1278,7 @@ Only when `--metagenomic_tool malt` is also supplied
 
 #### `--maltextract_percentidentity`
 
-Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: 85.0.
+Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.
 
 Only when `--metagenomic_tool malt` is also supplied
 

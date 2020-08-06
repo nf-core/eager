@@ -1,24 +1,23 @@
-# ![nf-core/eager](docs/images/nf-core_eager_logo.png)
+# ![nf-core/eager](docs/images/nf-core-eager_logo.png)
 
-**A fully reproducible ancient and modern DNA pipeline in Nextflow and with cloud support.**.
+**A fully reproducible and state of the art ancient DNA analysis pipeline**.
 
-![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20eager%20CI/badge.svg)
-![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)
+[![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/eager/actions)
+[![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/eager/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A520.04.0-brightgreen.svg)](https://www.nextflow.io/)
 [![nf-core](https://img.shields.io/badge/nf--core-pipeline-brightgreen.svg)](https://nf-co.re/)
 [![DOI](https://zenodo.org/badge/135918251.svg)](https://zenodo.org/badge/latestdoi/135918251)
 
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
-[![Docker Container available](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager/)
+[![Docker](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager)
 ![Singularity Container available](https://img.shields.io/badge/singularity-available-7E4C74.svg)
-
-[![Joins us on Slack](https://img.shields.io/badge/slack-nfcore/eager-blue.svg)](https://nfcore.slack.com/channels/eager)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
+[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23eager-4A154B?logo=slack)](https://nfcore.slack.com/channels/eager)
 
 ## Introduction
 
 **nf-core/eager** is a bioinformatics best-practice analysis pipeline for NGS sequencing based ancient DNA (aDNA) data analysis.
 
-The pipeline uses [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool. It pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. The pipeline pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
 <p align="center">
     <img src="docs/images/output/overview/eager2_workflow.png" alt="nf-core/eager schematic workflow" width="70%"
@@ -82,34 +81,40 @@ Additional functionality contained by the pipeline currently includes:
 
 ## Quick Start
 
-1. Install [`nextflow`](https://nf-co.re/usage/installation) (>= v19.10.0)
+1. Install [`nextflow`](https://nf-co.re/usage/installation) (version >= 20.04.0)
 
-2. Install one of [`docker`](https://docs.docker.com/engine/installation/), [`singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`conda`](https://conda.io/miniconda.html)
+2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
 
-3. Download the EAGER pipeline
+3. Download the pipeline and test it on a minimal dataset with a single command:
 
-        nextflow pull nf-core/eager
+    ```bash
+    nextflow run nf-core/eager -profile test,<docker/singularity/conda/institute>
+    ```
 
-4. Test the pipeline using the provided test data
+    > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda>,test
+4. Start running your own analysis!
 
-5. Start running your own ancient DNA analysis either via the command-line or [GUI](https://nf-co.re/launch)! Command line example:
+    ```bash
+    nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+    ```
 
-        nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+5. Once your run has completed successfully, clean up the intermediate files.
 
-6. Once your run has completed successfully, clean up the intermediate files.
+    ```bash
+    nextflow clean -f -k
+    ```
 
-        nextflow clean -f -k
+See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
 
-NB. You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
+**N.B.** You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
 
 Modifications to the default pipeline are easily made using various options
 as described in the documentation.
 
 ## Documentation
 
-The nf-core/eager pipeline comes with documentation about the pipeline, found in the `docs/` directory or on the main homepage of the nf-core project:
+The nf-core/eager pipeline comes with documentation about the pipeline which you can read at [https://nf-core/eager/docs](https://nf-core/eager/docs) or find in the [`docs/` directory](docs).
 
 1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
@@ -124,7 +129,11 @@ The nf-core/eager pipeline comes with documentation about the pipeline, found in
 
 ## Credits
 
-This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)) and [James A. Fellows Yates](https://github.com/jfy133), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas), [Aida Andrades Valtueña](https://github.com/aidaanva) and [Maxime Garcia](https://github.com/MaxUlysse). If you want to contribute, please open an issue (or even better, a pull request!) and ask to be added to the project - everyone is welcome to contribute here!
+This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)) and [James A. Fellows Yates](https://github.com/jfy133), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas), [Aida Andrades Valtueña](https://github.com/aidaanva) and [Maxime Garcia](https://github.com/MaxUlysse) and the nf-core community.
+
+If you would like to contribute to this pipeline, please open an issue (or even better, a pull request - please see the [contributing guidelines](.github/CONTRIBUTING.md), and ask to be added to the project - everyone is welcome to contribute here!.
+
+For further information or help, don't hesitate to get in touch on the [Slack `#eager` channel](https://nfcore.slack.com/channels/eager) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Authors (alphabetical)
 
@@ -211,5 +220,5 @@ You can cite the `nf-core` publication as follows:
 >
 > Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
 >
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).  
+> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
 > ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
