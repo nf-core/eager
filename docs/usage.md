@@ -2479,7 +2479,7 @@ e.g. `cat` and see if you can identify the error of the program itself.
 
 Finally, you can also try running the commands _yourself_. You can firstly try
 to do this by loading your given nf-core/eager environment (e.g. `singularity
-shell /<path>/<to>/nf-core-eager-X-X-X.img` or `conda activate
+shell /\<path\>/\<to\>/nf-core-eager-X-X-X.img` or `conda activate
 nf-core-eager-X.X.X`), then running `bash .command.sh`.
 
 If this doesn't work this suggests either there is something wrong with the

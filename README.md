@@ -122,7 +122,7 @@ The nf-core/eager pipeline comes with documentation about the pipeline which you
     * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
-   - This includes tutorials, FAQs, and troubleshooting instructions
+   * This includes tutorials, FAQs, and troubleshooting instructions
 4. [Output and how to interpret the results](docs/output.md)
 
 ## Credits
