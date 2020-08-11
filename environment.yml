@@ -18,7 +18,7 @@ dependencies:
   - bioconda::samtools=1.9
   - bioconda::dedup=0.12.6
   - bioconda::angsd=0.933
-  - bioconda::circularmapper=1.93.4
+  - bioconda::circularmapper=1.93.5
   - bioconda::gatk4=4.1.7.0
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
