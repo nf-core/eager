@@ -98,7 +98,7 @@
     - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
       - [`--run_bam_filtering`](#--run_bam_filtering)
       - [`--bam_mapping_quality_threshold`](#--bam_mapping_quality_threshold)
-      - [`bam_filter_minreadlength`](#bam_filter_minreadlength)
+      - [`--bam_filter_minreadlength`](#--bam_filter_minreadlength)
       - [`--bam_unmapped_type`](#--bam_unmapped_type)
     - [Read DeDuplication Parameters](#read-deduplication-parameters)
       - [`--dedupper`](#--dedupper)
@@ -1350,7 +1350,7 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream
 analysis. By default keeps all reads and is therefore set to `0` (basically
 doesn't filter anything).
 
-#### `bam_filter_minreadlength`
+#### `--bam_filter_minreadlength`
 
 Specify minimum length of mapped reads. This filtering will apply at the same
 time as mapping quality filtering.
