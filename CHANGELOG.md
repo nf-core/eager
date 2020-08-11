@@ -52,6 +52,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#516](https://github.com/nf-core/eager/issues/516) - Made bedtools not report out of memory exit code when warning of inconsistant FASTA/Bed entry names
 * [#504](https://github.com/nf-core/eager/issues/504) - Removed uninformative sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination is now reported with the correct library names.
+* Merged all tutorials and FAQs into `usage.md` for display on nf-co.re
 
 ### `Dependencies`
 
