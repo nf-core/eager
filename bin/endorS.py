@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser(prog='endorS.py',
    '''))
 parser.add_argument('samtoolsfiles', metavar='<samplefile>.stats', type=str, nargs='+',
                     help='output of samtools flagstat in a txt file (at least one required). If two files are supplied, the mapped reads of the second file is divided by the total reads in the first, since it assumes that the <samplefile.stats> are related to the same sample. Useful after BAM filtering')
-parser.add_argument('-v','--version', action='version', version='%(prog)s 0.3')
+parser.add_argument('-v','--version', action='version', version='%(prog)s 0.4')
 parser.add_argument('--output', '-o', nargs='?', help='specify a file format for an output file. Options: <json> for a MultiQC json output. Default: none')
 parser.add_argument('--name', '-n', nargs='?', help='specify name for the output file. Default: extracted from the first samtools flagstat file provided')
 args = parser.parse_args()
@@ -82,7 +82,7 @@ else:
 if mappedPost == "NA":
     #Creating the json file
     jsonOutput={
-    "id": "endorS.py ",
+    "id": "endorSpy",
     "plot_type": "generalstats",
     "pconfig": {
         "endogenous_dna": { "max": 100, "min": 0, "title": "Endogenous DNA (%)", "format": '{:,.2f}'}
@@ -94,7 +94,7 @@ if mappedPost == "NA":
 else:
     #Creating the json file
     jsonOutput={
-    "id": "endorS.py ",
+    "id": "endorSpy",
     "plot_type": "generalstats",
     "pconfig": {
         "endogenous_dna": { "max": 100, "min": 0, "title": "Endogenous DNA (%)", "format": '{:,.2f}'},

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [dev]
+## v2.2.0dev - [date]
 
 ### `Added`
 
@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#522](https://github.com/nf-core/eager/issues/522)  Added post-mapping length filter to asisst in more realistic endogenous DNA calculations
 * [#512](https://github.com/nf-core/eager/issues/512) Added flexible trimming of bams by library type. 'half' and 'none' UDG libraries can now be trimmed differentially within a single eager run.
 * Added a `.dockstore.yml` config file for automatic workflow registration with [dockstore.org](https://dockstore.org/)
+* Updated template to nf-core/tools 1.10.2
 
 ### `Fixed`
 
@@ -52,6 +53,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#516](https://github.com/nf-core/eager/issues/516) - Made bedtools not report out of memory exit code when warning of inconsistant FASTA/Bed entry names
 * [#504](https://github.com/nf-core/eager/issues/504) - Removed uninformative sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination is now reported with the correct library names.
+* Merged all tutorials and FAQs into `usage.md` for display on nf-co.re
 
 ### `Dependencies`
 
@@ -69,7 +71,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Latest version of xopen (0.9.0)
 * Added Bowtie 2 (2.4.1)
 * Latest version of Sex.DetERRmine (1.1.2)
-* Latest version of endorS.py (0.3)
+* Latest version of endorS.py (0.4)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 

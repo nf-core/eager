@@ -1,17 +1,11 @@
----
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
----
-
 # nf-core/eager bug report
-
+<!--
 Hi there!
 
 Thanks for telling us about a problem with the pipeline.
+
+Please delete this text and anything that's not relevant from the template below:
+-->
 
 ## Check Documentation
 
@@ -21,7 +15,7 @@ Have you checked in the following places for your error?:
 - [ ] [Troubleshooting](https://nf-co.re/usage/troubleshooting)
       (for nf-core specific information)
 
-Please also check the the corresponding branch documentation on github, if not 
+Please also check the the corresponding branch documentation on github, if not
 testing the latest release.
 
 ## Describe the bug
