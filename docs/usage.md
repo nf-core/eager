@@ -570,7 +570,7 @@ Turns off adaptor trimming and paired-end read merging. Equivalent to setting bo
 
 #### `--skip_mapping`
 
-Allows you to skip mapping step and go straight downstream to BAM processing steps.
+Allows you to skip mapping step and go straight downstream to BAM processing steps. **Tip**: Provide a small decoy reference genome, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome if you do not actual need a reference genome for any downstream analyses. 
 
 #### `--skip_preseq`
 
