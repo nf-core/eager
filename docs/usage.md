@@ -328,6 +328,7 @@ Note the following important points and limitations for setting up:
   - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
   - This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
+  - You should provide small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
 - nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
 - Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 - Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes
@@ -346,6 +347,8 @@ Note the following important points and limitations for setting up:
 Specifies the input file type to `--input` is in BAM format. This will automatically also apply `--single_end`.
 
 Only required when using the 'Path' method of [`--input`](#--input).
+
+> **Tip**: You should small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
 
 #### `--single_stranded`
 
@@ -368,6 +371,8 @@ For example:
 ```bash
 --fasta '/<path>/<to>/my_reference.fasta'
 ```
+
+You always need to provide an input FASTA even if you do not do any mapping (e.g. supplying BAM files). You should small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome.
 
 > If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--save_reference` flag.
 > You must select either a `--fasta` or `--genome`
