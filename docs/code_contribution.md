@@ -4,6 +4,22 @@ To make the EAGER2 code and processing logic more understandable for new contrib
 
 If you wish to contribute a new module, please use the following coding standards.
 
+The typical workflow for adding a new module is as follows:
+
+1. Define the corresponding input channel into your new process from the expected previous process channel (or re-routing block, see below).
+2. Write the process block (see below).
+3. Define the output channel if needed (see below).
+4. Add any new flags/options to `nextflow.config` with a default (see below).
+5. Add any new flags/options to the help message (for integer/text parameters, print to help the corresponding `nextflow.config` parameter).
+6. Add sanity checks for all relevant parameters.
+7. Add any new software to the `scrape_software_versions.py` script in `bin/` and the version command to the `scrape_software_versions` process in `main.nf`.
+8. Do local tests that the new code works properly and as expected.
+9. Add a new test command in `.github/workflow/ci.yaml`.
+10. If applicable add a [MultiQC](https://https://multiqc.info/) module.
+11. Update MultiQC config `assests/multiqc_config.yaml` so relevant suffixes, name clean up, General Statistics Table column order, and module figures are in the right order.
+12. Add new flags/options to 'usage' documentation under `docs/usage.md`.
+13. Add any descriptions of MultiQC report sections and output files to `docs/output.md`.
+
 ## Default Values
 
 Default values should go in `nextflow.config` under the `params` scope.
@@ -125,3 +141,11 @@ You then need to edit the script `bin/scrape_software_versions.py` to
 2. add a HTML block entry to the `OrderedDict` for formatting in MultiQC.
 
 > If a tool does not unfortunately offer any printing of version data, you may add this 'manually' e.g. with `echo "v1.1" > v_<YOUR_TOOL>.txt`
+
+## Images and Figures
+
+For all internal nf-core/eager documentation images we are using the 'Kalam' font by the Indian Type Foundry and licensed under the Open Font License.
+
+For the overview image we follow the nf-core [style and guidelines](https://nf-co.re/developers/design_guidelines).
+
+These can be found for download [here](https://fonts.google.com/specimen/Kalam)

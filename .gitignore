@@ -6,3 +6,7 @@ results/
 tests/
 testing/
 *.pyc
+main_playground.nf
+.vscode
+*.code-workspace
+nf-params.json
