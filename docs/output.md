@@ -28,7 +28,7 @@
 
 ## Introduction
 
-The output of nf-core/eager primarily consists of main components: output alignment files (e.g. VCf, BAM or FASTQ files), and summary statistics of the whole run presented in a [`MultiQC`](https://multiqc.info) report. Intermediate files and module-specific statistics files are also retained depending on your particular run configuration.
+The output of nf-core/eager primarily consists of main components: output alignment files (e.g. VCF, BAM or FASTQ files), and summary statistics of the whole run presented in a [`MultiQC`](https://multiqc.info) report. Intermediate files and module-specific statistics files are also retained depending on your particular run configuration.
 
 ## Directory Structure
 
@@ -101,7 +101,7 @@ The possible columns displayed by default are as follows:
 - **% Unclassified** This is from Kraken. It reports the percentage of reads that could not be aligned and taxonomically assigned against your Kraken metagenomic database. This can often be high for aDNA due to short reads and database bias.
 - **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _prior_ map quality filtering.
 - **Endogenous DNA (%)** This is from the endorS.py tool. It displays a percentage of mapped reads over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). Assuming a perfect ancient sample with no modern contamination, this would be the amount of true ancient DNA in the sample. However this value _most likely_ include contamination and will not entirely be the true 'endogenous' content.
-- **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _after_ map quality filtering(note the column name does not distinguish itself from prior-map quality filtering, but the post-filter column is always second)
+- **Reads Mapped** This is from Samtools. This is the raw number of preprocessed reads mapped to your reference genome _after_ map quality filtering (note the column name does not distinguish itself from prior-map quality filtering, but the post-filter column is always second)
 - **Endogenous DNA Post (%)** This is from the endorS.py tool. It displays a percentage of mapped reads _after_ BAM filtering (e.g. for mapping quality) over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). This column will only be displayed if BAM filtering is turned on and is based on the original mapping for total reads, and mapped reads as calculated from the post-filtering BAM.
 - **ClusterFactor** This is from DeDup. This is a value representing the how many duplicates in the library exist for each unique read. A cluster factor close to one replicates a highly complex library and could be sequenced further. Generally with a value of more than 2 you will not be gaining much more information by sequencing deeper.
 - **Dups** This is from Picard's markDuplicates. It represents the percentage of reads in your library that were exact duplicates of other reads in your database. The lower the better, as high duplication rate means lots of sequencing of the same information (and therefore is not time or cost effective).
