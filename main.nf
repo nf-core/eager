@@ -3358,12 +3358,17 @@ def checkHostname() {
 }
 
 // Channelling the TSV file containing FASTQ or BAM 
-// Header Format is: "Sample_Name  Library_ID  Lane  SeqType  Organism  Strandedness  UDG_Treatment  R1  R2  BAM  BAM_Index Group  Populations  Age"
 def extract_data(tsvFile) {
     Channel.from(tsvFile)
         .splitCsv(header: true, sep: '\t')
         .map { row ->
+
+            def expected_keys = ['Sample_Name', 'Library_ID', 'Lane', 'Color_Chemistry', 'SeqType', 'Organism', 'Strandedness', 'UDG_Treatment', 'R1', 'R2', 'BAM']
+            if ( !row.keySet().containsAll(expected_keys) ) exit 1, "[nf-core/eager] error: Invalid TSV input - malformed column names. Please check input TSV. Column names should be ${expected keys}"
+            println(!row.keySet().containsAll(expected_keys))
+
             checkNumberOfItem(row, 11)
+
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID
             def lane = row.Lane
