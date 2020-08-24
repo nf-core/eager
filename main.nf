@@ -590,7 +590,7 @@ if (tsv_path) {
     tsv_file = file(tsv_path)
     if (!tsv_file.exists()) exit 1, "[nf-core/eager] error: input TSV file could not be found. Does the file exist or in the right place? You gave the path: ${params.input}"
 
-    ch_input_sample = extract_data(tsv_file)
+    ch_input_sample = extract_data(tsv_path)
 
 } else if (params.input && !has_extension(params.input, "tsv")) {
 
@@ -3359,13 +3359,13 @@ def checkHostname() {
 
 // Channelling the TSV file containing FASTQ or BAM 
 def extract_data(tsvFile) {
-    Channel.from(tsvFile)
+    Channel.fromPath(tsvFile)
         .splitCsv(header: true, sep: '\t')
+        .dump()
         .map { row ->
 
-            def expected_keys = ['Sample_Name', 'Library_ID', 'Lane', 'Color_Chemistry', 'SeqType', 'Organism', 'Strandedness', 'UDG_Treatment', 'R1', 'R2', 'BAM']
-            if ( !row.keySet().containsAll(expected_keys) ) exit 1, "[nf-core/eager] error: Invalid TSV input - malformed column names. Please check input TSV. Column names should be ${expected keys}"
-            println(!row.keySet().containsAll(expected_keys))
+            def expected_keys = ['Sample_Name', 'Library_ID', 'Lane', 'Colour_Chemistry', 'SeqType', 'Organism', 'Strandedness', 'UDG_Treatment', 'R1', 'R2', 'BAM']
+            if ( !row.keySet().containsAll(expected_keys) ) exit 1, "[nf-core/eager] error: Invalid TSV input - malformed column names. Please check input TSV. Column names should be: ${expected_keys.join(", ")}"
 
             checkNumberOfItem(row, 11)
 
