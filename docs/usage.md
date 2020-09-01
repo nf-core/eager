@@ -701,42 +701,19 @@ Note the following important points and limitations for setting up:
     run is PE and one run is SE, you need to give fake lane IDs to one of the
     runs as well.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
-- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the
-  same single-end or paired-end configuration
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files
-  (unless you use `--run_convertbam`), as only FASTQ files are lane-merged
-  together.
-- Same libraries that are sequenced on different sequencing configurations (i.e
-  single- and paired-end data), will be merged after mapping and will _always_
-  be considered 'paired-end' during downstream processes
-  - **Important** running DeDup in this context is _not_ recommended, as PE and
-    SE data at the same position will _not_ be evaluated as duplicates.
-    Therefore not all duplicates will be removed.
-  - When you wish to run PE/SE data together `-dedupper markduplicates` is
-    therefore prefered.
-  - An error will be thrown if you try to merge both PE and SE and also supply
-    `--skip_merging`.
-  - If truly you want to mix SE data and PE data but using mate-pair info for PE
-    mapping, please run FASTQ preprocessing mapping manually and supply BAM
-    files for downstream processing by nf-core/eager
-  - If you _regularly_ want to run the situation above, please leave an feature
-    request on github.
-- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on
-  each unique library separately after deduplication (but prior same-treated
-  library merging).
-- nf-core/eager functionality such as `--run_trim_bam` will be applied to only
-  non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
-- Qualimap is run on each sample, after merging of libraries (i.e. your values
-  will reflect the values of all libraries combined - after being damage trimmed
-  etc.).
-- Genotyping will typically be performed on each `sample` independently as
-  normally all libraries will have been merged together. However, if you have a
-  mixture of single-stranded and double-stranded libraries, you will normally
-  need to genotype separately. In this case you **must** give each the SS and DS
-  libraries _distinct_ `Sample_IDs` otherwise you will recieve a `file
-  collision` error in steps such as `sexdeterrmine`, and merge these yourself.
-  We will consider changing this behaviour in the future if there is enough
-  interest.  
+  - You should provide small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
+- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
+- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
+- Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes
+  - **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.
+  - When you wish to run PE/SE data together `-dedupper markduplicates` is therefore prefered.
+  - An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
+  - If truly you want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
+  - If you _regularly_ want to run the situation above, please leave an feature request on github.
+- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).
+- nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
+- Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
+- Genotyping will typically be performed on each `sample` independently as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs` otherwise you will recieve a `file collision` error in steps such as `sexdeterrmine`, and merge these yourself. We will consider changing this behaviour in the future if there is enough interest.  
 
 #### `--udg_type`
 
@@ -750,6 +727,8 @@ data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify
 PMDtools `'half'` will use a different model for DNA damage assessment in
 PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage
 assessment will use CpG context only. Default: `'none'`.
+
+> **Tip**: You should small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
 
 #### `--single_stranded`
 
@@ -832,11 +811,10 @@ For example:
 --fasta '/<path>/<to>/my_reference.fasta'
 ```
 
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters
-> (see [below](#optional-reference-options)), the pipeline will create these
-> indices for you automatically. Note that you can save the indices created for
-> you for later by giving the `--save_reference` flag. You must select either a
-> `--fasta` or `--genome`
+You need to provide an input FASTA even if you do not do any mapping (e.g. supplying BAM files). You should small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome.
+
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--save_reference` flag.
+> You must select either a `--fasta` or `--genome`
 
 #### `--genome` (using iGenomes)
 
