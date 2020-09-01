@@ -1,4 +1,4 @@
-### Tutorial - How to set up nf-core/eager for pathogen screening
+# Tutorial - How to set up nf-core/eager for pathogen screening
 
 🛠️ Under Construction 🛠️
 
