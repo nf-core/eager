@@ -4,15 +4,16 @@ from collections import OrderedDict
 import re
 
 regexes = {
-    'nf-core/eager': ['v_pipeline.txt', r"(\S+)"],
-    'Nextflow': ['v_nextflow.txt', r"(\S+)"],
-    'FastQC': ['v_fastqc.txt', r"FastQC v(\S+)"],
+    "nf-core/eager": ["v_pipeline.txt", r"(\S+)"],
+    "Nextflow": ["v_nextflow.txt", r"(\S+)"],
+    "FastQC": ["v_fastqc.txt", r"FastQC v(\S+)"],
+    "MultiQC": ["v_multiqc.txt", r"multiqc, version (\S+)"],
     'AdapterRemoval':['v_adapterremoval.txt', r"AdapterRemoval ver. (\S+)"],
-    'Picard MarkDuplicates': ['v_markduplicates.txt', r"([\d\.]+)-SNAPSHOT"],
+    'Picard MarkDuplicates': ['v_markduplicates.txt', r"(\S+)"],
     'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
     'Preseq': ['v_preseq.txt', r"Version: (\S+)"],
-    'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"],
-    'BWA': ['v_bwa.txt', r"Version: (\S+)"],
+    'BWA': ['v_bwa.txt', r"Version: (\S+)"], 
+    'Bowtie2': ['v_bowtie2.txt', r"bowtie2-([0-9]+\.[0-9]+\.[0-9]+) -fdebug"],
     'Qualimap': ['v_qualimap.txt', r"QualiMap v.(\S+)"],
     'GATK HaplotypeCaller': ['v_gatk.txt', r" v(\S+)"],
     #'GATK UnifiedGenotyper': ['v_gatk3_5.txt', r"version (\S+)"],
@@ -24,6 +25,7 @@ regexes = {
     'circulargenerator':['v_circulargenerator.txt',r"CircularGeneratorv(\S+)"],
     'DeDup':['v_dedup.txt',r"DeDup v(\S+)"],
     'freebayes':['v_freebayes.txt',r"v([0-9]\S+)"],
+    'sequenceTools':['v_sequencetools.txt',r"(\S+)"],
     'maltextract':['v_maltextract.txt', r"version(\S+)"],
     'malt':['v_malt.txt',r"version (\S+)"],
     'multivcfanalyzer':['v_multivcfanalyzer.txt', r"MultiVCFAnalyzer - (\S+)"],
@@ -36,12 +38,14 @@ regexes = {
 }
 
 results = OrderedDict()
-results['nf-core/eager'] = '<span style="color:#999999;\">N/A</span>'
-results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
-results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
+results["nf-core/eager"] = '<span style="color:#999999;">N/A</span>'
+results["Nextflow"] = '<span style="color:#999999;">N/A</span>'
+results["FastQC"] = '<span style="color:#999999;">N/A</span>'
+results["MultiQC"] = '<span style="color:#999999;">N/A</span>'
 results['AdapterRemoval'] = '<span style="color:#999999;\">N/A</span>'
 results['fastP'] = '<span style="color:#999999;\">N/A</span>'
 results['BWA'] = '<span style="color:#999999;\">N/A</span>'
+results['Bowtie2'] = '<span style="color:#999999;\">N/A</span>'
 results['circulargenerator'] = '<span style="color:#999999;\">N/A</span>'
 results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['endorS.py'] = '<span style="color:#999999;\">N/A</span>'
@@ -52,6 +56,7 @@ results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
 results['GATK HaplotypeCaller'] = '<span style="color:#999999;\">N/A</span>'
 #results['GATK UnifiedGenotyper'] = '<span style="color:#999999;\">N/A</span>'
 results['freebayes'] = '<span style="color:#999999;\">N/A</span>'
+results['sequenceTools'] = '<span style="color:#999999;\">N/A</span>'
 results['VCF2genome'] = '<span style="color:#999999;\">N/A</span>'
 results['MTNucRatioCalculator'] = '<span style="color:#999999;\">N/A</span>'
 results['bedtools'] = '<span style="color:#999999;\">N/A</span>'
@@ -64,7 +69,6 @@ results['multivcfanalyzer'] = '<span style="color:#999999;\">N/A</span>'
 results['malt'] = '<span style="color:#999999;\">N/A</span>'
 results['kraken'] = '<span style="color:#999999;\">N/A</span>'
 results['maltextract'] = '<span style="color:#999999;\">N/A</span>'
-results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
@@ -80,23 +84,25 @@ for k, v in regexes.items():
 # Remove software set to false in results
 for k in list(results):
     if not results[k]:
-        del(results[k])
+        del results[k]
 
 # Dump to YAML
-print ('''
+print(
+    """
 id: 'software_versions'
 section_name: 'nf-core/eager Software Versions'
 section_href: 'https://github.com/nf-core/eager'
 plot_type: 'html'
-description: 'are collected at run time from all software contained in nf-core/eager. This may include software not used in your run!'
+description: 'are collected at run time from the software output.'
 data: |
     <dl class="dl-horizontal">
-''')
-for k,v in results.items():
-    print("        <dt>{}</dt><dd><samp>{}</samp></dd>".format(k,v))
-print ("    </dl>")
+"""
+)
+for k, v in results.items():
+    print("        <dt>{}</dt><dd><samp>{}</samp></dd>".format(k, v))
+print("    </dl>")
 
 # Write out regexes as csv file:
-with open('software_versions.csv', 'w') as f:
-    for k,v in results.items():
-        f.write("{}\t{}\n".format(k,v))
+with open("software_versions.csv", "w") as f:
+    for k, v in results.items():
+        f.write("{}\t{}\n".format(k, v))
