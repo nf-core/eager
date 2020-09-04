@@ -3022,14 +3022,8 @@ process kraken {
 
   output:
   file "*.kraken.out" into ch_kraken_out
-<<<<<<< HEAD
-  tuple val(prefix), file("*.kreport") into ch_kraken_report
-  
-  
-=======
   tuple prefix, path("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
 
->>>>>>> baa0d60a9cbf9096322f4cfbfbfadcebece13827
   script:
   prefix = fastq.toString().tokenize('.')[0]
   out = prefix+".kraken.out"
