@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Added a `.dockstore.yml` config file for automatic workflow registration with [dockstore.org](https://dockstore.org/)
 * Updated template to nf-core/tools 1.10.2
 * [#544](https://github.com/nf-core/eager/pull/544) Add script to perform bam filtering on fragment length
+* [#456](https://github.com/nf-core/eager/pull/546) Bumps the base (default) runtime of all processes to 24 hours, and set shorter timelimits for test profiles (1 hour)
 
 ### `Fixed`
 
