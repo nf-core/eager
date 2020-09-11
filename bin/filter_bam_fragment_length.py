@@ -61,7 +61,7 @@ def filter_bam(infile, outfile, fraglen, allreads):
     bamfile = pysam.AlignmentFile(infile, "rb")
     bamwrite = pysam.AlignmentFile(outfile + ".filtered.bam", "wb", template=bamfile)
 
-    for read in bamfile.fetch():
+    for read in bamfile.fetch(until_eof=True):
         if allreads:
             if read.query_length >= fraglen:
                 bamwrite.write(read)
