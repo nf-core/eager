@@ -1809,11 +1809,10 @@ process samtools_filter {
         samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
 
         ## Mapped LEN filtering
-        if [[ !{minlength} -eq 0 ]]; then
+        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
             mv tmp_mapped.bam !{libraryid}.filtered.bam
         else
-            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
-            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{minlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         fi
 
         samtools index !{libraryid}.filtered.bam !{size}
@@ -1827,8 +1826,7 @@ process samtools_filter {
         if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
             mv tmp_mapped.bam !{libraryid}.filtered.bam
         else
-            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
-            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{params.bam_filter_minreadlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         fi
 
         samtools index !{libraryid}.filtered.bam !{size}
@@ -1843,8 +1841,7 @@ process samtools_filter {
         if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
             mv tmp_mapped.bam !{libraryid}.filtered.bam
         else
-            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
-            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{params.bam_filter_minreadlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         fi
 
         samtools index !{libraryid}.filtered.bam !{size}
@@ -1859,8 +1856,7 @@ process samtools_filter {
         if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
             mv tmp_mapped.bam !{libraryid}.filtered.bam
         else
-            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
-            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{params.bam_filter_minreadlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         fi
 
         samtools index !{libraryid}.filtered.bam !{size}
@@ -1879,8 +1875,7 @@ process samtools_filter {
         if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
             mv tmp_mapped.bam !{libraryid}.filtered.bam
         else
-            ## From https://www.biostars.org/p/92889/#92908; note may not be optimal for un-merged reads (i.e. reads with long fragment lenths)
-            samtools view -h tmp_mapped.bam | awk 'length($10) >= !{params.bam_filter_minreadlength} || $1 ~ /^@/' | samtools view -bS - > !{libraryid}.filtered.bam
+            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         fi
 
         samtools index !{libraryid}.filtered.bam !{size}
