@@ -36,8 +36,8 @@ def _get_args():
     parser.add_argument(
         '-m',
         dest='mode',
-        default='strip',
-        help='Read removal mode: remove reads (strip) or replace sequence by N (replace)'
+        default='remove',
+        help='Read removal mode: remove reads (remove) or replace sequence by N (replace)'
     )
     parser.add_argument(
         '-p',
@@ -179,14 +179,14 @@ def get_mapped_reads(fq_dict, mapped_reads):
     return(fqd)
 
 
-def write_fq(fq_dict, fname, write_mode, strip_mode, proc):
+def write_fq(fq_dict, fname, write_mode, remove_mode, proc):
     """Write to fastq file
     Args:
         fq_dict(dict): fq_dict with unmapped read names as keys,
             unmapped/mapped (u|m), seq, and quality as values in a list
         fname(string) Path to output fastq file
         write_mode (str): 'rb' or 'r'
-        strip_mode (str): strip (remove read) or replace (replace read sequence) by Ns
+        remove_mode (str): remove (remove read) or replace (replace read sequence) by Ns
         proc(int) number of processes
     """
     fq_dict_keys = list(fq_dict.keys())
@@ -194,12 +194,12 @@ def write_fq(fq_dict, fname, write_mode, strip_mode, proc):
         with xopen(fname, mode='wb', threads=proc) as fw:
             for fq_dict_key in fq_dict_keys:
                 wstring = ""
-                if strip_mode == 'strip':
+                if remove_mode == 'remove':
                     if fq_dict[fq_dict_key][0] == 'u':
                         wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
                         for i in fq_dict[fq_dict_key][2:]:
                             wstring += f"{i}\n"
-                elif strip_mode == 'replace':
+                elif remove_mode == 'replace':
                     # if unmapped, write all the read lines
                     if fq_dict[fq_dict_key][0] == 'u':
                         wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
@@ -217,12 +217,12 @@ def write_fq(fq_dict, fname, write_mode, strip_mode, proc):
         with open(fname, 'w') as fw:
             for fq_dict_key in fq_dict_keys:
                 wstring = ""
-                if strip_mode == 'strip':
+                if remove_mode == 'remove':
                     if fq_dict[fq_dict_key][0] == 'u':
                         wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
                         for i in fq_dict[fq_dict_key][2:]:
                             wstring += f"{i}\n"
-                elif strip_mode == 'replace':
+                elif remove_mode == 'replace':
                     # if unmapped, write all the read lines
                     if fq_dict[fq_dict_key][0] == 'u':
                         wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
@@ -238,8 +238,8 @@ def write_fq(fq_dict, fname, write_mode, strip_mode, proc):
                 fw.write(wstring)
 
 
-def check_strip_mode(mode):
-    if mode.lower() not in ['replace', 'strip']:
+def check_remove_mode(mode):
+    if mode.lower() not in ['replace', 'remove']:
         print(f"Mode must be {' or '.join(mode)}")
     return(mode.lower())
 
@@ -257,7 +257,7 @@ if __name__ == "__main__":
     else:
         write_mode = "w"
 
-    strip_mode = check_strip_mode(MODE)
+    remove_mode = check_remove_mode(MODE)
     BAMFILE = pysam.AlignmentFile(BAM, 'r')
 
    # FORWARD OR SE FILE
@@ -270,7 +270,7 @@ if __name__ == "__main__":
     # print(fq_dict_fwd)
     print(f"- Writing forward fq to {out_fwd}")
     write_fq(fq_dict=fq_dict_fwd, fname=out_fwd,
-             write_mode=write_mode, strip_mode=strip_mode, proc=PROC)
+             write_mode=write_mode, remove_mode=remove_mode, proc=PROC)
 
     # REVERSE FILE
     if IN_REV:
@@ -284,4 +284,4 @@ if __name__ == "__main__":
         fq_dict_rev = get_mapped_reads(fqd_rev, mapped_reads)
         print(f"- Writing reverse fq to {out_rev}")
         write_fq(fq_dict=fq_dict_rev, fname=out_rev,
-                 write_mode=write_mode, strip_mode=strip_mode, proc=PROC)
+                 write_mode=write_mode, remove_mode=remove_mode, proc=PROC)
