@@ -1,13 +1,14 @@
 name: nf-core-eager-2.2.0dev
 channels:
-  - defaults
-  - bioconda
   - conda-forge
+  - bioconda
+  - defaults
 dependencies:
-  - bioconda::rename=1.601
+  - conda-forge::python=3.7.3
+  - conda-forge::markdown=3.2.2 #Dont upgrade anymore
   - conda-forge::pymdown-extensions=7.1
   - conda-forge::pygments=2.6.1
-  - conda-forge::markdown=3.2.2 #Dont upgrade anymore
+  - bioconda::rename=1.601
   - conda-forge::openjdk=8.0.144
   - bioconda::fastqc=0.11.9
   - bioconda::adapterremoval=2.3.1
@@ -17,7 +18,7 @@ dependencies:
   - bioconda::samtools=1.9
   - bioconda::dedup=0.12.6
   - bioconda::angsd=0.933
-  - bioconda::circularmapper=1.93.4
+  - bioconda::circularmapper=1.93.5
   - bioconda::gatk4=4.1.7.0
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
@@ -33,7 +34,6 @@ dependencies:
   - bioconda::bamutil=1.0.14
   - bioconda::mtnucratio=0.7
   - pysam=0.15.4 #Says python3.7 or less
-  - python=3.7.3
   - bioconda::kraken2=2.0.9beta
   - conda-forge::pandas=1.0.4 #.4 is python3.8+ compatible
   - bioconda::freebayes=1.3.2 #should be fine with python 3.8, but says <3.7 on webpage

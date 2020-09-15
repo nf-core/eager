@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [dev]
+## v2.2.0dev - [date]
 
 ### `Added`
 
@@ -25,11 +25,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Added large 'fullsize' dataset test-profiles for ancient fish, human, and a draft pathogen contexts.
 * [#257](https://github.com/nf-core/eager/issues/257) Added the bowtie2 aligner as option for mapping, following Poullet and Orlando 2020 doi: [10.3389/fevo.2020.00105](https://doi.org/10.3389/fevo.2020.00105)
 * [#451](https://github.com/nf-core/eager/issues/451) Adds ANGSD genotype likelihood calculations as alternative to typical 'genotypers'
+* [#566](https://github.com/nf-core/eager/issues/466) Adds tutorials on how to set up nf-core/eager for different contexts
 * Nuclear contamination results are now shown in the MultiQC report.
 * Tutorial on how to use profiles for reproducible science (i.e. parameter sharing between different groups)
 * [#522](https://github.com/nf-core/eager/issues/522)  Added post-mapping length filter to asisst in more realistic endogenous DNA calculations
 * [#512](https://github.com/nf-core/eager/issues/512) Added flexible trimming of bams by library type. 'half' and 'none' UDG libraries can now be trimmed differentially within a single eager run.
 * Added a `.dockstore.yml` config file for automatic workflow registration with [dockstore.org](https://dockstore.org/)
+* Updated template to nf-core/tools 1.10.2
+* [#544](https://github.com/nf-core/eager/pull/544) Add script to perform bam filtering on fragment length
+* [#456](https://github.com/nf-core/eager/pull/546) Bumps the base (default) runtime of all processes to 4 hours, and set shorter timelimits for test profiles (1 hour)
 
 ### `Fixed`
 
@@ -52,6 +56,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#504](https://github.com/nf-core/eager/issues/504) - Removed uninformative sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination is now reported with the correct library names.
 * [#531](https://github.com/nf-core/eager/pull/531) - Renamed FASTQ stripping with host removal
+* Merged all tutorials and FAQs into `usage.md` for display on nf-co.re
 
 ### `Dependencies`
 
@@ -69,7 +74,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Latest version of xopen (0.9.0)
 * Added Bowtie 2 (2.4.1)
 * Latest version of Sex.DetERRmine (1.1.2)
-* Latest version of endorS.py (0.3)
+* Latest version of endorS.py (0.4)
 
 ## [2.1.0] - 2020-03-05 - "Ravensburg"
 
