@@ -206,7 +206,7 @@ def helpMessage() {
       --malt_min_support_percent [num]       Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
       --malt_max_queries [num]               Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
       --malt_memory_mode [str]               Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
-      --malt_sam_output [bool]               Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped.
+      --malt_sam_output [bool]               Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.
 
     Metagenomic Authentication
       --run_maltextract [bool]                  Turn on MaltExtract for MALT aDNA characteristics authentication
