@@ -58,7 +58,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#531](https://github.com/nf-core/eager/pull/531) - Renamed FASTQ stripping with host removal
 * Merged all tutorials and FAQs into `usage.md` for display on nf-co.re
 
-
 ### `Dependencies`
 
 * Added Sequencetools (1.4.0.6) that adds the ability to do genotyping with the 'pileupCaller'
