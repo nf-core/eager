@@ -95,9 +95,9 @@ def helpMessage() {
       --bt2_trim5 [num]          Specify number of bases to trim off from 5' (left) end of read before alignment. Default: ${params.bt2_trim5}
       --bt2_trim3 [num]          Specify number of bases to trim off from 3' (right) end of read before alignment. Default: ${params.bt2_trim3}
 
-    Stripping
-      --strip_input_fastq [bool]  Turn on creation of per-library pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data).
-      --strip_mode [str]          Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace). Default: '${params.strip_mode}'
+    Host removal
+      --hostremoval_input_fastq [bool]    Turn on creating pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+      --hostremoval_mode [str]            Host DNA Removal mode. Remove mapped reads completely from FASTQ (remove) or just mask mapped reads sequence by N (replace). Default: '${params.hostremoval_mode}'
       
     BAM Filtering
       --run_bam_filtering [bool]               Turn on filtering of mapping quality, read lengths, or unmapped reads of BAM files.
@@ -359,10 +359,10 @@ if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.singl
     exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
 }
 
-// Strip mode validation
-if (params.strip_input_fastq){
-    if (!(['strip','replace'].contains(params.strip_mode))) {
-        exit 1, "[nf-core/eager] error: --strip_mode can only be set to strip or replace."
+// Host removal mode validation
+if (params.hostremoval_input_fastq){
+    if (!(['remove','replace'].contains(params.hostremoval_mode))) {
+        exit 1, "[nf-core/eager] error: --hostremoval_mode can only be set to remove or replace."
     }
 }
 
@@ -654,9 +654,9 @@ ch_input_for_convertbam = Channel.empty()
 ch_bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; }
 
-// Also need to send raw files for lane merging, if we want to strip fastq
+// Also need to send raw files for lane merging, if we want to host removed fastq
 ch_fastq_channel
-  .into { ch_input_for_skipconvertbam; ch_input_for_lanemerge_stripfastq }
+  .into { ch_input_for_skipconvertbam; ch_input_for_lanemerge_hostremovalfastq }
 
 ///////////////////////////////////////////////////
 /* --             HEADER LOG INFO             -- */
@@ -683,9 +683,9 @@ summary['Running BAM filtering'] = params.run_bam_filtering ? 'Yes' : 'No'
 if (params.run_bam_filtering) {
   summary['Skip Read Merging'] = params.bam_unmapped_type
 }
-summary['Run Fastq Stripping'] = params.strip_input_fastq ? 'Yes' : 'No'
-if (params.strip_input_fastq){
-    summary['Strip mode'] = params.strip_mode
+summary['Run Fastq Host Removal'] = params.hostremoval_input_fastq ? 'Yes' : 'No'
+if (params.hostremoval_input_fastq){
+    summary['Host removal mode'] = params.hostremoval_mode
 }
 summary['Skipping Preseq?'] = params.skip_preseq ? 'Yes' : 'No'
 summary['Skipping Deduplication?'] = params.skip_deduplication ? 'Yes' : 'No'
@@ -1330,21 +1330,21 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
     .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 }
 }
 
-// ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads stripping 
+// ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads removal 
 
 // Per-library lane grouping done within process
-process lanemerge_stripfastq {
+process lanemerge_hostremoval_fastq {
   label 'sc_tiny'
   tag "${libraryid}"
 
   when: 
-  params.strip_input_fastq
+  params.hostremoval_input_fastq
 
   input:
-  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_lanemerge_stripfastq.groupTuple(by: [0,1,3,4,5,6,7])
+  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_lanemerge_hostremovalfastq.groupTuple(by: [0,1,3,4,5,6,7])
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_fastqlanemerge_for_hostremovalfastq
 
   script:
   if ( seqtype == 'PE' ){
@@ -1620,10 +1620,10 @@ process bowtie2 {
 
 // Gather all mapped BAMs from all possible mappers into common channels to send downstream
 ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for_filtering, ch_output_from_bt2)
-  .into { ch_mapping_for_stripfastq; ch_mapping_for_seqtype_merging }
+  .into { ch_mapping_for_hostremovalfastq; ch_mapping_for_seqtype_merging }
 
 // Synchronise the mapped input FASTQ and input non-remapped BAM channels
-ch_fastqlanemerge_for_stripfastq
+ch_fastqlanemerge_for_hostremovalfastq
     .map {
         def samplename = it[0]
         def libraryid  = it[1]
@@ -1638,7 +1638,7 @@ ch_fastqlanemerge_for_stripfastq
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
     }
-    .mix(ch_mapping_for_stripfastq)
+    .mix(ch_mapping_for_hostremovalfastq)
     .groupTuple(by: [0,1,3,4,5,6])
     .map {
         def samplename = it[0]
@@ -1657,38 +1657,37 @@ ch_fastqlanemerge_for_stripfastq
 
     }
     .filter{ it[8] != null }
-    .dump(tag: "StripFastq Input")
-    .set { ch_synced_for_stripfastq }
+    .set { ch_synced_for_hostremovalfastq }
 
 // Remove mapped reads from original (lane merged) input FASTQ e.g. for sensitive host data when running metagenomic data
 
-process strip_input_fastq {
+process hostremoval_input_fastq {
     label 'mc_medium'
     tag "${libraryid}"
-    publishDir "${params.outdir}/stripped_fastq", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/hostremoved_fastq", mode: params.publish_dir_mode
 
     when: 
-    params.strip_input_fastq
+    params.hostremoval_input_fastq
 
     input: 
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, path(r1), path(r2), file(bam), file(bai) from ch_synced_for_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_hostremovalfastq
 
     output:
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_hostremovalfastq
 
     script:
     if ( seqtype == 'SE' ) {
-        out_fwd = bam.baseName+'.stripped.fq.gz'
+        out_fwd = bam.baseName+'.hostremoved.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${r1} -m ${params.strip_mode} -of $out_fwd -p ${task.cpus}
+        extract_map_reads.py $bam ${r1} -m ${params.hostremoval_mode} -of $out_fwd -p ${task.cpus}
         """
     } else {
-        out_fwd = bam.baseName+'.stripped.fwd.fq.gz'
-        out_rev = bam.baseName+'.stripped.rev.fq.gz'
+        out_fwd = bam.baseName+'.hostremoved.fwd.fq.gz'
+        out_rev = bam.baseName+'.hostremoved.rev.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${r1} -rev ${r2} -m  ${params.strip_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
+        extract_map_reads.py $bam ${r1} -rev ${r2} -m  ${params.hostremoval_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
         """ 
     }
     

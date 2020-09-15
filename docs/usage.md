@@ -62,6 +62,8 @@
       - [`--skip_deduplication`](#--skip_deduplication)
       - [`--skip_damage_calculation`](#--skip_damage_calculation)
       - [`--skip_qualimap`](#--skip_qualimap)
+    - [BAM Conversion Options](#bam-conversion-options)
+      - [`--run_convertinputbam`](#--run_convertinputbam)
     - [Complexity Filtering Options](#complexity-filtering-options)
       - [`--complexity_filter_poly_g`](#--complexity_filter_poly_g)
       - [`--complexity_filter_poly_g_min`](#--complexity_filter_poly_g_min)
@@ -106,14 +108,7 @@
     - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
       - [`--preseq_step_size`](#--preseq_step_size)
     - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
-      - [`--damageprofiler_length`](#--damageprofiler_length)
-      - [`--damageprofiler_threshold`](#--damageprofiler_threshold)
-      - [`--damageprofiler_yaxis`](#--damageprofiler_yaxis)
-      - [`--run_pmdtools`](#--run_pmdtools)
-      - [`--pmdtools_range`](#--pmdtools_range)
-      - [`--pmdtools_threshold`](#--pmdtools_threshold)
-      - [`--pmdtools_reference_mask`](#--pmdtools_reference_mask)
-      - [`--pmdtools_max_reads`](#--pmdtools_max_reads)
+      - [`--udg_type`](#--udg_type)
     - [Feature Annotation Statistics](#feature-annotation-statistics)
       - [`--run_bedtools_coverage`](#--run_bedtools_coverage)
       - [`--anno_file`](#--anno_file)
@@ -1303,7 +1298,7 @@ when left-over sequencing artefacts of in-line barcodes present Default: 0
 Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful
 when left-over sequencing artefacts of in-line barcodes present Default: 0.
 
-### Mapped Reads Stripping
+### Mapped Reads Host Removal
 
 These parameters are used for removing mapped reads from the original input
 FASTQ files, usually in the context of uploading the original FASTQ files to a
@@ -1318,17 +1313,16 @@ your data to apply their own adapter removal/read merging procedures, while
 maintaining anonyminity for sample donors - for example with microbiome
 research.
 
-If using TSV input, stripping is performed library, i.e. after lane merging.
+If using TSV input, mapped read removal is performed library, i.e. after lane merging.
 
-#### `--strip_input_fastq`
+#### `--hostremoval_input_fastq`
 
 Create pre-Adapter Removal FASTQ files without reads that mapped to reference
 (e.g. for public upload of privacy sensitive non-host data)
 
-#### `--strip_mode`
+#### `--hostremoval_mode`
 
-Read removal mode. Strip mapped reads completely (`'strip'`) or just replace
-mapped reads sequence by N (`'replace'`)
+Read removal mode. Completely remove mapped reads from the file(s) (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)
 
 ### Read Filtering and Conversion Parameters
 

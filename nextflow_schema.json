@@ -570,24 +570,24 @@
             },
             "fa_icon": "fas fa-layer-group"
         },
-        "stripping": {
-            "title": "Stripping",
+        "host_removal": {
+            "title": "Host Removal",
             "type": "object",
             "description": "Options for production of host-read removed FASTQ files for privacy reasons.",
             "default": "",
             "properties": {
-                "strip_input_fastq": {
+                "hostremoval_input_fastq": {
                     "type": "boolean",
                     "description": "Turn on per-library creation pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)",
                     "fa_icon": "fas fa-power-off",
                     "help_text": "Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)\n"
                 },
-                "strip_mode": {
+                "hostremoval_mode": {
                     "type": "string",
-                    "default": "strip",
-                    "description": "Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace).",
+                    "default": "remove",
+                    "description": "Host removal mode. Remove mapped reads completely from FASTQ (remove) or just mask mapped reads sequence by N (replace).",
                     "fa_icon": "fas fa-mask",
-                    "help_text": "Read removal mode. Strip mapped reads completely (`'strip'`) or just replace mapped reads sequence by N (`'replace'`)\n"
+                    "help_text": "Read removal mode. Remove mapped reads completely (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)\n"
                 }
             },
             "fa_icon": "fas fa-user-shield"
@@ -1374,7 +1374,7 @@
             "$ref": "#/definitions/mapping"
         },
         {
-            "$ref": "#/definitions/stripping"
+            "$ref": "#/definitions/host_removal"
         },
         {
             "$ref": "#/definitions/bam_filtering"
