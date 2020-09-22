@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#504](https://github.com/nf-core/eager/issues/504) - Removed uninformative sexdeterrmine-snps plot from MultiQC report.
 * Nuclear contamination is now reported with the correct library names.
 * Merged all tutorials and FAQs into `usage.md` for display on nf-co.re
+* Corrected header of nuclear contamination table (`nuclear_contamination.txt`).
 
 ### `Dependencies`
 
