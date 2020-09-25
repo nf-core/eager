@@ -188,6 +188,7 @@
       - [`--malt_min_support_percent`](#--malt_min_support_percent)
       - [`--malt_max_queries`](#--malt_max_queries)
       - [`--malt_memory_mode`](#--malt_memory_mode)
+      - [`--malt_sam_output`](#--malt_sam_output)
     - [Metagenomic Authentication](#metagenomic-authentication)
       - [`--run_maltextract`](#--run_maltextract)
       - [`--maltextract_taxon_list`](#--maltextract_taxon_list)
@@ -2020,6 +2021,15 @@ database loading. Note that Page and Map modes do not work properly not with
 many remote file-systems such as GPFS. Default is `'load'`.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+#### `--malt_sam_output`
+
+Specify to _also_ produce gzipped SAM files of all alignments and un-aligned
+reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse'
+format. Can be useful for downstream analyses due to more common file format.
+
+> :warning: can result in very large run output directories as this is
+> essentially duplication of the RMA6 files.
 
 ### Metagenomic Authentication
 
