@@ -585,7 +585,7 @@ wildcards (`*`) e.g.:
 6. Due to limitations of downstream tools (e.g. FastQC), sample IDs maybe
    truncated after the first `.` in the name, Ensure file names are unique prior
    to this!
-7. For input BAM files  you should provide small decoy reference genome with 
+7. For input BAM files  you should provide small decoy reference genome with
    pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
 
 ##### TSV Input Method
@@ -1156,7 +1156,7 @@ For example
 
 ```bash
 --skip_collapse  --input '*_{R1,R2}_*.fastq'
-``` 
+```
 
 > It is important to use the paired-end wildcard globbing as `--skip_collapse`
 > can only be used on paired-end data! :warning: If you run this and also with
@@ -1771,7 +1771,7 @@ The name of your requested output FASTA file. Do not include `.fasta` suffix.
 #### `--vcf2genome_header`
 
 The name of the FASTA entry you would like in your FASTA file.
-O
+
 #### `--vcf2genome_minc`
 
 Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N.
