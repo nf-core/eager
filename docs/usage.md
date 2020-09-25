@@ -72,6 +72,7 @@
       - [`--clip_min_read_quality`](#--clip_min_read_quality)
       - [`--clip_min_adap_overlap`](#--clip_min_adap_overlap)
       - [`--skip_collapse`](#--skip_collapse)
+      - [`--skip_trim`](#--skip_trim)
       - [`--preserve5p`](#--preserve5p)
       - [`--mergedonly`](#--mergedonly)
     - [Read Mapping Parameters](#read-mapping-parameters)
@@ -1108,6 +1109,9 @@ documentation](https://adapterremoval.readthedocs.io/en/latest/)
 
 If using TSV input, this is performed per lane separately.
 
+> :warning: `--skip_trim` will skip adapter clipping AND quality trimming
+> (n, base quality). It is currently not possible skip one or the other.
+
 #### `--clip_forward_adaptor`
 
 Defines the adapter sequence to be used for the forward read. By default, this
@@ -1152,7 +1156,7 @@ For example
 
 ```bash
 --skip_collapse  --input '*_{R1,R2}_*.fastq'
-``` - You should provide small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
+``` 
 
 > It is important to use the paired-end wildcard globbing as `--skip_collapse`
 > can only be used on paired-end data! :warning: If you run this and also with
@@ -1163,13 +1167,20 @@ For example
 
 #### `--skip_trim`
 
-Turns off adaptor and quality trimming.
+Turns off adapter AND quality trimming.
 
 For example:
 
 ```bash
 --skip_trim  --input '*.fastq'
 ```
+
+> :warning: it is not possible to keep quality trimming (n or base quality) on
+> and skip adapter trimming.
+> :warning: it is not possible to turn off one or the other of quality
+> trimming or n trimming. i.e. --trimns --trimqualities are both given
+> or neither. However setting quality in `--clip_min_read_quality` to 0 would
+> theoretically turn off base quality trimming.
 
 #### `--preserve5p`
 
