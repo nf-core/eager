@@ -1922,7 +1922,7 @@ Kraken2.
 
 Please note the following:
 
-- :warning: Metagenomic screening is only performed on _unmapped_ reads from a 
+- :warning: Metagenomic screening is only performed on _unmapped_ reads from a
   mapping step.
   - You _must_ supply the `--run_bam_filtering` flag with unmmapped reads in
     FASTQ format.
