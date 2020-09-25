@@ -11,7 +11,7 @@ def make_float(x):
     output=[None for i in range(len(x))]
     ## If value for an estimate/error is -nan, replace with "NA". JSON does not accept NaN as a valid field.
     for i in range(len(x)):
-        if x[i] == "-nan":
+        if x[i] == "-nan" or x[i] == "nan":
             output[i]="N/A"
             continue
         try:
@@ -32,13 +32,14 @@ for fn in Input_files:
     ml1, err_ml1="N/A","N/A"
     mom2, err_mom2= "N/A","N/A"
     ml2, err_ml2="N/A","N/A"
+    nSNPs="0"
     with open(fn, 'r') as f:
         Estimates={}
         Ind=re.sub('\.X.contamination.out$', '', fn).split("/")[-1]
         for line in f:
             fields=line.strip().split()
-            if line.strip()[0:21] == "[readicnts] Has read:":
-                nSNPs=fields[4]
+            if line.strip()[0:19] == "We have nSNP sites:":
+                nSNPs=fields[4].rstrip(",")
             elif line.strip()[0:7] == "Method1" and line.strip()[9:16] == 'new_llh':
                 mom1=fields[3].split(":")[1]
                 err_mom1=fields[4].split(":")[1]
