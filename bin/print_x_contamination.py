@@ -7,7 +7,7 @@ data=OrderedDict()
 
 ## Function to convert a set of elements into floating point numbers, when possible, else leave them be.
 def make_float(x):
-    print (x)
+    # print (x)
     output=[None for i in range(len(x))]
     ## If value for an estimate/error is -nan, replace with "NA". JSON does not accept NaN as a valid field.
     for i in range(len(x)):
