@@ -72,7 +72,6 @@
       - [`--clip_min_read_quality`](#--clip_min_read_quality)
       - [`--clip_min_adap_overlap`](#--clip_min_adap_overlap)
       - [`--skip_collapse`](#--skip_collapse)
-      - [`--skip_trim`](#--skip_trim)
       - [`--preserve5p`](#--preserve5p)
       - [`--mergedonly`](#--mergedonly)
     - [Read Mapping Parameters](#read-mapping-parameters)
@@ -585,6 +584,8 @@ wildcards (`*`) e.g.:
 6. Due to limitations of downstream tools (e.g. FastQC), sample IDs maybe
    truncated after the first `.` in the name, Ensure file names are unique prior
    to this!
+7. For input BAM files  you should provide small decoy reference genome with 
+   pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
 
 ##### TSV Input Method
 
@@ -701,7 +702,7 @@ Note the following important points and limitations for setting up:
     run is PE and one run is SE, you need to give fake lane IDs to one of the
     runs as well.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
-  - You should provide small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
+  - You should provide small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
 - nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
 - Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 - Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes
@@ -798,6 +799,10 @@ Supplying pre-made indices saves time in pipeline execution and is especially
 advised when running multiple times on the same cluster system for example. You
 can even add a resource [specific profile](#profile) that sets paths to
 pre-computed reference genomes, saving time when specifying these.
+
+> :warning: you must always supply a reference file. If you want to use
+  functionality that does not require one, supply a small decoy genome such as
+  phiX or the human mtDNA genome.
 
 #### `--fasta`
 
@@ -1147,7 +1152,7 @@ For example
 
 ```bash
 --skip_collapse  --input '*_{R1,R2}_*.fastq'
-```
+``` - You should provide small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
 
 > It is important to use the paired-end wildcard globbing as `--skip_collapse`
 > can only be used on paired-end data! :warning: If you run this and also with
@@ -1342,6 +1347,8 @@ If using TSV input, filtering is performed library, i.e. after lane merging.
 Turns on the bam filtering module for either mapping quality filtering or
 unmapped read treatment.
 
+> :warning: this is **required** for metagenomic screening!
+
 #### `--bam_mapping_quality_threshold`
 
 Specify a mapping quality threshold for mapped reads to be kept for downstream
@@ -1371,6 +1378,8 @@ would happen if `--run_bam_filtering` was _not_ supplied.
 
 Note that in all cases, if `--bam_mapping_quality_threshold` is also supplied,
 mapping quality filtering will still occur on the mapped reads.
+
+> :warning: `--bam_unmapped_type 'fastq'` is **required** for metagenomic screening!
 
 ### Read DeDuplication Parameters
 
@@ -1751,7 +1760,7 @@ The name of your requested output FASTA file. Do not include `.fasta` suffix.
 #### `--vcf2genome_header`
 
 The name of the FASTA entry you would like in your FASTA file.
-
+O
 #### `--vcf2genome_minc`
 
 Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N.
@@ -1902,6 +1911,12 @@ Kraken2.
 
 Please note the following:
 
+- :warning: Metagenomic screening is only performed on _unmapped_ reads from a 
+  mapping step.
+  - You _must_ supply the `--run_bam_filtering` flag with unmmapped reads in
+    FASTQ format.
+  - If you wish to run solely MALT (i.e. the HOPS pipeline), you must still
+    supply a small decoy genome like phiX or human mtDNA `--fasta`.
 - MALT database construction functionality is _not_ included within the pipeline
   - this should be done independently, **prior** the nf-core/eager run.
   - To use `malt-build` from the same version as `malt-run`, load either the
