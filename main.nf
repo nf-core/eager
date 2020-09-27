@@ -589,6 +589,8 @@ ch_input_sample = Channel.empty()
 if (tsv_path) {
 
     tsv_file = file(tsv_path)
+    
+    if (tsv_file instanceof List) exit 1, "[nf-core/eager] error: can only accept one TSV file per run."
     if (!tsv_file.exists()) exit 1, "[nf-core/eager] error: input TSV file could not be found. Does the file exist or in the right place? You gave the path: ${params.input}"
 
     ch_input_sample = extract_data(tsv_path)
