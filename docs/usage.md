@@ -1313,7 +1313,7 @@ your data to apply their own adapter removal/read merging procedures, while
 maintaining anonyminity for sample donors - for example with microbiome
 research.
 
-If using TSV input, mapped read removal is performed library, i.e. after lane merging.
+If using TSV input, mapped read removal is performed per library, i.e. after lane merging.
 
 #### `--hostremoval_input_fastq`
 
