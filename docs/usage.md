@@ -1298,7 +1298,7 @@ when left-over sequencing artefacts of in-line barcodes present Default: 0
 Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful
 when left-over sequencing artefacts of in-line barcodes present Default: 0.
 
-### Mapped Reads Host Removal
+### Removal of Host-Mapped Reads
 
 These parameters are used for removing mapped reads from the original input
 FASTQ files, usually in the context of uploading the original FASTQ files to a
