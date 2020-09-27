@@ -571,7 +571,7 @@
             "fa_icon": "fas fa-layer-group"
         },
         "host_removal": {
-            "title": "Host Removal",
+            "title": "Removal of Host-Mapped Reads",
             "type": "object",
             "description": "Options for production of host-read removed FASTQ files for privacy reasons.",
             "default": "",
