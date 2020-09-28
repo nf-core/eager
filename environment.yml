@@ -22,7 +22,7 @@ dependencies:
   - bioconda::gatk4=4.1.7.0
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
-  - bioconda::damageprofiler=0.4.9
+  - bioconda::damageprofiler=0.5.0
   - bioconda::multiqc=1.9
   - bioconda::pmdtools=0.60
   - bioconda::bedtools=2.29.2
