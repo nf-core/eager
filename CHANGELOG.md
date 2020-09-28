@@ -65,6 +65,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Added Sequencetools (1.4.0.6) that adds the ability to do genotyping with the 'pileupCaller'
 * Latest version of DeDup (0.12.6) which now reports mapped reads after deduplication
+* [#560] Latest version of Dedup (0.12.7), which now correctly reports deduplication statistics based on calculations of mapped reads only (prior denominator was total reads of BAM file)
 * Latest version of ANGSD (0.933) which doesn't seg fault when running contamination on BAMs with insufficient reads
 * Latest version of MultiQC (1.9) with support for lots of extra tools in the pipeline (MALT, SexDetERRmine, DamageProfiler, MultiVCFAnalyzer)
 * Latest versions of Pygments (7.1), Pymdown-Extensions (2.6.1) and Markdown (3.2.2) for documentation output
