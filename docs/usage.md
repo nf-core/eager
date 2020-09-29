@@ -799,6 +799,8 @@ not required for smaller references (including a human `hg19` or
 `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI`
 indices. Default: off
 
+> modifies
+
 #### `--save_reference`
 
 Use this if you do not have pre-made reference FASTA indices for `bwa`,
@@ -956,7 +958,7 @@ This option can be used to define the minimum length of a poly-G tail to begin
 low complexity trimming. By default, this is set to a value of `10` unless the
 user has chosen something specifically using this option.
 
-> modifies fastp parameter: `--poly_g_min_len`
+> Modifies fastp parameter: `--poly_g_min_len`
 
 ### Adapter Clipping and Merging Options
 
@@ -975,7 +977,7 @@ If using TSV input, this is performed per lane separately.
 Defines the adapter sequence to be used for the forward read. By default, this
 is set to `'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'`.
 
-> modifies AdapterRemoval parameter: `--adapter1`
+> Modifies AdapterRemoval parameter: `--adapter1`
 
 #### `--clip_reverse_adaptor`
 
@@ -983,7 +985,7 @@ Defines the adapter sequence to be used for the reverse read in paired end
 sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by
 default.
 
-> modifies AdapterRemoval parameter: `--adapter2`
+> Modifies AdapterRemoval parameter: `--adapter2`
 
 #### `--clip_readlength`
 
@@ -996,10 +998,10 @@ short reads in your library - such retrieved in single-stranded library
 protocols. When you have very few reads passing this length filter, it will
 artificially inflate your endogenous DNA by creating a very small denominator.
 In these cases it is recommended to set this to 0, and use
-`--bam_filter_minreadlength` to instead, to filter out 'unusuable' short reads
+`--bam_filter_minreadlength` to instead, to filter out 'un-usable' short reads
 after mapping.
 
-> modifies AdapterRemoval parameter: `--minlength`
+> Modifies AdapterRemoval parameter: `--minlength`
 
 #### `--clip_min_read_quality`
 
@@ -1007,14 +1009,14 @@ Defines the minimum read quality per base that is required for a base to be
 kept. Individual bases at the ends of reads falling below this threshold will be
 clipped off. Default is set to `20`.
 
-> modifies AdapterRemoval parameter: `--minquality`
+> Modifies AdapterRemoval parameter: `--minquality`
 
 #### `--clip_min_adap_overlap`
 
 Sets the minimum overlap between two reads when read merging is performed.
 Default is set to `1` base overlap.
 
-> modifies AdapterRemoval parameter: `--minadapteroverlap`
+> Modifies AdapterRemoval parameter: `--minadapteroverlap`
 
 #### `--skip_collapse`
 
@@ -1033,7 +1035,7 @@ removing single reads from either the pair1 or pair2 file. These will be NOT
 be mapped when aligning with either `bwa` or `bowtie`, as both can only accept
 one (forward) or two (forward and reverse) FASTQs as input.
 
-> modifies AdapterRemoval parameter: `--collapse`
+> Modifies AdapterRemoval parameter: `--collapse`
 
 #### `--skip_trim`
 
@@ -1052,7 +1054,7 @@ trimming or n trimming. i.e. --trimns --trimqualities are both given
 or neither. However setting quality in `--clip_min_read_quality` to 0 would
 theoretically turn off base quality trimming.
 
-> modifies AdapterRemoval parameters: `--trimns --trimqualities --adapter1 --adapter2`
+> Modifies AdapterRemoval parameters: `--trimns --trimqualities --adapter1 --adapter2`
 
 #### `--preserve5p`
 
@@ -1064,7 +1066,7 @@ This also entirely disables quality based trimming of collapsed reads, since
 both ends of these are informative for PCR duplicate filtering. Described
 [here](https://github.com/MikkelSchubert/adapterremoval/issues/32#issuecomment-504758137).
 
-> modifies AdapterRemoval parameters: `--preserve5p`
+> Modifies AdapterRemoval parameters: `--preserve5p`
 
 #### `--mergedonly`
 
@@ -1114,14 +1116,14 @@ Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what
 to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App
 for more information on how to set this parameter efficiently.
 
-> modifies bwa aln parameter: `-n`
+> Modifies bwa aln parameter: `-n`
 
 ##### `--bwaalnk`
 
-Modifies the number of mismiatches in the _seed_ during the seeding phase in the 
+Modifies the number of mismiatches in the _seed_ during the seeding phase in the
 `bwa aln` mapping algorithm. Default is set to `2`.
 
-> modifies bwa aln parameter: `-k`
+> Modifies bwa aln parameter: `-k`
 
 ##### `--bwaalnl`
 
@@ -1133,7 +1135,7 @@ Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with
 Note: Despite being recommended, turning off seeding can result in long
 runtimes!
 
-> modifies bwa aln parameter: `-l`
+> Modifies bwa aln parameter: `-l`
 
 #### CircularMapper
 
@@ -1142,7 +1144,7 @@ runtimes!
 The number of bases to extend the reference genome with. By default this is set
 to `500` if not specified otherwise.
 
-> modifies circulargenerator and realignsamfile parameter: `-e` 
+> Modifies circulargenerator and realignsamfile parameter: `-e`
 
 ##### `--circulartarget`
 
@@ -1150,7 +1152,7 @@ The chromosome in your FASTA reference that you'd like to be treated as
 circular. By default this is set to `MT` but can be configured to match any
 other chromosome.
 
-> modifies circulargenerator parameter: `-s`
+> Modifies circulargenerator parameter: `-s`
 
 ##### `--circularfilter`
 
@@ -1169,7 +1171,7 @@ aligned. Default is 'local', following [Cahill et al
 (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando
 2020](https://doi.org/10.3389/fevo.2020.00105).
 
-> modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`
+> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`
 
 ##### `--bt2_sensitivity`
 
@@ -1181,7 +1183,7 @@ for actual settings. Default is 'sensitive' (following [Poullet and Orlando
 (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data
 _without_ UDG treatment)
 
-> modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`
+> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`
 
 ##### `--bt2n`
 
@@ -1189,7 +1191,7 @@ The number of mismatches allowed in the seed during seed-and-extend procedure of
 Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either
 be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).
 
-> modifies Bowtie2 parameters: `-N`
+> Modifies Bowtie2 parameters: `-N`
 
 ##### `--bt2l`
 
@@ -1198,21 +1200,21 @@ values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity`
 defaults: [20 for local and 22 for
 end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).
 
-> modifies Bowtie2 parameters: `-L`
+> Modifies Bowtie2 parameters: `-L`
 
 ##### `-bt2_trim5`
 
 Number of bases to trim of 5' (left) end of read prior alignment. Maybe useful
 when left-over sequencing artefacts of in-line barcodes present Default: 0
 
-> modifies Bowtie2 parameters: `-bt2_trim5`
+> Modifies Bowtie2 parameters: `-bt2_trim5`
 
 ##### `-bt2_trim3`
 
 Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful
 when left-over sequencing artefacts of in-line barcodes present Default: 0.
 
-> modifies Bowtie2 parameters: `-bt2_trim3`
+> Modifies Bowtie2 parameters: `-bt2_trim3`
 
 ### Mapped Reads Stripping
 
@@ -1241,7 +1243,7 @@ Create pre-Adapter Removal FASTQ files without reads that mapped to reference
 Read removal mode. Strip mapped reads completely (`'strip'`) or just replace
 mapped reads sequence by N (`'replace'`)
 
-> modifies extract_map_reads.py parameter: `-m`
+> Modifies extract_map_reads.py parameter: `-m`
 
 ### Read Filtering and Conversion Parameters
 
@@ -1265,7 +1267,7 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream
 analysis. By default keeps all reads and is therefore set to `0` (basically
 doesn't filter anything).
 
-> modifies samtools view parameter: `-q` 
+> Modifies samtools view parameter: `-q`
 
 #### `--bam_filter_minreadlength`
 
@@ -1275,12 +1277,12 @@ time as mapping quality filtering.
 If used _instead_ of minimum length read filtering at AdapterRemoval, this can
 be useful to get more realistic endogenous DNA percentages, when most of your
 reads are very short (e.g. in single-stranded libraries) and would otherwise be
-discarded by AdapterRemoval (thus making an artifically small denominator for a
+discarded by AdapterRemoval (thus making an artificially small denominator for a
 typical endogenous DNA calculation). Note in this context you should not perform
 mapping quality filtering nor discarding of unmapped reads to ensure a correct
 'denominator' of 'all reads', for the Endogenous DNA calculation.
 
-> modifies filter_bam_fragment_length.py parameter: `-l`
+> Modifies filter_bam_fragment_length.py parameter: `-l`
 
 #### `--bam_unmapped_type`
 
@@ -1296,7 +1298,7 @@ mapping quality filtering will still occur on the mapped reads.
 :warning: `--bam_unmapped_type 'fastq'` is **required** for metagenomic
 screening!
 
-> modifies samtools view parameter: `-f4 -F4`
+> Modifies samtools view parameter: `-f4 -F4`
 
 ### Read DeDuplication Parameters
 
@@ -1326,7 +1328,7 @@ example not prefixed with `M_` in all cases. Therefore, this can be used as a
 workaround when also using a mixture of paired-end and single-end data, however
 this is not recommended (see above).
 
-> modifies dedup parameter: `-m`
+> Modifies dedup parameter: `-m`
 
 ### Library Complexity Estimation Parameters
 
@@ -1341,7 +1343,7 @@ Can be used to configure the step size of Preseqs `c_curve` method. Can be
 useful when only few and thus shallow sequencing results are used for
 extrapolation.
 
-> modifies preseq c_curve 
+> Modifies preseq c_curve parameter: `-s`
 
 ### DNA Damage Assessment Parameters
 
@@ -1359,10 +1361,14 @@ performed on non-UDG and half-UDG treated data.
 
 Specifies the length filter for DamageProfiler. By default set to `100`.
 
+> Modifies DamageProfile parameter: `-l`
+
 #### `--damageprofiler_threshold`
 
 Specifies the length of the read start and end to be considered for profile
 generation in DamageProfiler. By default set to `15` bases.
+
+> Modifies DamageProfile parameter: `-t`
 
 #### `--damageprofiler_yaxis`
 
@@ -1375,6 +1381,8 @@ damage is about 10%, the highest value on the y-axis would be set to 0.12). This
 'autoscale' behaviour can be turned on by specifying the number to `0`. Default:
 `0.30`.
 
+> Modifies DamageProfile parameter: `-yaxis_damageplot`
+
 #### `--run_pmdtools`
 
 Specifies to run PMDTools for damage based read filtering and assessment of DNA
@@ -1385,12 +1393,16 @@ damage in sequencing libraries. By default turned off.
 Specifies the range in which to consider DNA damage from the ends of reads. By
 default set to `10`.
 
+> Modifies PMDTools parameter: `--range`
+
 #### `--pmdtools_threshold`
 
 Specifies the PMDScore threshold to use in the pipeline when filtering BAM files
 for DNA damage. Only reads which surpass this damage score are considered for
 downstream DNA analysis. By default set to `3` if not set specifically by the
 user.
+
+> Modifies PMDTools parameter: `--threshold`
 
 #### `--pmdtools_reference_mask`
 
@@ -1401,6 +1413,8 @@ Can be used to set a path to a reference genome mask for PMDTools.
 The maximum number of reads used for damage assessment in PMDtools. Can be used
 to significantly reduce the amount of time required for damage assessment in
 PMDTools. Note that a too low value can also obtain incorrect results.
+
+> Modifies PMDTools parameter: `-n`
 
 ### Feature Annotation Statistics
 
@@ -1450,8 +1464,10 @@ separately for libraries with `--udg_type` `'none'` and `'half'`  (see
 `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right` /
 `--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`).
 
-> Note: additional artefacts such as bar-codes or adapters that could
-> potentially also be trimmed should be removed prior mapping.
+Note: additional artefacts such as bar-codes or adapters that could
+potentially also be trimmed should be removed prior mapping.
+
+> Modifies bam trimBam parameter: `-L -R`
 
 #### `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right`
 
@@ -1460,11 +1476,15 @@ from libraries whose UDG treatment is set to `half`. Note that reverse reads
 will automatically be clipped off at the reverse side with this (automatically
 reverses left and right for the reverse read).
 
+> Modifies bam trimBam parameter: `-L -R`
+
 #### `--bamutils_softclip`
 
 By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with
 quality `!` in the BAM output. Turn this on to use soft-clipping instead,
 masking reads at the read ends respectively using the CIGAR string.
+
+> Modifies bam trimBam parameter: `-c`
 
 ### Genotyping Parameters
 
@@ -1528,17 +1548,23 @@ forums of the Broad Institute.
 If selected a GATK genotyper phred-scaled confidence threshold of a given
 SNP/INDEL call. Default: `30`
 
+> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `-stand_call_conf`
+
 #### `--gatk_ploidy`
 
 If selected a GATK genotyper, what is the ploidy of your reference organism.
 E.g. do you want to allow heterozygous calls from >= diploid organisms. Default:
 `2`
 
+> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `--sample-ploidy`
+
 #### `--gatk_downsample`
 
 Maximum depth coverage allowed for genotyping before down-sampling is turned on.
 Any position with a coverage higher than this value will be randomly
 down-sampled to 250 reads. Default: `250`
+
+> Modifies GATK UnifiedGenotyper parameter: `-dcov`
 
 #### `--gatk_dbsnp`
 
@@ -1553,10 +1579,14 @@ produce calls for every site or just confidence sites. Options:
 `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`.
 Default: `'EMIT_VARIANTS_ONLY'`
 
+> Modifies GATK HaplotypeCaller parameter: `-output_mode`
+
 #### `--gatk_hc_emitrefconf`
 
 If selected GATK HaplotypeCaller, mode for emitting reference confidence calls.
 Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`
+
+> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`
 
 #### `--gatk_ug_out_mode`
 
@@ -1565,11 +1595,15 @@ i.e. produce calls for every site or just confidence sites. Options:
 `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`.
 Default: `'EMIT_VARIANTS_ONLY'`
 
+> Modifies GATK UnifiedGenotyper parameter: `--output_mode`
+
 #### `--gatk_ug_genotype_model`
 
 If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e.
 whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`,
 `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`
+
+> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`
 
 #### `--gatk_ug_keep_realign_bam`
 
@@ -1586,10 +1620,14 @@ information. Maybe useful if you have 'synthetically' generated reads (e.g.
 chopping up a reference genome). Default is set to -1  which is do not set any
 default quality (turned off). Default: `-1`
 
+> Modifies GATK UnifiedGenotyper parameter: `--defaultBaseQualities`
+
 #### `--freebayes_C`
 
 Specify minimum required supporting observations to consider a variant. Default:
 `1`
+
+> Modifies freebayes parameter: `-C`
 
 #### `--freebayes_g`
 
@@ -1597,9 +1635,13 @@ Specify to skip over regions of high depth by discarding alignments overlapping
 positions where total read depth is greater than specified C. Not set by
 default.
 
+> Modifies freebayes parameter: `-g`
+
 #### `--freebayes_p`
 
 Specify ploidy of sample in FreeBayes. Default is diploid. Default: `2`
+
+> Modifies freebayes parameter: `-p`
 
 #### `--pileupcaller_bedfile`
 
@@ -1617,16 +1659,22 @@ pileupCaller will call these sites.
 Specify calling method to use. Options: randomHaploid, randomDiploid,
 majorityCall. Default: `'randomHaploid'`
 
+> Modifies pileupCaller parameter: `--randomHaploid --randomDiploid --majorityCall`
+
 #### `--pileupcaller_transitions_mode`
 
 Specify if genotypes of transition SNPs should be called, set to missing, or
 excluded from the genotypes respectively. Options: `'AllSites'`,
 `'TransitionsMissing'`, `'SkipTransitions'`. Default: `'AllSites'`
 
+> Modifies pileupCaller parameter: `--skipTransitions --transitionsMissing`
+
 #### `--angsd_glmodel`
 
 Specify which genotype likelihood model to use. Options: `'samtools`, `'gatk'`,
 `'soapsnp'`, `'syk'`. Default: `'samtools'`
+
+> Modifies ANGSD parameter: `-GL`
 
 #### `--angsd_glformat`
 
@@ -1644,6 +1692,8 @@ The options refer to the following descriptions respectively:
 See the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information
 on which to select for your downstream applications.
 
+> Modifies ANGSD parameter: `-doGlF`
+
 #### `--angsd_createfasta`
 
 Turns on the ANGSD creation of a FASTA file from the BAM file.
@@ -1655,9 +1705,11 @@ Options: `'random'` or `'common'`. Will output the most common non-N base at
 each given position, whereas 'random' will pick one at random. Default:
 `'random'`.
 
+> Modifies ANGSD parameter: `-doFasta -doCounts`
+
 ### Consensus Sequence Generation
 
-If using TSV input, consensus eneration is performed per sample (i.e. after all
+If using TSV input, consensus generation is performed per sample (i.e. after all
 types of libraries are merged).
 
 #### `--run_vcf2genome`
@@ -1680,15 +1732,21 @@ The name of the FASTA entry you would like in your FASTA file.
 Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N.
 Default: `5`
 
+> Modifies VCF2Genome parameter: `-minc`
+
 #### `--vcf2genome_minq`
 
 Minimum genotyping quality of a call to be called. Else N will be called.
 Default: `30`
 
+> Modifies VCF2Genome parameter: `-minq`
+
 #### `--vcf2genome_minfreq`
 
 In the case of two possible alleles, the frequency of the majority allele
 required to be called. Else, a SNP will be called as N. Default: `0.8`
+
+> Modifies VCF2Genome parameter: `-minfreq`
 
 ### SNP Table Generation
 
@@ -1878,7 +1936,9 @@ For Kraken2, it can be either the path to the _directory_ or the path to the
 Specify the minimum number of reads a given taxon is required to have to be
 retained as a positive 'hit'.  
 For malt, this only applies when `--malt_min_support_mode` is set to 'reads'.
-Default: 1 .
+Default: `1`.
+
+> Modifies MALT or kraken_parse.py parameter: `-sup` and `-c` respectively
 
 #### `--percent_identity`
 
@@ -1886,6 +1946,8 @@ Specify the minimum percent identity (or similarity) a squence must have to the
 reference for it to be retained. Default is `85`
 
 Only used when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MALT parameter: `-id`
 
 #### `--malt_mode`
 
@@ -1898,6 +1960,8 @@ for more details. Default: `'BlastN'`
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MALT parameter: `-m`
+
 #### `--malt_alignment_mode`
 
 Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'.
@@ -1905,6 +1969,8 @@ Local is a BLAST like alignment, but is much slower. Semi-global alignment
 aligns reads end-to-end. Default: `'SemiGlobal'`
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MALT parameter: `-at`
 
 #### `--malt_top_percent`
 
@@ -1916,12 +1982,16 @@ disjointScore is within 10% of the best disjointScore for that read.". Default:
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MALT parameter: `-top`
+
 #### `--malt_min_support_mode`
 
 Specify whether to use a percentage, or raw number of reads as the value used to
 decide the minimum support a taxon requires to be retained.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MALT parameter: `-sup -supp`
 
 #### `--malt_min_support_percent`
 
@@ -1932,12 +2002,16 @@ Default 0.01.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MALT parameter: `-supp`
+
 #### `--malt_max_queries`
 
 Specify the maximum number of alignments a read can have. All further alignments
 are discarded. Default: `100`
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MALT parameter: `-mq`
 
 #### `--malt_memory_mode`
 
@@ -1949,6 +2023,8 @@ database loading. Note that Page and Map modes do not work properly not with
 many remote file-systems such as GPFS. Default is `'load'`.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MALT parameter: `--memoryMode`
 
 ### Metagenomic Authentication
 
@@ -1991,6 +2067,8 @@ Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`,
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `-f`
+
 #### `--maltextract_toppercent`
 
 Specify percent of top alignments for each read to be considered for each node.
@@ -1998,12 +2076,16 @@ Default: `0.01`.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `-a`
+
 #### `--maltextract_destackingoff`
 
 Turn off destacking. If left on, a read that overlap with another read will be
 removed (leaving a depth coverage of 1).
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MaltExtract parameter: `--destackingOff`
 
 #### `--maltextract_downsamplingoff`
 
@@ -2014,6 +2096,8 @@ positive'.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `--downSampOff`
+
 #### `--maltextract_duplicateremovaloff`
 
 Turn off duplicate removal. By default, reads that are an exact copy (i.e. same
@@ -2022,11 +2106,15 @@ considered a PCR duplicate.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `--dupRemOff`
+
 #### `--maltextract_matches`
 
 Export alignments of hits for each node in BLAST format. By default turned off.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MaltExtract parameter: `--matches`
 
 #### `--maltextract_megansummary`
 
@@ -2034,6 +2122,8 @@ Export 'minimal' summary files (i.e. without alignments) that can be loaded into
 [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MaltExtract parameter: `--meganSummary`
 
 #### `--maltextract_percentidentity`
 
@@ -2046,12 +2136,16 @@ higher. Default: `85.0`.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `--minPI`
+
 #### `maltextract_topalignment`
 
 Use the best alignment of each read for every statistic, except for those
 concerning read distribution and coverage. Default: off.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MaltExtract parameter: `--useTopAlignment`
 
 ### Clean up
 
