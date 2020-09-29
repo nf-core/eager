@@ -2,249 +2,60 @@
 
 ## Table of contents
 
-<!-- TOC -->
+<!-- TOC depthfrom:2 depthto:3 -->
 
-- [nf-core/eager: Usage](#nf-coreeager-usage)
-  - [Table of contents](#table-of-contents)
-  - [Running the pipeline](#running-the-pipeline)
-    - [Quick Start](#quick-start)
-    - [Updating the pipeline](#updating-the-pipeline)
-    - [Reproducibility](#reproducibility)
-    - [Automatic Resubmission](#automatic-resubmission)
-  - [Core Nextflow arguments](#core-nextflow-arguments)
-    - [`-profile`](#-profile)
-    - [`-resume`](#-resume)
-    - [`-c`](#-c)
-      - [Custom resource requests](#custom-resource-requests)
-      - [`-name`](#-name)
-    - [Running in the background](#running-in-the-background)
-      - [Nextflow memory requirements](#nextflow-memory-requirements)
-  - [Pipeline Options](#pipeline-options)
-    - [Input](#input)
-      - [`--input`](#--input)
-        - [Direct Input Method](#direct-input-method)
-        - [TSV Input Method](#tsv-input-method)
-      - [`--udg_type`](#--udg_type)
-      - [`--single_stranded`](#--single_stranded)
-      - [`--single_end`](#--single_end)
-      - [`--colour_chemistry`](#--colour_chemistry)
-      - [`--bam`](#--bam)
-    - [Input Data Additional Options](#input-data-additional-options)
-      - [`--snpcapture_bed`](#--snpcapture_bed)
-      - [`--run_convertinputbam`](#--run_convertinputbam)
-    - [References](#references)
-      - [`--fasta`](#--fasta)
-      - [`--genome` (using iGenomes)](#--genome-using-igenomes)
-      - [`--bwa_index`](#--bwa_index)
-      - [`--bt2_index`](#--bt2_index)
-      - [`--fasta_index`](#--fasta_index)
-      - [`--seq_dict`](#--seq_dict)
-      - [`--large_ref`](#--large_ref)
-      - [`--save_reference`](#--save_reference)
-    - [Output](#output)
-      - [`--outdir`](#--outdir)
-      - [`-w / -work-dir`](#-w---work-dir)
-      - [`--publish_dir_mode`](#--publish_dir_mode)
-    - [Other run specific parameters](#other-run-specific-parameters)
-      - [`--max_memory`](#--max_memory)
-      - [`--max_time`](#--max_time)
-      - [`--max_cpus`](#--max_cpus)
-      - [`--email`](#--email)
-      - [`--email_on_fail`](#--email_on_fail)
-      - [`--plaintext_email`](#--plaintext_email)
-      - [`--monochrome_logs`](#--monochrome_logs)
-      - [`--multiqc_config`](#--multiqc_config)
-      - [`--custom_config_version`](#--custom_config_version)
-    - [Step skipping parameters](#step-skipping-parameters)
-      - [`--skip_fastqc`](#--skip_fastqc)
-      - [`--skip_adapterremoval`](#--skip_adapterremoval)
-      - [`--skip_preseq`](#--skip_preseq)
-      - [`--skip_deduplication`](#--skip_deduplication)
-      - [`--skip_damage_calculation`](#--skip_damage_calculation)
-      - [`--skip_qualimap`](#--skip_qualimap)
-    - [Complexity Filtering Options](#complexity-filtering-options)
-      - [`--complexity_filter_poly_g`](#--complexity_filter_poly_g)
-      - [`--complexity_filter_poly_g_min`](#--complexity_filter_poly_g_min)
-    - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
-      - [`--clip_forward_adaptor`](#--clip_forward_adaptor)
-      - [`--clip_reverse_adaptor`](#--clip_reverse_adaptor)
-      - [`--clip_readlength`](#--clip_readlength)
-      - [`--clip_min_read_quality`](#--clip_min_read_quality)
-      - [`--clip_min_adap_overlap`](#--clip_min_adap_overlap)
-      - [`--skip_collapse`](#--skip_collapse)
-      - [`--skip_trim`](#--skip_trim)
-      - [`--preserve5p`](#--preserve5p)
-      - [`--mergedonly`](#--mergedonly)
-    - [Read Mapping Parameters](#read-mapping-parameters)
-      - [`--mapper`](#--mapper)
-      - [BWA (default)](#bwa-default)
-        - [`--bwaalnn`](#--bwaalnn)
-        - [`--bwaalnk`](#--bwaalnk)
-        - [`--bwaalnl`](#--bwaalnl)
-      - [CircularMapper](#circularmapper)
-        - [`--circularextension`](#--circularextension)
-        - [`--circulartarget`](#--circulartarget)
-        - [`--circularfilter`](#--circularfilter)
-      - [Bowtie2](#bowtie2)
-        - [`--bt2_alignmode`](#--bt2_alignmode)
-        - [`--bt2_sensitivity`](#--bt2_sensitivity)
-        - [`--bt2n`](#--bt2n)
-        - [`--bt2l`](#--bt2l)
-        - [`-bt2_trim5`](#-bt2_trim5)
-        - [`-bt2_trim3`](#-bt2_trim3)
-    - [Mapped Reads Stripping](#mapped-reads-stripping)
-      - [`--strip_input_fastq`](#--strip_input_fastq)
-      - [`--strip_mode`](#--strip_mode)
-    - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
-      - [`--run_bam_filtering`](#--run_bam_filtering)
-      - [`--bam_mapping_quality_threshold`](#--bam_mapping_quality_threshold)
-      - [`--bam_filter_minreadlength`](#--bam_filter_minreadlength)
-      - [`--bam_unmapped_type`](#--bam_unmapped_type)
-    - [Read DeDuplication Parameters](#read-deduplication-parameters)
-      - [`--dedupper`](#--dedupper)
-      - [`--dedup_all_merged`](#--dedup_all_merged)
-    - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
-      - [`--preseq_step_size`](#--preseq_step_size)
-    - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
-      - [`--damageprofiler_length`](#--damageprofiler_length)
-      - [`--damageprofiler_threshold`](#--damageprofiler_threshold)
-      - [`--damageprofiler_yaxis`](#--damageprofiler_yaxis)
-      - [`--run_pmdtools`](#--run_pmdtools)
-      - [`--pmdtools_range`](#--pmdtools_range)
-      - [`--pmdtools_threshold`](#--pmdtools_threshold)
-      - [`--pmdtools_reference_mask`](#--pmdtools_reference_mask)
-      - [`--pmdtools_max_reads`](#--pmdtools_max_reads)
-    - [Feature Annotation Statistics](#feature-annotation-statistics)
-      - [`--run_bedtools_coverage`](#--run_bedtools_coverage)
-      - [`--anno_file`](#--anno_file)
-    - [BAM Trimming Parameters](#bam-trimming-parameters)
-      - [`--run_trim_bam`](#--run_trim_bam)
-      - [`--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right`](#--bamutils_clip_half_udg_left----bamutils_clip_half_udg_right)
-      - [`--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`](#--bamutils_clip_none_udg_left----bamutils_clip_none_udg_right)
-      - [`--bamutils_softclip`](#--bamutils_softclip)
-    - [Genotyping Parameters](#genotyping-parameters)
-      - [`--run_genotyping`](#--run_genotyping)
-      - [`--genotyping_tool`](#--genotyping_tool)
-      - [`--genotyping_source`](#--genotyping_source)
-      - [`--gatk_ug_jar`](#--gatk_ug_jar)
-      - [`--gatk_call_conf`](#--gatk_call_conf)
-      - [`--gatk_ploidy`](#--gatk_ploidy)
-      - [`--gatk_downsample`](#--gatk_downsample)
-      - [`--gatk_dbsnp`](#--gatk_dbsnp)
-      - [`--gatk_hc_out_mode`](#--gatk_hc_out_mode)
-      - [`--gatk_hc_emitrefconf`](#--gatk_hc_emitrefconf)
-      - [`--gatk_ug_out_mode`](#--gatk_ug_out_mode)
-      - [`--gatk_ug_genotype_model`](#--gatk_ug_genotype_model)
-      - [`--gatk_ug_keep_realign_bam`](#--gatk_ug_keep_realign_bam)
-      - [`--gatk_ug_gatk_ug_defaultbasequalities`](#--gatk_ug_gatk_ug_defaultbasequalities)
-      - [`--freebayes_C`](#--freebayes_c)
-      - [`--freebayes_g`](#--freebayes_g)
-      - [`--freebayes_p`](#--freebayes_p)
-      - [`--pileupcaller_bedfile`](#--pileupcaller_bedfile)
-      - [`--pileupcaller_snpfile`](#--pileupcaller_snpfile)
-      - [`--pileupcaller_method`](#--pileupcaller_method)
-      - [`--pileupcaller_transitions_mode`](#--pileupcaller_transitions_mode)
-      - [`--angsd_glmodel`](#--angsd_glmodel)
-      - [`--angsd_glformat`](#--angsd_glformat)
-      - [`--angsd_createfasta`](#--angsd_createfasta)
-      - [`--angsd_fastamethod`](#--angsd_fastamethod)
-    - [Consensus Sequence Generation](#consensus-sequence-generation)
-      - [`--run_vcf2genome`](#--run_vcf2genome)
-      - [`--vcf2genome_outfile`](#--vcf2genome_outfile)
-      - [`--vcf2genome_header`](#--vcf2genome_header)
-      - [`--vcf2genome_minc`](#--vcf2genome_minc)
-      - [`--vcf2genome_minq`](#--vcf2genome_minq)
-      - [`--vcf2genome_minfreq`](#--vcf2genome_minfreq)
-    - [SNP Table Generation](#snp-table-generation)
-      - [`--run_multivcfanalyzer`](#--run_multivcfanalyzer)
-      - [`--write_allele_frequencies`](#--write_allele_frequencies)
-      - [`--min_genotype_quality`](#--min_genotype_quality)
-      - [`--min_base_coverage`](#--min_base_coverage)
-      - [`--min_allele_freq_hom`](#--min_allele_freq_hom)
-      - [`--min_allele_freq_het`](#--min_allele_freq_het)
-      - [`--additional_vcf_files`](#--additional_vcf_files)
-      - [`--reference_gff_annotations`](#--reference_gff_annotations)
-      - [`--reference_gff_exclude`](#--reference_gff_exclude)
-      - [`--snp_eff_results`](#--snp_eff_results)
-    - [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
-      - [`--run_mtnucratio`](#--run_mtnucratio)
-      - [`--mtnucratio_header`](#--mtnucratio_header)
-    - [Human Sex Determination](#human-sex-determination)
-      - [`--run_sexdeterrmine`](#--run_sexdeterrmine)
-      - [`--sexdeterrmine_bedfile`](#--sexdeterrmine_bedfile)
-    - [Human Nuclear Contamination](#human-nuclear-contamination)
-      - [`--run_nuclear_contamination`](#--run_nuclear_contamination)
-      - [`--contamination_chrom_name`](#--contamination_chrom_name)
-    - [Metagenomic Screening](#metagenomic-screening)
-      - [`--run_metagenomic_screening`](#--run_metagenomic_screening)
-      - [`--metagenomic_tool`](#--metagenomic_tool)
-      - [`--database`](#--database)
-      - [`--metgenomic_min_support_reads`](#--metgenomic_min_support_reads)
-      - [`--percent_identity`](#--percent_identity)
-      - [`--malt_mode`](#--malt_mode)
-      - [`--malt_alignment_mode`](#--malt_alignment_mode)
-      - [`--malt_top_percent`](#--malt_top_percent)
-      - [`--malt_min_support_mode`](#--malt_min_support_mode)
-      - [`--malt_min_support_percent`](#--malt_min_support_percent)
-      - [`--malt_max_queries`](#--malt_max_queries)
-      - [`--malt_memory_mode`](#--malt_memory_mode)
-    - [Metagenomic Authentication](#metagenomic-authentication)
-      - [`--run_maltextract`](#--run_maltextract)
-      - [`--maltextract_taxon_list`](#--maltextract_taxon_list)
-      - [`--maltextract_ncbifiles`](#--maltextract_ncbifiles)
-      - [`--maltextract_filter`](#--maltextract_filter)
-      - [`--maltextract_toppercent`](#--maltextract_toppercent)
-      - [`--maltextract_destackingoff`](#--maltextract_destackingoff)
-      - [`--maltextract_downsamplingoff`](#--maltextract_downsamplingoff)
-      - [`--maltextract_duplicateremovaloff`](#--maltextract_duplicateremovaloff)
-      - [`--maltextract_matches`](#--maltextract_matches)
-      - [`--maltextract_megansummary`](#--maltextract_megansummary)
-      - [`--maltextract_percentidentity`](#--maltextract_percentidentity)
-      - [`maltextract_topalignment`](#maltextract_topalignment)
-    - [Clean up](#clean-up)
-  - [Troubleshooting and FAQs](#troubleshooting-and-faqs)
-    - [My pipeline update doesn't seem to do anything](#my-pipeline-update-doesnt-seem-to-do-anything)
-    - [Warning about sticked on revision](#warning-about-sticked-on-revision)
-    - [Input files not found](#input-files-not-found)
-    - [I am only getting output for a single sample although I specified multiple with wildcards](#i-am-only-getting-output-for-a-single-sample-although-i-specified-multiple-with-wildcards)
-    - [The pipeline crashes almost immediately with an early pipeline step](#the-pipeline-crashes-almost-immediately-with-an-early-pipeline-step)
-      - [I am running Docker](#i-am-running-docker)
-      - [I am running Singularity](#i-am-running-singularity)
-    - [The pipeline has crashed with an error but Nextflow is still running](#the-pipeline-has-crashed-with-an-error-but-nextflow-is-still-running)
-    - [I get a file name collision error during merging](#i-get-a-file-name-collision-error-during-merging)
-    - [I specified a module and it didn't produce the expected output](#i-specified-a-module-and-it-didnt-produce-the-expected-output)
-    - [I get a unable to acquire lock](#i-get-a-unable-to-acquire-lock)
-  - [Tutorials](#tutorials)
-    - [Tutorial - How to investigate a failed run](#tutorial---how-to-investigate-a-failed-run)
-      - [1a Nextflow reports an 'error executing process' with command error](#1a-nextflow-reports-an-error-executing-process-with-command-error)
-      - [1b Nextflow reports an 'error executing process' with no command error](#1b-nextflow-reports-an-error-executing-process-with-no-command-error)
-      - [2 Investigating an failed process's `work/` directory](#2-investigating-an-failed-processs-work-directory)
-    - [Tutorial - What are Profiles and How To Use Them](#tutorial---what-are-profiles-and-how-to-use-them)
-      - [Tutorial Profiles - Background](#tutorial-profiles---background)
-      - [Tutorial Profiles - Inheritance Rules](#tutorial-profiles---inheritance-rules)
-        - [Tutorial Profiles - Profiles](#tutorial-profiles---profiles)
-        - [Tutorial Profiles - Configuration Files](#tutorial-profiles---configuration-files)
-      - [Tutorial Profiles - Writing your own profile](#tutorial-profiles---writing-your-own-profile)
-    - [Tutorial - How to set up nf-core/eager for human population genetics](#tutorial---how-to-set-up-nf-coreeager-for-human-population-genetics)
-      - [Tutorial Human Pop-Gen - Introduction](#tutorial-human-pop-gen---introduction)
-      - [Tutorial Human Pop-Gen - Preparation](#tutorial-human-pop-gen---preparation)
-      - [Tutorial Human Pop-Gen - Inputs and Outputs](#tutorial-human-pop-gen---inputs-and-outputs)
-      - [Tutorial Human Pop-Gen - Pipeline Configuration](#tutorial-human-pop-gen---pipeline-configuration)
-      - [Tutorial Human Pop-Gen - Results](#tutorial-human-pop-gen---results)
-        - [Tutorial Human Pop-Gen - MultiQC Report](#tutorial-human-pop-gen---multiqc-report)
-        - [Tutorial Human Pop-Gen - Files for Downstream Analysis](#tutorial-human-pop-gen---files-for-downstream-analysis)
-      - [Tutorial Human Pop-Gen - Clean up](#tutorial-human-pop-gen---clean-up)
-      - [Summary](#summary)
-    - [Tutorial - How to set up nf-core/eager for metagenomic screening](#tutorial---how-to-set-up-nf-coreeager-for-metagenomic-screening)
-      - [Tutorial Metagenomics - Introduction](#tutorial-metagenomics---introduction)
-      - [Tutorial Metagenomics - Preparation](#tutorial-metagenomics---preparation)
-      - [Tutorial Metagenomics - Inputs and Outputs](#tutorial-metagenomics---inputs-and-outputs)
-      - [Tutorial Metagenomics - Pipeline Configuration](#tutorial-metagenomics---pipeline-configuration)
-      - [Tutorial Metagenomics - Results](#tutorial-metagenomics---results)
-        - [Tutorial Metagenomics - MultiQC Report](#tutorial-metagenomics---multiqc-report)
-        - [Tutorial Metagenomics - Files for Downstream Analysis](#tutorial-metagenomics---files-for-downstream-analysis)
-      - [Tutorial Metagenomics - Clean up](#tutorial-metagenomics---clean-up)
-      - [Tutorial Metagenomics - Summary](#tutorial-metagenomics---summary)
+- [Table of contents](#table-of-contents)
+- [Running the pipeline](#running-the-pipeline)
+  - [Quick Start](#quick-start)
+  - [Updating the pipeline](#updating-the-pipeline)
+  - [Reproducibility](#reproducibility)
+  - [Automatic Resubmission](#automatic-resubmission)
+- [Core Nextflow arguments](#core-nextflow-arguments)
+  - [-profile](#-profile)
+  - [-resume](#-resume)
+  - [-c](#-c)
+  - [Running in the background](#running-in-the-background)
+- [Pipeline Options](#pipeline-options)
+  - [Input](#input)
+  - [Input Data Additional Options](#input-data-additional-options)
+  - [References](#references)
+  - [Output](#output)
+  - [Other run specific parameters](#other-run-specific-parameters)
+  - [Step skipping parameters](#step-skipping-parameters)
+  - [Complexity Filtering Options](#complexity-filtering-options)
+  - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
+  - [Read Mapping Parameters](#read-mapping-parameters)
+  - [Mapped Reads Stripping](#mapped-reads-stripping)
+  - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
+  - [Read DeDuplication Parameters](#read-deduplication-parameters)
+  - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
+  - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
+  - [Feature Annotation Statistics](#feature-annotation-statistics)
+  - [BAM Trimming Parameters](#bam-trimming-parameters)
+  - [Genotyping Parameters](#genotyping-parameters)
+  - [Consensus Sequence Generation](#consensus-sequence-generation)
+  - [SNP Table Generation](#snp-table-generation)
+  - [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
+  - [Human Sex Determination](#human-sex-determination)
+  - [Human Nuclear Contamination](#human-nuclear-contamination)
+  - [Metagenomic Screening](#metagenomic-screening)
+  - [Metagenomic Authentication](#metagenomic-authentication)
+  - [Clean up](#clean-up)
+- [Troubleshooting and FAQs](#troubleshooting-and-faqs)
+  - [My pipeline update doesn't seem to do anything](#my-pipeline-update-doesnt-seem-to-do-anything)
+  - [Warning about sticked on revision](#warning-about-sticked-on-revision)
+  - [Input files not found](#input-files-not-found)
+  - [I am only getting output for a single sample although I specified multiple with wildcards](#i-am-only-getting-output-for-a-single-sample-although-i-specified-multiple-with-wildcards)
+  - [The pipeline crashes almost immediately with an early pipeline step](#the-pipeline-crashes-almost-immediately-with-an-early-pipeline-step)
+  - [The pipeline has crashed with an error but Nextflow is still running](#the-pipeline-has-crashed-with-an-error-but-nextflow-is-still-running)
+  - [I get a file name collision error during merging](#i-get-a-file-name-collision-error-during-merging)
+  - [I specified a module and it didn't produce the expected output](#i-specified-a-module-and-it-didnt-produce-the-expected-output)
+  - [I get a unable to acquire lock](#i-get-a-unable-to-acquire-lock)
+- [Tutorials](#tutorials)
+  - [Tutorial - How to investigate a failed run](#tutorial---how-to-investigate-a-failed-run)
+  - [Tutorial - What are Profiles and How To Use Them](#tutorial---what-are-profiles-and-how-to-use-them)
+  - [Tutorial - How to set up nf-core/eager for human population genetics](#tutorial---how-to-set-up-nf-coreeager-for-human-population-genetics)
+  - [Tutorial - How to set up nf-core/eager for metagenomic screening](#tutorial---how-to-set-up-nf-coreeager-for-metagenomic-screening)
 
 <!-- /TOC -->
 
@@ -586,7 +397,10 @@ wildcards (`*`) e.g.:
    truncated after the first `.` in the name, Ensure file names are unique prior
    to this!
 7. For input BAM files  you should provide small decoy reference genome with
-   pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
+   pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory
+   parameter `--fasta` in order to avoid long computational time for generating
+   the index files of the reference genome, even if you do not actual need a
+   reference genome for any downstream analyses.
 
 ##### TSV Input Method
 
@@ -703,19 +517,47 @@ Note the following important points and limitations for setting up:
     run is PE and one run is SE, you need to give fake lane IDs to one of the
     runs as well.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
-  - You should provide small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
-- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
-- Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes
-  - **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.
-  - When you wish to run PE/SE data together `-dedupper markduplicates` is therefore prefered.
-  - An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
-  - If truly you want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
-  - If you _regularly_ want to run the situation above, please leave an feature request on github.
-- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).
-- nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
-- Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
-- Genotyping will typically be performed on each `sample` independently as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs` otherwise you will recieve a `file collision` error in steps such as `sexdeterrmine`, and merge these yourself. We will consider changing this behaviour in the future if there is enough interest.  
+  - You should provide small decoy reference genome with pre-made indices, e.g.
+    the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in
+    order to avoid long computational time for generating the index files of the
+    reference genome, even if you do not actual need a reference genome for any
+    downstream analyses.
+- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the
+  same single-end or paired-end configuration
+- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files
+  (unless you use `--run_convertbam`), as only FASTQ files are lane-merged
+  together.
+- Same libraries that are sequenced on different sequencing configurations (i.e
+  single- and paired-end data), will be merged after mapping and will _always_
+  be considered 'paired-end' during downstream processes
+  - **Important** running DeDup in this context is _not_ recommended, as PE and
+    SE data at the same position will _not_ be evaluated as duplicates.
+    Therefore not all duplicates will be removed.
+  - When you wish to run PE/SE data together `-dedupper markduplicates` is
+    therefore prefered.
+  - An error will be thrown if you try to merge both PE and SE and also supply
+    `--skip_merging`.
+  - If truly you want to mix SE data and PE data but using mate-pair info for PE
+    mapping, please run FASTQ preprocessing mapping manually and supply BAM
+    files for downstream processing by nf-core/eager
+  - If you _regularly_ want to run the situation above, please leave an feature
+    request on github.
+- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on
+  each unique library separately after deduplication (but prior same-treated
+  library merging).
+- nf-core/eager functionality such as `--run_trim_bam` will be applied to only
+  non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
+- Qualimap is run on each sample, after merging of libraries (i.e. your values
+  will reflect the values of all libraries combined - after being damage trimmed
+  etc.).
+- Genotyping will typically be performed on each `sample` independently as
+  normally all libraries will have been merged together. However, if you have a
+  mixture of single-stranded and double-stranded libraries, you will normally
+  need to genotype separately. In this case you **must** give each the SS and DS
+  libraries _distinct_ `Sample_IDs` otherwise you will recieve a `file
+  collision` error in steps such as `sexdeterrmine`, and merge these yourself.
+  We will consider changing this behaviour in the future if there is enough
+  interest.  
 
 #### `--udg_type`
 
@@ -727,18 +569,24 @@ data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify
 `'half'`. If you have complete UDG treated data ([Briggs et al.
 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using
 PMDtools `'half'` will use a different model for DNA damage assessment in
-PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage
-assessment will use CpG context only. Default: `'none'`.
+PMDTools (PMDtools: `--UDGhalf`). Specify the parameter with `'full'` and the
+PMDtools DNA damage assessment will use CpG context only (PMDtools: `--CpG`).
+Default: `'none'`.
 
-> **Tip**: You should small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
+> **Tip**: You should small decoy reference genome with pre-made indices, e.g.
+> the human mtDNA genome, for the mandatory parameter `--fasta` in order to
+> avoid long computational time for generating the index files of the reference
+> genome, even if you do not actual need a reference genome for any downstream
+> analyses.
 
 #### `--single_stranded`
 
 Indicates libraries are single stranded.
 
 Currently only affects MALTExtract where it will switch on damage patterns
-calculation mode to single-stranded, and genotyping with pileupcaller where a
-different method is used. Default: false.
+calculation mode to single-stranded, (MaltExtract: `--singleStranded`) and
+genotyping with pileupCaller where a different method is used (pileupCaller:
+`--singleStrandMode`). Default: false.
 
 Only required when using the 'Path' method of [`--input`](#--input).
 
@@ -817,10 +665,17 @@ For example:
 --fasta '/<path>/<to>/my_reference.fasta'
 ```
 
-You need to provide an input FASTA even if you do not do any mapping (e.g. supplying BAM files). You should small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome.
+You need to provide an input FASTA even if you do not do any mapping (e.g.
+supplying BAM files). You should small decoy reference genome with pre-made
+indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in
+order to avoid long computational time for generating the index files of the
+reference genome.
 
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--save_reference` flag.
-> You must select either a `--fasta` or `--genome`
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters
+> (see [below](#optional-reference-options)), the pipeline will create these
+> indices for you automatically. Note that you can save the indices created for
+> you for later by giving the `--save_reference` flag. You must select either a
+> `--fasta` or `--genome`
 
 #### `--genome` (using iGenomes)
 
@@ -939,9 +794,10 @@ For example:
 This parameter is required to be set for large reference genomes. If your
 reference genome is larger than 3.5GB, the `samtools index` calls in the
 pipeline need to generate `CSI` indices instead of `BAI` indices to compensate
-for the size of the reference genome. This parameter is not required for smaller
-references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB`
-genomes have been shown to need `CSI` indices. Default: off
+for the size of the reference genome (with samtools: `-c`). This parameter is
+not required for smaller references (including a human `hg19` or
+`grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI`
+indices. Default: off
 
 #### `--save_reference`
 
@@ -1100,6 +956,8 @@ This option can be used to define the minimum length of a poly-G tail to begin
 low complexity trimming. By default, this is set to a value of `10` unless the
 user has chosen something specifically using this option.
 
+> modifies fastp parameter: `--poly_g_min_len`
+
 ### Adapter Clipping and Merging Options
 
 These options handle various parts of adapter clipping and read merging steps.
@@ -1117,11 +975,15 @@ If using TSV input, this is performed per lane separately.
 Defines the adapter sequence to be used for the forward read. By default, this
 is set to `'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'`.
 
+> modifies AdapterRemoval parameter: `--adapter1`
+
 #### `--clip_reverse_adaptor`
 
 Defines the adapter sequence to be used for the reverse read in paired end
 sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by
 default.
+
+> modifies AdapterRemoval parameter: `--adapter2`
 
 #### `--clip_readlength`
 
@@ -1137,16 +999,22 @@ In these cases it is recommended to set this to 0, and use
 `--bam_filter_minreadlength` to instead, to filter out 'unusuable' short reads
 after mapping.
 
+> modifies AdapterRemoval parameter: `--minlength`
+
 #### `--clip_min_read_quality`
 
 Defines the minimum read quality per base that is required for a base to be
 kept. Individual bases at the ends of reads falling below this threshold will be
 clipped off. Default is set to `20`.
 
+> modifies AdapterRemoval parameter: `--minquality`
+
 #### `--clip_min_adap_overlap`
 
 Sets the minimum overlap between two reads when read merging is performed.
 Default is set to `1` base overlap.
+
+> modifies AdapterRemoval parameter: `--minadapteroverlap`
 
 #### `--skip_collapse`
 
@@ -1158,12 +1026,14 @@ For example
 --skip_collapse  --input '*_{R1,R2}_*.fastq'
 ```
 
-> It is important to use the paired-end wildcard globbing as `--skip_collapse`
-> can only be used on paired-end data! :warning: If you run this and also with
-> `--clip_readlength` set to something (as is by default), you may end up
-> removing single reads from either the pair1 or pair2 file. These will be NOT
-> be mapped when aligning with either `bwa` or `bowtie`, as both can only accept
-> one (forward) or two (forward and reverse) FASTQs as input.
+It is important to use the paired-end wildcard globbing as `--skip_collapse`
+can only be used on paired-end data! :warning: If you run this and also with
+`--clip_readlength` set to something (as is by default), you may end up
+removing single reads from either the pair1 or pair2 file. These will be NOT
+be mapped when aligning with either `bwa` or `bowtie`, as both can only accept
+one (forward) or two (forward and reverse) FASTQs as input.
+
+> modifies AdapterRemoval parameter: `--collapse`
 
 #### `--skip_trim`
 
@@ -1175,12 +1045,14 @@ For example:
 --skip_trim  --input '*.fastq'
 ```
 
-> :warning: it is not possible to keep quality trimming (n or base quality) on
-> and skip adapter trimming.
-> :warning: it is not possible to turn off one or the other of quality
-> trimming or n trimming. i.e. --trimns --trimqualities are both given
-> or neither. However setting quality in `--clip_min_read_quality` to 0 would
-> theoretically turn off base quality trimming.
+:warning: it is not possible to keep quality trimming (n or base quality) on
+and skip adapter trimming.
+:warning: it is not possible to turn off one or the other of quality
+trimming or n trimming. i.e. --trimns --trimqualities are both given
+or neither. However setting quality in `--clip_min_read_quality` to 0 would
+theoretically turn off base quality trimming.
+
+> modifies AdapterRemoval parameters: `--trimns --trimqualities --adapter1 --adapter2`
 
 #### `--preserve5p`
 
@@ -1188,9 +1060,11 @@ Turns off quality based trimming at the 5p end of reads when any of the
 --trimns, --trimqualities, or --trimwindows options are used. Only 3p end of
 reads will be removed.
 
-> This also entirely disables quality based trimming of collapsed reads, since
-> both ends of these are informative for PCR duplicate filtering. Described
-> [here](https://github.com/MikkelSchubert/adapterremoval/issues/32#issuecomment-504758137).
+This also entirely disables quality based trimming of collapsed reads, since
+both ends of these are informative for PCR duplicate filtering. Described
+[here](https://github.com/MikkelSchubert/adapterremoval/issues/32#issuecomment-504758137).
+
+> modifies AdapterRemoval parameters: `--preserve5p`
 
 #### `--mergedonly`
 
@@ -1234,27 +1108,32 @@ These parameters configure mapping algorithm parameters.
 
 ##### `--bwaalnn`
 
-Configures the `bwa aln -n` parameter, defining how many mismatches are allowed
-in a read. By default set to `0.04` (following recommendations of [Schubert et
-al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're
-uncertain what to set check out
-[this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more
-information on how to set this parameter efficiently.
+Defineshow many mismatches from the reference are allowed in a read. By default
+set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC
+Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what
+to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App
+for more information on how to set this parameter efficiently.
+
+> modifies bwa aln parameter: `-n`
 
 ##### `--bwaalnk`
 
-Configures the `bwa aln -k` parameter for the seeding phase in the mapping
-algorithm. Default is set to `2`.
+Modifies the number of mismiatches in the _seed_ during the seeding phase in the 
+`bwa aln` mapping algorithm. Default is set to `2`.
+
+> modifies bwa aln parameter: `-k`
 
 ##### `--bwaalnl`
 
-Configures the length of the seed used in `bwa aln -l`. Default is set to be
+Configures the length of the seed used during seeding. Default is set to be
 'turned off' at the recommendation of Schubert et al. ([2012 _BMC
 Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with
 `1024`.
 
-> Note: Despite being recommended, turning off seeding can result in long
-> runtimes!
+Note: Despite being recommended, turning off seeding can result in long
+runtimes!
+
+> modifies bwa aln parameter: `-l`
 
 #### CircularMapper
 
@@ -1263,11 +1142,15 @@ Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with
 The number of bases to extend the reference genome with. By default this is set
 to `500` if not specified otherwise.
 
+> modifies circulargenerator and realignsamfile parameter: `-e` 
+
 ##### `--circulartarget`
 
 The chromosome in your FASTA reference that you'd like to be treated as
 circular. By default this is set to `MT` but can be configured to match any
 other chromosome.
+
+> modifies circulargenerator parameter: `-s`
 
 ##### `--circularfilter`
 
@@ -1286,6 +1169,8 @@ aligned. Default is 'local', following [Cahill et al
 (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando
 2020](https://doi.org/10.3389/fevo.2020.00105).
 
+> modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`
+
 ##### `--bt2_sensitivity`
 
 The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast',
@@ -1296,11 +1181,15 @@ for actual settings. Default is 'sensitive' (following [Poullet and Orlando
 (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data
 _without_ UDG treatment)
 
+> modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`
+
 ##### `--bt2n`
 
 The number of mismatches allowed in the seed during seed-and-extend procedure of
 Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either
 be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).
+
+> modifies Bowtie2 parameters: `-N`
 
 ##### `--bt2l`
 
@@ -1309,15 +1198,21 @@ values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity`
 defaults: [20 for local and 22 for
 end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).
 
+> modifies Bowtie2 parameters: `-L`
+
 ##### `-bt2_trim5`
 
 Number of bases to trim of 5' (left) end of read prior alignment. Maybe useful
 when left-over sequencing artefacts of in-line barcodes present Default: 0
 
+> modifies Bowtie2 parameters: `-bt2_trim5`
+
 ##### `-bt2_trim3`
 
 Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful
 when left-over sequencing artefacts of in-line barcodes present Default: 0.
+
+> modifies Bowtie2 parameters: `-bt2_trim3`
 
 ### Mapped Reads Stripping
 
@@ -1346,12 +1241,16 @@ Create pre-Adapter Removal FASTQ files without reads that mapped to reference
 Read removal mode. Strip mapped reads completely (`'strip'`) or just replace
 mapped reads sequence by N (`'replace'`)
 
+> modifies extract_map_reads.py parameter: `-m`
+
 ### Read Filtering and Conversion Parameters
 
 Users can configure to keep/discard/extract certain groups of reads efficiently
 in the nf-core/eager pipeline.
 
 If using TSV input, filtering is performed library, i.e. after lane merging.
+
+This module utilises `samtools view` and `filter_bam_fragment_length.py`
 
 #### `--run_bam_filtering`
 
@@ -1366,6 +1265,8 @@ Specify a mapping quality threshold for mapped reads to be kept for downstream
 analysis. By default keeps all reads and is therefore set to `0` (basically
 doesn't filter anything).
 
+> modifies samtools view parameter: `-q` 
+
 #### `--bam_filter_minreadlength`
 
 Specify minimum length of mapped reads. This filtering will apply at the same
@@ -1379,6 +1280,8 @@ typical endogenous DNA calculation). Note in this context you should not perform
 mapping quality filtering nor discarding of unmapped reads to ensure a correct
 'denominator' of 'all reads', for the Endogenous DNA calculation.
 
+> modifies filter_bam_fragment_length.py parameter: `-l`
+
 #### `--bam_unmapped_type`
 
 Defines how to proceed with unmapped reads: `'discard'` removes all unmapped
@@ -1390,7 +1293,10 @@ would happen if `--run_bam_filtering` was _not_ supplied.
 Note that in all cases, if `--bam_mapping_quality_threshold` is also supplied,
 mapping quality filtering will still occur on the mapped reads.
 
-> :warning: `--bam_unmapped_type 'fastq'` is **required** for metagenomic screening!
+:warning: `--bam_unmapped_type 'fastq'` is **required** for metagenomic
+screening!
+
+> modifies samtools view parameter: `-f4 -F4`
 
 ### Read DeDuplication Parameters
 
@@ -1420,6 +1326,8 @@ example not prefixed with `M_` in all cases. Therefore, this can be used as a
 workaround when also using a mixture of paired-end and single-end data, however
 this is not recommended (see above).
 
+> modifies dedup parameter: `-m`
+
 ### Library Complexity Estimation Parameters
 
 nf-core/eager uses Preseq on map reads as one method to calculate library
@@ -1432,6 +1340,8 @@ paired-end read collapsing is not performed, the `-P` flag is used.
 Can be used to configure the step size of Preseqs `c_curve` method. Can be
 useful when only few and thus shallow sequencing results are used for
 extrapolation.
+
+> modifies preseq c_curve 
 
 ### DNA Damage Assessment Parameters
 
@@ -1547,13 +1457,6 @@ separately for libraries with `--udg_type` `'none'` and `'half'`  (see
 
 Default set to `1` and clips off one base of the left or right side of reads
 from libraries whose UDG treatment is set to `half`. Note that reverse reads
-will automatically be clipped off at the reverse side with this (automatically
-reverses left and right for the reverse read).
-
-#### `--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`
-
-Default set to `1` and clips off one base of the left or right side of reads
-from libraries whose UDG treatment is set to `none`. Note that reverse reads
 will automatically be clipped off at the reverse side with this (automatically
 reverses left and right for the reverse read).
 
