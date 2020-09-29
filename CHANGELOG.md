@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Updated template to nf-core/tools 1.10.2
 * [#544](https://github.com/nf-core/eager/pull/544) Add script to perform bam filtering on fragment length
 * [#456](https://github.com/nf-core/eager/pull/546) Bumps the base (default) runtime of all processes to 4 hours, and set shorter timelimits for test profiles (1 hour)
+* [#552](https://github.com/nf-core/eager/issues/552) Adds optional creation of MALT SAM files alongside RMA6 files.
 
 ### `Fixed`
 
@@ -57,6 +58,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Nuclear contamination is now reported with the correct library names.
 * Merged all tutorials and FAQs into `usage.md` for display on nf-co.re
 * Corrected header of nuclear contamination table (`nuclear_contamination.txt`).
+* Fixed a bug with `nSNPs` definition in `print_x_contamination.py`. Number of SNPs now correctly reported.
+* `print_x_contamination.py` now correctly converts all NA values to "N/A".
 
 ### `Dependencies`
 

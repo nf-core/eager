@@ -206,6 +206,7 @@ def helpMessage() {
       --malt_min_support_percent [num]       Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
       --malt_max_queries [num]               Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
       --malt_memory_mode [str]               Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
+      --malt_sam_output [bool]               Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.
 
     Metagenomic Authentication
       --run_maltextract [bool]                  Turn on MaltExtract for MALT aDNA characteristics authentication
@@ -588,6 +589,8 @@ ch_input_sample = Channel.empty()
 if (tsv_path) {
 
     tsv_file = file(tsv_path)
+    
+    if (tsv_file instanceof List) exit 1, "[nf-core/eager] error: can only accept one TSV file per run."
     if (!tsv_file.exists()) exit 1, "[nf-core/eager] error: input TSV file could not be found. Does the file exist or in the right place? You gave the path: ${params.input}"
 
     ch_input_sample = extract_data(tsv_path)
@@ -2887,8 +2890,9 @@ process malt {
   file db from ch_db_for_malt
 
   output:
-  file "*.rma6" into ch_rma_for_maltExtract
-  file "malt.log" into ch_malt_for_multiqc
+  path("*.rma6") into ch_rma_for_maltExtract
+  path("*.sam.gz") optional true
+  path("malt.log") into ch_malt_for_multiqc
 
   script:
   if ( "${params.malt_min_support_mode}" == "percent" ) {
@@ -2896,6 +2900,7 @@ process malt {
   } else if ( "${params.malt_min_support_mode}" == "reads" ) {
     min_supp = "-sup ${params.metagenomic_min_support_reads}"
   }
+  def sam_out = params.malt_sam_output ? "-a . -f SAM" : ""
   """
   malt-run \
   -J-Xmx${task.memory.toGiga()}g \
@@ -2903,6 +2908,7 @@ process malt {
   -v \
   -o . \
   -d ${db} \
+  ${sam_out} \
   -id ${params.percent_identity} \
   -m ${params.malt_mode} \
   -at ${params.malt_alignment_mode} \

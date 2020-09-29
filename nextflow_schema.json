@@ -1267,6 +1267,12 @@
                     "description": "Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'.",
                     "fa_icon": "fas fa-memory",
                     "help_text": "How to load the database into memory. Options are `'load'`, `'page'` or `'map'`. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. `'page'` and `'map'` perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `--memoryMode`"
+                },
+                "malt_sam_output": {
+                    "type": "boolean",
+                    "description": "Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.",
+                    "fa_icon": "fas fa-file-alt",
+                    "help_text": "Specify to _also_ produce gzipped SAM files of all alignments and un-aligned reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse' format. Can be useful for downstream analyses due to more common file format. :warning: can result in very large run output directories as this is essentially duplication of the RMA6 files."
                 }
             },
             "fa_icon": "fas fa-search",
