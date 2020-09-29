@@ -21,7 +21,12 @@
                     "default": "none",
                     "description": "Specifies whether you have UDG treated libraries. Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Not required for TSV input.",
                     "fa_icon": "fas fa-vial",
-                    "help_text": "Defines whether Uracil-DNA glycosylase (UDG) treatment was used to remove DNA damage on the sequencing libraries.\n\nSpecify `'none'` if no treatment was performed. If you have partial UDG treated data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify `'half'`. If you have complete UDG treated data ([Briggs et al. 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using PMDtools `'half'` will use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage assessment will use CpG context only. Default: `'none'`."
+                    "help_text": "Defines whether Uracil-DNA glycosylase (UDG) treatment was used to remove DNA damage on the sequencing libraries.\n\nSpecify `'none'` if no treatment was performed. If you have partial UDG treated data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify `'half'`. If you have complete UDG treated data ([Briggs et al. 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using PMDtools `'half'` will use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage assessment will use CpG context only. Default: `'none'`.",
+                    "enum": [
+                        "none",
+                        "half",
+                        "full"
+                    ]
                 },
                 "single_stranded": {
                     "type": "boolean",
@@ -487,7 +492,13 @@
                     "description": "Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'.",
                     "default": "bwaaln",
                     "fa_icon": "fas fa-layer-group",
-                    "help_text": "Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`), or bowtie2 (`bowtie2`). bwa aln is the default and highly suited for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to bwa aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)\n"
+                    "help_text": "Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`), or bowtie2 (`bowtie2`). bwa aln is the default and highly suited for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to bwa aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)\n",
+                    "enum": [
+                        "bwaaln",
+                        "bwamem",
+                        "circularmapper",
+                        "bowtie2"
+                    ]
                 },
                 "bwaalnn": {
                     "type": "number",
@@ -535,14 +546,25 @@
                     "default": "local",
                     "description": "Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'.",
                     "fa_icon": "fas fa-arrows-alt-h",
-                    "help_text": "The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105).\n\n> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`"
+                    "help_text": "The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105).\n\n> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`",
+                    "enum": [
+                        "local",
+                        "end-to-end"
+                    ]
                 },
                 "bt2_sensitivity": {
                     "type": "string",
                     "default": "sensitive",
                     "description": "Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'.",
                     "fa_icon": "fas fa-microscope",
-                    "help_text": "The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both `--bt2_alignmode` options. See the Bowtie2 [manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line) for actual settings. Default is 'sensitive' (following [Poullet and Orlando (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data _without_ UDG treatment)\n\n> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`"
+                    "help_text": "The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both `--bt2_alignmode` options. See the Bowtie2 [manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line) for actual settings. Default is 'sensitive' (following [Poullet and Orlando (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data _without_ UDG treatment)\n\n> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`",
+                    "enum": [
+                        "no-preset",
+                        "very-fast",
+                        "fast",
+                        "sensitive",
+                        "very-sensitive"
+                    ]
                 },
                 "bt2n": {
                     "type": "integer",
@@ -593,7 +615,11 @@
                     "default": "strip",
                     "description": "Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace).",
                     "fa_icon": "fas fa-mask",
-                    "help_text": "Read removal mode. Strip mapped reads completely (`'strip'`) or just replace mapped reads sequence by N (`'replace'`)\n\n> Modifies extract_map_reads.py parameter: `-m`"
+                    "help_text": "Read removal mode. Strip mapped reads completely (`'strip'`) or just replace mapped reads sequence by N (`'replace'`)\n\n> Modifies extract_map_reads.py parameter: `-m`",
+                    "enum": [
+                        "strip",
+                        "replace"
+                    ]
                 }
             },
             "fa_icon": "fas fa-user-shield",
@@ -630,7 +656,14 @@
                     "default": "discard",
                     "description": "Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'.",
                     "fa_icon": "fas fa-trash-alt",
-                    "help_text": "Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `keep` keeps both unmapped and mapped reads in the same BAM file, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, `both` keeps both BAM and FASTQ files. Default is `discard`.  `keep` is what would happen if `--run_bam_filtering` was _not_ supplied.\n\nNote that in all cases, if `--bam_mapping_quality_threshold` is also supplied, mapping quality filtering will still occur on the mapped reads.\n\n> Modifies samtools view parameter: `-f4 -F4`"
+                    "help_text": "Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `keep` keeps both unmapped and mapped reads in the same BAM file, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, `both` keeps both BAM and FASTQ files. Default is `discard`.  `keep` is what would happen if `--run_bam_filtering` was _not_ supplied.\n\nNote that in all cases, if `--bam_mapping_quality_threshold` is also supplied, mapping quality filtering will still occur on the mapped reads.\n\n> Modifies samtools view parameter: `-f4 -F4`",
+                    "enum": [
+                        "discard",
+                        "keep",
+                        "bam",
+                        "fastq",
+                        "both"
+                    ]
                 }
             },
             "fa_icon": "fas fa-sort-amount-down",
@@ -647,7 +680,11 @@
                     "default": "markduplicates",
                     "description": "Deduplication method to use. Options: 'markduplicates',  'dedup'.",
                     "fa_icon": "fas fa-object-group",
-                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool 'dedup' ([Peltzer et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered.\n\nThis utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.\n\nNote that if you run without the `--mergedonly` flag for AdapterRemoval, DeDup will\nlikely fail. If you absolutely want to use both PE and SE data, you can supply the\n`--dedup_all_merged` flag to consider singletons to also be merged paired-end reads. This\nmay result in over-zealous deduplication."
+                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool 'dedup' ([Peltzer et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered.\n\nThis utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.\n\nNote that if you run without the `--mergedonly` flag for AdapterRemoval, DeDup will\nlikely fail. If you absolutely want to use both PE and SE data, you can supply the\n`--dedup_all_merged` flag to consider singletons to also be merged paired-end reads. This\nmay result in over-zealous deduplication.",
+                    "enum": [
+                        "markduplicates",
+                        "dedup"
+                    ]
                 },
                 "dedup_all_merged": {
                     "type": "boolean",
@@ -827,7 +864,14 @@
                     "type": "string",
                     "description": "Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.",
                     "fa_icon": "fas fa-tools",
-                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.\n\n> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file."
+                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.\n\n> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file.",
+                    "enum": [
+                        "ug",
+                        "hc",
+                        "freebayes",
+                        "pileupcaller",
+                        "angsd"
+                    ]
                 },
                 "genotyping_source": {
                     "type": "string",
@@ -874,28 +918,50 @@
                     "default": "EMIT_VARIANTS_ONLY",
                     "description": "Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'.",
                     "fa_icon": "fas fa-bullhorn",
-                    "help_text": "If selected the GATK genotyper HaplotypeCaller, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`\n\n> Modifies GATK HaplotypeCaller parameter: `-output_mode`"
+                    "help_text": "If selected the GATK genotyper HaplotypeCaller, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`\n\n> Modifies GATK HaplotypeCaller parameter: `-output_mode`",
+                    "enum": [
+                        "EMIT_ALL_ACTIVE_SITES",
+                        "EMIT_ALL_CONFIDENT_SITES",
+                        "EMIT_VARIANTS_ONLY"
+                    ]
                 },
                 "gatk_hc_emitrefconf": {
                     "type": "string",
                     "default": "GVCF",
                     "description": "Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'.",
                     "fa_icon": "fas fa-bullhorn",
-                    "help_text": "If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`\n\n> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`\n"
+                    "help_text": "If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`\n\n> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`\n",
+                    "enum": [
+                        "NONE",
+                        "GVCF",
+                        "BP_RESOLUTION"
+                    ]
                 },
                 "gatk_ug_out_mode": {
                     "type": "string",
                     "default": "EMIT_VARIANTS_ONLY",
                     "description": "Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'.",
                     "fa_icon": "fas fa-bullhorn",
-                    "help_text": "If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`\n\n> Modifies GATK UnifiedGenotyper parameter: `--output_mode`"
+                    "help_text": "If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`\n\n> Modifies GATK UnifiedGenotyper parameter: `--output_mode`",
+                    "enum": [
+                        "EMIT_ALL_SITES",
+                        "EMIT_ALL_CONFIDENT_SITES",
+                        "EMIT_VARIANTS_ONLY"
+                    ]
                 },
                 "gatk_ug_genotype_model": {
                     "type": "string",
                     "default": "SNP",
                     "description": "Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.",
                     "fa_icon": "fas fa-project-diagram",
-                    "help_text": "If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`, `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`\n\n> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`"
+                    "help_text": "If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`, `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`\n\n> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`",
+                    "enum": [
+                        "SNP",
+                        "INDEL",
+                        "BOTH",
+                        "GENERALPLOIDYSNP",
+                        "GENERALPLOIDYINDEL"
+                    ]
                 },
                 "gatk_ug_keep_realign_bam": {
                     "type": "string",
@@ -947,28 +1013,50 @@
                     "default": "randomHaploid",
                     "description": "Specify calling method to use. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'.",
                     "fa_icon": "fas fa-toolbox",
-                    "help_text": "Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: `'randomHaploid'`\n\n> Modifies pileupCaller parameter: `--randomHaploid --randomDiploid --majorityCall`"
+                    "help_text": "Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: `'randomHaploid'`\n\n> Modifies pileupCaller parameter: `--randomHaploid --randomDiploid --majorityCall`",
+                    "enum": [
+                        "randomHaploid",
+                        "randomDiploid",
+                        "majorityCall"
+                    ]
                 },
                 "pileupcaller_transitions_mode": {
                     "type": "string",
                     "default": "AllSites",
                     "description": "Specify the calling mode for transitions. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'.",
                     "fa_icon": "fas fa-toggle-on",
-                    "help_text": "Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: `'AllSites'`, `'TransitionsMissing'`, `'SkipTransitions'`. Default: `'AllSites'`\n\n> Modifies pileupCaller parameter: `--skipTransitions --transitionsMissing`"
+                    "help_text": "Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: `'AllSites'`, `'TransitionsMissing'`, `'SkipTransitions'`. Default: `'AllSites'`\n\n> Modifies pileupCaller parameter: `--skipTransitions --transitionsMissing`",
+                    "enum": [
+                        "AllSites",
+                        "TransitionsMissing",
+                        "SkipTransitions"
+                    ]
                 },
                 "angsd_glmodel": {
                     "type": "string",
                     "default": "samtools",
                     "description": "Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'.",
                     "fa_icon": "fas fa-project-diagram",
-                    "help_text": "Specify which genotype likelihood model to use. Options: `'samtools`, `'gatk'`, `'soapsnp'`, `'syk'`. Default: `'samtools'`\n\n> Modifies ANGSD parameter: `-GL`"
+                    "help_text": "Specify which genotype likelihood model to use. Options: `'samtools`, `'gatk'`, `'soapsnp'`, `'syk'`. Default: `'samtools'`\n\n> Modifies ANGSD parameter: `-GL`",
+                    "enum": [
+                        "samtools",
+                        "gatk",
+                        "soapsnp",
+                        "syk"
+                    ]
                 },
                 "angsd_glformat": {
                     "type": "string",
                     "default": "binary",
                     "description": "Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'.",
                     "fa_icon": "fas fa-text-height",
-                    "help_text": "Specifies what type of genotyping likelihood file format will be output. Options: `'text'`, `'binary'`, `'binary_three'`, `'beagle_binary'`. Default: `'text'`.\n\nThe options refer to the following descriptions respectively:\n\n- `text`: textoutput of all 10 log genotype likelihoods.\n- `binary`: binary all 10 log genotype likelihood\n- `binary_three`: binary 3 times likelihood\n- `beagle_binary`: beagle likelihood file\n\nSee the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information on which to select for your downstream applications.\n\n> Modifies ANGSD parameter: `-doGlF`"
+                    "help_text": "Specifies what type of genotyping likelihood file format will be output. Options: `'text'`, `'binary'`, `'binary_three'`, `'beagle_binary'`. Default: `'text'`.\n\nThe options refer to the following descriptions respectively:\n\n- `text`: textoutput of all 10 log genotype likelihoods.\n- `binary`: binary all 10 log genotype likelihood\n- `binary_three`: binary 3 times likelihood\n- `beagle_binary`: beagle likelihood file\n\nSee the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information on which to select for your downstream applications.\n\n> Modifies ANGSD parameter: `-doGlF`",
+                    "enum": [
+                        "text",
+                        "binary",
+                        "binary_three",
+                        "beagle"
+                    ]
                 },
                 "angsd_createfasta": {
                     "type": "boolean",
@@ -981,7 +1069,11 @@
                     "default": "random",
                     "description": "Specify which genotype type of 'base calling' to use for ANGSD FASTA generation. Options: 'random', 'common'.",
                     "fa_icon": "fas fa-toolbox",
-                    "help_text": "The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given position, whereas 'random' will pick one at random. Default: `'random'`.\n\n> Modifies ANGSD parameter: `-doFasta -doCounts`"
+                    "help_text": "The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given position, whereas 'random' will pick one at random. Default: `'random'`.\n\n> Modifies ANGSD parameter: `-doFasta -doCounts`",
+                    "enum": [
+                        "random",
+                        "common"
+                    ]
                 }
             },
             "fa_icon": "fas fa-sliders-h",
@@ -1224,14 +1316,23 @@
                     "default": "BlastN",
                     "description": "Specify which alignment mode to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'.",
                     "fa_icon": "fas fa-align-left",
-                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.\nrespectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: `'BlastN'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-m`"
+                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.\nrespectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: `'BlastN'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-m`",
+                    "enum": [
+                        "BlastN",
+                        "BlastP",
+                        "BlastX"
+                    ]
                 },
                 "malt_alignment_mode": {
                     "type": "string",
                     "default": "SemiGlobal",
                     "description": "Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'.",
                     "fa_icon": "fas fa-align-center",
-                    "help_text": "Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-at`"
+                    "help_text": "Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-at`",
+                    "enum": [
+                        "Local",
+                        "SemiGlobal"
+                    ]
                 },
                 "malt_top_percent": {
                     "type": "integer",
@@ -1245,7 +1346,11 @@
                     "default": "percent",
                     "description": "Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'.",
                     "fa_icon": "fas fa-drumstick-bite",
-                    "help_text": "Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-sup -supp`"
+                    "help_text": "Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-sup -supp`",
+                    "enum": [
+                        "percent",
+                        "reads"
+                    ]
                 },
                 "malt_min_support_percent": {
                     "type": "number",
@@ -1266,13 +1371,18 @@
                     "default": "load",
                     "description": "Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'.",
                     "fa_icon": "fas fa-memory",
-                    "help_text": "How to load the database into memory. Options are `'load'`, `'page'` or `'map'`. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. `'page'` and `'map'` perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `--memoryMode`"
+                    "help_text": "How to load the database into memory. Options are `'load'`, `'page'` or `'map'`. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. `'page'` and `'map'` perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `--memoryMode`",
+                    "enum": [
+                        "load",
+                        "page",
+                        "map"
+                    ]
                 },
                 "malt_sam_output": {
                     "type": "boolean",
                     "description": "Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.",
                     "fa_icon": "fas fa-file-alt",
-                    "help_text": "Specify to _also_ produce gzipped SAM files of all alignments and un-aligned reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse' format. Can be useful for downstream analyses due to more common file format. :warning: can result in very large run output directories as this is essentially duplication of the RMA6 files."
+                    "help_text": "Specify to _also_ produce gzipped SAM files of all alignments and un-aligned reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse' format. Can be useful for downstream analyses due to more common file format. \n\n:warning: can result in very large run output directories as this is essentially duplication of the RMA6 files.\n\n> Modifies MALT parameter `-a -f`"
                 }
             },
             "fa_icon": "fas fa-search",
@@ -1307,7 +1417,15 @@
                     "default": "def_anc",
                     "description": "Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'.",
                     "fa_icon": "fas fa-filter",
-                    "help_text": "Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`, 'assignment'. Default: `'def_anc'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `-f`"
+                    "help_text": "Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`, 'assignment'. Default: `'def_anc'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `-f`",
+                    "enum": [
+                        "def_anc",
+                        "default",
+                        "ancient",
+                        "scan",
+                        "crawl",
+                        "srna"
+                    ]
                 },
                 "maltextract_toppercent": {
                     "type": "number",

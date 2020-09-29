@@ -2033,8 +2033,10 @@ Specify to _also_ produce gzipped SAM files of all alignments and un-aligned
 reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse'
 format. Can be useful for downstream analyses due to more common file format.
 
-> :warning: can result in very large run output directories as this is
-> essentially duplication of the RMA6 files.
+:warning: can result in very large run output directories as this is
+essentially duplication of the RMA6 files.
+
+> Modifies MALT parameter `-a -f`
 
 ### Metagenomic Authentication
 
