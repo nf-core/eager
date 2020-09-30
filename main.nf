@@ -27,7 +27,7 @@ def helpMessage() {
         -profile [str]          Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
 
     Input
-      --input [file]            Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). Indicate multiple files wildcards (*). For paired end data, the path must use '{1,2}' notation to specify read pairs.
+      --input [file]            Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). Indicate multiple files with wildcards (*). For paired end data, the path must use '{1,2}' notation to specify read pairs.
                                 OR 
                                 A path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
 
@@ -39,7 +39,7 @@ def helpMessage() {
 
 
     Additional Options:
-      --snpcapture_bed [file]       If library result of SNP capture, path to BED file containing SNPS positions on reference genome.
+      --snpcapture_bed [file]       If library result of SNP capture, path to BED file containing SNPs positions on reference genome.
       --run_convertinputbam [bool]  Turns on conversion of an input BAM file into FASTQ format to allow re-preprocessing (e.g. AdapterRemoval etc.).
 
     References
@@ -49,7 +49,7 @@ def helpMessage() {
       --bt2_index [dir]       Path to directory containing pre-made Bowtie2 indices (i.e. everything before the endings e.g. '.1.bt2', '.2.bt2', '.rev.1.bt2'. Most likely the same value as --fasta). If not supplied will be made for you.
       --fasta_index [file]    Path to samtools FASTA index (typically ending in '.fai').
       --seq_dict [file]       Path to picard sequence dictionary file (typically ending in '.dict').
-      --large_ref [bool]      Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficent data handling with the '.csi' format over the older '.bai'.
+      --large_ref [bool]      Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficient data handling with the '.csi' format over the older '.bai'.
       --save_reference [bool] Turns on saving reference genome indices for later re-usage.
 
     Output options:     
@@ -127,11 +127,11 @@ def helpMessage() {
       --anno_file [file]                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.
 
     BAM Trimming
-      --run_trim_bam [bool]                  Turn on BAM trimming. Will only run on full-UDG or half-UDG libaries.
-      --bamutils_clip_half_udg_left [num]    Specify the number of bases to clip off reads from 'left' end of read for half-UDG libaries. Default: ${params.bamutils_clip_half_udg_left}
-      --bamutils_clip_half_udg_right [num]   Specify the number of bases to clip off reads from 'right' end of read for half-UDG libaries. Default: ${params.bamutils_clip_half_udg_right}
-      --bamutils_clip_none_udg_left [num]    Specify the number of bases to clip off reads from 'left' end of read for non-UDG libaries. Default: ${params.bamutils_clip_none_udg_left}
-      --bamutils_clip_none_udg_right [num]   Specify the number of bases to clip off reads from 'right' end of read for non-UDG libaries. Default: ${params.bamutils_clip_none_udg_right}
+      --run_trim_bam [bool]                  Turn on BAM trimming. Will only run on full-UDG or half-UDG libraries.
+      --bamutils_clip_half_udg_left [num]    Specify the number of bases to clip off reads from 'left' end of read for half-UDG libraries. Default: ${params.bamutils_clip_half_udg_left}
+      --bamutils_clip_half_udg_right [num]   Specify the number of bases to clip off reads from 'right' end of read for half-UDG libraries. Default: ${params.bamutils_clip_half_udg_right}
+      --bamutils_clip_none_udg_left [num]    Specify the number of bases to clip off reads from 'left' end of read for non-UDG libraries. Default: ${params.bamutils_clip_none_udg_left}
+      --bamutils_clip_none_udg_right [num]   Specify the number of bases to clip off reads from 'right' end of read for non-UDG libraries. Default: ${params.bamutils_clip_none_udg_right}
       --bamutils_softclip [bool]             Turn on using softclip instead of hard masking.
 
     Genotyping
@@ -263,7 +263,6 @@ println ""
 
 if (params.fasta) {
     file(params.fasta, checkIfExists: true)
-
     lastPath = params.fasta.lastIndexOf(File.separator)
     lastExt = params.fasta.lastIndexOf(".")
     fasta_base = params.fasta.substring(lastPath+1)
@@ -271,6 +270,7 @@ if (params.fasta) {
     if (params.fasta.endsWith('.gz')) {
         fasta_base = params.fasta.substring(lastPath+1,lastExt)
         index_base = fasta_base.substring(0,fasta_base.lastIndexOf("."))
+
     }
 } else {
     exit 1, "[nf-core/eager] error: please specify --fasta with the path to your reference"
@@ -282,7 +282,7 @@ if("${params.fasta}".endsWith(".gz")){
         tag "${zipped_fasta}"
 
         input:
-        path zipped_fasta from params.fasta
+        path zipped_fasta from file(params.fasta) // path doesn't like it if string of object not prefaced with root dir (/), so use file to find 
 
         output:
         path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd
@@ -2249,7 +2249,7 @@ process pmdtools {
     file fasta from ch_fasta_for_pmdtools.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.bam"), path("*.{bai,csi}") into ch_output_from_pmdtools
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.pmd.bam"), path("*.pmd.bam.{bai,csi}") into ch_output_from_pmdtools
     file "*.cpg.range*.txt"
 
     script:
@@ -2265,8 +2265,13 @@ process pmdtools {
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${libraryid}".pmd.bam
+    
     #Run Calc Range step
-    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt 
+    ## To allow early shut off of pipe: https://github.com/nextflow-io/nextflow/issues/1564
+    trap 'if [[ \$? == 141 ]]; then echo "Shutting samtools early due to -n parameter" && samtools index ${libraryid}.pmd.bam ${size}; exit 0; fi' EXIT
+    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
+    
+    echo "Running indexing"
     samtools index ${libraryid}.pmd.bam ${size}
     """
 }
