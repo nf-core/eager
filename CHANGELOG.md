@@ -61,6 +61,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Corrected header of nuclear contamination table (`nuclear_contamination.txt`).
 * Fixed a bug with `nSNPs` definition in `print_x_contamination.py`. Number of SNPs now correctly reported.
 * `print_x_contamination.py` now correctly converts all NA values to "N/A".
+* Increased amount of memory MultiQC by default uses, to account for very large nf-core/eager runs (e.g. >1000 samples).
 
 ### `Dependencies`
 
