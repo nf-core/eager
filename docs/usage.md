@@ -1218,7 +1218,7 @@ when left-over sequencing artefacts of in-line barcodes present Default: 0.
 
 > Modifies Bowtie2 parameters: `-bt2_trim3`
 
-### Mapped Reads Stripping
+### Removal of Host-Mapped Reads
 
 These parameters are used for removing mapped reads from the original input
 FASTQ files, usually in the context of uploading the original FASTQ files to a
@@ -1233,17 +1233,16 @@ your data to apply their own adapter removal/read merging procedures, while
 maintaining anonymity for sample donors - for example with microbiome
 research.
 
-If using TSV input, stripping is performed library, i.e. after lane merging.
+If using TSV input, mapped read removal is performed per library, i.e. after lane merging.
 
-#### `--strip_input_fastq`
+#### `--hostremoval_input_fastq`
 
 Create pre-Adapter Removal FASTQ files without reads that mapped to reference
 (e.g. for public upload of privacy sensitive non-host data)
 
-#### `--strip_mode`
+#### `--hostremoval_mode`
 
-Read removal mode. Strip mapped reads completely (`'strip'`) or just replace
-mapped reads sequence by N (`'replace'`)
+Read removal mode. Completely remove mapped reads from the file(s) (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)
 
 > Modifies extract_map_reads.py parameter: `-m`
 

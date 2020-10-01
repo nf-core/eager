@@ -27,7 +27,7 @@ def helpMessage() {
         -profile [str]          Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
 
     Input
-      --input [file]            Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). Indicate multiple files wildcards (*). For paired end data, the path must use '{1,2}' notation to specify read pairs.
+      --input [file]            Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). Indicate multiple files with wildcards (*). For paired end data, the path must use '{1,2}' notation to specify read pairs.
                                 OR 
                                 A path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.
 
@@ -39,7 +39,7 @@ def helpMessage() {
 
 
     Additional Options:
-      --snpcapture_bed [file]       If library result of SNP capture, path to BED file containing SNPS positions on reference genome.
+      --snpcapture_bed [file]       If library result of SNP capture, path to BED file containing SNPs positions on reference genome.
       --run_convertinputbam [bool]  Turns on conversion of an input BAM file into FASTQ format to allow re-preprocessing (e.g. AdapterRemoval etc.).
 
     References
@@ -49,7 +49,7 @@ def helpMessage() {
       --bt2_index [dir]       Path to directory containing pre-made Bowtie2 indices (i.e. everything before the endings e.g. '.1.bt2', '.2.bt2', '.rev.1.bt2'. Most likely the same value as --fasta). If not supplied will be made for you.
       --fasta_index [file]    Path to samtools FASTA index (typically ending in '.fai').
       --seq_dict [file]       Path to picard sequence dictionary file (typically ending in '.dict').
-      --large_ref [bool]      Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficent data handling with the '.csi' format over the older '.bai'.
+      --large_ref [bool]      Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficient data handling with the '.csi' format over the older '.bai'.
       --save_reference [bool] Turns on saving reference genome indices for later re-usage.
 
     Output options:     
@@ -95,9 +95,9 @@ def helpMessage() {
       --bt2_trim5 [num]          Specify number of bases to trim off from 5' (left) end of read before alignment. Default: ${params.bt2_trim5}
       --bt2_trim3 [num]          Specify number of bases to trim off from 3' (right) end of read before alignment. Default: ${params.bt2_trim3}
 
-    Stripping
-      --strip_input_fastq [bool]  Turn on creation of per-library pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data).
-      --strip_mode [str]          Stripping mode. Remove mapped reads completely from FASTQ (strip) or just mask mapped reads sequence by N (replace). Default: '${params.strip_mode}'
+    Host removal
+      --hostremoval_input_fastq [bool]    Turn on creating pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)
+      --hostremoval_mode [str]            Host DNA Removal mode. Remove mapped reads completely from FASTQ (remove) or just mask mapped reads sequence by N (replace). Default: '${params.hostremoval_mode}'
       
     BAM Filtering
       --run_bam_filtering [bool]               Turn on filtering of mapping quality, read lengths, or unmapped reads of BAM files.
@@ -127,11 +127,11 @@ def helpMessage() {
       --anno_file [file]                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.
 
     BAM Trimming
-      --run_trim_bam [bool]                  Turn on BAM trimming. Will only run on full-UDG or half-UDG libaries.
-      --bamutils_clip_half_udg_left [num]    Specify the number of bases to clip off reads from 'left' end of read for half-UDG libaries. Default: ${params.bamutils_clip_half_udg_left}
-      --bamutils_clip_half_udg_right [num]   Specify the number of bases to clip off reads from 'right' end of read for half-UDG libaries. Default: ${params.bamutils_clip_half_udg_right}
-      --bamutils_clip_none_udg_left [num]    Specify the number of bases to clip off reads from 'left' end of read for non-UDG libaries. Default: ${params.bamutils_clip_none_udg_left}
-      --bamutils_clip_none_udg_right [num]   Specify the number of bases to clip off reads from 'right' end of read for non-UDG libaries. Default: ${params.bamutils_clip_none_udg_right}
+      --run_trim_bam [bool]                  Turn on BAM trimming. Will only run on full-UDG or half-UDG libraries.
+      --bamutils_clip_half_udg_left [num]    Specify the number of bases to clip off reads from 'left' end of read for half-UDG libraries. Default: ${params.bamutils_clip_half_udg_left}
+      --bamutils_clip_half_udg_right [num]   Specify the number of bases to clip off reads from 'right' end of read for half-UDG libraries. Default: ${params.bamutils_clip_half_udg_right}
+      --bamutils_clip_none_udg_left [num]    Specify the number of bases to clip off reads from 'left' end of read for non-UDG libraries. Default: ${params.bamutils_clip_none_udg_left}
+      --bamutils_clip_none_udg_right [num]   Specify the number of bases to clip off reads from 'right' end of read for non-UDG libraries. Default: ${params.bamutils_clip_none_udg_right}
       --bamutils_softclip [bool]             Turn on using softclip instead of hard masking.
 
     Genotyping
@@ -263,7 +263,6 @@ println ""
 
 if (params.fasta) {
     file(params.fasta, checkIfExists: true)
-
     lastPath = params.fasta.lastIndexOf(File.separator)
     lastExt = params.fasta.lastIndexOf(".")
     fasta_base = params.fasta.substring(lastPath+1)
@@ -271,6 +270,7 @@ if (params.fasta) {
     if (params.fasta.endsWith('.gz')) {
         fasta_base = params.fasta.substring(lastPath+1,lastExt)
         index_base = fasta_base.substring(0,fasta_base.lastIndexOf("."))
+
     }
 } else {
     exit 1, "[nf-core/eager] error: please specify --fasta with the path to your reference"
@@ -282,7 +282,7 @@ if("${params.fasta}".endsWith(".gz")){
         tag "${zipped_fasta}"
 
         input:
-        path zipped_fasta from params.fasta
+        path zipped_fasta from file(params.fasta) // path doesn't like it if string of object not prefaced with root dir (/), so use file to find 
 
         output:
         path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd
@@ -360,10 +360,10 @@ if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.singl
     exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
 }
 
-// Strip mode validation
-if (params.strip_input_fastq){
-    if (!(['strip','replace'].contains(params.strip_mode))) {
-        exit 1, "[nf-core/eager] error: --strip_mode can only be set to strip or replace."
+// Host removal mode validation
+if (params.hostremoval_input_fastq){
+    if (!(['remove','replace'].contains(params.hostremoval_mode))) {
+        exit 1, "[nf-core/eager] error: --hostremoval_mode can only be set to remove or replace."
     }
 }
 
@@ -657,9 +657,9 @@ ch_input_for_convertbam = Channel.empty()
 ch_bam_channel
   .into { ch_input_for_convertbam; ch_input_for_indexbam; }
 
-// Also need to send raw files for lane merging, if we want to strip fastq
+// Also need to send raw files for lane merging, if we want to host removed fastq
 ch_fastq_channel
-  .into { ch_input_for_skipconvertbam; ch_input_for_lanemerge_stripfastq }
+  .into { ch_input_for_skipconvertbam; ch_input_for_lanemerge_hostremovalfastq }
 
 ///////////////////////////////////////////////////
 /* --             HEADER LOG INFO             -- */
@@ -686,9 +686,9 @@ summary['Running BAM filtering'] = params.run_bam_filtering ? 'Yes' : 'No'
 if (params.run_bam_filtering) {
   summary['Skip Read Merging'] = params.bam_unmapped_type
 }
-summary['Run Fastq Stripping'] = params.strip_input_fastq ? 'Yes' : 'No'
-if (params.strip_input_fastq){
-    summary['Strip mode'] = params.strip_mode
+summary['Run Fastq Host Removal'] = params.hostremoval_input_fastq ? 'Yes' : 'No'
+if (params.hostremoval_input_fastq){
+    summary['Host removal mode'] = params.hostremoval_mode
 }
 summary['Skipping Preseq?'] = params.skip_preseq ? 'Yes' : 'No'
 summary['Skipping Deduplication?'] = params.skip_deduplication ? 'Yes' : 'No'
@@ -1333,21 +1333,21 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
     .into { ch_lanemerge_for_skipmap; ch_lanemerge_for_bwa; ch_lanemerge_for_cm; ch_lanemerge_for_bwamem; ch_lanemerge_for_bt2 }
 }
 
-// ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads stripping 
+// ENA upload doesn't do separate lanes, so merge raw FASTQs for mapped-reads removal 
 
 // Per-library lane grouping done within process
-process lanemerge_stripfastq {
+process lanemerge_hostremoval_fastq {
   label 'sc_tiny'
   tag "${libraryid}"
 
   when: 
-  params.strip_input_fastq
+  params.hostremoval_input_fastq
 
   input:
-  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_lanemerge_stripfastq.groupTuple(by: [0,1,3,4,5,6,7])
+  tuple samplename, libraryid, lane, colour, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_input_for_lanemerge_hostremovalfastq.groupTuple(by: [0,1,3,4,5,6,7])
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fq.gz") into ch_fastqlanemerge_for_stripfastq
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_fastqlanemerge_for_hostremovalfastq
 
   script:
   if ( seqtype == 'PE' ){
@@ -1623,10 +1623,10 @@ process bowtie2 {
 
 // Gather all mapped BAMs from all possible mappers into common channels to send downstream
 ch_output_from_bwa.mix(ch_output_from_bwamem, ch_output_from_cm, ch_indexbam_for_filtering, ch_output_from_bt2)
-  .into { ch_mapping_for_stripfastq; ch_mapping_for_seqtype_merging }
+  .into { ch_mapping_for_hostremovalfastq; ch_mapping_for_seqtype_merging }
 
 // Synchronise the mapped input FASTQ and input non-remapped BAM channels
-ch_fastqlanemerge_for_stripfastq
+ch_fastqlanemerge_for_hostremovalfastq
     .map {
         def samplename = it[0]
         def libraryid  = it[1]
@@ -1641,7 +1641,7 @@ ch_fastqlanemerge_for_stripfastq
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
     }
-    .mix(ch_mapping_for_stripfastq)
+    .mix(ch_mapping_for_hostremovalfastq)
     .groupTuple(by: [0,1,3,4,5,6])
     .map {
         def samplename = it[0]
@@ -1660,38 +1660,37 @@ ch_fastqlanemerge_for_stripfastq
 
     }
     .filter{ it[8] != null }
-    .dump(tag: "StripFastq Input")
-    .set { ch_synced_for_stripfastq }
+    .set { ch_synced_for_hostremovalfastq }
 
 // Remove mapped reads from original (lane merged) input FASTQ e.g. for sensitive host data when running metagenomic data
 
-process strip_input_fastq {
+process hostremoval_input_fastq {
     label 'mc_medium'
     tag "${libraryid}"
-    publishDir "${params.outdir}/stripped_fastq", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/hostremoved_fastq", mode: params.publish_dir_mode
 
     when: 
-    params.strip_input_fastq
+    params.hostremoval_input_fastq
 
     input: 
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, path(r1), path(r2), file(bam), file(bai) from ch_synced_for_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file(r1), file(r2), file(bam), file(bai) from ch_synced_for_hostremovalfastq
 
     output:
-    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_stripfastq
+    tuple samplename, libraryid, seqtype, organism, strandedness, udg, file("*.fq.gz") into ch_output_from_hostremovalfastq
 
     script:
     if ( seqtype == 'SE' ) {
-        out_fwd = bam.baseName+'.stripped.fq.gz'
+        out_fwd = bam.baseName+'.hostremoved.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${r1} -m ${params.strip_mode} -of $out_fwd -p ${task.cpus}
+        extract_map_reads.py $bam ${r1} -m ${params.hostremoval_mode} -of $out_fwd -p ${task.cpus}
         """
     } else {
-        out_fwd = bam.baseName+'.stripped.fwd.fq.gz'
-        out_rev = bam.baseName+'.stripped.rev.fq.gz'
+        out_fwd = bam.baseName+'.hostremoved.fwd.fq.gz'
+        out_rev = bam.baseName+'.hostremoved.rev.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${r1} -rev ${r2} -m  ${params.strip_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
+        extract_map_reads.py $bam ${r1} -rev ${r2} -m  ${params.hostremoval_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
         """ 
     }
     
@@ -2250,7 +2249,7 @@ process pmdtools {
     file fasta from ch_fasta_for_pmdtools.collect()
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.bam"), path("*.{bai,csi}") into ch_output_from_pmdtools
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.pmd.bam"), path("*.pmd.bam.{bai,csi}") into ch_output_from_pmdtools
     file "*.cpg.range*.txt"
 
     script:
@@ -2266,8 +2265,13 @@ process pmdtools {
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${libraryid}".pmd.bam
+    
     #Run Calc Range step
-    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt 
+    ## To allow early shut off of pipe: https://github.com/nextflow-io/nextflow/issues/1564
+    trap 'if [[ \$? == 141 ]]; then echo "Shutting samtools early due to -n parameter" && samtools index ${libraryid}.pmd.bam ${size}; exit 0; fi' EXIT
+    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
+    
+    echo "Running indexing"
     samtools index ${libraryid}.pmd.bam ${size}
     """
 }
