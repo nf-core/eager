@@ -3151,7 +3151,7 @@ process get_software_versions {
 // MultiQC file generation for pipeline report
 
 process multiqc {
-    label 'sc_small'
+    label 'sc_medium'
 
     publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
 
