@@ -25,7 +25,7 @@
   - [Complexity Filtering Options](#complexity-filtering-options)
   - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
   - [Read Mapping Parameters](#read-mapping-parameters)
-  - [Mapped Reads Stripping](#mapped-reads-stripping)
+  - [Removal of Host-Mapped Reads](#removal-of-host-mapped-reads)
   - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
   - [Read DeDuplication Parameters](#read-deduplication-parameters)
   - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
@@ -689,8 +689,10 @@ resource.
 There are 31 different species supported in the iGenomes references. To run the
 pipeline, you must specify which to use with the `--genome` flag.
 
-You can find the keys to specify the genomes in the [iGenomes config
-file](../conf/igenomes.config). Common genomes that are supported are:
+You can find the keys to specify the genomes in the iGenomes config file under
+`conf/` on the nf-core/eager [GitHub
+repository](https://github.com/nf-core/eager). Common genomes that are supported
+are:
 
 - Human
   - `--genome GRCh37`
@@ -3392,8 +3394,8 @@ signal drop or want to log off, Nextflow will not crash.
 #### Tutorial Human Pop-Gen - Results
 
 Assuming the run completed without any crashes (if problems do occur, check all
-against [#usage](usage.md) all parameters are as expected, or check the
-[FAQ](../faq.md)), we can now check our results in `results/`.
+against [#usage](#pipeline-options) all parameters are as expected, or check the
+[FAQ](#troubleshooting-and-faqs)), we can now check our results in `results/`.
 
 ##### Tutorial Human Pop-Gen - MultiQC Report
 
@@ -3641,9 +3643,9 @@ each `Lane`, but the `Sample_Name` and `Library_ID` columns identify and group
 them together accordingly. Secondly, as we have NextSeq data, we have specified
 we have two `Colour_Chemistry`, which is important for downstream processing
 (see below). The other columns are less important for this particular context of
-metagenomic screening. See the nf-core/eager [usage](../usage.md) documentation
-for more specifications on how to set up a TSV file (e.g. why despite NextSeqs
-only having 4 lanes, we go up to 8 in the example above).
+metagenomic screening. See the nf-core/eager [usage](#pipeline-options)
+documentation for more specifications on how to set up a TSV file (e.g. why
+despite NextSeqs only having 4 lanes, we go up to 8 in the example above).
 
 Alongside our input TSV file, we will also specify the paths to our reference
 FASTA file and the corresponding indices.
@@ -3827,8 +3829,8 @@ signal drop or want to log off, Nextflow will not crash.
 #### Tutorial Metagenomics - Results
 
 Assuming the run completed without any crashes (if problems do occur, check all
-against [#usage](usage.md) all parameters are as expected, or check the
-[FAQ](../faq.md)), we can now check our results in `results/`.
+against [usage](#pipeline-options) all parameters are as expected, or check the
+[FAQ](#troubleshooting-and-faqs), we can now check our results in `results/`.
 
 ##### Tutorial Metagenomics - MultiQC Report
 
@@ -4442,8 +4444,8 @@ signal drop or want to log off, Nextflow will not crash.
 #### Tutorial Pathogen Genomics - Results
 
 Assuming the run completed without any crashes (if problems do occur, check all
-against [#usage](usage.md) all parameters are as expected, or check the
-[FAQ](../faq.md)), we can now check our results in `results/`.
+against [#usage](#pipeline-options) all parameters are as expected, or check the
+[FAQ](#troubleshooting-and-faqs), we can now check our results in `results/`.
 
 ##### Tutorial Pathogen Genomics - MultiQC Report
 
