@@ -2599,7 +2599,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   path(snp) from ch_snp_for_pileupcaller.collect().dump(tag: "Pileupcaller SNP file")
 
   output:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("pileupcaller.${strandedness}.*")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("pileupcaller.${strandedness}.*") into ch_for_eigenstrat_snp_coverage
 
   script:
   def use_bed = bed.getName() != 'nf-core_eager_dummy.txt' ? "-l ${bed}" : ''
@@ -2614,7 +2614,32 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   samtools mpileup -B -q 30 -Q 30 ${use_bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} ${use_snp} -e pileupcaller.${strandedness}
   """
  }
-
+ 
+ process eigenstrat_snp_coverage {
+   label 'mc_tiny'
+   tag "${strandedness}"
+   publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
+   
+   when:
+   params.run_genotyping && params.genotyping_tool == 'pileupcaller'
+   
+   input:
+   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") from ch_for_eigenstrat_snp_coverage.dump()
+   
+   output:
+   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.json") into ch_eigenstrat_snp_cov_for_multiqc
+   path("*_eigenstrat_coverage.txt")
+   
+   script:
+/*   """
+   eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
+   """*/
+   """
+   eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt
+   parse_snp_cov.py ${strandedness}_eigenstrat_coverage.txt
+   """
+ }
+ 
  process genotyping_angsd {
   label 'mc_small'
   tag "${samplename}"
@@ -3139,6 +3164,7 @@ process get_software_versions {
     endorS.py --version &> v_endorSpy.txt || true
     pileupCaller --version &> v_sequencetools.txt 2>&1 || true
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
+    eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -3176,6 +3202,7 @@ process multiqc {
     file ('kraken/*') from ch_kraken_for_multiqc.collect().ifEmpty([])
     file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
     file ('nuclear_contamination/*') from ch_nuclear_contamination_for_multiqc.collect().ifEmpty([])
+    file ('genotyping/*') from ch_eigenstrat_snp_cov_for_multiqc
 
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
