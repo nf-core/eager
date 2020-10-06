@@ -2631,6 +2631,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
    path("*_eigenstrat_coverage.txt")
    
    script:
+   // The following code block can be swapped in once the eigenstratdatabasetools MultiQC module becomes available.
 /*   """
    eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
    """*/
