@@ -1033,7 +1033,7 @@ For example
 ```
 
 It is important to use the paired-end wildcard globbing as `--skip_collapse`
-can only be used on paired-end data! :warning: If you run this and also with
+can only be used on paired-end data! :warning: If you provide this option together with
 `--clip_readlength` set to something (as is by default), you may end up
 removing single reads from either the pair1 or pair2 file. These will be NOT
 be mapped when aligning with either `bwa` or `bowtie`, as both can only accept
@@ -1114,7 +1114,7 @@ These parameters configure mapping algorithm parameters.
 
 ##### `--bwaalnn`
 
-Defineshow many mismatches from the reference are allowed in a read. By default
+Defines how many mismatches from the reference are allowed in a read. By default
 set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC
 Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what
 to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App
@@ -2371,7 +2371,7 @@ Unable to acquire lock on session with ID 84333844-66e3-4846-a664-b446d070f775
 ```
 
 Normally suggest a previous nextflow run (on the same folder) was not cleanly
-killed by a user (e.g. using ctrl + z to hard kill an crashed run).
+killed by a user (e.g. using ctrl + z to hard kill a crashed run).
 
 To fix this, you must clean the entirety of the output directory (including
 output files) e.g. with `rm -r <output_dir>/* <output_dir>/.*` and re-running
@@ -2917,7 +2917,7 @@ This tutorial will give a basic example on how to set up nf-core/eager to
 perform initial screening of samples in the context of ancient human population
 genetics research.
 
-> :warning: this tutorial does not describe how to install and set-up
+> :warning: this tutorial does not describe how to install and set up
 > nf-core/eager For this please see other documentation on the
 > [nf-co.re](https://nf-co.re/usage/installation) website.
 
@@ -3532,7 +3532,7 @@ dental calculus (oral). This tutorial will give a basic example on how to set up
 nf-core/eager to perform initial screening of samples in the context of ancient
 microbiome research.
 
-> :warning: this tutorial does not describe how to install and set-up
+> :warning: this tutorial does not describe how to install and set up
 > nf-core/eager For this please see other documentation on the
 > [nf-co.re](https://nf-co.re/usage/installation) website.
 

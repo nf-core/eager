@@ -3402,7 +3402,7 @@ def extract_data(tsvFile) {
             if (!colour == 2 && !colour == 4) exit 1, "[nf-core/eager] error: Colour chemistry in TSV can either be 2 (e.g. NextSeq/NovaSeq) or 4 (e.g. HiSeq/MiSeq)"
 
             //  Ensure that we do not accept incompatible chemistry setup
-            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "[nf-core/eager] error:  SeqType for one or more rows in TSV is neither SE nor PE! see --help or documentation under 'running the pipeline' for more information. You have: '${seqtype}''"
+            if (!seqtype.matches('PE') && !seqtype.matches('SE')) exit 1, "[nf-core/eager] error:  SeqType for one or more rows in TSV is neither SE nor PE! see --help or documentation under 'running the pipeline' for more information. You have: '${seqtype}'"
             
            // So we don't accept existing files that are wrong format: e.g. fasta or sam
             if ( !r1.matches('NA') && !has_extension(r1, "fastq.gz") && !has_extension(r1, "fq.gz") && !has_extension(r1, "fastq") && !has_extension(r1, "fq")) exit 1, "[nf-core/eager] error: A specified R1 file either has a non-recognizable FASTQ extension or is not NA. See --help or documentation under 'running the pipeline' for more information. Check: ${r1}"

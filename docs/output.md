@@ -304,7 +304,7 @@ FastP is a general pre-processing toolkit for Illumina sequencing data. In nf-co
 
 While the machine should detect a reduction in base-calling quality, this is not always the case and you will retain these tails in your FASTQ files. This can cause skews in GC content and false positive SNP calls when the reference genome has long mono-nucleotide stretches (typically in larger eukaryotic genomes).
 
-In the case of dual-indexed paired-end sequencing, it is likely poly-G tails are less of an issue as during your adapterRemoval step, anything passed the adapter will be clipped off anyway. However you can check this under the 'Per Sequence GC Content' plot in FastQC.
+In the case of dual-indexed paired-end sequencing, it is likely poly-G tails are less of an issue as during your AdapterRemoval step, anything passed the adapter will be clipped off anyway. However you can check this under the 'Per Sequence GC Content' plot in FastQC.
 
 > **NB:** As you are more likely to see this at the end of the run, in paired-end data you should see all 'Read 2' data having a higher GC content distribution than the 'Read 1'
 
