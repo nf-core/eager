@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#544](https://github.com/nf-core/eager/pull/544) Add script to perform bam filtering on fragment length
 * [#456](https://github.com/nf-core/eager/pull/546) Bumps the base (default) runtime of all processes to 4 hours, and set shorter timelimits for test profiles (1 hour)
 * [#552](https://github.com/nf-core/eager/issues/552) Adds optional creation of MALT SAM files alongside RMA6 files.
+* Added eigenstrat snp coverage statistics to MultiQC report. Process results are published in `genotyping/*_eigenstrat_coverage.txt`.
 
 ### `Fixed`
 
