@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#544](https://github.com/nf-core/eager/pull/544) Add script to perform bam filtering on fragment length
 * [#456](https://github.com/nf-core/eager/pull/546) Bumps the base (default) runtime of all processes to 4 hours, and set shorter timelimits for test profiles (1 hour)
 * [#552](https://github.com/nf-core/eager/issues/552) Adds optional creation of MALT SAM files alongside RMA6 files.
+* Added eigenstrat snp coverage statistics to MultiQC report. Process results are published in `genotyping/*_eigenstrat_coverage.txt`.
 
 ### `Fixed`
 
@@ -61,11 +62,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Corrected header of nuclear contamination table (`nuclear_contamination.txt`).
 * Fixed a bug with `nSNPs` definition in `print_x_contamination.py`. Number of SNPs now correctly reported.
 * `print_x_contamination.py` now correctly converts all NA values to "N/A".
+* Increased amount of memory MultiQC by default uses, to account for very large nf-core/eager runs (e.g. >1000 samples).
 
 ### `Dependencies`
 
 * Added Sequencetools (1.4.0.6) that adds the ability to do genotyping with the 'pileupCaller'
 * Latest version of DeDup (0.12.6) which now reports mapped reads after deduplication
+* [#560] Latest version of Dedup (0.12.7), which now correctly reports deduplication statistics based on calculations of mapped reads only (prior denominator was total reads of BAM file)
 * Latest version of ANGSD (0.933) which doesn't seg fault when running contamination on BAMs with insufficient reads
 * Latest version of MultiQC (1.9) with support for lots of extra tools in the pipeline (MALT, SexDetERRmine, DamageProfiler, MultiVCFAnalyzer)
 * Latest versions of Pygments (7.1), Pymdown-Extensions (2.6.1) and Markdown (3.2.2) for documentation output
