@@ -4430,7 +4430,6 @@ nextflow run nf-core/eager \
 --min_allele_freq_hom 0.9 \
 --min_allele_freq_het 0.1 \
 --additional_vcf_files '../vcfs/*.vcf.gz'
-<...>
 ```
 
 For the two `min_allele_freq` parameters we specify that anything above 90%
