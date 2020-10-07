@@ -311,19 +311,19 @@ if ( params.genome && !params.genomes.containsKey(params.genome)) {
 
 // Mapper validation
 if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem' && !params.mapper == "bowtie2"){
-    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: 'bwaaln'. You gave: --mapper '${params.mapper}'."
+    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: 'bwaaln'. Found parameter: --mapper '${params.mapper}'."
 }
 
 if (params.mapper == 'bowtie2' && params.bt2_alignmode != 'local' && params.bt2_alignmode != 'end-to-end' ) {
-    exit 1, "[nf-core/eager] error: invalid bowtie2 alignment mode. Options: 'local', 'end-to-end'. You gave: -bt2_alignmode '${params.bt2_alignmode}'"
+    exit 1, "[nf-core/eager] error: invalid bowtie2 alignment mode. Options: 'local', 'end-to-end'. Found parameter: --bt2_alignmode '${params.bt2_alignmode}'"
 }
 
 if (params.mapper == 'bowtie2' && params.bt2_sensitivity != 'no-preset' && params.bt2_sensitivity != 'very-fast' && params.bt2_sensitivity != 'fast' && params.bt2_sensitivity != 'sensitive' && params.bt2_sensitivity != 'very-sensitive' ) {
-    exit 1, "[nf-core/eager] error: invalid bowtie2 sensitivity mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Options are for both alignmodes You gave: --bt2_sensitivity '${params.bt2_sensitivity}'."
+    exit 1, "[nf-core/eager] error: invalid bowtie2 sensitivity mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Options are for both alignmodes Found parameter: --bt2_sensitivity '${params.bt2_sensitivity}'."
 }
 
 if (params.bt2n != 0 && params.bt2n != 1) {
-    exit 1, "[nf-core/eager] error: invalid bowtie2 --bt2n (-N) parameter. Options: 0, 1. You gave: --bt2n ${params.bt2n}."
+    exit 1, "[nf-core/eager] error: invalid bowtie2 --bt2n (-N) parameter. Options: 0, 1. Found parameter: --bt2n ${params.bt2n}."
 
 }
 
@@ -368,12 +368,21 @@ if (params.hostremoval_input_fastq){
 }
 
 if (params.bam_unmapped_type == '') {
-    exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'keep', 'bam', 'fastq', 'both'. You gave --bam_unmapped_type '${params.bam_unmapped_type}'."
+    exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'keep', 'bam', 'fastq', 'both'. Found parameter: --bam_unmapped_type '${params.bam_unmapped_type}'."
 }
 
 // Bedtools validation
 if(params.run_bedtools_coverage && params.anno_file == ''){
   exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
+}
+
+// Set up channels for annotation file
+if (!params.run_bedtools_coverage){
+  ch_anno_for_bedtools = Channel.empty()
+} else {
+  Channel
+    ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
+    .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --anno_file ${params.anno_file}."}
 }
 
 // BAM filtering validation
@@ -387,17 +396,24 @@ if (params.run_bam_filtering && params.bam_unmapped_type != 'discard' && params.
 
 // Deduplication validation
 if (params.dedupper != 'dedup' && params.dedupper != 'markduplicates') {
-  exit 1, "[nf-core/eager] error: Selected deduplication tool is not recognised. Options: 'dedup' or 'markduplicates'. You gave: --dedupper '${params.dedupper}'."
+  exit 1, "[nf-core/eager] error: Selected deduplication tool is not recognised. Options: 'dedup' or 'markduplicates'. Found parameter: --dedupper '${params.dedupper}'."
 }
 
 if (params.dedupper == 'dedup' && !params.mergedonly) {
     log.warn "[nf-core/eager] Warning: you are using DeDup but without specifying --mergedonly for AdapterRemoval, dedup will likely fail! See documentation for more information."
 }
 
+// SexDetermination channel set up and bedfile validation
+if (params.sexdeterrmine_bedfile == '') {
+  ch_bed_for_sexdeterrmine = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy.txt")
+} else {
+  ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile, checkIfExists: true)
+}
+
 // Genotyping validation
 if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' && params.genotyping_tool != 'angsd' ) {
-  exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. You gave: --genotyping_tool '${params.genotyping_tool}'."
+  exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
   }
 
   if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
@@ -405,27 +421,27 @@ if (params.run_genotyping){
   }
 
   if (params.genotyping_tool == 'ug' && !params.gatk_ug_jar.endsWith('.jar') ) {
-    exit 1, "[nf-core/eager] error: please specify path with --gatk_ug_jar to a valid GATK 3.5 binary that ends with .jar!. You gave: --gatk_ug_jar '${params.gatk_ug_jar}'."
+    exit 1, "[nf-core/eager] error: please specify path with --gatk_ug_jar to a valid GATK 3.5 binary that ends with .jar!. Found parameter: --gatk_ug_jar '${params.gatk_ug_jar}'."
   }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
-  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: --gatk_ug_out_mode '${params.gatk_out_mode}'."
+  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Found parameter: --gatk_ug_out_mode '${params.gatk_out_mode}'."
   }
 
   if (params.gatk_hc_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_hc_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_hc_out_mode != 'EMIT_ALL_ACTIVE_SITES') {
-  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. You gave: --gatk_out_mode '${params.gatk_out_mode}'."
+  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Found parameter: --gatk_out_mode '${params.gatk_out_mode}'."
   }
   
   if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "[nf-core/eager] error: please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. You gave: --gatk_ug_genotype_model '${params.gatk_ug_genotype_model}'."
+    exit 1, "[nf-core/eager] error: please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. Found parameter: --gatk_ug_genotype_model '${params.gatk_ug_genotype_model}'."
   }
 
   if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "[nf-core/eager] error: please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. You gave: --gatk_hc_emitrefconf '${params.gatk_hc_emitrefconf}'."
+    exit 1, "[nf-core/eager] error: please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. Found parameter: --gatk_hc_emitrefconf '${params.gatk_hc_emitrefconf}'."
   }
 
   if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_method == 'randomHaploid' || params.pileupcaller_method == 'randomDiploid' || params.pileupcaller_method == 'majorityCall' ) ) {
-  	exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. You gave: --pileupcaller_method '${params.pileupcaller_method}'."
+    exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. Found parameter: --pileupcaller_method '${params.pileupcaller_method}'."
   }
 
   if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile == '' ) ) {
@@ -433,11 +449,11 @@ if (params.run_genotyping){
   }
 
   if (params.genotyping_tool == 'angsd' && ! ( params.angsd_glmodel == 'samtools' || params.angsd_glmodel == 'gatk' || params.angsd_glmodel == 'soapsnp' || params.angsd_glmodel == 'syk' ) ) {
-    exit 1, "[nf-core/eager] error: please check your ANGSD genotyping model! Options: 'samtools', 'gatk', 'soapsnp', 'syk'. You gave: --angsd_glmodel' ${params.angsd_glmodel}'."
+    exit 1, "[nf-core/eager] error: please check your ANGSD genotyping model! Options: 'samtools', 'gatk', 'soapsnp', 'syk'. Found parameter: --angsd_glmodel' ${params.angsd_glmodel}'."
   }
 
   if (params.genotyping_tool == 'angsd' && ! ( params.angsd_glformat == 'text' || params.angsd_glformat == 'binary' || params.angsd_glformat == 'binary_three' || params.angsd_glformat == 'beagle' ) ) {
-    exit 1, "[nf-core/eager] error: please check your ANGSD genotyping model! Options: 'text', 'binary', 'binary_three', 'beagle'. You gave: --angsd_glmodel '${params.angsd_glmodel}'."
+    exit 1, "[nf-core/eager] error: please check your ANGSD genotyping model! Options: 'text', 'binary', 'binary_three', 'beagle'. Found parameter: --angsd_glmodel '${params.angsd_glmodel}'."
   }
 
   if ( !params.angsd_createfasta && params.angsd_fastamethod != 'random' ) {
@@ -445,12 +461,36 @@ if (params.run_genotyping){
   }
 
   if ( params.angsd_createfasta && !( params.angsd_fastamethod == 'random' || params.angsd_fastamethod == 'common' ) ) {
-    exit 1, "[nf-core/eager] error: please check your ANGSD FASTA file creation method. Options: 'random', 'common'. You gave: --angsd_fastamethod '${params.angsd_fastamethod}'."
+    exit 1, "[nf-core/eager] error: please check your ANGSD FASTA file creation method. Options: 'random', 'common'. Found parameter: --angsd_fastamethod '${params.angsd_fastamethod}'."
   }
- 
+
   if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_transitions_mode == 'AllSites' || params.pileupcaller_transitions_mode == 'TransitionsMissing' || params.pileupcaller_transitions_mode == 'SkipTransitions') ) {
-    exit 1, "[nf-core/eager] error: please check your pileupCaller transitions mode parameter. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'. You gave: ${params.pileupcaller_transitions_mode}"
+    exit 1, "[nf-core/eager] error: please check your pileupCaller transitions mode parameter. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'. Found parameter: --pileupcaller_transitions_mode '${params.pileupcaller_transitions_mode}'"
   }
+}
+
+// check manually supplied UG JAR found
+if ( params.gatk_ug_jar != '' ) {
+  Channel
+    .fromPath( params.gatk_ug_jar, checkIfExists: true )
+    .set{ ch_unifiedgenotyper_jar }
+} else {
+  Channel
+    .empty()
+    .set{ ch_unifiedgenotyper_jar }
+}
+
+ // pileupCaller channel generation and input checks for 'random sampling' genotyping
+if (params.pileupcaller_bedfile.isEmpty()) {
+  ch_bed_for_pileupcaller = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy.txt")
+} else {
+  ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile, checkIfExists: true)
+}
+
+if (params.pileupcaller_snpfile.isEmpty ()) {
+  ch_snp_for_pileupcaller = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy2.txt")
+} else {
+  ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile, checkIfExists: true)
 }
 
 // Consensus sequence generation validation
@@ -460,7 +500,7 @@ if (params.run_vcf2genome) {
     }
 
     if (params.genotyping_tool != 'ug') {
-      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters."
+      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
     }
 }
 
@@ -471,26 +511,30 @@ if (params.run_multivcfanalyzer) {
   }
 
   if (params.genotyping_tool != "ug") {
-    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Please check your genotyping parameters."
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
   }
 
-  if (params.gatk_ploidy != '2') {
-    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Please check your genotyping parameters."
+  if (params.gatk_ploidy != 2) {
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Found parameter: --gatk_ploidy ${params.gatk_ploidy}."
+  }
+
+  if (params.additional_vcf_files != '') {
+      ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files, checkIfExists: true)
   }
 }
 
 // Metagenomic validation
 if (params.run_metagenomic_screening) {
   if ( params.bam_unmapped_type == "discard" ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'."
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Suppled: --bam_unmapped_type '${params.bam_unmapped_type}'."
   }
 
   if (params.bam_unmapped_type != 'fastq' ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTQ format. Please supply --bam_unmapped_type 'fastq'. You gave: --bam_unmapped_type '${params.bam_unmapped_type}'."
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTQ format. Please supply --bam_unmapped_type 'fastq'. Found parameter: --bam_unmapped_type '${params.bam_unmapped_type}'."
   }
 
   if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
-    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. You gave: --metagenomic_tool '${params.metagenomic_tool}'."
+    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifer. Found parameter: --metagenomic_tool '${params.metagenomic_tool}'."
   }
 
   if (params.database == '' ) {
@@ -498,11 +542,11 @@ if (params.run_metagenomic_screening) {
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
-    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. You gave: --malt_mode '${params.malt_mode}'."
+    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. Found parameter: --malt_mode '${params.malt_mode}'."
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
-    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. You gave: --malt_alignment_mode '${params.malt_alignment_mode}'."
+    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. Found parameter: --malt_alignment_mode '${params.malt_alignment_mode}'."
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
@@ -514,23 +558,30 @@ if (params.run_metagenomic_screening) {
   }
 
   if (params.metagenomic_tool == 'malt' && params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
-    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. You gave: --malt_memory_mode '${params.malt_memory_mode}'."
+    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. Found parameter: --malt_memory_mode '${params.malt_memory_mode}'."
   }
 
   if (!params.metagenomic_min_support_reads.toString().isInteger()){
-    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. --metagenomic_min_support_reads You gave: ${params.metagenomic_min_support_reads}."
+    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. --metagenomic_min_support_reads Found parameter: ${params.metagenomic_min_support_reads}."
   }
+}
+
+// Create input channel for MALT database directory, checking directory exists
+if ( params.database == '') {
+    ch_db_for_malt = Channel.empty()
+} else {
+    ch_db_for_malt = Channel.fromPath(params.database, checkIfExists: true)
 }
 
 // MaltExtract validation
 if (params.run_maltextract) {
 
   if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
-    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'."
+    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'. Found parameter: --metagenomic_tool '${params.metagenomic_tool}'"
   }
 
   if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
-    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'."
+    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'. Found parameter: --metagenomic_tool '${params.metagenomic_tool}'"
   }
 
   if (params.maltextract_taxon_list == '') {
@@ -538,10 +589,25 @@ if (params.run_maltextract) {
   }
 
   if (params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
-    exit 1, "[nf-core/eager] error: unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. You gave: --maltextract_filter '${params.maltextract_filter}'."
+    exit 1, "[nf-core/eager] error: unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. Found parameter: --maltextract_filter '${params.maltextract_filter}'."
   }
 
 }
+
+// Create input channel for MaltExtract taxon list, to allow downloading of taxon list, checking file exists.
+if ( params.maltextract_taxon_list== '' ) {
+    ch_taxonlist_for_maltextract = Channel.empty()
+} else {
+    ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list, checkIfExists: true)
+}
+
+// Create input channel for MaltExtract NCBI files, checking files exists.
+if ( params.maltextract_ncbifiles == '' ) {
+    ch_ncbifiles_for_maltextract = Channel.empty()
+} else {
+    ch_ncbifiles_for_maltextract = Channel.fromPath(params.maltextract_ncbifiles, checkIfExists: true)
+}
+
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
@@ -625,12 +691,12 @@ ch_input_sample_check
     }
     .collect()
     .map{
-       file -> 
-       filenames = file
-       filenames -= 'NA'
-       
-       if( filenames.size() != filenames.unique().size() )
-           exit 1, "[nf-core/eager] error: You have duplicate input FASTQ and/or BAM file names! All files must have unique names, different directories are not sufficent. Please check your input."
+      file -> 
+      filenames = file
+      filenames -= 'NA'
+      
+      if( filenames.size() != filenames.unique().size() )
+          exit 1, "[nf-core/eager] error: You have duplicate input FASTQ and/or BAM file names! All files must have unique names, different directories are not sufficent. Please check your input."
     }
 
 // Drop samples with R1/R2 to fastQ channel, BAM samples to other channel
@@ -1656,7 +1722,7 @@ ch_fastqlanemerge_for_hostremovalfastq
         def bam = it[7][1]
         def bai = it[8][1]
 
-       [ samplename, libraryid, seqtype, organism, strandedness, udg, r1, r2, bam, bai ]
+      [ samplename, libraryid, seqtype, organism, strandedness, udg, r1, r2, bam, bai ]
 
     }
     .filter{ it[8] != null }
@@ -2173,14 +2239,6 @@ process preseq {
 
 // Optional mapping statistics for specific annotations - e.g. genes in bacterial genome
 
-// Set up channels for annotation file
-if (!params.run_bedtools_coverage){
-  ch_anno_for_bedtools = Channel.empty()
-} else {
-  Channel
-    ch_anno_for_bedtools = Channel.fromPath(params.anno_file)
-}
-
 process bedtools {
   label 'mc_small'
   tag "${libraryid}"
@@ -2420,36 +2478,26 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
-   ch_output_from_pmdtools
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+  ch_output_from_pmdtools
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( !params.run_genotyping && params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 }
 
 // Unified Genotyper - although not-supported, better for aDNA (because HC does de novo assembly which requires higher coverages), and needed for MultiVCFAnalyzer
 
-if ( params.gatk_ug_jar != '' ) {
-  Channel
-    .fromPath( params.gatk_ug_jar )
-    .set{ ch_unifiedgenotyper_jar }
-} else {
-  Channel
-    .empty()
-    .set{ ch_unifiedgenotyper_jar }
-}
-
- process genotyping_ug {
+process genotyping_ug {
   label 'mc_small'
   tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode, pattern: '*{.vcf.gz,.realign.bam,realign.bai}'
@@ -2493,11 +2541,11 @@ if ( params.gatk_ug_jar != '' ) {
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
- }
+}
 
  // HaplotypeCaller as 'best practise' tool for human DNA in particular 
 
- process genotyping_hc {
+process genotyping_hc {
   label 'mc_small'
   tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
@@ -2526,11 +2574,11 @@ if ( params.gatk_ug_jar != '' ) {
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
     pigz -p ${task.cpus} ${samplename}.haplotypecaller.vcf
     """
- }
+}
 
  // Freebayes for 'more efficient/simple' and more generic genotyping (vs HC) 
 
- process genotyping_freebayes {
+process genotyping_freebayes {
   label 'mc_small'
   tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
@@ -2553,40 +2601,27 @@ if ( params.gatk_ug_jar != '' ) {
   freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${samplename}.freebayes.vcf
   pigz -p ${task.cpus} ${samplename}.freebayes.vcf
   """
- }
-
- // pileupCaller for 'random sampling' genotyping
-
-if (params.pileupcaller_bedfile.isEmpty()) {
-  ch_bed_for_pileupcaller = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy.txt")
-} else {
-  ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile)
 }
 
-if (params.pileupcaller_snpfile.isEmpty ()) {
-  ch_snp_for_pileupcaller = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy2.txt")
-} else {
-  ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile)
-}
 
  // Branch channel by strandedness
- ch_damagemanipulation_for_genotyping_pileupcaller
-   .branch{
-       singleStranded: it[5] == "single"
-       doubleStranded: it[5] == "double"
-   }
-   .set{ch_input_for_genotyping_pileupcaller}
- 
+ch_damagemanipulation_for_genotyping_pileupcaller
+  .branch{
+      singleStranded: it[5] == "single"
+      doubleStranded: it[5] == "double"
+  }
+  .set{ch_input_for_genotyping_pileupcaller}
+
  // Create pileupcaller input tuples
- ch_input_for_genotyping_pileupcaller.singleStranded
-   .groupTuple(by:[5])
-   .set {ch_prepped_for_pileupcaller_single}
+ch_input_for_genotyping_pileupcaller.singleStranded
+  .groupTuple(by:[5])
+  .set {ch_prepped_for_pileupcaller_single}
 
- ch_input_for_genotyping_pileupcaller.doubleStranded
-   .groupTuple(by:[5])
-   .set {ch_prepped_for_pileupcaller_double}
+ch_input_for_genotyping_pileupcaller.doubleStranded
+  .groupTuple(by:[5])
+  .set {ch_prepped_for_pileupcaller_double}
 
- process genotyping_pileupcaller {
+process genotyping_pileupcaller {
   label 'mc_small'
   tag "${strandedness}"
   publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
@@ -2617,9 +2652,9 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   """
   samtools mpileup -B -q 30 -Q 30 ${use_bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} ${use_snp} -e pileupcaller.${strandedness}
   """
- }
+}
 
- process genotyping_angsd {
+process genotyping_angsd {
   label 'mc_small'
   tag "${samplename}"
   publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
@@ -2665,7 +2700,7 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   mkdir angsd
   angsd -bam bam.filelist -nThreads ${task.cpus} -GL ${angsd_glmodel} -doGlF ${angsd_glformat} ${angsd_fasta} -out ${samplename}.angsd
   """
- }
+}
 
 ////////////////////////////////////
 /* --    CONSENSUS CALLING     -- */
@@ -2701,15 +2736,14 @@ process vcf2genome {
 
 // More complex consensus caller with additional filtering functionality (e.g. for heterozygous calls) to generate SNP tables and other things sometimes used in aDNA bacteria studies
 
-// Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs
+// Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs.
 if (params.additional_vcf_files == '') {
     ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[7] }.collect()
 } else {
-    ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files)
     ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it [7] }.collect().mix(ch_extravcfs_for_multivcfanalyzer)
 }
 
- process multivcfanalyzer {
+process multivcfanalyzer {
   label  'mc_small'
   publishDir "${params.outdir}/multivcfanalyzer", mode: params.publish_dir_mode
 
@@ -2769,12 +2803,6 @@ if (params.additional_vcf_files == '') {
  }
 
 // Human biological sex estimation
-
-if (params.sexdeterrmine_bedfile == '') {
-  ch_bed_for_sexdeterrmine = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy.txt")
-} else {
-  ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile)
-}
 
 // As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
 process sex_deterrmine {
@@ -2872,15 +2900,6 @@ if (params.metagenomic_tool == 'malt') {
 
 }
 
-
-// Stage database files
-// Create input channel for MaltExtract taxon list, to allow downloading of taxon list
-if ( params.database == '') {
-    ch_db_for_malt = Channel.empty()
-} else {
-    ch_db_for_malt = Channel.fromPath(params.database, checkIfExists: true)
-}
-
 // As we collect all files for a single MALT run, we DO NOT use the normal input/output tuple
 process malt {
   label 'mc_small'
@@ -2922,20 +2941,6 @@ process malt {
   --memoryMode ${params.malt_memory_mode} \
   -i ${fastqs.join(' ')} |&tee malt.log
   """
-}
-
-// Create input channel for MaltExtract taxon list, to allow downloading of taxon list
-if ( params.maltextract_taxon_list== '' ) {
-    ch_taxonlist_for_maltextract = Channel.empty()
-} else {
-    ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list, checkIfExists: true)
-}
-
-// Create input channel for MaltExtract NCBI files
-if ( params.maltextract_ncbifiles == '' ) {
-    ch_ncbifiles_for_maltextract = Channel.empty()
-} else {
-    ch_ncbifiles_for_maltextract = Channel.fromPath(params.maltextract_ncbifiles, checkIfExists: true)
 }
 
 // MaltExtract performs aDNA evaluation from the output of MALT (damage patterns, read lengths etc.)
