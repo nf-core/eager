@@ -397,7 +397,7 @@ wildcards (`*`) e.g.:
 6. Due to limitations of downstream tools (e.g. FastQC), sample IDs maybe
    truncated after the first `.` in the name, Ensure file names are unique prior
    to this!
-7. For input BAM files  you should provide small decoy reference genome with
+7. For input BAM files you should provide small decoy reference genome with
    pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory
    parameter `--fasta` in order to avoid long computational time for generating
    the index files of the reference genome, even if you do not actual need a
