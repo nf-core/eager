@@ -542,7 +542,7 @@ Note the following important points and limitations for setting up:
   - If truly you want to mix SE data and PE data but using mate-pair info for PE
     mapping, please run FASTQ preprocessing mapping manually and supply BAM
     files for downstream processing by nf-core/eager
-  - If you _regularly_ want to run the situation above, please leave an feature
+  - If you _regularly_ want to run the situation above, please leave a feature
     request on github.
 - DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on
   each unique library separately after deduplication (but prior same-treated
