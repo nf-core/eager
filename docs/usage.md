@@ -1032,7 +1032,7 @@ For example
 --skip_collapse  --input '*_{R1,R2}_*.fastq'
 ```
 
-It is important to use the paired-end wildcard globbing as `--skip_collapse`
+It is important to use the paired-end wildcard globbing, as `--skip_collapse`
 can only be used on paired-end data! :warning: If you provide this option together with
 `--clip_readlength` set to something (as is by default), you may end up
 removing single reads from either the pair1 or pair2 file. These will be NOT
