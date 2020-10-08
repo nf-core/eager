@@ -643,7 +643,7 @@ An ideal plot for this is to see an increasing curve, representing larger greate
 
 #### GC Content Distribution
 
-This plot shows the distribution of th frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
+This plot shows the distribution of the frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
 
 <p align="center">
   <img src="images/output/qualimap/qualimap_gc_content_distribution.png" width="75%" height = "75%">
