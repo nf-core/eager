@@ -3995,7 +3995,7 @@ SNP calling and producing an SNP alignment for its usage in phylogenetic
 analysis.
 
 I will use as an example data from [Andrades Valtueña et al
-2017](https://doi.org/10.1016/j.cub.2017.10.025), who retrieved Neolithic/Bronze
+2017](https://doi.org/10.1016/j.cub.2017.10.025), who retrieved Late Neolithic/Bronze
 Age _Yersinia pestis_ genomes. This data is **very large shotgun data** and is
 not ideal for testing, so running on your own data is recommended as otherwise
 running this data will require a lot of computing resources and time. However,
