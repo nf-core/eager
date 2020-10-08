@@ -4464,7 +4464,7 @@ General Stats Table:
 - Does the percentage of trimmed reads look normal for aDNA, and do lengths
   after trimming look short as expected of aDNA?
 - Does the Endogenous DNA (%) columns look reasonable (high enough to indicate
-  you have recieved enough coverage for downstream, and/or do you lose an
+  you have received enough coverage for downstream, and/or do you lose an
   unusually high reads after filtering )
 - Does ClusterFactor or '% Dups' look high (e.g. >2 or >10% respectively -  high
   values suggesting over-amplified or badly preserved samples (i.e. low
