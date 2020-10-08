@@ -668,7 +668,7 @@ For example:
 ```
 
 You need to provide an input FASTA even if you do not do any mapping (e.g.
-supplying BAM files). You should small decoy reference genome with pre-made
+supplying BAM files). You should use a small decoy reference genome with pre-made
 indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in
 order to avoid long computational time for generating the index files of the
 reference genome.
