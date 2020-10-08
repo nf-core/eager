@@ -4386,7 +4386,7 @@ nextflow run nf-core/eager \
 Finally we can set up MultiVCFAnalyzer itself. First we want to make sure we
 specified that we want to report the frequency of the given called allele at each
 position so we can assess cross mapping, and then often with ancient pathogens,
-such as _Y. pestis_, we want to also to add to the SNP table comparative data
+such as _Y. pestis_, we want to also include to the SNP table comparative data
 from previously published and ancient genomes. For this we specify additional
 VCF files that have been generated in previous runs with the same settings and
 reference genome. We can do this as follows.
