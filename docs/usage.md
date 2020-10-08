@@ -4236,7 +4236,7 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-While some of our input data is paired-end, we will be using keep with the
+While some of our input data is paired-end, we will keep with the
 default of Picard's 'MarkDuplicates' for duplicate removal for duplicate
 removal, which takes into account both the start and end of a merged read before
 flagging it as a duplicate. We can then specify which dedupper we want to use
