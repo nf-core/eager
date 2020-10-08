@@ -3988,7 +3988,7 @@ pathogenomic research.
 > [nf-co.re](https://nf-co.re/usage/installation) website.
 
 We will describe how to set up mapping ancient pathogen samples against the
-reference of a targeted organism genome, to allow sequencing and library
+reference of a targeted organism genome, to check sequencing and library
 quality-control, calculation of depth and breath of coverage, check for damage
 profiles, feature-annotation statistics (e.g. for gene presence and absence),
 SNP calling and producing an SNP alignment for its usage in phylogenetic
