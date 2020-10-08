@@ -542,7 +542,7 @@ Note the following important points and limitations for setting up:
   - If truly you want to mix SE data and PE data but using mate-pair info for PE
     mapping, please run FASTQ preprocessing mapping manually and supply BAM
     files for downstream processing by nf-core/eager
-  - If you _regularly_ want to run the situation above, please leave an feature
+  - If you _regularly_ want to run the situation above, please leave a feature
     request on github.
 - DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on
   each unique library separately after deduplication (but prior same-treated
@@ -668,7 +668,7 @@ For example:
 ```
 
 You need to provide an input FASTA even if you do not do any mapping (e.g.
-supplying BAM files). You should supply a small decoy reference genome with pre-made
+supplying BAM files). You should use a small decoy reference genome with pre-made
 indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in
 order to avoid long computational time for generating the index files of the
 reference genome.
@@ -1032,7 +1032,7 @@ For example
 --skip_collapse  --input '*_{R1,R2}_*.fastq'
 ```
 
-It is important to use the paired-end wildcard globbing as `--skip_collapse`
+It is important to use the paired-end wildcard globbing, as `--skip_collapse`
 can only be used on paired-end data! :warning: If you provide this option together with
 `--clip_readlength` set to something (as is by default), you may end up
 removing single reads from either the pair1 or pair2 file. These will be NOT
@@ -3998,14 +3998,14 @@ pathogenomic research.
 > [nf-co.re](https://nf-co.re/usage/installation) website.
 
 We will describe how to set up mapping ancient pathogen samples against the
-reference of a targeted organism genome, to allow sequencing and library
+reference of a targeted organism genome, to check sequencing and library
 quality-control, calculation of depth and breath of coverage, check for damage
 profiles, feature-annotation statistics (e.g. for gene presence and absence),
 SNP calling and producing an SNP alignment for its usage in phylogenetic
 analysis.
 
 I will use as an example data from [Andrades Valtueña et al
-2017](https://doi.org/10.1016/j.cub.2017.10.025), who retrieved Neolithic/Bronze
+2017](https://doi.org/10.1016/j.cub.2017.10.025), who retrieved Late Neolithic/Bronze
 Age _Yersinia pestis_ genomes. This data is **very large shotgun data** and is
 not ideal for testing, so running on your own data is recommended as otherwise
 running this data will require a lot of computing resources and time. However,
@@ -4404,13 +4404,13 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-Finally we can set up MultiVCFAnalyzer itself. First we ant to make sure we
-specified we want to report the frequency of the given called allele at each
-position so we can assess cross mapping, and then often with ancient pathogens,
-such as _Y. pestis_, we want to also to add to the SNP table comparative data
-from previously published and ancient genomes. For this we specify additional
-VCF files that have been generated in previous runs with the same settings and
-reference genome. We can do this as follows.
+Finally we can set up MultiVCFAnalyzer itself. First we want to make sure we
+specified that we want to report the frequency of the given called allele at
+each position so we can assess cross mapping. Then, often with ancient
+pathogens, such as _Y. pestis_, we also want to include to the SNP table
+comparative data from previously published and ancient genomes. For this we
+specify additional VCF files that have been generated in previous runs with the
+same settings and reference genome. We can do this as follows.
 
 ```bash
 nextflow run nf-core/eager \
