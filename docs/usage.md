@@ -4286,8 +4286,8 @@ annotated parts of your reference genome, e.g. to see whether certain virulence
 factors present or absent. nf-core/eager offers some basic statistics (percent and
 and depth coverage) of these via Bedtools. We will therefore turn on this
 module and specify the GFF file we downloaded alongside our reference fasta.
-Note that this GFF file has a _lot_ of redundant data, so often a custom 
-BED file with just genees of interest is recommended. Furthermore
+Note that this GFF file has a _lot_ of redundant data, so often a custom
+BED file with just genes of interest is recommended. Furthermore
 
 ```bash
 nextflow run nf-core/eager \
