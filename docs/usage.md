@@ -2,245 +2,61 @@
 
 ## Table of contents
 
-<!-- TOC -->
+<!-- TOC depthfrom:2 depthto:3 -->
 
-- [nf-core/eager: Usage](#nf-coreeager-usage)
-  - [Table of contents](#table-of-contents)
-  - [Running the pipeline](#running-the-pipeline)
-    - [Quick Start](#quick-start)
-    - [Updating the pipeline](#updating-the-pipeline)
-    - [Reproducibility](#reproducibility)
-    - [Automatic Resubmission](#automatic-resubmission)
-  - [Core Nextflow arguments](#core-nextflow-arguments)
-    - [`-profile`](#-profile)
-    - [`-resume`](#-resume)
-    - [`-c`](#-c)
-      - [Custom resource requests](#custom-resource-requests)
-      - [`-name`](#-name)
-    - [Running in the background](#running-in-the-background)
-      - [Nextflow memory requirements](#nextflow-memory-requirements)
-  - [Pipeline Options](#pipeline-options)
-    - [Input](#input)
-      - [`--input`](#--input)
-        - [Direct Input Method](#direct-input-method)
-        - [TSV Input Method](#tsv-input-method)
-      - [`--udg_type`](#--udg_type)
-      - [`--single_stranded`](#--single_stranded)
-      - [`--single_end`](#--single_end)
-      - [`--colour_chemistry`](#--colour_chemistry)
-      - [`--bam`](#--bam)
-    - [Input Data Additional Options](#input-data-additional-options)
-      - [`--snpcapture_bed`](#--snpcapture_bed)
-      - [`--run_convertinputbam`](#--run_convertinputbam)
-    - [References](#references)
-      - [`--fasta`](#--fasta)
-      - [`--genome` (using iGenomes)](#--genome-using-igenomes)
-      - [`--bwa_index`](#--bwa_index)
-      - [`--bt2_index`](#--bt2_index)
-      - [`--fasta_index`](#--fasta_index)
-      - [`--seq_dict`](#--seq_dict)
-      - [`--large_ref`](#--large_ref)
-      - [`--save_reference`](#--save_reference)
-    - [Output](#output)
-      - [`--outdir`](#--outdir)
-      - [`-w / -work-dir`](#-w---work-dir)
-      - [`--publish_dir_mode`](#--publish_dir_mode)
-    - [Other run specific parameters](#other-run-specific-parameters)
-      - [`--max_memory`](#--max_memory)
-      - [`--max_time`](#--max_time)
-      - [`--max_cpus`](#--max_cpus)
-      - [`--email`](#--email)
-      - [`--email_on_fail`](#--email_on_fail)
-      - [`--plaintext_email`](#--plaintext_email)
-      - [`--monochrome_logs`](#--monochrome_logs)
-      - [`--multiqc_config`](#--multiqc_config)
-      - [`--custom_config_version`](#--custom_config_version)
-    - [Step skipping parameters](#step-skipping-parameters)
-      - [`--skip_fastqc`](#--skip_fastqc)
-      - [`--skip_adapterremoval`](#--skip_adapterremoval)
-      - [`--skip_preseq`](#--skip_preseq)
-      - [`--skip_deduplication`](#--skip_deduplication)
-      - [`--skip_damage_calculation`](#--skip_damage_calculation)
-      - [`--skip_qualimap`](#--skip_qualimap)
-    - [BAM Conversion Options](#bam-conversion-options)
-      - [`--run_convertinputbam`](#--run_convertinputbam)
-    - [Complexity Filtering Options](#complexity-filtering-options)
-      - [`--complexity_filter_poly_g`](#--complexity_filter_poly_g)
-      - [`--complexity_filter_poly_g_min`](#--complexity_filter_poly_g_min)
-    - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
-      - [`--clip_forward_adaptor`](#--clip_forward_adaptor)
-      - [`--clip_reverse_adaptor`](#--clip_reverse_adaptor)
-      - [`--clip_readlength`](#--clip_readlength)
-      - [`--clip_min_read_quality`](#--clip_min_read_quality)
-      - [`--clip_min_adap_overlap`](#--clip_min_adap_overlap)
-      - [`--skip_collapse`](#--skip_collapse)
-      - [`--skip_trim`](#--skip_trim)
-      - [`--preserve5p`](#--preserve5p)
-      - [`--mergedonly`](#--mergedonly)
-    - [Read Mapping Parameters](#read-mapping-parameters)
-      - [`--mapper`](#--mapper)
-      - [BWA (default)](#bwa-default)
-        - [`--bwaalnn`](#--bwaalnn)
-        - [`--bwaalnk`](#--bwaalnk)
-        - [`--bwaalnl`](#--bwaalnl)
-      - [CircularMapper](#circularmapper)
-        - [`--circularextension`](#--circularextension)
-        - [`--circulartarget`](#--circulartarget)
-        - [`--circularfilter`](#--circularfilter)
-      - [Bowtie2](#bowtie2)
-        - [`--bt2_alignmode`](#--bt2_alignmode)
-        - [`--bt2_sensitivity`](#--bt2_sensitivity)
-        - [`--bt2n`](#--bt2n)
-        - [`--bt2l`](#--bt2l)
-        - [`-bt2_trim5`](#-bt2_trim5)
-        - [`-bt2_trim3`](#-bt2_trim3)
-    - [Mapped Reads Stripping](#mapped-reads-stripping)
-      - [`--strip_input_fastq`](#--strip_input_fastq)
-      - [`--strip_mode`](#--strip_mode)
-    - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
-      - [`--run_bam_filtering`](#--run_bam_filtering)
-      - [`--bam_mapping_quality_threshold`](#--bam_mapping_quality_threshold)
-      - [`--bam_filter_minreadlength`](#--bam_filter_minreadlength)
-      - [`--bam_unmapped_type`](#--bam_unmapped_type)
-    - [Read DeDuplication Parameters](#read-deduplication-parameters)
-      - [`--dedupper`](#--dedupper)
-      - [`--dedup_all_merged`](#--dedup_all_merged)
-    - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
-      - [`--preseq_step_size`](#--preseq_step_size)
-    - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
-      - [`--udg_type`](#--udg_type)
-    - [Feature Annotation Statistics](#feature-annotation-statistics)
-      - [`--run_bedtools_coverage`](#--run_bedtools_coverage)
-      - [`--anno_file`](#--anno_file)
-    - [BAM Trimming Parameters](#bam-trimming-parameters)
-      - [`--run_trim_bam`](#--run_trim_bam)
-      - [`--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right`](#--bamutils_clip_half_udg_left----bamutils_clip_half_udg_right)
-      - [`--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`](#--bamutils_clip_none_udg_left----bamutils_clip_none_udg_right)
-      - [`--bamutils_softclip`](#--bamutils_softclip)
-    - [Genotyping Parameters](#genotyping-parameters)
-      - [`--run_genotyping`](#--run_genotyping)
-      - [`--genotyping_tool`](#--genotyping_tool)
-      - [`--genotyping_source`](#--genotyping_source)
-      - [`--gatk_ug_jar`](#--gatk_ug_jar)
-      - [`--gatk_call_conf`](#--gatk_call_conf)
-      - [`--gatk_ploidy`](#--gatk_ploidy)
-      - [`--gatk_downsample`](#--gatk_downsample)
-      - [`--gatk_dbsnp`](#--gatk_dbsnp)
-      - [`--gatk_hc_out_mode`](#--gatk_hc_out_mode)
-      - [`--gatk_hc_emitrefconf`](#--gatk_hc_emitrefconf)
-      - [`--gatk_ug_out_mode`](#--gatk_ug_out_mode)
-      - [`--gatk_ug_genotype_model`](#--gatk_ug_genotype_model)
-      - [`--gatk_ug_keep_realign_bam`](#--gatk_ug_keep_realign_bam)
-      - [`--gatk_ug_gatk_ug_defaultbasequalities`](#--gatk_ug_gatk_ug_defaultbasequalities)
-      - [`--freebayes_C`](#--freebayes_c)
-      - [`--freebayes_g`](#--freebayes_g)
-      - [`--freebayes_p`](#--freebayes_p)
-      - [`--pileupcaller_bedfile`](#--pileupcaller_bedfile)
-      - [`--pileupcaller_snpfile`](#--pileupcaller_snpfile)
-      - [`--pileupcaller_method`](#--pileupcaller_method)
-      - [`--pileupcaller_transitions_mode`](#--pileupcaller_transitions_mode)
-      - [`--angsd_glmodel`](#--angsd_glmodel)
-      - [`--angsd_glformat`](#--angsd_glformat)
-      - [`--angsd_createfasta`](#--angsd_createfasta)
-      - [`--angsd_fastamethod`](#--angsd_fastamethod)
-    - [Consensus Sequence Generation](#consensus-sequence-generation)
-      - [`--run_vcf2genome`](#--run_vcf2genome)
-      - [`--vcf2genome_outfile`](#--vcf2genome_outfile)
-      - [`--vcf2genome_header`](#--vcf2genome_header)
-      - [`--vcf2genome_minc`](#--vcf2genome_minc)
-      - [`--vcf2genome_minq`](#--vcf2genome_minq)
-      - [`--vcf2genome_minfreq`](#--vcf2genome_minfreq)
-    - [SNP Table Generation](#snp-table-generation)
-      - [`--run_multivcfanalyzer`](#--run_multivcfanalyzer)
-      - [`--write_allele_frequencies`](#--write_allele_frequencies)
-      - [`--min_genotype_quality`](#--min_genotype_quality)
-      - [`--min_base_coverage`](#--min_base_coverage)
-      - [`--min_allele_freq_hom`](#--min_allele_freq_hom)
-      - [`--min_allele_freq_het`](#--min_allele_freq_het)
-      - [`--additional_vcf_files`](#--additional_vcf_files)
-      - [`--reference_gff_annotations`](#--reference_gff_annotations)
-      - [`--reference_gff_exclude`](#--reference_gff_exclude)
-      - [`--snp_eff_results`](#--snp_eff_results)
-    - [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
-      - [`--run_mtnucratio`](#--run_mtnucratio)
-      - [`--mtnucratio_header`](#--mtnucratio_header)
-    - [Human Sex Determination](#human-sex-determination)
-      - [`--run_sexdeterrmine`](#--run_sexdeterrmine)
-      - [`--sexdeterrmine_bedfile`](#--sexdeterrmine_bedfile)
-    - [Human Nuclear Contamination](#human-nuclear-contamination)
-      - [`--run_nuclear_contamination`](#--run_nuclear_contamination)
-      - [`--contamination_chrom_name`](#--contamination_chrom_name)
-    - [Metagenomic Screening](#metagenomic-screening)
-      - [`--run_metagenomic_screening`](#--run_metagenomic_screening)
-      - [`--metagenomic_tool`](#--metagenomic_tool)
-      - [`--database`](#--database)
-      - [`--metgenomic_min_support_reads`](#--metgenomic_min_support_reads)
-      - [`--percent_identity`](#--percent_identity)
-      - [`--malt_mode`](#--malt_mode)
-      - [`--malt_alignment_mode`](#--malt_alignment_mode)
-      - [`--malt_top_percent`](#--malt_top_percent)
-      - [`--malt_min_support_mode`](#--malt_min_support_mode)
-      - [`--malt_min_support_percent`](#--malt_min_support_percent)
-      - [`--malt_max_queries`](#--malt_max_queries)
-      - [`--malt_memory_mode`](#--malt_memory_mode)
-      - [`--malt_sam_output`](#--malt_sam_output)
-    - [Metagenomic Authentication](#metagenomic-authentication)
-      - [`--run_maltextract`](#--run_maltextract)
-      - [`--maltextract_taxon_list`](#--maltextract_taxon_list)
-      - [`--maltextract_ncbifiles`](#--maltextract_ncbifiles)
-      - [`--maltextract_filter`](#--maltextract_filter)
-      - [`--maltextract_toppercent`](#--maltextract_toppercent)
-      - [`--maltextract_destackingoff`](#--maltextract_destackingoff)
-      - [`--maltextract_downsamplingoff`](#--maltextract_downsamplingoff)
-      - [`--maltextract_duplicateremovaloff`](#--maltextract_duplicateremovaloff)
-      - [`--maltextract_matches`](#--maltextract_matches)
-      - [`--maltextract_megansummary`](#--maltextract_megansummary)
-      - [`--maltextract_percentidentity`](#--maltextract_percentidentity)
-      - [`maltextract_topalignment`](#maltextract_topalignment)
-    - [Clean up](#clean-up)
-  - [Troubleshooting and FAQs](#troubleshooting-and-faqs)
-    - [My pipeline update doesn't seem to do anything](#my-pipeline-update-doesnt-seem-to-do-anything)
-    - [Warning about sticked on revision](#warning-about-sticked-on-revision)
-    - [Input files not found](#input-files-not-found)
-    - [I am only getting output for a single sample although I specified multiple with wildcards](#i-am-only-getting-output-for-a-single-sample-although-i-specified-multiple-with-wildcards)
-    - [The pipeline crashes almost immediately with an early pipeline step](#the-pipeline-crashes-almost-immediately-with-an-early-pipeline-step)
-      - [I am running Docker](#i-am-running-docker)
-      - [I am running Singularity](#i-am-running-singularity)
-    - [The pipeline has crashed with an error but Nextflow is still running](#the-pipeline-has-crashed-with-an-error-but-nextflow-is-still-running)
-    - [I get a file name collision error during merging](#i-get-a-file-name-collision-error-during-merging)
-    - [I specified a module and it didn't produce the expected output](#i-specified-a-module-and-it-didnt-produce-the-expected-output)
-    - [I get a unable to acquire lock](#i-get-a-unable-to-acquire-lock)
-  - [Tutorials](#tutorials)
-    - [Tutorial - How to investigate a failed run](#tutorial---how-to-investigate-a-failed-run)
-      - [1a Nextflow reports an 'error executing process' with command error](#1a-nextflow-reports-an-error-executing-process-with-command-error)
-      - [1b Nextflow reports an 'error executing process' with no command error](#1b-nextflow-reports-an-error-executing-process-with-no-command-error)
-      - [2 Investigating an failed process's `work/` directory](#2-investigating-an-failed-processs-work-directory)
-    - [Tutorial - What are Profiles and How To Use Them](#tutorial---what-are-profiles-and-how-to-use-them)
-      - [Tutorial Profiles - Background](#tutorial-profiles---background)
-      - [Tutorial Profiles - Inheritance Rules](#tutorial-profiles---inheritance-rules)
-        - [Tutorial Profiles - Profiles](#tutorial-profiles---profiles)
-        - [Tutorial Profiles - Configuration Files](#tutorial-profiles---configuration-files)
-      - [Tutorial Profiles - Writing your own profile](#tutorial-profiles---writing-your-own-profile)
-    - [Tutorial - How to set up nf-core/eager for human population genetics](#tutorial---how-to-set-up-nf-coreeager-for-human-population-genetics)
-      - [Tutorial Human Pop-Gen - Introduction](#tutorial-human-pop-gen---introduction)
-      - [Tutorial Human Pop-Gen - Preparation](#tutorial-human-pop-gen---preparation)
-      - [Tutorial Human Pop-Gen - Inputs and Outputs](#tutorial-human-pop-gen---inputs-and-outputs)
-      - [Tutorial Human Pop-Gen - Pipeline Configuration](#tutorial-human-pop-gen---pipeline-configuration)
-      - [Tutorial Human Pop-Gen - Results](#tutorial-human-pop-gen---results)
-        - [Tutorial Human Pop-Gen - MultiQC Report](#tutorial-human-pop-gen---multiqc-report)
-        - [Tutorial Human Pop-Gen - Files for Downstream Analysis](#tutorial-human-pop-gen---files-for-downstream-analysis)
-      - [Tutorial Human Pop-Gen - Clean up](#tutorial-human-pop-gen---clean-up)
-      - [Summary](#summary)
-    - [Tutorial - How to set up nf-core/eager for metagenomic screening](#tutorial---how-to-set-up-nf-coreeager-for-metagenomic-screening)
-      - [Tutorial Metagenomics - Introduction](#tutorial-metagenomics---introduction)
-      - [Tutorial Metagenomics - Preparation](#tutorial-metagenomics---preparation)
-      - [Tutorial Metagenomics - Inputs and Outputs](#tutorial-metagenomics---inputs-and-outputs)
-      - [Tutorial Metagenomics - Pipeline Configuration](#tutorial-metagenomics---pipeline-configuration)
-      - [Tutorial Metagenomics - Results](#tutorial-metagenomics---results)
-        - [Tutorial Metagenomics - MultiQC Report](#tutorial-metagenomics---multiqc-report)
-        - [Tutorial Metagenomics - Files for Downstream Analysis](#tutorial-metagenomics---files-for-downstream-analysis)
-      - [Tutorial Metagenomics - Clean up](#tutorial-metagenomics---clean-up)
-      - [Tutorial Metagenomics - Summary](#tutorial-metagenomics---summary)
+- [Table of contents](#table-of-contents)
+- [Running the pipeline](#running-the-pipeline)
+  - [Quick Start](#quick-start)
+  - [Updating the pipeline](#updating-the-pipeline)
+  - [Reproducibility](#reproducibility)
+  - [Automatic Resubmission](#automatic-resubmission)
+- [Core Nextflow arguments](#core-nextflow-arguments)
+  - [-profile](#-profile)
+  - [-resume](#-resume)
+  - [-c](#-c)
+  - [Running in the background](#running-in-the-background)
+- [Pipeline Options](#pipeline-options)
+  - [Input](#input)
+  - [Input Data Additional Options](#input-data-additional-options)
+  - [References](#references)
+  - [Output](#output)
+  - [Other run specific parameters](#other-run-specific-parameters)
+  - [Step skipping parameters](#step-skipping-parameters)
+  - [Complexity Filtering Options](#complexity-filtering-options)
+  - [Adapter Clipping and Merging Options](#adapter-clipping-and-merging-options)
+  - [Read Mapping Parameters](#read-mapping-parameters)
+  - [Removal of Host-Mapped Reads](#removal-of-host-mapped-reads)
+  - [Read Filtering and Conversion Parameters](#read-filtering-and-conversion-parameters)
+  - [Read DeDuplication Parameters](#read-deduplication-parameters)
+  - [Library Complexity Estimation Parameters](#library-complexity-estimation-parameters)
+  - [DNA Damage Assessment Parameters](#dna-damage-assessment-parameters)
+  - [Feature Annotation Statistics](#feature-annotation-statistics)
+  - [BAM Trimming Parameters](#bam-trimming-parameters)
+  - [Genotyping Parameters](#genotyping-parameters)
+  - [Consensus Sequence Generation](#consensus-sequence-generation)
+  - [SNP Table Generation](#snp-table-generation)
+  - [Mitochondrial to Nuclear Ratio](#mitochondrial-to-nuclear-ratio)
+  - [Human Sex Determination](#human-sex-determination)
+  - [Human Nuclear Contamination](#human-nuclear-contamination)
+  - [Metagenomic Screening](#metagenomic-screening)
+  - [Metagenomic Authentication](#metagenomic-authentication)
+  - [Clean up](#clean-up)
+- [Troubleshooting and FAQs](#troubleshooting-and-faqs)
+  - [My pipeline update doesn't seem to do anything](#my-pipeline-update-doesnt-seem-to-do-anything)
+  - [Warning about sticked on revision](#warning-about-sticked-on-revision)
+  - [Input files not found](#input-files-not-found)
+  - [I am only getting output for a single sample although I specified multiple with wildcards](#i-am-only-getting-output-for-a-single-sample-although-i-specified-multiple-with-wildcards)
+  - [The pipeline crashes almost immediately with an early pipeline step](#the-pipeline-crashes-almost-immediately-with-an-early-pipeline-step)
+  - [The pipeline has crashed with an error but Nextflow is still running](#the-pipeline-has-crashed-with-an-error-but-nextflow-is-still-running)
+  - [I get a file name collision error during merging](#i-get-a-file-name-collision-error-during-merging)
+  - [I specified a module and it didn't produce the expected output](#i-specified-a-module-and-it-didnt-produce-the-expected-output)
+  - [I get a unable to acquire lock](#i-get-a-unable-to-acquire-lock)
+- [Tutorials](#tutorials)
+  - [Tutorial - How to investigate a failed run](#tutorial---how-to-investigate-a-failed-run)
+  - [Tutorial - What are Profiles and How To Use Them](#tutorial---what-are-profiles-and-how-to-use-them)
+  - [Tutorial - How to set up nf-core/eager for human population genetics](#tutorial---how-to-set-up-nf-coreeager-for-human-population-genetics)
+  - [Tutorial - How to set up nf-core/eager for metagenomic screening](#tutorial---how-to-set-up-nf-coreeager-for-metagenomic-screening)
+  - [Tutorial - How to set up nf-core/eager for pathogen genomics](#tutorial---how-to-set-up-nf-coreeager-for-pathogen-genomics)
 
 <!-- /TOC -->
 
@@ -531,7 +347,7 @@ There are two possible ways of supplying input sequencing data to nf-core/eager.
 The most efficient but more simplistic is supplying direct paths (with
 wildcards) to your FASTQ or BAM files, with each file or pair being considered a
 single library and each one run independently. TSV input requires creation of an
-extra file by the user and extra metadta, but allows more powerful lane and
+extra file by the user and extra metadata, but allows more powerful lane and
 library merging.
 
 ##### Direct Input Method
@@ -581,6 +397,11 @@ wildcards (`*`) e.g.:
 6. Due to limitations of downstream tools (e.g. FastQC), sample IDs maybe
    truncated after the first `.` in the name, Ensure file names are unique prior
    to this!
+7. For input BAM files you should provide a small decoy reference genome with
+   pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory
+   parameter `--fasta` in order to avoid long computational time for generating
+   the index files of the reference genome, even if you do not actual need a
+   reference genome for any downstream analyses.
 
 ##### TSV Input Method
 
@@ -672,7 +493,7 @@ In this context the following will occur:
   _with the same `SeqType`_ (and all other _metadata_ columns) will be
   concatenated together for each **Library**.
 - After mapping, and prior BAM filtering, BAM files with the same with different
-  `SeqType` (but with all other metadata columns th esame) will be merged
+  `SeqType` (but with all other metadata columns the same) will be merged
   together for each **Library**.
 - After duplicate removal, BAM files with `Library_ID`s with the same
   `Sample_Name` and the same `UDG_Treatment` will be merged together.
@@ -683,7 +504,7 @@ In this context the following will occur:
 Note the following important points and limitations for setting up:
 
 - The TSV must use actual tabs (not spaces) between cells.
-- *File* names must be unique irregardless of file path, due to risk of
+- *File* names must be unique regardless of file path, due to risk of
   over-writing (see:
   [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
   - If it is 'too late' and already have duplicate file names, a work around is
@@ -698,19 +519,47 @@ Note the following important points and limitations for setting up:
     run is PE and one run is SE, you need to give fake lane IDs to one of the
     runs as well.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
-  - You should provide small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
-- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
-- Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes
-  - **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.
-  - When you wish to run PE/SE data together `-dedupper markduplicates` is therefore prefered.
-  - An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
-  - If truly you want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
-  - If you _regularly_ want to run the situation above, please leave an feature request on github.
-- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).
-- nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
-- Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
-- Genotyping will typically be performed on each `sample` independently as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs` otherwise you will recieve a `file collision` error in steps such as `sexdeterrmine`, and merge these yourself. We will consider changing this behaviour in the future if there is enough interest.  
+  - You should provide a small decoy reference genome with pre-made indices, e.g.
+    the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in
+    order to avoid long computational time for generating the index files of the
+    reference genome, even if you do not actual need a reference genome for any
+    downstream analyses.
+- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the
+  same single-end or paired-end configuration
+- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files
+  (unless you use `--run_convertbam`), as only FASTQ files are lane-merged
+  together.
+- Same libraries that are sequenced on different sequencing configurations (i.e
+  single- and paired-end data), will be merged after mapping and will _always_
+  be considered 'paired-end' during downstream processes
+  - **Important** running DeDup in this context is _not_ recommended, as PE and
+    SE data at the same position will _not_ be evaluated as duplicates.
+    Therefore not all duplicates will be removed.
+  - When you wish to run PE/SE data together `-dedupper markduplicates` is
+    therefore preferred.
+  - An error will be thrown if you try to merge both PE and SE and also supply
+    `--skip_merging`.
+  - If truly you want to mix SE data and PE data but using mate-pair info for PE
+    mapping, please run FASTQ preprocessing mapping manually and supply BAM
+    files for downstream processing by nf-core/eager
+  - If you _regularly_ want to run the situation above, please leave a feature
+    request on github.
+- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on
+  each unique library separately after deduplication (but prior same-treated
+  library merging).
+- nf-core/eager functionality such as `--run_trim_bam` will be applied to only
+  non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.
+- Qualimap is run on each sample, after merging of libraries (i.e. your values
+  will reflect the values of all libraries combined - after being damage trimmed
+  etc.).
+- Genotyping will typically be performed on each `sample` independently as
+  normally all libraries will have been merged together. However, if you have a
+  mixture of single-stranded and double-stranded libraries, you will normally
+  need to genotype separately. In this case you **must** give each the SS and DS
+  libraries _distinct_ `Sample_IDs` otherwise you will receive a `file
+  collision` error in steps such as `sexdeterrmine`, and merge these yourself.
+  We will consider changing this behaviour in the future if there is enough
+  interest.  
 
 #### `--udg_type`
 
@@ -722,18 +571,24 @@ data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify
 `'half'`. If you have complete UDG treated data ([Briggs et al.
 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using
 PMDtools `'half'` will use a different model for DNA damage assessment in
-PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage
-assessment will use CpG context only. Default: `'none'`.
+PMDTools (PMDtools: `--UDGhalf`). Specify the parameter with `'full'` and the
+PMDtools DNA damage assessment will use CpG context only (PMDtools: `--CpG`).
+Default: `'none'`.
 
-> **Tip**: You should small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actual need a reference genome for any downstream analyses.
+> **Tip**: You should provide a small decoy reference genome with pre-made indices, e.g.
+> the human mtDNA genome, for the mandatory parameter `--fasta` in order to
+> avoid long computational time for generating the index files of the reference
+> genome, even if you do not actual need a reference genome for any downstream
+> analyses.
 
 #### `--single_stranded`
 
 Indicates libraries are single stranded.
 
 Currently only affects MALTExtract where it will switch on damage patterns
-calculation mode to single-stranded, and genotyping with pileupcaller where a
-different method is used. Default: false.
+calculation mode to single-stranded, (MaltExtract: `--singleStranded`) and
+genotyping with pileupCaller where a different method is used (pileupCaller:
+`--singleStrandMode`). Default: false.
 
 Only required when using the 'Path' method of [`--input`](#--input).
 
@@ -768,7 +623,7 @@ Only required when using the 'Path' method of [`--input`](#--input).
 #### `--snpcapture_bed`
 
 Can be used to set a path to a BED file (3/6 column format) of SNP positions of
-a reference genome, to calculate SNP capture'd libraries on-target efficiency.
+a reference genome, to calculate SNP captured libraries on-target efficiency.
 This should be used for array or in-solution SNP capture protocols such as
 390K,1240K, etc. If supplied, on-target metrics automatically for you by
 qualimap.
@@ -796,6 +651,10 @@ advised when running multiple times on the same cluster system for example. You
 can even add a resource [specific profile](#profile) that sets paths to
 pre-computed reference genomes, saving time when specifying these.
 
+> :warning: you must always supply a reference file. If you want to use
+  functionality that does not require one, supply a small decoy genome such as
+  phiX or the human mtDNA genome.
+
 #### `--fasta`
 
 You specify the full path to your reference genome here. The FASTA file can have
@@ -808,10 +667,17 @@ For example:
 --fasta '/<path>/<to>/my_reference.fasta'
 ```
 
-You need to provide an input FASTA even if you do not do any mapping (e.g. supplying BAM files). You should small decoy reference genome with pre-made indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome.
+You need to provide an input FASTA even if you do not do any mapping (e.g.
+supplying BAM files). You should use a small decoy reference genome with pre-made
+indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in
+order to avoid long computational time for generating the index files of the
+reference genome.
 
-> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters (see [below](#optional-reference-options)), the pipeline will create these indices for you automatically. Note that you can save the indices created for you for later by giving the `--save_reference` flag.
-> You must select either a `--fasta` or `--genome`
+> If you don't specify appropriate `--bwa_index`, `--fasta_index` parameters
+> (see [below](#optional-reference-options)), the pipeline will create these
+> indices for you automatically. Note that you can save the indices created for
+> you for later by giving the `--save_reference` flag. You must select either a
+> `--fasta` or `--genome`
 
 #### `--genome` (using iGenomes)
 
@@ -823,8 +689,10 @@ resource.
 There are 31 different species supported in the iGenomes references. To run the
 pipeline, you must specify which to use with the `--genome` flag.
 
-You can find the keys to specify the genomes in the [iGenomes config
-file](../conf/igenomes.config). Common genomes that are supported are:
+You can find the keys to specify the genomes in the iGenomes config file under
+`conf/` on the nf-core/eager [GitHub
+repository](https://github.com/nf-core/eager). Common genomes that are supported
+are:
 
 - Human
   - `--genome GRCh37`
@@ -838,7 +706,7 @@ file](../conf/igenomes.config). Common genomes that are supported are:
 
 > \* Not bundled with nf-core eager by default.
 
-Note that you can use the same configuration setup to save sets of reference
+Note that you can use the same configuration set-up to save sets of reference
 files for your own use, even if they are not part of the iGenomes resource. See
 the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html)
 for instructions on where to save such a file.
@@ -930,9 +798,12 @@ For example:
 This parameter is required to be set for large reference genomes. If your
 reference genome is larger than 3.5GB, the `samtools index` calls in the
 pipeline need to generate `CSI` indices instead of `BAI` indices to compensate
-for the size of the reference genome. This parameter is not required for smaller
-references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB`
-genomes have been shown to need `CSI` indices. Default: off
+for the size of the reference genome (with samtools: `-c`). This parameter is
+not required for smaller references (including a human `hg19` or
+`grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI`
+indices. Default: off
+
+> modifies
 
 #### `--save_reference`
 
@@ -981,7 +852,7 @@ specified, will be taken from the configuration in the `-profile` flag.
 
 #### `--max_cpus`
 
-When _not_ using a instutite specific `-profile`, you can use this parameter to
+When _not_ using a institute specific `-profile`, you can use this parameter to
 set a top-limit for the default CPU requirement for each **process**. This is
 not the maximum number of CPUs that can be used for the whole pipeline, but the
 maximum number of CPUs each program can use for each program submission (known
@@ -1032,7 +903,7 @@ Provide git commit id for custom Institutional configs hosted at
 set to `master`.
 
 ```bash
-\#\# Download and use config file with following git commid id
+\#\# Download and use config file with following git commit id
 --custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
 ```
 
@@ -1091,6 +962,8 @@ This option can be used to define the minimum length of a poly-G tail to begin
 low complexity trimming. By default, this is set to a value of `10` unless the
 user has chosen something specifically using this option.
 
+> Modifies fastp parameter: `--poly_g_min_len`
+
 ### Adapter Clipping and Merging Options
 
 These options handle various parts of adapter clipping and read merging steps.
@@ -1100,16 +973,23 @@ documentation](https://adapterremoval.readthedocs.io/en/latest/)
 
 If using TSV input, this is performed per lane separately.
 
+> :warning: `--skip_trim` will skip adapter clipping AND quality trimming
+> (n, base quality). It is currently not possible skip one or the other.
+
 #### `--clip_forward_adaptor`
 
 Defines the adapter sequence to be used for the forward read. By default, this
 is set to `'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'`.
+
+> Modifies AdapterRemoval parameter: `--adapter1`
 
 #### `--clip_reverse_adaptor`
 
 Defines the adapter sequence to be used for the reverse read in paired end
 sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by
 default.
+
+> Modifies AdapterRemoval parameter: `--adapter2`
 
 #### `--clip_readlength`
 
@@ -1122,8 +1002,10 @@ short reads in your library - such retrieved in single-stranded library
 protocols. When you have very few reads passing this length filter, it will
 artificially inflate your endogenous DNA by creating a very small denominator.
 In these cases it is recommended to set this to 0, and use
-`--bam_filter_minreadlength` to instead, to filter out 'unusuable' short reads
+`--bam_filter_minreadlength` to instead, to filter out 'un-usable' short reads
 after mapping.
+
+> Modifies AdapterRemoval parameter: `--minlength`
 
 #### `--clip_min_read_quality`
 
@@ -1131,10 +1013,14 @@ Defines the minimum read quality per base that is required for a base to be
 kept. Individual bases at the ends of reads falling below this threshold will be
 clipped off. Default is set to `20`.
 
+> Modifies AdapterRemoval parameter: `--minquality`
+
 #### `--clip_min_adap_overlap`
 
 Sets the minimum overlap between two reads when read merging is performed.
 Default is set to `1` base overlap.
+
+> Modifies AdapterRemoval parameter: `--minadapteroverlap`
 
 #### `--skip_collapse`
 
@@ -1146,16 +1032,18 @@ For example
 --skip_collapse  --input '*_{R1,R2}_*.fastq'
 ```
 
-> It is important to use the paired-end wildcard globbing as `--skip_collapse`
-> can only be used on paired-end data! :warning: If you run this and also with
-> `--clip_readlength` set to something (as is by default), you may end up
-> removing single reads from either the pair1 or pair2 file. These will be NOT
-> be mapped when aligning with either `bwa` or `bowtie`, as both can only accept
-> one (forward) or two (forward and reverse) FASTQs as input.
+It is important to use the paired-end wildcard globbing, as `--skip_collapse`
+can only be used on paired-end data! :warning: If you provide this option together with
+`--clip_readlength` set to something (as is by default), you may end up
+removing single reads from either the pair1 or pair2 file. These will be NOT
+be mapped when aligning with either `bwa` or `bowtie`, as both can only accept
+one (forward) or two (forward and reverse) FASTQs as input.
+
+> Modifies AdapterRemoval parameter: `--collapse`
 
 #### `--skip_trim`
 
-Turns off adaptor and quality trimming.
+Turns off adapter AND quality trimming.
 
 For example:
 
@@ -1163,15 +1051,26 @@ For example:
 --skip_trim  --input '*.fastq'
 ```
 
+:warning: it is not possible to keep quality trimming (n or base quality) on
+and skip adapter trimming.
+:warning: it is not possible to turn off one or the other of quality
+trimming or n trimming. i.e. --trimns --trimqualities are both given
+or neither. However setting quality in `--clip_min_read_quality` to 0 would
+theoretically turn off base quality trimming.
+
+> Modifies AdapterRemoval parameters: `--trimns --trimqualities --adapter1 --adapter2`
+
 #### `--preserve5p`
 
 Turns off quality based trimming at the 5p end of reads when any of the
 --trimns, --trimqualities, or --trimwindows options are used. Only 3p end of
 reads will be removed.
 
-> This also entirely disables quality based trimming of collapsed reads, since
-> both ends of these are informative for PCR duplicate filtering. Described
-> [here](https://github.com/MikkelSchubert/adapterremoval/issues/32#issuecomment-504758137).
+This also entirely disables quality based trimming of collapsed reads, since
+both ends of these are informative for PCR duplicate filtering. Described
+[here](https://github.com/MikkelSchubert/adapterremoval/issues/32#issuecomment-504758137).
+
+> Modifies AdapterRemoval parameters: `--preserve5p`
 
 #### `--mergedonly`
 
@@ -1215,27 +1114,32 @@ These parameters configure mapping algorithm parameters.
 
 ##### `--bwaalnn`
 
-Configures the `bwa aln -n` parameter, defining how many mismatches are allowed
-in a read. By default set to `0.04` (following recommendations of [Schubert et
-al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're
-uncertain what to set check out
-[this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more
-information on how to set this parameter efficiently.
+Defines how many mismatches from the reference are allowed in a read. By default
+set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC
+Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what
+to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App
+for more information on how to set this parameter efficiently.
+
+> Modifies bwa aln parameter: `-n`
 
 ##### `--bwaalnk`
 
-Configures the `bwa aln -k` parameter for the seeding phase in the mapping
-algorithm. Default is set to `2`.
+Modifies the number of mismatches in the _seed_ during the seeding phase in the
+`bwa aln` mapping algorithm. Default is set to `2`.
+
+> Modifies bwa aln parameter: `-k`
 
 ##### `--bwaalnl`
 
-Configures the length of the seed used in `bwa aln -l`. Default is set to be
+Configures the length of the seed used during seeding. Default is set to be
 'turned off' at the recommendation of Schubert et al. ([2012 _BMC
 Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with
 `1024`.
 
-> Note: Despite being recommended, turning off seeding can result in long
-> runtimes!
+Note: Despite being recommended, turning off seeding can result in long
+runtimes!
+
+> Modifies bwa aln parameter: `-l`
 
 #### CircularMapper
 
@@ -1244,11 +1148,15 @@ Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with
 The number of bases to extend the reference genome with. By default this is set
 to `500` if not specified otherwise.
 
+> Modifies circulargenerator and realignsamfile parameter: `-e`
+
 ##### `--circulartarget`
 
 The chromosome in your FASTA reference that you'd like to be treated as
 circular. By default this is set to `MT` but can be configured to match any
 other chromosome.
+
+> Modifies circulargenerator parameter: `-s`
 
 ##### `--circularfilter`
 
@@ -1267,6 +1175,8 @@ aligned. Default is 'local', following [Cahill et al
 (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando
 2020](https://doi.org/10.3389/fevo.2020.00105).
 
+> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`
+
 ##### `--bt2_sensitivity`
 
 The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast',
@@ -1277,28 +1187,38 @@ for actual settings. Default is 'sensitive' (following [Poullet and Orlando
 (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data
 _without_ UDG treatment)
 
+> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`
+
 ##### `--bt2n`
 
 The number of mismatches allowed in the seed during seed-and-extend procedure of
 Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either
 be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).
 
+> Modifies Bowtie2 parameters: `-N`
+
 ##### `--bt2l`
 
-The length of the seed substring to use during seeding. This will override any
+The length of the seed sub-string to use during seeding. This will override any
 values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity`
 defaults: [20 for local and 22 for
 end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).
+
+> Modifies Bowtie2 parameters: `-L`
 
 ##### `-bt2_trim5`
 
 Number of bases to trim of 5' (left) end of read prior alignment. Maybe useful
 when left-over sequencing artefacts of in-line barcodes present Default: 0
 
+> Modifies Bowtie2 parameters: `-bt2_trim5`
+
 ##### `-bt2_trim3`
 
 Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful
 when left-over sequencing artefacts of in-line barcodes present Default: 0.
+
+> Modifies Bowtie2 parameters: `-bt2_trim3`
 
 ### Removal of Host-Mapped Reads
 
@@ -1312,7 +1232,7 @@ either removed or 'masked' (every base replaced with Ns).
 
 This functionality allows you to provide other researchers who wish to re-use
 your data to apply their own adapter removal/read merging procedures, while
-maintaining anonyminity for sample donors - for example with microbiome
+maintaining anonymity for sample donors - for example with microbiome
 research.
 
 If using TSV input, mapped read removal is performed per library, i.e. after lane merging.
@@ -1326,6 +1246,8 @@ Create pre-Adapter Removal FASTQ files without reads that mapped to reference
 
 Read removal mode. Completely remove mapped reads from the file(s) (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)
 
+> Modifies extract_map_reads.py parameter: `-m`
+
 ### Read Filtering and Conversion Parameters
 
 Users can configure to keep/discard/extract certain groups of reads efficiently
@@ -1333,16 +1255,22 @@ in the nf-core/eager pipeline.
 
 If using TSV input, filtering is performed library, i.e. after lane merging.
 
+This module utilises `samtools view` and `filter_bam_fragment_length.py`
+
 #### `--run_bam_filtering`
 
 Turns on the bam filtering module for either mapping quality filtering or
 unmapped read treatment.
+
+> :warning: this is **required** for metagenomic screening!
 
 #### `--bam_mapping_quality_threshold`
 
 Specify a mapping quality threshold for mapped reads to be kept for downstream
 analysis. By default keeps all reads and is therefore set to `0` (basically
 doesn't filter anything).
+
+> Modifies samtools view parameter: `-q`
 
 #### `--bam_filter_minreadlength`
 
@@ -1352,10 +1280,12 @@ time as mapping quality filtering.
 If used _instead_ of minimum length read filtering at AdapterRemoval, this can
 be useful to get more realistic endogenous DNA percentages, when most of your
 reads are very short (e.g. in single-stranded libraries) and would otherwise be
-discarded by AdapterRemoval (thus making an artifically small denominator for a
+discarded by AdapterRemoval (thus making an artificially small denominator for a
 typical endogenous DNA calculation). Note in this context you should not perform
 mapping quality filtering nor discarding of unmapped reads to ensure a correct
 'denominator' of 'all reads', for the Endogenous DNA calculation.
+
+> Modifies filter_bam_fragment_length.py parameter: `-l`
 
 #### `--bam_unmapped_type`
 
@@ -1367,6 +1297,11 @@ would happen if `--run_bam_filtering` was _not_ supplied.
 
 Note that in all cases, if `--bam_mapping_quality_threshold` is also supplied,
 mapping quality filtering will still occur on the mapped reads.
+
+:warning: `--bam_unmapped_type 'fastq'` is **required** for metagenomic
+screening!
+
+> Modifies samtools view parameter: `-f4 -F4`
 
 ### Read DeDuplication Parameters
 
@@ -1396,11 +1331,13 @@ example not prefixed with `M_` in all cases. Therefore, this can be used as a
 workaround when also using a mixture of paired-end and single-end data, however
 this is not recommended (see above).
 
+> Modifies dedup parameter: `-m`
+
 ### Library Complexity Estimation Parameters
 
 nf-core/eager uses Preseq on map reads as one method to calculate library
-complexity. If DeDup is used, Preseq uses the historigram output of DeDup,
-otherwise the sored non-duplicated BAM file is supplied. Furthermore, if
+complexity. If DeDup is used, Preseq uses the histogram output of DeDup,
+otherwise the sorted non-duplicated BAM file is supplied. Furthermore, if
 paired-end read collapsing is not performed, the `-P` flag is used.
 
 #### `--preseq_step_size`
@@ -1408,6 +1345,8 @@ paired-end read collapsing is not performed, the `-P` flag is used.
 Can be used to configure the step size of Preseqs `c_curve` method. Can be
 useful when only few and thus shallow sequencing results are used for
 extrapolation.
+
+> Modifies preseq c_curve parameter: `-s`
 
 ### DNA Damage Assessment Parameters
 
@@ -1425,10 +1364,14 @@ performed on non-UDG and half-UDG treated data.
 
 Specifies the length filter for DamageProfiler. By default set to `100`.
 
+> Modifies DamageProfile parameter: `-l`
+
 #### `--damageprofiler_threshold`
 
 Specifies the length of the read start and end to be considered for profile
 generation in DamageProfiler. By default set to `15` bases.
+
+> Modifies DamageProfile parameter: `-t`
 
 #### `--damageprofiler_yaxis`
 
@@ -1441,6 +1384,8 @@ damage is about 10%, the highest value on the y-axis would be set to 0.12). This
 'autoscale' behaviour can be turned on by specifying the number to `0`. Default:
 `0.30`.
 
+> Modifies DamageProfile parameter: `-yaxis_damageplot`
+
 #### `--run_pmdtools`
 
 Specifies to run PMDTools for damage based read filtering and assessment of DNA
@@ -1451,12 +1396,16 @@ damage in sequencing libraries. By default turned off.
 Specifies the range in which to consider DNA damage from the ends of reads. By
 default set to `10`.
 
+> Modifies PMDTools parameter: `--range`
+
 #### `--pmdtools_threshold`
 
 Specifies the PMDScore threshold to use in the pipeline when filtering BAM files
 for DNA damage. Only reads which surpass this damage score are considered for
 downstream DNA analysis. By default set to `3` if not set specifically by the
 user.
+
+> Modifies PMDTools parameter: `--threshold`
 
 #### `--pmdtools_reference_mask`
 
@@ -1467,6 +1416,8 @@ Can be used to set a path to a reference genome mask for PMDTools.
 The maximum number of reads used for damage assessment in PMDtools. Can be used
 to significantly reduce the amount of time required for damage assessment in
 PMDTools. Note that a too low value can also obtain incorrect results.
+
+> Modifies PMDTools parameter: `-n`
 
 ### Feature Annotation Statistics
 
@@ -1516,8 +1467,10 @@ separately for libraries with `--udg_type` `'none'` and `'half'`  (see
 `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right` /
 `--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`).
 
-> Note: additional artefacts such as bar-codes or adapters that could
-> potentially also be trimmed should be removed prior mapping.
+Note: additional artefacts such as bar-codes or adapters that could
+potentially also be trimmed should be removed prior mapping.
+
+> Modifies bam trimBam parameter: `-L -R`
 
 #### `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right`
 
@@ -1526,18 +1479,15 @@ from libraries whose UDG treatment is set to `half`. Note that reverse reads
 will automatically be clipped off at the reverse side with this (automatically
 reverses left and right for the reverse read).
 
-#### `--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`
-
-Default set to `1` and clips off one base of the left or right side of reads
-from libraries whose UDG treatment is set to `none`. Note that reverse reads
-will automatically be clipped off at the reverse side with this (automatically
-reverses left and right for the reverse read).
+> Modifies bam trimBam parameter: `-L -R`
 
 #### `--bamutils_softclip`
 
 By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with
 quality `!` in the BAM output. Turn this on to use soft-clipping instead,
 masking reads at the read ends respectively using the CIGAR string.
+
+> Modifies bam trimBam parameter: `-c`
 
 ### Genotyping Parameters
 
@@ -1577,7 +1527,7 @@ Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.
 > officially deprecated by the Broad Institute and is only accessible by an
 > archived version not properly available on `conda`. Therefore if specifying
 > 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`.
-> Note that this means the pipline is not fully reproducible in this
+> Note that this means the pipeline is not fully reproducible in this
 > configuration, unless you personally supply the `.jar` file.
 
 #### `--genotyping_source`
@@ -1601,17 +1551,23 @@ forums of the Broad Institute.
 If selected a GATK genotyper phred-scaled confidence threshold of a given
 SNP/INDEL call. Default: `30`
 
+> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `-stand_call_conf`
+
 #### `--gatk_ploidy`
 
 If selected a GATK genotyper, what is the ploidy of your reference organism.
 E.g. do you want to allow heterozygous calls from >= diploid organisms. Default:
 `2`
 
+> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `--sample-ploidy`
+
 #### `--gatk_downsample`
 
 Maximum depth coverage allowed for genotyping before down-sampling is turned on.
 Any position with a coverage higher than this value will be randomly
 down-sampled to 250 reads. Default: `250`
+
+> Modifies GATK UnifiedGenotyper parameter: `-dcov`
 
 #### `--gatk_dbsnp`
 
@@ -1626,10 +1582,14 @@ produce calls for every site or just confidence sites. Options:
 `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`.
 Default: `'EMIT_VARIANTS_ONLY'`
 
+> Modifies GATK HaplotypeCaller parameter: `-output_mode`
+
 #### `--gatk_hc_emitrefconf`
 
 If selected GATK HaplotypeCaller, mode for emitting reference confidence calls.
 Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`
+
+> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`
 
 #### `--gatk_ug_out_mode`
 
@@ -1638,11 +1598,15 @@ i.e. produce calls for every site or just confidence sites. Options:
 `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`.
 Default: `'EMIT_VARIANTS_ONLY'`
 
+> Modifies GATK UnifiedGenotyper parameter: `--output_mode`
+
 #### `--gatk_ug_genotype_model`
 
 If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e.
 whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`,
 `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`
+
+> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`
 
 #### `--gatk_ug_keep_realign_bam`
 
@@ -1659,10 +1623,14 @@ information. Maybe useful if you have 'synthetically' generated reads (e.g.
 chopping up a reference genome). Default is set to -1  which is do not set any
 default quality (turned off). Default: `-1`
 
+> Modifies GATK UnifiedGenotyper parameter: `--defaultBaseQualities`
+
 #### `--freebayes_C`
 
 Specify minimum required supporting observations to consider a variant. Default:
 `1`
+
+> Modifies freebayes parameter: `-C`
 
 #### `--freebayes_g`
 
@@ -1670,9 +1638,13 @@ Specify to skip over regions of high depth by discarding alignments overlapping
 positions where total read depth is greater than specified C. Not set by
 default.
 
+> Modifies freebayes parameter: `-g`
+
 #### `--freebayes_p`
 
 Specify ploidy of sample in FreeBayes. Default is diploid. Default: `2`
+
+> Modifies freebayes parameter: `-p`
 
 #### `--pileupcaller_bedfile`
 
@@ -1690,16 +1662,22 @@ pileupCaller will call these sites.
 Specify calling method to use. Options: randomHaploid, randomDiploid,
 majorityCall. Default: `'randomHaploid'`
 
+> Modifies pileupCaller parameter: `--randomHaploid --randomDiploid --majorityCall`
+
 #### `--pileupcaller_transitions_mode`
 
 Specify if genotypes of transition SNPs should be called, set to missing, or
 excluded from the genotypes respectively. Options: `'AllSites'`,
 `'TransitionsMissing'`, `'SkipTransitions'`. Default: `'AllSites'`
 
+> Modifies pileupCaller parameter: `--skipTransitions --transitionsMissing`
+
 #### `--angsd_glmodel`
 
 Specify which genotype likelihood model to use. Options: `'samtools`, `'gatk'`,
 `'soapsnp'`, `'syk'`. Default: `'samtools'`
+
+> Modifies ANGSD parameter: `-GL`
 
 #### `--angsd_glformat`
 
@@ -1717,6 +1695,8 @@ The options refer to the following descriptions respectively:
 See the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information
 on which to select for your downstream applications.
 
+> Modifies ANGSD parameter: `-doGlF`
+
 #### `--angsd_createfasta`
 
 Turns on the ANGSD creation of a FASTA file from the BAM file.
@@ -1728,14 +1708,16 @@ Options: `'random'` or `'common'`. Will output the most common non-N base at
 each given position, whereas 'random' will pick one at random. Default:
 `'random'`.
 
+> Modifies ANGSD parameter: `-doFasta -doCounts`
+
 ### Consensus Sequence Generation
 
-If using TSV input, consensus eneration is performed per sample (i.e. after all
+If using TSV input, consensus generation is performed per sample (i.e. after all
 types of libraries are merged).
 
 #### `--run_vcf2genome`
 
-Turn on concensus sequence genome creation via VCF2Genome. Only accepts GATK
+Turn on consensus sequence genome creation via VCF2Genome. Only accepts GATK
 UnifiedGenotyper VCF files with the `--gatk_ug_out_mode 'EMIT_ALL_SITES'` and
 `--gatk_ug_genotype_model 'SNP` flags. Typically useful for small genomes such
 as mitochondria.
@@ -1753,15 +1735,21 @@ The name of the FASTA entry you would like in your FASTA file.
 Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N.
 Default: `5`
 
+> Modifies VCF2Genome parameter: `-minc`
+
 #### `--vcf2genome_minq`
 
 Minimum genotyping quality of a call to be called. Else N will be called.
 Default: `30`
 
+> Modifies VCF2Genome parameter: `-minq`
+
 #### `--vcf2genome_minfreq`
 
 In the case of two possible alleles, the frequency of the majority allele
 required to be called. Else, a SNP will be called as N. Default: `0.8`
+
+> Modifies VCF2Genome parameter: `-minfreq`
 
 ### SNP Table Generation
 
@@ -1871,7 +1859,7 @@ Specify to run the optional process of sex determination.
 
 Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate
 calculation. Running without this parameter will considerably increase runtime,
-and render the resulting error bars unstrustworthy. Theoretically, any set of
+and render the resulting error bars untrustworthy. Theoretically, any set of
 SNPs that are distant enough that two SNPs are unlikely to be covered by the
 same read can be used here. The programme was coded with the 1240K panel in
 mind. The path must be in quotes.
@@ -1891,13 +1879,19 @@ Defaults to `'X'`.
 ### Metagenomic Screening
 
 An increasingly common line of analysis in high-throughput aDNA analysis today
-is simultaenously screening off target reads of the host for endogenous
+is simultaneously screening off target reads of the host for endogenous
 microbial signals - particularly of pathogens. Metagenomic screening is
 currently offered via MALT with aDNA specific verification via MaltExtract, or
 Kraken2.
 
 Please note the following:
 
+- :warning: Metagenomic screening is only performed on _unmapped_ reads from a
+  mapping step.
+  - You _must_ supply the `--run_bam_filtering` flag with unmapped reads in
+    FASTQ format.
+  - If you wish to run solely MALT (i.e. the HOPS pipeline), you must still
+    supply a small decoy genome like phiX or human mtDNA `--fasta`.
 - MALT database construction functionality is _not_ included within the pipeline
   - this should be done independently, **prior** the nf-core/eager run.
   - To use `malt-build` from the same version as `malt-run`, load either the
@@ -1929,30 +1923,34 @@ Specify which taxonomic classifier to use. There are two options available:
 :warning: **Important** It is very important to run `nextflow clean -f` on your
 nextflow run directory once completed. RMA6 files are VERY large and are
 _copied_ from a `work/` directory into the results folder. You should clean the
-work directory with the command to ensure non-redundency and large HDD
+work directory with the command to ensure non-redundancy and large HDD
 footprints!
 
 #### `--database`
 
-Specify the path to the _directory_ containing your taxonomic classifer's
+Specify the path to the _directory_ containing your taxonomic classifier's
 database (malt or kraken).
 
 For Kraken2, it can be either the path to the _directory_ or the path to the
 `.tar.gz` compressed directory of the Kraken2 database.
 
-#### `--metgenomic_min_support_reads`
+#### `--metagenomic_min_support_reads`
 
 Specify the minimum number of reads a given taxon is required to have to be
 retained as a positive 'hit'.  
 For malt, this only applies when `--malt_min_support_mode` is set to 'reads'.
-Default: 1 .
+Default: `1`.
+
+> Modifies MALT or kraken_parse.py parameter: `-sup` and `-c` respectively
 
 #### `--percent_identity`
 
-Specify the minimum percent identity (or similarity) a squence must have to the
+Specify the minimum percent identity (or similarity) a sequence must have to the
 reference for it to be retained. Default is `85`
 
 Only used when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MALT parameter: `-id`
 
 #### `--malt_mode`
 
@@ -1965,6 +1963,8 @@ for more details. Default: `'BlastN'`
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MALT parameter: `-m`
+
 #### `--malt_alignment_mode`
 
 Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'.
@@ -1973,9 +1973,11 @@ aligns reads end-to-end. Default: `'SemiGlobal'`
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MALT parameter: `-at`
+
 #### `--malt_top_percent`
 
-Specify the top percent value of the LCA algorthim. From the [MALT
+Specify the top percent value of the LCA algorithm. From the [MALT
 manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf):
 "For each read, only those matches are used for taxonomic placement whose bit
 disjointScore is within 10% of the best disjointScore for that read.". Default:
@@ -1983,12 +1985,16 @@ disjointScore is within 10% of the best disjointScore for that read.". Default:
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MALT parameter: `-top`
+
 #### `--malt_min_support_mode`
 
 Specify whether to use a percentage, or raw number of reads as the value used to
 decide the minimum support a taxon requires to be retained.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MALT parameter: `-sup -supp`
 
 #### `--malt_min_support_percent`
 
@@ -1999,12 +2005,16 @@ Default 0.01.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MALT parameter: `-supp`
+
 #### `--malt_max_queries`
 
 Specify the maximum number of alignments a read can have. All further alignments
 are discarded. Default: `100`
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MALT parameter: `-mq`
 
 #### `--malt_memory_mode`
 
@@ -2017,14 +2027,18 @@ many remote file-systems such as GPFS. Default is `'load'`.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MALT parameter: `--memoryMode`
+
 #### `--malt_sam_output`
 
 Specify to _also_ produce gzipped SAM files of all alignments and un-aligned
 reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse'
 format. Can be useful for downstream analyses due to more common file format.
 
-> :warning: can result in very large run output directories as this is
-> essentially duplication of the RMA6 files.
+:warning: can result in very large run output directories as this is
+essentially duplication of the RMA6 files.
+
+> Modifies MALT parameter `-a -f`
 
 ### Metagenomic Authentication
 
@@ -2067,6 +2081,8 @@ Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`,
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `-f`
+
 #### `--maltextract_toppercent`
 
 Specify percent of top alignments for each read to be considered for each node.
@@ -2074,12 +2090,16 @@ Default: `0.01`.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `-a`
+
 #### `--maltextract_destackingoff`
 
 Turn off destacking. If left on, a read that overlap with another read will be
 removed (leaving a depth coverage of 1).
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MaltExtract parameter: `--destackingOff`
 
 #### `--maltextract_downsamplingoff`
 
@@ -2090,6 +2110,8 @@ positive'.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `--downSampOff`
+
 #### `--maltextract_duplicateremovaloff`
 
 Turn off duplicate removal. By default, reads that are an exact copy (i.e. same
@@ -2098,11 +2120,15 @@ considered a PCR duplicate.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `--dupRemOff`
+
 #### `--maltextract_matches`
 
 Export alignments of hits for each node in BLAST format. By default turned off.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MaltExtract parameter: `--matches`
 
 #### `--maltextract_megansummary`
 
@@ -2110,6 +2136,8 @@ Export 'minimal' summary files (i.e. without alignments) that can be loaded into
 [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MaltExtract parameter: `--meganSummary`
 
 #### `--maltextract_percentidentity`
 
@@ -2122,12 +2150,16 @@ higher. Default: `85.0`.
 
 Only when `--metagenomic_tool malt` is also supplied.
 
+> Modifies MaltExtract parameter: `--minPI`
+
 #### `maltextract_topalignment`
 
 Use the best alignment of each read for every statistic, except for those
 concerning read distribution and coverage. Default: off.
 
 Only when `--metagenomic_tool malt` is also supplied.
+
+> Modifies MaltExtract parameter: `--useTopAlignment`
 
 ### Clean up
 
@@ -2139,7 +2171,7 @@ output directories are present as you expect and need, you can perform a clean
 up.
 
 > **Important**: Once clean up is completed, you will _not_ be able to re-rerun
-> the pipline from an earlier step and you'll have to re-run from scratch.
+> the pipeline from an earlier step and you'll have to re-run from scratch.
 
 While in your output directory, firstly verify you're only deleting files stored
 in `work/` with the dry run command:
@@ -2155,14 +2187,14 @@ nextflow clean -f -k
 ```
 
 This will make your system administrator very happy as you will _halve_ the
-harddrive footprint of the run, so be sure to do this!
+hard drive footprint of the run, so be sure to do this!
 
 ## Troubleshooting and FAQs
 
 ### My pipeline update doesn't seem to do anything
 
 To download a new version of a pipeline, you can use the following, replacing
-`<VERSION>` the the corresponding verison.
+`<VERSION>` the the corresponding version.
 
 ```bash
 nextflow pull nf-core/eager -r <VERSION>
@@ -2259,7 +2291,7 @@ nextflow run nf-core/eager --input /path/to/sample_1/sample_1.fq.gz /path/to/sam
 
 And Nextflow will only take the first path after `--input`, ignoring the others.
 
-On the otherhand encapsulating the path in quotes will allow Nextflow to
+On the other hand encapsulating the path in quotes will allow Nextflow to
 evaluate the paths.
 
 ```bash
@@ -2339,7 +2371,7 @@ Unable to acquire lock on session with ID 84333844-66e3-4846-a664-b446d070f775
 ```
 
 Normally suggest a previous nextflow run (on the same folder) was not cleanly
-killed by a user (e.g. using ctrl + z to hard kill an errored run).
+killed by a user (e.g. using ctrl + z to hard kill a crashed run).
 
 To fix this, you must clean the entirety of the output directory (including
 output files) e.g. with `rm -r <output_dir>/* <output_dir>/.*` and re-running
@@ -2397,7 +2429,7 @@ Command error:
         at java.lang.AbstractStringBuilder.ensureCapacityInternal(AbstractStringBuilder.java:124)
         at java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:448)
         at java.lang.StringBuffer.append(StringBuffer.java:270)
-  rk dirat CircularGenerator.extendFastA(CircularGenerator.java:155)
+        at CircularGenerator.extendFastA(CircularGenerator.java:155)
         at CircularGenerator.main(CircularGenerator.java:119)
 
 Work dir:
@@ -2486,7 +2518,7 @@ shell /\<path\>/\<to\>/nf-core-eager-X-X-X.img` or `conda activate
 nf-core-eager-X.X.X`), then running `bash .command.sh`.
 
 If this doesn't work this suggests either there is something wrong with the
-nf-core/eager environment confirugration, _or_ there still a problem with the
+nf-core/eager environment configuration, _or_ there still a problem with the
 program itself. To confirm the former, try running the command within the
 `.command.sh` file (viewable with `cat`) but with locally installed versions of
 programs you may already have on your system. If the command still doesn't work,
@@ -2494,7 +2526,7 @@ it is a problem with the program or your specified configuration. If it does
 work locally, please report as a [github
 issue](https://github.com/nf-core/eager/issues).
 
-If it does, please ask the developer of the tool (although we will endevour to
+If it does, please ask the developer of the tool (although we will endeavour to
 help as much as we can via the [nf-core slack](https://nf-co.re/join/slack) in
 the #eager channel).
 
@@ -2723,8 +2755,8 @@ profiles {
 ```
 
 If you run with `nextflow run -profile shh` to specify to use an
-institutional-level nf-core config, the parameters will be read as `--bwaaln
-0.04` and `--bwaaln 32` as these are the defaults 'fall back' params as
+institutional-level nf-core config, the parameters will be read as `--bwaalnn
+0.04` and `--bwaalnl 32` as these are the defaults 'fall back' params as
 indicated in the example above.
 
 If you specify as `nextflow run -profile pathogen_loose,shh`, as expected
@@ -2768,7 +2800,7 @@ Furthermore, in their 'Table 1' they say they used the NCBI **Y. pestis** genome
 'NC_003143.1', which can be found on the NCBI FTP server at:
 [https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/009/065/GCF_000009065.1_ASM906v1/GCF_000009065.1_ASM906v1_genomic.fna.gz](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/009/065/GCF_000009065.1_ASM906v1/GCF_000009065.1_ASM906v1_genomic.fna.gz)
 
-To make a profile with these paramters for use with nf-core/eager we first need
+To make a profile with these parameters for use with nf-core/eager we first need
 to open a text editor, and define a Nextflow 'profile' block.
 
 ```txt
@@ -2885,7 +2917,7 @@ This tutorial will give a basic example on how to set up nf-core/eager to
 perform initial screening of samples in the context of ancient human population
 genetics research.
 
-> :warning: this tutorial does not describe how to install and setup
+> :warning: this tutorial does not describe how to install and set up
 > nf-core/eager For this please see other documentation on the
 > [nf-co.re](https://nf-co.re/usage/installation) website.
 
@@ -2902,13 +2934,19 @@ analysis. Capture techniques are often used to enrich DNA libraries for
 fragments, that overlap these SNPs, as is being assumed has been performed in
 this example.
 
+> :warning: Please be aware that the settings used in this tutorial may not use
+> settings nor produce files you would actually use in 'real' analysis. The
+> settings are only specified for demonstration purposes. Please consult the
+> your colleagues, communities and the literature for optimal parameters.
+
 #### Tutorial Human Pop-Gen - Preparation
 
 Prior setting up the nf-core/eager run, we will need:
 
 1. Raw sequencing data in FASTQ format
 2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools`
-   and `picard SequenceDictionary` indices
+   and `picard SequenceDictionary` indices (however note these can be made for
+   you with nf-core/eager, but this can make a pipeline run take much longer!)
 3. A BED file with the positions of the sites of interest.
 4. An eigenstrat formatted `.snp` file for the positions of interest.
 
@@ -2932,8 +2970,8 @@ To start, lets make a directory where all your nf-core/eager related files for
 this run will go, and change into it.
 
 ```bash
-mkdir projectX_preprossessing20200727
-cd projectX_preprossessing20200727
+mkdir projectX_preprocessing20200727
+cd projectX_preprocessing20200727
 ```
 
 The first part of constructing any nf-core/eager run is specifying a few generic
@@ -2946,7 +2984,7 @@ running.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
+-name 'projectX_preprocessing20200727' \
 <...>
 ```
 
@@ -2959,7 +2997,7 @@ optimised for the specific cluster/institution, such as maximum memory available
 or which scheduler queues to submit to. More explanations about configs and
 profiles can be seen in the [nf-core
 website](https://nf-co.re/usage/configuration) and the [profile
-tutorial](../tutorial_profiles.md).
+tutorial](#tutorial---what-are-profiles-and-how-to-use-them).
 
 Next we need to specify our input data. nf-core/eager can accept input FASTQs
 files in two main ways, either with direct paths to files (with wildcards), or
@@ -2997,10 +3035,10 @@ EGR002  EGR002.B0201.SG1        8       2       PE      homo_sapiens    double  
 You can see that we have a single line for each pair of FASTQ files representing
 each `Lane`, but the `Sample_Name` and `Library_ID` columns identify and group
 them together accordingly. Secondly, as we have NextSeq data, we have specified
-we have two `Colour_Chemistry`, which is important for downstream processing
-(see below). The other columns are less important for this particular context of
-metagenomic screening. See the nf-core/eager [usage](../usage.md) documentation
-for more specifications on how to set up a TSV file (e.g. why despite NextSeqs
+we have `2` for `Colour_Chemistry`, which is important for downstream processing
+(see below). See the nf-core/eager
+parameter documentation above for more specifications on how to set up a
+TSV file (e.g. why despite NextSeqs
 only having 4 lanes, we go up to 8 in the example above).
 
 Alongside our input TSV file, we will also specify the paths to our reference
@@ -3010,8 +3048,8 @@ FASTA file and the corresponding indices.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3035,8 +3073,8 @@ directory (which contains "intermediate" working files and directories).
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3064,8 +3102,8 @@ string to be clipped.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3079,9 +3117,9 @@ nextflow run nf-core/eager \
 Since our input data is paired-end, we will be using `DeDup` for duplicate
 removal, which takes into account both the start and end of a merged read before
 flagging it as a duplicate. To ensure this happens works properly we first need
-to diable base quality trimming of collapsed reads within Adapter Removal. To do
+to disable base quality trimming of collapsed reads within Adapter Removal. To do
 this, we will provide the option `--preserve5p`. Additionally, Dedup should only
-be provided with merged reads, so we will need to provide the ooption
+be provided with merged reads, so we will need to provide the option
 `--mergedonly` here as well. We can then specify which dedupper we want to use
 with `--dedupper`.
 
@@ -3089,8 +3127,8 @@ with `--dedupper`.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3106,7 +3144,7 @@ nextflow run nf-core/eager \
 
 We then need to specify the mapping parameters for this run. The default mapping
 parameters of nf-core/eager are fine for the purposes of our run. Personally, I
-like to set `--bwaalnn` to `0.01`, (down from the defauls `0.04`) which reduces
+like to set `--bwaalnn` to `0.01`, (down from the default `0.04`) which reduces
 the stringency in the number of allowed mismatches between the aligned sequences
 and the reference.
 
@@ -3114,8 +3152,8 @@ and the reference.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3130,19 +3168,19 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-Next, we will set up trimming of the mapped reads to allevite the effects of DNA
-damage during genotyping. To do this we will activate trimming with
-`--run_trim_bam`. The libraries in this underwent 'half' UDG treatment. This
-will generally restrict all remaining DNA damage to the first 2 base pairs of a
-fragment. We will therefore use `--bamutils_clip_half_udg_left` and
-`--bamutils_clip_half_udg_right` to trim 2bp on either side of each fragment.
+We may also want to remove ambiguous sequences from our alignments, and also
+remove off-target reads to speed up downstream processing (and reduce your
+hard-disk footprint). We can do this with the samtools filter module to set a
+mapping-quality filter (e.g. with a value of `25` to retain only slightly
+ambiguous alignments that might occur from damage), and to indicate to discard
+unmapped reads.
 
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3154,6 +3192,39 @@ nextflow run nf-core/eager \
 --mergedonly \
 --dedupper 'dedup' \
 --bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
+<...>
+```
+
+Next, we will set up trimming of the mapped reads to alleviate the effects of DNA
+damage during genotyping. To do this we will activate trimming with
+`--run_trim_bam`. The libraries in this underwent 'half' UDG treatment. This
+will generally restrict all remaining DNA damage to the first 2 base pairs of a
+fragment. We will therefore use `--bamutils_clip_half_udg_left` and
+`--bamutils_clip_half_udg_right` to trim 2bp on either side of each fragment.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+- w './work/' \
+--complexity_filter_poly_g \
+--preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
+--bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
 --bamutils_clip_half_udg_right 2 \
@@ -3172,8 +3243,8 @@ error bar around the relative coverage on the X and Y chromosomes.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3185,6 +3256,9 @@ nextflow run nf-core/eager \
 --mergedonly \
 --dedupper 'dedup' \
 --bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
 --bamutils_clip_half_udg_right 2 \
@@ -3203,8 +3277,8 @@ is simply named "X".
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3216,6 +3290,9 @@ nextflow run nf-core/eager \
 --mergedonly \
 --dedupper 'dedup' \
 --bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
 --bamutils_clip_half_udg_right 2 \
@@ -3227,7 +3304,7 @@ nextflow run nf-core/eager \
 ```
 
 Because nuclear contamination estimates can only be provided for males, it is
-possible that we will need to get mitchondrial DNA contamination estimates for
+possible that we will need to get mitochondrial DNA contamination estimates for
 any females in our dataset. This cannot be done within nf-core/eager (v2.2.0)
 and we will need to do this manually at a later time. However, mtDNA
 contamination estimates have been shown to only be reliable for nuclear
@@ -3241,8 +3318,8 @@ providing the name of the mitochondrial DNA contig in our reference genome with
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3254,6 +3331,9 @@ nextflow run nf-core/eager \
 --mergedonly \
 --dedupper 'dedup' \
 --bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
 --bamutils_clip_half_udg_right 2 \
@@ -3280,8 +3360,8 @@ file of these sites that is specified with `--pileupcaller_snpfile`.
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
--name 'projectX_preprossessing20200727' \
---input 'preprossessing20200727.tsv' \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3293,6 +3373,9 @@ nextflow run nf-core/eager \
 --mergedonly \
 --dedupper 'dedup' \
 --bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
 --run_trim_bam \
 --bamutils_clip_half_udg_left 2 \
 --bamutils_clip_half_udg_right 2 \
@@ -3316,8 +3399,8 @@ signal drop or want to log off, Nextflow will not crash.
 #### Tutorial Human Pop-Gen - Results
 
 Assuming the run completed without any crashes (if problems do occur, check all
-against [#usage](usage.md) all parameters are as expected, or check the
-[FAQ](../faq.md)), we can now check our results in `results/`.
+against [#usage](#pipeline-options) all parameters are as expected, or check the
+[FAQ](#troubleshooting-and-faqs)), we can now check our results in `results/`.
 
 ##### Tutorial Human Pop-Gen - MultiQC Report
 
@@ -3342,8 +3425,7 @@ General Stats Table:
 - Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively)
   suggesting over-amplified or badly preserved samples?
 - Do the mapped reads show increased frequency of C>Ts on the 5' end of
-  molecules (you may need to un-hide the 2nd base columns with 'configure
-  columns' button)?
+  molecules?
 - Is the number of SNPs used for nuclear contamination really low for any
   individuals (e.g. < 100)? then the estimates might not be very accurate.
 
@@ -3370,7 +3452,7 @@ Samtools Flagstat (pre/post Filter):
   exceptionally preserved? If not, a value higher than e.g. 50% might require
   your attention.
 
-DeDup/Picard MarkDuplicates):
+DeDup/Picard MarkDuplicates:
 
 - Do I see large numbers of duplicates being removed, possibly indicating
   over-amplified or badly preserved samples?
@@ -3426,7 +3508,7 @@ intermediate files (if your `-profile` does not already do so). You can do this
 by going to above your `results/` and `work/` directory, e.g.
 
 ```bash
-cd /<path>/<to>/projectX_preprossessing20200727
+cd /<path>/<to>/projectX_preprocessing20200727
 ```
 
 and running
@@ -3435,10 +3517,10 @@ and running
 nextflow clean -f -k
 ```
 
-#### Summary
+#### Tutorial Human Pop-Gen - Summary
 
 In this this tutorial we have described an example on how to set up an
-nf-core/eager run to preproccess human aDNA for population genetic studies,
+nf-core/eager run to preprocess human aDNA for population genetic studies,
 preform some simple quality control checks, and generate random draw genotypes
 for downstream analysis of the data. Additionally, we described what to look for
 in the run summary report generated by MultiQC and where to find output files
@@ -3448,14 +3530,14 @@ that can be used for downstream analysis.
 
 #### Tutorial Metagenomics - Introduction
 
-The archaeogenetics field is now expanding out from analysing the genomes of
+The field of archaeogenetics is now expanding out from analysing the genomes of
 single organisms but to whole communities of taxa. One particular example is of
 human associated microbiomes, as preserved in ancient palaeofaeces (gut) or
 dental calculus (oral). This tutorial will give a basic example on how to set up
 nf-core/eager to perform initial screening of samples in the context of ancient
 microbiome research.
 
-> :warning: this tutorial does not describe how to install and setup
+> :warning: this tutorial does not describe how to install and set up
 > nf-core/eager For this please see other documentation on the
 > [nf-co.re](https://nf-co.re/usage/installation) website.
 
@@ -3463,6 +3545,11 @@ We will describe how to set up mapping ancient dental calculus samples against
 the human reference genome to allow sequencing and library quality-control, but
 additionally perform taxonomic profiling of the off-target reads from this
 mapping using MALT, and perform aDNA authentication with HOPS.
+
+> :warning: Please be aware that the settings used in this tutorial may not use
+> settings nor produce files you would actually use in 'real' analysis. The
+> settings are only specified for demonstration purposes. Please consult the
+> your colleagues, communities and the literature for optimal parameters.
 
 #### Tutorial Metagenomics - Preparation
 
@@ -3473,7 +3560,7 @@ Prior setting up an nf-core/eager run for metagenomic screening, we will need:
    and `picard SequenceDictionary` indices
 3. A MALT database of your choice (see [MALT
    manual](https://software-ab.informatik.uni-tuebingen.de/download/malt/manual.pdf)
-   for setup)
+   for set-up)
 4. A list of (NCBI) taxa containing well-known taxa of your microbiome (see
    below)
 5. HOPS resources `.map` and `.tre` files (available
@@ -3526,7 +3613,7 @@ optimised for the specific cluster/institution, such as maximum memory available
 or which scheduler queues to submit to. More explanations about configs and
 profiles can be seen in the [nf-core
 website](https://nf-co.re/usage/configuration) and the [profile
-tutorial](../tutorial_profiles.md).
+tutorial](#tutorial---what-are-profiles-and-how-to-use-them).
 
 Next we need to specify our input data. nf-core/eager can accept input FASTQs
 files in two main ways, either with direct paths to files (with wildcards), or
@@ -3566,9 +3653,9 @@ each `Lane`, but the `Sample_Name` and `Library_ID` columns identify and group
 them together accordingly. Secondly, as we have NextSeq data, we have specified
 we have two `Colour_Chemistry`, which is important for downstream processing
 (see below). The other columns are less important for this particular context of
-metagenomic screening. See the nf-core/eager [usage](../usage.md) documentation
-for more specifications on how to set up a TSV file (e.g. why despite NextSeqs
-only having 4 lanes, we go up to 8 in the example above).
+metagenomic screening. See the nf-core/eager [usage](#pipeline-options)
+documentation for more specifications on how to set up a TSV file (e.g. why
+despite NextSeqs only having 4 lanes, we go up to 8 in the example above).
 
 Alongside our input TSV file, we will also specify the paths to our reference
 FASTA file and the corresponding indices.
@@ -3752,8 +3839,8 @@ signal drop or want to log off, Nextflow will not crash.
 #### Tutorial Metagenomics - Results
 
 Assuming the run completed without any crashes (if problems do occur, check all
-against [#usage](usage.md) all parameters are as expected, or check the
-[FAQ](../faq.md)), we can now check our results in `results/`.
+against [usage](#pipeline-options) all parameters are as expected, or check the
+[FAQ](#troubleshooting-and-faqs), we can now check our results in `results/`.
 
 ##### Tutorial Metagenomics - MultiQC Report
 
@@ -3780,9 +3867,8 @@ General Stats Table:
   given this is on the human reads this is just a rule of thumb and may not
   reflect the quality of the metagenomic profile) suggesting over-amplified or
   badly preserved samples?
-- Does the human DNA show increased frequency of C>Ts on the 5' end of molecules
-  (you may need to un-hide the 2nd base columns with 'configure columns'
-  button)?
+- Does the human DNA show increased frequency of C>Ts on the 5' end of
+  molecules?
 
 FastQC (pre-AdapterRemoval):
 
@@ -3814,7 +3900,7 @@ Samtools Flagstat (pre/post Filter):
 - Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
   of contamination) that require downstream closer assessment?
 
-DeDup/Picard MarkDuplicates):
+DeDup/Picard MarkDuplicates:
 
 - Do I see large numbers of duplicates being removed, possibly indicating
   over-amplified or badly preserved samples?
@@ -3842,7 +3928,7 @@ have to remove some of them that you didn't actually use in the set up.
 
 For example, in this example, we have used: Nextflow, nf-core/eager, FastQC,
 AdapterRemoval, fastP, BWA, Samtools, endorS.py, Picard Markduplicates,
-Qualimap, PreSeq, DamageProfiler, MALT, Maltextract and MultiQC.
+Qualimap, PreSeq, DamageProfiler, MALT, MaltExtract and MultiQC.
 
 Citations to all used tools can be seen
 [here](https://nf-co.re/eager#tool-references)
@@ -3891,10 +3977,640 @@ nextflow clean -f -k
 
 #### Tutorial Metagenomics - Summary
 
-In this this tutorial we have described an example on how to set up a metagnomic
+In this this tutorial we have described an example on how to set up a metagenomic
 screening run of ancient microbiome samples. We have covered how set up
 nf-core/eager to extract off-target in a form that can be used for MALT, and how
 to additional run HOPS to authenticate expected taxa to be found in the
 microbiome. Finally we have also described what to look for in the MultiQC run
 summary report and where to find output files that can be used for downstream
 analysis.
+
+### Tutorial - How to set up nf-core/eager for pathogen genomics
+
+#### Tutorial Pathogen Genomics - Introduction
+
+This tutorial will give a basic example on how to set up nf-core/eager to
+perform bacterial genome reconstruction from samples in the context of ancient
+pathogenomic research.
+
+> :warning: this tutorial does not describe how to install and set-up
+> nf-core/eager For this please see other documentation on the
+> [nf-co.re](https://nf-co.re/usage/installation) website.
+
+We will describe how to set up mapping ancient pathogen samples against the
+reference of a targeted organism genome, to check sequencing and library
+quality-control, calculation of depth and breath of coverage, check for damage
+profiles, feature-annotation statistics (e.g. for gene presence and absence),
+SNP calling and producing an SNP alignment for its usage in phylogenetic
+analysis.
+
+I will use as an example data from [Andrades Valtueña et al
+2017](https://doi.org/10.1016/j.cub.2017.10.025), who retrieved Late Neolithic/Bronze
+Age _Yersinia pestis_ genomes. This data is **very large shotgun data** and is
+not ideal for testing, so running on your own data is recommended as otherwise
+running this data will require a lot of computing resources and time. However,
+note the same procedure can equally be applied on shallow-shotgun and also
+whole-genome enrichment data, so other than the TSV file you can apply this
+command explained below.
+
+> :warning: Please be aware that the settings used in this tutorial may not use
+> settings nor produce files you would actually use in 'real' analysis. The
+> settings are only specified for demonstration purposes. Please consult the
+> your colleagues, communities and the literature for optimal parameters.
+
+#### Tutorial Pathogen Genomics - Preparation
+
+Prior setting up the nf-core/eager run, we will need:
+
+1. Raw sequencing data in FASTQ format
+2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools`
+   and `picard SequenceDictionary` indices (however note these can be made for
+   you with nf-core/eager, but this can make a pipeline run take much longer!)
+3. A GFF file of gene sequence annotations (normally supplied with reference
+   genomes downloaded from NCBI Genomes, in this context from
+   [here](https://www.ncbi.nlm.nih.gov/genome/?term=Yersinia+pestis))
+4. The JAR file for GATK v3.5 downloadable from
+   [here](https://console.cloud.google.com/storage/browser/gatk-software/package-archive/gatk?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&prefix=&forceOnObjectsSortingFiltering=false)
+   (Make sure to extract the Zip file first!)
+5. [Optional] Previously made VCF GATK 3.5 files (see below for settings), of
+   previously published _Y. pestis_ genomes.
+
+We should also ensure we have the very latest version of the nf-core/eager
+pipeline so we have all latest bugfixes etc. In this case we will be using
+nf-core/eager version 2.2.0. You should always check on the
+[nf-core](https://nf-co.re/eager) website  whether a newer release has been made
+(particularly point releases e.g. 2.2.1).
+
+```bash
+nextflow pull nf-core/eager -r 2.2.0
+```
+
+It is important to note that if you are planning on running multiple runs of
+nf-core/eager for a given project, that the version should be **kept the same**
+for all runs to ensure consistency in settings for all of your libraries.
+
+#### Tutorial Pathogen Genomics - Inputs and Outputs
+
+To start, lets make a directory where all your nf-core/eager related files for
+this run will go, and change into it.
+
+```bash
+mkdir projectX_preprocessing20200727
+cd projectX_preprocessing20200727
+```
+
+The first part of constructing any nf-core/eager run is specifying a few generic
+parameters that will often be common across all runs. This will be which
+pipeline, version and _profile_ we will use. We will also specify a unique name
+of the run to help us keep track of all the nf-core/eager runs you may be
+running.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+<...>
+```
+
+For the `-profile` parameter, I have indicated that I wish to use singularity as
+my software container environment, and I will use the MPI-SHH institutional
+config as listed on
+[nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config),
+and using the profile for the 'sdag' cluster. These profiles specify settings
+optimised for the specific cluster/institution, such as maximum memory available
+or which scheduler queues to submit to. More explanations about configs and
+profiles can be seen in the [nf-core
+website](https://nf-co.re/usage/configuration) and the [profile
+tutorial](#tutorial---what-are-profiles-and-how-to-use-them).
+
+Next we need to specify our input data. nf-core/eager can accept input FASTQs
+files in two main ways, either with direct paths to files (with wildcards), or
+with a Tab-Separate-Value (TSV) file which contains the paths and extra
+metadata. In this example, we will use the TSV method, as to simulate a
+realistic use-case, such as both receiving single-end and paired-end data from
+Illumina NextSeq _and_ Illumina HiSeqs of double-stranded libraries. Illumina
+NextSeqs sequence a given library across four different 'lanes', so for each
+library you will receive four FASTQ files. Sometimes samples will be sequenced
+across multiple HiSeq lanes to maintain complexity to improve imaging by of base
+calls.The TSV input method is more useful for this context, as it allows
+'merging' of these lanes after preprocessing prior mapping (whereas direct paths
+will consider each pair of FASTQ files as independent libraries/samples).
+
+```bash
+Sample_Name   Library_ID    Lane    Colour_Chemistry    SeqType   Organism    Strandedness    UDG_Treatment   R1    R2    BAM
+KunilaII    KunilaII_nonUDG   4   4   PE    Yersinia pestis   double    none    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/007/ERR2112547/ERR2112547_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/007/ERR2112547/ERR2112547_2.fastq.gz    NA
+KunilaII    KunilaII_UDG    4   4   PE    Yersinia pestis   double    full    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/008/ERR2112548/ERR2112548_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/008/ERR2112548/ERR2112548_2.fastq.gz    NA
+6Post   6Post_PE    1   2   PE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/009/ERR2112549/ERR2112549_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/009/ERR2112549/ERR2112549_2.fastq.gz    NA
+6Post   6Post_PE    2   2   PE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/000/ERR2112550/ERR2112550_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/000/ERR2112550/ERR2112550_2.fastq.gz    NA
+6Post   6Post_PE    3   2   PE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/001/ERR2112551/ERR2112551_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/001/ERR2112551/ERR2112551_2.fastq.gz    NA
+6Post   6Post_PE    4   2   PE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/002/ERR2112552/ERR2112552_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/002/ERR2112552/ERR2112552_2.fastq.gz    NA
+6Post   6Post_SE    1   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/009/ERR2112569/ERR2112569.fastq.gz    NA    NA
+6Post   6Post_SE    2   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/000/ERR2112570/ERR2112570.fastq.gz    NA    NA
+6Post   6Post_SE    3   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/001/ERR2112571/ERR2112571.fastq.gz    NA    NA
+6Post   6Post_SE    4   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/002/ERR2112572/ERR2112572.fastq.gz    NA    NA
+6Post   6Post_SE    8   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/003/ERR2112573/ERR2112573.fastq.gz    NA    NA
+```
+
+Note we also have a mixture of non-UDG and half-UDG treated libraries.
+
+You can see that we have a single line for each set of FASTQ files representing
+each `Lane`, but the `Sample_Name` and `Library_ID` columns identify and group
+them together accordingly. Secondly, as we have NextSeq data, we have specified
+we have `2` for `Colour_Chemistry` vs `4` for HiSeq; something that is important
+for downstream processing (see below). See the nf-core/eager
+parameter documentation above for more specifications on how to set up a TSV
+file (e.g. why despite NextSeqs only having 4 lanes, we can also go up to 8 or
+more when having a sample sequenced on two NextSeq runs).
+
+Alongside our input TSV file, we will also specify the paths to our reference
+FASTA file and the corresponding indices.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+<...>
+```
+
+We specify the paths to each reference genome and it's corresponding tool
+specific index. Paths should always be encapsulated in quotes to ensure Nextflow
+evaluates them, rather than your shell! Also note that as `bwa` generates
+multiple index files, nf-core/eager takes a _directory_ that must contain these
+indices instead.
+
+> Note the difference between single and double `-` parameters. The former
+> represent nextflow flags, while the latter are nf-core/eager specific flags.
+
+Finally, we can also specify the output directory and the Nextflow `work/`
+directory (which contains "intermediate" working files and directories).
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+- w './work/' \
+<...>
+```
+
+#### Tutorial Pathogen Genomics - Pipeline Configuration
+
+Now that we have specified the input data, we can start moving onto specifying
+settings for each different module we will be running. As mentioned above, some
+of our samples were generated as NextSeq data, which is generated with a
+two-colour imaging technique. What this means is when you have shorter molecules
+than the number of cycles of the sequencing chemistry, the sequencer will
+repeatedly see 'G' calls (no colour) at the last few cycles, and you get long
+poly-G 'tails' on your reads. We therefore will turn on the poly-G clipping
+functionality offered by [`fastp`](https://github.com/OpenGene/fastp), and any
+pairs of files indicated in the TSV file as having `2` in the `Colour_Chemistry`
+column will be passed to `fastp` (the HiSeq data will not). We will not change
+the default minimum length of a poly-G string to be clipped.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+- w './work/' \
+--complexity_filter_poly_g \
+<...>
+```
+
+We then need to specify the mapping parameters for this run. Typically, to
+account for damage of very old aDNA libraries and also sometimes for evolutionary
+divergence of the ancient genome to the modern reference, we should relax the
+mapping thresholds that specify how many mismatches a read can have from the
+reference to be considered 'mapped'. We will also speed up the seeding step of
+the seed-and-extend approach by specifying the length of the seed. We will do
+this with `--bwaalnn` and `--bwaalnl` respectively.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+- w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+<...>
+```
+
+As we are also interested at checking for gene presence/absence (see below), we
+will ensure no mapping quality filter is applied (to account for gene
+duplication that may cause a read to map equally to to places) by setting the
+threshold to 0. In addition, we will discard unmapped reads to reduce our
+hard-drive footprint.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+- w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+<...>
+```
+
+While some of our input data is paired-end, we will keep with the default of
+Picard's 'MarkDuplicates' for duplicate removal for duplicate removal, as DeDup
+takes into account both the start and end of a _merged_ read before flagging it
+as a duplicate - something that isn't valid for a single-end read (where the
+true end of the molecule might not have been sequenced). We can then specify
+which dedupper we want to use with `--dedupper`. While we are using the default
+(which does not need to be directly specified), we will put it explicitly in our
+command for clarity.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+- w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
+<...>
+```
+
+Alongside making a SNP table for downstream phylogenetic analysis (will get to
+this in a bit), you may be interested in generating some summary statistics of
+annotated parts of your reference genome, e.g. to see whether certain virulence
+factors present or absent. nf-core/eager offers some basic statistics (percent and
+and depth coverage) of these via Bedtools. We will therefore turn on this
+module and specify the GFF file we downloaded alongside our reference fasta.
+Note that this GFF file has a _lot_ of redundant data, so often a custom
+BED file with just genes of interest is recommended. Furthermore
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+- w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
+--run_bedtools_coverage \
+--anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff'
+<...>
+```
+
+Next, we will set up trimming of the mapped reads to alleviate the effects of
+DNA damage during genotyping. To do this we will activate trimming with
+`--run_trim_bam`. The libraries in this underwent either no or 'half'-UDG
+treatment. The latter This will generally restrict all remaining DNA damage to
+the first 2 base pairs of a fragment. We will therefore use
+`--bamutils_clip_half_udg_left` and `--bamutils_clip_half_udg_right` to trim 2bp
+on either side of each fragment. For the non-UDG treated libraries we can trim a
+little more to remove most damage with the `--bamutils_clip_none_udg_<*>`
+variants of the flag. Note that there is a tendency in ancient pathogenomics to
+trim damage _prior_ mapping, as it allows mapping with stricter parameters to
+improve removal of reads deriving from  potential evolutionary diverged
+contaminants (this can be done nf-core/eager with teh Bowtie2 aligner), however
+we do it here to as another demonstration of functionality.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+- w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
+--run_bedtools_coverage \
+--anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff'
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--bamutils_clip_none_udg_left 3 \
+--bamutils_clip_none_udg_right 3 \
+<...>
+```
+
+Here we will use MultiVCFanalyzer for the generation of our SNP table. A
+MultiVCFAnalyzer SNP table allows downstream assessment of the level
+multi-allelic positions, something not expected when dealing with a single
+ploidy organism and thus may reflect cross-mapping from multiple-strains,
+environmental relatives or other contaminants.
+
+For this we need to run genotyping, but specifically with GATK UnifiedGenotyper
+3.5 (as MultiVCFAnalyzer requires this particular format of VCF files). We will
+therefore turn on Genotyping, supply the path to the GATK 3.5 JAR file, and
+check ploidy is set 2 so 'heterozygous' positions can be reported. We will also
+need to specify that we want to use the trimmed bams from the previous step.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+- w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--bamutils_clip_none_udg_left 3 \
+--bamutils_clip_none_udg_right 3 \
+--run_bedtools_coverage \
+--anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff' \
+--run_genotyping \
+--genotyping_tool 'ug' \
+--genotyping_source 'trimmed' \
+--gatk_ug_jar '../bin/GenomeAnalysisTK.jar' \
+--gatk_ploidy 2 \
+--gatk_ug_mode 'EMIT_ALL_SITES' \
+--gatk_ug_genotype_model 'SNP' \
+<...>
+```
+
+Finally we can set up MultiVCFAnalyzer itself. First we want to make sure we
+specified that we want to report the frequency of the given called allele at
+each position so we can assess cross mapping. Then, often with ancient
+pathogens, such as _Y. pestis_, we also want to include to the SNP table
+comparative data from previously published and ancient genomes. For this we
+specify additional VCF files that have been generated in previous runs with the
+same settings and reference genome. We can do this as follows.
+
+```bash
+nextflow run nf-core/eager \
+-r 2.2.0 \
+-profile sdag,shh,singularity \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+- w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--bamutils_clip_none_udg_left 3 \
+--bamutils_clip_none_udg_right 3 \
+--run_bedtools_coverage \
+--anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff' \
+--run_genotyping \
+--genotyping_tool 'ug' \
+--genotyping_source 'trimmed' \
+--gatk_ug_jar '../bin/GenomeAnalysisTK.jar' \
+--gatk_ploidy 2 \
+--gatk_ug_mode 'EMIT_ALL_SITES' \
+--gatk_ug_genotype_model 'SNP' \
+--run_multivcfanalyzer \
+--write_allele_frequencies \
+--min_base_coverage 5 \
+--min_allele_freq_hom 0.9 \
+--min_allele_freq_het 0.1 \
+--additional_vcf_files '../vcfs/*.vcf.gz'
+```
+
+For the two `min_allele_freq` parameters we specify that anything above 90%
+frequency is considered 'homozygous', and anything above 10% (but below 90%) is
+considered an ambiguous call and the frequency will be reported. Note that you
+would not normally use this SNP table with these parameters for downstream
+phylogenetic analysis, as the table will include ambiguous IUPAC codes, making
+it only useful for fine-comb checking of multi-allelic positions. Instead, set
+both parameters to the same value (e.g. 0.8) and use that table for downstream
+phylogenetic analysis.
+
+With this, we are ready to submit! If running on a remote cluster/server, Make
+sure to run this in `screen` session or similar, so that if you get a `ssh`
+signal drop or want to log off, Nextflow will not crash.
+
+#### Tutorial Pathogen Genomics - Results
+
+Assuming the run completed without any crashes (if problems do occur, check all
+against [#usage](#pipeline-options) all parameters are as expected, or check the
+[FAQ](#troubleshooting-and-faqs), we can now check our results in `results/`.
+
+##### Tutorial Pathogen Genomics - MultiQC Report
+
+In here there are many different directories containing different output files.
+The first directory to check is the `MultiQC/` directory. In here you should
+find a `multiqc_report.html` file. You will need to view this in a web browser,
+so I recommend either mounting your server to your file browser, or downloading
+it to your own local machine (PC/Laptop etc.).
+
+Once you've opened this you can go through each section and evaluate all the
+results. For example, I normally look for things like:
+
+General Stats Table:
+
+- Do I see the expected number of raw sequencing reads (summed across each set
+  of FASTQ files per library) that was requested for sequencing?
+- Does the percentage of trimmed reads look normal for aDNA, and do lengths
+  after trimming look short as expected of aDNA?
+- Does the Endogenous DNA (%) columns look reasonable (high enough to indicate
+  you have received enough coverage for downstream, and/or do you lose an
+  unusually high reads after filtering )
+- Does ClusterFactor or '% Dups' look high (e.g. >2 or >10% respectively -  high
+  values suggesting over-amplified or badly preserved samples i.e. low
+  complexity; note that genome-enrichment libraries may by their nature look
+  higher).
+- Do you see an increased frequency of C>Ts on the 5' end of molecules in the
+  mapped reads?
+- Do median read lengths look relatively low (normally <= 100 bp) indicating
+  typically fragmented aDNA?
+- Does the % coverage decrease relatively gradually at each depth coverage, and
+  does not drop extremely drastically
+- Does the Median coverage and percent >3x (or whatever you set) show sufficient
+  coverage for reliable SNP calls and that a good proportion of the genome is
+  covered indicating you have the right reference genome?
+- Do you see a high proportion of % Hets, indicating many multi-allelic sites
+  (and possibly presence of cross-mapping from other species, that may lead to
+  false positive or less confident SNP calls)?
+
+FastQC (pre-AdapterRemoval):
+
+- Do I see any very early drop off of sequence quality scores suggesting
+  problematic sequencing run?
+- Do I see outlier GC content distributions?
+- Do I see high sequence duplication levels?
+
+AdapterRemoval:
+
+- Do I see high numbers of singletons or discarded read pairs?
+
+FastQC (post-AdapterRemoval):
+
+- Do I see improved sequence quality scores along the length of reads?
+- Do I see reduced adapter content levels?
+
+Samtools Flagstat (pre/post Filter):
+
+- Do I see outliers, e.g. with unusually low levels of mapped reads, (indicative
+  of badly preserved samples) that require downstream closer assessment?
+
+DeDup/Picard MarkDuplicates:
+
+- Do I see large numbers of duplicates being removed, possibly indicating
+  over-amplified or badly preserved samples?
+
+PreSeq:
+
+- Do I see a large drop off of a sample's curve away from the theoretical
+  complexity? If so, this may indicate it's not worth performing deeper
+  sequencing as you will get few unique reads (vs. duplicates that are not any
+  more informative than the reads you've already sequenced)
+
+DamageProfiler:
+
+- Do I see evidence of damage on the microbial DNA (i.e. a % C>T of more than ~5% in
+  the first few nucleotide positions?) ? If not, possibly your mapped
+  reads are deriving from modern contamination.
+
+QualiMap:
+
+- Do you see a peak of coverage (X) at a good level, e.g. >= 3x, indicating
+  sufficient coverage for reliable SNP calls?
+
+MultiVCFAnalyzer:
+
+- Do I have a good number of called SNPs that suggest the samples have genomes
+  with sufficient nucleotide diversity to inform phylogenetic analysis?
+- Do you have a large number of discarded SNP calls?
+- Are the % Hets very high?
+
+> Detailed documentation and descriptions for all MultiQC modules can be seen in
+> the the 'Documentation' folder of the results directory or here in the [output
+> documentation](output.md)
+
+If you're happy everything looks good in terms of sequencing, we then look at
+specific directories to find any files you might want to use for downstream
+processing.
+
+Note that when you get back to writing up your publication, all the versions of
+the tools can be found under the 'nf-core/eager Software Versions' section of
+the MultiQC report. Note that all tools in the container are listed, so you may
+have to remove some of them that you didn't actually use in the set up.
+
+For example, in this example, we have used: Nextflow, nf-core/eager, FastQC,
+AdapterRemoval, fastP, BWA, Samtools, endorS.py, Picard Markduplicates,
+Bedtools, Qualimap, PreSeq, DamageProfiler, MultiVCFAnalyzer and MultiQC.
+
+Citations to all used tools can be seen
+[here](https://nf-co.re/eager#tool-references)
+
+##### Tutorial Pathogen Genomics - Files for Downstream Analysis
+
+You will find the most relevant output files in your `results/` directory. Each
+directory generally corresponds to a specific step or tool of the pipeline. Most
+importantly you should look in `deduplication` for your de-duplicated BAM files
+(e.g. for viewing in IGV), bedtools for depth (X) and breadth (%) coverages of
+annotations of your reference (e.g. genes), `multivcfanalyzer` for final SNP
+tables etc.
+
+#### Tutorial Pathogen Genomics - Clean up
+
+Finally, I would recommend cleaning up your `work/` directory of any
+intermediate files (if your `-profile` does not already do so). You can do this
+by going to above your `results/` and `work/` directory, e.g.
+
+```bash
+cd /<path>/<to>/projectX_preprocessing20200727
+```
+
+and running
+
+```bash
+nextflow clean -f -k
+```
+
+#### Tutorial Pathogen Genomics - Summary
+
+In this this tutorial we have described an example on how to set up an
+nf-core/eager run to process microbial aDNA for a relatively standard pathogen
+genomics study for phylogenetics and basic functional screening. This includes
+preform some simple quality control checks, mapping, genotyping, and SNP table
+generation for downstream analysis of the data. Additionally, we described what
+to look for in the run summary report generated by MultiQC and where to find
+output files that can be used for downstream analysis.

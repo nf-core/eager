@@ -14,20 +14,25 @@
                     "default": "null",
                     "description": "Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs. Alternatively, a path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.",
                     "fa_icon": "fas fa-file-csv",
-                    "help_text": "\nThere are two possible ways of supplying input sequencing data to nf-core/eager. The most efficient but more simplistic is supplying direct paths (with wildcards) to your FASTQ or BAM files, with each file or pair being considered a single library and each one run independently. TSV input requires creation of an extra file by the user and extra metadta, but allows more powerful lane and library merging.\n\n##### Direct Input Method\n\nThis method is where you specify with `--input`, the path locations of FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to the [TSV input method](#tsv-input-method) which is used for more complex input configurations such as lane and library merging.\n\nWhen using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.  \n\nBy default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')\n\nFor example, for a single set of FASTQs, or multiple files paired-end FASTQ files in one directory, you can specify:\n\n```bash\n--input 'path/to/data/sample_*_{1,2}.fastq.gz'\n```\n\nIf you have multiple files in different directories, you can use additional wildcards (`*`) e.g.:\n\n```bash\n--input 'path/to/data/*/sample_*_{1,2}.fastq.gz'\n```\n\n> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see the [TSV input method](#tsv-input-method) for possibilities.\n\n**Please note** the following requirements:\n\n1. Valid file extensions: `.fastq.gz`, `.fastq`, `.fq.gz`, `.fq`, `.bam`.\n2. The path **must** be enclosed in quotes\n3. The path must have at least one `*` wildcard character\n4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.\n5. Files names must be unique, having files with the same name, but in different directories is _not_ sufficient\n   - This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.\n6. Due to limitations of downstream tools (e.g. FastQC), sample IDs maybe truncated after the first `.` in the name, Ensure file names are unique prior to this!\n\n##### TSV Input Method\n\nAlternatively to the [direct input method](#direct-input-method), you can supply to `--input` a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata. This allows for more complex procedures such as merging of sequencing data across lanes, sequencing runs, sequencing configuration types, and samples.\n\nThe use of the TSV `--input` method is recommended to be used when performing more complex procedures such as lane or library merging. You do not need to specify `--single_end`, `--bam`, `--colour_chemistry`, `-udg_type` etc. when using TSV input - this is defined within the TSV file itself.\n\nThis TSV should look like the following:\n\n| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1 | R2 | BAM |\n|-------------|------------|------|------------------|--------|----------|--------------|---------------|----|----|-----|\n| JK2782      | JK2782     | 1    | 4                | PE      | Mammoth  | double       | full          | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2802      | JK2802     | 2    | 2                | SE      | Mammoth  | double       | full          | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n\nA template can be taken from https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/TSV_template.tsv.\n\n> :warning: Cells **must not** contain spaces before or after strings, as this will make the TSV unreadable by nextflow. Strings containing spaces should be wrapped in quotes.\n\nWhen using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging), assuming all other metadata columns are the same. If you have the same `Library_ID` but with different SeqType, this will be merged directly after mapping prior BAM filtering. Finally, it will also merge BAM files with the same `Sample_ID` but different `Library_ID` after duplicate removal, but prior to genotyping. Please see caveats to this below.\n\nColumn descriptions are as follows:\n\n- **Sample_Name:** A text string containing the name of a given sample of which there can be multiple libraries. All libraries with the same sample name and same SeqType will be merged after deduplication.\n- **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).\n- **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (and different SeqType) will be concatenated after read clipping and merging.\n- **Colour Chemistry** A number indicating whether the Illumina sequencing machine the library was sequenced on was 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq). This informs whether poly-G trimming (if turned on) should be performed.\n- **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [forward], or BAM). This will affect lane merging if different per library.\n- **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library\n- **Strandedness:** A text string indicating whether the library type is 'single' or 'double'. This currently has no functionality, but will affect lane/library merging if different per library.\n- **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.\n- **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column. File names **must be unique**, even if in different directories.\n- **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column. File names **must be unique**, even if in different directories.\n- **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'\n\nFor example, with the following:\n\n| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM |\n|-------------|------------|------|------------------|---------|----------|--------------|---------------|----------------------------------------------------------------|----------------------------------------------------------------|-----|\n| JK2782      | JK2782     | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2782      | JK2782     | 8    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2802      | JK2802  | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2802      | JK2802  | 8    | 4                | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  |\n\nIn this context the following will occur:\n\n- After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**.\n- After mapping, and prior BAM filtering, BAM files with the same with different `SeqType` (but with all other metadata columns th esame) will be merged together for each **Library**.\n- After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` and the same `UDG_Treatment` will be merged together.\n- If BAM trimming is turned, all post-trimming BAMs (i.e. non-UDG and half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the same `Sample_Name`.\n\nNote the following important points and limitations for setting up:\n\n- The TSV must use actual tabs (not spaces) between cells.\n- *File* names must be unique irregardless of file path, due to risk of over-writing (see: https://github.com/nextflow-io/nextflow/issues/470.\n  - If it is 'too late' and already have duplicate file names, a work around is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.\n- Lane IDs must be unique for each sequencing of each library.\n  - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.\n  - This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.\n- All _BAM_ files must be specified as `SE` under `SeqType`.\n- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration\n- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.\n- Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes\n  - **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.\n  - When you wish to run PE/SE data together `-dedupper markduplicates` is therefore prefered.\n  - An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.\n  - If truly you want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager\n  - If you _regularly_ want to run the situation above, please leave an feature request on github.\n- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).\n- nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.\n- Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).\n- Genotyping will typically be performed on each `sample` independently as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs` otherwise you will recieve a `file collision` error in steps such as `sexdeterrmine`, and merge these yourself. We will consider changing this behaviour in the future if there is enough interest.  \n"
+                    "help_text": "\nThere are two possible ways of supplying input sequencing data to nf-core/eager. The most efficient but more simplistic is supplying direct paths (with wildcards) to your FASTQ or BAM files, with each file or pair being considered a single library and each one run independently. TSV input requires creation of an extra file by the user and extra metadata, but allows more powerful lane and library merging.\n\n##### Direct Input Method\n\nThis method is where you specify with `--input`, the path locations of FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to the [TSV input method](#tsv-input-method) which is used for more complex input configurations such as lane and library merging.\n\nWhen using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.  \n\nBy default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')\n\nFor example, for a single set of FASTQs, or multiple files paired-end FASTQ files in one directory, you can specify:\n\n```bash\n--input 'path/to/data/sample_*_{1,2}.fastq.gz'\n```\n\nIf you have multiple files in different directories, you can use additional wildcards (`*`) e.g.:\n\n```bash\n--input 'path/to/data/*/sample_*_{1,2}.fastq.gz'\n```\n\n> :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see the [TSV input method](#tsv-input-method) for possibilities.\n\n**Please note** the following requirements:\n\n1. Valid file extensions: `.fastq.gz`, `.fastq`, `.fq.gz`, `.fq`, `.bam`.\n2. The path **must** be enclosed in quotes\n3. The path must have at least one `*` wildcard character\n4. When using the pipeline with **paired end data**, the path must use `{1,2}` notation to specify read pairs.\n5. Files names must be unique, having files with the same name, but in different directories is _not_ sufficient\n   - This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.\n6. Due to limitations of downstream tools (e.g. FastQC), sample IDs maybe truncated after the first `.` in the name, Ensure file names are unique prior to this!\n\n##### TSV Input Method\n\nAlternatively to the [direct input method](#direct-input-method), you can supply to `--input` a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata. This allows for more complex procedures such as merging of sequencing data across lanes, sequencing runs, sequencing configuration types, and samples.\n\nThe use of the TSV `--input` method is recommended to be used when performing more complex procedures such as lane or library merging. You do not need to specify `--single_end`, `--bam`, `--colour_chemistry`, `-udg_type` etc. when using TSV input - this is defined within the TSV file itself.\n\nThis TSV should look like the following:\n\n| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1 | R2 | BAM |\n|-------------|------------|------|------------------|--------|----------|--------------|---------------|----|----|-----|\n| JK2782      | JK2782     | 1    | 4                | PE      | Mammoth  | double       | full          | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2802      | JK2802     | 2    | 2                | SE      | Mammoth  | double       | full          | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n\nA template can be taken from https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/TSV_template.tsv.\n\n> :warning: Cells **must not** contain spaces before or after strings, as this will make the TSV unreadable by nextflow. Strings containing spaces should be wrapped in quotes.\n\nWhen using TSV_input, nf-core/eager will merge FASTQ files of libraries with the same `Library_ID` but different `Lanes` after adapter clipping (and merging), assuming all other metadata columns are the same. If you have the same `Library_ID` but with different SeqType, this will be merged directly after mapping prior BAM filtering. Finally, it will also merge BAM files with the same `Sample_ID` but different `Library_ID` after duplicate removal, but prior to genotyping. Please see caveats to this below.\n\nColumn descriptions are as follows:\n\n- **Sample_Name:** A text string containing the name of a given sample of which there can be multiple libraries. All libraries with the same sample name and same SeqType will be merged after deduplication.\n- **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).\n- **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (and different SeqType) will be concatenated after read clipping and merging.\n- **Colour Chemistry** A number indicating whether the Illumina sequencing machine the library was sequenced on was 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq). This informs whether poly-G trimming (if turned on) should be performed.\n- **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [forward], or BAM). This will affect lane merging if different per library.\n- **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library\n- **Strandedness:** A text string indicating whether the library type is 'single' or 'double'. This currently has no functionality, but will affect lane/library merging if different per library.\n- **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.\n- **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column. File names **must be unique**, even if in different directories.\n- **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column. File names **must be unique**, even if in different directories.\n- **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'\n\nFor example, with the following:\n\n| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM |\n|-------------|------------|------|------------------|---------|----------|--------------|---------------|----------------------------------------------------------------|----------------------------------------------------------------|-----|\n| JK2782      | JK2782     | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2782      | JK2782     | 8    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2802      | JK2802  | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2802      | JK2802  | 8    | 4                | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  |\n\nIn this context the following will occur:\n\n- After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**.\n- After mapping, and prior BAM filtering, BAM files with the same with different `SeqType` (but with all other metadata columns the same) will be merged together for each **Library**.\n- After duplicate removal, BAM files with `Library_ID`s with the same `Sample_Name` and the same `UDG_Treatment` will be merged together.\n- If BAM trimming is turned, all post-trimming BAMs (i.e. non-UDG and half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the same `Sample_Name`.\n\nNote the following important points and limitations for setting up:\n\n- The TSV must use actual tabs (not spaces) between cells.\n- *File* names must be unique regardless of file path, due to risk of over-writing (see: https://github.com/nextflow-io/nextflow/issues/470.\n  - If it is 'too late' and already have duplicate file names, a work around is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.\n- Lane IDs must be unique for each sequencing of each library.\n  - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.\n  - This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.\n- All _BAM_ files must be specified as `SE` under `SeqType`.\n- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration\n- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.\n- Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes\n  - **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.\n  - When you wish to run PE/SE data together `-dedupper markduplicates` is therefore preferred.\n  - An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.\n  - If truly you want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager\n  - If you _regularly_ want to run the situation above, please leave an feature request on github.\n- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).\n- nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.\n- Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).\n- Genotyping will typically be performed on each `sample` independently as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs` otherwise you will receive a `file collision` error in steps such as `sexdeterrmine`, and merge these yourself. We will consider changing this behaviour in the future if there is enough interest.  \n"
                 },
                 "udg_type": {
                     "type": "string",
                     "default": "none",
                     "description": "Specifies whether you have UDG treated libraries. Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Not required for TSV input.",
                     "fa_icon": "fas fa-vial",
-                    "help_text": "Defines whether Uracil-DNA glycosylase (UDG) treatment was used to remove DNA damage on the sequencing libraries.\n\nSpecify `'none'` if no treatment was performed. If you have partial UDG treated data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify `'half'`. If you have complete UDG treated data ([Briggs et al. 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using PMDtools `'half'` will use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage assessment will use CpG context only. Default: `'none'`."
+                    "help_text": "Defines whether Uracil-DNA glycosylase (UDG) treatment was used to remove DNA damage on the sequencing libraries.\n\nSpecify `'none'` if no treatment was performed. If you have partial UDG treated data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify `'half'`. If you have complete UDG treated data ([Briggs et al. 2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using PMDtools `'half'` will use a different model for DNA damage assessment in PMDTools. Specify the parameter with `'full'` and the PMDtools DNA damage assessment will use CpG context only. Default: `'none'`.",
+                    "enum": [
+                        "none",
+                        "half",
+                        "full"
+                    ]
                 },
                 "single_stranded": {
                     "type": "boolean",
                     "description": "Specifies that libraries are single stranded. Always affects MALTExtract but will be ignored by pileupCaller with TSV input. Not required for TSV input.",
                     "fa_icon": "fas fa-minus",
-                    "help_text": "Indicates libraries are single stranded.\n\nCurrently only affects MALTExtract where it will switch on damage patterns calculation mode to single-stranded, and genotyping with pileupcaller where a different method is used. Default: false.\n\nOnly required when using the 'Path' method of `--input"
+                    "help_text": "Indicates libraries are single stranded.\n\nCurrently only affects MALTExtract where it will switch on damage patterns\ncalculation mode to single-stranded, (MaltExtract: `--singleStranded`) and\ngenotyping with pileupCaller where a different method is used (pileupCaller:\n`--singleStrandMode`). Default: false\n\nOnly required when using the 'Path' method of `--input`"
                 },
                 "single_end": {
                     "type": "boolean",
@@ -53,7 +58,8 @@
             "description": "Define where the pipeline should find input data, and additional metadata.",
             "required": [
                 "input"
-            ]
+            ],
+            "help_text": "There are two possible ways of supplying input sequencing data to nf-core/eager.\nThe most efficient but more simplistic is supplying direct paths (with\nwildcards) to your FASTQ or BAM files, with each file or pair being considered a\nsingle library and each one run independently. TSV input requires creation of an\nextra file by the user and extra metadata, but allows more powerful lane and\nlibrary merging."
         },
         "input_data_additional_options": {
             "title": "Input Data Additional Options",
@@ -65,7 +71,7 @@
                     "type": "string",
                     "fa_icon": "fas fa-magnet",
                     "description": "If library result of SNP capture, path to BED file containing SNPS positions on reference genome.",
-                    "help_text": "Can be used to set a path to a BED file (3/6 column format) of SNP positions of a reference genome, to calculate SNP capture'd libraries on-target efficiency. If supplied, on-target metrics automatically for you by qualimap."
+                    "help_text": "Can be used to set a path to a BED file (3/6 column format) of SNP positions of a reference genome, to calculate SNP captured libraries on-target efficiency. If supplied, on-target metrics automatically for you by qualimap."
                 },
                 "run_convertinputbam": {
                     "type": "boolean",
@@ -132,9 +138,9 @@
                 },
                 "large_ref": {
                     "type": "boolean",
-                    "description": "Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficent data handling with the '.csi' format over the older '.bai'.",
+                    "description": "Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficient data handling with the '.csi' format over the older '.bai'.",
                     "fa_icon": "fas fa-mountain",
-                    "help_text": "This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `CSI` indices instead of `BAI` indices to compensate for the size of the reference genome. This parameter is not required for smaller references (including a human `hg19` or `grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI` indices. Default: off"
+                    "help_text": "This parameter is required to be set for large reference genomes. If your\nreference genome is larger than 3.5GB, the `samtools index` calls in the\npipeline need to generate `CSI` indices instead of `BAI` indices to compensate\nfor the size of the reference genome (with samtools: `-c`). This parameter is\nnot required for smaller references (including a human `hg19` or\n`grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI`\nindices. Default: off"
                 },
                 "save_reference": {
                     "type": "boolean",
@@ -144,7 +150,8 @@
                 }
             },
             "fa_icon": "fas fa-dna",
-            "description": "Specify locations of references and optionally, additional pre-made indices"
+            "description": "Specify locations of references and optionally, additional pre-made indices",
+            "help_text": "All nf-core/eager runs require a reference genome in FASTA format to map reads\nagainst to.\n\nIn addition we provide various options for indexing of different types of\nreference genomes (based on the tools used in the pipeline). nf-core/eager can\nindex reference genomes for you (with options to save these for other analysis),\nbut you can also supply your pre-made indices.\n\nSupplying pre-made indices saves time in pipeline execution and is especially\nadvised when running multiple times on the same cluster system for example. You\ncan even add a resource [specific profile](#profile) that sets paths to\npre-computed reference genomes, saving time when specifying these.\n\n> :warning: you must always supply a reference file. If you want to use\n  functionality that does not require one, supply a small decoy genome such as\n  phiX or the human mtDNA genome."
         },
         "output_options": {
             "title": "Output options",
@@ -174,7 +181,7 @@
                 },
                 "saveAlignedIntermediates": {
                     "type": "boolean",
-                    "description": "Turn this on if you want to keep intermediate alignment files (SAM, BAM, non-deduped BAM)",
+                    "description": "Turn this on if you want to keep intermediate alignment files (SAM, BAM, non-dedupped BAM)",
                     "hidden": true
                 }
             },
@@ -378,7 +385,8 @@
                     "help_text": "Turns off QualiMap and thus does not compute coverage and other mapping metrics.\n"
                 }
             },
-            "fa_icon": "fas fa-forward"
+            "fa_icon": "fas fa-forward",
+            "help_text": "Some of the steps in the pipeline can be executed optionally. If you specify\nspecific steps to be skipped, there won't be any output related to these\nmodules."
         },
         "complexity_filtering": {
             "title": "Complexity filtering",
@@ -397,10 +405,11 @@
                     "default": 10,
                     "description": "Specify length of poly-g min for clipping to be performed.",
                     "fa_icon": "fas fa-ruler-horizontal",
-                    "help_text": "This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming. By default, this is set to a value of `10` unless the user has chosen something specifically using this option."
+                    "help_text": "This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.\n\n> Modifies MaltExtract parameter: `--downSampOff`"
                 }
             },
-            "fa_icon": "fas fa-filter"
+            "fa_icon": "fas fa-filter",
+            "help_text": "More details can be seen in the [fastp\ndocumentation](https://github.com/OpenGene/fastp)\n\nIf using TSV input, this is performed per lane separately"
         },
         "read_merging_and_adapter_removal": {
             "title": "Read merging and adapter removal",
@@ -413,53 +422,53 @@
                     "default": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC",
                     "description": "Specify adapter sequence to be clipped off (forward strand).",
                     "fa_icon": "fas fa-cut",
-                    "help_text": "Defines the adapter sequence to be used for the forward read. By default, this is set to `'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'`.\n"
+                    "help_text": "Defines the adapter sequence to be used for the forward read. By default, this is set to `'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'`.\n\n> Modifies AdapterRemoval parameter: `--adapter1`"
                 },
                 "clip_reverse_adaptor": {
                     "type": "string",
                     "default": "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA",
                     "description": "Specify adapter sequence to be clipped off (reverse strand).",
                     "fa_icon": "fas fa-cut",
-                    "help_text": "Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.\n"
+                    "help_text": "Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.\n\n> Modifies AdapterRemoval parameter: `--adapter2`"
                 },
                 "clip_readlength": {
                     "type": "integer",
                     "default": 30,
                     "description": "Specify read minimum length to be kept for downstream analysis.",
                     "fa_icon": "fas fa-ruler",
-                    "help_text": "Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.\n\nNote that performing read length filtering at this step is not reliable for correct endogenous DNA calculation, when you have a large percentage of very short reads in your library - such retrieved in single-stranded library protocols. When you have very few reads passing this length filter, it will artificially inflate your endogenous DNA by creating a very small denominator. In these cases it is recommended to set this to 0, and use `--bam_filter_minreadlength` to instead, to filter out 'unusuable' short reads after mapping."
+                    "help_text": "Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.\n\nNote that performing read length filtering at this step is not reliable for correct endogenous DNA calculation, when you have a large percentage of very short reads in your library - such retrieved in single-stranded library protocols. When you have very few reads passing this length filter, it will artificially inflate your endogenous DNA by creating a very small denominator. In these cases it is recommended to set this to 0, and use `--bam_filter_minreadlength` to instead, to filter out 'un-usable' short reads after mapping.\n\n> Modifies AdapterRemoval parameter: `--minlength`\n"
                 },
                 "clip_min_read_quality": {
                     "type": "integer",
                     "default": 20,
                     "description": "Specify minimum base quality for trimming off bases.",
                     "fa_icon": "fas fa-medal",
-                    "help_text": "Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off. Default is set to `20`.\n"
+                    "help_text": "Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off. Default is set to `20`.\n\n> Modifies AdapterRemoval parameter: `--minquality`"
                 },
                 "min_adap_overlap": {
                     "type": "integer",
                     "default": 1,
                     "description": "Specify minimum adapter overlap required for clipping.",
                     "fa_icon": "fas fa-hands-helping",
-                    "help_text": "Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.\n"
+                    "help_text": "Sets the minimum overlap between two reads when read merging is performed. Default is set to `1` base overlap.\n\n> Modifies AdapterRemoval parameter: `--minadapteroverlap`"
                 },
                 "skip_collapse": {
                     "type": "boolean",
                     "description": "Skip of merging forward and reverse reads together. Only applicable for paired-end libraries.",
                     "fa_icon": "fas fa-fast-forward",
-                    "help_text": "Turns off the paired-end read merging.\n\nFor example\n\n```bash\n--skip_collapse  --input '*_{R1,R2}_*.fastq'\n```\n\n> It is important to use the paired-end wildcard globbing as `--skip_collapse` can only be used on paired-end data!\n> :warning: If you run this and also with `--clip_readlength` set to something (as is by default), you may end up removing single reads from either the pair1 or pair2 file. These will be NOT be mapped when aligning with either `bwa` or `bowtie`, as both can only accept one (forward) or two (forward and reverse) FASTQs as input.\n"
+                    "help_text": "Turns off the paired-end read merging.\n\nFor example\n\n```bash\n--skip_collapse  --input '*_{R1,R2}_*.fastq'\n```\n\nIt is important to use the paired-end wildcard globbing as `--skip_collapse` can only be used on paired-end data!\n:warning: If you run this and also with `--clip_readlength` set to something (as is by default), you may end up removing single reads from either the pair1 or pair2 file. These will be NOT be mapped when aligning with either `bwa` or `bowtie`, as both can only accept one (forward) or two (forward and reverse) FASTQs as input.\n\n> Modifies AdapterRemoval parameter: `--collapse`"
                 },
                 "skip_trim": {
                     "type": "boolean",
                     "description": "Skip adapter and quality trimming.",
                     "fa_icon": "fas fa-fast-forward",
-                    "help_text": "Turns off adaptor and quality trimming.\n\nFor example:\n\n```bash\n--skip_trim  --input '*.fastq'\n```\n"
+                    "help_text": "Turns off adaptor and quality trimming.\n\nFor example:\n\n```bash\n--skip_trim  --input '*.fastq'\n```\n\n> Modifies AdapterRemoval parameters: `--trimns --trimqualities --adapter1 --adapter2`"
                 },
                 "preserve5p": {
                     "type": "boolean",
                     "description": "Skip quality base trimming (n, score, window) of 5 prime end.",
                     "fa_icon": "fas fa-life-ring",
-                    "help_text": "Turns off quality based trimming at the 5p end of reads when any of the --trimns, --trimqualities, or --trimwindows options are used. Only 3p end of reads will be removed.\n\n> This also entirely disables quality based trimming of collapsed reads, since both ends of these are informative for PCR duplicate filtering. Described [here](https://github.com/MikkelSchubert/adapterremoval/issues/32#issuecomment-504758137).\n"
+                    "help_text": "Turns off quality based trimming at the 5p end of reads when any of the --trimns, --trimqualities, or --trimwindows options are used. Only 3p end of reads will be removed.\n\nThis also entirely disables quality based trimming of collapsed reads, since both ends of these are informative for PCR duplicate filtering. Described [here](https://github.com/MikkelSchubert/adapterremoval/issues/32#issuecomment-504758137).\n\n> Modifies AdapterRemoval parameters: `--preserve5p`"
                 },
                 "mergedonly": {
                     "type": "boolean",
@@ -468,7 +477,8 @@
                     "help_text": "Specify that only merged reads are sent downstream for analysis.\n\nSingletons (i.e. reads missing a pair), or un-merged reads (where there wasn't sufficient overlap) are discarded.\n\nYou may want to use this if you want ensure only the best quality reads for your analysis, but with the penalty of potentially losing still valid data (even if some reads have slightly lower quality). It is highly recommended when using `--dedupper 'dedup'` (see below)."
                 }
             },
-            "fa_icon": "fas fa-cut"
+            "fa_icon": "fas fa-cut",
+            "help_text": "These options handle various parts of adapter clipping and read merging steps.\n\nMore details can be seen in the [AdapterRemoval\ndocumentation](https://adapterremoval.readthedocs.io/en/latest/)\n\nIf using TSV input, this is performed per lane separately.\n\n> :warning: `--skip_trim` will skip adapter clipping AND quality trimming\n> (n, base quality). It is currently not possible skip one or the other."
         },
         "mapping": {
             "title": "Read mapping to reference genome",
@@ -482,42 +492,48 @@
                     "description": "Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'.",
                     "default": "bwaaln",
                     "fa_icon": "fas fa-layer-group",
-                    "help_text": "Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`), or bowtie2 (`bowtie2`). bwa aln is the default and highly suited for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to bwa aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)\n"
+                    "help_text": "Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem (`'bwamem'`), circularmapper (`'circularmapper'`), or bowtie2 (`bowtie2`). bwa aln is the default and highly suited for short read ancient DNA. bwa mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to bwa aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)\n",
+                    "enum": [
+                        "bwaaln",
+                        "bwamem",
+                        "circularmapper",
+                        "bowtie2"
+                    ]
                 },
                 "bwaalnn": {
                     "type": "number",
                     "default": 0.04,
                     "description": "Specify the -n parameter for BWA aln, i.e. amount of allowed mismatches in the alignment.",
                     "fa_icon": "fas fa-sort-numeric-down",
-                    "help_text": "Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently."
+                    "help_text": "Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.\n\n> Modifies bwa aln parameter: `-n`"
                 },
                 "bwaalnk": {
                     "type": "integer",
                     "default": 2,
                     "description": "Specify the -k parameter for BWA aln, i.e. maximum edit distance allowed in a seed.",
                     "fa_icon": "fas fa-drafting-compass",
-                    "help_text": "Configures the `bwa aln -k` parameter for the seeding phase in the mapping algorithm. Default is set to `2`.\n"
+                    "help_text": "Configures the `bwa aln -k` parameter for the seeding phase in the mapping algorithm. Default is set to `2`.\n\n> Modifies bwa aln parameter: `-k`"
                 },
                 "bwaalnl": {
                     "type": "integer",
                     "default": 1024,
                     "description": "Specify the -l parameter for BWA aln i.e. the length of seeds to be used.",
                     "fa_icon": "fas fa-ruler-horizontal",
-                    "help_text": "Configures the length of the seed used in `bwa aln -l`. Default is set to be 'turned off' at the recommendation of Schubert et al. ([2012 _BMC Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with `1024`.\n\n> Note: Despite being recommended, turning off seeding can result in long runtimes!"
+                    "help_text": "Configures the length of the seed used in `bwa aln -l`. Default is set to be 'turned off' at the recommendation of Schubert et al. ([2012 _BMC Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with `1024`.\n\nNote: Despite being recommended, turning off seeding can result in long runtimes!\n\n> Modifies bwa aln parameter: `-l`\n"
                 },
                 "circularextension": {
                     "type": "integer",
                     "default": 500,
                     "description": "Specify the number of bases to extend reference by (circularmapper only).",
                     "fa_icon": "fas fa-external-link-alt",
-                    "help_text": "The number of bases to extend the reference genome with. By default this is set to `500` if not specified otherwise."
+                    "help_text": "The number of bases to extend the reference genome with. By default this is set to `500` if not specified otherwise.\n\n> Modifies circulargenerator and realignsamfile parameter: `-e`"
                 },
                 "circulartarget": {
                     "type": "string",
                     "default": "MT",
                     "description": "Specify the FASTA header of the target chromosome to extend (circularmapper only).",
                     "fa_icon": "fas fa-bullseye",
-                    "help_text": "The chromosome in your FASTA reference that you'd like to be treated as circular. By default this is set to `MT` but can be configured to match any other chromosome.\n"
+                    "help_text": "The chromosome in your FASTA reference that you'd like to be treated as circular. By default this is set to `MT` but can be configured to match any other chromosome.\n\n> Modifies circulargenerator parameter: `-s`"
                 },
                 "circularfilter": {
                     "type": "boolean",
@@ -530,45 +546,57 @@
                     "default": "local",
                     "description": "Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'.",
                     "fa_icon": "fas fa-arrows-alt-h",
-                    "help_text": "The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)."
+                    "help_text": "The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. Default is 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105).\n\n> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`",
+                    "enum": [
+                        "local",
+                        "end-to-end"
+                    ]
                 },
                 "bt2_sensitivity": {
                     "type": "string",
                     "default": "sensitive",
                     "description": "Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'.",
                     "fa_icon": "fas fa-microscope",
-                    "help_text": "The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both `--bt2_alignmode` options. See the Bowtie2 [manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line) for actual settings. Default is 'sensitive' (following [Poullet and Orlando (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data _without_ UDG treatment)"
+                    "help_text": "The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both `--bt2_alignmode` options. See the Bowtie2 [manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line) for actual settings. Default is 'sensitive' (following [Poullet and Orlando (2020)](https://doi.org/10.3389/fevo.2020.00105), when running damaged-data _without_ UDG treatment)\n\n> Modifies Bowtie2 parameters: `--very-fast --fast --sensitive --very-sensitive --very-fast-local --fast-local --sensitive-local --very-sensitive-local`",
+                    "enum": [
+                        "no-preset",
+                        "very-fast",
+                        "fast",
+                        "sensitive",
+                        "very-sensitive"
+                    ]
                 },
                 "bt2n": {
                     "type": "integer",
                     "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity.",
                     "default": "0",
                     "fa_icon": "fas fa-sort-numeric-down",
-                    "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults)."
+                    "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).\n\n> Modifies Bowtie2 parameters: `-N`"
                 },
                 "bt2l": {
                     "type": "integer",
                     "description": "Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity.",
                     "fa_icon": "fas fa-ruler-horizontal",
                     "default": "0",
-                    "help_text": "The length of the seed substring to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)."
+                    "help_text": "The length of the seed sub-string to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).\n\n> Modifies Bowtie2 parameters: `-L`"
                 },
                 "bt2_trim5": {
                     "type": "integer",
                     "description": "Specify number of bases to trim off from 5' (left) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
                     "default": "0",
-                    "help_text": "Number of bases to trim of 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0"
+                    "help_text": "Number of bases to trim of 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0\n\n> Modifies Bowtie2 parameters: `-bt2_trim5`"
                 },
                 "bt2_trim3": {
                     "type": "integer",
                     "description": "Specify number of bases to trim off from 3' (right) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
                     "default": "0",
-                    "help_text": "Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0."
+                    "help_text": "Number of bases to trim of 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.\n\n> Modifies Bowtie2 parameters: `-bt2_trim3`"
                 }
             },
-            "fa_icon": "fas fa-layer-group"
+            "fa_icon": "fas fa-layer-group",
+            "help_text": "If using TSV input, mapping is performed library, i.e. after lane merging.\n"
         },
         "host_removal": {
             "title": "Removal of Host-Mapped Reads",
@@ -587,10 +615,15 @@
                     "default": "remove",
                     "description": "Host removal mode. Remove mapped reads completely from FASTQ (remove) or just mask mapped reads sequence by N (replace).",
                     "fa_icon": "fas fa-mask",
-                    "help_text": "Read removal mode. Remove mapped reads completely (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)\n"
+                    "help_text": "Read removal mode. Remove mapped reads completely (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)\n\n> Modifies extract_map_reads.py parameter: `-m`",
+                    "enum": [
+                        "strip",
+                        "replace"
+                    ]
                 }
             },
-            "fa_icon": "fas fa-user-shield"
+            "fa_icon": "fas fa-user-shield",
+            "help_text": "These parameters are used for removing mapped reads from the original input\nFASTQ files, usually in the context of uploading the original FASTQ files to a\npublic read archive (NCBI SRA/EBI ENA).\n\nThese flags will produce FASTQ files almost identical to your input files,\nexcept that reads with the same read ID as one found in the mapped bam file, are\neither removed or 'masked' (every base replaced with Ns).\n\nThis functionality allows you to provide other researchers who wish to re-use\nyour data to apply their own adapter removal/read merging procedures, while\nmaintaining anonymity for sample donors - for example with microbiome\nresearch.\n\nIf using TSV input, stripping is performed library, i.e. after lane merging."
         },
         "bam_filtering": {
             "title": "BAM Filtering",
@@ -609,29 +642,37 @@
                     "description": "Minimum mapping quality for reads filter.",
                     "default": "0",
                     "fa_icon": "fas fa-greater-than-equal",
-                    "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).\n"
+                    "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).\n\n> Modifies samtools view parameter: `-q`"
                 },
                 "bam_filter_minreadlength": {
                     "type": "integer",
                     "fa_icon": "fas fa-ruler-horizontal",
                     "description": "Specify minimum read length to be kept after mapping.",
                     "default": "0",
-                    "help_text": "Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.\n\nIf used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artifically small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct 'denominator' of 'all reads', for the Endogenous DNA calculation."
+                    "help_text": "Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.\n\nIf used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artificially small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct 'denominator' of 'all reads', for the Endogenous DNA calculation.\n\n> Modifies filter_bam_fragment_length.py parameter: `-l`"
                 },
                 "bam_unmapped_type": {
                     "type": "string",
                     "default": "discard",
                     "description": "Defines whether to discard all unmapped reads, keep only bam and/or keep only fastq format Options: 'discard', 'bam', 'fastq', 'both'.",
                     "fa_icon": "fas fa-trash-alt",
-                    "help_text": "Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `keep` keeps both unmapped and mapped reads in the same BAM file, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, `both` keeps both BAM and FASTQ files. Default is `discard`.  `keep` is what would happen if `--run_bam_filtering` was _not_ supplied.\n\nNote that in all cases, if `--bam_mapping_quality_threshold` is also supplied, mapping quality filtering will still occur on the mapped reads."
+                    "help_text": "Defines how to proceed with unmapped reads: `'discard'` removes all unmapped reads, `keep` keeps both unmapped and mapped reads in the same BAM file, `'bam'` keeps unmapped reads as BAM file, `'fastq'` keeps unmapped reads as FastQ file, `both` keeps both BAM and FASTQ files. Default is `discard`.  `keep` is what would happen if `--run_bam_filtering` was _not_ supplied.\n\nNote that in all cases, if `--bam_mapping_quality_threshold` is also supplied, mapping quality filtering will still occur on the mapped reads.\n\n> Modifies samtools view parameter: `-f4 -F4`",
+                    "enum": [
+                        "discard",
+                        "keep",
+                        "bam",
+                        "fastq",
+                        "both"
+                    ]
                 }
             },
-            "fa_icon": "fas fa-sort-amount-down"
+            "fa_icon": "fas fa-sort-amount-down",
+            "help_text": "Users can configure to keep/discard/extract certain groups of reads efficiently\nin the nf-core/eager pipeline.\n\nIf using TSV input, filtering is performed library, i.e. after lane merging.\n\nThis module utilises `samtools view` and `filter_bam_fragment_length.py`"
         },
         "deduplication": {
             "title": "DeDuplication",
             "type": "object",
-            "description": "Options for removal of PCR amplicon duplciates that can artificially inflate coverage.",
+            "description": "Options for removal of PCR amplicon duplicates that can artificially inflate coverage.",
             "default": "",
             "properties": {
                 "dedupper": {
@@ -639,16 +680,21 @@
                     "default": "markduplicates",
                     "description": "Deduplication method to use. Options: 'markduplicates',  'dedup'.",
                     "fa_icon": "fas fa-object-group",
-                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool 'dedup' ([Peltzer et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered.\n\nThis utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.\n\nNote that if you run without the `--mergedonly` flag for AdapterRemoval, DeDup will\nlikely fail. If you absolutely want to use both PE and SE data, you can supply the\n`--dedup_all_merged` flag to consider singletons to also be merged paired-end reads. This\nmay result in over-zealous deduplication."
+                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool 'dedup' ([Peltzer et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered.\n\nThis utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.\n\nNote that if you run without the `--mergedonly` flag for AdapterRemoval, DeDup will\nlikely fail. If you absolutely want to use both PE and SE data, you can supply the\n`--dedup_all_merged` flag to consider singletons to also be merged paired-end reads. This\nmay result in over-zealous deduplication.",
+                    "enum": [
+                        "markduplicates",
+                        "dedup"
+                    ]
                 },
                 "dedup_all_merged": {
                     "type": "boolean",
                     "description": "Turn on treating all reads as merged reads.",
                     "fa_icon": "fas fa-handshake",
-                    "help_text": "Sets DeDup to treat all reads as merged reads. This is useful if reads are for example not prefixed with `M_` in all cases. Therefore, this can be used as a workaround when also using a mixture of paired-end and single-end data, however this is not recommended (see above)."
+                    "help_text": "Sets DeDup to treat all reads as merged reads. This is useful if reads are for example not prefixed with `M_` in all cases. Therefore, this can be used as a workaround when also using a mixture of paired-end and single-end data, however this is not recommended (see above).\n\n> Modifies dedup parameter: `-m`"
                 }
             },
-            "fa_icon": "fas fa-clone"
+            "fa_icon": "fas fa-clone",
+            "help_text": "If using TSV input, deduplication is performed library, i.e. after lane merging."
         },
         "library_complexity_analysis": {
             "title": "Library Complexity Analysis",
@@ -661,10 +707,11 @@
                     "default": 1000,
                     "description": "Specify the step size of Preseq.",
                     "fa_icon": "fas fa-shoe-prints",
-                    "help_text": "Can be used to configure the step size of Preseqs `c_curve` method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.\n"
+                    "help_text": "Can be used to configure the step size of Preseqs `c_curve` method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.\n\n> Modifies preseq c_curve parameter: `-s`"
                 }
             },
-            "fa_icon": "fas fa-bezier-curve"
+            "fa_icon": "fas fa-bezier-curve",
+            "help_text": "nf-core/eager uses Preseq on map reads as one method to calculate library\ncomplexity. If DeDup is used, Preseq uses the histogram output of DeDup,\notherwise the sorted non-duplicated BAM file is supplied. Furthermore, if\npaired-end read collapsing is not performed, the `-P` flag is used."
         },
         "adna_damage_analysis": {
             "title": "(aDNA) Damage Analysis",
@@ -677,21 +724,21 @@
                     "default": 100,
                     "description": "Specify length filter for DamageProfiler.",
                     "fa_icon": "fas fa-sort-amount-up",
-                    "help_text": "Specifies the length filter for DamageProfiler. By default set to `100`.\n"
+                    "help_text": "Specifies the length filter for DamageProfiler. By default set to `100`.\n\n> Modifies DamageProfile parameter: `-l`"
                 },
                 "damageprofiler_threshold": {
                     "type": "integer",
                     "default": 15,
                     "description": "Specify number of bases of each read to consider for DamageProfiler calculations.",
                     "fa_icon": "fas fa-ruler-horizontal",
-                    "help_text": "Specifies the length of the read start and end to be considered for profile generation in DamageProfiler. By default set to `15` bases.\n"
+                    "help_text": "Specifies the length of the read start and end to be considered for profile generation in DamageProfiler. By default set to `15` bases.\n\n> Modifies DamageProfile parameter: `-t`"
                 },
                 "damageprofiler_yaxis": {
                     "type": "number",
                     "default": 0.3,
                     "description": "Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'.",
                     "fa_icon": "fas fa-ruler-vertical",
-                    "help_text": "Specifies what the maximum misincorporation frequency should be displayed as, in the DamageProfiler damage plot. This is set to `0.30` (i.e. 30%) by default as this matches the popular [mapDamage2.0](https://ginolhac.github.io/mapDamage) program. However, the default behaviour of DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any _possible_ damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behaviour can be turned on by specifying the number to `0`. Default: `0.30`."
+                    "help_text": "Specifies what the maximum misincorporation frequency should be displayed as, in the DamageProfiler damage plot. This is set to `0.30` (i.e. 30%) by default as this matches the popular [mapDamage2.0](https://ginolhac.github.io/mapDamage) program. However, the default behaviour of DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any _possible_ damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behaviour can be turned on by specifying the number to `0`. Default: `0.30`.\n\n> Modifies DamageProfile parameter: `-yaxis_damageplot`"
                 },
                 "run_pmdtools": {
                     "type": "boolean",
@@ -704,33 +751,33 @@
                     "default": 10,
                     "description": "Specify range of bases for PMDTools to scan for damage.",
                     "fa_icon": "fas fa-arrows-alt-h",
-                    "help_text": "Specifies the range in which to consider DNA damage from the ends of reads. By default set to `10`.\n"
+                    "help_text": "Specifies the range in which to consider DNA damage from the ends of reads. By default set to `10`.\n\n> Modifies PMDTools parameter: `--range`"
                 },
                 "pmdtools_threshold": {
                     "type": "integer",
                     "default": 3,
                     "description": "Specify PMDScore threshold for PMDTools.",
                     "fa_icon": "fas fa-chart-bar",
-                    "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user.\n"
+                    "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user.\n\n> Modifies PMDTools parameter: `--threshold`"
                 },
                 "pmdtools_reference_mask": {
                     "type": "string",
                     "description": "Specify a path to reference mask for PMDTools.",
                     "fa_icon": "fas fa-mask",
-                    "help_text": "Can be used to set a path to a reference genome mask for PMDTools.\n"
+                    "help_text": "Can be used to set a path to a reference genome mask for PMDTools."
                 },
                 "pmdtools_max_reads": {
                     "type": "integer",
                     "default": 10000,
                     "description": "Specify the maximum number of reads to consider for metrics generation.",
                     "fa_icon": "fas fa-greater-than-equal",
-                    "help_text": "The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results."
+                    "help_text": "The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results.\n\n> Modifies PMDTools parameter: `-n`"
                 }
             },
             "fa_icon": "fas fa-chart-line"
         },
-        "annotation_statistics": {
-            "title": "Annotation Statistics",
+        "feature_annotation_statistics": {
+            "title": "Feature Annotation Statistics",
             "type": "object",
             "description": "Options for getting reference annotation statistics (e.g. gene coverages)",
             "default": "",
@@ -748,7 +795,8 @@
                     "help_text": "Specify the path to a GFF/BED containing the feature coordinates (or any acceptable input for [`bedtools coverage`](https://bedtools.readthedocs.io/en/latest/content/tools/coverage.html)). Must be in quotes.\n"
                 }
             },
-            "fa_icon": "fas fa-scroll"
+            "fa_icon": "fas fa-scroll",
+            "help_text": "If you're interested in looking at coverage stats for certain features on your\nreference such as genes, SNPs etc., you can use the following bedtools module\nfor this purpose.\n\nMore documentation on bedtools can be seen in the [bedtools\ndocumentation](https://bedtools.readthedocs.io/en/latest/)\n\nIf using TSV input, bedtools is run after library merging of same-named library\nBAMs that have the same type of UDG treatment.\n"
         },
         "bam_trimming": {
             "title": "BAM Trimming",
@@ -766,38 +814,39 @@
                     "type": "integer",
                     "default": "1",
                     "fa_icon": "fas fa-ruler-combined",
-                    "description": "Specify the number of bases to clip off reads from 'left' end of read for half-UDG libaries.",
-                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read)."
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for half-UDG libraries.",
+                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bam trimBam parameter: `-L -R`"
                 },
                 "bamutils_clip_half_udg_right": {
                     "type": "integer",
                     "default": "1",
                     "fa_icon": "fas fa-ruler",
-                    "description": "Specify the number of bases to clip off reads from 'right' end of read for half-UDG libaries.",
-                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read)."
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for half-UDG libraries.",
+                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bam trimBam parameter: `-L -R`"
                 },
                 "bamutils_clip_none_udg_left": {
                     "type": "integer",
                     "default": "1",
                     "fa_icon": "fas fa-ruler-combined",
-                    "description": "Specify the number of bases to clip off reads from 'left' end of read for non-UDG libaries.",
-                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n"
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for non-UDG libraries.",
+                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bam trimBam parameter: `-L -R`"
                 },
                 "bamutils_clip_none_udg_right": {
                     "type": "integer",
                     "default": "1",
                     "fa_icon": "fas fa-ruler",
-                    "description": "Specify the number of bases to clip off reads from 'right' end of read for non-UDG libaries.",
-                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n"
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for non-UDG libraries.",
+                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bam trimBam parameter: `-L -R`"
                 },
                 "bamutils_softclip": {
                     "type": "boolean",
                     "description": "Turn on using softclip instead of hard masking.",
                     "fa_icon": "fas fa-paint-roller",
-                    "help_text": "By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string."
+                    "help_text": "By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with quality `!` in the BAM output. Turn this on to use soft-clipping instead, masking reads at the read ends respectively using the CIGAR string.\n\n> Modifies bam trimBam parameter: `-c`"
                 }
             },
-            "fa_icon": "fas fa-eraser"
+            "fa_icon": "fas fa-eraser",
+            "help_text": "For some library preparation protocols, users might want to clip off damaged\nbases before applying genotyping methods. This can be done in nf-core/eager\nautomatically by turning on the `--run_trim_bam` parameter.\n\nMore documentation can be seen in the [bamUtil\ndocumentation](https://genome.sph.umich.edu/wiki/BamUtil:_trimBam)\n"
         },
         "genotyping": {
             "title": "Genotyping",
@@ -815,7 +864,14 @@
                     "type": "string",
                     "description": "Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.",
                     "fa_icon": "fas fa-tools",
-                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.\n\n> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file."
+                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.\n\n> NB that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file.",
+                    "enum": [
+                        "ug",
+                        "hc",
+                        "freebayes",
+                        "pileupcaller",
+                        "angsd"
+                    ]
                 },
                 "genotyping_source": {
                     "type": "string",
@@ -835,21 +891,21 @@
                     "default": 30,
                     "description": "Specify GATK phred-scaled confidence threshold.",
                     "fa_icon": "fas fa-balance-scale-right",
-                    "help_text": "If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: `30`"
+                    "help_text": "If selected a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call. Default: `30`\n\n> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `-stand_call_conf`"
                 },
                 "gatk_ploidy": {
                     "type": "integer",
                     "default": 2,
                     "description": "Specify GATK organism ploidy.",
                     "fa_icon": "fas fa-pastafarianism",
-                    "help_text": "If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid organisms. Default: `2`\n"
+                    "help_text": "If selected a GATK genotyper, what is the ploidy of your reference organism. E.g. do you want to allow heterozygous calls from >= diploid organisms. Default: `2`\n\n> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `--sample-ploidy`"
                 },
                 "gatk_downsample": {
                     "type": "integer",
                     "default": 250,
                     "description": "Maximum depth coverage allowed for genotyping before down-sampling is turned on.",
                     "fa_icon": "fas fa-icicles",
-                    "help_text": "Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to 250 reads. Default: `250`\n"
+                    "help_text": "Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to 250 reads. Default: `250`\n\n> Modifies GATK UnifiedGenotyper parameter: `-dcov`"
                 },
                 "gatk_dbsnp": {
                     "type": "string",
@@ -862,28 +918,50 @@
                     "default": "EMIT_VARIANTS_ONLY",
                     "description": "Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_ACTIVE_SITES'.",
                     "fa_icon": "fas fa-bullhorn",
-                    "help_text": "If selected the GATK genotyper HaplotypeCaller, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`"
+                    "help_text": "If selected the GATK genotyper HaplotypeCaller, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`\n\n> Modifies GATK HaplotypeCaller parameter: `-output_mode`",
+                    "enum": [
+                        "EMIT_ALL_ACTIVE_SITES",
+                        "EMIT_ALL_CONFIDENT_SITES",
+                        "EMIT_VARIANTS_ONLY"
+                    ]
                 },
                 "gatk_hc_emitrefconf": {
                     "type": "string",
                     "default": "GVCF",
                     "description": "Specify HaplotypeCaller mode for emitting reference confidence calls . Options: 'NONE', 'BP_RESOLUTION', 'GVCF'.",
                     "fa_icon": "fas fa-bullhorn",
-                    "help_text": "If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`\n"
+                    "help_text": "If selected GATK HaplotypeCaller, mode for emitting reference confidence calls. Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`\n\n> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`\n",
+                    "enum": [
+                        "NONE",
+                        "GVCF",
+                        "BP_RESOLUTION"
+                    ]
                 },
                 "gatk_ug_out_mode": {
                     "type": "string",
                     "default": "EMIT_VARIANTS_ONLY",
                     "description": "Specify GATK output mode. Options: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'.",
                     "fa_icon": "fas fa-bullhorn",
-                    "help_text": "If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`"
+                    "help_text": "If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create, i.e. produce calls for every site or just confidence sites. Options: `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`. Default: `'EMIT_VARIANTS_ONLY'`\n\n> Modifies GATK UnifiedGenotyper parameter: `--output_mode`",
+                    "enum": [
+                        "EMIT_ALL_SITES",
+                        "EMIT_ALL_CONFIDENT_SITES",
+                        "EMIT_VARIANTS_ONLY"
+                    ]
                 },
                 "gatk_ug_genotype_model": {
                     "type": "string",
                     "default": "SNP",
                     "description": "Specify UnifiedGenotyper likelihood model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'.",
                     "fa_icon": "fas fa-project-diagram",
-                    "help_text": "If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`, `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`"
+                    "help_text": "If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`, `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`\n\n> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`",
+                    "enum": [
+                        "SNP",
+                        "INDEL",
+                        "BOTH",
+                        "GENERALPLOIDYSNP",
+                        "GENERALPLOIDYINDEL"
+                    ]
                 },
                 "gatk_ug_keep_realign_bam": {
                     "type": "string",
@@ -895,28 +973,28 @@
                     "type": "string",
                     "description": "Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.",
                     "fa_icon": "fas fa-undo-alt",
-                    "help_text": "Specify a value to set base quality scores, if reads are missing this information. Maybe useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to -1  which is do not set any default quality (turned off). Default: `-1`"
+                    "help_text": "Specify a value to set base quality scores, if reads are missing this information. Maybe useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to -1  which is do not set any default quality (turned off). Default: `-1`\n\n> Modifies GATK UnifiedGenotyper parameter: `--defaultBaseQualities`"
                 },
                 "freebayes_C": {
                     "type": "integer",
                     "default": 1,
                     "description": "Specify minimum required supporting observations to consider a variant.",
                     "fa_icon": "fas fa-align-center",
-                    "help_text": "Specify minimum required supporting observations to consider a variant. Default: `1`\n"
+                    "help_text": "Specify minimum required supporting observations to consider a variant. Default: `1`\n\n> Modifies freebayes parameter: `-C`"
                 },
                 "freebayes_g": {
                     "type": "integer",
                     "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C.",
                     "fa_icon": "fab fa-think-peaks",
                     "default": "0",
-                    "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.\n"
+                    "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.\n\n> Modifies freebayes parameter: `-g`"
                 },
                 "freebayes_p": {
                     "type": "integer",
                     "default": 2,
                     "description": "Specify ploidy of sample in FreeBayes.",
                     "fa_icon": "fas fa-pastafarianism",
-                    "help_text": "Specify ploidy of sample in FreeBayes. Default is diploid. Default: `2`\n"
+                    "help_text": "Specify ploidy of sample in FreeBayes. Default is diploid. Default: `2`\n\n> Modifies freebayes parameter: `-p`"
                 },
                 "pileupcaller_bedfile": {
                     "type": "string",
@@ -935,32 +1013,54 @@
                     "default": "randomHaploid",
                     "description": "Specify calling method to use. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'.",
                     "fa_icon": "fas fa-toolbox",
-                    "help_text": "Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: `'randomHaploid'`\n"
+                    "help_text": "Specify calling method to use. Options: randomHaploid, randomDiploid, majorityCall. Default: `'randomHaploid'`\n\n> Modifies pileupCaller parameter: `--randomHaploid --randomDiploid --majorityCall`",
+                    "enum": [
+                        "randomHaploid",
+                        "randomDiploid",
+                        "majorityCall"
+                    ]
                 },
                 "pileupcaller_transitions_mode": {
                     "type": "string",
                     "default": "AllSites",
                     "description": "Specify the calling mode for transitions. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'.",
                     "fa_icon": "fas fa-toggle-on",
-                    "help_text": "Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: `'AllSites'`, `'TransitionsMissing'`, `'SkipTransitions'`. Default: `'AllSites'`\n"
+                    "help_text": "Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. Options: `'AllSites'`, `'TransitionsMissing'`, `'SkipTransitions'`. Default: `'AllSites'`\n\n> Modifies pileupCaller parameter: `--skipTransitions --transitionsMissing`",
+                    "enum": [
+                        "AllSites",
+                        "TransitionsMissing",
+                        "SkipTransitions"
+                    ]
                 },
                 "angsd_glmodel": {
                     "type": "string",
                     "default": "samtools",
                     "description": "Specify which ANGSD genotyping likelihood model to use. Options: 'samtools', 'gatk', 'soapsnp', 'syk'.",
                     "fa_icon": "fas fa-project-diagram",
-                    "help_text": "Specify which genotype likelihood model to use. Options: `'samtools`, `'gatk'`, `'soapsnp'`, `'syk'`. Default: `'samtools'`\n"
+                    "help_text": "Specify which genotype likelihood model to use. Options: `'samtools`, `'gatk'`, `'soapsnp'`, `'syk'`. Default: `'samtools'`\n\n> Modifies ANGSD parameter: `-GL`",
+                    "enum": [
+                        "samtools",
+                        "gatk",
+                        "soapsnp",
+                        "syk"
+                    ]
                 },
                 "angsd_glformat": {
                     "type": "string",
                     "default": "binary",
                     "description": "Specify which output type to output ANGSD genotyping likelihood results: Options: 'text', 'binary', 'binary_three', 'beagle'.",
                     "fa_icon": "fas fa-text-height",
-                    "help_text": "Specifies what type of genotyping likelihood file format will be output. Options: `'text'`, `'binary'`, `'binary_three'`, `'beagle_binary'`. Default: `'text'`.\n\nThe options refer to the following descriptions respectively:\n\n- `text`: textoutput of all 10 log genotype likelihoods.\n- `binary`: binary all 10 log genotype likelihood\n- `binary_three`: binary 3 times likelihood\n- `beagle_binary`: beagle likelihood file\n\nSee the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information on which to select for your downstream applications."
+                    "help_text": "Specifies what type of genotyping likelihood file format will be output. Options: `'text'`, `'binary'`, `'binary_three'`, `'beagle_binary'`. Default: `'text'`.\n\nThe options refer to the following descriptions respectively:\n\n- `text`: textoutput of all 10 log genotype likelihoods.\n- `binary`: binary all 10 log genotype likelihood\n- `binary_three`: binary 3 times likelihood\n- `beagle_binary`: beagle likelihood file\n\nSee the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information on which to select for your downstream applications.\n\n> Modifies ANGSD parameter: `-doGlF`",
+                    "enum": [
+                        "text",
+                        "binary",
+                        "binary_three",
+                        "beagle"
+                    ]
                 },
                 "angsd_createfasta": {
                     "type": "boolean",
-                    "description": "Turn on creation of FASTA from ANGSD genotyping likelhoood.",
+                    "description": "Turn on creation of FASTA from ANGSD genotyping likelihood.",
                     "fa_icon": "fas fa-align-justify",
                     "help_text": "Turns on the ANGSD creation of a FASTA file from the BAM file.\n"
                 },
@@ -969,10 +1069,15 @@
                     "default": "random",
                     "description": "Specify which genotype type of 'base calling' to use for ANGSD FASTA generation. Options: 'random', 'common'.",
                     "fa_icon": "fas fa-toolbox",
-                    "help_text": "The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given position, whereas 'random' will pick one at random. Default: `'random'`."
+                    "help_text": "The type of base calling to be performed when creating the ANGSD FASTA file. Options: `'random'` or `'common'`. Will output the most common non-N base at each given position, whereas 'random' will pick one at random. Default: `'random'`.\n\n> Modifies ANGSD parameter: `-doFasta -doCounts`",
+                    "enum": [
+                        "random",
+                        "common"
+                    ]
                 }
             },
-            "fa_icon": "fas fa-sliders-h"
+            "fa_icon": "fas fa-sliders-h",
+            "help_text": "There are options for different genotypers (or genotype likelihood calculators)\nto be used. We suggest you the documentation of each tool to find the ones that\nsuit your needs.\n\nDocumentation for each tool:\n\n- [GATK\n  UnifiedGenotyper](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php)\n- [GATK\n  HaplotypeCaller](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php)\n- [FreeBayes](https://github.com/ekg/freebayes)\n- [ANGSD](http://www.popgen.dk/angsd/index.php/Genotype_Likelihoods)\n- [sequenceTools pileupCaller](https://github.com/stschiff/sequenceTools)\n\nIf using TSV input, genotyping is performed per sample (i.e. after all types of\nlibraries are merged), except pileupCaller which gathers all double-stranded and\nsingle-stranded (same-type merged) libraries respectively."
         },
         "consensus_sequence_generation": {
             "title": "Consensus Sequence Generation",
@@ -984,7 +1089,7 @@
                     "type": "boolean",
                     "description": "Turns on ability to create a consensus sequence FASTA file based on a UnifiedGenotyper VCF file and the original reference (only considers SNPs).",
                     "fa_icon": "fas fa-power-off",
-                    "help_text": "Turn on concensus sequence genome creation via VCF2Genome. Only accepts GATK UnifiedGenotyper VCF files with the `--gatk_ug_out_mode 'EMIT_ALL_SITES'` and `--gatk_ug_genotype_model 'SNP` flags. Typically useful for small genomes such as mitochondria.\n"
+                    "help_text": "Turn on consensus sequence genome creation via VCF2Genome. Only accepts GATK UnifiedGenotyper VCF files with the `--gatk_ug_out_mode 'EMIT_ALL_SITES'` and `--gatk_ug_genotype_model 'SNP` flags. Typically useful for small genomes such as mitochondria.\n"
                 },
                 "vcf2genome_outfile": {
                     "type": "string",
@@ -1003,29 +1108,30 @@
                     "default": 5,
                     "description": "Minimum depth coverage required for a call to be included (else N will be called).",
                     "fa_icon": "fas fa-sort-amount-up",
-                    "help_text": "Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: `5`\n"
+                    "help_text": "Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: `5`\n\n> Modifies VCF2Genome parameter: `-minc`"
                 },
                 "vcf2genome_minq": {
                     "type": "integer",
                     "default": 30,
                     "description": "Minimum genotyping quality of a call to be called. Else N will be called.",
                     "fa_icon": "fas fa-medal",
-                    "help_text": "Minimum genotyping quality of a call to be called. Else N will be called. Default: `30`\n"
+                    "help_text": "Minimum genotyping quality of a call to be called. Else N will be called. Default: `30`\n\n> Modifies VCF2Genome parameter: `-minq`"
                 },
                 "vcf2genome_minfreq": {
                     "type": "number",
                     "default": 0.8,
                     "description": "Minimum fraction of reads supporting a call to be included. Else N will be called.",
                     "fa_icon": "fas fa-percent",
-                    "help_text": "In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: `0.8`\n"
+                    "help_text": "In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: `0.8`\n\n> Modifies VCF2Genome parameter: `-minfreq`"
                 }
             },
-            "fa_icon": "fas fa-handshake"
+            "fa_icon": "fas fa-handshake",
+            "help_text": "If using TSV input, consensus generation is performed per sample (i.e. after all\ntypes of libraries are merged)."
         },
         "snp_table_generation": {
             "title": "SNP Table Generation",
             "type": "object",
-            "description": "Options for creation of a SNP table useful for downstream analysis (e.g. estimation of cross-mapping of different sepecies and multi-sequence alignment)",
+            "description": "Options for creation of a SNP table useful for downstream analysis (e.g. estimation of cross-mapping of different species and multi-sequence alignment)",
             "default": "",
             "properties": {
                 "run_multivcfanalyzer": {
@@ -1096,7 +1202,8 @@
                     "help_text": "If you wish to include results from SNPEff effect analysis, supply the output from SNPEff in txt format. The path must be in quotes.\n"
                 }
             },
-            "fa_icon": "fas fa-table"
+            "fa_icon": "fas fa-table",
+            "help_text": "SNP Table Generation here is performed by MultiVCFAnalyzer. The current version\nof MultiVCFAnalyzer version only accepts GATK UnifiedGenotyper 3.5 VCF files,\nand when the ploidy was set to 2 (this allows MultiVCFAnalyzer to look for\nreport frequencies of polymorphic positions). A description of how the tool\nworks can be seen in the Supplementary Information of [Bos et al.\n(2014)](https://doi.org/10.1038/nature13591) under \"SNP Calling and Phylogenetic\nAnalysis\".\n\nMore can be seen in the [MultiVCFAnalyzer\ndocumentation](https://github.com/alexherbig/MultiVCFAnalyzer).\n\nIf using TSV input, MultiVCFAnalyzer is performed on all samples gathered\ntogether."
         },
         "mitochondrial_to_nuclear_ratio": {
             "title": "Mitochondrial to Nuclear Ratio",
@@ -1118,10 +1225,11 @@
                     "help_text": "Specify the FASTA entry in the reference file specified as `--fasta`, which acts as the mitochondrial 'chromosome' to base the ratio calculation from. The tool only accepts the first section of the header before the first space. The default chromosome name is based on hs37d5/GrCH37 human reference genome. Default: 'MT'\n"
                 }
             },
-            "fa_icon": "fas fa-balance-scale-left"
+            "fa_icon": "fas fa-balance-scale-left",
+            "help_text": "If using TSV input, Mitochondrial to Nuclear Ratio calculation is calculated per\ndeduplicated library (after lane merging)"
         },
-        "sex_determination": {
-            "title": "Sex Determination",
+        "human_sex_determination": {
+            "title": "Human Sex Determination",
             "type": "object",
             "description": "Options for the calculation of biological sex of human individuals.",
             "default": "",
@@ -1136,10 +1244,11 @@
                     "type": "string",
                     "description": "Specify path to SNP panel in bed format for error bar calculation. Optional (see documentation).",
                     "fa_icon": "fas fa-bed",
-                    "help_text": "Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate calculation. Running without this parameter will considerably increase runtime, and render the resulting error bars unstrustworthy. Theoretically, any set of SNPs that are distant enough that two SNPs are unlikely to be covered by the same read can be used here. The programme was coded with the 1240K panel in mind. The path must be in quotes."
+                    "help_text": "Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate calculation. Running without this parameter will considerably increase runtime, and render the resulting error bars untrustworthy. Theoretically, any set of SNPs that are distant enough that two SNPs are unlikely to be covered by the same read can be used here. The programme was coded with the 1240K panel in mind. The path must be in quotes."
                 }
             },
-            "fa_icon": "fas fa-transgender"
+            "fa_icon": "fas fa-transgender",
+            "help_text": "An optional process for human DNA. It can be used to calculate the relative\ncoverage of X and Y chromosomes compared to the autosomes (X-/Y-rate). Standard\nerrors for these measurements are also calculated, assuming a binomial\ndistribution of reads across the SNPs.\n\nIf using TSV input, SexDetERRmine is performed on all samples gathered together."
         },
         "nuclear_contamination_for_human_dna": {
             "title": "Nuclear Contamination for Human DNA",
@@ -1180,85 +1289,104 @@
                     "description": "Specify which classifier to use. Options: 'malt', 'kraken'.",
                     "fa_icon": "fas fa-tools",
                     "default": "undefined",
-                    "help_text": "Specify which taxonomic classifier to use. There are two options available:\n\n- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)\n- `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)\n  \n:warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundency and large HDD footprints!\n"
+                    "help_text": "Specify which taxonomic classifier to use. There are two options available:\n\n- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)\n- `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)\n  \n:warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundancy and large HDD footprints!\n"
                 },
                 "database": {
                     "type": "string",
-                    "description": "Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory.",
+                    "description": "Specify path to classifier database directory. For Kraken2 this can also be a `.tar.gz` of the directory.",
                     "fa_icon": "fas fa-database",
-                    "help_text": "Specify the path to the _directory_ containing your taxonomic classifer's database (malt or kraken).\n\nFor Kraken2, it can be either the path to the _directory_ or the path to the `.tar.gz` compressed directory of the Kraken2 database."
+                    "help_text": "Specify the path to the _directory_ containing your taxonomic classifier's database (malt or kraken).\n\nFor Kraken2, it can be either the path to the _directory_ or the path to the `.tar.gz` compressed directory of the Kraken2 database."
                 },
                 "metagenomic_min_support_reads": {
                     "type": "integer",
                     "default": 1,
                     "description": "Specify a minimum number of reads a taxon of sample total is required to have to be retained. Not compatible with --malt_min_support_mode 'percent'.",
                     "fa_icon": "fas fa-sort-numeric-up-alt",
-                    "help_text": "Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.  \nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1 ."
+                    "help_text": "Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.  \nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1.\n\n> Modifies MALT or kraken_parse.py parameter: `-sup` and `-c` respectively\n"
                 },
                 "percent_identity": {
                     "type": "integer",
                     "default": 85,
                     "description": "Percent identity value threshold for MALT.",
                     "fa_icon": "fas fa-id-card",
-                    "help_text": "Specify the minimum percent identity (or similarity) a squence must have to the reference for it to be retained. Default is `85`\n\nOnly used when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Specify the minimum percent identity (or similarity) a sequence must have to the reference for it to be retained. Default is `85`\n\nOnly used when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-id`"
                 },
                 "malt_mode": {
                     "type": "string",
                     "default": "BlastN",
                     "description": "Specify which alignment mode to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'.",
                     "fa_icon": "fas fa-align-left",
-                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.\nrespectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: `'BlastN'`\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.\nrespectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: `'BlastN'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-m`",
+                    "enum": [
+                        "BlastN",
+                        "BlastP",
+                        "BlastX"
+                    ]
                 },
                 "malt_alignment_mode": {
                     "type": "string",
                     "default": "SemiGlobal",
                     "description": "Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'.",
                     "fa_icon": "fas fa-align-center",
-                    "help_text": "Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-at`",
+                    "enum": [
+                        "Local",
+                        "SemiGlobal"
+                    ]
                 },
                 "malt_top_percent": {
                     "type": "integer",
                     "default": 1,
                     "description": "Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual).",
                     "fa_icon": "fas fa-percent",
-                    "help_text": "Specify the top percent value of the LCA algorthim. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): \"For each\nread, only those matches are used for taxonomic placement whose bit disjointScore is within\n10% of the best disjointScore for that read.\". Default: `1`.\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Specify the top percent value of the LCA algorithm. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): \"For each\nread, only those matches are used for taxonomic placement whose bit disjointScore is within\n10% of the best disjointScore for that read.\". Default: `1`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-top`"
                 },
                 "malt_min_support_mode": {
                     "type": "string",
                     "default": "percent",
                     "description": "Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'.",
                     "fa_icon": "fas fa-drumstick-bite",
-                    "help_text": "Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-sup -supp`",
+                    "enum": [
+                        "percent",
+                        "reads"
+                    ]
                 },
                 "malt_min_support_percent": {
                     "type": "number",
                     "default": 0.01,
                     "description": "Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT.",
                     "fa_icon": "fas fa-percentage",
-                    "help_text": "Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n"
+                    "help_text": "Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-supp`"
                 },
                 "malt_max_queries": {
                     "type": "integer",
                     "default": 100,
                     "description": "Specify the maximum number of queries a read can have for MALT.",
                     "fa_icon": "fas fa-phone",
-                    "help_text": "Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: `100`\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: `100`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-mq`"
                 },
                 "malt_memory_mode": {
                     "type": "string",
                     "default": "load",
                     "description": "Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'.",
                     "fa_icon": "fas fa-memory",
-                    "help_text": "How to load the database into memory. Options are `'load'`, `'page'` or `'map'`. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. `'page'` and `'map'` perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "How to load the database into memory. Options are `'load'`, `'page'` or `'map'`. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. `'page'` and `'map'` perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `--memoryMode`",
+                    "enum": [
+                        "load",
+                        "page",
+                        "map"
+                    ]
                 },
                 "malt_sam_output": {
                     "type": "boolean",
                     "description": "Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.",
                     "fa_icon": "fas fa-file-alt",
-                    "help_text": "Specify to _also_ produce gzipped SAM files of all alignments and un-aligned reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse' format. Can be useful for downstream analyses due to more common file format. :warning: can result in very large run output directories as this is essentially duplication of the RMA6 files."
+                    "help_text": "Specify to _also_ produce gzipped SAM files of all alignments and un-aligned reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse' format. Can be useful for downstream analyses due to more common file format. \n\n:warning: can result in very large run output directories as this is essentially duplication of the RMA6 files.\n\n> Modifies MALT parameter `-a -f`"
                 }
             },
-            "fa_icon": "fas fa-search"
+            "fa_icon": "fas fa-search",
+            "help_text": "An increasingly common line of analysis in high-throughput aDNA analysis today\nis simultaneously screening off target reads of the host for endogenous\nmicrobial signals - particularly of pathogens. Metagenomic screening is\ncurrently offered via MALT with aDNA specific verification via MaltExtract, or\nKraken2.\n\nPlease note the following:\n\n- :warning: Metagenomic screening is only performed on _unmapped_ reads from a\n  mapping step.\n  - You _must_ supply the `--run_bam_filtering` flag with unmapped reads in\n    FASTQ format.\n  - If you wish to run solely MALT (i.e. the HOPS pipeline), you must still\n    supply a small decoy genome like phiX or human mtDNA `--fasta`.\n- MALT database construction functionality is _not_ included within the pipeline\n  - this should be done independently, **prior** the nf-core/eager run.\n  - To use `malt-build` from the same version as `malt-run`, load either the\n    docker, singularity or conda environment.\n- MALT can often require very large computing resources depending on your\n  database. We set a absolute minimum of 16 cores and 128GB of memory (which is\n  1/4 of the recommendation from the developer). Please leave an issue on the\n  [nf-core github](https://github.com/nf-core/eager/issues) if you would like to\n  see this changed.\n\n> :warning: Running MALT on a server with less than 128GB of memory should be\n> performed at your own risk.\n\nIf using TSV input, metagenomic screening is performed on all samples gathered\ntogether.\n"
         },
         "metagenomic_authentication": {
             "title": "Metagenomic Authentication",
@@ -1280,7 +1408,7 @@
                 },
                 "maltextract_ncbifiles": {
                     "type": "string",
-                    "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; avaliable: https://github.com/rhuebler/HOPS/)",
+                    "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; available: https://github.com/rhuebler/HOPS/)",
                     "fa_icon": "fas fa-database",
                     "help_text": "Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).\n\nOnly when `--metagenomic_tool malt` is also supplied."
                 },
@@ -1289,60 +1417,69 @@
                     "default": "def_anc",
                     "description": "Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'.",
                     "fa_icon": "fas fa-filter",
-                    "help_text": "Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`, 'assignment'. Default: `'def_anc'`.\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`, 'assignment'. Default: `'def_anc'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `-f`",
+                    "enum": [
+                        "def_anc",
+                        "default",
+                        "ancient",
+                        "scan",
+                        "crawl",
+                        "srna"
+                    ]
                 },
                 "maltextract_toppercent": {
                     "type": "number",
                     "default": 0.01,
                     "description": "Specify percent of top alignments to use.",
                     "fa_icon": "fas fa-percent",
-                    "help_text": "Specify percent of top alignments for each read to be considered for each node. Default: `0.01`.\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Specify percent of top alignments for each read to be considered for each node. Default: `0.01`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `-a`"
                 },
                 "maltextract_destackingoff": {
                     "type": "boolean",
                     "description": "Turn off destacking.",
                     "fa_icon": "fas fa-align-center",
-                    "help_text": "Turn off destacking. If left on, a read that overlap with another read will be removed (leaving a depth coverage of 1).\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Turn off destacking. If left on, a read that overlap with another read will be removed (leaving a depth coverage of 1).\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--destackingOff`"
                 },
                 "maltextract_downsamplingoff": {
                     "type": "boolean",
                     "description": "Turn off downsampling.",
                     "fa_icon": "fab fa-creative-commons-sampling",
-                    "help_text": "Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--downSampOff`"
                 },
                 "maltextract_duplicateremovaloff": {
                     "type": "boolean",
                     "description": "Turn off duplicate removal.",
                     "fa_icon": "fas fa-align-left",
-                    "help_text": "\nTurn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "\nTurn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--dupRemOff`"
                 },
                 "maltextract_matches": {
                     "type": "boolean",
                     "description": "Turn on exporting alignments of hits in BLAST format.",
                     "fa_icon": "fas fa-equals",
-                    "help_text": "\nExport alignments of hits for each node in BLAST format. By default turned off.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n"
+                    "help_text": "\nExport alignments of hits for each node in BLAST format. By default turned off.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--matches`"
                 },
                 "maltextract_megansummary": {
                     "type": "boolean",
                     "description": "Turn on export of MEGAN summary files.",
                     "fa_icon": "fas fa-download",
-                    "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n"
+                    "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--meganSummary`"
                 },
                 "maltextract_percentidentity": {
                     "type": "number",
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
                     "default": 85,
                     "fa_icon": "fas fa-id-card",
-                    "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.\n\nOnly when `--metagenomic_tool malt` is also supplied."
+                    "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--minPI`"
                 },
                 "maltextract_topalignment": {
                     "type": "boolean",
                     "description": "Turn on using top alignments per read after filtering.",
                     "fa_icon": "fas fa-star-half-alt",
-                    "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n"
+                    "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--useTopAlignment`"
                 }
             },
-            "fa_icon": "fas fa-tasks"
+            "fa_icon": "fas fa-tasks",
+            "help_text": "Turn on MaltExtract for MALT aDNA characteristics authentication of metagenomic\noutput from MALT.\n\nMore can be seen in the [MaltExtract\ndocumentation](https://github.com/rhuebler/)\n\nOnly when `--metagenomic_tool malt` is also supplied"
         }
     },
     "allOf": [
@@ -1395,7 +1532,7 @@
             "$ref": "#/definitions/adna_damage_analysis"
         },
         {
-            "$ref": "#/definitions/annotation_statistics"
+            "$ref": "#/definitions/feature_annotation_statistics"
         },
         {
             "$ref": "#/definitions/bam_trimming"
@@ -1413,7 +1550,7 @@
             "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
         },
         {
-            "$ref": "#/definitions/sex_determination"
+            "$ref": "#/definitions/human_sex_determination"
         },
         {
             "$ref": "#/definitions/nuclear_contamination_for_human_dna"

@@ -93,7 +93,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mergedonly
       - name: ADAPTERREMOVAL Run the basic pipeline with preserve5p end and merged reads only options
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --preserve5p --mergedonly
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --preserve5p --mergedonly
       - name: MAPPER_CIRCULARMAPPER Test running with CircularMapper
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'circularmapper' --circulartarget 'NC_007596.2'
@@ -115,9 +115,12 @@ jobs:
       - name: DEDUPLICATION Test with dedup
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'dedup' --dedup_all_merged
+      - name: BEDTOOLS Test bedtools feature annotation
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bedtools_coverage --anno_file 'https://github.com/nf-core/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.gff3'
       - name: GENOTYPING_HC Test running GATK HaplotypeCaller
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
       - name: GENOTYPING_FB Test running FreeBayes
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --genotyping_tool 'freebayes'
