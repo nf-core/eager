@@ -397,7 +397,7 @@ wildcards (`*`) e.g.:
 6. Due to limitations of downstream tools (e.g. FastQC), sample IDs maybe
    truncated after the first `.` in the name, Ensure file names are unique prior
    to this!
-7. For input BAM files  you should provide small decoy reference genome with
+7. For input BAM files you should provide a small decoy reference genome with
    pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory
    parameter `--fasta` in order to avoid long computational time for generating
    the index files of the reference genome, even if you do not actual need a
@@ -519,7 +519,7 @@ Note the following important points and limitations for setting up:
     run is PE and one run is SE, you need to give fake lane IDs to one of the
     runs as well.
 - All _BAM_ files must be specified as `SE` under `SeqType`.
-  - You should provide small decoy reference genome with pre-made indices, e.g.
+  - You should provide a small decoy reference genome with pre-made indices, e.g.
     the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in
     order to avoid long computational time for generating the index files of the
     reference genome, even if you do not actual need a reference genome for any
@@ -575,7 +575,7 @@ PMDTools (PMDtools: `--UDGhalf`). Specify the parameter with `'full'` and the
 PMDtools DNA damage assessment will use CpG context only (PMDtools: `--CpG`).
 Default: `'none'`.
 
-> **Tip**: You should small decoy reference genome with pre-made indices, e.g.
+> **Tip**: You should provide a small decoy reference genome with pre-made indices, e.g.
 > the human mtDNA genome, for the mandatory parameter `--fasta` in order to
 > avoid long computational time for generating the index files of the reference
 > genome, even if you do not actual need a reference genome for any downstream
@@ -668,7 +668,7 @@ For example:
 ```
 
 You need to provide an input FASTA even if you do not do any mapping (e.g.
-supplying BAM files). You should small decoy reference genome with pre-made
+supplying BAM files). You should supply a small decoy reference genome with pre-made
 indices, e.g. the human mtDNA genome, for the mandatory parameter `--fasta` in
 order to avoid long computational time for generating the index files of the
 reference genome.
@@ -2755,8 +2755,8 @@ profiles {
 ```
 
 If you run with `nextflow run -profile shh` to specify to use an
-institutional-level nf-core config, the parameters will be read as `--bwaaln
-0.04` and `--bwaaln 32` as these are the defaults 'fall back' params as
+institutional-level nf-core config, the parameters will be read as `--bwaalnn
+0.04` and `--bwaalnl 32` as these are the defaults 'fall back' params as
 indicated in the example above.
 
 If you specify as `nextflow run -profile pathogen_loose,shh`, as expected
@@ -2933,6 +2933,11 @@ and ancient populations, and are therefore useful for ancient population genetic
 analysis. Capture techniques are often used to enrich DNA libraries for
 fragments, that overlap these SNPs, as is being assumed has been performed in
 this example.
+
+> :warning: Please be aware that the settings used in this tutorial may not use
+> settings nor produce files you would actually use in 'real' analysis. The
+> settings are only specified for demonstration purposes. Please consult the
+> your colleagues, communities and the literature for optimal parameters.
 
 #### Tutorial Human Pop-Gen - Preparation
 
@@ -3541,6 +3546,11 @@ the human reference genome to allow sequencing and library quality-control, but
 additionally perform taxonomic profiling of the off-target reads from this
 mapping using MALT, and perform aDNA authentication with HOPS.
 
+> :warning: Please be aware that the settings used in this tutorial may not use
+> settings nor produce files you would actually use in 'real' analysis. The
+> settings are only specified for demonstration purposes. Please consult the
+> your colleagues, communities and the literature for optimal parameters.
+
 #### Tutorial Metagenomics - Preparation
 
 Prior setting up an nf-core/eager run for metagenomic screening, we will need:
@@ -4003,6 +4013,11 @@ note the same procedure can equally be applied on shallow-shotgun and also
 whole-genome enrichment data, so other than the TSV file you can apply this
 command explained below.
 
+> :warning: Please be aware that the settings used in this tutorial may not use
+> settings nor produce files you would actually use in 'real' analysis. The
+> settings are only specified for demonstration purposes. Please consult the
+> your colleagues, communities and the literature for optimal parameters.
+
 #### Tutorial Pathogen Genomics - Preparation
 
 Prior setting up the nf-core/eager run, we will need:
@@ -4084,17 +4099,17 @@ will consider each pair of FASTQ files as independent libraries/samples).
 
 ```bash
 Sample_Name   Library_ID    Lane    Colour_Chemistry    SeqType   Organism    Strandedness    UDG_Treatment   R1    R2    BAM
-KunilaII    KunilaII_nonUDG   4   4   PE    Human   double    none    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/007/ERR2112547/ERR2112547_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/007/ERR2112547/ERR2112547_2.fastq.gz    NA
-KunilaII    KunilaII_UDG    4   4   PE    Human   double    full    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/008/ERR2112548/ERR2112548_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/008/ERR2112548/ERR2112548_2.fastq.gz    NA
-6Post   6Post_PE    1   2   PE    Human   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/009/ERR2112549/ERR2112549_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/009/ERR2112549/ERR2112549_2.fastq.gz    NA
-6Post   6Post_PE    2   2   PE    Human   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/000/ERR2112550/ERR2112550_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/000/ERR2112550/ERR2112550_2.fastq.gz    NA
-6Post   6Post_PE    3   2   PE    Human   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/001/ERR2112551/ERR2112551_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/001/ERR2112551/ERR2112551_2.fastq.gz    NA
-6Post   6Post_PE    4   2   PE    Human   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/002/ERR2112552/ERR2112552_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/002/ERR2112552/ERR2112552_2.fastq.gz    NA
-6Post   6Post_SE    1   4   SE    Human   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/009/ERR2112569/ERR2112569.fastq.gz    NA    NA
-6Post   6Post_SE    2   4   SE    Human   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/000/ERR2112570/ERR2112570.fastq.gz    NA    NA
-6Post   6Post_SE    3   4   SE    Human   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/001/ERR2112571/ERR2112571.fastq.gz    NA    NA
-6Post   6Post_SE    4   4   SE    Human   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/002/ERR2112572/ERR2112572.fastq.gz    NA    NA
-6Post   6Post_SE    8   4   SE    Human   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/003/ERR2112573/ERR2112573.fastq.gz    NA    NA
+KunilaII    KunilaII_nonUDG   4   4   PE    Yersinia pestis   double    none    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/007/ERR2112547/ERR2112547_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/007/ERR2112547/ERR2112547_2.fastq.gz    NA
+KunilaII    KunilaII_UDG    4   4   PE    Yersinia pestis   double    full    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/008/ERR2112548/ERR2112548_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/008/ERR2112548/ERR2112548_2.fastq.gz    NA
+6Post   6Post_PE    1   2   PE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/009/ERR2112549/ERR2112549_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/009/ERR2112549/ERR2112549_2.fastq.gz    NA
+6Post   6Post_PE    2   2   PE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/000/ERR2112550/ERR2112550_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/000/ERR2112550/ERR2112550_2.fastq.gz    NA
+6Post   6Post_PE    3   2   PE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/001/ERR2112551/ERR2112551_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/001/ERR2112551/ERR2112551_2.fastq.gz    NA
+6Post   6Post_PE    4   2   PE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/002/ERR2112552/ERR2112552_1.fastq.gz    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/002/ERR2112552/ERR2112552_2.fastq.gz    NA
+6Post   6Post_SE    1   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/009/ERR2112569/ERR2112569.fastq.gz    NA    NA
+6Post   6Post_SE    2   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/000/ERR2112570/ERR2112570.fastq.gz    NA    NA
+6Post   6Post_SE    3   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/001/ERR2112571/ERR2112571.fastq.gz    NA    NA
+6Post   6Post_SE    4   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/002/ERR2112572/ERR2112572.fastq.gz    NA    NA
+6Post   6Post_SE    8   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/003/ERR2112573/ERR2112573.fastq.gz    NA    NA
 ```
 
 Note we also have a mixture of non-UDG and half-UDG treated libraries.
@@ -4103,8 +4118,7 @@ You can see that we have a single line for each set of FASTQ files representing
 each `Lane`, but the `Sample_Name` and `Library_ID` columns identify and group
 them together accordingly. Secondly, as we have NextSeq data, we have specified
 we have `2` for `Colour_Chemistry` vs `4` for HiSeq; something that is important
-for downstream processing (see below). The other columns are less important for
-this particular context of metagenomic screening. See the nf-core/eager
+for downstream processing (see below). See the nf-core/eager
 parameter documentation above for more specifications on how to set up a TSV
 file (e.g. why despite NextSeqs only having 4 lanes, we can also go up to 8 or
 more when having a sample sequenced on two NextSeq runs).
@@ -4204,16 +4218,15 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --bwaalnn 0.01 \
---bwaalnk 32 \
+--bwaalnl 16 \
 <...>
 ```
 
-We may also want to remove ambiguous sequences from our alignments, and also
-remove off-target reads to speed up downstream processing (and reduce your
-hard-disk footprint). We can do this with the samtools filter module to set a
-mapping-quality filter (e.g. with a value of `25` to retain only slightly
-ambiguous alignments that might occur from damage), and to indicate to discard
-unmapped reads.
+As we are also interested at checking for gene presence/absence (see below), we
+will ensure no mapping quality filter is applied (to account for gene
+duplication that may cause a read to map equally to to places) by setting the
+threshold to 0. In addition, we will discard unmapped reads to reduce our
+hard-drive footprint.
 
 ```bash
 nextflow run nf-core/eager \
@@ -4229,19 +4242,21 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --bwaalnn 0.01 \
---bwaalnk 32 \
+--bwaalnl 16 \
 --run_bam_filtering \
---bam_mapping_quality_threshold 25 \
+--bam_mapping_quality_threshold 0 \
 --bam_unmapped_type 'discard' \
 <...>
 ```
 
-While some of our input data is paired-end, we will be using keep with the
-default of Picard's 'MarkDuplicates' for duplicate removal for duplicate
-removal, which takes into account both the start and end of a merged read before
-flagging it as a duplicate. We can then specify which dedupper we want to use
-with `--dedupper`. While we are using the default (which does not need to be
-directly specified), we will put it explicitly in our command for clarity.
+While some of our input data is paired-end, we will keep with the default of
+Picard's 'MarkDuplicates' for duplicate removal for duplicate removal, as DeDup
+takes into account both the start and end of a _merged_ read before flagging it
+as a duplicate - something that isn't valid for a single-end read (where the
+true end of the molecule might not have been sequenced). We can then specify
+which dedupper we want to use with `--dedupper`. While we are using the default
+(which does not need to be directly specified), we will put it explicitly in our
+command for clarity.
 
 ```bash
 nextflow run nf-core/eager \
@@ -4257,9 +4272,9 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --bwaalnn 0.01 \
---bwaalnk 32 \
+--bwaalnl 16 \
 --run_bam_filtering \
---bam_mapping_quality_threshold 25 \
+--bam_mapping_quality_threshold 0 \
 --bam_unmapped_type 'discard' \
 --dedupper 'markduplicates' \
 <...>
@@ -4271,6 +4286,8 @@ annotated parts of your reference genome, e.g. to see whether certain virulence
 factors present or absent. nf-core/eager offers some basic statistics (percent and
 and depth coverage) of these via Bedtools. We will therefore turn on this
 module and specify the GFF file we downloaded alongside our reference fasta.
+Note that this GFF file has a _lot_ of redundant data, so often a custom 
+BED file with just genees of interest is recommended. Furthermore
 
 ```bash
 nextflow run nf-core/eager \
@@ -4286,9 +4303,9 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --bwaalnn 0.01 \
---bwaalnk 32 \
+--bwaalnl 16 \
 --run_bam_filtering \
---bam_mapping_quality_threshold 25 \
+--bam_mapping_quality_threshold 0 \
 --bam_unmapped_type 'discard' \
 --dedupper 'markduplicates' \
 --run_bedtools_coverage \
@@ -4296,15 +4313,19 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-Next, we will set up trimming of the mapped reads to alleviate the effects of DNA
-damage during genotyping. To do this we will activate trimming with
+Next, we will set up trimming of the mapped reads to alleviate the effects of
+DNA damage during genotyping. To do this we will activate trimming with
 `--run_trim_bam`. The libraries in this underwent either no or 'half'-UDG
 treatment. The latter This will generally restrict all remaining DNA damage to
 the first 2 base pairs of a fragment. We will therefore use
 `--bamutils_clip_half_udg_left` and `--bamutils_clip_half_udg_right` to trim 2bp
 on either side of each fragment. For the non-UDG treated libraries we can trim a
 little more to remove most damage with the `--bamutils_clip_none_udg_<*>`
-variants of the flag.
+variants of the flag. Note that there is a tendency in ancient pathogenomics to
+trim damage _prior_ mapping, as it allows mapping with stricter parameters to
+improve removal of reads deriving from  potential evolutionary diverged
+contaminants (this can be done nf-core/eager with teh Bowtie2 aligner), however
+we do it here to as another demonstration of functionality.
 
 ```bash
 nextflow run nf-core/eager \
@@ -4320,9 +4341,9 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --bwaalnn 0.01 \
---bwaalnk 32 \
+--bwaalnl 16 \
 --run_bam_filtering \
---bam_mapping_quality_threshold 25 \
+--bam_mapping_quality_threshold 0 \
 --bam_unmapped_type 'discard' \
 --dedupper 'markduplicates' \
 --run_bedtools_coverage \
@@ -4338,8 +4359,8 @@ nextflow run nf-core/eager \
 Here we will use MultiVCFanalyzer for the generation of our SNP table. A
 MultiVCFAnalyzer SNP table allows downstream assessment of the level
 multi-allelic positions, something not expected when dealing with a single
-ploidy organism and thus may reflect cross-mapping from environmental relatives
-or contaminants.
+ploidy organism and thus may reflect cross-mapping from multiple-strains,
+environmental relatives or other contaminants.
 
 For this we need to run genotyping, but specifically with GATK UnifiedGenotyper
 3.5 (as MultiVCFAnalyzer requires this particular format of VCF files). We will
@@ -4361,9 +4382,9 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --bwaalnn 0.01 \
---bwaalnk 32 \
+--bwaalnl 16 \
 --run_bam_filtering \
---bam_mapping_quality_threshold 25 \
+--bam_mapping_quality_threshold 0 \
 --bam_unmapped_type 'discard' \
 --dedupper 'markduplicates' \
 --run_trim_bam \
@@ -4385,7 +4406,7 @@ nextflow run nf-core/eager \
 
 Finally we can set up MultiVCFAnalyzer itself. First we ant to make sure we
 specified we want to report the frequency of the given called allele at each
-position so we can assess cross mapping), and then often with ancient pathogens,
+position so we can assess cross mapping, and then often with ancient pathogens,
 such as _Y. pestis_, we want to also to add to the SNP table comparative data
 from previously published and ancient genomes. For this we specify additional
 VCF files that have been generated in previous runs with the same settings and
@@ -4405,9 +4426,9 @@ nextflow run nf-core/eager \
 - w './work/' \
 --complexity_filter_poly_g \
 --bwaalnn 0.01 \
---bwaalnk 32 \
+--bwaalnl 16 \
 --run_bam_filtering \
---bam_mapping_quality_threshold 25 \
+--bam_mapping_quality_threshold 0 \
 --bam_unmapped_type 'discard' \
 --dedupper 'markduplicates' \
 --run_trim_bam \
@@ -4433,8 +4454,13 @@ nextflow run nf-core/eager \
 ```
 
 For the two `min_allele_freq` parameters we specify that anything above 90%
-frequency is considered 'homozygous', and anything above 10% (but below 90%)
-is considered an ambiguous call and the frequency will be reported.
+frequency is considered 'homozygous', and anything above 10% (but below 90%) is
+considered an ambiguous call and the frequency will be reported. Note that you
+would not normally use this SNP table with these parameters for downstream
+phylogenetic analysis, as the table will include ambiguous IUPAC codes, making
+it only useful for fine-comb checking of multi-allelic positions. Instead, set
+both parameters to the same value (e.g. 0.8) and use that table for downstream
+phylogenetic analysis.
 
 With this, we are ready to submit! If running on a remote cluster/server, Make
 sure to run this in `screen` session or similar, so that if you get a `ssh`
@@ -4464,21 +4490,24 @@ General Stats Table:
 - Does the percentage of trimmed reads look normal for aDNA, and do lengths
   after trimming look short as expected of aDNA?
 - Does the Endogenous DNA (%) columns look reasonable (high enough to indicate
-  you have recieved enough coverage for downstream, and/or do you lose an
+  you have received enough coverage for downstream, and/or do you lose an
   unusually high reads after filtering )
 - Does ClusterFactor or '% Dups' look high (e.g. >2 or >10% respectively -  high
-  values suggesting over-amplified or badly preserved samples (i.e. low
-  complexity).
-- Do you see an increased frequency of C>Ts on the 5' end of molecules in
-  the mapped reads?
+  values suggesting over-amplified or badly preserved samples i.e. low
+  complexity; note that genome-enrichment libraries may by their nature look
+  higher).
+- Do you see an increased frequency of C>Ts on the 5' end of molecules in the
+  mapped reads?
 - Do median read lengths look relatively low (normally <= 100 bp) indicating
   typically fragmented aDNA?
+- Does the % coverage decrease relatively gradually at each depth coverage, and
+  does not drop extremely drastically
 - Does the Median coverage and percent >3x (or whatever you set) show sufficient
   coverage for reliable SNP calls and that a good proportion of the genome is
   covered indicating you have the right reference genome?
 - Do you see a high proportion of % Hets, indicating many multi-allelic sites
-  (and possibly presence of cross-mapping from other species, that may
-  lead to false positive or less confident SNP calls)?
+  (and possibly presence of cross-mapping from other species, that may lead to
+  false positive or less confident SNP calls)?
 
 FastQC (pre-AdapterRemoval):
 

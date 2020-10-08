@@ -2,74 +2,32 @@
 
 ## Table of contents
 
-- [nf-core/eager: Output](#nf-coreeager-output)
-  - [Table of contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [Directory Structure](#directory-structure)
-    - [Primary Output Directories](#primary-output-directories)
-    - [Secondary Output Directories](#secondary-output-directories)
-  - [MultiQC Report](#multiqc-report)
-    - [General Stats Table](#general-stats-table)
-      - [Background](#background)
-      - [Table](#table)
-    - [FastQC](#fastqc)
-      - [Background](#background-1)
-      - [Sequence Counts](#sequence-counts)
-      - [Sequence Quality Histograms](#sequence-quality-histograms)
-      - [Per Sequence Quality Scores](#per-sequence-quality-scores)
-      - [Per Base Sequencing Content](#per-base-sequencing-content)
-      - [Per Sequence GC Content](#per-sequence-gc-content)
-      - [Per Base N Content](#per-base-n-content)
-      - [Sequence Duplication Levels](#sequence-duplication-levels)
-      - [Overrepresented sequences](#overrepresented-sequences)
-      - [Adapter Content](#adapter-content)
-    - [FastP](#fastp)
-      - [Background](#background-2)
-      - [GC Content](#gc-content)
-    - [AdapterRemoval](#adapterremoval)
-      - [Background](#background-3)
-      - [Retained and Discarded Reads Plot](#retained-and-discarded-reads-plot)
-      - [Length Distribution Plot](#length-distribution-plot)
-    - [Bowtie2](#bowtie2)
-      - [Background](#background-4)
-      - [Single/Paired-end alignments](#singlepaired-end-alignments)
-    - [MALT](#malt)
-      - [Background](#background-5)
-      - [Metagenomic Mappability](#metagenomic-mappability)
-      - [Taxonomic assignment success](#taxonomic-assignment-success)
-    - [Kraken](#kraken)
-      - [Background](#background-6)
-      - [Top Taxa](#top-taxa)
-    - [Samtools](#samtools)
-      - [Background](#background-7)
-      - [Flagstat Plot](#flagstat-plot)
-    - [DeDup](#dedup)
-      - [Background](#background-8)
-      - [DeDup Plot](#dedup-plot)
-    - [Picard](#picard)
-      - [Background](#background-9)
-      - [Mark Duplicates](#mark-duplicates)
-    - [Preseq](#preseq)
-      - [Background](#background-10)
-      - [Complexity Curve](#complexity-curve)
-    - [DamageProfiler](#damageprofiler)
-      - [Background](#background-11)
-      - [Misincorporation Plots](#misincorporation-plots)
-      - [Length Distribution](#length-distribution)
-    - [QualiMap](#qualimap)
-      - [Background](#background-12)
-      - [Coverage Histogram](#coverage-histogram)
-      - [Cumulative Genome Coverage](#cumulative-genome-coverage)
-      - [GC Content Distribution](#gc-content-distribution)
-    - [Sex.DetERRmine](#sexdeterrmine)
-      - [Background](#background-13)
-      - [Relative Coverage](#relative-coverage)
-      - [Read Counts](#read-counts)
-    - [MultiVCFAnalyzer](#multivcfanalyzer)
-      - [Background](#background-14)
-      - [Summary metrics](#summary-metrics)
-      - [Call statistics barplot](#call-statistics-barplot)
-  - [Output Files](#output-files)
+<!-- TOC depthfrom:2 depthto:3 -->
+
+- [Table of contents](#table-of-contents)
+- [Introduction](#introduction)
+- [Directory Structure](#directory-structure)
+  - [Primary Output Directories](#primary-output-directories)
+  - [Secondary Output Directories](#secondary-output-directories)
+- [MultiQC Report](#multiqc-report)
+  - [General Stats Table](#general-stats-table)
+  - [FastQC](#fastqc)
+  - [FastP](#fastp)
+  - [AdapterRemoval](#adapterremoval)
+  - [Bowtie2](#bowtie2)
+  - [MALT](#malt)
+  - [Kraken](#kraken)
+  - [Samtools](#samtools)
+  - [DeDup](#dedup)
+  - [Picard](#picard)
+  - [Preseq](#preseq)
+  - [DamageProfiler](#damageprofiler)
+  - [QualiMap](#qualimap)
+  - [Sex.DetERRmine](#sexdeterrmine)
+  - [MultiVCFAnalyzer](#multivcfanalyzer)
+- [Output Files](#output-files)
+
+<!-- /TOC -->
 
 ## Introduction
 
@@ -443,7 +401,7 @@ there is some sequencing artefact (although it could just be badly preserved and
 
 Kraken is another metagenomic classifier, but takes a different approach to alignment as with [MALT](#malt). It uses 'K-mer similarity' between reads and references to very efficiently find similar patterns in sequences. It does not however, do alignment - meaning you cannot screen for authentication criteria such as damage patterns and fragment lengths.
 
-It is useful when you do not have large computing power or you want very rapid and want rough approximation of the metagenomic profile of your sample.
+It is useful when you do not have large computing power or you want very rapid but rough approximation of the metagenomic profile of your sample.
 
 You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
 
@@ -643,7 +601,7 @@ An ideal plot for this is to see an increasing curve, representing larger greate
 
 #### GC Content Distribution
 
-This plot shows the distribution of th frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
+This plot shows the distribution of the frequency of reads at different GC contents. The X axis represents the GC content (i.e the percentage of Gs and Cs nucleotides in a given read), the Y axis represents a frequency.
 
 <p align="center">
   <img src="images/output/qualimap/qualimap_gc_content_distribution.png" width="75%" height = "75%">
@@ -697,7 +655,7 @@ This table shows the contents of the `snpStatistics.tsv` file produced by MultiV
 
 You can get different variants of the Call statistics bar plot, depending on how you configured  the MultiVCFAnalyzer options.
 
-If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to two different values (left panel A in the figure below), this allows you to assess the number of multi-allelic positions that were called in your genome. Typically MultiVCFAnalyzer is used for analysing smallish on haploid genomes (such as bacteria), therefore a position with multiple possible 'alleles' suggests some form of cross-mapping from other taxa. If this is the case, you will need to be careful with downstream analysis of the consensus sequence (e.g. for phylogenetic tree analysis) as you may accidentally pick up SNPs from other taxa - particularly when dealing with low coverage data. Therefore, if you have a high level of 'het' values, you should carefully check your alignments manually to see how clean your genomes are, or whether you can do some form of strain separation (e.g. by majority/minor calling).
+If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to two different values (left panel A in the figure below), this allows you to assess the number of multi-allelic positions that were called in your genome. Typically MultiVCFAnalyzer is used for analysing smallish haploid genomes (such as mitochondrial or bacterial genomes), therefore a position with multiple possible 'alleles' suggests some form of cross-mapping from other taxa or presence of multiple strains. If this is the case, you will need to be careful with downstream analysis of the consensus sequence (e.g. for phylogenetic tree analysis) as you may accidentally pick up SNPs from other taxa/strains - particularly when dealing with low coverage data. Therefore if you have a high level of 'het' values (see image), you should carefully check your alignments manually to see how clean your genomes are, or whether you can do some form of strain separation (e.g. by majority/minor calling).
 
 <p align="center">
   <img src="images/output/multivcfanalyzer/multivcfanalyzer_call_categories.png" width="75%" height = "75%">
