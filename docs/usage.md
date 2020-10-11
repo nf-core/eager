@@ -651,9 +651,7 @@ advised when running multiple times on the same cluster system for example. You
 can even add a resource [specific profile](#profile) that sets paths to
 pre-computed reference genomes, saving time when specifying these.
 
-> :warning: you must always supply a reference file. If you want to use
-  functionality that does not require one, supply a small decoy genome such as
-  phiX or the human mtDNA genome.
+> :warning: you must always supply a reference file. If you want to use functionality that does not require one, supply a small decoy genome such as phiX or the human mtDNA genome.
 
 #### `--fasta`
 
