@@ -17,6 +17,7 @@ Additional pages are:
   * [Local installation](https://nf-co.re/usage/local_installation)
   * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
   * [Reference genomes](https://nf-co.re/usage/reference_genomes)
-* [Code Contribution Guidelines](code_contribution.md)
+* [Contribution Guidelines](../.github/CONTRIBUTING.md)
+  * Basic contribution & behaviour guidelines
   * Checklists and guidelines for people who would like to contribute code
   
