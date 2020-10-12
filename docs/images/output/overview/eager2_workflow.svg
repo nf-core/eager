@@ -13,11 +13,11 @@
    viewBox="0 0 272.16501 148.21181"
    version="1.1"
    id="svg8"
-   inkscape:version="1.0 (1.0+r73+1)"
+   inkscape:version="1.0.1 (1.0.1+r73)"
    sodipodi:docname="eager2_workflow.svg"
    inkscape:export-filename="C:\Users\fagernaes\Pictures\eager2\eager2_workflow_v2.png"
-   inkscape:export-xdpi="289.40701"
-   inkscape:export-ydpi="289.40701">
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300">
   <defs
      id="defs2">
     <marker
@@ -211,16 +211,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2"
-     inkscape:cx="284.42877"
-     inkscape:cy="552.28182"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="193.99244"
+     inkscape:cy="387.65414"
      inkscape:document-units="mm"
-     inkscape:current-layer="g6248"
+     inkscape:current-layer="g4857"
      showgrid="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1016"
-     inkscape:window-x="708"
-     inkscape:window-y="1107"
+     inkscape:window-height="1043"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      showguides="true"
      inkscape:document-rotation="0"
@@ -706,14 +706,14 @@
           <text
              id="text4774-8-5"
              y="110.18465"
-             x="78.242126"
+             x="84.776199"
              style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:0.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
              xml:space="preserve"><tspan
                style="font-size:3.175px;stroke-width:0.264583"
                y="110.18465"
-               x="78.242126"
+               x="84.776199"
                id="tspan4772-5-7"
-               sodipodi:role="line">DeDup/MarkDuplicates</tspan></text>
+               sodipodi:role="line">DeDup/Picard</tspan></text>
         </g>
       </g>
       <rect
@@ -1241,14 +1241,14 @@
       <text
          id="text4774-6-2-9"
          y="63.108101"
-         x="87.404686"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:0.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="80.633675"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;line-height:0.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
          xml:space="preserve"><tspan
-           style="font-size:3.175px;stroke-width:0.264583"
+           style="font-size:2.82222px;stroke-width:0.264583"
            y="63.108101"
-           x="87.404686"
+           x="80.633675"
            id="tspan4772-0-5-5"
-           sodipodi:role="line">strip_fastq</tspan></text>
+           sodipodi:role="line">extract_map_reads.py</tspan></text>
       <text
          inkscape:export-ydpi="289.40701"
          inkscape:export-xdpi="289.40701"
@@ -1398,23 +1398,6 @@
            y="126.70213"
            x="189.31529"
            sodipodi:role="line">Consensus calling</tspan></text>
-      <text
-         inkscape:export-ydpi="289.40701"
-         inkscape:export-xdpi="289.40701"
-         id="text4674"
-         y="184.26242"
-         x="13.761204"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;line-height:1.25;font-family:Kalam;-inkscape-font-specification:Kalam;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.264583"
-         xml:space="preserve"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:end;text-anchor:end;fill:#b3b3b3;stroke-width:0.264583"
-           y="184.26242"
-           x="13.761204"
-           sodipodi:role="line"
-           id="tspan4673">CC-BY 4.0</tspan><tspan
-           y="187.79019"
-           x="13.761204"
-           sodipodi:role="line"
-           id="tspan4662" /></text>
       <text
          inkscape:export-ydpi="289.40701"
          inkscape:export-xdpi="289.40701"
@@ -1626,14 +1609,14 @@
       <text
          id="text4774-5-7-6-5-5"
          y="118.8362"
-         x="180.93904"
+         x="178.9334"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:0.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
          xml:space="preserve"><tspan
            style="font-size:3.175px;stroke-width:0.264583"
            y="118.8362"
-           x="180.93904"
+           x="178.9334"
            id="tspan4772-1-3-3-0-4"
-           sodipodi:role="line">pileupCaller</tspan></text>
+           sodipodi:role="line">sequenceTools</tspan></text>
     </g>
   </g>
 </svg>
