@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Written by Maxime Borry and released under the MIT license. 
+# See git repository (https://github.com/nf-core/eager) for full license text.
+
 import argparse
 import pysam
 
