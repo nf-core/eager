@@ -4,7 +4,7 @@
 # See git repository (https://github.com/aidaanva/endorS.py) for full license text.
 
 """Script to calculate the endogenous DNA in a sample from samtools flag stats.
-It accepts can accept up to two files: pre-quality and post-quality filtering. We recommend
+It can accept up to two files: pre-quality and post-quality filtering. We recommend
 to use both files but you can also use the pre-quality filtering.
 """
 import re
