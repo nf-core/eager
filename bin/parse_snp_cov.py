@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# Written by Thiseas C. Lamnidis and released under the MIT license. 
+# See git repository (https://github.com/nf-core/eager) for full license text.
+
 import sys, json
 from collections import OrderedDict
 
