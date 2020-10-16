@@ -69,29 +69,30 @@ The typical workflow for adding a new module is as follows:
 2. Write the process block (see below).
 3. Define the output channel if needed (see below).
 4. Add any new flags/options to `nextflow.config` with a default (see below).
-5. Add any new flags/options to the help message (for integer/text parameters, print to help the corresponding `nextflow.config` parameter).
-6. Add sanity checks for all relevant parameters.
-7. Add any new software to the `scrape_software_versions.py` script in `bin/` and the version command to the `scrape_software_versions` process in `main.nf`.
-8. Do local tests that the new code works properly and as expected.
-9. Add a new test command in `.github/workflow/ci.yaml`.
-10. If applicable add a [MultiQC](https://https://multiqc.info/) module.
-11. Update MultiQC config `assests/multiqc_config.yaml` so relevant suffixes, name clean up, General Statistics Table column order, and module figures are in the right order.
-12. Add new flags/options to 'usage' documentation under `docs/usage.md`.
-13. Add any descriptions of MultiQC report sections and output files to `docs/output.md`.
+5. Add any new flags/options to `nextflow_schema.json` with help text (with `nf-core schema build .`)
+6. Add any new flags/options to the help message (for integer/text parameters, print to help the corresponding `nextflow.config` parameter).
+7. Add sanity checks for all relevant parameters.
+8. Add any new software to the `scrape_software_versions.py` script in `bin/` and the version command to the `scrape_software_versions` process in `main.nf`.
+9. Do local tests that the new code works properly and as expected.
+10. Add a new test command in `.github/workflow/ci.yaml`.
+11. If applicable add a [MultiQC](https://https://multiqc.info/) module.
+12. Update MultiQC config `assets/multiqc_config.yaml` so relevant suffixes, name clean up, General Statistics Table column order, and module figures are in the right order.
+13. Add new flags/options to 'usage' documentation under `docs/usage.md`.
+14. Add any descriptions of MultiQC report sections and output files to `docs/output.md`.
 
 ## Default Values
 
-Default values should go in `nextflow.config` under the `params` scope.
+Default values should go in `nextflow.config` under the `params` scope, and `nextflow_schema.json` (latter with `nf-core schema build .`)
 
 ## Default resource processes
 
-Defining recommended 'minimum' resource requiements (CPUs/Memory) for a process should be defined in `conf/base.config`. This can be utilised within the process using `${task.cpu}` or `${task.memory}` variables in the `script:` block.
+Defining recommended 'minimum' resource requirements (CPUs/Memory) for a process should be defined in `conf/base.config`. This can be utilised within the process using `${task.cpu}` or `${task.memory}` variables in the `script:` block.
 
 ## Process Concept
 
 We are providing a highly configurable pipeline, with many options to turn on and off different processes in different combinations. This can make a very complex graph structure that can cause a large amount of duplicated channels coming out of every process to account for each possible combination.
 
-The EAGER pipeline can currently be broken down into the following 'stages', where a stage is a collection of  non-terminal mututally exclusive processes, which is the output of which is used for another file reporting module (but not reporting!) .
+The EAGER pipeline can currently be broken down into the following 'stages', where a stage is a collection of  non-terminal mutually exclusive processes, which is the output of which is used for another file reporting module (but not reporting!) .
 
 * Input
 * Convert BAM
@@ -174,9 +175,7 @@ Please use the following naming schemes, to make it easy to understand what is g
 
 ## Nextflow Version Bumping
 
-If you have agreement from reviewers, you may bump the 'default' minimum version of nextflow (e.g. for testing).
-
-For this, you need to update the in the `manifest{}` scope of `nextflow.config`, and also in `.travis.yml` and `.github/workflows/nf-core_eager.yml`
+If you have agreement from reviewers, you may bump the 'default' minimum version of nextflow (e.g. for testing), with `nf-core bump-version`.
 
 ## Software Version Reporting
 
@@ -203,8 +202,6 @@ You then need to edit the script `bin/scrape_software_versions.py` to
 
 ## Images and Figures
 
-For all internal nf-core/eager documentation images we are using the 'Kalam' font by the Indian Type Foundry and licensed under the Open Font License.
+For all internal nf-core/eager documentation images we are using the 'Kalam' font by the Indian Type Foundry and licensed under the Open Font License. It can be found for download here [here](https://fonts.google.com/specimen/Kalam).
 
-For the overview image we follow the nf-core [style and guidelines](https://nf-co.re/developers/design_guidelines).
-
-These can be found for download [here](https://fonts.google.com/specimen/Kalam)
+For the overview image we follow the nf-core [style guidelines](https://nf-co.re/developers/design_guidelines).

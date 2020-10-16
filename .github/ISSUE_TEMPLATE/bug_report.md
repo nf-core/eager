@@ -1,4 +1,5 @@
 # nf-core/eager bug report
+
 <!--
 Hi there!
 
@@ -10,12 +11,13 @@ Please delete this text and anything that's not relevant from the template below
 ## Check Documentation
 
 Have you checked in the following places for your error?:
-- [ ] [Frequently Asked Questions](https://nf-co.re/eager/docs/faq)
+
+- [ ] [Frequently Asked Questions](https://github.com/nf-core/eager/blob/master/docs/usage.md#troubleshooting-and-faqs)
       (for nf-core/eager specific information)
 - [ ] [Troubleshooting](https://nf-co.re/usage/troubleshooting)
       (for nf-core specific information)
 
-Please also check the the corresponding branch documentation on github, if not
+Please also check the the corresponding version's documentation on github, if not
 testing the latest release.
 
 ## Describe the bug
@@ -35,9 +37,9 @@ A clear and concise description of what you expected to happen.
 
 ## Log files
 
-1. The command use to run the pipeline
-2. The `.nextflow.log` file (which a hidden file in which ever place you _ran_
-   the pipeline from - not necessarily the output directory!)
+1. The command used to run the pipeline
+2. The `.nextflow.log` file (which is a hidden file in whichever place you _ran_
+   the pipeline from - not necessarily in the output directory!)
 
 ## System
 

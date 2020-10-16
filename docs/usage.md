@@ -18,7 +18,7 @@
 - [Pipeline Options](#pipeline-options)
   - [Input](#input)
   - [Input Data Additional Options](#input-data-additional-options)
-  - [References](#references)
+  - [Reference Genomes](#reference-genomes)
   - [Output](#output)
   - [Other run specific parameters](#other-run-specific-parameters)
   - [Step skipping parameters](#step-skipping-parameters)
@@ -65,9 +65,9 @@
 ### Quick Start
 
 > Before you start you should change into the output directory you wish your
-> results to go in. When you start the nextflow job, it will place all the log
-> files and 'working' folders in the current directory and NOT necessarily the
-> directory the output files will be in.
+> results to go in. This will guarantee, that when you start the nextflow job,
+> it will place all the log files and 'working' folders in the corresponding
+> output directory, (and not wherever else you may have executed the run from)
 
 The typical command for running the pipeline is as follows:
 
@@ -75,7 +75,7 @@ The typical command for running the pipeline is as follows:
 nextflow run nf-core/eager --input '*_R{1,2}.fastq.gz' --fasta 'some.fasta' -profile standard,docker
 ```
 
-where the reads are from libraries of the same pairing.
+where the reads are from FASTQ files of the same pairing.
 
 This will launch the pipeline with the `docker` configuration profile. See below
 for more information about profiles.
@@ -87,16 +87,17 @@ directory:
 work            # Directory containing the nextflow working files
 results         # Finished results (configurable, see below)
 .nextflow.log   # Log file from Nextflow
-               \# Other nextflow hidden files, eg. history of pipeline runs and old logs.
+                # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
 To see the the nf-core/eager pipeline help message run: `nextflow run
 nf-core/eager --help`
 
 If you want to configure your pipeline interactively using a graphical user
-interface, please visit [https://nf-co.re/launch](https://nf-co.re/launch),
-select the `eager` pipeline and the version you intend to run and follow the
-on-screen instructions to create a config for your pipeline run.
+interface, please visit [nf-co.re
+launch](https://nf-co.re/launch?pipeline=eager). Select the `eager` pipeline and
+the version you intend to run, and follow the on-screen instructions to create a
+config for your pipeline run.
 
 ### Updating the pipeline
 
@@ -206,7 +207,7 @@ the [nf-core/configs](https://github.com/nf-core/configs) repository.
   - A profile for the BinAC cluster at the University of Tuebingen 0 Loads
     Singularity and defines appropriate resources for running the pipeline
 - `shh`
-  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of
+  - A profile for the S/CDAG cluster at the Department of Archaeogenetics of
     the Max Planck Institute for the Science of Human History
   - Loads Singularity and defines appropriate resources for running the pipeline
 
@@ -354,7 +355,7 @@ library merging.
 
 This method is where you specify with `--input`, the path locations of FASTQ
 (optionally gzipped) or BAM file(s). This option is mutually exclusive to the
-[TSV input method](#tsv-input-method) which is used for more complex input
+[TSV input method](#tsv-input-method), which is used for more complex input
 configurations such as lane and library merging.
 
 When using the direct method of `--input` you can specify one or multiple
@@ -364,7 +365,7 @@ in different directories.
 By default, the pipeline _assumes_ you have paired-end data. If you want to run
 single-end data you must specify [`--single_end`]('#single_end')
 
-For example, for a single set of FASTQs, or multiple files paired-end FASTQ
+For example, for a single set of FASTQs, or multiple paired-end FASTQ
 files in one directory, you can specify:
 
 ```bash
@@ -394,7 +395,7 @@ wildcards (`*`) e.g.:
    - This can happen when a library has been sequenced across two sequencers on
      the same lane. Either rename the file, try a symlink with a unique name, or
      merge the two FASTQ files prior input.
-6. Due to limitations of downstream tools (e.g. FastQC), sample IDs maybe
+6. Due to limitations of downstream tools (e.g. FastQC), sample IDs may be
    truncated after the first `.` in the name, Ensure file names are unique prior
    to this!
 7. For input BAM files you should provide a small decoy reference genome with
@@ -412,10 +413,10 @@ sequencing data across lanes, sequencing runs, sequencing configuration types,
 and samples.
 
 <p align="center">
-  <img src="images/usage/merging_files.png" alt="Schematic diagram indicated merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
+  <img src="images/usage/merging_files.png" alt="Schematic diagram indicating merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
 </p>
 
-The use of the TSV `--input` method is recommended to be used when performing
+The use of the TSV `--input` method is recommended when performing
 more complex procedures such as lane or library merging. You do not need to
 specify `--single_end`, `--bam`, `--colour_chemistry`, `-udg_type` etc. when
 using TSV input - this is defined within the TSV file itself. You can only
@@ -436,9 +437,9 @@ A template can be taken from
 > wrapped in quotes.
 
 When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the
-same `Library_ID` but different `Lanes` after adapter clipping (and merging),
-assuming all other metadata columns are the same. If you have the same
-`Library_ID` but with different SeqType, this will be merged directly after
+same `Library_ID` but different `Lanes` values after adapter clipping (and
+merging), assuming all other metadata columns are the same. If you have the same
+`Library_ID` but with different `SeqType`, this will be merged directly after
 mapping prior BAM filtering. Finally, it will also merge BAM files with the same
 `Sample_ID` but different `Library_ID` after duplicate removal, but prior to
 genotyping. Please see caveats to this below.
@@ -453,10 +454,10 @@ Column descriptions are as follows:
 - **Lane:** A number indicating which lane the library was sequenced on. Files
   from the libraries sequenced on different lanes (and different SeqType) will
   be concatenated after read clipping and merging.
-- **Colour Chemistry** A number indicating whether the Illumina sequencing
-  machine the library was sequenced on was 2 (e.g. Next/NovaSeq) or 4
-  (Hi/MiSeq). This informs whether poly-G trimming (if turned on) should be
-  performed.
+- **Colour Chemistry** A number indicating whether the Illumina sequencer the
+  library was sequenced on was a 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq) colour
+  chemistry machine. This informs whether poly-G trimming (if turned on) should
+  be performed.
 - **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with
   both an R1 [or forward] and R2 [or reverse]) and single end data (only R1
   [forward], or BAM). This will affect lane merging if different per library.
@@ -464,30 +465,30 @@ Column descriptions are as follows:
   currently has no functionality and can be set to 'NA', but will affect
   lane/library merging if different per library
 - **Strandedness:** A text string indicating whether the library type is
-  'single' or 'double'. This currently has no functionality, but will affect
-  lane/library merging if different per library.
+  'single' or 'double'. This will affect lane/library merging if different per
+  library.
 - **UDG_Treatment:** A text string indicating whether the library was generated
   with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library
   merging if different per library.
 - **R1:** A text string of a file path pointing to a forward or R1 FASTQ file.
-  This can be used with the R2 column. File names **must be unique**, even if in
-  different directories.
+  This can be used with the R2 column. File names **must be unique**, even if
+  they are in different directories.
 - **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file,
   or 'NA' when single end data. This can be used with the R1 column. File names
-  **must be unique**, even if in different directories.
+  **must be unique**, even if they are in different directories.
 - **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot
   be specified at the same time as R1 or R2, both of which should be set to 'NA'
 
-For example, with the following:
+For example, the following TSV table:
 
 | Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM |
 |-------------|------------|------|------------------|---------|----------|--------------|---------------|----------------------------------------------------------------|----------------------------------------------------------------|-----|
 | JK2782      | JK2782     | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |
 | JK2782      | JK2782     | 8    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |
-| JK2802      | JK2802  | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |
-| JK2802      | JK2802  | 8    | 4                | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  |
+| JK2802      | JK2802     | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |
+| JK2802      | JK2802     | 8    | 4                | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  |
 
-In this context the following will occur:
+will have the following effects:
 
 - After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8
   _with the same `SeqType`_ (and all other _metadata_ columns) will be
@@ -497,9 +498,9 @@ In this context the following will occur:
   together for each **Library**.
 - After duplicate removal, BAM files with `Library_ID`s with the same
   `Sample_Name` and the same `UDG_Treatment` will be merged together.
-- If BAM trimming is turned, all post-trimming BAMs (i.e. non-UDG and half-UDG )
-  will be merged with UDG-treated (untreated) BAMs, if they have the same
-  `Sample_Name`.
+- If BAM trimming is turned on, all post-trimming BAMs (i.e. non-UDG and
+  half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the
+  same `Sample_Name`.
 
 Note the following important points and limitations for setting up:
 
@@ -507,7 +508,7 @@ Note the following important points and limitations for setting up:
 - *File* names must be unique regardless of file path, due to risk of
   over-writing (see:
   [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
-  - If it is 'too late' and already have duplicate file names, a work around is
+  - If it is 'too late' and you already have duplicate file names, a workaround is
     to concatenate the FASTQ files together and supply this to a nf-core/eager
     run. The only downside is that you will not get independent FASTQC results
     for each file.
@@ -539,7 +540,7 @@ Note the following important points and limitations for setting up:
     therefore preferred.
   - An error will be thrown if you try to merge both PE and SE and also supply
     `--skip_merging`.
-  - If truly you want to mix SE data and PE data but using mate-pair info for PE
+  - If you truly want to mix SE data and PE data but using mate-pair info for PE
     mapping, please run FASTQ preprocessing mapping manually and supply BAM
     files for downstream processing by nf-core/eager
   - If you _regularly_ want to run the situation above, please leave a feature
@@ -552,14 +553,14 @@ Note the following important points and limitations for setting up:
 - Qualimap is run on each sample, after merging of libraries (i.e. your values
   will reflect the values of all libraries combined - after being damage trimmed
   etc.).
-- Genotyping will typically be performed on each `sample` independently as
+- Genotyping will be typically performed on each `sample` independently, as
   normally all libraries will have been merged together. However, if you have a
   mixture of single-stranded and double-stranded libraries, you will normally
   need to genotype separately. In this case you **must** give each the SS and DS
-  libraries _distinct_ `Sample_IDs` otherwise you will receive a `file
-  collision` error in steps such as `sexdeterrmine`, and merge these yourself.
-  We will consider changing this behaviour in the future if there is enough
-  interest.  
+  libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file
+  collision` error in steps such as `sexdeterrmine`, and then you will need to
+  merge these yourself. We will consider changing this behaviour in the future
+  if there is enough interest.
 
 #### `--udg_type`
 
@@ -569,9 +570,10 @@ damage on the sequencing libraries.
 Specify `'none'` if no treatment was performed. If you have partial UDG treated
 data ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify
 `'half'`. If you have complete UDG treated data ([Briggs et al.
-2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. When also using
-PMDtools `'half'` will use a different model for DNA damage assessment in
-PMDTools (PMDtools: `--UDGhalf`). Specify the parameter with `'full'` and the
+2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. 
+
+When also using PMDtools specifying `'half'` will use a different model for DNA
+damage assessment in PMDTools (PMDtools: `--UDGhalf`). Specify `'full'` and the
 PMDtools DNA damage assessment will use CpG context only (PMDtools: `--CpG`).
 Default: `'none'`.
 
@@ -585,7 +587,7 @@ Default: `'none'`.
 
 Indicates libraries are single stranded.
 
-Currently only affects MALTExtract where it will switch on damage patterns
+Currently only affects MALTExtract, where it will switch on damage patterns
 calculation mode to single-stranded, (MaltExtract: `--singleStranded`) and
 genotyping with pileupCaller where a different method is used (pileupCaller:
 `--singleStrandMode`). Default: false.
@@ -602,8 +604,8 @@ Only required when using the 'Path' method of [`--input`](#--input).
 
 #### `--colour_chemistry`
 
-Specifies which Illumina colour chemistry was a library was sequenced with. This
-informs  whether to perform poly-G trimming (if `--complexity_filter_poly_g` is
+Specifies which Illumina colour chemistry a library was sequenced with. This
+informs whether to perform poly-G trimming (if `--complexity_filter_poly_g` is
 also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can
 generate uncertain poly-G tails (due to 'G' being indicated via a no-colour
 detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do
@@ -636,7 +638,7 @@ clipping.
 
 If not turned on, BAMs will automatically be sent to post-mapping steps.
 
-### References
+### Reference Genomes
 
 All nf-core/eager runs require a reference genome in FASTA format to map reads
 against to.
@@ -797,8 +799,8 @@ This parameter is required to be set for large reference genomes. If your
 reference genome is larger than 3.5GB, the `samtools index` calls in the
 pipeline need to generate `CSI` indices instead of `BAI` indices to compensate
 for the size of the reference genome (with samtools: `-c`). This parameter is
-not required for smaller references (including a human `hg19` or
-`grch37`/`grch38` reference), but `>4GB` genomes have been shown to need `CSI`
+not required for smaller references (including the human `hg19` or
+`grch37`/`grch38` references), but `>4GB` genomes have been shown to need `CSI`
 indices. Default: off
 
 > modifies
@@ -1089,22 +1091,22 @@ If using TSV input, mapping is performed library, i.e. after lane merging.
 #### `--mapper`
 
 Specify which mapping tool to use. Options are BWA aln (`'bwaaln'`), BWA mem
-(`'bwamem'`), circularmapper (`'circularmapper'`), or bowtie2 (`bowtie2`). bwa
-aln is the default and highly suited for short read ancient DNA. bwa mem can be
+(`'bwamem'`), circularmapper (`'circularmapper'`), or bowtie2 (`bowtie2`). BWA
+aln is the default and highly suited for short read ancient DNA. BWA mem can be
 quite useful for modern DNA, but is rarely used in projects for ancient DNA.
 CircularMapper enhances  the mapping procedure to circular references, using the
 BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016,
-Genome Biology for details). Bowtie2 is similar to bwa aln, and has recently
+Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently
 been suggested to provide slightly better results under certain conditions
 ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well
 as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'
 
 More documentation can be seen for each tool under:
 
-- [bwa aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
-- [bwa mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)
+- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)
 - [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)
-- [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)
+- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)
 
 #### BWA (default)
 
@@ -1125,7 +1127,7 @@ for more information on how to set this parameter efficiently.
 Modifies the number of mismatches in the _seed_ during the seeding phase in the
 `bwa aln` mapping algorithm. Default is set to `2`.
 
-> Modifies bwa aln parameter: `-k`
+> Modifies BWA aln parameter: `-k`
 
 ##### `--bwaalnl`
 
@@ -1137,7 +1139,7 @@ Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with
 Note: Despite being recommended, turning off seeding can result in long
 runtimes!
 
-> Modifies bwa aln parameter: `-l`
+> Modifies BWA aln parameter: `-l`
 
 #### CircularMapper
 
@@ -1281,7 +1283,7 @@ reads are very short (e.g. in single-stranded libraries) and would otherwise be
 discarded by AdapterRemoval (thus making an artificially small denominator for a
 typical endogenous DNA calculation). Note in this context you should not perform
 mapping quality filtering nor discarding of unmapped reads to ensure a correct
-'denominator' of 'all reads', for the Endogenous DNA calculation.
+denominator of all reads, for the endogenous DNA calculation.
 
 > Modifies filter_bam_fragment_length.py parameter: `-l`
 
@@ -1303,7 +1305,7 @@ screening!
 
 ### Read DeDuplication Parameters
 
-If using TSV input, deduplication is performed library, i.e. after lane merging.
+If using TSV input, deduplication is performed per library, i.e. after lane merging.
 
 #### `--dedupper`
 
@@ -1353,7 +1355,7 @@ More documentation can be seen in the follow links for:
 - [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
 - [PMDTools documentation](https://github.com/pontussk/PMDtools)
 
-If using TSV input, DamageProfiler is performed library, i.e. after lane
+If using TSV input, DamageProfiler is performed per library, i.e. after lane
 merging. PMDtools and  BAM Trimming is run after library merging of same-named
 library BAMs that have the same type of UDG treatment. BAM Trimming is only
 performed on non-UDG and half-UDG treated data.
@@ -1453,8 +1455,8 @@ documentation](https://genome.sph.umich.edu/wiki/BamUtil:_trimBam)
 #### `--run_trim_bam`
 
 Turns on the BAM trimming method. Trims off `[n]` bases from reads in the
-deduplicated BAM file  Damage assessment in PMDTools or DamageProfiler remains
-untouched, as data is routed through this independently. BAM trimming os
+deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains
+untouched, as data is routed through this independently. BAM trimming is
 typically performed to reduce errors during genotyping that can be caused by
 aDNA damage.
 
@@ -1468,7 +1470,7 @@ separately for libraries with `--udg_type` `'none'` and `'half'`  (see
 Note: additional artefacts such as bar-codes or adapters that could
 potentially also be trimmed should be removed prior mapping.
 
-> Modifies bam trimBam parameter: `-L -R`
+> Modifies bamUtil's trimBam parameter: `-L -R`
 
 #### `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right`
 
@@ -1477,7 +1479,7 @@ from libraries whose UDG treatment is set to `half`. Note that reverse reads
 will automatically be clipped off at the reverse side with this (automatically
 reverses left and right for the reverse read).
 
-> Modifies bam trimBam parameter: `-L -R`
+> Modifies bamUtil's trimBam parameter: `-L -R`
 
 #### `--bamutils_softclip`
 
@@ -1485,7 +1487,7 @@ By default, nf-core/eager uses hard clipping and sets clipped bases to `N` with
 quality `!` in the BAM output. Turn this on to use soft-clipping instead,
 masking reads at the read ends respectively using the CIGAR string.
 
-> Modifies bam trimBam parameter: `-c`
+> Modifies bamUtil's trimBam parameter: `-c`
 
 ### Genotyping Parameters
 
@@ -1504,7 +1506,7 @@ Documentation for each tool:
 - [sequenceTools pileupCaller](https://github.com/stschiff/sequenceTools)
 
 If using TSV input, genotyping is performed per sample (i.e. after all types of
-libraries are merged), except pileupCaller which gathers all double-stranded and
+libraries are merged), except for pileupCaller which gathers all double-stranded and
 single-stranded (same-type merged) libraries respectively.
 
 #### `--run_genotyping`
@@ -1546,15 +1548,15 @@ forums of the Broad Institute.
 
 #### `--gatk_call_conf`
 
-If selected a GATK genotyper phred-scaled confidence threshold of a given
+If selected, specify a GATK genotyper phred-scaled confidence threshold of a given
 SNP/INDEL call. Default: `30`
 
 > Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `-stand_call_conf`
 
 #### `--gatk_ploidy`
 
-If selected a GATK genotyper, what is the ploidy of your reference organism.
-E.g. do you want to allow heterozygous calls from >= diploid organisms. Default:
+If selected, specify a GATK genotyper ploidy value of your reference organism.
+E.g. if you want to allow heterozygous calls from >= diploid organisms. Default:
 `2`
 
 > Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `--sample-ploidy`
@@ -1569,13 +1571,13 @@ down-sampled to 250 reads. Default: `250`
 
 #### `--gatk_dbsnp`
 
-(Optional) Specify VCF file for output VCF SNP annotation e.g. if you want
+(Optional) Specify VCF file for output VCF SNP annotation e.g. if you want to
 annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more
 information. Gzip not accepted.
 
 #### `--gatk_hc_out_mode`
 
-If selected the GATK genotyper HaplotypeCaller, what type of VCF to create, i.e.
+If the GATK genotyper HaplotypeCaller is selected, what type of VCF to create, i.e.
 produce calls for every site or just confidence sites. Options:
 `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_ACTIVE_SITES'`.
 Default: `'EMIT_VARIANTS_ONLY'`
@@ -1584,14 +1586,14 @@ Default: `'EMIT_VARIANTS_ONLY'`
 
 #### `--gatk_hc_emitrefconf`
 
-If selected GATK HaplotypeCaller, mode for emitting reference confidence calls.
+If the GATK HaplotypeCaller is selected, mode for emitting reference confidence calls.
 Options: `'NONE'`, `'BP_RESOLUTION'`, `'GVCF'`. Default: `'GVCF'`
 
 > Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`
 
 #### `--gatk_ug_out_mode`
 
-If selected the GATK genotyper UnifiedGenotyper, what type of VCF to create,
+If the GATK UnifiedGenotyper is selected, what type of VCF to create,
 i.e. produce calls for every site or just confidence sites. Options:
 `'EMIT_VARIANTS_ONLY'`, `'EMIT_ALL_CONFIDENT_SITES'`, `'EMIT_ALL_SITES'`.
 Default: `'EMIT_VARIANTS_ONLY'`
@@ -1600,7 +1602,7 @@ Default: `'EMIT_VARIANTS_ONLY'`
 
 #### `--gatk_ug_genotype_model`
 
-If selected GATK UnifiedGenotyper, which likelihood model to follow, i.e.
+If the GATK UnifiedGenotyper is selected, which likelihood model to follow, i.e.
 whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`,
 `'GENERALPLOIDYSNP'`, `'GENERALPLOIDYINDEL`'. Default: `'SNP'`
 
@@ -1608,18 +1610,19 @@ whether to call use SNPs or INDELS etc. Options: `'SNP'`, `'INDEL'`, `'BOTH'`,
 
 #### `--gatk_ug_keep_realign_bam`
 
-If provided, this will put into the output folder the BAMs that have realigned
-reads (with GATK's (v3) IndelRealigner) around possible variants for improved
-genotyping.
+If provided when running GATK's UnifiedGenotyper, this will put the BAMs into
+the output folder, that have realigned reads (with GATK's (v3) IndelRealigner)
+around possible variants for improved genotyping.
 
 These BAMs will be stored in the same folder as the corresponding VCF files.
 
 #### `--gatk_ug_gatk_ug_defaultbasequalities`
 
-Specify a value to set base quality scores, if reads are missing this
-information. Maybe useful if you have 'synthetically' generated reads (e.g.
-chopping up a reference genome). Default is set to -1  which is do not set any
-default quality (turned off). Default: `-1`
+When running GATK's UnifiedGenotyper, specify a value to set base quality
+scores, if reads are missing this information. Might be useful if you have
+'synthetically' generated reads (e.g. chopping up a reference genome). Default
+is set to -1  which is to not set any default quality (turned off). Default:
+`-1`
 
 > Modifies GATK UnifiedGenotyper parameter: `--defaultBaseQualities`
 
@@ -2300,7 +2303,7 @@ nextflow run nf-core/eager --input "/path/to/sample_*/*.fq.gz"
 
 Sometimes a newly downloaded and set up nf-core/eager pipeline will encounter an
 issue where a run almost immediately crashes (e.g. at `fastqc`,
-`outputdocumentation` etc.) saying the tool could not be found or similar.
+`output_documentation` etc.) saying the tool could not be found or similar.
 
 #### I am running Docker
 
@@ -2892,7 +2895,7 @@ For example, Aida (Andrades Valtueña) on her cluster `sdag` at the MPI-SHH
 nextflow run nf-core/eager -c /<path>/<to>/AndradesValtuena2018.config -profile AndradesValtuena2018,sdag,shh --input '/<path>/<to>/<some_input>/' <...>
 ```
 
-Then a collegue at a different institution, such as the SciLifeLab, could run
+Then a colleague at a different institution, such as the SciLifeLab, could run
 the same profile on the UPPMAX cluster in Uppsala with:
 
 ```bash

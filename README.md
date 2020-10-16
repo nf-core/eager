@@ -1,6 +1,6 @@
 # ![nf-core/eager](docs/images/nf-core-eager_logo.png)
 
-**A fully reproducible and state of the art ancient DNA analysis pipeline**.
+**A fully reproducible and state of the art genomics pipeline for ancient DNA**.
 
 [![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/eager/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/eager/actions)
@@ -105,7 +105,7 @@ Additional functionality contained by the pipeline currently includes:
     nextflow clean -f -k
     ```
 
-See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
+See [usage docs](https://nf-co.re/eager/docs/usage.md) for all of the available options when running the pipeline.
 
 **N.B.** You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
 
@@ -121,9 +121,9 @@ The nf-core/eager pipeline comes with documentation about the pipeline which you
     * [Pipeline installation](https://nf-co.re/usage/local_installation)
     * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
-3. [Running the pipeline](docs/usage.md)
+3. [Running the pipeline](https://nf-co.re/eager/docs/usage.md)
    * This includes tutorials, FAQs, and troubleshooting instructions
-4. [Output and how to interpret the results](docs/output.md)
+4. [Output and how to interpret the results](https://nf-co.re/eager/docs/output.md)
 
 ## Credits
 
@@ -204,7 +204,6 @@ This repository uses test data from the following studies:
 * Fellows Yates, J. A. et al. (2017) ‘Central European Woolly Mammoth Population Dynamics: Insights from Late Pleistocene Mitochondrial Genomes’, Scientific reports, 7(1), p. 17714. [doi: 10.1038/s41598-017-17723-1](https://doi.org/10.1038/s41598-017-17723-1).
 * Gamba, C. et al. (2014) ‘Genome flux and stasis in a five millennium transect of European prehistory’, Nature communications, 5, p. 5257. [doi: 10.1038/ncomms6257](https://doi.org/10.1038/ncomms6257).
 * Star, B. et al. (2017) ‘Ancient DNA reveals the Arctic origin of Viking Age cod from Haithabu, Germany’, Proceedings of the National Academy of Sciences of the United States of America, 114(34), pp. 9152–9157. [doi: 10.1073/pnas.1710186114](https://doi.org/10.1073/pnas.1710186114).
-* Andrades Valtueña, A. et al. (2017) ‘The Stone Age Plague and Its Persistence in Eurasia’, Current biology: CB, 27(23), pp. 3683–3691.e8. [doi: 10.1016/j.cub.2017.10.025](https://doi.org/10.1016/j.cub.2017.10.025).
 
 ## Citation
 
