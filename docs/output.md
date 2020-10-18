@@ -593,7 +593,7 @@ Things to watch out for:
 
 This plot shows how much of the genome in percentage (X axis) is covered by a given fold depth coverage (Y axis).
 
-An ideal plot for this is to see an increasing curve, representing larger greater fractions of the genome being increasingly covered at higher depth. However, for low-coverage ancient DNA data, it will be more likely to see decreasing curves starting at a large percentage of the genome being covered at 0 fold coverage.
+An ideal plot for this is to see an increasing curve, representing larger greater fractions of the genome being increasingly covered at higher depth. However, for low-coverage ancient DNA data, you will be more likely to see decreasing curves starting at a large percentage of the genome being covered at 0 fold coverage - something particular true for large genome such has for humans.
 
 <p align="center">
   <img src="images/output/qualimap/qualimap_cumulative_genome_coverage.png" width="75%" height = "75%">
