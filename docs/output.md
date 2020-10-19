@@ -270,7 +270,7 @@ In the case of dual-indexed paired-end sequencing, it is likely poly-G tails are
 
 While the MultiQC report has multiple plots for FastP, we will only look at GC content as that's the functionality we use currently.
 
-You will receive output for each supplied FASTQ file.
+The pipeline will generate the respective output for each supplied FASTQ file.
 
 #### GC Content
 
