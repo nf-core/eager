@@ -45,7 +45,7 @@
                     "default": 4,
                     "description": "Specifies which Illumina sequencing chemistry was used. Used to inform whether to poly-G trim if turned on (see below). Not required for TSV input. Options: 2, 4.",
                     "fa_icon": "fas fa-palette",
-                    "help_text": "Specifies which Illumina colour chemistry was a library was sequenced with. This informs  whether to perform poly-G trimming (if `--complexity_filter_poly_g` is also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can generate uncertain poly-G tails (due to 'G' being indicated via a no-colour detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do not require poly-G trimming. Options: 2, 4. Default: 4\n\nOnly required when using the 'Path' method of input."
+                    "help_text": "Specifies which Illumina colour chemistry a library was sequenced with. This informs whether to perform poly-G trimming (if `--complexity_filter_poly_g` is also supplied). Only 2 colour chemistry sequencers (e.g. NextSeq or NovaSeq) can generate uncertain poly-G tails (due to 'G' being indicated via a no-colour detection). Default is '4' to indicate e.g. HiSeq or MiSeq platforms, which do not require poly-G trimming. Options: 2, 4. Default: 4\n\nOnly required when using the 'Path' method of input."
                 },
                 "bam": {
                     "type": "boolean",

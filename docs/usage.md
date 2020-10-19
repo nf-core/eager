@@ -2339,10 +2339,10 @@ being left! You can clean a nextflow run of all intermediate files with
 
 ### I get a file name collision error during merging
 
-When using TSV input, nf-core/eager will attempt to merge all files with the
-same `Library ID` or `Sample ID`. However, if you have specified the same
-`Library_ID` for two sets of FASTQ files you will likely receive an error such
-as
+When using TSV input, nf-core/eager will attempt to merge all `Lanes` of a
+`Library_ID`, or all files with the same `Library_ID` or `Sample_ID`. However,
+if you have specified the same `Lane` or  `Library_ID` for two sets of FASTQ
+files you will likely receive an error such as
 
 ```bash
 Error executing process > 'library_merge (JK2782)'
@@ -2352,7 +2352,10 @@ Tip: you can try to figure out what's wrong by changing to the process work dir 
 Execution cancelled -- Finishing pending tasks before exit
 ```
 
-In this case you must modify your `Library_ID` accordingly to make them unique.
+In this case: for lane merging errors, you can give 'fake' lane IDs to ensure
+they are unique (e.g. if one library was sequenced on Lane 8 of two HiSeq runs,
+specify lanes as 8 and 16 for each FASTQ file respectively). For library merging
+errors, you must modify your `Library_ID`s accordingly, to make them unique.
 
 ### I specified a module and it didn't produce the expected output
 
