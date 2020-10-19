@@ -114,7 +114,7 @@ as described in the documentation.
 
 ## Documentation
 
-The nf-core/eager pipeline comes with documentation about the pipeline which you can read at [https://nf-core/eager/docs](https://nf-core/eager/docs) or find in the [`docs/` directory](docs).
+The nf-core/eager pipeline comes with documentation about the pipeline which you can read at [https://nf-co.re/eager/usage](https://nf-co.re/eager/usage) or find in the [`docs/` directory](docs).
 
 1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
