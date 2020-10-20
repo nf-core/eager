@@ -1228,7 +1228,7 @@
                     "default": "MT",
                     "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space).",
                     "fa_icon": "fas fa-heading",
-                    "help_text": "Specify the FASTA entry in the reference file specified as `--fasta`, which acts\nas the mitochondrial 'chromosome' to base the ratio calculation on. The tool\nonly accepts the first section of the header before the first space. The default\nchromosome name is based on hs37d5/GrCH37 human reference genome. Default: 'MT'"
+                    "help_text": "Specify the FASTA entry in the reference file specified as `--fasta`, which acts\nas the mitochondrial 'chromosome' to base the ratio calculation on. The tool\nonly accepts the first section of the header before the first space. The default\nchromosome name is based on hs37d5/GrCH37 human reference genome. Default: `'MT'`"
                 }
             },
             "fa_icon": "fas fa-balance-scale-left",
