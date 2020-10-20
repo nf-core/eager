@@ -2374,7 +2374,7 @@ profiles {
 }
 ```
 
-Where we have increased the default `4.GB` to `16.GB`. Make sure that you 
+Where we have increased the default `4.GB` to `16.GB`. Make sure that you
 keep the `check_max` function, as this prevents your run asking for too much
 memory during retries.
 
