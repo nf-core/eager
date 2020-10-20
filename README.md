@@ -1,6 +1,6 @@
 # ![nf-core/eager](docs/images/nf-core-eager_logo.png)
 
-**A fully reproducible and state of the art genomics pipeline for ancient DNA**.
+**A fully reproducible and state-of-the-art genomics pipeline for ancient DNA**.
 
 [![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/eager/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/eager/actions)

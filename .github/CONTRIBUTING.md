@@ -98,9 +98,9 @@ The EAGER pipeline can currently be broken down into the following 'stages', whe
 * Convert BAM
 * PolyG Clipping
 * AdapterRemoval
-* Mapping (either: `bwa`, `bwamem`, or `circularmapper`)
+* Mapping (either `bwa`, `bwamem`, or `circularmapper`)
 * BAM Filtering
-* Deduplication (either `dedup` or `markduplicates`
+* Deduplication (either `dedup` or `markduplicates`)
 * BAM Trimming
 * PMDtools
 * Genotyping
@@ -118,7 +118,7 @@ The concept is as follows:
   * If the current stage is turned on: will mix the previous stage and current stage output and filter for file suffixes unique to the current stage output
   * If the current stage is turned off or skipped: will mix the previous stage and current stage output. However as there there is no files in the output channel from the current stage, no filtering is required and the files in the 'ch_XXX_for_skipXXX' stage will be used.
   
- This ensures the same channel inputs to the next stage is 'homogenous' - i.e. all comes from the same source (the bypass statement)
+ This ensures the same channel inputs to the next stage is 'homogeneous' - i.e. all comes from the same source (the bypass statement)
   
  An example schematic can be given as follows
 

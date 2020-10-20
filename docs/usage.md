@@ -2177,14 +2177,15 @@ Only when `--metagenomic_tool malt` is also supplied.
 
 ### Clean up
 
-Once completed a run has completed, you will have _lots_ of (some very large)
-intermediate files in your output directory, within the directory named `work`.
+Once a run has completed, you will have _lots_ of (some very large) intermediate
+files in your output directory. These are stored within the directory named
+`work`.
 
 After you have verified your run completed correctly and everything in the
 module output directories are present as you expect and need, you can perform a
-clean up.
+clean-up.
 
-> **Important**: Once clean up is completed, you will _not_ be able to re-rerun
+> **Important**: Once clean-up is completed, you will _not_ be able to re-rerun
 > the pipeline from an earlier step and you'll have to re-run from scratch.
 
 While in your output directory, firstly verify you're only deleting files stored
@@ -2431,7 +2432,7 @@ Errors like the following
 Unable to acquire lock on session with ID 84333844-66e3-4846-a664-b446d070f775
 ```
 
-Normally suggest a previous Nextflow run (on the same folder) was not cleanly
+normally suggest a previous Nextflow run (on the same folder) was not cleanly
 killed by a user (e.g. using ctrl + z to hard kill a crashed run).
 
 To fix this, you must clean the entirety of the output directory (including
