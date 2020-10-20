@@ -2099,7 +2099,12 @@ Only when `--metagenomic_tool malt` is also supplied.
 
 #### `--maltextract_toppercent`
 
-Specify percent of top alignments for each read to be considered for each node.
+Specify frequency of top alignments for each read to be considered for each node.
+Default is 0.01, i.e. 1% of all reads (where 1 would correspond to 100%).
+
+> :warning: this parameter follows the same concept as `--malt_top_percent` but
+> uses a different notation i.e. integer (MALT) version float (MALTExtract)
+
 Default: `0.01`.
 
 Only when `--metagenomic_tool malt` is also supplied.
@@ -2235,9 +2240,9 @@ version of the version with the fixes.
 
 ### Input files not found
 
-If no file, only one input file, or only 'read one' and not 'read two' is picked
-up then something is likely wrong with your input file declaration
-([`--input`](#--input)):
+When using the [direct input](#direct-input-method) method: if no file, only one
+input file, or only 'read one' and not 'read two' is picked up then something is
+likely wrong with your input file declaration ([`--input`](#--input)):
 
 1. The path must be enclosed in quotes (`'` or `"`)
 2. The path must have at least one `*` wildcard character. This is even if you
@@ -2246,11 +2251,12 @@ up then something is likely wrong with your input file declaration
    `{R1,R2}` notation to specify read pairs.
 4. If you are running single-end data make sure to specify `--single_end`
 
-**Important**: The pipeline can't take a list of multiple input files - it takes
-a 'glob' expression. If your input files are scattered in different paths then
-we recommend that you generate a directory with symlinked files. If running in
-paired-end mode please make sure that your files are sensibly named so that they
-can be properly paired. See the previous point.
+**Important**: The pipeline can't take a list of multiple input files when using
+the direct input method - it takes a 'glob' expression. If your input files are
+scattered in different paths then we recommend that you generate a directory
+with symlinked files. If running in paired-end mode please make sure that your
+files are sensibly named so that they can be properly paired. See the previous
+point.
 
 If the pipeline can't find your files then you will get the following error
 
@@ -2262,6 +2268,10 @@ If your sample name is "messy" then you have to be very particular with your
 glob specification. A file name like `L1-1-D-2h_S1_L002_R1_001.fastq.gz` can be
 difficult enough for a human to read. Specifying `*{1,2}*.gz` won't work give
 you what you want whilst `*{R1,R2}*.gz` (i.e. the addition of the `R`s) will.
+
+If using the [TSV input](#tsv-input-method) method, this likely means there is a
+mistake or typo in the path in a given column. Often this is a trailing space at
+the end of the path. 
 
 ### I am only getting output for a single sample although I specified multiple with wildcards
 
