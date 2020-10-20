@@ -2271,7 +2271,7 @@ you what you want whilst `*{R1,R2}*.gz` (i.e. the addition of the `R`s) will.
 
 If using the [TSV input](#tsv-input-method) method, this likely means there is a
 mistake or typo in the path in a given column. Often this is a trailing space at
-the end of the path. 
+the end of the path.
 
 ### I am only getting output for a single sample although I specified multiple with wildcards
 
