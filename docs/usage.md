@@ -43,11 +43,11 @@
   - [Clean up](#clean-up)
 - [Troubleshooting and FAQs](#troubleshooting-and-faqs)
   - [My pipeline update doesn't seem to do anything](#my-pipeline-update-doesnt-seem-to-do-anything)
-  - [Warning about sticked on revision](#warning-about-sticked-on-revision)
   - [Input files not found](#input-files-not-found)
   - [I am only getting output for a single sample although I specified multiple with wildcards](#i-am-only-getting-output-for-a-single-sample-although-i-specified-multiple-with-wildcards)
   - [The pipeline crashes almost immediately with an early pipeline step](#the-pipeline-crashes-almost-immediately-with-an-early-pipeline-step)
   - [The pipeline has crashed with an error but Nextflow is still running](#the-pipeline-has-crashed-with-an-error-but-nextflow-is-still-running)
+  - [I get a exceeded job memory limit error](#i-get-a-exceeded-job-memory-limit-error)
   - [I get a file name collision error during merging](#i-get-a-file-name-collision-error-during-merging)
   - [I specified a module and it didn't produce the expected output](#i-specified-a-module-and-it-didnt-produce-the-expected-output)
   - [I get a unable to acquire lock](#i-get-a-unable-to-acquire-lock)
@@ -2229,7 +2229,6 @@ rm -r ~/.nextflow/assets/nf-core/eager
 And re-pull the pipeline with the command above. This will install a fresh
 version of the version with the fixes.
 
-
 ### Input files not found
 
 If no file, only one input file, or only read one and not read two is picked up
@@ -2322,6 +2321,74 @@ keyboard (or equivalent) to stop the nextflow run.
 the output folder. Otherwise you may end up a lot of large intermediate files
 being left! You can clean a nextflow run of all intermediate files with
 `nextflow clean -f -k` or delete the `work/` directory.
+
+### I get a exceeded job memory limit error
+
+While Nextflow tries to make your life easier by automatically retrying jobs
+that run out of memory with more resources (until your specified max-limit),
+sometimes you may have such large data you run out even after the default 3
+retries.
+
+To fix this you need to change the default memory requirements for process that
+is breaking. We can do this by making a custom profile, which we then provide to
+the Nextflow run command.
+
+For example, lets say it's the `markduplicates` process that is running out of
+memory.
+
+First we need to check to see what default memory value we have. We can do this
+by going to the main [nf-core/eager code](https://github.com/nf-core/) and
+opening the `main.nf` file. We can then use your browser's find functionality
+for: `process markduplicates`.
+
+Once found, we then need to check the line called `label`. In this case the
+label is `mc_small` (for multi-core small).
+
+Next we need to go back to the main github repository, and open
+`conf/base.config`. Again using our find functionality, we search for:
+`withLabel:'mc_small'`.
+
+We see that the `memory` is set to `4.GB` (`memory = { check_max( 4.GB *
+task.attempt, 'memory' )})`).
+
+Now back on your computer, we need to make a new file called
+`custom_resources.conf`. You should save it somewhere centrally so you can
+reuse it.
+
+> If you think this would be useful for multiple people in your lab/institute,
+> we highly recommend you make an institutional profile at
+> [nf-core/configs](https://github.com/nf-core/configs). This will simplify this
+> process in the future.
+
+Within this file, you will need to add the following:
+
+```txt
+profiles {
+    big_data {
+      process {
+        withName: markduplicates {
+          memory = { check_max( 16.GB * task.attempt, 'memory' ) }
+        }
+      }
+    }
+}
+```
+
+Where we have increased the default `4.GB` to `16.GB`. Make sure that you 
+keep the `check_max` function, as this prevents your run asking for too much
+memory during retries.
+
+Once saved, we can then modify your original nextflow run command.
+
+```bash
+nextflow run nf-core/eager -r 2.2.0 -c /<path>/<to>/custom_resources.conf -profile big_data,<original>,<profiles> <...>
+```
+
+adding `-c` to specify which file to use for the custom profiles, and then
+adding the `big_data` profile to the original profiles you were using.
+
+:warning: it's important that big_data comes first, to ensure it overwrites any
+parameters set in the subsequent profiles!
 
 ### I get a file name collision error during merging
 
