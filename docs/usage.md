@@ -65,7 +65,7 @@
 ### Quick Start
 
 > Before you start you should change into the output directory you wish your
-> results to go in. This will guarantee, that when you start the nextflow job,
+> results to go in. This will guarantee, that when you start the Nextflow job,
 > it will place all the log files and 'working' folders in the corresponding
 > output directory, (and not wherever else you may have executed the run from)
 
@@ -84,10 +84,10 @@ Note that the pipeline will create the following files in your working
 directory:
 
 ```bash
-work            # Directory containing the nextflow working files
+work            # Directory containing the Nextflow working files
 results         # Finished results (configurable, see below)
 .nextflow.log   # Log file from Nextflow
-                # Other nextflow hidden files, eg. history of pipeline runs and old logs.
+                # Other Nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
 To see the the nf-core/eager pipeline help message run: `nextflow run
@@ -305,7 +305,7 @@ process must run until the pipeline is finished.
 Nextflow handles job submissions on SLURM or other environments, and supervises
 running the jobs. Thus the Nextflow process must run until the pipeline is
 finished. We recommend that you put the process running in the background
-through `screen` / `tmux` or similar tool. Alternatively you can run nextflow
+through `screen` / `tmux` or similar tool. Alternatively you can run Nextflow
 within a cluster job submitted your job scheduler.
 
 To create a screen session:
@@ -433,7 +433,7 @@ A template can be taken from
 [here](https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/TSV_template.tsv).
 
 > :warning: Cells **must not** contain spaces before or after strings, as this
-> will make the TSV unreadable by nextflow. Strings containing spaces should be
+> will make the TSV unreadable by Nextflow. Strings containing spaces should be
 > wrapped in quotes.
 
 When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the
@@ -684,7 +684,7 @@ reference genome.
 #### `--genome` (using iGenomes)
 
 Alternatively, the pipeline config files come bundled with paths to the Illumina
-iGenomes reference index files. If running with docker or AWS, the configuration
+iGenomes reference index files. If running with Docker or AWS, the configuration
 is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/)
 resource.
 
@@ -1746,14 +1746,14 @@ The name of the FASTA entry you would like in your FASTA file.
 
 #### `--vcf2genome_minc`
 
-Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N.
+Minimum depth coverage for a SNP to be made. Else, a SNP will be called as N.
 Default: `5`
 
 > Modifies VCF2Genome parameter: `-minc`
 
 #### `--vcf2genome_minq`
 
-Minimum genotyping quality of a call to be called. Else N will be called.
+Minimum genotyping quality of a call to be made. Else N will be called.
 Default: `30`
 
 > Modifies VCF2Genome parameter: `-minq`
@@ -1761,7 +1761,7 @@ Default: `30`
 #### `--vcf2genome_minfreq`
 
 In the case of two possible alleles, the frequency of the majority allele
-required to be called. Else, a SNP will be called as N. Default: `0.8`
+required for a call to be made. Else, a SNP will be called as N. Default: `0.8`
 
 > Modifies VCF2Genome parameter: `-minfreq`
 
@@ -1769,9 +1769,9 @@ required to be called. Else, a SNP will be called as N. Default: `0.8`
 
 SNP Table Generation here is performed by MultiVCFAnalyzer. The current version
 of MultiVCFAnalyzer version only accepts GATK UnifiedGenotyper 3.5 VCF files,
-and when the ploidy was set to 2 (this allows MultiVCFAnalyzer to look for
-report frequencies of polymorphic positions). A description of how the tool
-works can be seen in the Supplementary Information of [Bos et al.
+and when the ploidy was set to 2 (this allows MultiVCFAnalyzer to report
+frequencies of polymorphic positions). A description of how the tool works can
+be seen in the Supplementary Information of [Bos et al.
 (2014)](https://doi.org/10.1038/nature13591) under "SNP Calling and Phylogenetic
 Analysis".
 
@@ -1784,7 +1784,8 @@ together.
 #### `--run_multivcfanalyzer`
 
 Turns on MultiVCFAnalyzer. Will only work when in combination with
-UnifiedGenotyper genotyping module.
+UnifiedGenotyper genotyping module (see
+[`--genotyping_tool`](#--genotyping_tool)).
 
 #### `--write_allele_frequencies`
 
@@ -1815,8 +1816,8 @@ is `0.9`.
 The minimum frequency of a nucleotide for a 'heterozygous' SNP to be called. If
 this parameter is set to the same as `--min_allele_freq_hom`, then only
 homozygous calls are made. If this value is less than the previous parameter,
-then a SNP call will be made if it is between this and the previous parameter
-and displayed as a IUPAC uncertainty call. Default is `0.9`.
+then a SNP call will be made. If it is between this and the previous parameter,
+it will be displayed as a IUPAC uncertainty call. Default is `0.9`.
 
 #### `--additional_vcf_files`
 
@@ -1827,7 +1828,7 @@ your settings for [GATK UnifiedGenotyping](#genotyping-parameters) module above.
 #### `--reference_gff_annotations`
 
 If you wish to report in the SNP table annotation information for the regions
-SNPs fall in. This must be in GFF format and the path must be in quotes.
+SNPs fall in, provide a file in GFF format (the path must be in quotes).
 
 #### `--reference_gff_exclude`
 
@@ -1838,7 +1839,7 @@ quotes).
 #### `--snp_eff_results`
 
 If you wish to include results from SNPEff effect analysis, supply the output
-from SNPEff in txt format. The path must be in quotes.
+from SNPEff in txt format (the path must be in quotes).
 
 ### Mitochondrial to Nuclear Ratio
 
@@ -1852,7 +1853,7 @@ Turn on the module to estimate the ratio of mitochondrial to nuclear reads.
 #### `--mtnucratio_header`
 
 Specify the FASTA entry in the reference file specified as `--fasta`, which acts
-as the mitochondrial 'chromosome' to base the ratio calculation from. The tool
+as the mitochondrial 'chromosome' to base the ratio calculation on. The tool
 only accepts the first section of the header before the first space. The default
 chromosome name is based on hs37d5/GrCH37 human reference genome. Default: 'MT'
 
@@ -1909,7 +1910,7 @@ Please note the following:
 - MALT database construction functionality is _not_ included within the pipeline
   - this should be done independently, **prior** the nf-core/eager run.
   - To use `malt-build` from the same version as `malt-run`, load either the
-    docker, singularity or conda environment.
+    Docker, Singularity or Conda environment.
 - MALT can often require very large computing resources depending on your
   database. We set a absolute minimum of 16 cores and 128GB of memory (which is
   1/4 of the recommendation from the developer). Please leave an issue on the
@@ -1930,12 +1931,11 @@ Turn on the metagenomic screening module.
 
 Specify which taxonomic classifier to use. There are two options available:
 
-- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)
-- `malt` : more can be seen in the [MALT
-  documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
+- `kraken` for [Kraken2](https://ccb.jhu.edu/software/kraken2)
+- `malt` for [MALT](https://software-ab.informatik.uni-tuebingen.de/download/malt/welcome.html)
 
 :warning: **Important** It is very important to run `nextflow clean -f` on your
-nextflow run directory once completed. RMA6 files are VERY large and are
+Nextflow run directory once completed. RMA6 files are VERY large and are
 _copied_ from a `work/` directory into the results folder. You should clean the
 work directory with the command to ensure non-redundancy and large HDD
 footprints!
@@ -1970,7 +1970,7 @@ Only used when `--metagenomic_tool malt` is also supplied.
 
 Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA
 and DNA, protein and protein, or DNA reads against protein references
-respectively. respectively. Ensure your database matches the mode. Check the
+respectively. Ensure your database matches the mode. Check the
 [MALT
 manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)
 for more details. Default: `'BlastN'`
@@ -2035,7 +2035,7 @@ Only when `--metagenomic_tool malt` is also supplied.
 How to load the database into memory. Options are `'load'`, `'page'` or `'map'`.
 'load' directly loads the entire database into memory prior seed look up, this
 is slow but compatible with all servers/file systems. `'page'` and `'map'`
-perform a sort of 'chunked' database loading, allow seed look up prior entire
+perform a sort of 'chunked' database loading, allowing seed look up prior entire
 database loading. Note that Page and Map modes do not work properly not with
 many remote file-systems such as GPFS. Default is `'load'`.
 
@@ -2108,7 +2108,7 @@ Only when `--metagenomic_tool malt` is also supplied.
 
 #### `--maltextract_destackingoff`
 
-Turn off destacking. If left on, a read that overlap with another read will be
+Turn off destacking. If left on, a read that overlaps with another read will be
 removed (leaving a depth coverage of 1).
 
 Only when `--metagenomic_tool malt` is also supplied.
@@ -2180,9 +2180,9 @@ Only when `--metagenomic_tool malt` is also supplied.
 Once completed a run has completed, you will have _lots_ of (some very large)
 intermediate files in your output directory, within the directory named `work`.
 
-Once you have verified your run completed correctly and everything in the module
-output directories are present as you expect and need, you can perform a clean
-up.
+After you have verified your run completed correctly and everything in the
+module output directories are present as you expect and need, you can perform a
+clean up.
 
 > **Important**: Once clean up is completed, you will _not_ be able to re-rerun
 > the pipeline from an earlier step and you'll have to re-run from scratch.
@@ -2193,6 +2193,9 @@ in `work/` with the dry run command:
 ```bash
 nextflow clean -n
 ```
+
+> :warning: some institutional profiles already have clean-up on successful run
+> completion turned on by default.
 
 If you're ready, you can then remove the files with
 
@@ -2208,7 +2211,7 @@ hard drive footprint of the run, so be sure to do this!
 ### My pipeline update doesn't seem to do anything
 
 To download a new version of a pipeline, you can use the following, replacing
-`<VERSION>` the the corresponding version.
+`<VERSION>` to the corresponding version.
 
 ```bash
 nextflow pull nf-core/eager -r <VERSION>
@@ -2231,20 +2234,21 @@ version of the version with the fixes.
 
 ### Input files not found
 
-If no file, only one input file, or only read one and not read two is picked up
-then something is wrong with your input file declaration
+If no file, only one input file, or only 'read one' and not 'read two' is picked
+up then something is likely wrong with your input file declaration
+([`--input`](#--input)):
 
 1. The path must be enclosed in quotes (`'` or `"`)
 2. The path must have at least one `*` wildcard character. This is even if you
    are only running one paired end sample.
 3. When using the pipeline with paired end data, the path must use `{1,2}` or
    `{R1,R2}` notation to specify read pairs.
-4. If you are running Single end data make sure to specify `--single_end`
+4. If you are running single-end data make sure to specify `--single_end`
 
 **Important**: The pipeline can't take a list of multiple input files - it takes
 a 'glob' expression. If your input files are scattered in different paths then
 we recommend that you generate a directory with symlinked files. If running in
-paired end mode please make sure that your files are sensibly named so that they
+paired-end mode please make sure that your files are sensibly named so that they
 can be properly paired. See the previous point.
 
 If the pipeline can't find your files then you will get the following error
@@ -2253,10 +2257,10 @@ If the pipeline can't find your files then you will get the following error
 ERROR ~ Cannot find any reads matching: *{1,2}.fastq.gz
 ```
 
-IF your sample name is "messy" then you have to be very particular with your
+If your sample name is "messy" then you have to be very particular with your
 glob specification. A file name like `L1-1-D-2h_S1_L002_R1_001.fastq.gz` can be
 difficult enough for a human to read. Specifying `*{1,2}*.gz` won't work give
-you what you want whilst `*{R1,R2}*.gz` will.
+you what you want whilst `*{R1,R2}*.gz` (i.e. the addition of the `R`s) will.
 
 ### I am only getting output for a single sample although I specified multiple with wildcards
 
@@ -2277,7 +2281,7 @@ nextflow run nf-core/eager --input /path/to/sample_1/sample_1.fq.gz /path/to/sam
 
 And Nextflow will only take the first path after `--input`, ignoring the others.
 
-On the other hand encapsulating the path in quotes will allow Nextflow to
+On the other hand, encapsulating the path in quotes will allow Nextflow to
 evaluate the paths.
 
 ```bash
@@ -2293,10 +2297,10 @@ issue where a run almost immediately crashes (e.g. at `fastqc`,
 #### I am running Docker
 
 You may have an outdated container. This happens more often when running on the
-`dev` branch of nf-core/eager, because docker will _not_ update the container on
+`dev` branch of nf-core/eager, because Docker will _not_ update the container on
 each new commit, and thus may not get new tools called within the pipeline code.
 
-To fix, just re-pull the nf-core/eager docker container manually with:
+To fix, just re-pull the nf-core/eager Docker container manually with:
 
 ```bash
 docker pull nfcore/eager:dev
@@ -2304,8 +2308,8 @@ docker pull nfcore/eager:dev
 
 #### I am running Singularity
 
-If you're running singularity, it could be that nextflow cannot access your
-singularity image properly - often due to missing bind paths.
+If you're running Singularity, it could be that Nextflow cannot access your
+Singularity image properly - often due to missing bind paths.
 
 See
 [here](https://nf-co.re/usage/troubleshooting#cannot-find-input-files-when-using-singularity)
@@ -2314,12 +2318,12 @@ for more information.
 ### The pipeline has crashed with an error but Nextflow is still running
 
 If this happens, you can either wait until all other already running jobs to
-safely finish, or if nextflow _still_ does not stop press `ctrl + c` on your
-keyboard (or equivalent) to stop the nextflow run.
+safely finish, or if Nextflow _still_ does not stop press `ctrl + c` on your
+keyboard (or equivalent) to stop the Nextflow run.
 
 > :warning: if you do this, and do not plan to fix the run make sure to delete
 the output folder. Otherwise you may end up a lot of large intermediate files
-being left! You can clean a nextflow run of all intermediate files with
+being left! You can clean a Nextflow run of all intermediate files with
 `nextflow clean -f -k` or delete the `work/` directory.
 
 ### I get a exceeded job memory limit error
@@ -2329,9 +2333,9 @@ that run out of memory with more resources (until your specified max-limit),
 sometimes you may have such large data you run out even after the default 3
 retries.
 
-To fix this you need to change the default memory requirements for process that
-is breaking. We can do this by making a custom profile, which we then provide to
-the Nextflow run command.
+To fix this you need to change the default memory requirements for the process
+that is breaking. We can do this by making a custom profile, which we then
+provide to the Nextflow run command.
 
 For example, lets say it's the `markduplicates` process that is running out of
 memory.
@@ -2374,18 +2378,18 @@ profiles {
 }
 ```
 
-Where we have increased the default `4.GB` to `16.GB`. Make sure that you
-keep the `check_max` function, as this prevents your run asking for too much
-memory during retries.
+Where we have increased the default `4.GB` to `16.GB`. Make sure that you keep
+the `check_max` function, as this prevents your run asking for too much memory
+during retries.
 
-Once saved, we can then modify your original nextflow run command.
+Once saved, we can then modify your original Nextflow run command:
 
 ```bash
 nextflow run nf-core/eager -r 2.2.0 -c /<path>/<to>/custom_resources.conf -profile big_data,<original>,<profiles> <...>
 ```
 
-adding `-c` to specify which file to use for the custom profiles, and then
-adding the `big_data` profile to the original profiles you were using.
+Where we have added `-c` to specify which file to use for the custom profiles,
+and then added the `big_data` profile to the original profiles you were using.
 
 :warning: it's important that big_data comes first, to ensure it overwrites any
 parameters set in the subsequent profiles!
@@ -2427,19 +2431,19 @@ Errors like the following
 Unable to acquire lock on session with ID 84333844-66e3-4846-a664-b446d070f775
 ```
 
-Normally suggest a previous nextflow run (on the same folder) was not cleanly
+Normally suggest a previous Nextflow run (on the same folder) was not cleanly
 killed by a user (e.g. using ctrl + z to hard kill a crashed run).
 
 To fix this, you must clean the entirety of the output directory (including
 output files) e.g. with `rm -r <output_dir>/* <output_dir>/.*` and re-running
 from scratch.
 
-<kbd>ctrl</kbd> + <kbd>z<kbd> is **not** a recommended way of killing a Nextflow
-job. Runs that take a long time to fail are often still running because other
-job submissions are still running. Nextflow will normally wait for those
-processes to complete before cleaning shutting down the run (to allow rerunning
-of a run with `-resume`). <kbd>ctrl</kbd> + <kbd>c</kbd> is much safer as it
-will tell Nextflow to stop earlier but cleanly.
+`ctrl +z` is **not** a recommended way of killing a Nextflow job. Runs that take
+a long time to fail are often still running because other job submissions are
+still running. Nextflow will normally wait for those processes to complete
+before cleaning shutting down the run (to allow rerunning of a run with
+`-resume`). `ctrl + c` is much safer as it will tell Nextflow to stop earlier
+but cleanly.
 
 ## Tutorials
 
@@ -2459,7 +2463,7 @@ nf-core/eager command.
 
 When reading the following, you can see that the actual _command_ failed. When
 you get this error, this would suggest that an actual program used by the
-pipeline has failed. This is identifiable that you get an `exit status` and a
+pipeline has failed. This is identifiable when you get an `exit status` and a
 `Command error:`, the latter of which is what is reported by the failed program
 itself.
 
@@ -2499,14 +2503,14 @@ Tip: you can replicate the issue by changing to the process work dir and enterin
 
 If you find it is a common error try and fix it yourself by changing your
 options in your nf-core/eager run - it could be a configuration error on your
-part - however in some cases it could be an error in the way we've set up the
+part. However in some cases it could be an error in the way we've set up the
 process in nf-core/eager.
 
 To further investigate, go to step 2.
 
 #### 1b Nextflow reports an 'error executing process' with no command error
 
-Alternatively, you may get an error with nextflow itself. The most common one
+Alternatively, you may get an error with Nextflow itself. The most common one
 would be a 'process fails' and it looks like the following.
 
 ```bash
@@ -2518,14 +2522,14 @@ Execution cancelled -- Finishing pending tasks before exit
 ```
 
 However in this case, there is no `exit status` or `Command error:` message. In
-this case this is a nextflow issue.
+this case this is a Nextflow issue.
 
 The example above is because a user has specified multiple sequencing runs of
-different libraries but with the same library name. In this case nextflow could
+different libraries but with the same library name. In this case Nextflow could
 not identify which is the correct file to merge because they have the same name.
 
-This again can also be a user or nextflow error, but the errors are often more
-abstract and less clear how to solve (unless you are familiar with nextflow).
+This again can also be a user or Nextflow error, but the errors are often more
+abstract and less clear how to solve (unless you are familiar with Nextflow).
 
 Try to investigate a bit further and see if you can understand what the error
 refers to, but if you cannot - please ask on the #eager channel on the [nf-core
@@ -2535,7 +2539,7 @@ issue](https://github.com/nf-core/eager/issues).
 #### 2 Investigating an failed process's `work/` directory
 
 If you haven't found a clear solution to the failed process from the reported
-error's, you can next go into the directory where the process was working in,
+errors, you can next go into the directory where the process was working in,
 and investigate the log and error messages that are produced by each command of
 the process.
 
@@ -2548,14 +2552,18 @@ Work dir:
   /projects1/microbiome_calculus/RIII/03-preprocessing/mtCap_preprocessing/work/7f/52f33fdd50ed2593d3d62e7c74e408
 ```
 
+> A shortened version of the 'hash' directory ID can also be seen in your
+> terminal while the pipeline is running in the square brackets at the beginning
+> of each line.
+
 If you change into this with `cd` and run `ls -la` you should see a collection
-normal files, symbolic links (symlinks) and hidden files (indicated with `.` at
-the beginning of the file name).
+of normal files, symbolic links (symlinks) and hidden files (indicated with `.`
+at the beginning of the file name).
 
 - Symbolic links: are typically input files from previous processes.
 - Normal files: are typically successfully completed output files from some of
   some of the commands in the process
-- Hidden files are nextflow generated files and include the submission commands
+- Hidden files are Nextflow generated files and include the submission commands
   as well as log files
 
 When you have an error run, you can firstly check the contents of the output
@@ -2564,7 +2572,7 @@ interpretation of which will depend on the program thus dependent on the user
 knowledge.
 
 Next, you can investigate `.command.err` and `.command.out`, or `.command.log`.
-These represent the standard out or err (in the case of `.log`, both combined)
+These represent the standard out or error (in the case of `.log`, both combined)
 of all the commands/programs in the process - i.e. what would be printed to
 screen if you were running the command/program yourself. Again, view these with
 e.g. `cat` and see if you can identify the error of the program itself.
@@ -2574,8 +2582,8 @@ to do this by loading your given nf-core/eager environment (e.g. `singularity
 shell /\<path\>/\<to\>/nf-core-eager-X-X-X.img` or `conda activate
 nf-core-eager-X.X.X`), then running `bash .command.sh`.
 
-If this doesn't work this suggests either there is something wrong with the
-nf-core/eager environment configuration, _or_ there still a problem with the
+If this doesn't work, this suggests either there is something wrong with the
+nf-core/eager environment configuration, _or_ there is still a problem with the
 program itself. To confirm the former, try running the command within the
 `.command.sh` file (viewable with `cat`) but with locally installed versions of
 programs you may already have on your system. If the command still doesn't work,
@@ -2596,7 +2604,7 @@ can specify many default parameters and other settings on how to run your
 pipeline.
 
 For example, you can use it to set your preferred mapping parameters, or specify
-where to keep docker, singularity or conda environments, and which cluster
+where to keep Docker, Singularity or Conda environments, and which cluster
 scheduling system (and queues) your pipeline runs should normally use.
 
 This are defined in `.config` files, and these in-turn can contain different
@@ -2652,8 +2660,8 @@ or from other researchers.
 ##### Tutorial Profiles - Profiles
 
 An important thing to understand before you start writing your own profile is
-understanding 'inheritance' of profiles when specifying multiple when using
-`nextflow run`.
+understanding 'inheritance' of profiles when specifying multiple profiles, when
+using `nextflow run`.
 
 When specifying multiple profiles, parameters defined in the profile in the
 first position will overwrite those in the second, and everything defined in the
@@ -2672,13 +2680,13 @@ This would be translated as follows.
 
 If your parameters looked like the following
 
-Parameter       | Resolved Parameters    | my_paper | cluster | institution
-----------------|------------------------|----------|---------|------------
---executor      | singularity            | \<none\>   | \<none\>  | singularity
---max_memory    | 256GB                  | \<none\>   | 256GB   | 756GB
---bwa_aln       | 0.1                    | 0.1      | 0.01    | \<none\>
+Parameter       | Resolved Parameters    | my_paper   | cluster  | institution
+----------------|------------------------|------------|----------|------------
+--executor      | singularity            | \<none\>   | \<none\> | singularity
+--max_memory    | 256GB                  | \<none\>   | 256GB    | 756GB
+--bwa_aln       | 0.1                    | 0.1        | 0.01     | \<none\>
 
-(where '\<none\>' is the parameter is not defined in a given profile.)
+(where '\<none\>' is a parameter not defined in a given profile.)
 
 You can see that `my_paper` inherited the `0.1` parameter over the `0.01`
 defined in the `cluster` profile.
@@ -2708,8 +2716,8 @@ This can be visualised here
   <img src="images/tutorials/profiles/config_profile_inheritence.png" width="75%" height = "75%">
 </p>
 
-Using the example given in the [background](#background), if the `hpc_blue`
-profile has the following pipeline parameters set
+Using the example given in the [background](#tutorial-profiles---background), if
+the `hpc_blue` profile has the following pipeline parameters set
 
 ```txt
 <...>
@@ -2782,7 +2790,7 @@ pipeline-specific
 [configuration](https://github.com/nf-core/configs/blob/master/conf/pipeline/eager/shh.config).
 
 This pipeline-specific profile is automatically loaded if nf-core/eager detects
-we are running eager and specified the profile as `shh`.
+we are running eager, and that we specified the profile as `shh`.
 
 ```txt
 // global 'fallback' parameters
@@ -2824,7 +2832,7 @@ Importantly however, if you specify `-profile shh,pathogen_loose` the
 'global' params.
 
 Equally, a **process**-level defined parameter (within the nf-core/eager code
-itself) will take precedence over the fall back parameters in the `config` file.
+itself) will take precedence over the fallback parameters in the `config` file.
 This is also described in the Nextflow documentation
 [here](https://www.nextflow.io/docs/latest/config.html#config-profiles)
 
@@ -3010,7 +3018,7 @@ Prior setting up the nf-core/eager run, we will need:
 We should also ensure we have the very latest version of the nf-core/eager
 pipeline so we have all latest bugfixes etc. In this case we will be using
 nf-core/eager version 2.2.0. You should always check on the
-[nf-core](https://nf-co.re/eager) website  whether a newer release has been made
+[nf-core](https://nf-co.re/eager) website whether a newer release has been made
 (particularly point releases e.g. 2.2.1).
 
 ```bash
@@ -3045,11 +3053,11 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-For the `-profile` parameter, I have indicated that I wish to use singularity as
+For the `-profile` parameter, I have indicated that I wish to use Singularity as
 my software container environment, and I will use the MPI-SHH institutional
 config as listed on
 [nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config),
-and using the profile for the 'sdag' cluster. These profiles specify settings
+ using the profile for the 'sdag' cluster. These profiles specify settings
 optimised for the specific cluster/institution, such as maximum memory available
 or which scheduler queues to submit to. More explanations about configs and
 profiles can be seen in the [nf-core
@@ -3121,17 +3129,17 @@ multiple index files, nf-core/eager takes a _directory_ that must contain these
 indices instead.
 
 > Note the difference between single and double `-` parameters. The former
-> represent nextflow flags, while the latter are nf-core/eager specific flags.
+> represent Nextflow flags, while the latter are nf-core/eager specific flags.
 
 Finally, we can also specify the output directory and the Nextflow `work/`
-directory (which contains "intermediate" working files and directories).
+directory (which contains 'intermediate' working files and directories).
 
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
 -profile sdag,shh,singularity \
 -name 'projectX_preprocessing20200727' \
---input 'preprocessing20200727.tsv' \
+--input 'preprocessing20200727.tsv' \`
 --fasta '../Reference/genome/hs37d5.fa' \
 --bwa_index '../Reference/genome/hs37d5/' \
 --fasta_index '../Reference/genome/hs37d5.fa.fai' \
@@ -3174,9 +3182,9 @@ nextflow run nf-core/eager \
 Since our input data is paired-end, we will be using `DeDup` for duplicate
 removal, which takes into account both the start and end of a merged read before
 flagging it as a duplicate. To ensure this happens works properly we first need
-to disable base quality trimming of collapsed reads within Adapter Removal. To do
-this, we will provide the option `--preserve5p`. Additionally, Dedup should only
-be provided with merged reads, so we will need to provide the option
+to disable base quality trimming of collapsed reads within Adapter Removal. To
+do this, we will provide the option `--preserve5p`. Additionally, Dedup should
+only be provided with merged reads, so we will need to provide the option
 `--mergedonly` here as well. We can then specify which dedupper we want to use
 with `--dedupper`.
 
@@ -3288,12 +3296,12 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-To activate sex determination (using
+To activate human sex determination (using
 [Sex.DetERRmine.py](https://github.com/TCLamnidis/Sex.DetERRmine)) we will
 provide the option `--run_sexdeterrmine`. Additionally, we will provide
 sexdeterrmine with the BED file of our SNPs of interest using the
 `--sexdeterrmine_bedfile` flag. Here I will use the 1240k SNP set as an example.
-This will cut down on computational time and while also providing us with an
+This will cut down on computational time and also providing us with an
 error bar around the relative coverage on the X and Y chromosomes.
 
 ```bash
@@ -3328,7 +3336,7 @@ Similarly, we will activate nuclear contamination estimation with
 `--run_nuclear_contamination`. This process requires us to also specify the
 contig name of the X chromosome in the reference genome we are using with
 `--contamination_chrom_name`. Here, we are using hs37d5, where the X chromosome
-is simply named "X".
+is simply named 'X'.
 
 ```bash
 nextflow run nf-core/eager \
@@ -3406,7 +3414,7 @@ nextflow run nf-core/eager \
 Finally, we need to specify genotyping parameters. First, we need to activate
 genotyping with `--run_genotyping`. It is also important to specify we wish to
 use the **trimmed** data for genotyping, to avoid the effects of DNA damage. To
-do this, we will specify the `--genotyping_source` is `'trimmed'`. Then we can
+do this, we will specify the `--genotyping_source` as `'trimmed'`. Then we can
 specify the genotyping tool to use with `--genotyping_tool`. We will be using
 `'pileupCaller'` to produce random draw genotypes in eigenstrat format. For this
 process we will need to specify a BED file of the sites of interest (the same as
@@ -3450,19 +3458,20 @@ nextflow run nf-core/eager \
 ```
 
 With this, we are ready to submit! If running on a remote cluster/server, Make
-sure to run this in `screen` session or similar, so that if you get a `ssh`
+sure to run this in a `screen` session or similar, so that if you get a `ssh`
 signal drop or want to log off, Nextflow will not crash.
 
 #### Tutorial Human Pop-Gen - Results
 
-Assuming the run completed without any crashes (if problems do occur, check all
-against [#usage](#pipeline-options) all parameters are as expected, or check the
-[FAQ](#troubleshooting-and-faqs)), we can now check our results in `results/`.
+Assuming the run completed without any crashes (if problems do occur, check
+against [#usage](#pipeline-options) that all parameters are as expected, or
+check the [FAQ](#troubleshooting-and-faqs)), we can now check our results in
+`results/`.
 
 ##### Tutorial Human Pop-Gen - MultiQC Report
 
 In here there are many different directories containing different output files.
-The first directory to check is the `MultiQC/` directory. In here you should
+The first directory to check is the `MultiQC/` directory. You should
 find a `multiqc_report.html` file. You will need to view this in a web browser,
 so I recommend either mounting your server to your file browser, or downloading
 it to your own local machine (PC/Laptop etc.).
@@ -3484,11 +3493,12 @@ General Stats Table:
 - Do the mapped reads show increased frequency of C>Ts on the 5' end of
   molecules?
 - Is the number of SNPs used for nuclear contamination really low for any
-  individuals (e.g. < 100)? then the estimates might not be very accurate.
+  individuals (e.g. < 100)? If so, then the estimates might not be very
+  accurate.
 
 FastQC (pre-AdapterRemoval):
 
-- Do I see any very early drop off of sequence quality scores suggesting
+- Do I see any very early drop off of sequence quality scores suggesting a
   problematic sequencing run?
 - Do I see outlier GC content distributions?
 - Do I see high sequence duplication levels?
@@ -3517,7 +3527,7 @@ DeDup/Picard MarkDuplicates:
 DamageProfiler:
 
 - Do I see evidence of damage on human DNA?
-  - If high numbers of mapped reads but no damage may indicate significant
+  - High numbers of mapped reads but no damage may indicate significant
     modern contamination.
   - Was the read trimming I specified enough to overcome damage effects?
 
@@ -3598,10 +3608,10 @@ microbiome research.
 > nf-core/eager For this please see other documentation on the
 > [nf-co.re](https://nf-co.re/usage/installation) website.
 
-We will describe how to set up mapping ancient dental calculus samples against
-the human reference genome to allow sequencing and library quality-control, but
-additionally perform taxonomic profiling of the off-target reads from this
-mapping using MALT, and perform aDNA authentication with HOPS.
+We will describe how to set up mapping of ancient dental calculus samples
+against the human reference genome to allow sequencing and library
+quality-control, but additionally perform taxonomic profiling of the off-target
+reads from this mapping using MALT, and perform aDNA authentication with HOPS.
 
 > :warning: Please be aware that the settings used in this tutorial may not use
 > settings nor produce files you would actually use in 'real' analysis. The
@@ -3661,7 +3671,7 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-For the `-profile` parameter, I have indicated that I wish to use singularity as
+For the `-profile` parameter, I have indicated that I wish to use Singularity as
 my software container environment, and I will use the MPI-SHH institutional
 config as listed on
 [nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config),
@@ -3708,7 +3718,7 @@ EGR002  EGR002.B0201.SG1        8       2       PE      homo_sapiens    double  
 You can see that we have a single line for each pair of FASTQ files representing
 each `Lane`, but the `Sample_Name` and `Library_ID` columns identify and group
 them together accordingly. Secondly, as we have NextSeq data, we have specified
-we have two `Colour_Chemistry`, which is important for downstream processing
+we have `2` for `Colour_Chemistry`, which is important for downstream processing
 (see below). The other columns are less important for this particular context of
 metagenomic screening. See the nf-core/eager [usage](#pipeline-options)
 documentation for more specifications on how to set up a TSV file (e.g. why
@@ -3737,10 +3747,10 @@ multiple index files, nf-core/eager takes a _directory_ that must contain these
 indices instead.
 
 > Note the difference between single and double `-` parameters. The former
-> represent nextflow flags, while double are nf-core/eager specific flags.
+> represent Nextflow flags, while double are nf-core/eager specific flags.
 
 Finally, we can also specify the output directory and the Nextflow `work/`
-directory (which contains "intermediate" working files and directories).
+directory (which contains 'intermediate' working files and directories).
 
 ```bash
 nextflow run nf-core/eager \
@@ -3874,7 +3884,7 @@ nextflow run nf-core/eager \
 --maltextract_destackingoff
 ```
 
-In the last parameters above we've specified the path to  our list of taxa. This
+In the last parameters above we've specified the path to our list of taxa. This
 contains something like (for oral microbiomes):
 
 ```text
@@ -3884,25 +3894,26 @@ Tannerella
 Porphyromonas
 ```
 
-The path to the HOPS resources [downloaded earlier](#preparation), and that I
-want to turn off 'destacking' (removal of any read that overlaps the positions
-of another - something only recommended to keep on when you have high coverage
-data).
+We have also specified the path to the HOPS resources [downloaded
+earlier](#preparation), and that I want to turn off 'destacking' (removal of any
+read that overlaps the positions of another - something only recommended to keep
+on when you have high coverage data).
 
 With this, we are ready to submit! If running on a remote cluster/server, Make
-sure to run this in `screen` session or similar, so that if you get a `ssh`
+sure to run this in a `screen` session or similar, so that if you get a `ssh`
 signal drop or want to log off, Nextflow will not crash.
 
 #### Tutorial Metagenomics - Results
 
-Assuming the run completed without any crashes (if problems do occur, check all
-against [usage](#pipeline-options) all parameters are as expected, or check the
-[FAQ](#troubleshooting-and-faqs), we can now check our results in `results/`.
+Assuming the run completed without any crashes (if problems do occur, check
+against [usage](#pipeline-options) that all parameters are as expected, or check
+the [FAQ](#troubleshooting-and-faqs)), we can now check our results in
+`results/`.
 
 ##### Tutorial Metagenomics - MultiQC Report
 
 In here there are many different directories containing different output files.
-The first directory to check is the `MultiQC/` directory. In here you should
+The first directory to check is the `MultiQC/` directory. You should
 find a `multiqc_report.html` file. You will need to view this in a web browser,
 so I recommend either mounting your server to your file browser, or downloading
 it to your own local machine (PC/Laptop etc.).
@@ -3920,10 +3931,10 @@ General Stats Table:
   of FASTQ files per library) that was requested for sequencing?
 - Does the percentage of trimmed reads look normal for aDNA, and do lengths
   after trimming look short as expected of aDNA?
-- Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively - however
+- Does ClusterFactor or 'Dups' look high suggesting over-amplified or
+  badly preserved samples (e.g. >2 or >10% respectively - however
   given this is on the human reads this is just a rule of thumb and may not
-  reflect the quality of the metagenomic profile) suggesting over-amplified or
-  badly preserved samples?
+  reflect the quality of the metagenomic profile) ?
 - Does the human DNA show increased frequency of C>Ts on the 5' end of
   molecules?
 
@@ -3949,8 +3960,8 @@ MALT:
   - Somewhere between 10-30% can be pretty normal for aDNA, whereas e.g. <1%
     requires careful manual assessment
 - Do I have a reasonable taxonomic assignment success?
-  - You hope a large number of the mapped reads (from the mappability plot) also
-    have taxonomic assignment.
+  - You hope to have a large number of the mapped reads (from the mappability
+    plot) that also have taxonomic assignment.
 
 Samtools Flagstat (pre/post Filter):
 
@@ -3967,8 +3978,8 @@ DamageProfiler:
 - Do I see evidence of damage on human DNA? Note this is just a
   rule-of-thumb/corroboration of any signals you might find in the metagenomic
   screening and not essential.
-  - If high numbers of human DNA reads but no damage may indicate significant
-    modern contamination.
+  - If you have high numbers of human DNA reads but no damage may indicate
+    significant modern contamination.
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
 > the the 'Documentation' folder of the results directory or here in the [output
@@ -3983,8 +3994,8 @@ the tools can be found under the 'nf-core/eager Software Versions' section of
 the MultiQC report. Note that all tools in the container are listed, so you may
 have to remove some of them that you didn't actually use in the set up.
 
-For example, in this example, we have used: Nextflow, nf-core/eager, FastQC,
-AdapterRemoval, fastP, BWA, Samtools, endorS.py, Picard Markduplicates,
+For example, in the example above, we have used: Nextflow, nf-core/eager,
+FastQC, AdapterRemoval, fastP, BWA, Samtools, endorS.py, Picard Markduplicates,
 Qualimap, PreSeq, DamageProfiler, MALT, MaltExtract and MultiQC.
 
 Citations to all used tools can be seen
@@ -3997,10 +4008,10 @@ based tool
 [MEGAN6](https://software-ab.informatik.uni-tuebingen.de/download/megan6/welcome.html),
 you can find the `.rma6` files that is accepted by MEGAN under
 `metagenomic_classification/malt/`. The log file containing the information
-printed to screen while MALT is running can also be found in this directory. The
+printed to screen while MALT is running can also be found in this directory.
 
-As we ran the HOPS pipeline (primarily with the MaltExtract tool), we can look
-in `MaltExtract/results/` to find all the corresponding output files for the
+As we ran the HOPS pipeline (primarily the MaltExtract tool), we can look in
+`MaltExtract/results/` to find all the corresponding output files for the
 authentication validation of the metagenomic screening (against the taxa you
 specified in your `--maltextract_taxon_list`). First you can check the
 `heatmap_overview_Wevid.pdf` summary PDF from HOPS (again you will need to
@@ -4034,13 +4045,13 @@ nextflow clean -f -k
 
 #### Tutorial Metagenomics - Summary
 
-In this this tutorial we have described an example on how to set up a metagenomic
-screening run of ancient microbiome samples. We have covered how set up
-nf-core/eager to extract off-target in a form that can be used for MALT, and how
-to additional run HOPS to authenticate expected taxa to be found in the
-microbiome. Finally we have also described what to look for in the MultiQC run
-summary report and where to find output files that can be used for downstream
-analysis.
+In this this tutorial we have described an example on how to set up a
+metagenomic screening run of ancient microbiome samples. We have covered how to
+set up nf-core/eager to extract off-target reads in a form that can be used for
+MALT, and how to additionally run HOPS to authenticate expected taxa to be found
+in the human oral microbiome. Finally we have also described what to look for in
+the MultiQC run summary report and where to find output files that can be used
+for downstream analysis.
 
 ### Tutorial - How to set up nf-core/eager for pathogen genomics
 
@@ -4058,8 +4069,8 @@ We will describe how to set up mapping ancient pathogen samples against the
 reference of a targeted organism genome, to check sequencing and library
 quality-control, calculation of depth and breath of coverage, check for damage
 profiles, feature-annotation statistics (e.g. for gene presence and absence),
-SNP calling and producing an SNP alignment for its usage in phylogenetic
-analysis.
+SNP calling, and producing an SNP alignment for its usage in downstream
+phylogenetic analysis.
 
 I will use as an example data from [Andrades Valtueña et al
 2017](https://doi.org/10.1016/j.cub.2017.10.025), who retrieved Late Neolithic/Bronze
@@ -4130,7 +4141,7 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-For the `-profile` parameter, I have indicated that I wish to use singularity as
+For the `-profile` parameter, I have indicated that I wish to use Singularity as
 my software container environment, and I will use the MPI-SHH institutional
 config as listed on
 [nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config),
@@ -4150,7 +4161,7 @@ Illumina NextSeq _and_ Illumina HiSeqs of double-stranded libraries. Illumina
 NextSeqs sequence a given library across four different 'lanes', so for each
 library you will receive four FASTQ files. Sometimes samples will be sequenced
 across multiple HiSeq lanes to maintain complexity to improve imaging by of base
-calls.The TSV input method is more useful for this context, as it allows
+calls. The TSV input method is more useful for this context, as it allows
 'merging' of these lanes after preprocessing prior mapping (whereas direct paths
 will consider each pair of FASTQ files as independent libraries/samples).
 
@@ -4169,7 +4180,7 @@ KunilaII    KunilaII_UDG    4   4   PE    Yersinia pestis   double    full    ft
 6Post   6Post_SE    8   4   SE    Yersinia pestis   double    half    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR211/003/ERR2112573/ERR2112573.fastq.gz    NA    NA
 ```
 
-Note we also have a mixture of non-UDG and half-UDG treated libraries.
+> Note we also have a mixture of non-UDG and half-UDG treated libraries.
 
 You can see that we have a single line for each set of FASTQ files representing
 each `Lane`, but the `Sample_Name` and `Library_ID` columns identify and group
@@ -4203,10 +4214,10 @@ multiple index files, nf-core/eager takes a _directory_ that must contain these
 indices instead.
 
 > Note the difference between single and double `-` parameters. The former
-> represent nextflow flags, while the latter are nf-core/eager specific flags.
+> represent Nextflow flags, while the latter are nf-core/eager specific flags.
 
 Finally, we can also specify the output directory and the Nextflow `work/`
-directory (which contains "intermediate" working files and directories).
+directory (which contains 'intermediate' working files and directories).
 
 ```bash
 nextflow run nf-core/eager \
@@ -4254,12 +4265,12 @@ nextflow run nf-core/eager \
 ```
 
 We then need to specify the mapping parameters for this run. Typically, to
-account for damage of very old aDNA libraries and also sometimes for evolutionary
-divergence of the ancient genome to the modern reference, we should relax the
-mapping thresholds that specify how many mismatches a read can have from the
-reference to be considered 'mapped'. We will also speed up the seeding step of
-the seed-and-extend approach by specifying the length of the seed. We will do
-this with `--bwaalnn` and `--bwaalnl` respectively.
+account for damage of very old aDNA libraries and also sometimes for
+evolutionary divergence of the ancient genome to the modern reference, we should
+relax the mapping thresholds that specify how many mismatches a read can have
+from the reference to be considered 'mapped'. We will also speed up the seeding
+step of the seed-and-extend approach by specifying the length of the seed. We
+will do this with `--bwaalnn` and `--bwaalnl` respectively.
 
 ```bash
 nextflow run nf-core/eager \
@@ -4307,13 +4318,13 @@ nextflow run nf-core/eager \
 ```
 
 While some of our input data is paired-end, we will keep with the default of
-Picard's 'MarkDuplicates' for duplicate removal for duplicate removal, as DeDup
-takes into account both the start and end of a _merged_ read before flagging it
-as a duplicate - something that isn't valid for a single-end read (where the
-true end of the molecule might not have been sequenced). We can then specify
-which dedupper we want to use with `--dedupper`. While we are using the default
-(which does not need to be directly specified), we will put it explicitly in our
-command for clarity.
+Picard's MarkDuplicates'for duplicate removal, as DeDup takes into account
+both the start and end of a _merged_ read before flagging it as a duplicate -
+something that isn't valid for a single-end read (where the true end of the
+molecule might not have been sequenced). We can then specify which dedupper we
+want to use with `--dedupper`. While we are using the default (which does not
+need to be directly specified), we will put it explicitly in our command for
+clarity.
 
 ```bash
 nextflow run nf-core/eager \
@@ -4337,14 +4348,14 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-Alongside making a SNP table for downstream phylogenetic analysis (will get to
-this in a bit), you may be interested in generating some summary statistics of
-annotated parts of your reference genome, e.g. to see whether certain virulence
-factors present or absent. nf-core/eager offers some basic statistics (percent and
-and depth coverage) of these via Bedtools. We will therefore turn on this
-module and specify the GFF file we downloaded alongside our reference fasta.
-Note that this GFF file has a _lot_ of redundant data, so often a custom
-BED file with just genes of interest is recommended. Furthermore
+Alongside making a SNP table for downstream phylogenetic analysis (we will get
+to this in a bit), you may be interested in generating some summary statistics
+of annotated parts of your reference genome, e.g. to see whether certain
+virulence factors are present or absent. nf-core/eager offers some basic
+statistics (percent and and depth coverage) of these via Bedtools. We will
+therefore turn on this module and specify the GFF file we downloaded alongside
+our reference fasta. Note that this GFF file has a _lot_ of redundant data, so
+often a custom BED file with just genes of interest is recommended. Furthermore
 
 ```bash
 nextflow run nf-core/eager \
@@ -4372,17 +4383,17 @@ nextflow run nf-core/eager \
 
 Next, we will set up trimming of the mapped reads to alleviate the effects of
 DNA damage during genotyping. To do this we will activate trimming with
-`--run_trim_bam`. The libraries in this underwent either no or 'half'-UDG
-treatment. The latter This will generally restrict all remaining DNA damage to
-the first 2 base pairs of a fragment. We will therefore use
-`--bamutils_clip_half_udg_left` and `--bamutils_clip_half_udg_right` to trim 2bp
-on either side of each fragment. For the non-UDG treated libraries we can trim a
-little more to remove most damage with the `--bamutils_clip_none_udg_<*>`
+`--run_trim_bam`. The libraries in this example underwent either no or
+'half'-UDG treatment. The latter will generally restrict all remaining DNA
+damage to the first 2 base pairs of a fragment. We will therefore use
+`--bamutils_clip_half_udg_left` and `--bamutils_clip_half_udg_right` to trim 2
+bp on either side of each fragment. For the non-UDG treated libraries we can
+trim a little more to remove most damage with the `--bamutils_clip_none_udg_<*>`
 variants of the flag. Note that there is a tendency in ancient pathogenomics to
 trim damage _prior_ mapping, as it allows mapping with stricter parameters to
-improve removal of reads deriving from  potential evolutionary diverged
-contaminants (this can be done nf-core/eager with teh Bowtie2 aligner), however
-we do it here to as another demonstration of functionality.
+improve removal of reads deriving from potential evolutionary diverged
+contaminants (this can be done nf-core/eager with the Bowtie2 aligner), however
+we do BAM trimming instead here as another demonstration of functionality.
 
 ```bash
 nextflow run nf-core/eager \
@@ -4413,8 +4424,8 @@ nextflow run nf-core/eager \
 <...>
 ```
 
-Here we will use MultiVCFanalyzer for the generation of our SNP table. A
-MultiVCFAnalyzer SNP table allows downstream assessment of the level
+Here we will use MultiVCFAnalyzer for the generation of our SNP table. A
+MultiVCFAnalyzer SNP table allows downstream assessment of the level of
 multi-allelic positions, something not expected when dealing with a single
 ploidy organism and thus may reflect cross-mapping from multiple-strains,
 environmental relatives or other contaminants.
@@ -4520,19 +4531,20 @@ both parameters to the same value (e.g. 0.8) and use that table for downstream
 phylogenetic analysis.
 
 With this, we are ready to submit! If running on a remote cluster/server, Make
-sure to run this in `screen` session or similar, so that if you get a `ssh`
+sure to run this in a `screen` session or similar, so that if you get a `ssh`
 signal drop or want to log off, Nextflow will not crash.
 
 #### Tutorial Pathogen Genomics - Results
 
-Assuming the run completed without any crashes (if problems do occur, check all
-against [#usage](#pipeline-options) all parameters are as expected, or check the
-[FAQ](#troubleshooting-and-faqs), we can now check our results in `results/`.
+Assuming the run completed without any crashes (if problems do occur, check
+against [#usage](#pipeline-options) that all parameters are as expected, or
+check the [FAQ](#troubleshooting-and-faqs)), we can now check our results in
+`results/`.
 
 ##### Tutorial Pathogen Genomics - MultiQC Report
 
 In here there are many different directories containing different output files.
-The first directory to check is the `MultiQC/` directory. In here you should
+The first directory to check is the `MultiQC/` directory. You should
 find a `multiqc_report.html` file. You will need to view this in a web browser,
 so I recommend either mounting your server to your file browser, or downloading
 it to your own local machine (PC/Laptop etc.).
@@ -4615,7 +4627,8 @@ MultiVCFAnalyzer:
 - Do I have a good number of called SNPs that suggest the samples have genomes
   with sufficient nucleotide diversity to inform phylogenetic analysis?
 - Do you have a large number of discarded SNP calls?
-- Are the % Hets very high?
+- Are the % Hets very high indicating possible cross-mapping from off-target
+  organisms that may confounding variant calling?
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
 > the the 'Documentation' folder of the results directory or here in the [output
@@ -4630,8 +4643,8 @@ the tools can be found under the 'nf-core/eager Software Versions' section of
 the MultiQC report. Note that all tools in the container are listed, so you may
 have to remove some of them that you didn't actually use in the set up.
 
-For example, in this example, we have used: Nextflow, nf-core/eager, FastQC,
-AdapterRemoval, fastP, BWA, Samtools, endorS.py, Picard Markduplicates,
+For example, in the example above, we have used: Nextflow, nf-core/eager,
+FastQC, AdapterRemoval, fastP, BWA, Samtools, endorS.py, Picard Markduplicates,
 Bedtools, Qualimap, PreSeq, DamageProfiler, MultiVCFAnalyzer and MultiQC.
 
 Citations to all used tools can be seen
@@ -4644,7 +4657,7 @@ directory generally corresponds to a specific step or tool of the pipeline. Most
 importantly you should look in `deduplication` for your de-duplicated BAM files
 (e.g. for viewing in IGV), bedtools for depth (X) and breadth (%) coverages of
 annotations of your reference (e.g. genes), `multivcfanalyzer` for final SNP
-tables etc.
+tables etc that can be used for downstream phylogenetic applications.
 
 #### Tutorial Pathogen Genomics - Clean up
 

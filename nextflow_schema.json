@@ -1114,21 +1114,21 @@
                     "default": 5,
                     "description": "Minimum depth coverage required for a call to be included (else N will be called).",
                     "fa_icon": "fas fa-sort-amount-up",
-                    "help_text": "Minimum depth coverage for a SNP to be called. Else, a SNP will be called as N. Default: `5`\n\n> Modifies VCF2Genome parameter: `-minc`"
+                    "help_text": "Minimum depth coverage for a SNP to be made. Else, a SNP will be called as N. Default: `5`\n\n> Modifies VCF2Genome parameter: `-minc`"
                 },
                 "vcf2genome_minq": {
                     "type": "integer",
                     "default": 30,
                     "description": "Minimum genotyping quality of a call to be called. Else N will be called.",
                     "fa_icon": "fas fa-medal",
-                    "help_text": "Minimum genotyping quality of a call to be called. Else N will be called. Default: `30`\n\n> Modifies VCF2Genome parameter: `-minq`"
+                    "help_text": "Minimum genotyping quality of a call to be made. Else N will be called. Default: `30`\n\n> Modifies VCF2Genome parameter: `-minq`"
                 },
                 "vcf2genome_minfreq": {
                     "type": "number",
                     "default": 0.8,
                     "description": "Minimum fraction of reads supporting a call to be included. Else N will be called.",
                     "fa_icon": "fas fa-percent",
-                    "help_text": "In the case of two possible alleles, the frequency of the majority allele required to be called. Else, a SNP will be called as N. Default: `0.8`\n\n> Modifies VCF2Genome parameter: `-minfreq`"
+                    "help_text": "In the case of two possible alleles, the frequency of the majority allele required for a call to be made. Else, a SNP will be called as N. Default: `0.8`\n\n> Modifies VCF2Genome parameter: `-minfreq`"
                 }
             },
             "fa_icon": "fas fa-handshake",
@@ -1178,7 +1178,7 @@
                     "default": 0.9,
                     "description": "Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call.",
                     "fa_icon": "fas fa-percent",
-                    "help_text": "The minimum frequency of a nucleotide for a 'heterozygous' SNP to be called. If this parameter is set to the same as `--min_allele_freq_hom`, then only homozygous calls are made. If this value is less than the previous parameter, then a SNP call will be made if it is between this and the previous parameter and displayed as a IUPAC uncertainty call. Default is `0.9`.\n"
+                    "help_text": "The minimum frequency of a nucleotide for a 'heterozygous' SNP to be called. If\nthis parameter is set to the same as `--min_allele_freq_hom`, then only\nhomozygous calls are made. If this value is less than the previous parameter,\nthen a SNP call will be made. If it is between this and the previous parameter,\nit will be displayed as a IUPAC uncertainty call. Default is `0.9`."
                 },
                 "additional_vcf_files": {
                     "type": "string",
@@ -1191,7 +1191,7 @@
                     "default": "NA",
                     "description": "Specify path to the reference genome annotations in '.gff' format. Optional.",
                     "fa_icon": "fas fa-file-signature",
-                    "help_text": "If you wish to report in the SNP table annotation information for the regions SNPs fall in. This must be in GFF format and the path must be in quotes.\n"
+                    "help_text": "If you wish to report in the SNP table annotation information for the regions\nSNPs fall in, provide a file in GFF format (the path must be in quotes).\n"
                 },
                 "reference_gff_exclude": {
                     "type": "string",
@@ -1205,11 +1205,11 @@
                     "default": "NA",
                     "description": "Specify path to the output file from SNP effect analysis in '.txt' format. Optional.",
                     "fa_icon": "fas fa-magic",
-                    "help_text": "If you wish to include results from SNPEff effect analysis, supply the output from SNPEff in txt format. The path must be in quotes.\n"
+                    "help_text": "If you wish to include results from SNPEff effect analysis, supply the output\nfrom SNPEff in txt format (the path must be in quotes)."
                 }
             },
             "fa_icon": "fas fa-table",
-            "help_text": "SNP Table Generation here is performed by MultiVCFAnalyzer. The current version\nof MultiVCFAnalyzer version only accepts GATK UnifiedGenotyper 3.5 VCF files,\nand when the ploidy was set to 2 (this allows MultiVCFAnalyzer to look for\nreport frequencies of polymorphic positions). A description of how the tool\nworks can be seen in the Supplementary Information of [Bos et al.\n(2014)](https://doi.org/10.1038/nature13591) under \"SNP Calling and Phylogenetic\nAnalysis\".\n\nMore can be seen in the [MultiVCFAnalyzer\ndocumentation](https://github.com/alexherbig/MultiVCFAnalyzer).\n\nIf using TSV input, MultiVCFAnalyzer is performed on all samples gathered\ntogether."
+            "help_text": "SNP Table Generation here is performed by MultiVCFAnalyzer. The current version\nof MultiVCFAnalyzer version only accepts GATK UnifiedGenotyper 3.5 VCF files,\nand when the ploidy was set to 2 (this allows MultiVCFAnalyzer to report\nfrequencies of polymorphic positions). A description of how the tool works can\nbe seen in the Supplementary Information of [Bos et al.\n(2014)](https://doi.org/10.1038/nature13591) under \"SNP Calling and Phylogenetic\nAnalysis\".\n\nMore can be seen in the [MultiVCFAnalyzer\ndocumentation](https://github.com/alexherbig/MultiVCFAnalyzer).\n\nIf using TSV input, MultiVCFAnalyzer is performed on all samples gathered\ntogether."
         },
         "mitochondrial_to_nuclear_ratio": {
             "title": "Mitochondrial to Nuclear Ratio",
@@ -1228,7 +1228,7 @@
                     "default": "MT",
                     "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space).",
                     "fa_icon": "fas fa-heading",
-                    "help_text": "Specify the FASTA entry in the reference file specified as `--fasta`, which acts as the mitochondrial 'chromosome' to base the ratio calculation from. The tool only accepts the first section of the header before the first space. The default chromosome name is based on hs37d5/GrCH37 human reference genome. Default: 'MT'\n"
+                    "help_text": "Specify the FASTA entry in the reference file specified as `--fasta`, which acts\nas the mitochondrial 'chromosome' to base the ratio calculation on. The tool\nonly accepts the first section of the header before the first space. The default\nchromosome name is based on hs37d5/GrCH37 human reference genome. Default: 'MT'"
                 }
             },
             "fa_icon": "fas fa-balance-scale-left",
@@ -1295,7 +1295,7 @@
                     "description": "Specify which classifier to use. Options: 'malt', 'kraken'.",
                     "fa_icon": "fas fa-tools",
                     "default": "undefined",
-                    "help_text": "Specify which taxonomic classifier to use. There are two options available:\n\n- `kraken` with [Kraken2](https://ccb.jhu.edu/software/kraken2)\n- `malt` : more can be seen in the [MALT documentation](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)\n  \n:warning: **Important** It is very important to run `nextflow clean -f` on your nextflow run directory once completed. RMA6 files are VERY large and are _copied_ from a `work/` directory into the results folder. You should clean the work directory with the command to ensure non-redundancy and large HDD footprints!\n"
+                    "help_text": "Specify which taxonomic classifier to use. There are two options available:\n\n- `kraken` for [Kraken2](https://ccb.jhu.edu/software/kraken2)\n- `malt` for [MALT](https://software-ab.informatik.uni-tuebingen.de/download/malt/welcome.html)\n\n:warning: **Important** It is very important to run `nextflow clean -f` on your\nnextflow run directory once completed. RMA6 files are VERY large and are\n_copied_ from a `work/` directory into the results folder. You should clean the\nwork directory with the command to ensure non-redundancy and large HDD\nfootprints!"
                 },
                 "database": {
                     "type": "string",
@@ -1322,7 +1322,7 @@
                     "default": "BlastN",
                     "description": "Specify which alignment mode to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'.",
                     "fa_icon": "fas fa-align-left",
-                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA and DNA, protein and protein, or DNA reads against protein references respectively.\nrespectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details. Default: `'BlastN'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-m`",
+                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA\nand DNA, protein and protein, or DNA reads against protein references\nrespectively. Ensure your database matches the mode. Check the\n[MALT\nmanual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)\nfor more details. Default: `'BlastN'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-m`\n",
                     "enum": [
                         "BlastN",
                         "BlastP",
@@ -1377,7 +1377,7 @@
                     "default": "load",
                     "description": "Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'.",
                     "fa_icon": "fas fa-memory",
-                    "help_text": "How to load the database into memory. Options are `'load'`, `'page'` or `'map'`. 'load' directly loads the entire database into memory prior seed look up, this is slow but compatible with all servers/file systems. `'page'` and `'map'` perform a sort of 'chunked' database loading, allow seed look up prior entire database loading. Note that Page and Map modes do not work properly not with many remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `--memoryMode`",
+                    "help_text": "\nHow to load the database into memory. Options are `'load'`, `'page'` or `'map'`.\n'load' directly loads the entire database into memory prior seed look up, this\nis slow but compatible with all servers/file systems. `'page'` and `'map'`\nperform a sort of 'chunked' database loading, allowing seed look up prior entire\ndatabase loading. Note that Page and Map modes do not work properly not with\nmany remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `--memoryMode`",
                     "enum": [
                         "load",
                         "page",
@@ -1444,7 +1444,7 @@
                     "type": "boolean",
                     "description": "Turn off destacking.",
                     "fa_icon": "fas fa-align-center",
-                    "help_text": "Turn off destacking. If left on, a read that overlap with another read will be removed (leaving a depth coverage of 1).\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--destackingOff`"
+                    "help_text": "Turn off destacking. If left on, a read that overlaps with another read will be\nremoved (leaving a depth coverage of 1).\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--destackingOff`"
                 },
                 "maltextract_downsamplingoff": {
                     "type": "boolean",
