@@ -622,7 +622,7 @@
                     "fa_icon": "fas fa-mask",
                     "help_text": "Read removal mode. Remove mapped reads completely (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)\n\n> Modifies extract_map_reads.py parameter: `-m`",
                     "enum": [
-                        "strip",
+                        "remove",
                         "replace"
                     ]
                 }
