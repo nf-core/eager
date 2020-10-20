@@ -1438,7 +1438,7 @@
                     "default": 0.01,
                     "description": "Specify percent of top alignments to use.",
                     "fa_icon": "fas fa-percent",
-                    "help_text": "Specify frequency of top alignments for each read to be considered for each node.\nDefault is 0.01, i.e. 1% of all reads (where 1 would correspond to 100%).\n\n> :warning: this parameter follows the same concept as `--malt_top_percent` but\n> uses a different notation i.e. integer (MALT) version float (MALTExtract)\n\nDefault: `0.01`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `-a`\n"
+                    "help_text": "Specify frequency of top alignments for each read to be considered for each node.\nDefault is 0.01, i.e. 1% of all reads (where 1 would correspond to 100%).\n\n> :warning: this parameter follows the same concept as `--malt_top_percent` but\n> uses a different notation i.e. integer (MALT) versus float (MALTExtract)\n\nDefault: `0.01`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `-a`"
                 },
                 "maltextract_destackingoff": {
                     "type": "boolean",

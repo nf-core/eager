@@ -2103,7 +2103,7 @@ Specify frequency of top alignments for each read to be considered for each node
 Default is 0.01, i.e. 1% of all reads (where 1 would correspond to 100%).
 
 > :warning: this parameter follows the same concept as `--malt_top_percent` but
-> uses a different notation i.e. integer (MALT) version float (MALTExtract)
+> uses a different notation i.e. integer (MALT) versus float (MALTExtract)
 
 Default: `0.01`.
 
