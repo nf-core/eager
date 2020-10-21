@@ -1,4 +1,4 @@
-name: nf-core-eager-2.2.0
+name: nf-core-eager-2.3.0dev
 channels:
   - conda-forge
   - bioconda
