@@ -52,9 +52,9 @@ jobs:
       - name: Get test data for cases where we don't use TSV input
         run: |
           git clone --single-branch --branch eager https://github.com/nf-core/test-datasets.git data
-      - name: RANDOM DELAY to try address some odd behaviour with what appears to be a conflict between parallel htslib jobs leading to CI hangs
+      - name: DELAY to try address some odd behaviour with what appears to be a conflict between parallel htslib jobs leading to CI hangs
         run: | 
-          sleep $(( ( RANDOM % 180 )  + 20 ))
+          if [[ $NXF_VER = '' ]]; then sleep 360; fi
       - name: BASIC Run the basic pipeline with directly supplied single-end FASTQ
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --input 'data/testdata/Mammoth/fastq/*_R1_*.fq.gz' --single_end
