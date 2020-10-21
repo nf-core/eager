@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+# Written by Maxime Borry and released under the MIT license. 
+# See git repository (https://github.com/nf-core/eager) for full license text.
+
 import argparse
 import os
 import pandas as pd
 import numpy as np
-
 
 def _get_args():
     '''This function parses and return arguments passed in'''
