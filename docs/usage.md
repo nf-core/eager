@@ -735,6 +735,10 @@ If you want to use pre-existing `bwa index` indices, please supply the
 nf-core/eager will automagically detect the index files by searching for the
 FASTA filename with the corresponding `bwa` index file suffixes.
 
+> :warning: pre-built indices must currently be built on non-gzipped FASTA files
+> due to limitations of `samtools`. However once indices have been built, you
+> can re-gzip the FASTA file as nf-core will unzip this particular file for you.
+
 For example:
 
 ```bash
@@ -755,6 +759,10 @@ If you want to use pre-existing `bt2 index` indices, please supply the
 **directory** to the FASTA you also specified in `--fasta` (see above).
 nf-core/eager will automagically detect the index files by searching for the
 FASTA filename with the corresponding `bt2` index file suffixes.
+
+> :warning: pre-built indices must currently be built on non-gzipped FASTA files
+> due to limitations of `samtools`. However once indices have been built, you
+> can re-gzip the FASTA file as nf-core will unzip this particular file for you.
 
 For example:
 
@@ -788,6 +796,10 @@ For example:
 If you want to use a pre-existing `picard CreateSequenceDictionary` dictionary
 file, use this to specify the required `.dict` file for the selected reference
 genome.
+
+> :warning: pre-built indices must currently be built on non-gzipped FASTA files
+> due to limitations of `samtools`. However once indices have been built, you
+> can re-gzip the FASTA file as nf-core will unzip this particular file for you.
 
 For example:
 
