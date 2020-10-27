@@ -2394,7 +2394,7 @@ profiles {
     big_data {
       process {
         withName: markduplicates {
-          memory = { check_max( 16.GB * task.attempt, 'memory' ) }
+          memory = 16.GB
         }
       }
     }
@@ -2404,6 +2404,12 @@ profiles {
 Where we have increased the default `4.GB` to `16.GB`. Make sure that you keep
 the `check_max` function, as this prevents your run asking for too much memory
 during retries.
+
+> Note that with this you will _not_ have the automatic retry mechanism. If
+> you want this, re-add the `check_max()` function on the `memory` line, and
+> add to the bottom of the entire file (outside the profiles block), the
+> block starting `def check_max(obj, type) {`, which is at the end of the
+> [nextflow.config file](https://github.com/nf-core/eager/blob/master/nextflow.config)
 
 Once saved, we can then modify your original Nextflow run command:
 
