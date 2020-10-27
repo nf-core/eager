@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#590](https://github.com/nf-core/eager/issues/592) - Removed redundant dockstore.yml from root
 - [#596](https://github.com/nf-core/eager/issues/596) - Add workaround for issue regarding gzipped FASTAs and pre-built indices
 - Updated template to nf-core/tools 1.11
+- [#582](https://github.com/nf-core/eager/issues/582) - Clarify memory limit issue on FAQ 
 
 ## [2.2.0] - Ulm - 2020-10-20
 
