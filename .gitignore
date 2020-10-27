@@ -5,5 +5,8 @@ results/
 .DS_Store
 tests/
 testing/
-testing*
 *.pyc
+main_playground.nf
+.vscode
+*.code-workspace
+nf-params.json
