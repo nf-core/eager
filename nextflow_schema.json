@@ -1,8 +1,8 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema",
+    "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/eager/master/nextflow_schema.json",
     "title": "nf-core/eager pipeline parameters",
-    "description": "A fully reproducible and state of the art ancient DNA analysis pipeline",
+    "description": "A fully reproducible and state-of-the-art ancient DNA analysis pipeline",
     "type": "object",
     "definitions": {
         "input_output_options": {
@@ -101,7 +101,7 @@
                         "link",
                         "copy",
                         "copyNoFollow",
-                        "mov"
+                        "move"
                     ]
                 },
                 "name": {

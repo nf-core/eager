@@ -54,4 +54,4 @@ These tests are run both with the latest available version of `Nextflow` and als
 
 ## Getting help
 
-For further information/help, please consult the [nf-core/eager documentation](https://nf-co.re/eager/docs) and don't hesitate to get in touch on the nf-core Slack [#eager](https://nfcore.slack.com/channels/eager) channel ([join our Slack here](https://nf-co.re/join/slack)).
+For further information/help, please consult the [nf-core/eager documentation](https://nf-co.re/eager/usage) and don't hesitate to get in touch on the nf-core Slack [#eager](https://nfcore.slack.com/channels/eager) channel ([join our Slack here](https://nf-co.re/join/slack)).
