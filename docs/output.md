@@ -4,10 +4,6 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and these markdown files may not be up-to-date._
 
-## Introduction
-
-This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
-
 ## Table of contents
 
 <!-- TOC depthfrom:2 depthto:3 -->
