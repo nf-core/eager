@@ -1,8 +1,8 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema",
+    "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/eager/master/nextflow_schema.json",
     "title": "nf-core/eager pipeline parameters",
-    "description": "A fully reproducible and state of the art ancient DNA analysis pipeline",
+    "description": "A fully reproducible and state-of-the-art ancient DNA analysis pipeline",
     "type": "object",
     "definitions": {
         "input_options": {
@@ -169,9 +169,18 @@
                 "publish_dir_mode": {
                     "type": "string",
                     "default": "copy",
-                    "description": "Mode for publishing results in the output directory. Options: 'symlink', 'rellink', 'link', 'copy', 'copyNoFollow', 'move'.",
-                    "fa_icon": "fas fa-upload",
-                    "help_text": "Nextflow mode for 'publishing' final results files i.e. how to move final files into your `--outdir` from working directories. Options: 'symlink', 'rellink', 'link', 'copy', 'copyNoFollow', 'move'.  Default: 'copy'.\n\n> It is recommended to select `copy` (default) if you plan to regularly delete intermediate files from `work/`."
+                    "hidden": true,
+                    "description": "Method used to save pipeline results to output directory.",
+                    "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
+                    "fa_icon": "fas fa-copy",
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ]
                 },
                 "saveTrimmed": {
                     "type": "boolean",

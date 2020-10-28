@@ -1,6 +1,6 @@
 # ![nf-core/eager](docs/images/nf-core-eager_logo.png)
 
-**A fully reproducible and state-of-the-art genomics pipeline for ancient DNA**.
+**A fully reproducible and state-of-the-art ancient DNA analysis pipeline**.
 
 [![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/eager/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/eager/actions)
@@ -83,12 +83,12 @@ Additional functionality contained by the pipeline currently includes:
 
 1. Install [`nextflow`](https://nf-co.re/usage/installation) (version >= 20.04.0)
 
-2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
+2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`Podman`](https://podman.io/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
 
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
     ```bash
-    nextflow run nf-core/eager -profile test,<docker/singularity/conda/institute>
+    nextflow run nf-core/eager -profile test,<docker/singularity/podman/conda/institute>
     ```
 
     > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
@@ -114,7 +114,7 @@ as described in the documentation.
 
 ## Documentation
 
-The nf-core/eager pipeline comes with documentation about the pipeline which you can read at [https://nf-co.re/eager/usage](https://nf-co.re/eager/usage) or find in the [`docs/` directory](docs).
+The nf-core/eager pipeline comes with documentation about the pipeline: [usage](https://nf-co.re/eager/usage) and [output](https://nf-co.re/eager/output).
 
 1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration

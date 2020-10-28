@@ -1,5 +1,9 @@
 # nf-core/eager: Output
 
+## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/eager/output](https://nf-co.re/eager/output)
+
+> _Documentation of pipeline parameters is generated automatically from the pipeline schema and these markdown files may not be up-to-date._
+
 ## Table of contents
 
 <!-- TOC depthfrom:2 depthto:3 -->
