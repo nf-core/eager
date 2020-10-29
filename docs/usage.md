@@ -60,7 +60,7 @@
 
 <!-- /TOC -->
 
-# Introduction
+## Introduction
 
 ## Running the pipeline
 
