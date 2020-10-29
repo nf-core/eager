@@ -390,7 +390,7 @@
                     "help_text": "Turns off QualiMap and thus does not compute coverage and other mapping metrics.\n"
                 }
             },
-            "fa_icon": "fas fa-forward",
+            "fa_icon": "fas fa-fast-forward",
             "help_text": "Some of the steps in the pipeline can be executed optionally. If you specify\nspecific steps to be skipped, there won't be any output related to these\nmodules."
         },
         "complexity_filtering": {
