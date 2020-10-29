@@ -60,6 +60,8 @@
 
 <!-- /TOC -->
 
+# Introduction
+
 ## Running the pipeline
 
 ### Quick Start
