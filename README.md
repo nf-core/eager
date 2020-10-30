@@ -160,7 +160,6 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Raphael Eisenhofer](https://github.com/EisenRa)
 * [Torsten Günter](https://bitbucket.org/tguenther/)
 * [Kevin Lord](https://github.com/lordkev)
-* [Irina Velsko](https://github.com/ivelsko)
 * [He Yu](https://github.com/paulayu)
 
 If you've contributed and you're missing in here, please let us know and we will add you in of course!
