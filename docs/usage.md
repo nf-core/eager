@@ -3332,8 +3332,10 @@ To activate human sex determination (using
 provide the option `--run_sexdeterrmine`. Additionally, we will provide
 sexdeterrmine with the BED file of our SNPs of interest using the
 `--sexdeterrmine_bedfile` flag. Here I will use the 1240k SNP set as an example.
-This will cut down on computational time and also providing us with an
+This will cut down on computational time and also provide us with an
 error bar around the relative coverage on the X and Y chromosomes.
+If you wish to use the same bedfile to follow along with this tutorial,
+you can download the file from [here](https://github.com/nf-core/test-datasets/blob/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz).
 
 ```bash
 nextflow run nf-core/eager \
