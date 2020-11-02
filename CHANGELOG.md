@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+* Fixed AWS full test profile.
+
 ### `Dependencies`
 
 ## [2.2.0] - Ulm - 2020-10-20
