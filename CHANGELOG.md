@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added
 
+* Added large scale 'stress-test' profile for AWS (using de Barros Damgaard et al. 2018's 137 ancient human genomes)
+
 ### `Fixed`
 
 * Fixed AWS full test profile.
