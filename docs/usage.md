@@ -1,5 +1,9 @@
 # nf-core/eager: Usage
 
+## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/eager/usage](https://nf-co.re/eager/usage)
+
+> _Documentation of pipeline parameters is generated automatically from the pipeline schema and may not be up-to-date here._
+
 ## Table of contents
 
 <!-- TOC depthfrom:2 depthto:3 -->
@@ -175,21 +179,20 @@ software to be installed and available on the `PATH`. This is _not_ recommended.
 > *Important*: If running nf-core/eager on a cluster - ask your system
 > administrator what profile to use.
 
+Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Conda) - see below.
+
 - `docker`
-  - A generic configuration profile to be used with
-    [Docker](https://docker.com/)
-  - Pulls software from Docker Hub:
-    [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+  - A generic configuration profile to be used with [Docker](https://docker.com/)
+  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
 - `singularity`
-  - A generic configuration profile to be used with
-    [Singularity](https://sylabs.io/docs/)
-  - Pulls software from Docker Hub:
-    [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+  - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+- `podman`
+  - A generic configuration profile to be used with [Podman](https://podman.io/)
+  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
 - `conda`
-  - Please only use Conda as a last resort i.e. when it's not possible to run
-    the pipeline with Docker or Singularity.
-  - A generic configuration profile to be used with
-    [Conda](https://conda.io/docs/)
+  - Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity or Podman.
+  - A generic configuration profile to be used with [Conda](https://conda.io/docs/)
   - Pulls most software from [Bioconda](https://bioconda.github.io/)
 - `test`
   - A profile with a complete configuration for automated testing
@@ -231,6 +234,15 @@ We currently offer a nf-core/eager specific profile for
 Further institutions can be added at
 [nf-core/configs](https://github.com/nf-core/configs). Please ask the eager
 developers to add your institution to the list above, if you add one!
+
+If you are likely to be running `nf-core` pipelines regularly it may be a good idea to request
+that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do
+this please can you test that the config file works with your pipeline of choice using the `-c`
+parameter (see definition above). You can then create a pull request to the `nf-core/configs`
+repository with the addition of your config file, associated documentation file (see examples in
+[`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending
+[`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to
+include your custom profile.
 
 ### `-resume`
 
@@ -3332,8 +3344,10 @@ To activate human sex determination (using
 provide the option `--run_sexdeterrmine`. Additionally, we will provide
 sexdeterrmine with the BED file of our SNPs of interest using the
 `--sexdeterrmine_bedfile` flag. Here I will use the 1240k SNP set as an example.
-This will cut down on computational time and also providing us with an
+This will cut down on computational time and also provide us with an
 error bar around the relative coverage on the X and Y chromosomes.
+If you wish to use the same bedfile to follow along with this tutorial,
+you can download the file from [here](https://github.com/nf-core/test-datasets/blob/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz).
 
 ```bash
 nextflow run nf-core/eager \
