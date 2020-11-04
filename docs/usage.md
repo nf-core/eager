@@ -64,6 +64,8 @@
 
 <!-- /TOC -->
 
+## Introduction
+
 ## Running the pipeline
 
 ### Quick Start
@@ -747,6 +749,10 @@ If you want to use pre-existing `bwa index` indices, please supply the
 nf-core/eager will automagically detect the index files by searching for the
 FASTA filename with the corresponding `bwa` index file suffixes.
 
+> :warning: pre-built indices must currently be built on non-gzipped FASTA files
+> due to limitations of `samtools`. However once indices have been built, you
+> can re-gzip the FASTA file as nf-core will unzip this particular file for you.
+
 For example:
 
 ```bash
@@ -767,6 +773,10 @@ If you want to use pre-existing `bt2 index` indices, please supply the
 **directory** to the FASTA you also specified in `--fasta` (see above).
 nf-core/eager will automagically detect the index files by searching for the
 FASTA filename with the corresponding `bt2` index file suffixes.
+
+> :warning: pre-built indices must currently be built on non-gzipped FASTA files
+> due to limitations of `samtools`. However once indices have been built, you
+> can re-gzip the FASTA file as nf-core will unzip this particular file for you.
 
 For example:
 
@@ -800,6 +810,10 @@ For example:
 If you want to use a pre-existing `picard CreateSequenceDictionary` dictionary
 file, use this to specify the required `.dict` file for the selected reference
 genome.
+
+> :warning: pre-built indices must currently be built on non-gzipped FASTA files
+> due to limitations of `samtools`. However once indices have been built, you
+> can re-gzip the FASTA file as nf-core will unzip this particular file for you.
 
 For example:
 
@@ -2394,7 +2408,7 @@ profiles {
     big_data {
       process {
         withName: markduplicates {
-          memory = { check_max( 16.GB * task.attempt, 'memory' ) }
+          memory = 16.GB
         }
       }
     }
@@ -2404,6 +2418,12 @@ profiles {
 Where we have increased the default `4.GB` to `16.GB`. Make sure that you keep
 the `check_max` function, as this prevents your run asking for too much memory
 during retries.
+
+> Note that with this you will _not_ have the automatic retry mechanism. If
+> you want this, re-add the `check_max()` function on the `memory` line, and
+> add to the bottom of the entire file (outside the profiles block), the
+> block starting `def check_max(obj, type) {`, which is at the end of the
+> [nextflow.config file](https://github.com/nf-core/eager/blob/master/nextflow.config)
 
 Once saved, we can then modify your original Nextflow run command:
 

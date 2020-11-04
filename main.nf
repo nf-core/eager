@@ -348,6 +348,7 @@ if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
         .into {bt2_index; bt2_index_bwamem}
 
     bwa_index = Channel.empty()
+    bwa_index_bwamem = Channel.empty()
 }
 
 // Validate BAM input isn't set to paired_end
@@ -855,6 +856,7 @@ if( params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaa
     mkdir BWAIndex && mv ${fasta}* BWAIndex
     """
     }
+    
     bt2_index = Channel.empty()
 }
 
