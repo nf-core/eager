@@ -8,7 +8,9 @@
 
 <!-- TOC depthfrom:2 depthto:3 -->
 
+- [:warning: Please read this documentation on the nf-core website: https://nf-co.re/eager/usage](#warning-please-read-this-documentation-on-the-nf-core-website-httpsnf-coreeagerusage)
 - [Table of contents](#table-of-contents)
+- [Introduction](#introduction)
 - [Running the pipeline](#running-the-pipeline)
   - [Quick Start](#quick-start)
   - [Updating the pipeline](#updating-the-pipeline)
@@ -1351,21 +1353,16 @@ Picard. Alternatively an ancient DNA specific read deduplication tool  `dedup`
 
 This utilises both ends of paired-end data to remove duplicates (i.e. true exact
 duplicates, as markduplicates will over-zealously deduplicate anything with the
-same starting position even if the ends are different). DeDup should only be
-used solely on paired-end data otherwise suboptimal deduplication can occur if
-applied to either single-end or a mix of single-end/paired-end data.
-
-Note that if you run without the `--mergedonly` flag for AdapterRemoval, DeDup
-will likely fail. If you absolutely want to use both PE and SE data, you can
-supply the `--dedup_all_merged` flag to consider singletons to also be merged
-paired-end reads. This may result in over-zealous deduplication.
+same starting position even if the ends are different). DeDup should generally
+only be used solely on paired-end data otherwise suboptimal deduplication can
+occur if applied to either single-end or a mix of single-end/paired-end data.
 
 #### `--dedup_all_merged`
 
 Sets DeDup to treat all reads as merged reads. This is useful if reads are for
-example not prefixed with `M_` in all cases. Therefore, this can be used as a
-workaround when also using a mixture of paired-end and single-end data, however
-this is not recommended (see above).
+example not prefixed with `M_`, `R_`, or `L_` in all cases. Therefore, this can
+be used as a workaround when also using a mixture of paired-end and single-end
+data, however this is not recommended (see above).
 
 > Modifies dedup parameter: `-m`
 
