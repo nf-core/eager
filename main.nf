@@ -1185,7 +1185,7 @@ process adapter_removal {
     fi
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
    
     mv *.settings output/
     """
@@ -1209,7 +1209,7 @@ process adapter_removal {
     fi
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
 
     mv *.settings output/
     """
