@@ -509,7 +509,7 @@ will have the following effects:
 - After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8
   _with the same `SeqType`_ (and all other _metadata_ columns) will be
   concatenated together for each **Library**.
-- After mapping, and prior BAM filtering, BAM files with the same with different
+- After mapping, and prior BAM filtering, BAM files with different
   `SeqType` (but with all other metadata columns the same) will be merged
   together for each **Library**.
 - After duplicate removal, BAM files with `Library_ID`s with the same
