@@ -142,7 +142,6 @@ jobs:
       - name: PMDTOOLS Test PMDtools works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_pmdtools
-      - name: GATK 3.5 Download resource files
       - name: GENOTYPING_UG AND MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
         run: |
          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
