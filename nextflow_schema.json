@@ -877,9 +877,9 @@
                 },
                 "genotyping_tool": {
                     "type": "string",
-                    "description": "Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.",
+                    "description": "Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.",
                     "fa_icon": "fas fa-tools",
-                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file.",
+                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.\n\n> > Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute.",
                     "enum": [
                         "ug",
                         "hc",
@@ -894,12 +894,6 @@
                     "description": "Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'.",
                     "fa_icon": "fas fa-faucet",
                     "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: `'raw'` for mapped only, filtered, or DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs); `'pmd'` (for pmdtools output). Default is: `'raw'`.\n"
-                },
-                "gatk_ug_jar": {
-                    "type": "string",
-                    "description": "When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.",
-                    "fa_icon": "fas fa-archive",
-                    "help_text": "Specify a path to a local copy of a GATK 3.5 `.jar` file, preferably version\n'3.5-0-g36282e4'. The download location of this may be available from the GATK\nforums or the [Google Cloud\nStorage](https://console.cloud.google.com/storage/browser/gatk-software/package-archive/gatk?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&prefix=&forceOnObjectsSortingFiltering=false)\nof the Broad Institute."
                 },
                 "gatk_call_conf": {
                     "type": "integer",

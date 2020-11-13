@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.3.0dev] - Wangen - Unreleased
+## [2.2.2dev] - Unreleased
 
 ### `Added`
 
@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Fixed AWS full test profile.
 - [#587](https://github.com/nf-core/eager/issues/587) - Re-implemented AdapterRemovalFixPrefix for DeDup compatibility of including singletons
+- [#602](https://github.com/nf-core/eager/issues/602) - Added the newly avaliable GATK 3.5 conda package.
+
+### `Deprecated`
+
+- Flag `--gatk_ug_jar` has now been removed as GATK 3.5 is now avaliable within the nf-core/eager software environment.
 
 ## [2.2.1] - 2020-10-20
 
