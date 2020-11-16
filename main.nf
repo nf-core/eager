@@ -327,7 +327,7 @@ if (params.bt2n != 0 && params.bt2n != 1) {
 }
 
 // Index files provided? Then check whether they are correct and complete
-if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwamem')){
+if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwamem' | params.mapper == 'circularmapper')){
     Channel
         .fromPath(params.bwa_index, checkIfExists: true)
         .ifEmpty { exit 1, "[nf-core/eager] error: bwa indices not found in: ${index_base}." }
