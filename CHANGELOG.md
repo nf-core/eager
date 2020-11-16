@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Fixed AWS full test profile.
 - [#587](https://github.com/nf-core/eager/issues/587) - Re-implemented AdapterRemovalFixPrefix for DeDup compatibility of including singletons
+- [#610](https://github.com/nf-core/eager/issues/610) - Create bwa_index channel when specifying circularmapper as mapper
 
 ## [2.2.1] - 2020-10-20
 
