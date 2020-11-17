@@ -1556,12 +1556,8 @@ UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.
 Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.
 
 > Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA
-> (HaplotypeCaller does _de novo_ assembly around each variant site), it is
-> officially deprecated by the Broad Institute and is only accessible by an
-> archived version not properly available on `conda`. Therefore if specifying
-> 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`.
-> Note that this means the pipeline is not fully reproducible in this
-> configuration, unless you personally supply the `.jar` file.
+> (HaplotypeCaller does _de novo_ assembly around each variant site), be aware
+> GATK 3.5 it is officially deprecated by the Broad Institute.
 
 #### `--genotyping_source`
 
@@ -1569,17 +1565,6 @@ Indicates which BAM file to use for genotyping, depending on what BAM processing
 modules you have turned on. Options are: `'raw'` for mapped only, filtered, or
 DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs);
 `'pmd'` (for pmdtools output). Default is: `'raw'`.
-
-#### `--gatk_ug_jar`
-
-Specify a path to a local copy of a GATK 3.5 `.jar` file, preferably version
-'3.5-0-g36282e4'. The download location of this may be available from the GATK
-forums or the [Google Cloud
-Storage](https://console.cloud.google.com/storage/browser/gatk-software/package-archive/gatk?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&prefix=&forceOnObjectsSortingFiltering=false)
-of the Broad Institute.
-
-> You must manually report your version of GATK 3.5 in publications/MultiQC as
-> it is not included in our container.
 
 #### `--gatk_call_conf`
 
@@ -4139,10 +4124,7 @@ Prior setting up the nf-core/eager run, we will need:
 3. A GFF file of gene sequence annotations (normally supplied with reference
    genomes downloaded from NCBI Genomes, in this context from
    [here](https://www.ncbi.nlm.nih.gov/genome/?term=Yersinia+pestis))
-4. The JAR file for GATK v3.5 downloadable from
-   [here](https://console.cloud.google.com/storage/browser/gatk-software/package-archive/gatk?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&prefix=&forceOnObjectsSortingFiltering=false)
-   (Make sure to extract the Zip file first!)
-5. [Optional] Previously made VCF GATK 3.5 files (see below for settings), of
+4. [Optional] Previously made VCF GATK 3.5 files (see below for settings), of
    previously published _Y. pestis_ genomes.
 
 We should also ensure we have the very latest version of the nf-core/eager
@@ -4474,7 +4456,7 @@ environmental relatives or other contaminants.
 
 For this we need to run genotyping, but specifically with GATK UnifiedGenotyper
 3.5 (as MultiVCFAnalyzer requires this particular format of VCF files). We will
-therefore turn on Genotyping, supply the path to the GATK 3.5 JAR file, and
+therefore turn on Genotyping, and
 check ploidy is set 2 so 'heterozygous' positions can be reported. We will also
 need to specify that we want to use the trimmed bams from the previous step.
 
@@ -4507,7 +4489,6 @@ nextflow run nf-core/eager \
 --run_genotyping \
 --genotyping_tool 'ug' \
 --genotyping_source 'trimmed' \
---gatk_ug_jar '../bin/GenomeAnalysisTK.jar' \
 --gatk_ploidy 2 \
 --gatk_ug_mode 'EMIT_ALL_SITES' \
 --gatk_ug_genotype_model 'SNP' \
@@ -4551,7 +4532,6 @@ nextflow run nf-core/eager \
 --run_genotyping \
 --genotyping_tool 'ug' \
 --genotyping_source 'trimmed' \
---gatk_ug_jar '../bin/GenomeAnalysisTK.jar' \
 --gatk_ploidy 2 \
 --gatk_ug_mode 'EMIT_ALL_SITES' \
 --gatk_ug_genotype_model 'SNP' \

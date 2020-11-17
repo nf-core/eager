@@ -136,9 +136,8 @@ def helpMessage() {
 
     Genotyping
       --run_genotyping [bool]                Turn on genotyping of BAM files.
-      --genotyping_tool [str]                Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.
+      --genotyping_tool [str]                Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.
       --genotyping_source [str]              Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'. Default: '${params.genotyping_source}'
-      --gatk_ug_jar [file]                   When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.
       --gatk_call_conf [num]                 Specify GATK phred-scaled confidence threshold. Default: ${params.gatk_call_conf}
       --gatk_ploidy [num]                    Specify GATK organism ploidy. Default: ${params.gatk_ploidy}
       --gatk_downsample [num]                Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
@@ -416,14 +415,6 @@ if (params.run_genotyping){
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' && params.genotyping_tool != 'angsd' ) {
   exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
   }
-
-  if (params.genotyping_tool == 'ug' && params.gatk_ug_jar == '') {
-  exit 1, "[nf-core/eager] error: please specify path to a GATK 3.5 .jar file with --gatk_ug_jar."
-  }
-
-  if (params.genotyping_tool == 'ug' && !params.gatk_ug_jar.endsWith('.jar') ) {
-    exit 1, "[nf-core/eager] error: please specify path with --gatk_ug_jar to a valid GATK 3.5 binary that ends with .jar!. Found parameter: --gatk_ug_jar '${params.gatk_ug_jar}'."
-  }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
   exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Found parameter: --gatk_ug_out_mode '${params.gatk_out_mode}'."
@@ -468,17 +459,6 @@ if (params.run_genotyping){
   if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_transitions_mode == 'AllSites' || params.pileupcaller_transitions_mode == 'TransitionsMissing' || params.pileupcaller_transitions_mode == 'SkipTransitions') ) {
     exit 1, "[nf-core/eager] error: please check your pileupCaller transitions mode parameter. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'. Found parameter: --pileupcaller_transitions_mode '${params.pileupcaller_transitions_mode}'"
   }
-}
-
-// check manually supplied UG JAR found
-if ( params.gatk_ug_jar != '' ) {
-  Channel
-    .fromPath( params.gatk_ug_jar, checkIfExists: true )
-    .set{ ch_unifiedgenotyper_jar }
-} else {
-  Channel
-    .empty()
-    .set{ ch_unifiedgenotyper_jar }
 }
 
  // pileupCaller channel generation and input checks for 'random sampling' genotyping
@@ -2516,7 +2496,6 @@ process genotyping_ug {
   input:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_ug
   file fasta from ch_fasta_for_genotyping_ug.collect()
-  file jar from ch_unifiedgenotyper_jar.collect()
   file fai from ch_fai_for_ug.collect()
   file dict from ch_dict_for_ug.collect()
 
@@ -2530,9 +2509,9 @@ process genotyping_ug {
   if (params.gatk_dbsnp == '')
     """
     samtools index -b ${bam}
-    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
-    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
-    java -Xmx${task.memory.toGiga()}g -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    gatk3 -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
+    gatk3 -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
+    gatk3 -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
     $keep_realign
     
@@ -2541,9 +2520,9 @@ process genotyping_ug {
   else if (params.gatk_dbsnp != '')
     """
     samtools index ${bam}
-    java -jar ${jar} -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
-    java -jar ${jar} -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
-    java -jar ${jar} -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    gatk3 -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
+    gatk3 -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
+    gatk3 -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
     $keep_realign
     
