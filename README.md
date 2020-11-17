@@ -161,6 +161,7 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Torsten Günter](https://bitbucket.org/tguenther/)
 * [Kevin Lord](https://github.com/lordkev)
 * [He Yu](https://github.com/paulayu)
+* [Selina Carlhoff](https://github.com/scarlhoff)
 
 If you've contributed and you're missing in here, please let us know and we will add you in of course!
 
