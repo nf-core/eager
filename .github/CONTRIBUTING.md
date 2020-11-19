@@ -117,9 +117,9 @@ The concept is as follows:
 * The bypass statement works as follows:
   * If the current stage is turned on: will mix the previous stage and current stage output and filter for file suffixes unique to the current stage output
   * If the current stage is turned off or skipped: will mix the previous stage and current stage output. However as there there is no files in the output channel from the current stage, no filtering is required and the files in the 'ch_XXX_for_skipXXX' stage will be used.
-  
+
  This ensures the same channel inputs to the next stage is 'homogeneous' - i.e. all comes from the same source (the bypass statement)
-  
+
  An example schematic can be given as follows
 
 ```nextflow
@@ -148,7 +148,7 @@ process fastp {
 
     script:
     """
-    echo "I have been fastp'd" > ${fq}  
+    echo "I have been fastp'd" > ${fq}
     mv ${fq} ${fq}.pG.fq
     """
 }

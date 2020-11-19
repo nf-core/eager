@@ -59,7 +59,7 @@ extra_fn_clean_exts:
     - '_libmerged'
     - '_bt2'
 
- 
+
 top_modules:
     - 'fastqc':
        name: 'FastQC (pre-AdapterRemoval)'
@@ -153,7 +153,7 @@ table_columns_visible:
         3 Prime2: False
         mean_readlength: True
         median: True
-    mtnucratio: 
+    mtnucratio:
         mt_nuc_ratio: True
     QualiMap:
         mapped_reads: True
@@ -190,7 +190,7 @@ table_columns_placement:
         after_filtering_gc_content: 200
     Adapter Removal:
         percent_aligned: 300
-    FastQC (post-AdapterRemoval): 
+    FastQC (post-AdapterRemoval):
         total_sequences: 400
         avg_sequence_length: 410
         percent_gc: 420

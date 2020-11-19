@@ -141,7 +141,9 @@ You will receive output for each supplied FASTQ file.
 
 When dealing with ancient DNA data the MultiQC plots for FastQC will often show lots of 'warning' or 'failed' samples. You generally can discard this sort of information as we are dealing with very degraded and metagenomic samples which have artefacts that violate the FastQC 'quality definitions', while still being valid data for aDNA researchers. Instead you will *normally* be looking for 'global' patterns across all samples of a sequencing run to check for library construction or sequencing failures. Decision on whether a individual sample has 'failed' or not should be made by the user after checking all the plots themselves (e.g. if the sample is consistently an outlier to all others in the run).
 
-For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences.
+
+For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
 > **NB:** The FastQC (pre-AdapterRemoval) plots displayed in the MultiQC report shows *untrimmed* reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the FastQC (post-AdapterRemoval). You should expect after AdapterRemoval, that most of the artefacts are removed.
 
@@ -170,7 +172,7 @@ Things to watch out for:
 - all positions having Phred scores less than 27
 - a sharp drop-off of quality early in the read
 - for paired-end data, if either R1 or R2 is significantly lower quality across the whole read compared to the complementary read.
-  
+
 #### Per Sequence Quality Scores
 
 This is a further summary of the previous plot. This is a histogram of the _overall_ read quality (compared to per-base, above). The x axis is the mean read-quality score (summarising all the bases of the read in a single value), and the y-axis is the number of reads with this Phred score. You should see a peak with the majority of your reads between 27-35.
@@ -183,7 +185,7 @@ Things to watch out for:
 
 - bi-modal peaks which suggests artefacts in some of the sequencing cycles
 - all peaks being in orange or red sections which suggests an overall bad sequencing run (possibly due to a faulty flow-cell).
-  
+
 #### Per Base Sequencing Content
 
 This is a heatmap which shows the average percentage of C, G, T, and A nucleotides across ~4bp bins across all reads.
@@ -325,7 +327,7 @@ Other Categories:
 <p align="center">
   <img src="images/output/adapter_removal/adapter_removal_discarded_reads.png" width="75%" height = "75%">
 </p>
-  
+
 For ancient DNA, assuming a good quality run, you expect to see a the vast majority of your reads overlapping because we have such fragmented molecules. Large numbers of singletons suggest your molecules are too long and may not represent true ancient DNA.
 
 If you see high numbers of discarded or truncated reads, you should check your FastQC results for low sequencing quality of that particular run.
@@ -459,7 +461,7 @@ This stacked bar plot shows as a whole the total number of reads in the BAM file
 - **Reverse Removed** - the number of reads that found to be a duplicate of another and removed that were un-collapsed reverse reads (from the earlier read merging step).
 - **Forward Removed** - the number of reads that found to be a duplicate of another and removed that were an un-collapsed forward reads (from the earlier read merging step).
 - **Merged Removed** - the number of reads that were found to be a duplicate and removed that were a collapsed read (from the earlier read merging step).
-  
+
 Exceptions to the above:
 
 - If you do not have paired end data, you will not have sections for 'Merged removed' or 'Reverse removed'.
@@ -536,7 +538,7 @@ Therefore, three main characteristics of ancient DNA are:
 - Increased C and Ts at ends of fragments
 
 You will receive output for each deduplicated *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
-  
+
 #### Misincorporation Plots
 
 The MultiQC DamageProfiler module misincorporation plots shows the percent frequency (Y axis) of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The X axis represents base pairs from the end of the molecule from the given prime end, going into the middle of the molecule i.e. 1st base of molecule, 2nd base of molecule etc until the 14th base pair. The mismatches are when compared to the base of the reference genome at that position.
@@ -592,7 +594,7 @@ Things to watch out for:
 
 - You will typically see a direct decay from the lowest coverage to higher. A large range of coverages along the X axis is potentially suspicious.
 - If you have stacking of reads i.e. a small region with an abnormally large amount of reads despite the rest of the reference being quite shallowly covered, this will artificially increase your coverage. This would be represented by a small peak that is a much further along the X axis away from the main distribution of reads.
-  
+
 #### Cumulative Genome Coverage
 
 This plot shows how much of the genome in percentage (X axis) is covered by a given fold depth coverage (Y axis).

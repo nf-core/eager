@@ -3,6 +3,7 @@ from __future__ import print_function
 from collections import OrderedDict
 import re
 
+# TODO nf-core: Add additional regexes for new tools in process get_software_versions
 regexes = {
     "nf-core/eager": ["v_pipeline.txt", r"(\S+)"],
     "Nextflow": ["v_nextflow.txt", r"(\S+)"],
@@ -12,7 +13,7 @@ regexes = {
     'Picard MarkDuplicates': ['v_markduplicates.txt', r"(\S+)"],
     'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
     'Preseq': ['v_preseq.txt', r"Version: (\S+)"],
-    'BWA': ['v_bwa.txt', r"Version: (\S+)"], 
+    'BWA': ['v_bwa.txt', r"Version: (\S+)"],
     'Bowtie2': ['v_bowtie2.txt', r"bowtie2-([0-9]+\.[0-9]+\.[0-9]+) -fdebug"],
     'Qualimap': ['v_qualimap.txt', r"QualiMap v.(\S+)"],
     'GATK HaplotypeCaller': ['v_gatk.txt', r" v(\S+)"],

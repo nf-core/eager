@@ -376,7 +376,7 @@ configurations such as lane and library merging.
 
 When using the direct method of `--input` you can specify one or multiple
 samples in one or more directories files. File names **must be unique**, even if
-in different directories.  
+in different directories.
 
 By default, the pipeline _assumes_ you have paired-end data. If you want to run
 single-end data you must specify [`--single_end`]('#single_end')
@@ -729,7 +729,7 @@ files for your own use, even if they are not part of the iGenomes resource. See
 the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html)
 for instructions on where to save such a file.
 
-The syntax for this reference configuration is as follows:
+Whilst these default requirements will hopefully work for most people with most data, you may find that you want to customise the compute resources that the pipeline requests. You can do this by creating a custom config file. For example, to give the workflow process `star` 32GB of memory, you could use the following config:
 
 ```nextflow
 params {
@@ -1959,7 +1959,7 @@ For Kraken2, it can be either the path to the _directory_ or the path to the
 #### `--metagenomic_min_support_reads`
 
 Specify the minimum number of reads a given taxon is required to have to be
-retained as a positive 'hit'.  
+retained as a positive 'hit'.
 For malt, this only applies when `--malt_min_support_mode` is set to 'reads'.
 Default: `1`.
 
@@ -2292,7 +2292,7 @@ For example
 nextflow run nf-core/eager --input /path/to/sample_*/*.fq.gz
 ```
 
-Would be evaluated by your shell as  
+Would be evaluated by your shell as
 
 ```bash
 nextflow run nf-core/eager --input /path/to/sample_1/sample_1.fq.gz /path/to/sample_1/sample_1.fq.gz /path/to/sample_1/sample_1.fq.gz
@@ -2823,7 +2823,7 @@ params {
   // Specific nf-core/configs params
   config_profile_contact = 'James Fellows Yates (@jfy133)'
   config_profile_description = 'nf-core/eager SHH profile provided by nf-core/configs'
-  
+
   // default BWA
    bwaalnn = 0.04
    bwaalnl = 32

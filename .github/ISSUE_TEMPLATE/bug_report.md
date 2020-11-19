@@ -1,10 +1,15 @@
-# nf-core/eager bug report
+---
+name: Bug report
+about: Report something that is broken or incorrect
+labels: bug
+---
 
 <!--
+# nf-core/eager bug report
+
 Hi there!
 
 Thanks for telling us about a problem with the pipeline.
-
 Please delete this text and anything that's not relevant from the template below:
 -->
 
@@ -20,26 +25,25 @@ Have you checked in the following places for your error?:
 Please also check the the corresponding version's documentation on github, if not
 testing the latest release.
 
-## Describe the bug
+## Description of the bug
 
-A clear and concise description of what the bug is.
+<!-- A clear and concise description of what the bug is. -->
 
 ## Steps to reproduce
 
 Steps to reproduce the behaviour:
 
-1. Command line: `nextflow run ...`
-2. See error: _Please provide your error message_
+1. Command line: <!-- [e.g. `nextflow run ...`] -->
+2. See error: <!-- [Please provide your error message] -->
 
 ## Expected behaviour
 
-A clear and concise description of what you expected to happen.
+<!-- A clear and concise description of what you expected to happen. -->
 
 ## Log files
 
 1. The command used to run the pipeline
-2. The `.nextflow.log` file (which is a hidden file in whichever place you _ran_
-   the pipeline from - not necessarily in the output directory!)
+2. The `.nextflow.log` file (which is a hidden file in whichever place you _ran_ the pipeline
 
 ## System
 
@@ -55,10 +59,9 @@ A clear and concise description of what you expected to happen.
 ## Container engine
 
 - Engine: <!-- [e.g. Conda, Docker, Singularity or Podman] -->
-- version: <!-- [e.g. 2.2.0] -->
-- Image tag: <!-- [e.g. nfcore/eager:2.2.0] -->
-
+- version: <!-- [e.g. 1.0.0] -->
+- Image tag: <!-- [e.g. nfcore/eager:1.0.0] -->
 
 ## Additional context
 
-Add any other context about the problem here.
+<!-- Add any other context about the problem here. -->

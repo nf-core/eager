@@ -1,5 +1,11 @@
-# nf-core/eager feature request
+---
+name: Feature request
+about: Suggest an idea for the nf-core website
+labels: enhancement
+---
+
 <!--
+# nf-core/eager feature request
 
 Hi there!
 
