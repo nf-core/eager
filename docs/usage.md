@@ -269,11 +269,7 @@ error code of `143` (exceeded requested resources) it will automatically
 resubmit with higher requests (2 x original, then 3 x original). If it still
 fails after three times then the pipeline is stopped.
 
-Whilst these default requirements will hopefully work for most people with most
-data, you may find that you want to customise the compute resources that the
-pipeline requests. You can do this by creating a custom config file. For
-example, to give the workflow process `star` 32GB of memory, you could use the
-following config:
+Whilst these default requirements will hopefully work for most people with most data, you may find that you want to customise the compute resources that the pipeline requests. You can do this by creating a custom config file. For example, to give the workflow process `bwa` 32GB of memory, you could use the following config:
 
 ```nextflow
 process {
@@ -729,7 +725,7 @@ files for your own use, even if they are not part of the iGenomes resource. See
 the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html)
 for instructions on where to save such a file.
 
-Whilst these default requirements will hopefully work for most people with most data, you may find that you want to customise the compute resources that the pipeline requests. You can do this by creating a custom config file. For example, to give the workflow process `star` 32GB of memory, you could use the following config:
+The syntax for this reference configuration is as follows:
 
 ```nextflow
 params {
