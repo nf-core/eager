@@ -1,13 +1,15 @@
-name: nf-core-eager
+# You can use this file to create a conda environment for this pipeline:
+#   conda env create -f environment.yml
+name: nf-core-eager-2.2.2dev
 channels:
-  - defaults
   - conda-forge
   - bioconda
+  - defaults
 dependencies:
-  - conda-forge::openjdk # Needed for FastQC docker - see bioconda/bioconda-recipes#5026
-  - fastqc=0.11.5
-  - multiqc=1.5
-  - adapterremoval=2.2.2
-  - gatk4=4.0.2.1
-  - samtools=1.7
-  - qualimap=2.2.2
+  - conda-forge::python=3.7.3
+  - conda-forge::markdown=3.1.1
+  - conda-forge::pymdown-extensions=6.0
+  - conda-forge::pygments=2.5.2
+  # TODO nf-core: Add required software dependencies here
+  - bioconda::fastqc=0.11.8
+  - bioconda::multiqc=1.7
