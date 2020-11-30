@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#610](https://github.com/nf-core/eager/issues/610) - Create bwa_index channel when specifying circularmapper as mapper
 - Updated template to nf-core/tools 1.12
 
-
 ### `Deprecated`
 
 - Flag `--gatk_ug_jar` has now been removed as GATK 3.5 is now avaliable within the nf-core/eager software environment.
