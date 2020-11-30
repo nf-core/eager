@@ -11,6 +11,7 @@
 ============================================================================================================
 */
 
+
 def helpMessage() {
     log.info nfcoreHeader()
     log.info"""
@@ -24,8 +25,8 @@ def helpMessage() {
     nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
 
     Mandatory arguments:
-        -profile [str]          Institution or personal hardware config to use (e.g. standard, docker, singularity, conda, aws). Ask your system admin if unsure, or check documentation.
-
+      -profile [str]                  Configuration profile to use. Can use multiple (comma separated). Ask system administrator if unsure.
+                                      Available: conda, docker, singularity, test, awsbatch, <institute> and more
     Input
       --input [file]            Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). Indicate multiple files with wildcards (*). For paired end data, the path must use '{1,2}' notation to specify read pairs.
                                 OR 
@@ -55,7 +56,6 @@ def helpMessage() {
     Output options:     
       --outdir [dir]            The output directory where the results will be saved. Default: ${params.outdir}
       -w [dir]                  The directory where intermediate files will be stored. Recommended: '<outdir>/work/'
-      --publish_dir_mode [str]  Mode for publishing results in the output directory. Options: 'symlink', 'rellink', 'link', 'copy', 'copyNoFollow', 'move'. Default ${params.publish_dir_mode} 
 
     Skipping                            Skip any of the mentioned steps.
       --skip_fastqc [bool]              Skips both pre- and post-Adapter Removal FastQC steps.
@@ -226,6 +226,7 @@ def helpMessage() {
       --max_memory [str]              Memory limit for each step of pipeline. Should be in form e.g. --max_memory '8.GB'. Default: '${params.max_memory}'
       --max_time [str]                Time limit for each step of the pipeline. Should be in form e.g. --max_time '2.h'. Default: '${params.max_time}'
       --max_cpus [str]                Maximum number of CPUs to use for each step of the pipeline. Should be in form e.g. Default: '${params.max_cpus}'
+      --publish_dir_mode [str]        Mode for publishing results in the output directory. Available: symlink, rellink, link, copy, copyNoFollow, move. Default: '${params.publish_dir_mode}'
       --email [email]                 Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       --email_on_fail [email]         Same as --email, except only send mail if the workflow is not successful
       --plaintext_email [email]       Receive plain text emails rather than HTML
@@ -405,7 +406,7 @@ if (params.dedupper == 'dedup' && !params.mergedonly) {
 
 // SexDetermination channel set up and bedfile validation
 if (params.sexdeterrmine_bedfile == '') {
-  ch_bed_for_sexdeterrmine = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy.txt")
+  ch_bed_for_sexdeterrmine = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
 } else {
   ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile, checkIfExists: true)
 }
@@ -463,13 +464,13 @@ if (params.run_genotyping){
 
  // pileupCaller channel generation and input checks for 'random sampling' genotyping
 if (params.pileupcaller_bedfile.isEmpty()) {
-  ch_bed_for_pileupcaller = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy.txt")
+  ch_bed_for_pileupcaller = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
 } else {
   ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile, checkIfExists: true)
 }
 
 if (params.pileupcaller_snpfile.isEmpty ()) {
-  ch_snp_for_pileupcaller = Channel.fromPath("$baseDir/assets/nf-core_eager_dummy2.txt")
+  ch_snp_for_pileupcaller = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy2.txt")
 } else {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile, checkIfExists: true)
 }
@@ -612,12 +613,12 @@ if (workflow.profile.contains('awsbatch')) {
 /* --          CONFIG FILES                    -- */
 ////////////////////////////////////////////////////
 
-ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-ch_eager_logo = file("$baseDir/docs/images/nf-core_eager_logo.png")
-ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
-ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
-where_are_my_files = file("$baseDir/assets/where_are_my_files.txt")
+ch_eager_logo = file("$projectDir/docs/images/nf-core_eager_logo.png")
+ch_output_docs = file("$projectDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = file("$projectDir/docs/images/", checkIfExists: true)
+where_are_my_files = file("$projectDir/assets/where_are_my_files.txt")
 
 ///////////////////////////////////////////////////
 /* --    INPUT FILE LOADING AND VALIDATING    -- */
@@ -1094,7 +1095,7 @@ ch_input_for_fastp.fourcol
       def strandedness = it[6]
       def udg = it[7]
       def r1 = it[8]
-      def r2 = seqtype == "PE" ? it[9] : file("$baseDir/assets/nf-core_eager_dummy.txt")
+      def r2 = seqtype == "PE" ? it[9] : file("$projectDir/assets/nf-core_eager_dummy.txt")
       
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1111,7 +1112,7 @@ ch_output_from_fastp
     def strandedness = it[6]
     def udg = it[7]
     def r1 = it[8] instanceof ArrayList ? it[8].sort()[0] : it[8]
-    def r2 = seqtype == "PE" ? it[8].sort()[1] : file("$baseDir/assets/nf-core_eager_dummy.txt")
+    def r2 = seqtype == "PE" ? it[8].sort()[1] : file("$projectDir/assets/nf-core_eager_dummy.txt")
 
     [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1220,7 +1221,7 @@ if ( params.skip_collapse ){
         def strandedness = it[5]
         def udg = it[6]
         def r1 = file(it[7].sort()[0])
-        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$baseDir/assets/nf-core_eager_dummy.txt")
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$projectDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1238,7 +1239,7 @@ if ( params.skip_collapse ){
         def strandedness = it[5]
         def udg = it[6]
         def r1 = file(it[7])
-        def r2 = file("$baseDir/assets/nf-core_eager_dummy.txt")
+        def r2 = file("$projectDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
     }
@@ -1312,7 +1313,7 @@ ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
 
         // find and remove duplicate dummies to prevent file collision error
         def r2 = it[8]*.toString()
-        r2.removeAll{ it == "$baseDir/assets/nf-core_eager_dummy.txt" }
+        r2.removeAll{ it == "$projectDir/assets/nf-core_eager_dummy.txt" }
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
   }
@@ -1360,7 +1361,7 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
         def strandedness = it[5]
         def udg = it[6]
         def r1 = file(it[7].sort()[0])
-        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$baseDir/assets/nf-core_eager_dummy.txt")
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$projectDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1379,7 +1380,7 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
         def strandedness = it[5]
         def udg = it[6]
         def r1 = file(it[7])
-        def r2 = file("$baseDir/assets/nf-core_eager_dummy.txt")
+        def r2 = file("$projectDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
     }
@@ -1690,7 +1691,7 @@ ch_fastqlanemerge_for_hostremovalfastq
         def strandedness = it[5]
         def udg = it[6]
         def r1 = seqtype == "PE" ? file(it[7].sort()[0]) : file(it[7])
-        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$baseDir/assets/nf-core_eager_dummy.txt")
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$projectDir/assets/nf-core_eager_dummy.txt")
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
@@ -1991,7 +1992,7 @@ if (params.run_bam_filtering) {
         def strandedness = it[5]
         def udg = it[6]     
         def stats = file(it[7])
-        def poststats = file("$baseDir/assets/nf-core_eager_dummy.txt")
+        def poststats = file("$projectDir/assets/nf-core_eager_dummy.txt")
 
       [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
     .set{ ch_allflagstats_for_endorspy }
@@ -2347,7 +2348,7 @@ process bam_trim {
     label 'mc_small'
     tag "${libraryid}" 
     publishDir "${params.outdir}/trimmed_bam", mode: params.publish_dir_mode
- 
+
     when: params.run_trim_bam
 
     input:
@@ -2867,7 +2868,7 @@ process sex_deterrmine {
     """
     samtools index ${input}
     angsd -i ${input} -r ${params.contamination_chrom_name}:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out ${libraryid}.doCounts
-    contamination -a ${libraryid}.doCounts.icnts.gz -h ${baseDir}/assets/angsd_resources/HapMapChrX.gz 2> ${libraryid}.X.contamination.out
+    contamination -a ${libraryid}.doCounts.icnts.gz -h ${projectDir}/assets/angsd_resources/HapMapChrX.gz 2> ${libraryid}.X.contamination.out
     """
  }
  
@@ -3151,7 +3152,7 @@ process get_software_versions {
     damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
     bam --version &> v_bamutil.txt 2>&1 || true
     pmdtools --version &> v_pmdtools.txt 2>&1 || true
-    angsd -h |& head -n 1 | cut -d ' ' -f3-4 &> v_angsd.txt 2>&1 || true 
+    angsd -h |& head -n 1 | cut -d ' ' -f3-4 &> v_angsd.txt 2>&1 || true 
     multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
     malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d ',' &> v_malt.txt 2>&1 || true
     MaltExtract --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
@@ -3272,18 +3273,18 @@ workflow.onComplete {
 
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
-    def tf = new File("$baseDir/assets/email_template.txt")
+    def tf = new File("$projectDir/assets/email_template.txt")
     def txt_template = engine.createTemplate(tf).make(email_fields)
     def email_txt = txt_template.toString()
 
     // Render the HTML template
-    def hf = new File("$baseDir/assets/email_template.html")
+    def hf = new File("$projectDir/assets/email_template.html")
     def html_template = engine.createTemplate(hf).make(email_fields)
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
-    def sf = new File("$baseDir/assets/sendmail_template.txt")
+    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, projectDir: "$projectDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
+    def sf = new File("$projectDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
 
@@ -3334,6 +3335,7 @@ workflow.onComplete {
         checkHostname()
         log.info "-${c_purple}[nf-core/eager]${c_red} Pipeline completed with errors${c_reset}-"
     }
+    
 }
 
 /////////////////////////////////////
@@ -3341,7 +3343,7 @@ workflow.onComplete {
 /////////////////////////////////////
 
 def nfcoreHeader() {
-    // Log colours ANSI codes
+    // Log colors ANSI codes
     c_black = params.monochrome_logs ? '' : "\033[0;30m";
     c_blue = params.monochrome_logs ? '' : "\033[0;34m";
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
@@ -3362,6 +3364,7 @@ def nfcoreHeader() {
     -${c_dim}--------------------------------------------------${c_reset}-
     """.stripIndent()
 }
+
 
 def checkHostname() {
     def c_reset = params.monochrome_logs ? '' : "\033[0m"

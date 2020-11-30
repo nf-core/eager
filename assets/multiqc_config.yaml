@@ -59,7 +59,6 @@ extra_fn_clean_exts:
     - '_libmerged'
     - '_bt2'
 
- 
 top_modules:
     - 'fastqc':
        name: 'FastQC (pre-AdapterRemoval)'
