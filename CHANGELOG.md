@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.2.2dev] - Unreleased
+## [2.2.2] - 2020-12-03
 
 ### `Added`
 
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#602](https://github.com/nf-core/eager/issues/602) - Added the newly avaliable GATK 3.5 conda package.
 - [#610](https://github.com/nf-core/eager/issues/610) - Create bwa_index channel when specifying circularmapper as mapper
 - Updated template to nf-core/tools 1.12
+- General documentation improvements
 
 ### `Deprecated`
 
