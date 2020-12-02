@@ -1,4 +1,4 @@
-name: nf-core-eager-2.2.1
+name: nf-core-eager-2.2.2dev
 channels:
   - conda-forge
   - bioconda
@@ -20,6 +20,7 @@ dependencies:
   - bioconda::angsd=0.933
   - bioconda::circularmapper=1.93.5
   - bioconda::gatk4=4.1.7.0
+  - bioconda::gatk=3.5
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
   - bioconda::damageprofiler=0.4.9

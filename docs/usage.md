@@ -1,10 +1,16 @@
 # nf-core/eager: Usage
 
+## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/eager/usage](https://nf-co.re/eager/usage)
+
+> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
+
 ## Table of contents
 
 <!-- TOC depthfrom:2 depthto:3 -->
 
+- [:warning: Please read this documentation on the nf-core website: https://nf-co.re/eager/usage](#warning-please-read-this-documentation-on-the-nf-core-website-httpsnf-coreeagerusage)
 - [Table of contents](#table-of-contents)
+- [Introduction](#introduction)
 - [Running the pipeline](#running-the-pipeline)
   - [Quick Start](#quick-start)
   - [Updating the pipeline](#updating-the-pipeline)
@@ -103,12 +109,7 @@ config for your pipeline run.
 
 ### Updating the pipeline
 
-When you run the above command, Nextflow automatically pulls the pipeline code
-from GitHub and stores it as a cached version. When running the pipeline after
-this, it will always use the cached version if available - even if the pipeline
-has been updated since. To make sure that you're running the latest version of
-the pipeline, make sure that you regularly update the cached version of the
-pipeline:
+When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
 nextflow pull nf-core/eager
@@ -116,16 +117,9 @@ nextflow pull nf-core/eager
 
 ### Reproducibility
 
-It's a good idea to specify a pipeline version when running the pipeline on your
-data. This ensures that a specific version of the pipeline code and software are
-used when you run your pipeline. If you keep using the same tag, you'll be
-running the same version of the pipeline, even if there have been changes to the
-code since.
+It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/eager releases
-page](https://github.com/nf-core/eager/releases) and find the latest version
-number - numeric only (eg. `2.2.0`). Then specify this when running the pipeline
-with `-r` (one hyphen) - eg. `-r 2.2.0`.
+First, go to the [nf-core/eager releases page](https://github.com/nf-core/eager/releases) and find the latest version number - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`.
 
 This version number will be logged in reports when you run the pipeline, so that
 you'll know what you used when you look back in the future.
@@ -147,53 +141,38 @@ twice the amount of CPU and memory. This will occur two times before failing.
 
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give
-configuration presets for different compute environments.
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
 
-Several generic profiles are bundled with the pipeline which instruct the
-pipeline to use software packaged using different methods (Docker, Singularity,
-Conda) - see below.
+Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Conda) - see below.
 
-> We highly recommend the use of Docker or Singularity containers for full
-> pipeline reproducibility, however when this is not possible, Conda is also
-> supported.
+> We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
 
-The pipeline also dynamically loads configurations from
-[https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it
-runs, making multiple config profiles for various institutional clusters
-available at run time. For more information and to see if your system is
-available in these configs please see the [nf-core/configs
-documentation](https://github.com/nf-core/configs#documentation).
+The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
 
-Note that multiple profiles can be loaded, for example: `-profile test,docker` -
-the order of arguments is important! They are loaded in sequence, so later
-profiles can overwrite earlier profiles.
+Note that multiple profiles can be loaded, for example: `-profile test,docker` - the order of arguments is important!
+They are loaded in sequence, so later profiles can overwrite earlier profiles.
 
-If `-profile` is not specified, the pipeline will run locally and expect all
-software to be installed and available on the `PATH`. This is _not_ recommended.
+If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
+
+- `docker`
+  - A generic configuration profile to be used with [Docker](https://docker.com/)
+  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+- `singularity`
+  - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+- `podman`
+  - A generic configuration profile to be used with [Podman](https://podman.io/)
+  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+- `conda`
+  - Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity or Podman.
+  - A generic configuration profile to be used with [Conda](https://conda.io/docs/)
+  - Pulls most software from [Bioconda](https://bioconda.github.io/)
+- `test_tsv`
+  - A profile with a complete configuration for automated testing
+  - Includes links to test data so needs no other parameters
 
 > *Important*: If running nf-core/eager on a cluster - ask your system
 > administrator what profile to use.
-
-- `docker`
-  - A generic configuration profile to be used with
-    [Docker](https://docker.com/)
-  - Pulls software from Docker Hub:
-    [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
-- `singularity`
-  - A generic configuration profile to be used with
-    [Singularity](https://sylabs.io/docs/)
-  - Pulls software from Docker Hub:
-    [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
-- `conda`
-  - Please only use Conda as a last resort i.e. when it's not possible to run
-    the pipeline with Docker or Singularity.
-  - A generic configuration profile to be used with
-    [Conda](https://conda.io/docs/)
-  - Pulls most software from [Bioconda](https://bioconda.github.io/)
-- `test`
-  - A profile with a complete configuration for automated testing
-  - Includes links to test data so needs no other parameters
 
 **Institution Specific Profiles** These are profiles specific to certain **HPC
 clusters**, and are centrally maintained at
@@ -232,28 +211,23 @@ Further institutions can be added at
 [nf-core/configs](https://github.com/nf-core/configs). Please ask the eager
 developers to add your institution to the list above, if you add one!
 
+If you are likely to be running `nf-core` pipelines regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter (see definition above). You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
+
+If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
+
 ### `-resume`
 
-Specify this when restarting a pipeline. Nextflow will used cached results from
-any pipeline steps where the inputs are the same, continuing from where it got
-to previously.
+Specify this when restarting a pipeline. Nextflow will used cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously.
 
-You can also supply a run name to resume a specific run: `-resume [run-name]`.
-Use the `nextflow log` command to show previous run names.
+You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
 
 ### `-c`
 
-Specify the path to a specific config file (this is a core Nextflow command).
-See the [nf-core website documentation](https://nf-co.re/usage/configuration)
-for more information.
+Specify the path to a specific config file (this is a core Nextflow command). See the [nf-core website documentation](https://nf-co.re/usage/configuration) for more information.
 
 #### Custom resource requests
 
-Each step in the pipeline has a default set of requirements for number of CPUs,
-memory and time. For most of the steps in the pipeline, if the job exits with an
-error code of `143` (exceeded requested resources) it will automatically
-resubmit with higher requests (2 x original, then 3 x original). If it still
-fails after three times then the pipeline is stopped.
+Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
 
 Whilst these default requirements will hopefully work for most people with most
 data, you may find that you want to customise the compute resources that the
@@ -269,9 +243,7 @@ process {
 }
 ```
 
-See the main [Nextflow
-documentation](https://www.nextflow.io/docs/latest/config.html) for more
-information.
+See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information.
 
 If you are likely to be running `nf-core` pipelines regularly it may be a good
 idea to request that your custom config file is uploaded to the
@@ -301,14 +273,12 @@ e-mail (always).
 
 ### Running in the background
 
-Nextflow handles job submissions and supervises the running jobs. The Nextflow
-process must run until the pipeline is finished.
+Nextflow handles job submissions and supervises the running jobs. The Nextflow process must run until the pipeline is finished.
 
-Nextflow handles job submissions on SLURM or other environments, and supervises
-running the jobs. Thus the Nextflow process must run until the pipeline is
-finished. We recommend that you put the process running in the background
-through `screen` / `tmux` or similar tool. Alternatively you can run Nextflow
-within a cluster job submitted your job scheduler.
+The Nextflow `-bg` flag launches Nextflow in the background, detached from your terminal so that the workflow does not stop if you log out of your session. The logs are saved to a file.
+
+Alternatively, you can use `screen` / `tmux` or similar tool to create a detached session which you can log back into at a later time.
+Some HPC setups also allow you to run nextflow within a cluster job submitted your job scheduler (from where it submits more jobs).
 
 To create a screen session:
 
@@ -326,15 +296,10 @@ screen -r nf-core/eager
 
 to end the screen session while in it type `exit`.
 
-Alternatively, the Nextflow `-bg` flag launches Nextflow in the background,
-detached from your terminal so that the workflow does not stop if you log out of
-your session. The logs are saved to a file.
-
 #### Nextflow memory requirements
 
-In some cases, the Nextflow Java virtual machines can start to request a large
-amount of memory. We recommend adding the following line to your environment to
-limit this (typically in `~/.bashrc` or `~./bash_profile`):
+In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
+We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
 
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
@@ -495,7 +460,7 @@ will have the following effects:
 - After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8
   _with the same `SeqType`_ (and all other _metadata_ columns) will be
   concatenated together for each **Library**.
-- After mapping, and prior BAM filtering, BAM files with the same with different
+- After mapping, and prior BAM filtering, BAM files with different
   `SeqType` (but with all other metadata columns the same) will be merged
   together for each **Library**.
 - After duplicate removal, BAM files with `Library_ID`s with the same
@@ -715,7 +680,7 @@ files for your own use, even if they are not part of the iGenomes resource. See
 the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html)
 for instructions on where to save such a file.
 
-The syntax for this reference configuration is as follows:
+Whilst these default requirements will hopefully work for most people with most data, you may find that you want to customise the compute resources that the pipeline requests. You can do this by creating a custom config file. For example, to give the workflow process `star` 32GB of memory, you could use the following config:
 
 ```nextflow
 params {
@@ -1339,21 +1304,16 @@ Picard. Alternatively an ancient DNA specific read deduplication tool  `dedup`
 
 This utilises both ends of paired-end data to remove duplicates (i.e. true exact
 duplicates, as markduplicates will over-zealously deduplicate anything with the
-same starting position even if the ends are different). DeDup should only be
-used solely on paired-end data otherwise suboptimal deduplication can occur if
-applied to either single-end or a mix of single-end/paired-end data.
-
-Note that if you run without the `--mergedonly` flag for AdapterRemoval, DeDup
-will likely fail. If you absolutely want to use both PE and SE data, you can
-supply the `--dedup_all_merged` flag to consider singletons to also be merged
-paired-end reads. This may result in over-zealous deduplication.
+same starting position even if the ends are different). DeDup should generally
+only be used solely on paired-end data otherwise suboptimal deduplication can
+occur if applied to either single-end or a mix of single-end/paired-end data.
 
 #### `--dedup_all_merged`
 
 Sets DeDup to treat all reads as merged reads. This is useful if reads are for
-example not prefixed with `M_` in all cases. Therefore, this can be used as a
-workaround when also using a mixture of paired-end and single-end data, however
-this is not recommended (see above).
+example not prefixed with `M_`, `R_`, or `L_` in all cases. Therefore, this can
+be used as a workaround when also using a mixture of paired-end and single-end
+data, however this is not recommended (see above).
 
 > Modifies dedup parameter: `-m`
 
@@ -1547,12 +1507,8 @@ UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.
 Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.
 
 > Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA
-> (HaplotypeCaller does _de novo_ assembly around each variant site), it is
-> officially deprecated by the Broad Institute and is only accessible by an
-> archived version not properly available on `conda`. Therefore if specifying
-> 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`.
-> Note that this means the pipeline is not fully reproducible in this
-> configuration, unless you personally supply the `.jar` file.
+> (HaplotypeCaller does _de novo_ assembly around each variant site), be aware
+> GATK 3.5 it is officially deprecated by the Broad Institute.
 
 #### `--genotyping_source`
 
@@ -1560,17 +1516,6 @@ Indicates which BAM file to use for genotyping, depending on what BAM processing
 modules you have turned on. Options are: `'raw'` for mapped only, filtered, or
 DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs);
 `'pmd'` (for pmdtools output). Default is: `'raw'`.
-
-#### `--gatk_ug_jar`
-
-Specify a path to a local copy of a GATK 3.5 `.jar` file, preferably version
-'3.5-0-g36282e4'. The download location of this may be available from the GATK
-forums or the [Google Cloud
-Storage](https://console.cloud.google.com/storage/browser/gatk-software/package-archive/gatk?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&prefix=&forceOnObjectsSortingFiltering=false)
-of the Broad Institute.
-
-> You must manually report your version of GATK 3.5 in publications/MultiQC as
-> it is not included in our container.
 
 #### `--gatk_call_conf`
 
@@ -3332,8 +3277,10 @@ To activate human sex determination (using
 provide the option `--run_sexdeterrmine`. Additionally, we will provide
 sexdeterrmine with the BED file of our SNPs of interest using the
 `--sexdeterrmine_bedfile` flag. Here I will use the 1240k SNP set as an example.
-This will cut down on computational time and also providing us with an
+This will cut down on computational time and also provide us with an
 error bar around the relative coverage on the X and Y chromosomes.
+If you wish to use the same bedfile to follow along with this tutorial,
+you can download the file from [here](https://github.com/nf-core/test-datasets/blob/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz).
 
 ```bash
 nextflow run nf-core/eager \
@@ -4128,10 +4075,7 @@ Prior setting up the nf-core/eager run, we will need:
 3. A GFF file of gene sequence annotations (normally supplied with reference
    genomes downloaded from NCBI Genomes, in this context from
    [here](https://www.ncbi.nlm.nih.gov/genome/?term=Yersinia+pestis))
-4. The JAR file for GATK v3.5 downloadable from
-   [here](https://console.cloud.google.com/storage/browser/gatk-software/package-archive/gatk?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&prefix=&forceOnObjectsSortingFiltering=false)
-   (Make sure to extract the Zip file first!)
-5. [Optional] Previously made VCF GATK 3.5 files (see below for settings), of
+4. [Optional] Previously made VCF GATK 3.5 files (see below for settings), of
    previously published _Y. pestis_ genomes.
 
 We should also ensure we have the very latest version of the nf-core/eager
@@ -4463,7 +4407,7 @@ environmental relatives or other contaminants.
 
 For this we need to run genotyping, but specifically with GATK UnifiedGenotyper
 3.5 (as MultiVCFAnalyzer requires this particular format of VCF files). We will
-therefore turn on Genotyping, supply the path to the GATK 3.5 JAR file, and
+therefore turn on Genotyping, and
 check ploidy is set 2 so 'heterozygous' positions can be reported. We will also
 need to specify that we want to use the trimmed bams from the previous step.
 
@@ -4496,7 +4440,6 @@ nextflow run nf-core/eager \
 --run_genotyping \
 --genotyping_tool 'ug' \
 --genotyping_source 'trimmed' \
---gatk_ug_jar '../bin/GenomeAnalysisTK.jar' \
 --gatk_ploidy 2 \
 --gatk_ug_mode 'EMIT_ALL_SITES' \
 --gatk_ug_genotype_model 'SNP' \
@@ -4540,7 +4483,6 @@ nextflow run nf-core/eager \
 --run_genotyping \
 --genotyping_tool 'ug' \
 --genotyping_source 'trimmed' \
---gatk_ug_jar '../bin/GenomeAnalysisTK.jar' \
 --gatk_ploidy 2 \
 --gatk_ug_mode 'EMIT_ALL_SITES' \
 --gatk_ug_genotype_model 'SNP' \

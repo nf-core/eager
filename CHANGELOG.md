@@ -1,9 +1,25 @@
 # nf-core/eager: Changelog
 
-All notable changes to this project will be documented in this file.
-
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+## [2.2.2dev] - Unreleased
+
+### `Added`
+
+- Added large scale 'stress-test' profile for AWS (using de Barros Damgaard et al. 2018's 137 ancient human genomes)
+
+### `Fixed`
+
+- Fixed AWS full test profile.
+- [#587](https://github.com/nf-core/eager/issues/587) - Re-implemented AdapterRemovalFixPrefix for DeDup compatibility of including singletons
+- [#602](https://github.com/nf-core/eager/issues/602) - Added the newly avaliable GATK 3.5 conda package.
+- [#610](https://github.com/nf-core/eager/issues/610) - Create bwa_index channel when specifying circularmapper as mapper
+- Updated template to nf-core/tools 1.12
+
+### `Deprecated`
+
+- Flag `--gatk_ug_jar` has now been removed as GATK 3.5 is now avaliable within the nf-core/eager software environment.
 
 ## [2.2.1] - 2020-10-20
 

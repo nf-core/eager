@@ -1,6 +1,6 @@
 # ![nf-core/eager](docs/images/nf-core-eager_logo.png)
 
-**A fully reproducible and state-of-the-art genomics pipeline for ancient DNA**.
+**A fully reproducible and state-of-the-art ancient DNA analysis pipeline**.
 
 [![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/eager/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/eager/actions)
@@ -8,9 +8,10 @@
 [![nf-core](https://img.shields.io/badge/nf--core-pipeline-brightgreen.svg)](https://nf-co.re/)
 [![DOI](https://zenodo.org/badge/135918251.svg)](https://zenodo.org/badge/latestdoi/135918251)
 
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager)
 ![Singularity Container available](https://img.shields.io/badge/singularity-available-7E4C74.svg)
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
+
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23eager-4A154B?logo=slack)](https://nfcore.slack.com/channels/eager)
 
 ## Introduction
@@ -83,12 +84,12 @@ Additional functionality contained by the pipeline currently includes:
 
 1. Install [`nextflow`](https://nf-co.re/usage/installation) (version >= 20.04.0)
 
-2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
+2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`Podman`](https://podman.io/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
 
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
     ```bash
-    nextflow run nf-core/eager -profile test,<docker/singularity/conda/institute>
+    nextflow run nf-core/eager -profile test,<docker/singularity/podman/conda/institute>
     ```
 
     > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
@@ -114,7 +115,7 @@ as described in the documentation.
 
 ## Documentation
 
-The nf-core/eager pipeline comes with documentation about the pipeline which you can read at [https://nf-co.re/eager/usage](https://nf-co.re/eager/usage) or find in the [`docs/` directory](docs).
+The nf-core/eager pipeline comes with documentation about the pipeline: [usage](https://nf-co.re/eager/usage) and [output](https://nf-co.re/eager/output).
 
 1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
@@ -160,8 +161,8 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Raphael Eisenhofer](https://github.com/EisenRa)
 * [Torsten Günter](https://bitbucket.org/tguenther/)
 * [Kevin Lord](https://github.com/lordkev)
-* [Irina Velsko](https://github.com/ivelsko)
 * [He Yu](https://github.com/paulayu)
+* [Selina Carlhoff](https://github.com/scarlhoff)
 
 If you've contributed and you're missing in here, please let us know and we will add you in of course!
 
