@@ -403,7 +403,7 @@ wildcards (`*`) e.g.:
 7. For input BAM files you should provide a small decoy reference genome with
    pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory
    parameter `--fasta` in order to avoid long computational time for generating
-   the index files of the reference genome, even if you do not actual need a
+   the index files of the reference genome, even if you do not actually need a
    reference genome for any downstream analyses.
 
 ##### TSV Input Method
@@ -495,7 +495,7 @@ will have the following effects:
 - After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8
   _with the same `SeqType`_ (and all other _metadata_ columns) will be
   concatenated together for each **Library**.
-- After mapping, and prior BAM filtering, BAM files with the same with different
+- After mapping, and prior BAM filtering, BAM files with the same or with different
   `SeqType` (but with all other metadata columns the same) will be merged
   together for each **Library**.
 - After duplicate removal, BAM files with `Library_ID`s with the same
@@ -525,7 +525,7 @@ Note the following important points and limitations for setting up:
   - You should provide a small decoy reference genome with pre-made indices, e.g.
     the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in
     order to avoid long computational time for generating the index files of the
-    reference genome, even if you do not actual need a reference genome for any
+    reference genome, even if you do not actually need a reference genome for any
     downstream analyses.
 - nf-core/eager will only merge multiple _lanes_ of sequencing runs with the
   same single-end or paired-end configuration
@@ -582,7 +582,7 @@ Default: `'none'`.
 > **Tip**: You should provide a small decoy reference genome with pre-made indices, e.g.
 > the human mtDNA genome, for the mandatory parameter `--fasta` in order to
 > avoid long computational time for generating the index files of the reference
-> genome, even if you do not actual need a reference genome for any downstream
+> genome, even if you do not actually need a reference genome for any downstream
 > analyses.
 
 #### `--single_stranded`
