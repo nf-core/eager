@@ -13,9 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Fixed AWS full test profile.
 - [#587](https://github.com/nf-core/eager/issues/587) - Re-implemented AdapterRemovalFixPrefix for DeDup compatibility of including singletons
-- [#602](https://github.com/nf-core/eager/issues/602) - Added the newly avaliable GATK 3.5 conda package.
+- [#602](https://github.com/nf-core/eager/issues/602) - Added the newly available GATK 3.5 conda package.
 - [#610](https://github.com/nf-core/eager/issues/610) - Create bwa_index channel when specifying circularmapper as mapper
-- Updated template to nf-core/tools 1.12
+- Updated template to nf-core/tools 1.12.1
 - General documentation improvements
 
 ### `Deprecated`
