@@ -81,6 +81,14 @@ Additional functionality contained by the pipeline currently includes:
 * Taxonomic binner without alignment (`Kraken2`)
 * aDNA characteristic screening of taxonomically binned data from MALT (`MaltExtract`)
 
+#### Functionality Overview
+
+A graphical overview of suggested routes through the pipeline depending on context can be seen below.
+
+<p align="center">
+    <img src="docs/images/output/overview/eager2_metromap_complex.png" alt="nf-core/eager metro map" width="70%"
+</p>
+
 ## Quick Start
 
 1. Install [`nextflow`](https://nf-co.re/usage/installation) (version >= 20.04.0)
