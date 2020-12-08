@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-- Added large scale 'stress-test' profile for AWS (using de Barros Damgaard et al. 2018's 137 ancient human genomes)
+- Added large scale 'stress-test' profile for AWS (using de Barros Damgaard et al. 2018's 137 ancient human genomes).
+  - This will now be run automatically for every release. All processed data will be available on the nf-core website: <https://nf-co.re/eager/results>
+    - You can run this yourself using `-profile test_full`
 
 ### `Fixed`
 
