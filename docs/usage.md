@@ -243,11 +243,11 @@ We recommend adding the following line to your environment to limit this (typica
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
-### Input
+## Input Specifications
 
 There are two possible ways of supplying input sequencing data to nf-core/eager. The most efficient but more simplistic is supplying direct paths (with wildcards) to your FASTQ or BAM files, with each file or pair being considered a single library and each one run independently. TSV input requires creation of an extra file by the user and extra metadata, but allows more powerful lane and library merging.
 
-#### Direct Input Method
+### Direct Input Method
 
 This method is where you specify with `--input`, the path locations of FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to the [TSV input method](#tsv-input-method), which is used for more complex input configurations such as lane and library merging.
 
@@ -281,7 +281,7 @@ If you have multiple files in different directories, you can use additional wild
 6. Due to limitations of downstream tools (e.g. FastQC), sample IDs may be truncated after the first `.` in the name, Ensure file names are unique prior to this!
 7. For input BAM files you should provide a small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actually need a reference genome for any downstream analyses.
 
-#### TSV Input Method
+### TSV Input Method
 
 Alternatively to the [direct input method](#direct-input-method), you can supply to `--input` a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata. This allows for more complex procedures such as merging of sequencing data across lanes, sequencing runs, sequencing configuration types, and samples.
 
@@ -357,7 +357,7 @@ Note the following important points and limitations for setting up:
 - nf-core/eager functionality such as `--run_trim_bam` will be applied to only   non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries. - Qualimap is run on each sample, after merging of libraries (i.e. your values   will reflect the values of all libraries combined - after being damage trimmed   etc.).
 - Genotyping will be typically performed on each `sample` independently, as normally all libraries will have been merged together. However, if you have a   mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS   libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file  collision` error in steps such as `sexdeterrmine`, and then you will need to   merge these yourself. We will consider changing this behaviour in the future   if there is enough interest.
 
-### Clean up
+## Clean up
 
 Once a run has completed, you will have _lots_ of (some very large) intermediate
 files in your output directory. These are stored within the directory named
