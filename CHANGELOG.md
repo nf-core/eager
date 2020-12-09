@@ -3,6 +3,19 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [dev] - Unreleased
+
+### `Added`
+
+### `Fixed`
+
+- Removed leftover old DockerHub push CI commands.
+- [#627](https://github.com/nf-core/eager/issues/627) Added de Barros Damgaard citation to README
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.2.2] - 2020-12-09
 
 ### `Added`
