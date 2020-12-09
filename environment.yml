@@ -1,15 +1,17 @@
-name: nf-core-eager-2.2.1
+# You can use this file to create a conda environment for this pipeline:
+#   conda env create -f environment.yml
+name: nf-core-eager-2.2.2
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
   - conda-forge::python=3.7.3
-  - conda-forge::markdown=3.2.2 #Dont upgrade anymore
+  - conda-forge::markdown=3.2.2 #Don't upgrade anymore
   - conda-forge::pymdown-extensions=7.1
   - conda-forge::pygments=2.6.1
   - bioconda::rename=1.601
-  - conda-forge::openjdk=8.0.144
+  - conda-forge::openjdk=8.0.144 # Don't upgrade - required for GATK
   - bioconda::fastqc=0.11.9
   - bioconda::adapterremoval=2.3.1
   - bioconda::adapterremovalfixprefix=0.0.5
@@ -20,9 +22,10 @@ dependencies:
   - bioconda::angsd=0.933
   - bioconda::circularmapper=1.93.5
   - bioconda::gatk4=4.1.7.0
+  - bioconda::gatk=3.5 ## Don't upgrade - required for MultiVCFAnalyzer
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
-  - bioconda::damageprofiler=0.4.9
+  - bioconda::damageprofiler=0.4.9 # Don't upgrade - later versions don't allow java 8
   - bioconda::multiqc=1.9
   - bioconda::pmdtools=0.60
   - bioconda::bedtools=2.29.2

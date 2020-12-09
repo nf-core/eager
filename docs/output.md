@@ -1,33 +1,8 @@
 # nf-core/eager: Output
 
-## Table of contents
+## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/eager/output](https://nf-co.re/eager/output)
 
-<!-- TOC depthfrom:2 depthto:3 -->
-
-- [Table of contents](#table-of-contents)
-- [Introduction](#introduction)
-- [Directory Structure](#directory-structure)
-  - [Primary Output Directories](#primary-output-directories)
-  - [Secondary Output Directories](#secondary-output-directories)
-- [MultiQC Report](#multiqc-report)
-  - [General Stats Table](#general-stats-table)
-  - [FastQC](#fastqc)
-  - [FastP](#fastp)
-  - [AdapterRemoval](#adapterremoval)
-  - [Bowtie2](#bowtie2)
-  - [MALT](#malt)
-  - [Kraken](#kraken)
-  - [Samtools](#samtools)
-  - [DeDup](#dedup)
-  - [Picard](#picard)
-  - [Preseq](#preseq)
-  - [DamageProfiler](#damageprofiler)
-  - [QualiMap](#qualimap)
-  - [Sex.DetERRmine](#sexdeterrmine)
-  - [MultiVCFAnalyzer](#multivcfanalyzer)
-- [Output Files](#output-files)
-
-<!-- /TOC -->
+> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
 ## Introduction
 
@@ -137,7 +112,9 @@ You will receive output for each supplied FASTQ file.
 
 When dealing with ancient DNA data the MultiQC plots for FastQC will often show lots of 'warning' or 'failed' samples. You generally can discard this sort of information as we are dealing with very degraded and metagenomic samples which have artefacts that violate the FastQC 'quality definitions', while still being valid data for aDNA researchers. Instead you will *normally* be looking for 'global' patterns across all samples of a sequencing run to check for library construction or sequencing failures. Decision on whether a individual sample has 'failed' or not should be made by the user after checking all the plots themselves (e.g. if the sample is consistently an outlier to all others in the run).
 
-For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences.
+
+For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
 > **NB:** The FastQC (pre-AdapterRemoval) plots displayed in the MultiQC report shows *untrimmed* reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the FastQC (post-AdapterRemoval). You should expect after AdapterRemoval, that most of the artefacts are removed.
 

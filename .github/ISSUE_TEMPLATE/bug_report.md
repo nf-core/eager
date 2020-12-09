@@ -1,28 +1,29 @@
-# nf-core/eager bug report
+---
+name: Bug report
+about: Report something that is broken or incorrect
+labels: bug
+---
 
 <!--
+# nf-core/eager bug report
+
 Hi there!
 
 Thanks for telling us about a problem with the pipeline.
-
 Please delete this text and anything that's not relevant from the template below:
 -->
 
 ## Check Documentation
 
-Have you checked in the following places for your error?:
+I have checked the following places for your error:
 
-- [ ] [Frequently Asked Questions](https://github.com/nf-core/eager/blob/master/docs/usage.md#troubleshooting-and-faqs)
-      (for nf-core/eager specific information)
-- [ ] [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-      (for nf-core specific information)
+- [ ] [nf-core website: troubleshooting](https://nf-co.re/usage/troubleshooting)
+- [ ] [nf-core/eager pipeline documentation](https://nf-co.re/nf-core/eager/usage)
+      - nf-core/eager FAQ/troubleshooting can be found [here](https://nf-co.re/eager/usage#troubleshooting-and-faqs)
 
-Please also check the the corresponding version's documentation on github, if not
-testing the latest release.
+## Description of the bug
 
-## Describe the bug
-
-A clear and concise description of what the bug is.
+<!-- A clear and concise description of what the bug is. -->
 
 ## Steps to reproduce
 
@@ -33,13 +34,15 @@ Steps to reproduce the behaviour:
 
 ## Expected behaviour
 
-A clear and concise description of what you expected to happen.
+<!-- A clear and concise description of what you expected to happen. -->
 
 ## Log files
 
-1. The command used to run the pipeline
-2. The `.nextflow.log` file (which is a hidden file in whichever place you _ran_
-   the pipeline from - not necessarily in the output directory!)
+Have you provided the following extra information/files:
+
+- [ ] The command used to run the pipeline
+- [ ] The `.nextflow.log` file <!-- this is a hidden file in the directory where you launched the pipeline -->
+- [ ] The exact error: <!-- [Please provide your error message] -->
 
 ## System
 
@@ -54,10 +57,10 @@ A clear and concise description of what you expected to happen.
 
 ## Container engine
 
-- Engine: <!-- [e.g. Conda, Docker or Singularity] -->
-- version: <!-- [e.g. 2.1.0] -->
-- Image tag: <!-- [e.g. nfcore/eager:2.1.0] -->
+- Engine: <!-- [e.g. Conda, Docker, Singularity or Podman] -->
+- version: <!-- [e.g. 1.0.0] -->
+- Image tag: <!-- [e.g. nfcore/eager:1.0.0] -->
 
 ## Additional context
 
-Add any other context about the problem here.
+<!-- Add any other context about the problem here. -->

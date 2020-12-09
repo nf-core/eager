@@ -1,27 +1,32 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema",
+    "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/eager/master/nextflow_schema.json",
     "title": "nf-core/eager pipeline parameters",
-    "description": "A fully reproducible and state of the art ancient DNA analysis pipeline",
+    "description": "A fully reproducible and state-of-the-art ancient DNA analysis pipeline",
     "type": "object",
     "definitions": {
-        "input_options": {
-            "title": "Input options",
+        "input_output_options": {
+            "title": "Input/output options",
             "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Define where the pipeline should find input data, and additional metadata.",
+            "required": [
+                "input"
+            ],
             "properties": {
                 "input": {
                     "type": "string",
                     "default": "null",
                     "description": "Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs. Alternatively, a path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.",
-                    "fa_icon": "fas fa-file-csv",
-                    "help_text": "There are two possible ways of supplying input sequencing data to nf-core/eager.\nThe most efficient but more simplistic is supplying direct paths (with\nwildcards) to your FASTQ or BAM files, with each file or pair being considered a\nsingle library and each one run independently. TSV input requires creation of an\nextra file by the user and extra metadata, but allows more powerful lane and\nlibrary merging.\n\n##### Direct Input Method\n\nThis method is where you specify with `--input`, the path locations of FASTQ\n(optionally gzipped) or BAM file(s). This option is mutually exclusive to the\n[TSV input method](#tsv-input-method), which is used for more complex input\nconfigurations such as lane and library merging.\n\nWhen using the direct method of `--input` you can specify one or multiple\nsamples in one or more directories files. File names **must be unique**, even if\nin different directories.  \n\nBy default, the pipeline _assumes_ you have paired-end data. If you want to run\nsingle-end data you must specify [`--single_end`]('#single_end')\n\nFor example, for a single set of FASTQs, or multiple paired-end FASTQ\nfiles in one directory, you can specify:\n\n```bash\n--input 'path/to/data/sample_*_{1,2}.fastq.gz'\n```\n\nIf you have multiple files in different directories, you can use additional\nwildcards (`*`) e.g.:\n\n```bash\n--input 'path/to/data/*/sample_*_{1,2}.fastq.gz'\n```\n\n> :warning: It is not possible to run a mixture of single-end and paired-end\n> files in one run with the paths `--input` method! Please see the [TSV input\n> method](#tsv-input-method) for possibilities.\n\n**Please note** the following requirements:\n\n1. Valid file extensions: `.fastq.gz`, `.fastq`, `.fq.gz`, `.fq`, `.bam`.\n2. The path **must** be enclosed in quotes\n3. The path must have at least one `*` wildcard character\n4. When using the pipeline with **paired end data**, the path must use `{1,2}`\n   notation to specify read pairs.\n5. Files names must be unique, having files with the same name, but in different\n   directories is _not_ sufficient\n   - This can happen when a library has been sequenced across two sequencers on\n     the same lane. Either rename the file, try a symlink with a unique name, or\n     merge the two FASTQ files prior input.\n6. Due to limitations of downstream tools (e.g. FastQC), sample IDs may be\n   truncated after the first `.` in the name, Ensure file names are unique prior\n   to this!\n7. For input BAM files you should provide a small decoy reference genome with\n   pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory\n   parameter `--fasta` in order to avoid long computational time for generating\n   the index files of the reference genome, even if you do not actual need a\n   reference genome for any downstream analyses.\n\n##### TSV Input Method\n\nAlternatively to the [direct input method](#direct-input-method), you can supply\nto `--input` a path to a TSV file that contains paths to FASTQ/BAM files and\nadditional metadata. This allows for more complex procedures such as merging of\nsequencing data across lanes, sequencing runs, sequencing configuration types,\nand samples.\n\n<p align=\"center\">\n  <img src=\"images/usage/merging_files.png\" alt=\"Schematic diagram indicating merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes\" width=\"70%\">\n</p>\n\nThe use of the TSV `--input` method is recommended when performing\nmore complex procedures such as lane or library merging. You do not need to\nspecify `--single_end`, `--bam`, `--colour_chemistry`, `-udg_type` etc. when\nusing TSV input - this is defined within the TSV file itself. You can only\nsupply a single TSV per run (i.e. `--input '*.tsv'` will not work).\n\nThis TSV should look like the following:\n\n| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1 | R2 | BAM |\n|-------------|------------|------|------------------|--------|----------|--------------|---------------|----|----|-----|\n| JK2782      | JK2782     | 1    | 4                | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |\n| JK2802      | JK2802     | 2    | 2                | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |\n\nA template can be taken from\n[here](https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/TSV_template.tsv).\n\n> :warning: Cells **must not** contain spaces before or after strings, as this\n> will make the TSV unreadable by nextflow. Strings containing spaces should be\n> wrapped in quotes.\n\nWhen using TSV_input, nf-core/eager will merge FASTQ files of libraries with the\nsame `Library_ID` but different `Lanes` values after adapter clipping (and\nmerging), assuming all other metadata columns are the same. If you have the same\n`Library_ID` but with different `SeqType`, this will be merged directly after\nmapping prior BAM filtering. Finally, it will also merge BAM files with the same\n`Sample_ID` but different `Library_ID` after duplicate removal, but prior to\ngenotyping. Please see caveats to this below.\n\nColumn descriptions are as follows:\n\n- **Sample_Name:** A text string containing the name of a given sample of which\n  there can be multiple libraries. All libraries with the same sample name and\n  same SeqType will be merged after deduplication.\n- **Library_ID:** A text string containing a given library, which there can be\n  multiple sequencing lanes (with the same SeqType).\n- **Lane:** A number indicating which lane the library was sequenced on. Files\n  from the libraries sequenced on different lanes (and different SeqType) will\n  be concatenated after read clipping and merging.\n- **Colour Chemistry** A number indicating whether the Illumina sequencer the\n  library was sequenced on was a 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq) colour\n  chemistry machine. This informs whether poly-G trimming (if turned on) should\n  be performed.\n- **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with\n  both an R1 [or forward] and R2 [or reverse]) and single end data (only R1\n  [forward], or BAM). This will affect lane merging if different per library.\n- **Organism:** A text string of the organism name of the sample or 'NA'. This\n  currently has no functionality and can be set to 'NA', but will affect\n  lane/library merging if different per library\n- **Strandedness:** A text string indicating whether the library type is\n  'single' or 'double'. This will affect lane/library merging if different per\n  library.\n- **UDG_Treatment:** A text string indicating whether the library was generated\n  with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library\n  merging if different per library.\n- **R1:** A text string of a file path pointing to a forward or R1 FASTQ file.\n  This can be used with the R2 column. File names **must be unique**, even if\n  they are in different directories.\n- **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file,\n  or 'NA' when single end data. This can be used with the R1 column. File names\n  **must be unique**, even if they are in different directories.\n- **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot\n  be specified at the same time as R1 or R2, both of which should be set to 'NA'\n\nFor example, the following TSV table:\n\n| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM |\n|-------------|------------|------|------------------|---------|----------|--------------|---------------|----------------------------------------------------------------|----------------------------------------------------------------|-----|\n| JK2782      | JK2782     | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2782      | JK2782     | 8    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2802      | JK2802     | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |\n| JK2802      | JK2802     | 8    | 4                | SE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz | NA                                                             | NA  |\n\nwill have the following effects:\n\n- After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8\n  _with the same `SeqType`_ (and all other _metadata_ columns) will be\n  concatenated together for each **Library**.\n- After mapping, and prior BAM filtering, BAM files with the same with different\n  `SeqType` (but with all other metadata columns the same) will be merged\n  together for each **Library**.\n- After duplicate removal, BAM files with `Library_ID`s with the same\n  `Sample_Name` and the same `UDG_Treatment` will be merged together.\n- If BAM trimming is turned on, all post-trimming BAMs (i.e. non-UDG and\n  half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the\n  same `Sample_Name`.\n\nNote the following important points and limitations for setting up:\n\n- The TSV must use actual tabs (not spaces) between cells.\n- *File* names must be unique regardless of file path, due to risk of\n  over-writing (see:\n  [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).\n  - If it is 'too late' and you already have duplicate file names, a workaround is\n    to concatenate the FASTQ files together and supply this to a nf-core/eager\n    run. The only downside is that you will not get independent FASTQC results\n    for each file.\n- Lane IDs must be unique for each sequencing of each library.\n  - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can\n    give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will\n    still be processed correctly.\n  - This also applies to the SeqType column, i.e. with the example above, if one\n    run is PE and one run is SE, you need to give fake lane IDs to one of the\n    runs as well.\n- All _BAM_ files must be specified as `SE` under `SeqType`.\n  - You should provide a small decoy reference genome with pre-made indices, e.g.\n    the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in\n    order to avoid long computational time for generating the index files of the\n    reference genome, even if you do not actual need a reference genome for any\n    downstream analyses.\n- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the\n  same single-end or paired-end configuration\n- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files\n  (unless you use `--run_convertbam`), as only FASTQ files are lane-merged\n  together.\n- Same libraries that are sequenced on different sequencing configurations (i.e\n  single- and paired-end data), will be merged after mapping and will _always_\n  be considered 'paired-end' during downstream processes\n  - **Important** running DeDup in this context is _not_ recommended, as PE and\n    SE data at the same position will _not_ be evaluated as duplicates.\n    Therefore not all duplicates will be removed.\n  - When you wish to run PE/SE data together `-dedupper markduplicates` is\n    therefore preferred.\n  - An error will be thrown if you try to merge both PE and SE and also supply\n    `--skip_merging`.\n  - If you truly want to mix SE data and PE data but using mate-pair info for PE\n    mapping, please run FASTQ preprocessing mapping manually and supply BAM\n    files for downstream processing by nf-core/eager\n  - If you _regularly_ want to run the situation above, please leave a feature\n    request on github.\n- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on\n  each unique library separately after deduplication (but prior same-treated\n  library merging).\n- nf-core/eager functionality such as `--run_trim_bam` will be applied to only\n  non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries.\n- Qualimap is run on each sample, after merging of libraries (i.e. your values\n  will reflect the values of all libraries combined - after being damage trimmed\n  etc.).\n- Genotyping will be typically performed on each `sample` independently, as\n  normally all libraries will have been merged together. However, if you have a\n  mixture of single-stranded and double-stranded libraries, you will normally\n  need to genotype separately. In this case you **must** give each the SS and DS\n  libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file\n  collision` error in steps such as `sexdeterrmine`, and then you will need to\n  merge these yourself. We will consider changing this behaviour in the future\n  if there is enough interest."
+                    "fa_icon": "fas fa-dna",
+                    "help_text": "There are two possible ways of supplying input sequencing data to nf-core/eager. The most efficient but more simplistic is supplying direct paths (with wildcards) to your FASTQ or BAM files, with each file or pair being considered a single library and each one run independently  (e.g. for paired-end data: `--input '/<path>/<to>/*_{R1,R2}_*.fq.gz'`). TSV input requires creation of an extra file by the user (`--input '/<path>/<to>/eager_data.tsv'`) and extra metadata, but allows more powerful lane and library merging.  Please see [usage docs](https://nf-co.re/eager/docs/usage#input-specifications) for detailed instructions and specifications."
                 },
                 "udg_type": {
                     "type": "string",
                     "default": "none",
                     "description": "Specifies whether you have UDG treated libraries. Set to 'half' for partial treatment, or 'full' for UDG. If not set, libraries are assumed to have no UDG treatment ('none'). Not required for TSV input.",
                     "fa_icon": "fas fa-vial",
-                    "help_text": "Defines whether Uracil-DNA glycosylase (UDG) treatment was used to remove DNA\ndamage on the sequencing libraries.\n\nSpecify `'none'` if no treatment was performed. If you have partial UDG treated\ndata ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify\n`'half'`. If you have complete UDG treated data ([Briggs et al.\n2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. \n\nWhen also using PMDtools specifying `'half'` will use a different model for DNA\ndamage assessment in PMDTools (PMDtools: `--UDGhalf`). Specify `'full'` and the\nPMDtools DNA damage assessment will use CpG context only (PMDtools: `--CpG`).\nDefault: `'none'`.\n\n> **Tip**: You should provide a small decoy reference genome with pre-made indices, e.g.\n> the human mtDNA genome, for the mandatory parameter `--fasta` in order to\n> avoid long computational time for generating the index files of the reference\n> genome, even if you do not actual need a reference genome for any downstream\n> analyses.",
+                    "help_text": "Defines whether Uracil-DNA glycosylase (UDG) treatment was used to remove DNA\ndamage on the sequencing libraries.\n\nSpecify `'none'` if no treatment was performed. If you have partial UDG treated\ndata ([Rohland et al 2016](http://dx.doi.org/10.1098/rstb.2013.0624)), specify\n`'half'`. If you have complete UDG treated data ([Briggs et al.\n2010](https://doi.org/10.1093/nar/gkp1163)), specify `'full'`. \n\nWhen also using PMDtools specifying `'half'` will use a different model for DNA\ndamage assessment in PMDTools (PMDtools: `--UDGhalf`). Specify `'full'` and the\nPMDtools DNA damage assessment will use CpG context only (PMDtools: `--CpG`).\nDefault: `'none'`.\n\n> **Tip**: You should provide a small decoy reference genome with pre-made indices, e.g.\n> the human mtDNA genome, for the mandatory parameter `--fasta` in order to\n> avoid long computational time for generating the index files of the reference\n> genome, even if you do not actually need a reference genome for any downstream\n> analyses.",
                     "enum": [
                         "none",
                         "half",
@@ -54,11 +59,6 @@
                     "help_text": "Specifies the input file type to `--input` is in BAM format. This will automatically also apply `--single_end`.\n\nOnly required when using the 'Path' method of `--input`.\n"
                 }
             },
-            "fa_icon": "fas fa-terminal",
-            "description": "Define where the pipeline should find input data, and additional metadata.",
-            "required": [
-                "input"
-            ],
             "help_text": "There are two possible ways of supplying input sequencing data to nf-core/eager.\nThe most efficient but more simplistic is supplying direct paths (with\nwildcards) to your FASTQ or BAM files, with each file or pair being considered a\nsingle library and each one run independently. TSV input requires creation of an\nextra file by the user and extra metadata, but allows more powerful lane and\nlibrary merging."
         },
         "input_data_additional_options": {
@@ -82,9 +82,10 @@
             },
             "fa_icon": "far fa-plus-square"
         },
-        "reference_genomes": {
-            "title": "Reference Genomes",
+        "reference_genome_options": {
+            "title": "Reference genome options",
             "type": "object",
+            "fa_icon": "fas fa-dna",
             "properties": {
                 "fasta": {
                     "type": "string",
@@ -149,7 +150,6 @@
                     "help_text": "Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices nf-core/eager generates for you and will be saved in the `<your_output_dir>/results/reference_genomes` for you. If not supplied, nf-core/eager generated index references will be deleted.\n\n> modifies SAMtools index command: `-c`"
                 }
             },
-            "fa_icon": "fas fa-dna",
             "description": "Specify locations of references and optionally, additional pre-made indices",
             "help_text": "All nf-core/eager runs require a reference genome in FASTA format to map reads\nagainst to.\n\nIn addition we provide various options for indexing of different types of\nreference genomes (based on the tools used in the pipeline). nf-core/eager can\nindex reference genomes for you (with options to save these for other analysis),\nbut you can also supply your pre-made indices.\n\nSupplying pre-made indices saves time in pipeline execution and is especially\nadvised when running multiple times on the same cluster system for example. You\ncan even add a resource [specific profile](#profile) that sets paths to\npre-computed reference genomes, saving time when specifying these.\n\n> :warning: you must always supply a reference file. If you want to use\n  functionality that does not require one, supply a small decoy genome such as\n  phiX or the human mtDNA genome."
         },
@@ -169,9 +169,18 @@
                 "publish_dir_mode": {
                     "type": "string",
                     "default": "copy",
-                    "description": "Mode for publishing results in the output directory. Options: 'symlink', 'rellink', 'link', 'copy', 'copyNoFollow', 'move'.",
-                    "fa_icon": "fas fa-upload",
-                    "help_text": "Nextflow mode for 'publishing' final results files i.e. how to move final files into your `--outdir` from working directories. Options: 'symlink', 'rellink', 'link', 'copy', 'copyNoFollow', 'move'.  Default: 'copy'.\n\n> It is recommended to select `copy` (default) if you plan to regularly delete intermediate files from `work/`."
+                    "hidden": true,
+                    "description": "Method used to save pipeline results to output directory.",
+                    "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
+                    "fa_icon": "fas fa-copy",
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ]
                 },
                 "saveTrimmed": {
                     "type": "boolean",
@@ -223,20 +232,23 @@
                     "type": "boolean",
                     "description": "Send plain-text email instead of HTML.",
                     "fa_icon": "fas fa-remove-format",
-                    "hidden": true
+                    "hidden": true,
+                    "help_text": "Set to receive plain-text e-mails instead of HTML formatted."
                 },
                 "max_multiqc_email_size": {
                     "type": "string",
                     "description": "File size limit when attaching MultiQC reports to summary emails.",
                     "default": "25.MB",
                     "fa_icon": "fas fa-file-upload",
-                    "hidden": true
+                    "hidden": true,
+                    "help_text": "If file generated by pipeline exceeds the threshold, it will not be attached."
                 },
                 "monochrome_logs": {
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "hidden": true
+                    "hidden": true,
+                    "help_text": "Set to disable colourful command line output and live life in monochrome."
                 },
                 "multiqc_config": {
                     "type": "string",
@@ -259,10 +271,13 @@
         "max_job_request_options": {
             "title": "Max job request options",
             "type": "object",
+            "fa_icon": "fab fa-acquisitions-incorporated",
+            "description": "Set the top limit for requested resources for any single job.",
+            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
             "properties": {
                 "max_cpus": {
                     "type": "integer",
-                    "description": "Maximum number of CPUs that can be requested  for any single job.",
+                    "description": "Maximum number of CPUs that can be requested    for any single job.",
                     "default": 16,
                     "fa_icon": "fas fa-microchip",
                     "hidden": true,
@@ -284,28 +299,29 @@
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
                 }
-            },
-            "fa_icon": "fab fa-acquisitions-incorporated",
-            "description": "Set the top limit for requested resources for any single job.",
-            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details."
+            }
         },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "Parameters used to describe centralised config profiles. These generally should not be edited.",
+            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline.",
             "properties": {
                 "custom_config_version": {
                     "type": "string",
                     "description": "Git commit id for Institutional configs.",
                     "default": "master",
                     "hidden": true,
-                    "fa_icon": "fas fa-users-cog"
+                    "fa_icon": "fas fa-users-cog",
+                    "help_text": "Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default: `master`.\n\n```bash\n## Download and use config file with following git commit id\n--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96\n```"
                 },
                 "custom_config_base": {
                     "type": "string",
                     "description": "Base directory for Institutional configs.",
                     "default": "https://raw.githubusercontent.com/nf-core/configs/master",
                     "hidden": true,
-                    "help_text": "If you're running offline, Nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell Nextflow where to find them with this parameter.",
+                    "help_text": "If you're running offline, nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell nextflow where to find them with the `custom_config_base` option. For example:\n\n```bash\n## Download and unzip the config files\ncd /path/to/my/configs\nwget https://github.com/nf-core/configs/archive/master.zip\nunzip master.zip\n\n## Run the pipeline\ncd /path/to/my/data\nnextflow run /path/to/pipeline/ --custom_config_base /path/to/my/configs/configs-master/\n```\n\n> Note that the nf-core/tools helper package has a `download` command to download all required pipeline files + singularity containers + institutional configs in one go for you, to make this process easier.",
                     "fa_icon": "fas fa-users-cog"
                 },
                 "hostnames": {
@@ -348,10 +364,7 @@
                     "description": "Path to the AWS CLI tool",
                     "fa_icon": "fab fa-aws"
                 }
-            },
-            "fa_icon": "fas fa-university",
-            "description": "Parameters used to describe centralised config profiles. These generally should not be edited.",
-            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline."
+            }
         },
         "skip_steps": {
             "title": "Skip steps",
@@ -685,7 +698,7 @@
                     "default": "markduplicates",
                     "description": "Deduplication method to use. Options: 'markduplicates',  'dedup'.",
                     "fa_icon": "fas fa-object-group",
-                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` ([Peltzer et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered.\n\nThis utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.\n\nNote that if you run without the `--mergedonly` flag for AdapterRemoval, DeDup will\nlikely fail. If you absolutely want to use both PE and SE data, you can supply the\n`--dedup_all_merged` flag to consider singletons to also be merged paired-end reads. This\nmay result in over-zealous deduplication.",
+                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` ([Peltzer et al. 2016](http://dx.doi.org/10.1186/s13059-016-0918-z)) is offered.\n\nThis utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should generally only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data.\n",
                     "enum": [
                         "markduplicates",
                         "dedup"
@@ -868,9 +881,9 @@
                 },
                 "genotyping_tool": {
                     "type": "string",
-                    "description": "Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Note: UnifiedGenotyper requires user-supplied defined GATK 3.5 jar file. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.",
+                    "description": "Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.",
                     "fa_icon": "fas fa-tools",
-                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), it is officially deprecated by the Broad Institute and is only accessible by an archived version not properly available on `conda`. Therefore if specifying 'ug', will need to supply a GATK 3.5 `-jar` to the parameter `gatk_ug_jar`. Note that this means the pipline is not fully reproducible in this configuration, unless you personally supply the `.jar` file.",
+                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller. Specify 'ug', 'hc', 'freebayes', 'pileupcaller' and 'angsd' respectively.\n\n> > Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does _de novo_ assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute.",
                     "enum": [
                         "ug",
                         "hc",
@@ -885,12 +898,6 @@
                     "description": "Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'.",
                     "fa_icon": "fas fa-faucet",
                     "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: `'raw'` for mapped only, filtered, or DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs); `'pmd'` (for pmdtools output). Default is: `'raw'`.\n"
-                },
-                "gatk_ug_jar": {
-                    "type": "string",
-                    "description": "When specifying to use GATK UnifiedGenotyper, path to GATK 3.5 .jar.",
-                    "fa_icon": "fas fa-archive",
-                    "help_text": "Specify a path to a local copy of a GATK 3.5 `.jar` file, preferably version\n'3.5-0-g36282e4'. The download location of this may be available from the GATK\nforums or the [Google Cloud\nStorage](https://console.cloud.google.com/storage/browser/gatk-software/package-archive/gatk?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&prefix=&forceOnObjectsSortingFiltering=false)\nof the Broad Institute."
                 },
                 "gatk_call_conf": {
                     "type": "integer",
@@ -1490,13 +1497,13 @@
     },
     "allOf": [
         {
-            "$ref": "#/definitions/input_options"
+            "$ref": "#/definitions/input_output_options"
         },
         {
             "$ref": "#/definitions/input_data_additional_options"
         },
         {
-            "$ref": "#/definitions/reference_genomes"
+            "$ref": "#/definitions/reference_genome_options"
         },
         {
             "$ref": "#/definitions/output_options"

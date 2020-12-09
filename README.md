@@ -1,6 +1,6 @@
 # ![nf-core/eager](docs/images/nf-core-eager_logo.png)
 
-**A fully reproducible and state-of-the-art genomics pipeline for ancient DNA**.
+**A fully reproducible and state-of-the-art ancient DNA analysis pipeline**.
 
 [![GitHub Actions CI Status](https://github.com/nf-core/eager/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/eager/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/eager/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/eager/actions)
@@ -8,16 +8,18 @@
 [![nf-core](https://img.shields.io/badge/nf--core-pipeline-brightgreen.svg)](https://nf-co.re/)
 [![DOI](https://zenodo.org/badge/135918251.svg)](https://zenodo.org/badge/latestdoi/135918251)
 
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager)
 ![Singularity Container available](https://img.shields.io/badge/singularity-available-7E4C74.svg)
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
+
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23eager-4A154B?logo=slack)](https://nfcore.slack.com/channels/eager)
 
 ## Introduction
 
-**nf-core/eager** is a bioinformatics best-practice analysis pipeline for NGS sequencing based ancient DNA (aDNA) data analysis.
+<!-- nf-core: Write a 1-2 sentence summary of what data the pipeline is for and what it does -->
+**nf-core/eager** is a bioinformatics best-practise analysis pipeline for NGS sequencing based ancient DNA (aDNA) data analysis.
 
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. The pipeline pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible. The pipeline pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
 <p align="center">
     <img src="docs/images/output/overview/eager2_workflow.png" alt="nf-core/eager schematic workflow" width="70%"
@@ -79,16 +81,24 @@ Additional functionality contained by the pipeline currently includes:
 * Taxonomic binner without alignment (`Kraken2`)
 * aDNA characteristic screening of taxonomically binned data from MALT (`MaltExtract`)
 
+#### Functionality Overview
+
+A graphical overview of suggested routes through the pipeline depending on context can be seen below.
+
+<p align="center">
+    <img src="docs/images/output/overview/eager2_metromap_complex.png" alt="nf-core/eager metro map" width="70%"
+</p>
+
 ## Quick Start
 
 1. Install [`nextflow`](https://nf-co.re/usage/installation) (version >= 20.04.0)
 
-2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
+2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`Podman`](https://podman.io/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
 
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
     ```bash
-    nextflow run nf-core/eager -profile test,<docker/singularity/conda/institute>
+    nextflow run nf-core/eager -profile test,<docker/singularity/podman/conda/institute>
     ```
 
     > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
@@ -112,9 +122,18 @@ See [usage docs](https://nf-co.re/eager/docs/usage.md) for all of the available 
 Modifications to the default pipeline are easily made using various options
 as described in the documentation.
 
+## Pipeline Summary
+
+By default, the pipeline currently performs the following:
+
+<!-- TODO nf-core: Fill in short bullet-pointed list of default steps of pipeline -->
+
+* Sequencing quality control (`FastQC`)
+* Overall pipeline run summaries (`MultiQC`)
+
 ## Documentation
 
-The nf-core/eager pipeline comes with documentation about the pipeline which you can read at [https://nf-co.re/eager/usage](https://nf-co.re/eager/usage) or find in the [`docs/` directory](docs).
+The nf-core/eager pipeline comes with documentation about the pipeline: [usage](https://nf-co.re/eager/usage) and [output](https://nf-co.re/eager/output).
 
 1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
@@ -129,9 +148,8 @@ The nf-core/eager pipeline comes with documentation about the pipeline which you
 
 This pipeline was mostly written by Alexander Peltzer ([apeltzer](https://github.com/apeltzer)) and [James A. Fellows Yates](https://github.com/jfy133), with contributions from [Stephen Clayton](https://github.com/sc13-bioinf), [Thiseas C. Lamnidis](https://github.com/TCLamnidis), [Maxime Borry](https://github.com/maxibor), [Zandra Fagernäs](https://github.com/ZandraFagernas), [Aida Andrades Valtueña](https://github.com/aidaanva) and [Maxime Garcia](https://github.com/MaxUlysse) and the nf-core community.
 
-If you would like to contribute to this pipeline, please open an issue (or even better, a pull request - please see the [contributing guidelines](.github/CONTRIBUTING.md), and ask to be added to the project - everyone is welcome to contribute here!.
-
-For further information or help, don't hesitate to get in touch on the [Slack `#eager` channel](https://nfcore.slack.com/channels/eager) (you can join with [this invite](https://nf-co.re/join/slack)).
+We thank the following people for their extensive assistance in the development
+of this pipeline:
 
 ## Authors (alphabetical)
 
@@ -160,12 +178,34 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Raphael Eisenhofer](https://github.com/EisenRa)
 * [Torsten Günter](https://bitbucket.org/tguenther/)
 * [Kevin Lord](https://github.com/lordkev)
-* [Irina Velsko](https://github.com/ivelsko)
 * [He Yu](https://github.com/paulayu)
+* [Selina Carlhoff](https://github.com/scarlhoff)
 
 If you've contributed and you're missing in here, please let us know and we will add you in of course!
 
-## Tool References
+## Contributions and Support
+
+If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
+
+For further information or help, don't hesitate to get in touch on the [Slack `#eager` channel](https://nfcore.slack.com/channels/eager) (you can join with [this invite](https://nf-co.re/join/slack)).
+
+## Citations
+
+If you use `nf-core/eager` for your analysis, please cite the `eager` preprint as follows:
+> James A. Fellows Yates, Thiseas Christos Lamnidis, Maxime Borry, Aida Andrades Valtueña, Zandra Fagneräs, Stephen Clayton, Maxime U. Garcia, Judith Neukamm, Alexander Peltzer **Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager** bioRxiv 2020.06.11.145615; [doi: https://doi.org/10.1101/2020.06.11.145615](https://doi.org/10.1101/2020.06.11.145615)
+
+You can cite the eager zenodo record for a specific version using the following [doi: 10.5281/zenodo.3698082](https://zenodo.org/badge/latestdoi/135918251)
+
+You can cite the `nf-core` publication as follows:
+
+> **The nf-core framework for community-curated bioinformatics pipelines.**
+>
+> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
+>
+> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
+> ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
+
+In addition, references of tools and data used in this pipeline are as follows:
 
 * **EAGER v1**, CircularMapper, DeDup* Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. [https://doi.org/10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z).  Download: [https://github.com/apeltzer/EAGER-GUI](https://github.com/apeltzer/EAGER-GUI) and [https://github.com/apeltzer/EAGER-CLI](https://github.com/apeltzer/EAGER-CLI)
 * **FastQC** Download: [https://www.bioinformatics.babraham.ac.uk/projects/fastqc/](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
@@ -204,19 +244,3 @@ This repository uses test data from the following studies:
 * Fellows Yates, J. A. et al. (2017) ‘Central European Woolly Mammoth Population Dynamics: Insights from Late Pleistocene Mitochondrial Genomes’, Scientific reports, 7(1), p. 17714. [doi: 10.1038/s41598-017-17723-1](https://doi.org/10.1038/s41598-017-17723-1).
 * Gamba, C. et al. (2014) ‘Genome flux and stasis in a five millennium transect of European prehistory’, Nature communications, 5, p. 5257. [doi: 10.1038/ncomms6257](https://doi.org/10.1038/ncomms6257).
 * Star, B. et al. (2017) ‘Ancient DNA reveals the Arctic origin of Viking Age cod from Haithabu, Germany’, Proceedings of the National Academy of Sciences of the United States of America, 114(34), pp. 9152–9157. [doi: 10.1073/pnas.1710186114](https://doi.org/10.1073/pnas.1710186114).
-
-## Citation
-
-If you use `nf-core/eager` for your analysis, please cite the `eager` preprint as follows:
-> James A. Fellows Yates, Thiseas Christos Lamnidis, Maxime Borry, Aida Andrades Valtueña, Zandra Fagneräs, Stephen Clayton, Maxime U. Garcia, Judith Neukamm, Alexander Peltzer **Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager** bioRxiv 2020.06.11.145615; [doi: https://doi.org/10.1101/2020.06.11.145615](https://doi.org/10.1101/2020.06.11.145615)
-
-You can cite the eager zenodo record for a specific version using the following [doi: 10.5281/zenodo.3698082](https://zenodo.org/badge/latestdoi/135918251)
-
-You can cite the `nf-core` publication as follows:
-
-> **The nf-core framework for community-curated bioinformatics pipelines.**
->
-> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
->
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
-> ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)

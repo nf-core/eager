@@ -26,23 +26,25 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v1
+        uses: technote-space/get-diff-action@v4
         with:
-          PREFIX_FILTER: |
+          FILES: |
             Dockerfile
             environment.yml
 
       - name: Build new docker image
-        if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/eager:2.2.1
+        if: env.MATCHED_FILES
+        run: docker build --no-cache . -t nfcore/eager:2.2.2
 
       - name: Pull docker image
-        if: ${{ !env.GIT_DIFF }}
+        if: ${{ !env.MATCHED_FILES }}
         run: |
           docker pull nfcore/eager:dev
-          docker tag nfcore/eager:dev nfcore/eager:2.2.1
+          docker tag nfcore/eager:dev nfcore/eager:2.2.2
 
       - name: Install Nextflow
+        env:
+          CAPSULE_LOG: none
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
@@ -142,22 +144,15 @@ jobs:
       - name: PMDTOOLS Test PMDtools works alone
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_pmdtools
-      - name: GATK 3.5 Download resource files
-        run: |
-            mkdir -p jars/gatk_3_5
-            wget https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -P jars/gatk_3_5
-            tar xvf jars/gatk_3_5/GenomeAnalysisTK-3.5-0-g36282e4.tar.bz2 -C jars/gatk_3_5/
-            chmod +x jars/gatk_3_5/GenomeAnalysisTK.jar
-            GATK_JAR=$(readlink -f jars/gatk_3_5/GenomeAnalysisTK.jar)
       - name: GENOTYPING_UG AND MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
       - name: COMPLEX LANE/LIBRARY MERGING Test running lane and library merging prior to GATK UnifiedGenotyper and running MultiVCFAnalyzer
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker --run_genotyping --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
       - name: GENOTYPING_UG ON TRIMMED BAM Test
         run: |
-         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --run_trim_bam --genotyping_source 'trimmed' --gatk_ug_jar '/home/runner/work/eager/eager/jars/gatk_3_5/GenomeAnalysisTK.jar' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
+         nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --run_trim_bam --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
       - name: BAM_INPUT Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
         run: |
          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --skip_adapterremoval
