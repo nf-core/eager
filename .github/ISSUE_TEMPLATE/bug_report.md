@@ -15,12 +15,11 @@ Please delete this text and anything that's not relevant from the template below
 
 ## Check Documentation
 
-Have you checked in the following places for your error?:
+I have checked the following places for your error:
 
-- [ ] [Frequently Asked Questions](https://github.com/nf-core/eager/blob/master/docs/usage.md#troubleshooting-and-faqs)
-      (for nf-core/eager specific information)
-- [ ] [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-      (for nf-core specific information)
+- [ ] [nf-core website: troubleshooting](https://nf-co.re/usage/troubleshooting)
+- [ ] [nf-core/eager pipeline documentation](https://nf-co.re/nf-core/eager/usage)
+      - nf-core/eager FAQ/troubleshooting can be found [here](https://nf-co.re/eager/usage#troubleshooting-and-faqs)
 
 ## Description of the bug
 
@@ -39,9 +38,11 @@ Steps to reproduce the behaviour:
 
 ## Log files
 
-1. Command line: <!-- [e.g. `nextflow run ...`] -->
-2. The `.nextflow.log` file (which is a hidden file in whichever place you _ran_ the pipeline from - not necessarily in the output directory!)
-3. See error: <!-- [Please provide your error message] -->
+Have you provided the following extra information/files:
+
+- [ ] The command used to run the pipeline
+- [ ] The `.nextflow.log` file <!-- this is a hidden file in the directory where you launched the pipeline -->
+- [ ] The exact error: <!-- [Please provide your error message] -->
 
 ## System
 
