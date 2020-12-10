@@ -2443,7 +2443,7 @@ process qualimap {
     script:
     def snpcap = params.snpcapture_bed != '' ? "-gff ${params.snpcapture_bed}" : ''
     """
-    qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap}
+    qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap} --java-mem-size ${task.memory.toGiga()}G
     """
 }
 
