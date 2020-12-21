@@ -555,7 +555,7 @@
                 },
                 "circularfilter": {
                     "type": "boolean",
-                    "description": "Turn on to filter off-target reads (circularmapper only).",
+                    "description": "Turn on to remove off-target reads of mapping to circularised genome (circularmapper only).",
                     "fa_icon": "fas fa-filter",
                     "help_text": "If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.\n"
                 },
