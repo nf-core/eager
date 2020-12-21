@@ -87,7 +87,7 @@ def helpMessage() {
       --bwaalnl [num]            Specify the -l parameter for BWA aln, i.e. length of seeds to be used. Set to 1024 for whole read. Default: ${params.bwaalnl}
       --circularextension [num]  Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
       --circulartarget [chr]     Specify the FASTA header of the target chromosome to extend(circularmapper only). Default: '${params.circulartarget}'
-      --circularfilter [bool]    Turn on to remove off-target reads of mappinh to circularised genome (circularmapper only).
+      --circularfilter [bool]    Turn on to remove off-target reads of mapping to circularised genome (circularmapper only).
       --bt2_alignmode [str]      Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: '${params.bt2_alignmode}'
       --bt2_sensitivity [str]    Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: '${params.bt2_sensitivity}'
       --bt2n [num]               Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity. Default: ${params.bt2n}
@@ -1538,16 +1538,9 @@ process circulargenerator{
     publishDir "${params.outdir}/reference_genome/circularmapper_index", mode: params.publish_dir_mode, saveAs: { filename -> 
             if (params.save_reference) filename 
             else if(!params.save_reference && filename == "where_are_my_files.txt") filename
-            else nullrealignsamfile--hepl: command not found
-(/home/jfellows/.conda/cache/nf-core-eager-2.2.2dev-61f2726250792d9c381923b5b0b6e68d) jfellows@dat4903339:10:37:~:$ circulargenerator --help
-usage: CircularGeneratorv1.0
- -e,--elongation <ELONGATION>   the elongation factor [INT]
- -h,--help                      show this help page
- -i,--input <INPUT>             the input FastA File
- -s,--seq <SEQ>                 the names of the sequences that should to
-                                be elongated
-
+            else null
     }
+
 
     input:
     file fasta from ch_fasta_for_circulargenerator
