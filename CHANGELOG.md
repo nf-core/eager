@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Removed leftover old DockerHub push CI commands.
 - [#627](https://github.com/nf-core/eager/issues/627) Added de Barros Damgaard citation to README
-- [#638](https://github.com/nf-core/eager/issues/638#issuecomment-748877567) Fixed inverted circularfilter filtering (previously filtering would happen by default, not when requested by user as originally recorded in documentation) 
+- [#638](https://github.com/nf-core/eager/issues/638#issuecomment-748877567) Fixed inverted circularfilter filtering (previously filtering would happen by default, not when requested by user as originally recorded in documentation)
 
 ### `Dependencies`
 
