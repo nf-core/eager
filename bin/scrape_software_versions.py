@@ -35,7 +35,7 @@ regexes = {
     'VCF2genome':['v_vcf2genome.txt', r"VCF2Genome \(v. ([0-9].[0-9]+) "],
     'endorS.py':['v_endorSpy.txt', r"endorS.py (\S+)"],
     'kraken':['v_kraken.txt', r"Kraken version (\S+)"],
-    'eigenstrat_snp_coverage':['v_eigenstrat_snp_coverage.txt',r"(\S+)"]
+    'eigenstrat_snp_coverage':['v_eigenstrat_snp_coverage.txt',r"(\S+)"],
     'bbduk':['v_bbduk.txt',r"(\S+)"]
 }
 
