@@ -116,12 +116,15 @@ def helpMessage() {
       --damageprofiler_length [num]       Specify length filter for DamageProfiler. Default: ${params.damageprofiler_length}
       --damageprofiler_threshold [num]    Specify number of bases of each read to consider for DamageProfiler calculations. Default: ${params.damageprofiler_threshold}
       --damageprofiler_yaxis [float]      Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: ${params.damageprofiler_yaxis} 
+      --run_mapdamage_rescaling           Turn on damage rescaling of BAM files using mapDamage2 to probabilistically remove damage.
+      --rescale_length_5p                 Length of read for mapDamage2 to rescale from 5p end. Default: ${params.rescale_length_5p}
+      --rescale_length_3p                 Length of read for mapDamage2 to rescale from 5p end. Default: ${params.rescale_length_3p}
       --run_pmdtools [bool]               Turn on PMDtools
       --pmdtools_range [num]              Specify range of bases for PMDTools. Default: ${params.pmdtools_range} 
       --pmdtools_threshold [num]          Specify PMDScore threshold for PMDTools. Default: ${params.pmdtools_threshold} 
       --pmdtools_reference_mask [file]    Specify a path to reference mask for PMDTools.
       --pmdtools_max_reads [num]          Specify the maximum number of reads to consider for metrics generation. Default: ${params.pmdtools_max_reads}
-      
+
     Annotation Statistics
       --run_bedtools_coverage [bool]       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference.
       --anno_file [file]                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.
@@ -137,7 +140,7 @@ def helpMessage() {
     Genotyping
       --run_genotyping [bool]                Turn on genotyping of BAM files.
       --genotyping_tool [str]                Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.
-      --genotyping_source [str]              Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'. Default: '${params.genotyping_source}'
+      --genotyping_source [str]              Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed', 'pmd', 'rescaled'. Default: '${params.genotyping_source}'
       --gatk_call_conf [num]                 Specify GATK phred-scaled confidence threshold. Default: ${params.gatk_call_conf}
       --gatk_ploidy [num]                    Specify GATK organism ploidy. Default: ${params.gatk_ploidy}
       --gatk_downsample [num]                Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
@@ -285,7 +288,7 @@ if("${params.fasta}".endsWith(".gz")){
         path zipped_fasta from file(params.fasta) // path doesn't like it if a string of an object is not prefaced with a root dir (/), so use file() to resolve string before parsing to `path` 
 
         output:
-        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd
+        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling
 
         script:
         unzip = zipped_fasta.toString() - '.gz'
@@ -296,7 +299,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling }
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -413,8 +416,13 @@ if (params.sexdeterrmine_bedfile == '') {
 
 // Genotyping validation
 if (params.run_genotyping){
+
+  if (params.genotyping_source != 'raw' && params.genotyping_source != 'pmd' && params.genotyping_source != 'trimmed' && params.genotyping_source != 'rescaled' ) {
+      exit 1, "[nf-core/eager] error: please specify a  valid genotyping source. Options: 'raw', 'pmd', 'trimmed', 'rescaled'. Found parameter: --genotyping_source '${params.genotyping_source}'."
+  }
+
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' && params.genotyping_tool != 'angsd' ) {
-  exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
+  exit 1, "[nf-core/eager] error: please specify a valid genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
   }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
@@ -2172,11 +2180,11 @@ process library_merge {
 if (!params.skip_deduplication) {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation;  ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation;  ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools; ch_rmdup_for_damagerescaling } 
 
 } else {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools; ch_rmdup_for_damagerescaling } 
 }
 
 //////////////////////////////////////////////////
@@ -2282,7 +2290,37 @@ process damageprofiler {
     """
 }
 
-// Optionally perform further aDNA evaluation or filtering for  just reads with damage etc.
+// Damage rescaling with mapDamage
+
+process mapdamage_rescaling {
+
+    label 'sc_small'
+    tag "${libraryid}"
+
+    publishDir "${params.outdir}/damage_rescaling", mode: params.publish_dir_mode
+
+    when:
+    params.run_mapdamage_rescaling
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_damagerescaling
+    file fasta from ch_fasta_for_damagerescaling.collect()
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_rescaled.bam"), path("*rescaled.bam.{bai,csi}") into ch_output_from_damagerescaling
+
+    script:
+    def base = "${bam.baseName}"
+    def singlestranded = strandedness == "single" ? '--single-stranded' : ''
+    def size = params.large_ref ? '-c' : ''
+    """
+    mapDamage -i ${bam} -r ${fasta} --rescale --rescale-out ${bam}_rescaled.bam --rescale-length-5p ${params.rescale_length_5p} --rescale-length-3p=${params.rescale_length_3p} ${singlestranded}
+    samtools index ${bam}_rescaled.bam ${size}
+    """
+
+}
+
+// Optionally perform further aDNA evaluation or filtering for just reads with damage etc.
 
 process pmdtools {
     label 'mc_small'
@@ -2369,7 +2407,7 @@ process bam_trim {
     """
 }
 
-// Post trimming merging of libraries to single samples, except for SS/DS 
+// Post-trimming merging of libraries to single samples, except for SS/DS 
 // libraries as they should be genotyped separately, because we will assume 
 // that if trimming is turned on, 'lab-removed' libraries can be combined with 
 // merged with 'in-silico damage removed' libraries to improve genotyping
@@ -2464,11 +2502,18 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_pmdtools )  {
-    exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
+    exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmdtools (--run_pmdtools)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
   ch_output_from_pmdtools
     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+
+} else if ( params.run_genotyping && params.genotyping_source == "rescaled" && params.run_mapdamage_rescaling) {
+  ch_output_from_damagerescaling
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+
+} else if ( params.run_genotyping && params.genotyping_source == "rescaled" && !params.run_mapdamage_rescaling) {
+    exit 1, "[nf-core/eager] error: Cannot run genotyping with 'rescaled' source without running damage rescaling (--run_damagescaling)! Please check input parameters."
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
@@ -3165,6 +3210,7 @@ process get_software_versions {
     pileupCaller --version &> v_sequencetools.txt 2>&1 || true
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
     eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
+    mapDamage2 --version > v_mapdamage.txt || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
