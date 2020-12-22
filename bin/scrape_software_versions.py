@@ -36,6 +36,7 @@ regexes = {
     'endorS.py':['v_endorSpy.txt', r"endorS.py (\S+)"],
     'kraken':['v_kraken.txt', r"Kraken version (\S+)"],
     'eigenstrat_snp_coverage':['v_eigenstrat_snp_coverage.txt',r"(\S+)"]
+    'bbduk':['v_bbduk.txt',r"(\S+)"]
 }
 
 results = OrderedDict()
@@ -71,6 +72,7 @@ results['malt'] = '<span style="color:#999999;\">N/A</span>'
 results['kraken'] = '<span style="color:#999999;\">N/A</span>'
 results['maltextract'] = '<span style="color:#999999;\">N/A</span>'
 results['eigenstrat_snp_coverage'] = '<span style="color:#999999;\">N/A</span>'
+results['bbduk'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():

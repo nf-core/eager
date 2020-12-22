@@ -193,19 +193,21 @@ def helpMessage() {
       --contamination_chrom_name [str]    The name of the X chromosome in your bam or FASTA header. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
 
     Metagenomic Screening
-      --run_metagenomic_screening [bool]     Turn on metagenomic screening module for reference-unmapped reads
-      --metagenomic_tool [str]               Specify which classifier to use. Options: 'malt', 'kraken'. Default: '${params.contamination_chrom_name}'
-      --database [dir]                       Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory.
-      --metagenomic_min_support_reads [num]  Specify a minimum number of reads a taxon of sample total is required to have to be retained. Not compatible with . Default: ${params.metagenomic_min_support_reads}
-      --percent_identity [num]               Percent identity value threshold for MALT. Default: ${params.percent_identity}
-      --malt_mode [str]                      Specify which alignment method to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: '${params.malt_mode}'
-      --malt_alignment_mode [str]            Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'. Default: '${params.malt_alignment_mode}'
-      --malt_top_percent [num]               Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual). Default: ${params.malt_top_percent}
-      --malt_min_support_mode [str]          Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'. Default: '${params.malt_min_support_mode}'
-      --malt_min_support_percent [num]       Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
-      --malt_max_queries [num]               Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
-      --malt_memory_mode [str]               Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
-      --malt_sam_output [bool]               Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.
+      --metagenomic_complexity_filter             Turn on removal of low-sequence complexity reads for metagenomic screening with bbduk.
+      --metagenomic_complexity_entropy            Specify the entropy threshold that under which a sequencing read will be complexity filtered out. This should be between 0-1. Default: '${params.metagenomic_complexity_entropy}'
+      --run_metagenomic_screening [bool]          Turn on metagenomic screening module for reference-unmapped reads
+      --metagenomic_tool [str]                    Specify which classifier to use. Options: 'malt', 'kraken'. Default: '${params.contamination_chrom_name}'
+      --database [dir]                            Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory.
+      --metagenomic_min_support_reads [num]       Specify a minimum number of reads a taxon of sample total is required to have to be retained. Not compatible with . Default: ${params.metagenomic_min_support_reads}
+      --percent_identity [num]                    Percent identity value threshold for MALT. Default: ${params.percent_identity}
+      --malt_mode [str]                           Specify which alignment method to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: '${params.malt_mode}'
+      --malt_alignment_mode [str]                 Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'. Default: '${params.malt_alignment_mode}'
+      --malt_top_percent [num]                    Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual). Default: ${params.malt_top_percent}
+      --malt_min_support_mode [str]               Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'. Default: '${params.malt_min_support_mode}'
+      --malt_min_support_percent [num]            Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
+      --malt_max_queries [num]                    Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
+      --malt_memory_mode [str]                    Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
+      --malt_sam_output [bool]                    Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.
 
     Metagenomic Authentication
       --run_maltextract [bool]                  Turn on MaltExtract for MALT aDNA characteristics authentication
@@ -506,6 +508,7 @@ if (params.run_multivcfanalyzer) {
 }
 
 // Metagenomic validation
+
 if (params.run_metagenomic_screening) {
   if ( params.bam_unmapped_type == "discard" ) {
   exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
@@ -1079,7 +1082,7 @@ process fastp {
     """
     } else {
     """
-    fastp --in1 ${r1} --in2 ${r2} --out1 "${r1.baseName}.pG.fq.gz" --out2 "${r2.baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${libraryid}"_L${lane}_fastp.json 
+    fastp --in1 ${r1} --in2 ${r2} --out1 "${r1.baseName}.pG.fq.gz" --out2 "${r2.baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${libraryid}"_L${lane}_polyg_fastp.json 
     """
     }
 }
@@ -1853,7 +1856,7 @@ process samtools_filter {
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic,ch_metagenomic_for_skipentropyfilter
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
     // Using shell block rather than script because we are playing with awk
@@ -2640,36 +2643,36 @@ process genotyping_pileupcaller {
   """
   samtools mpileup -B -q 30 -Q 30 ${use_bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} ${use_snp} -e pileupcaller.${strandedness}
   """
- }
- 
+}
+
 process eigenstrat_snp_coverage {
-   label 'mc_tiny'
-   tag "${strandedness}"
-   publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
-   
-   when:
-   params.run_genotyping && params.genotyping_tool == 'pileupcaller'
-   
-   input:
-   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") from ch_for_eigenstrat_snp_coverage.dump()
-   
-   output:
-   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.json") into ch_eigenstrat_snp_cov_for_multiqc
-   path("*_eigenstrat_coverage.txt")
-   
-   script:
-   /* 
-   The following code block can be swapped in once the eigenstratdatabasetools MultiQC module becomes available.
-   """
-   eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
-   """
-   */
-   """
-   eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt
-   parse_snp_cov.py ${strandedness}_eigenstrat_coverage.txt
-   """
- }
- 
+  label 'mc_tiny'
+  tag "${strandedness}"
+  publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
+  
+  when:
+  params.run_genotyping && params.genotyping_tool == 'pileupcaller'
+  
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") from ch_for_eigenstrat_snp_coverage.dump(tag:'eigenstrat_input')
+  
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.json") into ch_eigenstrat_snp_cov_for_multiqc
+  path("*_eigenstrat_coverage.txt")
+  
+  script:
+  /* 
+  The following code block can be swapped in once the eigenstratdatabasetools MultiQC module becomes available.
+  """
+  eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
+  """
+  */
+  """
+  eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt
+  parse_snp_cov.py ${strandedness}_eigenstrat_coverage.txt
+  """
+}
+
 process genotyping_angsd {
   label 'mc_small'
   tag "${samplename}"
@@ -2897,22 +2900,57 @@ process print_nuclear_contamination{
 /* --    METAGENOMICS-SPECIFIC ADDITIONAL STEPS     -- */
 /////////////////////////////////////////////////////////
 
+// Low entropy read filter to reduce input sequences of reads that are highly uninformative, and thus reduce runtime/false positives
+
+process metagenomic_complexity_filter {
+  label 'mc_small'
+  tag "${samplename}"
+  publishDir "${params.outdir}/metagenomic_complexity_filter/", mode: params.publish_dir_mode
+
+  when:
+  params.metagenomic_complexity_filter
+  
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(fastq) from ch_bam_filtering_for_metagenomic
+
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_lowcomplexityremoved.fq.gz") into ch_lowcomplexityfiltered_for_metagenomic
+  path("*_bbduk.stats") into ch_metagenomic_complexity_filter_for_multiqc
+
+  script:
+  """
+  bbduk.sh -Xmx${task.memory.toGiga()}g in=${fastq} threads=${task.cpus} entropymask=f entropy=${params.metagenomic_complexity_entropy} out=${fastq}_lowcomplexityremoved.fq.gz 2> ${fastq}_bbduk.stats
+  """
+
+}
+
+// metagenomic complexity filter bypass
+
+if ( params.metagenomic_complexity_filter ) {
+  ch_lowcomplexityfiltered_for_metagenomic
+    .set{ ch_filtered_for_metagenomic }
+} else {
+  ch_metagenomic_for_skipentropyfilter
+    .set{ ch_filtered_for_metagenomic }
+}
+
 // MALT is a super-fast BLAST replacement typically used for pathogen detection or microbiome profiling against large databases, here using off-target reads from mapping
 
 // As we collect all files for a all metagenomic runs, we DO NOT use the normal input/output tuple!
 if (params.metagenomic_tool == 'malt') {
-  ch_bam_filtering_for_metagenomic
-    .set {ch_bam_filtering_for_metagenomic_malt}
+  ch_filtered_for_metagenomic
+    .set {ch_input_for_metagenomic_malt}
 
-  ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
+  ch_input_for_metagenomic_kraken = Channel.empty()
 } else if (params.metagenomic_tool == 'kraken') {
-  ch_bam_filtering_for_metagenomic
-    .set {ch_bam_filtering_for_metagenomic_kraken}
+  ch_filtered_for_metagenomic
+    .set {ch_input_for_metagenomic_kraken}
 
-  ch_bam_filtering_for_metagenomic_malt = Channel.empty()
+  ch_input_for_metagenomic_malt = Channel.empty()
 } else if ( params.metagenomic_tool == '' ) {
-  ch_bam_filtering_for_metagenomic_malt = Channel.empty()
-  ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
+  ch_input_for_metagenomic_malt = Channel.empty()
+  ch_input_for_metagenomic_kraken = Channel.empty()
 
 }
 
@@ -2925,7 +2963,7 @@ process malt {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
 
   input:
-  file fastqs from ch_bam_filtering_for_metagenomic_malt.map { it[7] }.collect()
+  file fastqs from ch_input_for_metagenomic_malt.map { it[7] }.collect()
   file db from ch_db_for_malt
 
   output:
@@ -3043,7 +3081,7 @@ process kraken {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
-  path(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }
+  path(fastq) from ch_input_for_metagenomic_kraken.map { it[7] }
   path(krakendb) from ch_krakendb
 
   output:
@@ -3165,6 +3203,7 @@ process get_software_versions {
     pileupCaller --version &> v_sequencetools.txt 2>&1 || true
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
     eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
+    bbduk.sh | grep 'Last modified' | cut -d' ' -f 3-99 > v_bbduk.txt || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -3198,6 +3237,7 @@ process multiqc {
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
     file ('multivcfanalyzer/*') from ch_multivcfanalyzer_for_multiqc.collect().ifEmpty([])
+    file ('fastp_lowcomplexityfilter/*') from ch_metagenomic_complexity_filter_for_multiqc.collect().ifEmpty([])
     file ('malt/*') from ch_malt_for_multiqc.collect().ifEmpty([])
     file ('kraken/*') from ch_kraken_for_multiqc.collect().ifEmpty([])
     file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
@@ -3391,7 +3431,7 @@ def checkHostname() {
 def extract_data(tsvFile) {
     Channel.fromPath(tsvFile)
         .splitCsv(header: true, sep: '\t')
-        .dump()
+        .dump(tag:'tsv_extract')
         .map { row ->
 
             def expected_keys = ['Sample_Name', 'Library_ID', 'Lane', 'Colour_Chemistry', 'SeqType', 'Organism', 'Strandedness', 'UDG_Treatment', 'R1', 'R2', 'BAM']
