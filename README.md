@@ -122,7 +122,6 @@ A graphical overview of suggested routes through the pipeline depending on conte
     <img src="docs/images/output/overview/eager2_metromap_complex.png" alt="nf-core/eager metro map" width="70%"
 </p>
 
-
 ## Documentation
 
 The nf-core/eager pipeline comes with documentation about the pipeline: [usage](https://nf-co.re/eager/usage) and [output](https://nf-co.re/eager/output).
