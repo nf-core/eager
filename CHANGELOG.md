@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#640](https://github.com/nf-core/eager/issues/640) - Added a pre-metagenomic screening filtering of low-sequence complexity reads with `bbduk`
+
 ### `Fixed`
 
 - Removed leftover old DockerHub push CI commands.
