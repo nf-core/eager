@@ -25,7 +25,39 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     <img src="docs/images/output/overview/eager2_workflow.png" alt="nf-core/eager schematic workflow" width="70%"
 </p>
 
-## Pipeline steps
+## Quick Start
+
+1. Install [`nextflow`](https://nf-co.re/usage/installation) (version >= 20.04.0)
+
+2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`Podman`](https://podman.io/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
+
+3. Download the pipeline and test it on a minimal dataset with a single command:
+
+    ```bash
+    nextflow run nf-core/eager -profile test,<docker/singularity/podman/conda/institute>
+    ```
+
+    > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
+
+4. Start running your own analysis!
+
+    ```bash
+    nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+    ```
+
+5. Once your run has completed successfully, clean up the intermediate files.
+
+    ```bash
+    nextflow clean -f -k
+    ```
+
+See [usage docs](https://nf-co.re/eager/docs/usage.md) for all of the available options when running the pipeline.
+
+**N.B.** You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
+
+Modifications to the default pipeline are easily made using various options as described in the documentation.
+
+## Pipeline Summary
 
 ### Default Steps
 
@@ -77,6 +109,7 @@ Additional functionality contained by the pipeline currently includes:
 
 #### Metagenomic Screening
 
+* Low-sequenced complexity filtering (`BBduk`)
 * Taxonomic binner with alignment (`MALT`)
 * Taxonomic binner without alignment (`Kraken2`)
 * aDNA characteristic screening of taxonomically binned data from MALT (`MaltExtract`)
@@ -89,47 +122,6 @@ A graphical overview of suggested routes through the pipeline depending on conte
     <img src="docs/images/output/overview/eager2_metromap_complex.png" alt="nf-core/eager metro map" width="70%"
 </p>
 
-## Quick Start
-
-1. Install [`nextflow`](https://nf-co.re/usage/installation) (version >= 20.04.0)
-
-2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`Podman`](https://podman.io/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
-
-3. Download the pipeline and test it on a minimal dataset with a single command:
-
-    ```bash
-    nextflow run nf-core/eager -profile test,<docker/singularity/podman/conda/institute>
-    ```
-
-    > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
-
-4. Start running your own analysis!
-
-    ```bash
-    nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
-    ```
-
-5. Once your run has completed successfully, clean up the intermediate files.
-
-    ```bash
-    nextflow clean -f -k
-    ```
-
-See [usage docs](https://nf-co.re/eager/docs/usage.md) for all of the available options when running the pipeline.
-
-**N.B.** You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
-
-Modifications to the default pipeline are easily made using various options
-as described in the documentation.
-
-## Pipeline Summary
-
-By default, the pipeline currently performs the following:
-
-<!-- TODO nf-core: Fill in short bullet-pointed list of default steps of pipeline -->
-
-* Sequencing quality control (`FastQC`)
-* Overall pipeline run summaries (`MultiQC`)
 
 ## Documentation
 
@@ -236,6 +228,7 @@ In addition, references of tools and data used in this pipeline are as follows:
 * **Bowtie2**  Langmead, B. and Salzberg, S. L. 2012 Fast gapped-read alignment with Bowtie 2. Nature methods, 9(4), p. 357–359. doi: [10.1038/nmeth.1923](https:/dx.doi.org/10.1038/nmeth.1923).
 * **sequenceTools** Stephan Schiffels (Unpublished). Download: [https://github.com/stschiff/sequenceTools](https://github.com/stschiff/sequenceTools)
 * **EigenstratDatabaseTools** Thiseas C. Lamnidis (Unpublished). Download: [https://github.com/TCLamnidis/EigenStratDatabaseTools.git](https://github.com/TCLamnidis/EigenStratDatabaseTools.git)
+* **BBduk** Brian Bushnell (Unpublished). Download: [https://sourceforge.net/projects/bbmap/](sourceforge.net/projects/bbmap/)
 
 ## Data References
 

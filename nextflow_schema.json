@@ -1297,7 +1297,7 @@
                     "help_text": "Turns on low-sequence complexity filtering of off-target reads using `bbduk`.\n\nThis is typically performed to reduce the number of uninformative reads or potential false-positive reads, typically for input for metagenomic screening. This thus reduces false positive species IDs and also run-time and resource requirements.\n\nSee `--metagenomic_complexity_entropy` for how complexity is calculated. **Important** There are no MultiQC output results for this module, you must check the number of reads removed with the `_bbduk.stats` output file.\n\nDefault: off\n",
                     "fa_icon": "fas fa-filter"
                 },
-                "metagenomic_complexity_filter_threshold": {
+                "metagenomic_complexity_entropy": {
                     "type": "number",
                     "default": 0.3,
                     "description": "Specify the entropy threshold that under which a sequencing read will be complexity filtered out. This should be between 0-1.",
