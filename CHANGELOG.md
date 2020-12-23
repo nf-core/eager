@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-- Updated usage (merging files) workflow images reflecting new functionality.
+- Updated usage (merging files) and workflow images reflecting new functionality.
 
 ### `Fixed`
 
