@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- Updated usage (merging files) workflow images reflecting new functionality.
+
 ### `Fixed`
 
 - Removed leftover old DockerHub push CI commands.

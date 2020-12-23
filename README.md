@@ -22,7 +22,7 @@
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible. The pipeline pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
 <p align="center">
-    <img src="docs/images/output/overview/eager2_workflow.png" alt="nf-core/eager schematic workflow" width="70%"
+    <img src="docs/images/usage/eager2_workflow.png" alt="nf-core/eager schematic workflow" width="70%"
 </p>
 
 ## Pipeline steps
@@ -86,7 +86,7 @@ Additional functionality contained by the pipeline currently includes:
 A graphical overview of suggested routes through the pipeline depending on context can be seen below.
 
 <p align="center">
-    <img src="docs/images/output/overview/eager2_metromap_complex.png" alt="nf-core/eager metro map" width="70%"
+    <img src="docs/images/usage/eager2_metromap_complex.png" alt="nf-core/eager metro map" width="70%"
 </p>
 
 ## Quick Start
