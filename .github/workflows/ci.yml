@@ -189,3 +189,6 @@ jobs:
       - name: MTNUCRATIO Run basic pipeline with bam input profile, but don't convert BAM, skip everything but nmtnucratio
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --skip_fastqc --skip_adapterremoval --skip_deduplication --skip_qualimap --skip_preseq --skip_damage_calculation --run_mtnucratio
+      - name: RESCALING Run basic pipeline with basic pipeline but with mapDamage rescaling of BAM files. Note this will be slow
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_mapdamage_rescaling --run_genotyping --genotyping_tool hc --genotyping_source 'rescaled'
