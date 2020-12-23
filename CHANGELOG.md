@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#583](https://github.com/nf-core/eager/issues/583) - mapDamage2 rescaling of BAM files to remove damage
+
 ### `Fixed`
 
 - Removed leftover old DockerHub push CI commands.
-- [#627](https://github.com/nf-core/eager/issues/627) Added de Barros Damgaard citation to README
-- [#630](https://github.com/nf-core/eager/pull/630) Better handling of Qualimap memory requirements and error strategy.
+- [#627](https://github.com/nf-core/eager/issues/627) - Added de Barros Damgaard citation to README
+- [#630](https://github.com/nf-core/eager/pull/630) - Better handling of Qualimap memory requirements and error strategy.
+- Fixed some imcomplete schema options to ensure users supply valid input values
 
 ### `Dependencies`
 
