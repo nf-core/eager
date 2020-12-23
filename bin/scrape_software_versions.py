@@ -37,6 +37,7 @@ regexes = {
     'kraken':['v_kraken.txt', r"Kraken version (\S+)"],
     'eigenstrat_snp_coverage':['v_eigenstrat_snp_coverage.txt',r"(\S+)"],
     'mapDamage2':['v_mapdamage.txt',r"(\S+)"],
+    'bbduk':['v_bbduk.txt',r"(\S+)"]
 }
 
 results = OrderedDict()
@@ -73,6 +74,8 @@ results['kraken'] = '<span style="color:#999999;\">N/A</span>'
 results['maltextract'] = '<span style="color:#999999;\">N/A</span>'
 results['eigenstrat_snp_coverage'] = '<span style="color:#999999;\">N/A</span>'
 results['mapDamage2'] = '<span style="color:#999999;\">N/A</span>'
+results['bbduk'] = '<span style="color:#999999;\">N/A</span>'
+
 
 # Search each file using its regex
 for k, v in regexes.items():

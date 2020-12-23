@@ -1317,6 +1317,21 @@
             "description": "Options for metagenomic screening of off-target reads.",
             "default": "",
             "properties": {
+                "metagenomic_complexity_filter": {
+                    "type": "boolean",
+                    "description": "Turn on removal of low-sequence complexity reads for metagenomic screening with bbduk",
+                    "help_text": "Turns on low-sequence complexity filtering of off-target reads using `bbduk`.\n\nThis is typically performed to reduce the number of uninformative reads or potential false-positive reads, typically for input for metagenomic screening. This thus reduces false positive species IDs and also run-time and resource requirements.\n\nSee `--metagenomic_complexity_entropy` for how complexity is calculated. **Important** There are no MultiQC output results for this module, you must check the number of reads removed with the `_bbduk.stats` output file.\n\nDefault: off\n",
+                    "fa_icon": "fas fa-filter"
+                },
+                "metagenomic_complexity_entropy": {
+                    "type": "number",
+                    "default": 0.3,
+                    "description": "Specify the entropy threshold that under which a sequencing read will be complexity filtered out. This should be between 0-1.",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "help_text": "Specify a minimum entropy threshold that under which it will be _removed_ from the FASTQ file that goes into metagenomic screening. \n\nA mono-nucleotide read such as GGGGGG will have an entropy of 0, a completely random sequence has an entropy of almost 1.\n\nSee the `bbduk` [documentation](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/-filter) on entropy for more information.\n\n> Modifies`bbduk` parameter `entropy=`",
+                    "fa_icon": "fas fa-percent"
+                },
                 "run_metagenomic_screening": {
                     "type": "boolean",
                     "description": "Turn on metagenomic screening module for reference-unmapped reads.",

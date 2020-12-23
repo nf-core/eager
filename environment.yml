@@ -48,3 +48,5 @@ dependencies:
   - bioconda::bowtie2=2.4.1
   - bioconda::eigenstratdatabasetools=1.0.2
   - bioconda::mapdamage2=2.2.0
+  - bioconda::bbmap=38.87
+
