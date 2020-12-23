@@ -1579,7 +1579,7 @@ process circularmapper{
     params.mapper == 'circularmapper'
 
     script:
-    def filter = params.circularfilter ? '-f true -x false' : ''
+    def filter = params.circularfilter ? '-f true -x true' : ''
     def elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
     def size = params.large_ref ? '-c' : ''
 
