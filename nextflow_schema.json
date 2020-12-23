@@ -790,6 +790,26 @@
                     "description": "Specify the maximum number of reads to consider for metrics generation.",
                     "fa_icon": "fas fa-greater-than-equal",
                     "help_text": "The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results.\n\n> Modifies PMDTools parameter: `-n`"
+                },
+                "run_mapdamage_rescaling": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-map",
+                    "description": "Turn on damage rescaling of BAM files using mapDamage2 to probabilistically remove damage.",
+                    "help_text": "Turns on mapDamage2's BAM rescaling functionality. This probablistically replaces Ts back to Cs depending on the likelihood this reference-mismatch was originally caused by damage. If the library is specified to be single stranded, this will automatically use the `--single-stranded` mode.\n\nThis functionality does not have any MultiQC output.\n\n:warning: rescaled libraries will not be merged with non-scaled libraries of the same sample for downstream genotyping, as the model may be different for each library. If you wish to merge these, please do this manually and re-run nf-core/eager using the merged BAMs as input. \n\n> Modifies the `--rescale` parameter of mapDamage2"
+                },
+                "rescale_length_5p": {
+                    "type": "integer",
+                    "default": 12,
+                    "fa_icon": "fas fa-balance-scale-right",
+                    "description": "Length of read for mapDamage2 to rescale from 5p end.",
+                    "help_text": "Specify the length from the end of the read that mapDamage should rescale.\n\n> Modifies the `--rescale-length-5p` parameter of mapDamage2."
+                },
+                "rescale_length_3p": {
+                    "type": "integer",
+                    "default": 12,
+                    "fa_icon": "fas fa-balance-scale-left",
+                    "description": "Length of read for mapDamage2 to rescale from 3p end.",
+                    "help_text": "Specify the length from the end of the read that mapDamage should rescale.\n\n> Modifies the `--rescale-length-3p` parameter of mapDamage2."
                 }
             },
             "fa_icon": "fas fa-chart-line",
@@ -895,9 +915,15 @@
                 "genotyping_source": {
                     "type": "string",
                     "default": "raw",
-                    "description": "Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'.",
+                    "description": "Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed', 'pmd' or 'rescaled'.",
                     "fa_icon": "fas fa-faucet",
-                    "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: `'raw'` for mapped only, filtered, or DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs); `'pmd'` (for pmdtools output). Default is: `'raw'`.\n"
+                    "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: `'raw'` for mapped only, filtered, or DeDup BAMs (with priority right to left); `'trimmed'` (for base clipped BAMs); `'pmd'` (for pmdtools output); `'rescaled'` (for mapDamage2 rescaling output). Default is: `'raw'`.\n",
+                    "enum": [
+                        "raw",
+                        "pmd",
+                        "trimmed",
+                        "rescaled"
+                    ]
                 },
                 "gatk_call_conf": {
                     "type": "integer",
