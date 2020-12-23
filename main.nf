@@ -87,7 +87,7 @@ def helpMessage() {
       --bwaalnl [num]            Specify the -l parameter for BWA aln, i.e. length of seeds to be used. Set to 1024 for whole read. Default: ${params.bwaalnl}
       --circularextension [num]  Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
       --circulartarget [chr]     Specify the FASTA header of the target chromosome to extend(circularmapper only). Default: '${params.circulartarget}'
-      --circularfilter [bool]    Turn on to filter off-target reads (circularmapper only).
+      --circularfilter [bool]    Turn on to remove reads that did not map to the circularised genome (circularmapper only).
       --bt2_alignmode [str]      Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: '${params.bt2_alignmode}'
       --bt2_sensitivity [str]    Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: '${params.bt2_sensitivity}'
       --bt2n [num]               Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity. Default: ${params.bt2n}
@@ -1549,6 +1549,7 @@ process circulargenerator{
             else null
     }
 
+
     input:
     file fasta from ch_fasta_for_circulargenerator
 
@@ -1586,7 +1587,7 @@ process circularmapper{
     params.mapper == 'circularmapper'
 
     script:
-    def filter = params.circularfilter ? '' : '-f true -x false'
+    def filter = params.circularfilter ? '-f true -x true' : ''
     def elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
     def size = params.large_ref ? '-c' : ''
 
