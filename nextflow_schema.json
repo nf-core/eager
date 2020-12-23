@@ -557,7 +557,7 @@
                     "type": "boolean",
                     "description": "Turn on to remove reads that did not map to the circularised genome (circularmapper only).",
                     "fa_icon": "fas fa-filter",
-                    "help_text": "If you want to filter out reads that don't map to a circular chromosome, turn this on. By default this option is turned off.\n"
+                    "help_text": "If you want to filter out reads that don't map to a circular chromosome (and also non-circular chromosome headers) from the resulting BAM file, turn this on. By default this option is turned off.\n> Modifies -f and -x parameters of CircularMapper's realignsamfile\n"
                 },
                 "bt2_alignmode": {
                     "type": "string",
