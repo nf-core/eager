@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [#640](https://github.com/nf-core/eager/issues/640) - Added a pre-metagenomic screening filtering of low-sequence complexity reads with `bbduk`
 - [#583](https://github.com/nf-core/eager/issues/583) - Added `mapDamage2` rescaling of BAM files to remove damage
+- Updated usage (merging files) and workflow images reflecting new functionality.
 
 ### `Fixed`
 
