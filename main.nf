@@ -87,7 +87,7 @@ def helpMessage() {
       --bwaalnl [num]            Specify the -l parameter for BWA aln, i.e. length of seeds to be used. Set to 1024 for whole read. Default: ${params.bwaalnl}
       --circularextension [num]  Specify the number of bases to extend reference by (circularmapper only). Default: ${params.circularextension}
       --circulartarget [chr]     Specify the FASTA header of the target chromosome to extend(circularmapper only). Default: '${params.circulartarget}'
-      --circularfilter [bool]    Turn on to filter off-target reads (circularmapper only).
+      --circularfilter [bool]    Turn on to remove reads that did not map to the circularised genome (circularmapper only).
       --bt2_alignmode [str]      Specify the bowtie2 alignment mode. Options:  'local', 'end-to-end'. Default: '${params.bt2_alignmode}'
       --bt2_sensitivity [str]    Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Default: '${params.bt2_sensitivity}'
       --bt2n [num]               Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity. Default: ${params.bt2n}
@@ -116,12 +116,15 @@ def helpMessage() {
       --damageprofiler_length [num]       Specify length filter for DamageProfiler. Default: ${params.damageprofiler_length}
       --damageprofiler_threshold [num]    Specify number of bases of each read to consider for DamageProfiler calculations. Default: ${params.damageprofiler_threshold}
       --damageprofiler_yaxis [float]      Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'. Default: ${params.damageprofiler_yaxis} 
+      --run_mapdamage_rescaling           Turn on damage rescaling of BAM files using mapDamage2 to probabilistically remove damage.
+      --rescale_length_5p                 Length of read for mapDamage2 to rescale from 5p end. Default: ${params.rescale_length_5p}
+      --rescale_length_3p                 Length of read for mapDamage2 to rescale from 5p end. Default: ${params.rescale_length_3p}
       --run_pmdtools [bool]               Turn on PMDtools
       --pmdtools_range [num]              Specify range of bases for PMDTools. Default: ${params.pmdtools_range} 
       --pmdtools_threshold [num]          Specify PMDScore threshold for PMDTools. Default: ${params.pmdtools_threshold} 
       --pmdtools_reference_mask [file]    Specify a path to reference mask for PMDTools.
       --pmdtools_max_reads [num]          Specify the maximum number of reads to consider for metrics generation. Default: ${params.pmdtools_max_reads}
-      
+
     Annotation Statistics
       --run_bedtools_coverage [bool]       Turn on ability to calculate no. reads, depth and breadth coverage of features in reference.
       --anno_file [file]                   Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.
@@ -137,7 +140,7 @@ def helpMessage() {
     Genotyping
       --run_genotyping [bool]                Turn on genotyping of BAM files.
       --genotyping_tool [str]                Specify which genotyper to use either GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller. Options: 'ug', 'hc', 'freebayes', 'pileupcaller', 'angsd'.
-      --genotyping_source [str]              Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed' or 'pmd'. Default: '${params.genotyping_source}'
+      --genotyping_source [str]              Specify which input BAM to use for genotyping. Options: 'raw', 'trimmed', 'pmd', 'rescaled'. Default: '${params.genotyping_source}'
       --gatk_call_conf [num]                 Specify GATK phred-scaled confidence threshold. Default: ${params.gatk_call_conf}
       --gatk_ploidy [num]                    Specify GATK organism ploidy. Default: ${params.gatk_ploidy}
       --gatk_downsample [num]                Maximum depth coverage allowed for genotyping before down-sampling is turned on. Default: ${params.gatk_downsample}
@@ -193,19 +196,21 @@ def helpMessage() {
       --contamination_chrom_name [str]    The name of the X chromosome in your bam or FASTA header. 'X' for hs37d5, 'chrX' for HG19. Default: '${params.contamination_chrom_name}'
 
     Metagenomic Screening
-      --run_metagenomic_screening [bool]     Turn on metagenomic screening module for reference-unmapped reads
-      --metagenomic_tool [str]               Specify which classifier to use. Options: 'malt', 'kraken'. Default: '${params.contamination_chrom_name}'
-      --database [dir]                       Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory.
-      --metagenomic_min_support_reads [num]  Specify a minimum number of reads a taxon of sample total is required to have to be retained. Not compatible with . Default: ${params.metagenomic_min_support_reads}
-      --percent_identity [num]               Percent identity value threshold for MALT. Default: ${params.percent_identity}
-      --malt_mode [str]                      Specify which alignment method to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: '${params.malt_mode}'
-      --malt_alignment_mode [str]            Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'. Default: '${params.malt_alignment_mode}'
-      --malt_top_percent [num]               Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual). Default: ${params.malt_top_percent}
-      --malt_min_support_mode [str]          Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'. Default: '${params.malt_min_support_mode}'
-      --malt_min_support_percent [num]       Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
-      --malt_max_queries [num]               Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
-      --malt_memory_mode [str]               Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
-      --malt_sam_output [bool]               Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.
+      --metagenomic_complexity_filter             Turn on removal of low-sequence complexity reads for metagenomic screening with bbduk.
+      --metagenomic_complexity_entropy            Specify the entropy threshold that under which a sequencing read will be complexity filtered out. This should be between 0-1. Default: '${params.metagenomic_complexity_entropy}'
+      --run_metagenomic_screening [bool]          Turn on metagenomic screening module for reference-unmapped reads
+      --metagenomic_tool [str]                    Specify which classifier to use. Options: 'malt', 'kraken'. Default: '${params.contamination_chrom_name}'
+      --database [dir]                            Specify path to classifer database directory. For Kraken2 this can also be a `.tar.gz` of the directory.
+      --metagenomic_min_support_reads [num]       Specify a minimum number of reads a taxon of sample total is required to have to be retained. Not compatible with . Default: ${params.metagenomic_min_support_reads}
+      --percent_identity [num]                    Percent identity value threshold for MALT. Default: ${params.percent_identity}
+      --malt_mode [str]                           Specify which alignment method to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'. Default: '${params.malt_mode}'
+      --malt_alignment_mode [str]                 Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'. Default: '${params.malt_alignment_mode}'
+      --malt_top_percent [num]                    Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual). Default: ${params.malt_top_percent}
+      --malt_min_support_mode [str]               Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'. Default: '${params.malt_min_support_mode}'
+      --malt_min_support_percent [num]            Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT. Default: Default: ${params.malt_min_support_percent}
+      --malt_max_queries [num]                    Specify the maximium number of queries a read can have for MALT. Default: ${params.malt_max_queries}
+      --malt_memory_mode [str]                    Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'. Default: '${params.malt_memory_mode}'
+      --malt_sam_output [bool]                    Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.
 
     Metagenomic Authentication
       --run_maltextract [bool]                  Turn on MaltExtract for MALT aDNA characteristics authentication
@@ -285,7 +290,7 @@ if("${params.fasta}".endsWith(".gz")){
         path zipped_fasta from file(params.fasta) // path doesn't like it if a string of an object is not prefaced with a root dir (/), so use file() to resolve string before parsing to `path` 
 
         output:
-        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd
+        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling
 
         script:
         unzip = zipped_fasta.toString() - '.gz'
@@ -296,7 +301,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling }
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -413,8 +418,13 @@ if (params.sexdeterrmine_bedfile == '') {
 
 // Genotyping validation
 if (params.run_genotyping){
+
+  if (params.genotyping_source != 'raw' && params.genotyping_source != 'pmd' && params.genotyping_source != 'trimmed' && params.genotyping_source != 'rescaled' ) {
+      exit 1, "[nf-core/eager] error: please specify a  valid genotyping source. Options: 'raw', 'pmd', 'trimmed', 'rescaled'. Found parameter: --genotyping_source '${params.genotyping_source}'."
+  }
+
   if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' && params.genotyping_tool != 'angsd' ) {
-  exit 1, "[nf-core/eager] error: please specify a genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
+  exit 1, "[nf-core/eager] error: please specify a valid genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
   }
   
   if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
@@ -506,6 +516,7 @@ if (params.run_multivcfanalyzer) {
 }
 
 // Metagenomic validation
+
 if (params.run_metagenomic_screening) {
   if ( params.bam_unmapped_type == "discard" ) {
   exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
@@ -1079,7 +1090,7 @@ process fastp {
     """
     } else {
     """
-    fastp --in1 ${r1} --in2 ${r2} --out1 "${r1.baseName}.pG.fq.gz" --out2 "${r2.baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${libraryid}"_L${lane}_fastp.json 
+    fastp --in1 ${r1} --in2 ${r2} --out1 "${r1.baseName}.pG.fq.gz" --out2 "${r2.baseName}.pG.fq.gz" -A -g --poly_g_min_len "${params.complexity_filter_poly_g_min}" -Q -L -w ${task.cpus} --json "${libraryid}"_L${lane}_polyg_fastp.json 
     """
     }
 }
@@ -1541,6 +1552,7 @@ process circulargenerator{
             else null
     }
 
+
     input:
     file fasta from ch_fasta_for_circulargenerator
 
@@ -1578,7 +1590,7 @@ process circularmapper{
     params.mapper == 'circularmapper'
 
     script:
-    def filter = params.circularfilter ? '' : '-f true -x false'
+    def filter = params.circularfilter ? '-f true -x true' : ''
     def elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
     def size = params.large_ref ? '-c' : ''
 
@@ -1853,7 +1865,7 @@ process samtools_filter {
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*filtered.bam"), file("*.{bai,csi}") into ch_output_from_filtering
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic,ch_metagenomic_for_skipentropyfilter
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
     // Using shell block rather than script because we are playing with awk
@@ -2172,11 +2184,11 @@ process library_merge {
 if (!params.skip_deduplication) {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
         .filter { it =~/.*_rmdup.bam/ }
-        .into { ch_rmdup_for_skipdamagemanipulation;  ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation;  ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools; ch_rmdup_for_damagerescaling } 
 
 } else {
     ch_input_for_skiplibrarymerging.mix(ch_output_from_librarymerging)
-        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools } 
+        .into { ch_rmdup_for_skipdamagemanipulation; ch_rmdup_for_pmdtools; ch_rmdup_for_bamutils; ch_rmdup_for_bedtools; ch_rmdup_for_damagerescaling } 
 }
 
 //////////////////////////////////////////////////
@@ -2282,7 +2294,37 @@ process damageprofiler {
     """
 }
 
-// Optionally perform further aDNA evaluation or filtering for  just reads with damage etc.
+// Damage rescaling with mapDamage
+
+process mapdamage_rescaling {
+
+    label 'sc_small'
+    tag "${libraryid}"
+
+    publishDir "${params.outdir}/damage_rescaling", mode: params.publish_dir_mode
+
+    when:
+    params.run_mapdamage_rescaling
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_damagerescaling
+    file fasta from ch_fasta_for_damagerescaling.collect()
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_rescaled.bam"), path("*rescaled.bam.{bai,csi}") into ch_output_from_damagerescaling
+
+    script:
+    def base = "${bam.baseName}"
+    def singlestranded = strandedness == "single" ? '--single-stranded' : ''
+    def size = params.large_ref ? '-c' : ''
+    """
+    mapDamage -i ${bam} -r ${fasta} --rescale --rescale-out ${bam}_rescaled.bam --rescale-length-5p ${params.rescale_length_5p} --rescale-length-3p=${params.rescale_length_3p} ${singlestranded}
+    samtools index ${bam}_rescaled.bam ${size}
+    """
+
+}
+
+// Optionally perform further aDNA evaluation or filtering for just reads with damage etc.
 
 process pmdtools {
     label 'mc_small'
@@ -2369,7 +2411,7 @@ process bam_trim {
     """
 }
 
-// Post trimming merging of libraries to single samples, except for SS/DS 
+// Post-trimming merging of libraries to single samples, except for SS/DS 
 // libraries as they should be genotyped separately, because we will assume 
 // that if trimming is turned on, 'lab-removed' libraries can be combined with 
 // merged with 'in-silico damage removed' libraries to improve genotyping
@@ -2464,11 +2506,18 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
         .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_pmdtools )  {
-    exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmtools (--run_pmdtools)! Please check input parameters."
+    exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmdtools (--run_pmdtools)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
   ch_output_from_pmdtools
     .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+
+} else if ( params.run_genotyping && params.genotyping_source == "rescaled" && params.run_mapdamage_rescaling) {
+  ch_output_from_damagerescaling
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+
+} else if ( params.run_genotyping && params.genotyping_source == "rescaled" && !params.run_mapdamage_rescaling) {
+    exit 1, "[nf-core/eager] error: Cannot run genotyping with 'rescaled' source without running damage rescaling (--run_damagescaling)! Please check input parameters."
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
@@ -2640,36 +2689,36 @@ process genotyping_pileupcaller {
   """
   samtools mpileup -B -q 30 -Q 30 ${use_bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} ${use_snp} -e pileupcaller.${strandedness}
   """
- }
- 
+}
+
 process eigenstrat_snp_coverage {
-   label 'mc_tiny'
-   tag "${strandedness}"
-   publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
-   
-   when:
-   params.run_genotyping && params.genotyping_tool == 'pileupcaller'
-   
-   input:
-   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") from ch_for_eigenstrat_snp_coverage.dump()
-   
-   output:
-   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.json") into ch_eigenstrat_snp_cov_for_multiqc
-   path("*_eigenstrat_coverage.txt")
-   
-   script:
-   /* 
-   The following code block can be swapped in once the eigenstratdatabasetools MultiQC module becomes available.
-   """
-   eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
-   """
-   */
-   """
-   eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt
-   parse_snp_cov.py ${strandedness}_eigenstrat_coverage.txt
-   """
- }
- 
+  label 'mc_tiny'
+  tag "${strandedness}"
+  publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
+  
+  when:
+  params.run_genotyping && params.genotyping_tool == 'pileupcaller'
+  
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") from ch_for_eigenstrat_snp_coverage.dump(tag:'eigenstrat_input')
+  
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.json") into ch_eigenstrat_snp_cov_for_multiqc
+  path("*_eigenstrat_coverage.txt")
+  
+  script:
+  /* 
+  The following code block can be swapped in once the eigenstratdatabasetools MultiQC module becomes available.
+  """
+  eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
+  """
+  */
+  """
+  eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt
+  parse_snp_cov.py ${strandedness}_eigenstrat_coverage.txt
+  """
+}
+
 process genotyping_angsd {
   label 'mc_small'
   tag "${samplename}"
@@ -2897,22 +2946,57 @@ process print_nuclear_contamination{
 /* --    METAGENOMICS-SPECIFIC ADDITIONAL STEPS     -- */
 /////////////////////////////////////////////////////////
 
+// Low entropy read filter to reduce input sequences of reads that are highly uninformative, and thus reduce runtime/false positives
+
+process metagenomic_complexity_filter {
+  label 'mc_small'
+  tag "${samplename}"
+  publishDir "${params.outdir}/metagenomic_complexity_filter/", mode: params.publish_dir_mode
+
+  when:
+  params.metagenomic_complexity_filter
+  
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(fastq) from ch_bam_filtering_for_metagenomic
+
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_lowcomplexityremoved.fq.gz") into ch_lowcomplexityfiltered_for_metagenomic
+  path("*_bbduk.stats") into ch_metagenomic_complexity_filter_for_multiqc
+
+  script:
+  """
+  bbduk.sh -Xmx${task.memory.toGiga()}g in=${fastq} threads=${task.cpus} entropymask=f entropy=${params.metagenomic_complexity_entropy} out=${fastq}_lowcomplexityremoved.fq.gz 2> ${fastq}_bbduk.stats
+  """
+
+}
+
+// metagenomic complexity filter bypass
+
+if ( params.metagenomic_complexity_filter ) {
+  ch_lowcomplexityfiltered_for_metagenomic
+    .set{ ch_filtered_for_metagenomic }
+} else {
+  ch_metagenomic_for_skipentropyfilter
+    .set{ ch_filtered_for_metagenomic }
+}
+
 // MALT is a super-fast BLAST replacement typically used for pathogen detection or microbiome profiling against large databases, here using off-target reads from mapping
 
 // As we collect all files for a all metagenomic runs, we DO NOT use the normal input/output tuple!
 if (params.metagenomic_tool == 'malt') {
-  ch_bam_filtering_for_metagenomic
-    .set {ch_bam_filtering_for_metagenomic_malt}
+  ch_filtered_for_metagenomic
+    .set {ch_input_for_metagenomic_malt}
 
-  ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
+  ch_input_for_metagenomic_kraken = Channel.empty()
 } else if (params.metagenomic_tool == 'kraken') {
-  ch_bam_filtering_for_metagenomic
-    .set {ch_bam_filtering_for_metagenomic_kraken}
+  ch_filtered_for_metagenomic
+    .set {ch_input_for_metagenomic_kraken}
 
-  ch_bam_filtering_for_metagenomic_malt = Channel.empty()
+  ch_input_for_metagenomic_malt = Channel.empty()
 } else if ( params.metagenomic_tool == '' ) {
-  ch_bam_filtering_for_metagenomic_malt = Channel.empty()
-  ch_bam_filtering_for_metagenomic_kraken = Channel.empty()
+  ch_input_for_metagenomic_malt = Channel.empty()
+  ch_input_for_metagenomic_kraken = Channel.empty()
 
 }
 
@@ -2925,7 +3009,7 @@ process malt {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'malt'
 
   input:
-  file fastqs from ch_bam_filtering_for_metagenomic_malt.map { it[7] }.collect()
+  file fastqs from ch_input_for_metagenomic_malt.map { it[7] }.collect()
   file db from ch_db_for_malt
 
   output:
@@ -3043,7 +3127,7 @@ process kraken {
   params.run_metagenomic_screening && params.run_bam_filtering && params.bam_unmapped_type == 'fastq' && params.metagenomic_tool == 'kraken'
 
   input:
-  path(fastq) from ch_bam_filtering_for_metagenomic_kraken.map { it[7] }
+  path(fastq) from ch_input_for_metagenomic_kraken.map { it[7] }
   path(krakendb) from ch_krakendb
 
   output:
@@ -3165,6 +3249,8 @@ process get_software_versions {
     pileupCaller --version &> v_sequencetools.txt 2>&1 || true
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
     eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
+    mapDamage2 --version > v_mapdamage.txt || true
+    bbduk.sh | grep 'Last modified' | cut -d' ' -f 3-99 > v_bbduk.txt || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -3198,6 +3284,7 @@ process multiqc {
     file ('mutnucratio/*') from ch_mtnucratio_for_multiqc.collect().ifEmpty([])
     file ('endorspy/*') from ch_endorspy_for_multiqc.collect().ifEmpty([])
     file ('multivcfanalyzer/*') from ch_multivcfanalyzer_for_multiqc.collect().ifEmpty([])
+    file ('fastp_lowcomplexityfilter/*') from ch_metagenomic_complexity_filter_for_multiqc.collect().ifEmpty([])
     file ('malt/*') from ch_malt_for_multiqc.collect().ifEmpty([])
     file ('kraken/*') from ch_kraken_for_multiqc.collect().ifEmpty([])
     file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
@@ -3391,7 +3478,7 @@ def checkHostname() {
 def extract_data(tsvFile) {
     Channel.fromPath(tsvFile)
         .splitCsv(header: true, sep: '\t')
-        .dump()
+        .dump(tag:'tsv_extract')
         .map { row ->
 
             def expected_keys = ['Sample_Name', 'Library_ID', 'Lane', 'Colour_Chemistry', 'SeqType', 'Organism', 'Strandedness', 'UDG_Treatment', 'R1', 'R2', 'BAM']
