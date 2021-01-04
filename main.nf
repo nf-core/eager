@@ -819,6 +819,8 @@ Channel.from(summary.collect{ [it.key, it.value] })
     """.stripIndent() }
     .set { ch_workflow_summary }
 
+log.info "Schaffa, Schaffa, Genome Baua!"
+
 ///////////////////////////////////////////////////
 /* --          REFERENCE FASTA INDEXING       -- */
 ///////////////////////////////////////////////////
