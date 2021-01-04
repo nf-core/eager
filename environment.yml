@@ -18,7 +18,7 @@ dependencies:
   - bioconda::bwa=0.7.17
   - bioconda::picard=2.22.9
   - bioconda::samtools=1.9
-  - bioconda::dedup=0.12.7
+  - bioconda::dedup=0.12.8
   - bioconda::angsd=0.933
   - bioconda::circularmapper=1.93.5
   - bioconda::gatk4=4.1.7.0
@@ -47,3 +47,6 @@ dependencies:
   - conda-forge::xopen=0.9.0
   - bioconda::bowtie2=2.4.1
   - bioconda::eigenstratdatabasetools=1.0.2
+  - bioconda::mapdamage2=2.2.0
+  - bioconda::bbmap=38.87
+

@@ -289,6 +289,8 @@ Alternatively to the [direct input method](#direct-input-method), you can supply
   <img src="https://github.com/nf-core/eager/raw/master/docs/images/usage/merging_files.png" alt="Schematic diagram indicating merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
 </p>
 
+> Only different libraries from a single sample that have been BAM trimmed will be merged together. Rescaled or PMD filtered libraries will not be merged prior genotyping as each library _may_ have a different model applied to it and have their own biases (i.e. users may need to play around with settings to get the damage-removal optimal).
+
 The use of the TSV `--input` method is recommended when performing more complex procedures such as lane or library merging. You do not need to specify `--single_end`, `--bam`, `--colour_chemistry`, `-udg_type` etc. when using TSV input - this is defined within the TSV file itself. You can only supply a single TSV per run (i.e. `--input '*.tsv'` will not work).
 
 This TSV should look like the following:
