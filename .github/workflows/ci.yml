@@ -145,6 +145,7 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_pmdtools
       - name: GENOTYPING_UG AND BOWTIE2 Test running bowtie2 mapping and genotyping to check valid output for GATK
+        run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'bowtie2' --bt2_alignmode 'local' --bt2_sensitivity 'sensitive' --bt2n 1 --bt2l 16 --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
       - name: GENOTYPING_UG AND MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
         run: |
