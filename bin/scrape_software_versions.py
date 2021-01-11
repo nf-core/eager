@@ -76,7 +76,6 @@ results['eigenstrat_snp_coverage'] = '<span style="color:#999999;\">N/A</span>'
 results['mapDamage2'] = '<span style="color:#999999;\">N/A</span>'
 results['bbduk'] = '<span style="color:#999999;\">N/A</span>'
 
-
 # Search each file using its regex
 for k, v in regexes.items():
     try:

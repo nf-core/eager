@@ -1021,7 +1021,7 @@ process indexinputbam {
 // Raw sequencing QC - allow user evaluate if sequencing any good?
 
 process fastqc {
-    label 'sc_small'
+    label 'mc_small'
     tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/fastqc/input_fastq", mode: params.publish_dir_mode,
         saveAs: { filename ->
@@ -1435,7 +1435,7 @@ process lanemerge_hostremoval_fastq {
 // Post-preprocessing QC to help user check pre-processing removed all sequencing artefacts
 
 process fastqc_after_clipping {
-    label 'sc_small'
+    label 'mc_small'
     tag "${libraryid}_L${lane}"
     publishDir "${params.outdir}/fastqc/after_clipping", mode: params.publish_dir_mode,
         saveAs: { filename ->
