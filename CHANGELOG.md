@@ -3,6 +3,30 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2021-01-11 - "Aalen"
+
+### `Added`
+
+- [#640](https://github.com/nf-core/eager/issues/640) - Added a pre-metagenomic screening filtering of low-sequence complexity reads with `bbduk`
+- [#583](https://github.com/nf-core/eager/issues/583) - Added `mapDamage2` rescaling of BAM files to remove damage
+- Updated usage (merging files) and workflow images reflecting new functionality.
+
+### `Fixed`
+
+- Removed leftover old DockerHub push CI commands.
+- [#627](https://github.com/nf-core/eager/issues/627) - Added de Barros Damgaard citation to README
+- [#630](https://github.com/nf-core/eager/pull/630) - Better handling of Qualimap memory requirements and error strategy.
+- Fixed some incomplete schema options to ensure users supply valid input values
+- [#638](https://github.com/nf-core/eager/issues/638#issuecomment-748877567) Fixed inverted circularfilter filtering (previously filtering would happen by default, not when requested by user as originally recorded in documentation)
+- [DeDup:](https://github.com/apeltzer/DeDup/commit/07d47868f10a6830da8c9161caa3755d9da155bf) Fixed Null Pointer Bug in DeDup by updating to 0.12.8 version
+- [#650](https://github.com/nf-core/eager/pull/650) - Increased memory given to FastQC for larger files by making it multithreaded
+
+### `Dependencies`
+
+- Update: DeDup v0.12.7 to v0.12.8
+
+### `Deprecated`
+
 ## [2.2.2] - 2020-12-09
 
 ### `Added`

@@ -22,10 +22,42 @@
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible. The pipeline pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
 <p align="center">
-    <img src="docs/images/output/overview/eager2_workflow.png" alt="nf-core/eager schematic workflow" width="70%"
+    <img src="docs/images/usage/eager2_workflow.png" alt="nf-core/eager schematic workflow" width="70%"
 </p>
 
-## Pipeline steps
+## Quick Start
+
+1. Install [`nextflow`](https://nf-co.re/usage/installation) (version >= 20.04.0)
+
+2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`Podman`](https://podman.io/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
+
+3. Download the pipeline and test it on a minimal dataset with a single command:
+
+    ```bash
+    nextflow run nf-core/eager -profile test_tsv,<docker/singularity/podman/conda/institute>
+    ```
+
+    > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
+
+4. Start running your own analysis!
+
+    ```bash
+    nextflow run nf-core/eager -profile <docker/singularity/podman/conda/institute> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+    ```
+
+5. Once your run has completed successfully, clean up the intermediate files.
+
+    ```bash
+    nextflow clean -f -k
+    ```
+
+See [usage docs](https://nf-co.re/eager/docs/usage.md) for all of the available options when running the pipeline.
+
+**N.B.** You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
+
+Modifications to the default pipeline are easily made using various options as described in the documentation.
+
+## Pipeline Summary
 
 ### Default Steps
 
@@ -77,6 +109,7 @@ Additional functionality contained by the pipeline currently includes:
 
 #### Metagenomic Screening
 
+* Low-sequenced complexity filtering (`BBduk`)
 * Taxonomic binner with alignment (`MALT`)
 * Taxonomic binner without alignment (`Kraken2`)
 * aDNA characteristic screening of taxonomically binned data from MALT (`MaltExtract`)
@@ -86,50 +119,8 @@ Additional functionality contained by the pipeline currently includes:
 A graphical overview of suggested routes through the pipeline depending on context can be seen below.
 
 <p align="center">
-    <img src="docs/images/output/overview/eager2_metromap_complex.png" alt="nf-core/eager metro map" width="70%"
+    <img src="docs/images/usage/eager2_metromap_complex.png" alt="nf-core/eager metro map" width="70%"
 </p>
-
-## Quick Start
-
-1. Install [`nextflow`](https://nf-co.re/usage/installation) (version >= 20.04.0)
-
-2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`Podman`](https://podman.io/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
-
-3. Download the pipeline and test it on a minimal dataset with a single command:
-
-    ```bash
-    nextflow run nf-core/eager -profile test,<docker/singularity/podman/conda/institute>
-    ```
-
-    > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
-
-4. Start running your own analysis!
-
-    ```bash
-    nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
-    ```
-
-5. Once your run has completed successfully, clean up the intermediate files.
-
-    ```bash
-    nextflow clean -f -k
-    ```
-
-See [usage docs](https://nf-co.re/eager/docs/usage.md) for all of the available options when running the pipeline.
-
-**N.B.** You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
-
-Modifications to the default pipeline are easily made using various options
-as described in the documentation.
-
-## Pipeline Summary
-
-By default, the pipeline currently performs the following:
-
-<!-- TODO nf-core: Fill in short bullet-pointed list of default steps of pipeline -->
-
-* Sequencing quality control (`FastQC`)
-* Overall pipeline run summaries (`MultiQC`)
 
 ## Documentation
 
@@ -236,6 +227,8 @@ In addition, references of tools and data used in this pipeline are as follows:
 * **Bowtie2**  Langmead, B. and Salzberg, S. L. 2012 Fast gapped-read alignment with Bowtie 2. Nature methods, 9(4), p. 357–359. doi: [10.1038/nmeth.1923](https:/dx.doi.org/10.1038/nmeth.1923).
 * **sequenceTools** Stephan Schiffels (Unpublished). Download: [https://github.com/stschiff/sequenceTools](https://github.com/stschiff/sequenceTools)
 * **EigenstratDatabaseTools** Thiseas C. Lamnidis (Unpublished). Download: [https://github.com/TCLamnidis/EigenStratDatabaseTools.git](https://github.com/TCLamnidis/EigenStratDatabaseTools.git)
+* **mapDamage2** Jónsson, H., et al 2013. mapDamage2.0: fast approximate Bayesian estimates of ancient DNA damage parameters. Bioinformatics , 29(13), 1682–1684. [https://doi.org/10.1093/bioinformatics/btt193](https://doi.org/10.1093/bioinformatics/btt193)
+* **BBduk** Brian Bushnell (Unpublished). Download: [https://sourceforge.net/projects/bbmap/](sourceforge.net/projects/bbmap/)
 
 ## Data References
 
@@ -244,3 +237,4 @@ This repository uses test data from the following studies:
 * Fellows Yates, J. A. et al. (2017) ‘Central European Woolly Mammoth Population Dynamics: Insights from Late Pleistocene Mitochondrial Genomes’, Scientific reports, 7(1), p. 17714. [doi: 10.1038/s41598-017-17723-1](https://doi.org/10.1038/s41598-017-17723-1).
 * Gamba, C. et al. (2014) ‘Genome flux and stasis in a five millennium transect of European prehistory’, Nature communications, 5, p. 5257. [doi: 10.1038/ncomms6257](https://doi.org/10.1038/ncomms6257).
 * Star, B. et al. (2017) ‘Ancient DNA reveals the Arctic origin of Viking Age cod from Haithabu, Germany’, Proceedings of the National Academy of Sciences of the United States of America, 114(34), pp. 9152–9157. [doi: 10.1073/pnas.1710186114](https://doi.org/10.1073/pnas.1710186114).
+* de Barros Damgaard, P. et al. (2018). '137 ancient human genomes from across the Eurasian steppes.', Nature, 557(7705), 369–374. [doi: 10.1038/s41586-018-0094-2](https://doi.org/10.1038/s41586-018-0094-2)
