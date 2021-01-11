@@ -34,7 +34,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
     ```bash
-    nextflow run nf-core/eager -profile test,<docker/singularity/podman/conda/institute>
+    nextflow run nf-core/eager -profile test_tsv,<docker/singularity/podman/conda/institute>
     ```
 
     > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
@@ -42,7 +42,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 4. Start running your own analysis!
 
     ```bash
-    nextflow run nf-core/eager -profile <docker/singularity/conda> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
+    nextflow run nf-core/eager -profile <docker/singularity/podman/conda/institute> --input '*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'
     ```
 
 5. Once your run has completed successfully, clean up the intermediate files.
