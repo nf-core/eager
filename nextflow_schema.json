@@ -587,29 +587,33 @@
                 "bt2n": {
                     "type": "integer",
                     "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity.",
-                    "default": "0",
+                    "default": 0,
                     "fa_icon": "fas fa-sort-numeric-down",
-                    "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).\n\n> Modifies Bowtie2 parameters: `-N`"
+                    "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).\n\n> Modifies Bowtie2 parameters: `-N`",
+                    "enum": [
+                        0,
+                        1
+                    ]
                 },
                 "bt2l": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity.",
                     "fa_icon": "fas fa-ruler-horizontal",
-                    "default": "0",
                     "help_text": "The length of the seed sub-string to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).\n\n> Modifies Bowtie2 parameters: `-L`"
                 },
                 "bt2_trim5": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Specify number of bases to trim off from 5' (left) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
-                    "default": "0",
                     "help_text": "Number of bases to trim at the 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0\n\n> Modifies Bowtie2 parameters: `-bt2_trim5`"
                 },
                 "bt2_trim3": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Specify number of bases to trim off from 3' (right) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
-                    "default": "0",
                     "help_text": "Number of bases to trim at the 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.\n\n> Modifies Bowtie2 parameters: `-bt2_trim3`"
                 }
             },
@@ -658,15 +662,15 @@
                 "bam_mapping_quality_threshold": {
                     "type": "integer",
                     "description": "Minimum mapping quality for reads filter.",
-                    "default": "0",
+                    "default": 0,
                     "fa_icon": "fas fa-greater-than-equal",
                     "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).\n\n> Modifies samtools view parameter: `-q`"
                 },
                 "bam_filter_minreadlength": {
                     "type": "integer",
+                    "default": 0,
                     "fa_icon": "fas fa-ruler-horizontal",
                     "description": "Specify minimum read length to be kept after mapping.",
-                    "default": "0",
                     "help_text": "Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.\n\nIf used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artificially small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct denominator of all reads, for the endogenous DNA calculation.\n\n> Modifies filter_bam_fragment_length.py parameter: `-l`"
                 },
                 "bam_unmapped_type": {
@@ -851,28 +855,28 @@
                 },
                 "bamutils_clip_half_udg_left": {
                     "type": "integer",
-                    "default": "1",
+                    "default": 1,
                     "fa_icon": "fas fa-ruler-combined",
                     "description": "Specify the number of bases to clip off reads from 'left' end of read for half-UDG libraries.",
                     "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
                 },
                 "bamutils_clip_half_udg_right": {
                     "type": "integer",
-                    "default": "1",
+                    "default": 1,
                     "fa_icon": "fas fa-ruler",
                     "description": "Specify the number of bases to clip off reads from 'right' end of read for half-UDG libraries.",
                     "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
                 },
                 "bamutils_clip_none_udg_left": {
                     "type": "integer",
-                    "default": "1",
+                    "default": 1,
                     "fa_icon": "fas fa-ruler-combined",
                     "description": "Specify the number of bases to clip off reads from 'left' end of read for non-UDG libraries.",
                     "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
                 },
                 "bamutils_clip_none_udg_right": {
                     "type": "integer",
-                    "default": "1",
+                    "default": 1,
                     "fa_icon": "fas fa-ruler",
                     "description": "Specify the number of bases to clip off reads from 'right' end of read for non-UDG libraries.",
                     "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
@@ -1023,9 +1027,9 @@
                 },
                 "freebayes_g": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C.",
                     "fa_icon": "fab fa-think-peaks",
-                    "default": "0",
                     "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.\n\n> Modifies freebayes parameter: `-g`"
                 },
                 "freebayes_p": {
