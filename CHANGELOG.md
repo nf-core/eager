@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
- - [#655](https://github.com/nf-core/eager/issues/655) - Updated read groups for all mappers to allow proper GATK validation
+- [#655](https://github.com/nf-core/eager/issues/655) - Updated read groups for all mappers to allow proper GATK validation
 
 ### `Dependencies`
 
