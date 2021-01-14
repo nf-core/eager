@@ -160,6 +160,7 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 
 * Arielle Munters
 * [Hester van Schalkwyk](https://github.com/hesterjvs)
+* [Ido Bar](https://github.com/IdoBar)
 * [Irina Velsko](https://github.com/ivelsko)
 * [Katerine Eaton](https://github.com/ktmeaton)
 * [Luc Venturini](https://github.com/lucventurini)
