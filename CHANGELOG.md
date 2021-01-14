@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- [#631](https://github.com/nf-core/eager/issues/631): - Update minimum Nextflow version to 20.07.1, due to unfortunate bug in Nextflow 20.04.1 causing eager to crash if patch pulled
+
 ### `Dependencies`
 
 ### `Deprecated`
