@@ -3,13 +3,15 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.3.1] - 2021-14                                                         
+## [2.3.1] - 2021-01-14                                                         
 
 ### `Added`
 
 ### `Fixed`
 
-- Fixed issue with Docker container not being pullable by Nextflow
+- [#654](https://github.com/nf-core/eager/issues/654) - Fixed some values in JSON schema (used in launch GUI) not passing validation checks during run
+- [#655](https://github.com/nf-core/eager/issues/655) - Updated read groups for all mappers to allow proper GATK validation
+- Fixed issue with Docker container not being pullable by Nextflow due to version-number inconsistencies
 
 ### `Dependencies`
 
