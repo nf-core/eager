@@ -472,7 +472,7 @@
                 },
                 "skip_collapse": {
                     "type": "boolean",
-                    "description": "Skip of merging forward and reverse reads together. Only applicable for paired-end libraries.",
+                    "description": "Skip of merging forward and reverse reads together and turns on paired-end alignment. Only applicable for paired-end libraries.",
                     "fa_icon": "fas fa-fast-forward",
                     "help_text": "Turns off the paired-end read merging.\n\nFor example\n\n```bash\n--skip_collapse  --input '*_{R1,R2}_*.fastq'\n```\n\nIt is important to use the paired-end wildcard globbing as `--skip_collapse` can only be used on paired-end data!\n\n:warning: If you run this and also with `--clip_readlength` set to something (as is by default), you may end up removing single reads from either the pair1 or pair2 file. These will be NOT be mapped when aligning with either `bwa` or `bowtie`, as both can only accept one (forward) or two (forward and reverse) FASTQs as input.\n\n> Modifies AdapterRemoval parameter: `--collapse`"
                 },
