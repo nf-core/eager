@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### `Added`
+
+### `Fixed`
+
+- [#666](https://github.com/nf-core/eager/issues/666) - Fixed input file staging for `print_nuclear_contamination`
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.3.1] - 2021-01-14
 
 ### `Added`
