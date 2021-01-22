@@ -159,6 +159,7 @@ of this pipeline:
 Those who have provided conceptual guidance, suggestions, bug reports etc.
 
 * Arielle Munters
+* [Åshild Vågene](https://github.com/ashildv)
 * [Hester van Schalkwyk](https://github.com/hesterjvs)
 * [Ido Bar](https://github.com/IdoBar)
 * [Irina Velsko](https://github.com/ivelsko)
