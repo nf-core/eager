@@ -1,4 +1,4 @@
-# ![nf-core/eager](docs/images/nf-core-eager_logo.png)
+# ![nf-core/eager](docs/images/nf-core_eager_logo.png)
 
 **A fully reproducible and state-of-the-art ancient DNA analysis pipeline**.
 
