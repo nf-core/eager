@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.3.2] - Unreleased
+
+### `Added`
+
+### `Fixed`
+
+- Made MultiQC crash behaviour stricter when dealing with large datasets, as repoted by @ashildv
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.3.1] - 2021-01-14
 
 ### `Added`
