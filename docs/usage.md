@@ -413,6 +413,14 @@ they are unique (e.g. if one library was sequenced on Lane 8 of two HiSeq runs,
 specify lanes as 8 and 16 for each FASTQ file respectively). For library merging
 errors, you must modify your `Library_ID`s accordingly, to make them unique.
 
+### A library or sample is missing in my MultiQC report
+
+In some cases it maybe no output log is produced by a particular tool for MultiQC. Therefore this sample will not be displayed.
+
+Known cases include: 
+
+- Qualimap: there will be no MultiQC output if the BAM file is empty. An empty BAM file causes Qualimap to crash - this is crash is ignored by nf-core/eager (to allow the rest of the pipeline to continue) and will therefore have no log file for that particular sample/library
+
 ## Tutorials
 
 ### Tutorial - How to investigate a failed run
