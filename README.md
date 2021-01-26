@@ -1,4 +1,4 @@
-# ![nf-core/eager](docs/images/nf-core-eager_logo.png)
+# ![nf-core/eager](docs/images/nf-core_eager_logo.png)
 
 **A fully reproducible and state-of-the-art ancient DNA analysis pipeline**.
 
@@ -159,7 +159,8 @@ of this pipeline:
 Those who have provided conceptual guidance, suggestions, bug reports etc.
 
 * Arielle Munters
-* [Charles Plessey](https://github.com/charles-plessey)
+* [Charles Plessey](https://github.com/charles-plessy)
+* [Åshild Vågene](https://github.com/ashildv)
 * [Hester van Schalkwyk](https://github.com/hesterjvs)
 * [Ido Bar](https://github.com/IdoBar)
 * [Irina Velsko](https://github.com/ivelsko)
