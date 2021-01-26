@@ -2932,7 +2932,7 @@ process print_nuclear_contamination{
     params.run_nuclear_contamination
 
     input:
-    path 'Contam' from ch_from_nuclear_contamination.map { it[7] }.collect()
+    path Contam from ch_from_nuclear_contamination.map { it[7] }.collect()
 
     output:
     file 'nuclear_contamination.txt'
