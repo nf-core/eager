@@ -1158,6 +1158,7 @@ process adapter_removal {
     //This checks whether we skip trimming and defines a variable respectively
     def trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
     def collapse_me = params.skip_collapse ? '' : '--collapse'
+    def do_5p = params.preserve5p ? 'do_5p' : 'no_5p'
     def preserve5p = params.preserve5p ? '--preserve5p' : ''
     def mergedonly = params.mergedonly ? "Y" : "N"
     
@@ -1168,9 +1169,9 @@ process adapter_removal {
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
     
     #Combine files
-    if [[ ${preserve5p}  = "--preserve5p" ]] && [[ ${mergedonly} = "N" ]]; then 
+    if [[ ${do_5p}  = "do_5p" ]] && [[ ${mergedonly} = "N" ]]; then 
       cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    elif [[ ${preserve5p}  = "--preserve5p" ]] && [[ ${mergedonly} = "Y" ]] ; then
+    elif [[ ${do_5p}  = "do_5p" ]] && [[ ${mergedonly} = "Y" ]] ; then
       cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     elif [[ ${mergedonly} = "Y" ]] ; then
       cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
