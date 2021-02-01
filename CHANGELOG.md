@@ -3,6 +3,21 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [dev] - unreleased
+
+### `Added`
+
+### `Fixed`
+
+- [#666](https://github.com/nf-core/eager/issues/666) - Fixed input file staging for `print_nuclear_contamination`
+- [#631](https://github.com/nf-core/eager/issues/631): - Update minimum Nextflow version to 20.07.1, due to unfortunate bug in Nextflow 20.04.1 causing eager to crash if patch pulled
+- Made MultiQC crash behaviour stricter when dealing with large datasets, as reported by @ashildv
+- Added note to documentation that when using `--skip_collapse` this will use _paired-end_ alignment mode with mappers when using PE data.  `
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.3.1] - 2021-01-14
 
 ### `Added`
