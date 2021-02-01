@@ -3115,7 +3115,7 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
   }
 
 } else if (! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening && params.metagenomic_tool == 'kraken') {
-    ch_krakendb = path(params.database)
+    ch_krakendb = Channel.fromPath(params.database)
 } else {
     ch_krakendb = Channel.empty()
 }
