@@ -3108,9 +3108,11 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
     path(dbname) into ch_krakendb
     
     script:
-    dbname = params.database.toString() - '.tar.gz'
+    dbname = ckdb.toString() - '.tar.gz'
     """
     tar xvzf $ckdb
+    mkdir -p $dbname
+    mv *.k2d $dbname
     """
   }
 
