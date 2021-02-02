@@ -3112,7 +3112,7 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
     """
     tar xvzf $ckdb
     mkdir -p $dbname
-    mv *.k2d $dbname
+    mv *.k2d $dbname || echo "nothing to do"
     """
   }
 
