@@ -3108,14 +3108,16 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
     path(dbname) into ch_krakendb
     
     script:
-    dbname = params.database.tokenize("/")[-1].tokenize(".")[0]
+    dbname = ckdb.toString() - '.tar.gz'
     """
     tar xvzf $ckdb
+    mkdir -p $dbname
+    mv *.k2d $dbname || echo "nothing to do"
     """
   }
 
 } else if (! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening && params.metagenomic_tool == 'kraken') {
-    ch_krakendb = path(params.database)
+    ch_krakendb = Channel.fromPath(params.database).first()
 } else {
     ch_krakendb = Channel.empty()
 }
