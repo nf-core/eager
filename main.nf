@@ -1170,9 +1170,9 @@ process adapter_removal {
     #Combine files
     if [[ ${preserve5p}  = "--preserve5p" ]] && [[ ${mergedonly} = "N" ]]; then 
       cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    elif [[ ${preserve5p}  = "--preserve5p" ]] && [[ ${mergedonly} = "Y" ]] ; then
+    elif [[ ${preserve5p}  = "--preserve5p" ]] && [[ ${mergedonly} = "Y" ]]; then
       cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
-    elif [[ ${mergedonly} = "Y" ]] ; then
+    elif [[ ${mergedonly} = "Y" ]]; then
       cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
     else
       cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
@@ -1180,7 +1180,7 @@ process adapter_removal {
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
     AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
-   
+
     mv *.settings output/
     """
     //PE, don't collapse, but trim reads
