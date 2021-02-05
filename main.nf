@@ -260,9 +260,12 @@ if (params.help){
 // Small console separator to make it easier to read errors after launch
 println ""
 
+
+
 ////////////////////////////////////////////////////
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
+
 /**FASTA input handling
 **/ 
 
@@ -366,6 +369,11 @@ if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.singl
     exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
 }
 
+// Validate not trying to both skip collapse and skip trim
+if ( params.skip_collapse && params.skip_trim ) {
+  exit 1, "[nf-core/eager error]: you have specified to skip both merging and trimming of paired end samples. Use --skip_adapterremoval instead."
+}
+
 // Host removal mode validation
 if (params.hostremoval_input_fastq){
     if (!(['remove','replace'].contains(params.hostremoval_mode))) {
@@ -386,7 +394,8 @@ if(params.run_bedtools_coverage && params.anno_file == ''){
 if (!params.run_bedtools_coverage){
   ch_anno_for_bedtools = Channel.empty()
 } else {
-  Channel
+  ChannelAdapterRemoval --file1 JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz --file2 JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz --basename JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq_L1.pe --gzip --threads 2 --collapse 
+
     ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
     .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --anno_file ${params.anno_file}."}
 }
@@ -957,7 +966,7 @@ process makeSeqDict {
 
     script:
     """
-    picard -Xmx${task.memory.toMega()}M CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M CreateSequenceDictionary R=$fasta O="${fasta.baseName}.dict"
     """
 }
 
@@ -1156,64 +1165,76 @@ process adapter_removal {
     script:
     base = "${r1.baseName}_L${lane}"
     //This checks whether we skip trimming and defines a variable respectively
-    def trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
-    def collapse_me = params.skip_collapse ? '' : '--collapse'
-    def do_5p = params.preserve5p ? 'do_5p' : 'no_5p'
-    def preserve5p = params.preserve5p ? '--preserve5p' : ''
-    def mergedonly = params.mergedonly ? "Y" : "N"
+    def preserve5p = params.preserve5p ? '--preserve5p' : '' // applies to any AR command - doesn't affect output file combination
     
-    //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
-    if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim ){
+    //PE mode, collapse and trim, outputting all reads
+    // TODO: BROKEN WITH PREERVE5p, NEED UNIQUE IFELSE WITHOUT COLLAPSED.TRUNCATED.
+    if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly ){
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
     
-    #Combine files
-    if [[ "$do_5p"  == "do_5p" ]] && [[ ${mergedonly} == "N" ]]; then 
-      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    elif [[ "$do_5p"  == "do_5p" ]] && [[ ${mergedonly} == "Y" ]]; then
-      cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
-    elif [[ ${mergedonly} == "Y" ]]; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    fi
-
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
     AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
 
     mv *.settings output/
     """
-    //PE, don't collapse, but trim reads
-    } else if ( seqtype == 'PE' && params.skip_collapse && !params.skip_trim ) {
+    // PE mode, collapse and trim but only output collapsed reads
+    } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
-    mv *.settings ${base}.pe.pair*.truncated.gz output/
-    """
-    //PE, collapse, but don't trim reads
-    } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
-    """
-    mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${collapse_me} ${trim_me}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
     
-    if [[ ${mergedonly} == "Y" ]]; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.pe.combined.tmp.fq.gz
-    fi
+    ## Add R_ and L_ for unmerged reads for DeDup compatibility
+    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
 
+    mv *.settings output/
+    """
+    // PE mode, collapsing but skip trim, (output all reads). Note: seems to still generate `truncated` files for some reason, so merging for safety.
+    // Will still do default AR length filtering I guess
+    } else if ( seqtype == 'PE'  && !params.skip_collapse && params.skip_trim && !params.mergedonly ) {
+    """
+    mkdir -p output
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p}  --adapter1 "" --adapter2 ""
+    cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.pe.combined.tmp.fq.gz
+    
+    ## Add R_ and L_ for unmerged reads for DeDup compatibility
+    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
+
+    mv *.settings output/
+    """
+    // PE mode, collapsing but skip trim, and only output collapsed reads. Note: seems to still generate `truncated` files for some reason, so merging for safety.
+    // Will still do default AR length filtering I guess
+    } else if ( seqtype == 'PE'  && !params.skip_collapse && params.skip_trim && params.mergedonly ) {
+    """
+    mkdir -p output
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p}  --adapter1 "" --adapter2 ""
+    cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    
+    ## Add R_ and L_ for unmerged reads for DeDup compatibility
+    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
+
+    mv *.settings output/
+    """
+    // PE mode, skip collapsing but trim (output all reads, as merging not possible) - activates paired-end mapping!
+    } else if ( seqtype == 'PE'  && params.skip_collapse && !params.skip_trim ) {
+    """
+    mkdir -p output
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
     AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
 
     mv *.settings output/
     """
     } else if ( seqtype != 'PE' ) {
-    //SE, collapse not possible, trim reads
+    //SE, collapse not possible, trim reads only
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
-    
+    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     mv *.settings *.se.truncated.gz output/
     """
     }
@@ -2100,7 +2121,7 @@ process markduplicates{
       mv ${bam} ${libraryid}.bam
     fi
 
-    picard -Xmx${task.memory.toMega()}M MarkDuplicates INPUT=${libraryid}.bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=${libraryid}.bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
     samtools index ${libraryid}_rmdup.bam ${size}
     """
 }
@@ -2933,7 +2954,7 @@ process print_nuclear_contamination{
     params.run_nuclear_contamination
 
     input:
-    path Contam from ch_from_nuclear_contamination.map { it[7] }.collect()
+    val 'Contam' from ch_from_nuclear_contamination.map { it[7] }.collect()
 
     output:
     file 'nuclear_contamination.txt'
