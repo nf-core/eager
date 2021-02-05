@@ -483,6 +483,11 @@ ch_fastq_channel
 def summary_params = Schema.params_summary_map(workflow, params, json_schema)
 log.info Schema.params_summary_log(workflow, params, json_schema)
 
+// Check that conda channels are set-up correctly
+if (params.enable_conda) {
+    Checks.check_conda_channels(log)
+}
+
 // Check AWS batch settings
 Checks.aws_batch(workflow, params)
 
