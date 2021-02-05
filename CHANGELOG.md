@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#676](https://github.com/nf-core/eager/issues/676) - Added Lib Checks and automatic help message / summary message formatting
+
 ### `Fixed`
 
 - [#666](https://github.com/nf-core/eager/issues/666) - Fixed input file staging for `print_nuclear_contamination`
