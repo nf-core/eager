@@ -15,6 +15,8 @@
 /* --                SET UP CONFIGURATION VARIABLES                       -- */
 ///////////////////////////////////////////////////////////////////////////////
 
+params.summary_params = [:]
+
 // Show help message
 params.help = false
 def json_schema = "$projectDir/nextflow_schema.json"
