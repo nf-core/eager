@@ -15,7 +15,8 @@
 /* --                SET UP CONFIGURATION VARIABLES                       -- */
 ///////////////////////////////////////////////////////////////////////////////
 
-params.summary_params = [:]
+//TODO: doesnt work as intended. 
+//params.summary_params = [:]
 
 // Show help message
 params.help = false
