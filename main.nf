@@ -29,9 +29,6 @@ if (params.help) {
 
 // Info required for completion email and summary
 def multiqc_report      = []
-def pass_percent_mapped = [:]
-def fail_percent_mapped = [:]
-
 
 // Small console separator to make it easier to read errors after launch
 println ""
@@ -2948,6 +2945,8 @@ process get_software_versions {
 }
 
 // MultiQC file generation for pipeline report
+def workflow_summary = Schema.params_summary_multiqc(workflow, summary_params)
+ch_workflow_summary = Channel.value(workflow_summary)
 
 process multiqc {
     label 'sc_medium'
@@ -2981,9 +2980,7 @@ process multiqc {
     file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
     file ('nuclear_contamination/*') from ch_nuclear_contamination_for_multiqc.collect().ifEmpty([])
     file ('genotyping/*') from ch_eigenstrat_snp_cov_for_multiqc.collect().ifEmpty([])
-
-    //TODO: Readd this to multiqc once we figured out how to do this in DSLV1
-    //file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
+    file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
     output:
     file "*multiqc_report.html" into ch_multiqc_report
@@ -3001,7 +2998,7 @@ process multiqc {
 // Send completion emails if requested, so user knows data is ready
 
 workflow.onComplete {
-    Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_percent_mapped)
+    Completion.email(workflow, params, summary_params, projectDir, log, multiqc_report)
     Completion.summary(workflow, params, log, fail_percent_mapped, pass_percent_mapped)
 }
 
