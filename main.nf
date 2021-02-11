@@ -11,14 +11,6 @@
 ============================================================================================================
 */
 
-////////////////////////////////////////////////////
-/* --         VALIDATE PARAMETERS              -- */
-////////////////////////////////////////////////////
-
-def unexpectedParams = []
-if (params.validate_params) {
-    unexpectedParams = Schema.validateParameters(params, json_schema, log)
-}
 
 // Show help message
 params.help = false
@@ -27,6 +19,15 @@ if (params.help) {
     def command = "nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'"
     log.info Schema.params_help(workflow, params, json_schema, command)
     exit 0
+}
+
+////////////////////////////////////////////////////
+/* --         VALIDATE PARAMETERS              -- */
+////////////////////////////////////////////////////
+
+def unexpectedParams = []
+if (params.validate_params) {
+    unexpectedParams = Schema.validateParameters(params, json_schema, log)
 }
 
 // Info required for completion email and summary

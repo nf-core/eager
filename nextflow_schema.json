@@ -269,7 +269,7 @@
                     "description": "Parameter used for checking conda channels to be set correctly."
                 },
                 "validate_params": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "true",
                     "description": "Boolean whether to validate parameters against the schema at runtime",
                     "fa_icon": "fab fa-angellist"
@@ -647,7 +647,8 @@
                     "help_text": "Read removal mode. Remove mapped reads completely (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)\n\n> Modifies extract_map_reads.py parameter: `-m`",
                     "enum": [
                         "strip",
-                        "replace"
+                        "replace", 
+                        "remove"
                     ]
                 }
             },
