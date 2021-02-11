@@ -11,12 +11,14 @@
 ============================================================================================================
 */
 
-///////////////////////////////////////////////////////////////////////////////
-/* --                SET UP CONFIGURATION VARIABLES                       -- */
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+/* --         VALIDATE PARAMETERS              -- */
+////////////////////////////////////////////////////
 
-//TODO: doesnt work as intended. 
-//params.summary_params = [:]
+def unexpectedParams = []
+if (params.validate_params) {
+    unexpectedParams = Schema.validateParameters(params, json_schema, log)
+}
 
 // Show help message
 params.help = false

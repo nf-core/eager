@@ -267,6 +267,12 @@
                     "type": "boolean",
                     "hidden": true,
                     "description": "Parameter used for checking conda channels to be set correctly."
+                },
+                "validate_params": {
+                    "type": "string",
+                    "default": "true",
+                    "description": "Boolean whether to validate parameters against the schema at runtime",
+                    "fa_icon": "fab fa-angellist"
                 }
             },
             "fa_icon": "fas fa-file-import",
