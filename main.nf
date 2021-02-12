@@ -3005,6 +3005,13 @@ workflow.onComplete {
     Completion.summary(workflow, params, log, fail_percent_mapped, pass_percent_mapped)
 }
 
+workflow.onError {
+    // Print unexpected parameters
+    for (p in unexpectedParams) {
+        log.warn "Unexpected parameter: ${p}"
+    }
+}
+
 /////////////////////////////////////
 /* --    AUXILARY FUNCTIONS     -- */
 /////////////////////////////////////
