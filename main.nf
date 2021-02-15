@@ -1166,36 +1166,40 @@ process adapter_removal {
     base = "${r1.baseName}_L${lane}"
     //This checks whether we skip trimming and defines a variable respectively
     def preserve5p = params.preserve5p ? '--preserve5p' : '' // applies to any AR command - doesn't affect output file combination
-    
+    def run_preserve5p = params.preserve5p ? 'T' : 'F'
+
     //PE mode, collapse and trim, outputting all reads
-    // TODO: BROKEN WITH PREERVE5p, NEED UNIQUE IFELSE WITHOUT COLLAPSED.TRUNCATED.
     if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly ){
     """
-    echo "+++dir"
     mkdir -p output
 
-    echo "+++ar"
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
-    cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    
-    echo "+++mv"
+   
+    if [[ "${run_preserve5p}" == 'T' ]]; then
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    else
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    fi
+
     mv *.settings output/
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    echo "+++arp"
     AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
 
-    echo "++comp"
     gzip output/${base}.pe.combined.fq
-
-    echo "+++done+++"
     """
     // PE mode, collapse and trim but only output collapsed reads
     } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly ) {
     """
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
-    cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    
+    
+    if [[ "${run_preserve5p}" == 'T' ]]; then
+      cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
+    else
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    fi
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
     AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
@@ -1207,7 +1211,14 @@ process adapter_removal {
     } else if ( seqtype == 'PE'  && !params.skip_collapse && params.skip_trim && !params.mergedonly ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p}  --adapter1 "" --adapter2 ""
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p} --adapter1 "" --adapter2 ""
+    
+    if [[ "${run_preserve5p}" == 'T' ]]; then
+      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    else
+      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    fi
+    
     cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.pe.combined.tmp.fq.gz
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
@@ -1221,7 +1232,12 @@ process adapter_removal {
     """
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p}  --adapter1 "" --adapter2 ""
-    cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    
+    if [[ "${run_preserve5p}" == 'T' ]]; then
+      cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
+    else
+      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    fi
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
     AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
@@ -1233,12 +1249,8 @@ process adapter_removal {
     """
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
-    cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
     
-    ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
-
-    mv *.settings output/
+    mv ${base}.pe.pair*.truncated.gz *.settings output/
     """
     } else if ( seqtype != 'PE' ) {
     //SE, collapse not possible, trim reads only
