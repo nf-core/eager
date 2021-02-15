@@ -27,7 +27,7 @@ if (params.help) {
 
 def unexpectedParams = []
 if (params.validate_params) {
-    unexpectedParams = Schema.validateParameters(params, json_schema, log)
+    unexpectedParams = NfcoreSchema.validateParameters(params, json_schema, log)
 }
 
 // Info required for completion email and summary
@@ -380,7 +380,6 @@ if ( params.maltextract_ncbifiles == '' ) {
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
-custom_runName = params.name
 if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
     custom_runName = workflow.runName
 }
@@ -2990,8 +2989,13 @@ process multiqc {
     file "*_data"
 
     script:
-    def rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
-    def rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
+    rtitle = ''
+    rfilename = ''
+    if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
+        rtitle = "--title \"${workflow.runName}\""
+        rfilename = "--filename " + workflow.runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report"
+    }
+    
     def custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
     multiqc -f $rtitle $rfilename $multiqc_config $custom_config_file .
