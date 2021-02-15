@@ -394,9 +394,7 @@ if(params.run_bedtools_coverage && params.anno_file == ''){
 if (!params.run_bedtools_coverage){
   ch_anno_for_bedtools = Channel.empty()
 } else {
-  ChannelAdapterRemoval --file1 JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz --file2 JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz --basename JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq_L1.pe --gzip --threads 2 --collapse 
-
-    ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
+  ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
     .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --anno_file ${params.anno_file}."}
 }
 
