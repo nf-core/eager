@@ -3490,6 +3490,18 @@ def extract_data(tsvFile) {
 
             checkNumberOfItem(row, 11)
 
+            if ( row.Sample_Name.isEmpty() ) exit 1, "[nf-core/eager] error: the Sample_Name column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Library_ID.isEmpty() ) exit 1, "[nf-core/eager] error: the Library_ID column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Lane.isEmpty() ) exit 1, "[nf-core/eager] error: the Lane column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Colour_Chemistry.isEmpty() ) exit 1, "[nf-core/eager] error: the Colour_Chemistry column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.SeqType.isEmpty() ) exit 1, "[nf-core/eager] error: the SeqType column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Organism.isEmpty() ) exit 1, "[nf-core/eager] error: the Organism column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Strandedness.isEmpty() ) exit 1, "[nf-core/eager] error: the Strandedness column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.UDG_Treatment.isEmpty() ) exit 1, "[nf-core/eager] error: the UDG_Treatment column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.R1.isEmpty() ) exit 1, "[nf-core/eager] error: the R1 column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.R2.isEmpty() ) exit 1, "[nf-core/eager] error: the R2 column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.BAM.isEmpty() ) exit 1, "[nf-core/eager] error: the BAM column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID
             def lane = row.Lane
@@ -3503,10 +3515,10 @@ def extract_data(tsvFile) {
             def bam = row.BAM.matches('NA') ? 'NA' : return_file(row.BAM)
 
             // check no empty metadata fields
-            if (samplename == '' || libraryid == '' || lane == '' || colour == '' || seqtype == '' || seqtype == '' || udg == '' || r1 == '' || r2 == '') exit 1, "[nf-core/eager] error: a field does not contain any information. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if (samplename == '' || libraryid == '' || lane == '' || colour == '' || seqtype == '' || organism == '' || strandedness == '' || udg == '' || r1 == '' || r2 == '' || bam == '') exit 1, "[nf-core/eager] error: a field/column does not contain any information. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
 
             // Check no 'empty' rows
-            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA') && bai.matches('NA')) exit 1, "[nf-core/eager] error: A row in your TSV appears to have all files defined as NA. See '--help' flag and documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
+            if (r1.matches('NA') && r2.matches('NA') && bam.matches('NA')) exit 1, "[nf-core/eager] error: A row in your TSV appears to have all files defined as NA. See '--help' flag and documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
 
             // Ensure BAMs aren't submitted with PE
             if (!bam.matches('NA') && seqtype.matches('PE')) exit 1, "[nf-core/eager] error: BAM input rows in TSV cannot be set as PE, only SE. See '--help' flag and documentation under 'running the pipeline' for more information. Check row for: ${samplename}"
