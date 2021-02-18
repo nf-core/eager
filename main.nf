@@ -17,7 +17,7 @@ params.help = false
 def json_schema = "$projectDir/nextflow_schema.json"
 if (params.help) {
     def command = "nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'"
-    log.info Schema.params_help(workflow, params, json_schema, command)
+    log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
     exit 0
 }
 
@@ -488,8 +488,8 @@ ch_fastq_channel
 /* --             HEADER LOG INFO             -- */
 ///////////////////////////////////////////////////
 
-def summary_params = Schema.params_summary_map(workflow, params, json_schema)
-log.info Schema.params_summary_log(workflow, params, json_schema)
+def summary_params = NfcoreSchema.params_summary_map(workflow, params, json_schema)
+log.info NfcoreSchema.params_summary_log(workflow, params, json_schema)
 
 // Check that conda channels are set-up correctly
 if (params.enable_conda) {
@@ -2947,7 +2947,7 @@ process get_software_versions {
 }
 
 // MultiQC file generation for pipeline report
-def workflow_summary = Schema.params_summary_multiqc(workflow, summary_params)
+def workflow_summary = NfcoreSchema.params_summary_multiqc(workflow, summary_params)
 ch_workflow_summary = Channel.value(workflow_summary)
 
 process multiqc {
