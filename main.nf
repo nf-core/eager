@@ -2115,21 +2115,27 @@ process dedup{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${libraryid}_rmdup.bam"), path("*.{bai,csi}") into ch_output_from_dedup, ch_dedup_for_libeval
 
     script:
-    def outname = "${bam.baseName}"
     def treat_merged = params.dedup_all_merged ? '-m' : ''
     def size = params.large_ref ? '-c' : ''
     
+    if ( bam.baseName != libraryid ) {
+      
+    // To make sure direct BAMs have a clean name
     """
-    ## To make sure direct BAMs have a clean name
-    if [[ "${bam}" != "${libraryid}.bam" ]]; then
-      mv ${bam} ${libraryid}.bam
-    fi
-    
+    mv ${bam} ${libraryid}.bam
     dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
     samtools index "${libraryid}"_rmdup.bam ${size}
     """
+    } else {
+    """
+    dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
+    mv *.log dedup.log
+    samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
+    samtools index "${libraryid}"_rmdup.bam ${size}
+    """
+    }
 }
 
 process markduplicates{
@@ -2149,7 +2155,6 @@ process markduplicates{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${libraryid}_rmdup.bam"), path("*.{bai,csi}") into ch_output_from_markdup, ch_markdup_for_libeval
 
     script:
-    def outname = "${bam.baseName}"
     def size = params.large_ref ? '-c' : ''
     """
     ## To make sure direct BAMs have a clean name
