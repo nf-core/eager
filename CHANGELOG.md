@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#673](https://github.com/nf-core/eager/pull/673) Fix Kraken database loading when loading from directory instead of compressed file.
 - [#688](https://github.com/nf-core/eager/issues/668) - Allow pipeline to complete, even if Qualimap crashes due to an empty or corrupt BAM file for one sample/library
 - [#683](https://github.com/nf-core/eager/pull/683) - Sets `--igenomes_ignore` to true by default, as rarely used by users currently and makes resolving configs less complex.
+- Added exit code `140` to re-tryable exit code list to account for certain scheduler wall-time limit fails.
 
 ### `Dependencies`
 
