@@ -3154,7 +3154,6 @@ process kraken_report_backward_compatibility {
 
   input:
   tuple val(prefix), path(kraken_r) from ch_kraken_report_backward_compatibility
-  path(krakendb) from ch_krakendb
 
   output:
   tuple prefix, path("*.kreport") into ch_kraken_for_multiqc
