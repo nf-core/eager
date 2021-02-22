@@ -1932,82 +1932,81 @@ process samtools_filter {
     shell:
     size = !{params.large_ref} ? '-c' : ''
     
-    if ( "${params.bam_unmapped_type}" == "keep" ) {
+    // Unmapped/MAPQ Filtering WITHOUT min-length filtering
+    if ( "${params.bam_unmapped_type}" == "keep"  && params.bam_filter_minreadlength == 0 ) {
         '''
-        ## Unmapped and MAPQ filtering
-        samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
-    } else if("${params.bam_unmapped_type}" == "discard"){
+    } else if ( "${params.bam_unmapped_type}" == "discard" && params.bam_filter_minreadlength == 0 ){
         '''
-        ## Unmapped and MAPQ filtering
-        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
-    } else if("${params.bam_unmapped_type}" == "bam"){
+    } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength == 0 ){
         '''
-        ## Unmapped and MAPQ filtering
         samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
-    } else if("${params.bam_unmapped_type}" == "fastq"){
+    } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength == 0 ){
         '''
-        ## Unmapped and MAPQ filtering
         samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
 
         ## FASTQ
         samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
         rm !{libraryid}.unmapped.bam
         '''
-    } else if("${params.bam_unmapped_type}" == "both"){
+    } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength == 0 ){
         '''
-        ## Unmapped and MAPQ filtering
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+        
+        ## FASTQ
+        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
+        '''
+    // Unmapped/MAPQ Filtering WITH min-length filtering
+    } else if ( "${params.bam_unmapped_type}" == "keep" && params.bam_filter_minreadlength != 0 ) {
+        '''
+        samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+        '''
+    } else if ( "${params.bam_unmapped_type}" == "discard" && params.bam_filter_minreadlength != 0 ){
+        '''
+        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+        '''
+    } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength != 0 ){
+        '''
         samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
         samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         samtools index !{libraryid}.filtered.bam !{size}
+        '''
+    } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength != 0 ){
+        '''
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+
+        ## FASTQ
+        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
+        rm !{libraryid}.unmapped.bam
+        '''
+    } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength != 0 ){
+        '''
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+        
+        ## FASTQ
         samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
         '''
     }
@@ -2119,7 +2118,6 @@ process dedup{
     def size = params.large_ref ? '-c' : ''
     
     if ( bam.baseName != libraryid ) {
-      
     // To make sure direct BAMs have a clean name
     """
     mv ${bam} ${libraryid}.bam
@@ -2156,15 +2154,21 @@ process markduplicates{
 
     script:
     def size = params.large_ref ? '-c' : ''
-    """
-    ## To make sure direct BAMs have a clean name
-    if [[ "${bam}" != "${libraryid}.bam" ]]; then
-      mv ${bam} ${libraryid}.bam
-    fi
 
+    if ( bam.baseName != libraryid ) {
+    // To make sure direct BAMs have a clean name
+    """
+    mv ${bam} ${libraryid}.bam
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=${libraryid}.bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
     samtools index ${libraryid}_rmdup.bam ${size}
     """
+    } else {
+    """
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=${libraryid}.bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools index ${libraryid}_rmdup.bam ${size}
+    """
+    }
+
 }
 
 // This is for post-deduplcation per-library evaluation steps _without_ any 
@@ -2953,11 +2957,7 @@ process sex_deterrmine {
     script:
     def filter = bed.getName() != 'nf-core_eager_dummy.txt' ? "-b $bed" : ''
     """
-    
-    for i in *.bam; do
-        echo \$i >> bamlist.txt
-    done
-  
+    ls *.bam >> bamlist.txt
     samtools depth -aa -q30 -Q30 $filter -f bamlist.txt | sexdeterrmine -f bamlist.txt > SexDet.txt
     """
 }
