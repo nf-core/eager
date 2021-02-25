@@ -159,6 +159,7 @@ of this pipeline:
 Those who have provided conceptual guidance, suggestions, bug reports etc.
 
 * Arielle Munters
+* [Charles Plessy](https://github.com/charles-plessy)
 * [Åshild Vågene](https://github.com/ashildv)
 * [Hester van Schalkwyk](https://github.com/hesterjvs)
 * [Ido Bar](https://github.com/IdoBar)
