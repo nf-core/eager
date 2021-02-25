@@ -1020,7 +1020,7 @@
                     ]
                 },
                 "gatk_ug_keep_realign_bam": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.",
                     "fa_icon": "fas fa-align-left",
                     "help_text": "If provided when running GATK's UnifiedGenotyper, this will put into the output folder the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping.\n\nThese BAMs will be stored in the same folder as the corresponding VCF files."
@@ -1358,7 +1358,6 @@
                     "type": "string",
                     "description": "Specify which classifier to use. Options: 'malt', 'kraken'.",
                     "fa_icon": "fas fa-tools",
-                    "default": "undefined",
                     "help_text": "Specify which taxonomic classifier to use. There are two options available:\n\n- `kraken` for [Kraken2](https://ccb.jhu.edu/software/kraken2)\n- `malt` for [MALT](https://software-ab.informatik.uni-tuebingen.de/download/malt/welcome.html)\n\n:warning: **Important** It is very important to run `nextflow clean -f` on your\nNextflow run directory once completed. RMA6 files are VERY large and are\n_copied_ from a `work/` directory into the results folder. You should clean the\nwork directory with the command to ensure non-redundancy and large HDD\nfootprints!"
                 },
                 "database": {
