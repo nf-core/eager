@@ -488,6 +488,8 @@ ch_fastq_channel
 /* --             HEADER LOG INFO             -- */
 ///////////////////////////////////////////////////
 
+log.info Headers.nf_core(workflow, params.monochrome_logs)
+
 def summary_params = NfcoreSchema.params_summary_map(workflow, params, json_schema)
 log.info NfcoreSchema.params_summary_log(workflow, params, json_schema)
 
