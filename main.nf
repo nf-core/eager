@@ -1911,9 +1911,9 @@ process samtools_filter {
     tag "$libraryid"
     publishDir "${params.outdir}/samtools/filter", mode: params.publish_dir_mode,
     saveAs: {filename ->
-            if (filename.indexOf(".fq.gz") > 0) "unmapped/$filename"
-            else if (filename.indexOf(".unmapped.bam") > 0) "unmapped/$filename"
-            else if (filename.indexOf(".filtered.bam")) filename
+            if (filename.indexOf(".fq.gz") > 0) "$filename"
+            else if (filename.indexOf(".unmapped.bam") > 0) "$filename"
+            else if (filename.indexOf(".filtered.bam")) "$filename"
             else null
     }
 
