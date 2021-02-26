@@ -1164,8 +1164,8 @@ process adapter_removal {
     base = "${r1.baseName}_L${lane}"
     //This checks whether we skip trimming and defines a variable respectively
     def preserve5p = params.preserve5p ? '--preserve5p' : '' // applies to any AR command - doesn't affect output file combination
-
-    //PE mode, collapse and trim, outputting all reads
+    
+    print "Settings - seqtype: $seqtype skip-collapse: ${params.skip_collapse} skip-trim: ${params.skip_trim} merged-only: ${params.mergedonly} preserve_5p: ${params.preserve5p}"
     if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly && !params.preserve5p ) {
     """
     mkdir -p output
@@ -1211,7 +1211,7 @@ process adapter_removal {
     mv *.settings output/
     """
     // PE mode, collapse and trim but only output collapsed reads, preserving 5p
-    } else if ( seqtype == 'PE'  && !params.skip_collapse && params.skip_trim && !params.mergedonly  && params.preserve5p ) {
+    } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && params.preserve5p ) {
     """
     mkdir -p output
     AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
