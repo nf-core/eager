@@ -1165,7 +1165,6 @@ process adapter_removal {
     //This checks whether we skip trimming and defines a variable respectively
     def preserve5p = params.preserve5p ? '--preserve5p' : '' // applies to any AR command - doesn't affect output file combination
     
-    print "Settings - seqtype: $seqtype skip-collapse: ${params.skip_collapse} skip-trim: ${params.skip_trim} merged-only: ${params.mergedonly} preserve_5p: ${params.preserve5p}"
     if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly && !params.preserve5p ) {
     """
     mkdir -p output
