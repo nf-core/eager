@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#688](https://github.com/nf-core/eager/issues/668) - Allow pipeline to complete, even if Qualimap crashes due to an empty or corrupt BAM file for one sample/library
 - [#683](https://github.com/nf-core/eager/pull/683) - Sets `--igenomes_ignore` to true by default, as rarely used by users currently and makes resolving configs less complex.
 - Added exit code `140` to re-tryable exit code list to account for certain scheduler wall-time limit fails.
+- [672](https://github.com/nf-core/eager/issues/672) - Removed java parameter from picard tools which could cause memory issues
+- [679](https://github.com/nf-core/eager/issues/679) - Refactor within-process bash conditions to groovy/nextflow, due to incompatibility with some servers environments
 
 ### `Dependencies`
 

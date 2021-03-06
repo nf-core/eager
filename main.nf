@@ -260,9 +260,12 @@ if (params.help){
 // Small console separator to make it easier to read errors after launch
 println ""
 
+
+
 ////////////////////////////////////////////////////
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
+
 /**FASTA input handling
 **/ 
 
@@ -366,6 +369,11 @@ if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.singl
     exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
 }
 
+// Validate not trying to both skip collapse and skip trim
+if ( params.skip_collapse && params.skip_trim ) {
+  exit 1, "[nf-core/eager error]: you have specified to skip both merging and trimming of paired end samples. Use --skip_adapterremoval instead."
+}
+
 // Host removal mode validation
 if (params.hostremoval_input_fastq){
     if (!(['remove','replace'].contains(params.hostremoval_mode))) {
@@ -386,8 +394,7 @@ if(params.run_bedtools_coverage && params.anno_file == ''){
 if (!params.run_bedtools_coverage){
   ch_anno_for_bedtools = Channel.empty()
 } else {
-  Channel
-    ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
+  ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
     .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --anno_file ${params.anno_file}."}
 }
 
@@ -1156,63 +1163,121 @@ process adapter_removal {
     script:
     base = "${r1.baseName}_L${lane}"
     //This checks whether we skip trimming and defines a variable respectively
-    def trim_me = params.skip_trim ? '' : "--trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}"
-    def collapse_me = params.skip_collapse ? '' : '--collapse'
-    def preserve5p = params.preserve5p ? '--preserve5p' : ''
-    def mergedonly = params.mergedonly ? "Y" : "N"
+    def preserve5p = params.preserve5p ? '--preserve5p' : '' // applies to any AR command - doesn't affect output file combination
     
-    //PE mode, dependent on trim_me and collapse_me the respective procedure is run or not :-) 
-    if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim ){
+    if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly && !params.preserve5p ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe ${trim_me} --gzip --threads ${task.cpus} ${collapse_me} ${preserve5p}
-    
-    #Combine files
-    if [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "N" ]; then 
-      cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    elif [ ${preserve5p}  = "--preserve5p" ] && [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
-    elif [ ${mergedonly} = "Y" ] ; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    fi
 
-    ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
-   
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+
+    cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+    
     mv *.settings output/
-    """
-    //PE, don't collapse, but trim reads
-    } else if ( seqtype == 'PE' && params.skip_collapse && !params.skip_trim ) {
-    """
-    mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${trim_me} ${collapse_me} ${preserve5p}
-    mv *.settings ${base}.pe.pair*.truncated.gz output/
-    """
-    //PE, collapse, but don't trim reads
-    } else if ( seqtype == 'PE' && !params.skip_collapse && params.skip_trim ) {
-    """
-    mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${collapse_me} ${trim_me}
-    
-    if [ ${mergedonly} = "Y" ]; then
-      cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
-    else
-      cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz  > output/${base}.pe.combined.tmp.fq.gz
-    fi
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+
+    pigz -p ${task.cpus} output/${base}.pe.combined.fq
+    """
+    //PE mode, collapse and trim, outputting all reads, preserving 5p
+    } else if (seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly && params.preserve5p) {
+    """
+    mkdir -p output
+
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+
+    cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+
+    mv *.settings output/
+
+    ## Add R_ and L_ for unmerged reads for DeDup compatibility
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+
+    pigz -p ${task.cpus} output/${base}.pe.combined.fq
+    """
+    // PE mode, collapse and trim but only output collapsed reads
+    } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && !params.preserve5p ) {
+    """
+    mkdir -p output
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    
+    cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+        
+    ## Add R_ and L_ for unmerged reads for DeDup compatibility
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    
+    pigz -p ${task.cpus} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
-    } else if ( seqtype != 'PE' ) {
-    //SE, collapse not possible, trim reads
+    // PE mode, collapse and trim but only output collapsed reads, preserving 5p
+    } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && params.preserve5p ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} ${trim_me} ${preserve5p}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     
+    cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
+    
+    ## Add R_ and L_ for unmerged reads for DeDup compatibility
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g  output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    
+    pigz -p ${task.cpus} output/${base}.pe.combined.fq
+
+    mv *.settings output/
+    """
+    // PE mode, collapsing but skip trim, (output all reads). Note: seems to still generate `truncated` files for some reason, so merging for safety.
+    // Will still do default AR length filtering I guess
+    } else if ( seqtype == 'PE'  && !params.skip_collapse && params.skip_trim && !params.mergedonly ) {
+    """
+    mkdir -p output
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p} --adapter1 "" --adapter2 ""
+    
+    cat *.collapsed.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
+        
+    ## Add R_ and L_ for unmerged reads for DeDup compatibility
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    
+    pigz -p ${task.cpus} output/${base}.pe.combined.fq
+
+    mv *.settings output/
+    """
+    // PE mode, collapsing but skip trim, and only output collapsed reads. Note: seems to still generate `truncated` files for some reason, so merging for safety.
+    // Will still do default AR length filtering I guess
+    } else if ( seqtype == 'PE'  && !params.skip_collapse && params.skip_trim && params.mergedonly ) {
+    """
+    mkdir -p output
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --collapse ${preserve5p}  --adapter1 "" --adapter2 ""
+    
+    cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
+    
+    ## Add R_ and L_ for unmerged reads for DeDup compatibility
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz  > output/${base}.pe.combined.fq
+    
+    pigz -p ${task.cpus} output/${base}.pe.combined.fq
+
+    mv *.settings output/
+    """
+    // PE mode, skip collapsing but trim (output all reads, as merging not possible) - activates paired-end mapping!
+    } else if ( seqtype == 'PE'  && params.skip_collapse && !params.skip_trim ) {
+    """
+    mkdir -p output
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    
+    mv ${base}.pe.pair*.truncated.gz *.settings output/
+    """
+    } else if ( seqtype != 'PE' && !params.skip_trim ) {
+    //SE, collapse not possible, trim reads only
+    """
+    mkdir -p output
+    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    mv *.settings *.se.truncated.gz output/
+    """
+    } else if ( seqtype != 'PE' && params.skip_trim ) {
+    //SE, collapse not possible, trim reads only
+    """
+    mkdir -p output
+    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} ${preserve5p} --adapter1 "" --adapter2 ""
     mv *.settings *.se.truncated.gz output/
     """
     }
@@ -1853,9 +1918,9 @@ process samtools_filter {
     tag "$libraryid"
     publishDir "${params.outdir}/samtools/filter", mode: params.publish_dir_mode,
     saveAs: {filename ->
-            if (filename.indexOf(".fq.gz") > 0) "unmapped/$filename"
-            else if (filename.indexOf(".unmapped.bam") > 0) "unmapped/$filename"
-            else if (filename.indexOf(".filtered.bam")) filename
+            if (filename.indexOf(".fq.gz") > 0) "$filename"
+            else if (filename.indexOf(".unmapped.bam") > 0) "$filename"
+            else if (filename.indexOf(".filtered.bam")) "$filename"
             else null
     }
 
@@ -1874,82 +1939,81 @@ process samtools_filter {
     shell:
     size = !{params.large_ref} ? '-c' : ''
     
-    if ( "${params.bam_unmapped_type}" == "keep" ) {
+    // Unmapped/MAPQ Filtering WITHOUT min-length filtering
+    if ( "${params.bam_unmapped_type}" == "keep"  && params.bam_filter_minreadlength == 0 ) {
         '''
-        ## Unmapped and MAPQ filtering
-        samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
-    } else if("${params.bam_unmapped_type}" == "discard"){
+    } else if ( "${params.bam_unmapped_type}" == "discard" && params.bam_filter_minreadlength == 0 ){
         '''
-        ## Unmapped and MAPQ filtering
-        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
-    } else if("${params.bam_unmapped_type}" == "bam"){
+    } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength == 0 ){
         '''
-        ## Unmapped and MAPQ filtering
         samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
-    } else if("${params.bam_unmapped_type}" == "fastq"){
+    } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength == 0 ){
         '''
-        ## Unmapped and MAPQ filtering
         samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
 
         ## FASTQ
         samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
         rm !{libraryid}.unmapped.bam
         '''
-    } else if("${params.bam_unmapped_type}" == "both"){
+    } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength == 0 ){
         '''
-        ## Unmapped and MAPQ filtering
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+        
+        ## FASTQ
+        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
+        '''
+    // Unmapped/MAPQ Filtering WITH min-length filtering
+    } else if ( "${params.bam_unmapped_type}" == "keep" && params.bam_filter_minreadlength != 0 ) {
+        '''
+        samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+        '''
+    } else if ( "${params.bam_unmapped_type}" == "discard" && params.bam_filter_minreadlength != 0 ){
+        '''
+        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+        '''
+    } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength != 0 ){
+        '''
         samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
         samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-
-        ## Mapped LEN filtering
-        if [[ !{params.bam_filter_minreadlength} -eq 0 ]]; then
-            mv tmp_mapped.bam !{libraryid}.filtered.bam
-        else
-            filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        fi
-
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         samtools index !{libraryid}.filtered.bam !{size}
+        '''
+    } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength != 0 ){
+        '''
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+
+        ## FASTQ
+        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
+        rm !{libraryid}.unmapped.bam
+        '''
+    } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength != 0 ){
+        '''
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
+        samtools index !{libraryid}.filtered.bam !{size}
+        
+        ## FASTQ
         samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
         '''
     }
@@ -2057,21 +2121,26 @@ process dedup{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${libraryid}_rmdup.bam"), path("*.{bai,csi}") into ch_output_from_dedup, ch_dedup_for_libeval
 
     script:
-    def outname = "${bam.baseName}"
     def treat_merged = params.dedup_all_merged ? '-m' : ''
     def size = params.large_ref ? '-c' : ''
     
+    if ( bam.baseName != libraryid ) {
+    // To make sure direct BAMs have a clean name
     """
-    ## To make sure direct BAMs have a clean name
-    if [[ "${bam}" != "${libraryid}.bam" ]]; then
-      mv ${bam} ${libraryid}.bam
-    fi
-    
+    mv ${bam} ${libraryid}.bam
     dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
     mv *.log dedup.log
     samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
     samtools index "${libraryid}"_rmdup.bam ${size}
     """
+    } else {
+    """
+    dedup -Xmx${task.memory.toGiga()}g -i ${libraryid}.bam $treat_merged -o . -u 
+    mv *.log dedup.log
+    samtools sort -@ ${task.cpus} "${libraryid}"_rmdup.bam -o "${libraryid}"_rmdup.bam
+    samtools index "${libraryid}"_rmdup.bam ${size}
+    """
+    }
 }
 
 process markduplicates{
@@ -2091,17 +2160,22 @@ process markduplicates{
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${libraryid}_rmdup.bam"), path("*.{bai,csi}") into ch_output_from_markdup, ch_markdup_for_libeval
 
     script:
-    def outname = "${bam.baseName}"
     def size = params.large_ref ? '-c' : ''
-    """
-    ## To make sure direct BAMs have a clean name
-    if [[ "${bam}" != "${libraryid}.bam" ]]; then
-      mv ${bam} ${libraryid}.bam
-    fi
 
+    if ( bam.baseName != libraryid ) {
+    // To make sure direct BAMs have a clean name
+    """
+    mv ${bam} ${libraryid}.bam
     picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=${libraryid}.bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
     samtools index ${libraryid}_rmdup.bam ${size}
     """
+    } else {
+    """
+    picard -Xmx${task.memory.toMega()}M -Xms${task.memory.toMega()}M MarkDuplicates INPUT=${libraryid}.bam OUTPUT=${libraryid}_rmdup.bam REMOVE_DUPLICATES=TRUE AS=TRUE METRICS_FILE="${libraryid}_rmdup.metrics" VALIDATION_STRINGENCY=SILENT
+    samtools index ${libraryid}_rmdup.bam ${size}
+    """
+    }
+
 }
 
 // This is for post-deduplcation per-library evaluation steps _without_ any 
@@ -2890,11 +2964,7 @@ process sex_deterrmine {
     script:
     def filter = bed.getName() != 'nf-core_eager_dummy.txt' ? "-b $bed" : ''
     """
-    
-    for i in *.bam; do
-        echo \$i >> bamlist.txt
-    done
-  
+    ls *.bam >> bamlist.txt
     samtools depth -aa -q30 -Q30 $filter -f bamlist.txt | sexdeterrmine -f bamlist.txt > SexDet.txt
     """
 }
