@@ -49,4 +49,5 @@ dependencies:
   - bioconda::eigenstratdatabasetools=1.0.2
   - bioconda::mapdamage2=2.2.0
   - bioconda::bbmap=38.87
+  - conda-forge::tbb=2020.02 # temp for bioconda broken bowtie2, remove once patched in bioconda
 
