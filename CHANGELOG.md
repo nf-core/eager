@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added exit code `140` to re-tryable exit code list to account for certain scheduler wall-time limit fails.
 - [672](https://github.com/nf-core/eager/issues/672) - Removed java parameter from picard tools which could cause memory issues
 - [679](https://github.com/nf-core/eager/issues/679) - Refactor within-process bash conditions to groovy/nextflow, due to incompatibility with some servers environments
+- [#690](https://github.com/nf-core/eager/pull/690) - Fixed ANGSD output mode for beagle by setting `-doMajorMinor 1` as default in that case
 
 ### `Dependencies`
 

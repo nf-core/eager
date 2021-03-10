@@ -463,7 +463,7 @@ if (params.run_genotyping){
   }
 
   if (params.genotyping_tool == 'angsd' && ! ( params.angsd_glformat == 'text' || params.angsd_glformat == 'binary' || params.angsd_glformat == 'binary_three' || params.angsd_glformat == 'beagle' ) ) {
-    exit 1, "[nf-core/eager] error: please check your ANGSD genotyping model! Options: 'text', 'binary', 'binary_three', 'beagle'. Found parameter: --angsd_glmodel '${params.angsd_glmodel}'."
+    exit 1, "[nf-core/eager] error: please check your ANGSD output format! Options: 'text', 'binary', 'binary_three', 'beagle'. Found parameter: --angsd_glformat '${params.angsd_glformat}'."
   }
 
   if ( !params.angsd_createfasta && params.angsd_fastamethod != 'random' ) {
@@ -2836,10 +2836,11 @@ process genotyping_angsd {
   }
   
   def angsd_fasta = !params.angsd_createfasta ? '' : params.angsd_fastamethod == 'random' ? '-doFasta 1 -doCounts 1' : '-doFasta 2 -doCounts 1' 
+  def angsd_majorminor = params.angsd_glformat != "beagle" ? '' : '-doMajorMinor 1'
   """
   echo ${bam} > bam.filelist
   mkdir angsd
-  angsd -bam bam.filelist -nThreads ${task.cpus} -GL ${angsd_glmodel} -doGlF ${angsd_glformat} ${angsd_fasta} -out ${samplename}.angsd
+  angsd -bam bam.filelist -nThreads ${task.cpus} -GL ${angsd_glmodel} -doGlF ${angsd_glformat} ${angsd_majorminor} ${angsd_fasta} -out ${samplename}.angsd
   """
 }
 
