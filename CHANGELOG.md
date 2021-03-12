@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Dependencies`
 
 - Bumped MultiQC to 1.10 for improved functionality
+- Bumped HOPS to 0.35 for MultiQC 1.10 compatibility
 
 ### `Deprecated`
 
