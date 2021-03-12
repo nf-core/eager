@@ -42,7 +42,7 @@ dependencies:
   - bioconda::freebayes=1.3.2 #should be fine with python 3.8, but says <3.7 on webpage
   - bioconda::sexdeterrmine=1.1.2
   - bioconda::multivcfanalyzer=0.85.2
-  - bioconda::hops=0.34
+  - bioconda::hops=0.35
   - conda-forge::biopython=1.76
   - conda-forge::xopen=0.9.0
   - bioconda::bowtie2=2.4.1
