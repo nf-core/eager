@@ -2894,33 +2894,17 @@ process kraken {
 
   output:
   file "*.kraken.out" into ch_kraken_out
-  tuple prefix, path("*.kraken2_report") into ch_kraken_report, ch_kraken_report_backward_compatibility
+  tuple prefix, path("*.kraken2_report") into ch_kraken_report, ch_kraken_for_multiqc
 
   script:
   prefix = fastq.toString().tokenize('.')[0]
   out = prefix+".kraken.out"
   kreport = prefix+".kraken2_report"
+  kreport_old = prefix+".kreport"
 
   """
   kraken2 --db ${krakendb} --threads ${task.cpus} --output $out --report-minimizer-data --report $kreport $fastq
-  """
-}
-
-process kraken_report_backward_compatibility {
-  tag "$prefix"
-  label 'sc_tiny'
-
-  input:
-  tuple val(prefix), path(kraken_r) from ch_kraken_report_backward_compatibility
-
-  output:
-  tuple prefix, path("*.kreport") into ch_kraken_for_multiqc
-
-  script:
-  kreport = prefix+".kreport"
-
-  """
-  cut -f1-3,6-8 $kraken_r > $kreport
+  cut -f1-3,6-8 $kreport > $kreport_old
   """
 }
 
