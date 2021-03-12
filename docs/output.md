@@ -600,6 +600,8 @@ Sex.DetERRmine calculates the coverage of your mapped reads on the X and Y chrom
 
 When a bedfile of specific sites is provided, Sex.DetERRmine additionally calculates error bars around each relative coverage estimate. For this estimate to be trustworthy, the sites included in the bedfile should be spaced apart enough that a single sequencing read cannot overlap multiple sites. Hence, when a bedfile has not been provided, this error should be ignored. When a suitable bedfile is provided, each observation of a covered site is independent, and the error around the coverage is equal to the binomial error estimate. This error is then propagated during the calculation of relative coverage for the X and Y chromosomes.
 
+> Note that in nf-core/eager this will be run on single- and double-stranded variants of the same library _separately_. This can also help assess for differential contamination between libraries.
+> 
 #### Relative Coverage
 
 Theoretically, males are expected to cluster around (0.5, 0.5) in the produced scatter plot, while females are expected to cluster around (1.0, 0.0). In practice, when analysing ancient DNA, these relative coverage on both axes is slightly lower than expected, and individuals can cluster around (0.45, 0.45) and (0.85, 0.05). As the number of covered sites for an individual gets smaller, the confidence on the estimate becomes lower, because it is increasingly more likely to be affected by randomness in the preservation and sequencing of ancient DNA.
