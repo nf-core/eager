@@ -158,6 +158,7 @@ of this pipeline:
 
 Those who have provided conceptual guidance, suggestions, bug reports etc.
 
+* [Alexandre Gilardet](https://github.com/alexandregilardet)
 * Arielle Munters
 * [Charles Plessy](https://github.com/charles-plessy)
 * [Åshild Vågene](https://github.com/ashildv)
