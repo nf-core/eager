@@ -29,7 +29,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#695](https://github.com/nf-core/eager/issues/695) - Fixed incorrect `-profile` order in tutorials (originally written reversed due to [nextflow bug](https://github.com/nextflow-io/nextflow/issues/1792))
 - [#653](https://github.com/nf-core/eager/issues/653) - Fixed file collision errors with sexdeterrmine for two same-named libraries with different strandedness
 
-
 ### `Dependencies`
 
 - Bumped MultiQC to 1.10 for improved functionality
