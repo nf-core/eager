@@ -1,14 +1,14 @@
 #!/usr/bin/env nextflow
 /*
-============================================================================================================
+------------------------------------------------------------------------------------------------------------
                          nf-core/eager
-============================================================================================================
+------------------------------------------------------------------------------------------------------------
  EAGER Analysis Pipeline. Started 2018-06-05
  #### Homepage / Documentation
  https://github.com/nf-core/eager
  #### Authors
  For a list of authors and contributors, see: https://github.com/nf-core/eager/tree/dev#authors-alphabetical
-============================================================================================================
+------------------------------------------------------------------------------------------------------------
 */
 
 
@@ -488,6 +488,10 @@ ch_fastq_channel
 /* --             HEADER LOG INFO             -- */
 ///////////////////////////////////////////////////
 
+//Add header
+log.info Headers.nf_core(workflow, params.monochrome_logs)
+
+//Add Summary Parameters
 def summary_params = NfcoreSchema.params_summary_map(workflow, params, json_schema)
 log.info NfcoreSchema.params_summary_log(workflow, params, json_schema)
 
@@ -501,9 +505,6 @@ Checks.aws_batch(workflow, params)
 
 // Check the hostnames against configured profiles
 Checks.hostname(workflow, params, log)
-
-// Check genome key exists if provided
-Checks.genome_exists(params, log)
 
 log.info "Schaffa, Schaffa, Genome Baua!"
 
