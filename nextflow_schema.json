@@ -505,7 +505,7 @@
                     "type": "integer",
                     "description": "Specify the maximum Phred score used in input FASTQ files",
                     "help_text": "Specify maximum Phred score of the quality field of FASTQ files. The quality-score range can vary depending on the machine and version (e.g. see diagram [here](https://en.wikipedia.org/wiki/FASTQ_format#Encoding), and this allows you to increase from the default AdapterRemoval value of `41`.\n\n> Modifies AdapterRemoval parameters: `--qualitymax`",
-                    "default": "41",
+                    "default": 41,
                     "fa_icon": "fas fa-arrow-up"
                 }
             },
