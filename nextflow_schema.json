@@ -206,13 +206,6 @@
                     "hidden": true,
                     "fa_icon": "fas fa-question-circle"
                 },
-                "name": {
-                    "type": "string",
-                    "description": "Workflow name of run, for future reference.",
-                    "fa_icon": "fas fa-fingerprint",
-                    "hidden": true,
-                    "help_text": "A custom name for the pipeline run. Unlike the core nextflow `-name` option with one hyphen this parameter can be reused multiple times, for example if using `-resume`. Passed through to steps such as MultiQC and used for things like report filenames and titles."
-                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
@@ -261,6 +254,31 @@
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
                     "default": "${params.outdir}/pipeline_info",
                     "fa_icon": "fas fa-cogs",
+                    "hidden": true
+                },
+                "enable_conda": {
+                    "type": "boolean",
+                    "hidden": true,
+                    "description": "Parameter used for checking conda channels to be set correctly."
+                },
+                "validate_params": {
+                    "type": "boolean",
+                    "default": "true",
+                    "description": "Boolean whether to validate parameters against the schema at runtime",
+                    "fa_icon": "fab fa-angellist",
+                    "hidden": true
+                },
+                "schema_ignore_params": {
+                    "type": "string",
+                    "fa_icon": "fas fa-not-equal",
+                    "description": "String to specify ignored parameters for parameter validation",
+                    "hidden": true,
+                    "default": "genomes"
+                },
+                "config_profile_name": {
+                    "type": "string",
+                    "description": "String to describe the config profile that is run.",
+                    "fa_icon": "fas fa-id-badge",
                     "hidden": true
                 }
             },
@@ -640,7 +658,8 @@
                     "help_text": "Read removal mode. Remove mapped reads completely (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)\n\n> Modifies extract_map_reads.py parameter: `-m`",
                     "enum": [
                         "strip",
-                        "replace"
+                        "replace",
+                        "remove"
                     ]
                 }
             },
@@ -661,8 +680,8 @@
                 },
                 "bam_mapping_quality_threshold": {
                     "type": "integer",
-                    "description": "Minimum mapping quality for reads filter.",
                     "default": 0,
+                    "description": "Minimum mapping quality for reads filter.",
                     "fa_icon": "fas fa-greater-than-equal",
                     "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).\n\n> Modifies samtools view parameter: `-q`"
                 },
@@ -1007,7 +1026,7 @@
                     ]
                 },
                 "gatk_ug_keep_realign_bam": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.",
                     "fa_icon": "fas fa-align-left",
                     "help_text": "If provided when running GATK's UnifiedGenotyper, this will put into the output folder the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping.\n\nThese BAMs will be stored in the same folder as the corresponding VCF files."
@@ -1346,7 +1365,6 @@
                     "type": "string",
                     "description": "Specify which classifier to use. Options: 'malt', 'kraken'.",
                     "fa_icon": "fas fa-tools",
-                    "default": "undefined",
                     "help_text": "Specify which taxonomic classifier to use. There are two options available:\n\n- `kraken` for [Kraken2](https://ccb.jhu.edu/software/kraken2)\n- `malt` for [MALT](https://software-ab.informatik.uni-tuebingen.de/download/malt/welcome.html)\n\n:warning: **Important** It is very important to run `nextflow clean -f` on your\nNextflow run directory once completed. RMA6 files are VERY large and are\n_copied_ from a `work/` directory into the results folder. You should clean the\nwork directory with the command to ensure non-redundancy and large HDD\nfootprints!"
                 },
                 "database": {
