@@ -16,14 +16,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Made MultiQC crash behaviour stricter when dealing with large datasets, as reported by @ashildv
 - [#652](https://github.com/nf-core/eager/issues/652) Added note to documentation that when using `--skip_collapse` this will use _paired-end_ alignment mode with mappers when using PE data
 - [#626](https://github.com/nf-core/eager/issues/626) - Add additional checks to ensure pipeline will give useful error if cells of a TSV column are empty
-- Added note to documentation that when using `--skip_collapse` this will use _paired-end_ alignment mode with mappers when using PE data.  `
-- [#673](https://github.com/nf-core/eager/pull/673) Fix Kraken database loading when loading from directory instead of compressed file.
+- Added note to documentation that when using `--skip_collapse` this will use _paired-end_ alignment mode with mappers when using PE data
+- [#673](https://github.com/nf-core/eager/pull/673) Fix Kraken database loading when loading from directory instead of compressed file
 - [#688](https://github.com/nf-core/eager/issues/668) - Allow pipeline to complete, even if Qualimap crashes due to an empty or corrupt BAM file for one sample/library
-- [#683](https://github.com/nf-core/eager/pull/683) - Sets `--igenomes_ignore` to true by default, as rarely used by users currently and makes resolving configs less complex.
-- Added exit code `140` to re-tryable exit code list to account for certain scheduler wall-time limit fails.
+- [#683](https://github.com/nf-core/eager/pull/683) - Sets `--igenomes_ignore` to true by default, as rarely used by users currently and makes resolving configs less complex
+- Added exit code `140` to re-tryable exit code list to account for certain scheduler wall-time limit fails
 - [672](https://github.com/nf-core/eager/issues/672) - Removed java parameter from picard tools which could cause memory issues
 - [679](https://github.com/nf-core/eager/issues/679) - Refactor within-process bash conditions to groovy/nextflow, due to incompatibility with some servers environments
 - [#690](https://github.com/nf-core/eager/pull/690) - Fixed ANGSD output mode for beagle by setting `-doMajorMinor 1` as default in that case
+- [#693](https://github.com/nf-core/eager/issues/693) - Fixed broken TSV input validation for the Colour Chemistry column
 
 ### `Dependencies`
 
