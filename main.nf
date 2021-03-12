@@ -2226,7 +2226,7 @@ process additional_library_merge {
 
 ch_trimmed_formerge.skip_merging
   .mix(ch_output_from_trimmerge)
-  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap; ch_for_sexdeterrmine }
+  .into{ ch_output_from_bamutils; ch_addlibmerge_for_qualimap; ch_for_sexdeterrmine_prep }
 
   // General mapping quality statistics for whole reference sequence - e.g. X and % coverage
 
@@ -2633,13 +2633,33 @@ process multivcfanalyzer {
 
 // Human biological sex estimation
 
+// rename to prevent single/double stranded library sample name-based file conflict
+process sexdeterrmine_prep {
+  label 'sc_small'
+  
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_for_sexdeterrmine_prep
+  
+  output:
+  file "*_{single,double}strand.bam" into ch_prepped_for_sexdeterrmine
+
+  when:
+  params.run_sexdeterrmine
+
+  script:
+  """
+  mv ${bam} ${bam.baseName}_${strandedness}strand.bam
+  """
+
+}
+
 // As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
-process sex_deterrmine {
+process sexdeterrmine {
     label 'sc_small'
     publishDir "${params.outdir}/sex_determination", mode: params.publish_dir_mode
      
     input:
-    path bam from ch_for_sexdeterrmine.map { it[7] }.collect()
+    path bam from ch_prepped_for_sexdeterrmine.collect()
     path(bed) from ch_bed_for_sexdeterrmine
 
     output:

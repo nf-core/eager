@@ -1294,7 +1294,7 @@
             "properties": {
                 "run_sexdeterrmine": {
                     "type": "boolean",
-                    "description": "Turn on sex determination for human reference genomes.",
+                    "description": "Turn on sex determination for human reference genomes. This will run on single- and double-stranded variants of a library separately.",
                     "fa_icon": "fas fa-transgender-alt",
                     "help_text": "Specify to run the optional process of sex determination.\n"
                 },

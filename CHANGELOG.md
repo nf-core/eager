@@ -22,11 +22,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#688](https://github.com/nf-core/eager/issues/668) - Allow pipeline to complete, even if Qualimap crashes due to an empty or corrupt BAM file for one sample/library
 - [#683](https://github.com/nf-core/eager/pull/683) - Sets `--igenomes_ignore` to true by default, as rarely used by users currently and makes resolving configs less complex
 - Added exit code `140` to re-tryable exit code list to account for certain scheduler wall-time limit fails
-- [672](https://github.com/nf-core/eager/issues/672) - Removed java parameter from picard tools which could cause memory issues
-- [679](https://github.com/nf-core/eager/issues/679) - Refactor within-process bash conditions to groovy/nextflow, due to incompatibility with some servers environments
+- [#672](https://github.com/nf-core/eager/issues/672) - Removed java parameter from picard tools which could cause memory issues
+- [#679](https://github.com/nf-core/eager/issues/679) - Refactor within-process bash conditions to groovy/nextflow, due to incompatibility with some servers environments
 - [#690](https://github.com/nf-core/eager/pull/690) - Fixed ANGSD output mode for beagle by setting `-doMajorMinor 1` as default in that case
 - [#693](https://github.com/nf-core/eager/issues/693) - Fixed broken TSV input validation for the Colour Chemistry column
 - [#695](https://github.com/nf-core/eager/issues/695) - Fixed incorrect `-profile` order in tutorials (originally written reversed due to [nextflow bug](https://github.com/nextflow-io/nextflow/issues/1792))
+- [#653](https://github.com/nf-core/eager/issues/653) - Fixed file collision errors with sexdeterrmine for two same-named libraries with different strandedness
 
 ### `Dependencies`
 
