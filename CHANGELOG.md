@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-- [#676](https://github.com/nf-core/eager/issues/676) - Added Lib Checks and automatic help message / summary message formatting
+- [#676](https://github.com/nf-core/eager/issues/676) - Refactor help message / summary message formatting to automatic versions using nf-core library
+- [#682](https://github.com/nf-core/eager/issues/682) - Add AdapterRemoval `--qualitymax` flag to allow FASTQ Phred score range max more than 41
 
 ### `Fixed`
 
