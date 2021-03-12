@@ -2914,15 +2914,17 @@ process kraken {
 
   output:
   file "*.kraken.out" into ch_kraken_out
-  tuple prefix, path("*.kreport") into ch_kraken_report, ch_kraken_for_multiqc
+  tuple prefix, path("*.kraken2_report") into ch_kraken_report, ch_kraken_for_multiqc
 
   script:
   prefix = fastq.toString().tokenize('.')[0]
   out = prefix+".kraken.out"
-  kreport = prefix+".kreport"
+  kreport = prefix+".kraken2_report"
+  kreport_old = prefix+".kreport"
 
   """
-  kraken2 --db ${krakendb} --threads ${task.cpus} --output $out --report $kreport $fastq
+  kraken2 --db ${krakendb} --threads ${task.cpus} --output $out --report-minimizer-data --report $kreport $fastq
+  cut -f1-3,6-8 $kreport > $kreport_old
   """
 }
 
@@ -2934,12 +2936,13 @@ process kraken_parse {
   tuple val(name), path(kraken_r) from ch_kraken_report
 
   output:
-  tuple val(name), path('*.kraken_parsed.csv') into ch_kraken_parsed
+  path('*_kraken_parsed.csv') into ch_kraken_parsed
 
   script:
-  out = name+".kraken_parsed.csv"
+  read_out = name+".read_kraken_parsed.csv"
+  kmer_out =  name+".kmer_kraken_parsed.csv"
   """
-  kraken_parse.py -c ${params.metagenomic_min_support_reads} -o $out $kraken_r
+  kraken_parse.py -c ${params.metagenomic_min_support_reads} -or $read_out -ok $kmer_out $kraken_r
   """    
 }
 
@@ -2947,15 +2950,16 @@ process kraken_merge {
   publishDir "${params.outdir}/metagenomic_classification/kraken", mode: params.publish_dir_mode
 
   input:
-  file csv_count from ch_kraken_parsed.map{ it[1] }.collect()
+  file csv_count from ch_kraken_parsed.collect()
 
   output:
-  path('kraken_count_table.csv')
+  path('*.csv')
 
   script:
-  out = "kraken_count_table.csv"
+  read_out = "kraken_read_count.csv"
+  kmer_out = "kraken_kmer_duplication.csv"
   """
-  merge_kraken_res.py -o $out
+  merge_kraken_res.py -or $read_out -ok $kmer_out
   """    
 }
 

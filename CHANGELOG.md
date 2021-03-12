@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#687](https://github.com/nf-core/eager/pull/687) - Adds Kraken2 unique kmer counting report
 - [#676](https://github.com/nf-core/eager/issues/676) - Refactor help message / summary message formatting to automatic versions using nf-core library
 - [#682](https://github.com/nf-core/eager/issues/682) - Add AdapterRemoval `--qualitymax` flag to allow FASTQ Phred score range max more than 41
 
