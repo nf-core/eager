@@ -413,6 +413,14 @@ they are unique (e.g. if one library was sequenced on Lane 8 of two HiSeq runs,
 specify lanes as 8 and 16 for each FASTQ file respectively). For library merging
 errors, you must modify your `Library_ID`s accordingly, to make them unique.
 
+### A library or sample is missing in my MultiQC report
+
+In some cases it maybe no output log is produced by a particular tool for MultiQC. Therefore this sample will not be displayed.
+
+Known cases include:
+
+- Qualimap: there will be no MultiQC output if the BAM file is empty. An empty BAM file causes Qualimap to crash - this is crash is ignored by nf-core/eager (to allow the rest of the pipeline to continue) and will therefore have no log file for that particular sample/library
+
 ## Tutorials
 
 ### Tutorial - How to investigate a failed run
@@ -563,7 +571,7 @@ If it does, please ask the developer of the tool (although we will endeavour to
 help as much as we can via the [nf-core slack](https://nf-co.re/join/slack) in
 the #eager channel).
 
-### Tutorial - What are Profiles and How To Use Them
+### Tutorial - What are profiles and how to use them
 
 #### Tutorial Profiles - Background
 
@@ -606,7 +614,7 @@ profile called 'old_dna'. We will have run our pipeline with the following
 command
 
 ```bash
-nextflow run nf-core/eager -c old_dna_profile.config -profile old_dna,hpc_blue <...>
+nextflow run nf-core/eager -c old_dna_profile.config -profile hpc_blue,old_dna <...>
 ```
 
 Then our colleague wished to recreate your results. As long as the
@@ -614,7 +622,7 @@ Then our colleague wished to recreate your results. As long as the
 same pipeline settings but on their own cluster HPC 'purple'.
 
 ```bash
-nextflow run nf-core/eager -c old_dna_profile.config -profile old_dna,hpc_purple <...>
+nextflow run nf-core/eager -c old_dna_profile.config -profile hpc_purple,old_dna <...>
 ```
 
 (where the `old_dna` profile is defined in `old_dna_profile.config`, and
@@ -632,27 +640,27 @@ understanding 'inheritance' of profiles when specifying multiple profiles, when
 using `nextflow run`.
 
 When specifying multiple profiles, parameters defined in the profile in the
-first position will overwrite those in the second, and everything defined in the
-first and second will overwrite everything in a third.
+first position will be overwritten by those in the second, and everything defined in the
+first and second will be overwritten everything in a third.
 
 This can be illustrated as follows.
 
 ```bash
-           overwrites  overwrites
-            ┌──────┐   ┌──────┐
-            │      ▼   │      ▼
--profile my_paper,cluster,institution
+              overwrites  overwrites
+               ┌──────┐   ┌──────┐
+               ▼      │   ▼      │
+-profile institution,cluster,my_paper
 ```
 
 This would be translated as follows.
 
 If your parameters looked like the following
 
-Parameter       | Resolved Parameters    | my_paper   | cluster  | institution
-----------------|------------------------|------------|----------|------------
---executor      | singularity            | \<none\>   | \<none\> | singularity
---max_memory    | 256GB                  | \<none\>   | 256GB    | 756GB
---bwa_aln       | 0.1                    | 0.1        | 0.01     | \<none\>
+Parameter       | Resolved Parameters    | institution | cluster  | my_paper
+----------------|------------------------|-------------|----------|----------
+--executor      | singularity            | singularity | \<none\> | \<none\>
+--max_memory    | 256GB                  | 756GB       | 256GB    | \<none\>
+--bwa_aln       | 0.1                    | \<none\>    | 0.01     | 0.1
 
 (where '\<none\>' is a parameter not defined in a given profile.)
 
@@ -667,10 +675,7 @@ defined in the `cluster` profile.
 ##### Tutorial Profiles - Configuration Files
 
 > :warning: This section is only needed for users that want to set up
-> institutional-level profiles.
-
-<details><summary>Expand to view</summary>
-<p>
+> institutional-level profiles. Otherwise please skip to [Writing your own profile](#tutorial-profiles---writing-your-own-profile)
 
 In actuality, a nf-core/eager run already contains many configs and profiles,
 and will normally use *multiple* configs profiles in a single run. Multiple
@@ -706,7 +711,7 @@ Then running the pipeline with the profiles in the order of the following run
 command:
 
 ```bash
-nextflow run nf-core/eager -c old_dna_profile.config -profile old_dna,hpc_blue <...>
+nextflow run nf-core/eager -c old_dna_profile.config -profile hpc_blue,old_dna <...>
 ```
 
 In the background, any parameters in the pipeline's `nextflow.config`
@@ -789,13 +794,13 @@ profiles {
 
 If you run with `nextflow run -profile shh` to specify to use an
 institutional-level nf-core config, the parameters will be read as `--bwaalnn
-0.04` and `--bwaalnl 32` as these are the defaults 'fall back' params as
+0.04` and `--bwaalnl 32` as these are the default 'fall back' params as
 indicated in the example above.
 
-If you specify as `nextflow run -profile pathogen_loose,shh`, as expected
+If you specify as `nextflow run -profile shh,pathogen_loose`, as expected
 Nextflow will resolve the two parameters as `0.01` and `16`.
 
-Importantly however, if you specify `-profile shh,pathogen_loose` the
+Importantly however, if you specify `-profile pathogen_loose,shh` the
 `pathogen_loose` **profile** will **still** take precedence over just the
 'global' params.
 
@@ -806,9 +811,6 @@ This is also described in the Nextflow documentation
 
 This is because selecting a `profile` will always take precedence over the
 values specified in a config file, but outside of a profile.
-
-</p>
-</details>
 
 #### Tutorial Profiles - Writing your own profile
 
@@ -924,14 +926,14 @@ For example, Aida (Andrades Valtueña) on her cluster `sdag` at the MPI-SHH
 (`shh`) in Jena could run the following:
 
 ```bash
-nextflow run nf-core/eager -c /<path>/<to>/AndradesValtuena2018.config -profile AndradesValtuena2018,sdag,shh --input '/<path>/<to>/<some_input>/' <...>
+nextflow run nf-core/eager -c /<path>/<to>/AndradesValtuena2018.config -profile shh,sdag,AndradesValtuena2018 --input '/<path>/<to>/<some_input>/' <...>
 ```
 
 Then a colleague at a different institution, such as the SciLifeLab, could run
 the same profile on the UPPMAX cluster in Uppsala with:
 
 ```bash
-nextflow run nf-core/eager -c /<path>/<to>/AndradesValtuena2018.config -profile AndradesValtuena2018,uppmax --input '/<path>/<to>/<some_input>/' <...>
+nextflow run nf-core/eager -c /<path>/<to>/AndradesValtuena2018.config -profile uppmax,AndradesValtuena2018 --input '/<path>/<to>/<some_input>/' <...>
 ```
 
 And that's all there is to it. Of course you should always check that there are
@@ -1016,7 +1018,7 @@ running.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 <...>
 ```
@@ -1080,7 +1082,7 @@ FASTA file and the corresponding indices.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1105,7 +1107,7 @@ directory (which contains 'intermediate' working files and directories).
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \`
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1134,7 +1136,7 @@ string to be clipped.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1159,7 +1161,7 @@ with `--dedupper`.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1184,7 +1186,7 @@ and the reference.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1211,7 +1213,7 @@ unmapped reads.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1241,7 +1243,7 @@ fragment. We will therefore use `--bamutils_clip_half_udg_left` and
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1277,7 +1279,7 @@ you can download the file from [here](https://github.com/nf-core/test-datasets/b
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1311,7 +1313,7 @@ is simply named 'X'.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1352,7 +1354,7 @@ providing the name of the mitochondrial DNA contig in our reference genome with
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1394,7 +1396,7 @@ file of these sites that is specified with `--pileupcaller_snpfile`.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1636,7 +1638,7 @@ running.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_screening20200720' \
 <...>
 ```
@@ -1700,7 +1702,7 @@ FASTA file and the corresponding indices.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1725,7 +1727,7 @@ directory (which contains 'intermediate' working files and directories).
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1754,7 +1756,7 @@ string to be clipped.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1775,7 +1777,7 @@ tell nf-core/eager what to do with the off target reads from the mapping.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1805,7 +1807,7 @@ documentation describing each parameters can be seen in the usage
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1832,7 +1834,7 @@ have indicators of true aDNA, we will run 'maltExtract' of the
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -2103,7 +2105,7 @@ running.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 <...>
 ```
@@ -2164,7 +2166,7 @@ FASTA file and the corresponding indices.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2189,7 +2191,7 @@ directory (which contains 'intermediate' working files and directories).
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2218,7 +2220,7 @@ the default minimum length of a poly-G string to be clipped.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2242,7 +2244,7 @@ will do this with `--bwaalnn` and `--bwaalnl` respectively.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2266,7 +2268,7 @@ hard-drive footprint.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2296,7 +2298,7 @@ clarity.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2327,7 +2329,7 @@ often a custom BED file with just genes of interest is recommended. Furthermore
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2365,7 +2367,7 @@ we do BAM trimming instead here as another demonstration of functionality.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2406,7 +2408,7 @@ need to specify that we want to use the trimmed bams from the previous step.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2449,7 +2451,7 @@ same settings and reference genome. We can do this as follows.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile sdag,shh,singularity \
+-profile singularity,shh,sdag \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
