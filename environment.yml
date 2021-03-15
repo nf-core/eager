@@ -1,6 +1,6 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-name: nf-core-eager-2.3.2dev
+name: nf-core-eager-2.3.2
 channels:
   - conda-forge
   - bioconda
