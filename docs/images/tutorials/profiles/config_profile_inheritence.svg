@@ -8,7 +8,7 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="config_profile_inheritence.svg"
-   inkscape:version="1.0 (1.0+r73+1)"
+   inkscape:version="1.0.2 (1.0.2+r75+1)"
    id="svg8"
    version="1.1"
    viewBox="0 0 203.72916 254"
@@ -864,9 +864,9 @@
      fit-margin-left="0"
      fit-margin-top="0"
      inkscape:window-maximized="1"
-     inkscape:window-y="0"
-     inkscape:window-x="0"
-     inkscape:window-height="1043"
+     inkscape:window-y="1107"
+     inkscape:window-x="1920"
+     inkscape:window-height="1016"
      inkscape:window-width="1920"
      inkscape:bbox-nodes="true"
      inkscape:snap-bbox="true"
@@ -874,9 +874,9 @@
      inkscape:document-rotation="0"
      inkscape:current-layer="g1826"
      inkscape:document-units="mm"
-     inkscape:cy="428.58865"
-     inkscape:cx="370.88851"
-     inkscape:zoom="0.7"
+     inkscape:cy="925.64833"
+     inkscape:cx="430.04375"
+     inkscape:zoom="0.98994949"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
@@ -1374,7 +1374,7 @@
 </tspan></tspan><tspan
            x="23.207031"
            y="32.525859"><tspan
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Ubuntu Mono';-inkscape-font-specification:'Ubuntu Mono'">-profile b,a</tspan></tspan></text>
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Ubuntu Mono';-inkscape-font-specification:'Ubuntu Mono'">-profile a,b</tspan></tspan></text>
       <text
          xml:space="preserve"
          id="text8940-8-9-9-1"
@@ -1387,7 +1387,7 @@
            y="27.234197"><tspan>-c new.conf \ 
 </tspan></tspan><tspan
            x="23.207031"
-           y="32.525859"><tspan>-profile c,b,a
+           y="32.525859"><tspan>-profile a,b,c
 </tspan></tspan><tspan
            x="23.207031"
            y="37.817519"><tspan

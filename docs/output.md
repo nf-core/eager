@@ -551,6 +551,8 @@ Note that many of the statistics from this module are displayed in the General S
 
 You will receive output for each *sample*. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
 
+:warning: If your library has no reads mapping to the reference, this will result in an empty BAM file. Qualimap will therefore not produce any output even if a BAM exists!
+
 #### Coverage Histogram
 
 This plot shows on the Y axis the range of fold coverages that the bases of the reference genome are possibly covered by. The Y axis shows the number of bases that were covered at the given fold coverage depth as indicated on the Y axis.
@@ -597,6 +599,8 @@ Things to watch out for:
 Sex.DetERRmine calculates the coverage of your mapped reads on the X and Y chromosomes relative to the coverage on the autosomes (X-/Y-rate). This metric can be thought of as the number of copies of chromosomes X and Y that is found within each cell, relative to the autosomal copies. The number of autosomal copies is assumed to be two, meaning that an X-rate of `1.0` means there are two X chromosomes in each cell, while `0.5` means there is a single copy of the X chromosome per cell. Human females have two copies of the X chromosome and no Y chromosome (XX), while human males have one copy of each of the X and Y chromosomes (XY).
 
 When a bedfile of specific sites is provided, Sex.DetERRmine additionally calculates error bars around each relative coverage estimate. For this estimate to be trustworthy, the sites included in the bedfile should be spaced apart enough that a single sequencing read cannot overlap multiple sites. Hence, when a bedfile has not been provided, this error should be ignored. When a suitable bedfile is provided, each observation of a covered site is independent, and the error around the coverage is equal to the binomial error estimate. This error is then propagated during the calculation of relative coverage for the X and Y chromosomes.
+
+> Note that in nf-core/eager this will be run on single- and double-stranded variants of the same library _separately_. This can also help assess for differential contamination between libraries.
 
 #### Relative Coverage
 
@@ -667,7 +671,11 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 - `metagenomic_complexity_filter` - this contains the output from filtering of input reads to metagenomic classification of low-sequence complexity reads as performed by `bbduk`. This will include the filtered FASTQ files (`*_lowcomplexityremoved.fq.gz`) and also the run-time log (`_bbduk.stats`) for each sample. **Note:** there are no sections in the MultiQC report for this module, therefore you must check the `._bbduk.stats` files to get summary statistics of the filtering.
 - `metagenomic_classification/` - this contains the output for a given metagenomic classifier.
   - Running MALT will contain RMA6 files that can be loaded into MEGAN6 or MaltExtract for phylogenetic visualisation of read taxonomic assignments and aDNA characteristics respectively. Additional a `malt.log` file is provided which gives additional information such as run-time, memory usage and per-sample statistics of numbers of alignments with taxonomic assignment etc. This will also include gzip SAM files if requested.
-  - Running kraken will contain the Kraken output and report files, as well as a merged Taxon count table.
+  - Running kraken will contain the Kraken output and report files, as well as a merged Taxon count table. You will also get a Kraken kmer duplication table, in a [KrakenUniq](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1568-0) fashion. This is very useful to check for breadth of coverage and detect read stacking. A small number of aligned reads (low coverage) and a kmer duplication >1 is usually a sign of read stacking, usually indicative of a false positive hit (e.g. from over-amplified libraries). *Kmer duplication is defined as: number of kmers / number of unique kmers*. You will find two kraken reports formats available:  
+    - the `*.kreport` which is the old report format, without distinct minimizer count information, used by some tools such as [Pavian](https://github.com/fbreitwieser/pavian)
+    - the `*.kraken2_report` which is the new kraken report format, with the distinct minimizer count information.  
+  
+    Finally, the `*.kraken.out` file are the direct output of Kraken2
 - `maltextract/` - this contains a `results` directory in which contains the output from MaltExtract - typically one folder for each filter type, an error and a log file. The characteristics of each node (e.g. damage, read lengths, edit distances - each in different txt formats) can be seen in each sub-folder of the filter folders. Output can be visualised either with the [HOPS postprocessing script](https://github.com/rhuebler/HOPS) or [MEx-IPA](https://github.com/jfy133/MEx-IPA)
 - `consensus_sequence/` - this contains three FASTA files from VCF2Genome of a consensus sequence based on the reference FASTA with each sample's unique modifications. The main FASTA is a standard file with bases not passing the specified thresholds as Ns. The two other FASTAS (`_refmod.fasta.gz`) and (`_uncertainity.fasta.gz`) are IUPAC uncertainty codes (rather than Ns) and a special number-based uncertainty system used for other downstream tools, respectively.
 - `librarymerged_bams/` - these contain the final BAM files that would go into genotyping (if genotyping is turned on). This means the files will contain all libraries of a given sample (including trimmed non-UDG or half-UDG treated libraries, if BAM trimming turned on)

@@ -95,9 +95,9 @@
                 },
                 "genome": {
                     "type": "string",
-                    "description": "Name of iGenomes reference (required if not FASTA reference).",
+                    "description": "Name of iGenomes reference (required if not FASTA reference). Requires argument `--igenomes_ignore false`, as iGenomes is ignored by default in nf-core/eager",
                     "fa_icon": "fas fa-book",
-                    "help_text": "Alternatively to `--fasta`, the pipeline config files come bundled with paths to the Illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.\n\nThere are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.\n\nYou can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:\n\n- Human\n  - `--genome GRCh37`\n  - `--genome GRCh38`\n- Mouse *\n  - `--genome GRCm38`\n- _Drosophila_ *\n  - `--genome BDGP6`\n- _S. cerevisiae_ *\n  - `--genome 'R64-1-1'`\n\n> \\* Not bundled with nf-core eager by default.\n\nNote that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.\n\nThe syntax for this reference configuration is as follows:\n\n```nextflow\nparams {\n  genomes {\n    'GRCh37' {\n      fasta   = '<path to the iGenomes genome fasta file>'\n    }\n    // Any number of additional genomes, key is used with --genome\n  }\n}\n```"
+                    "help_text": "Alternatively to `--fasta`, the pipeline config files come bundled with paths to the Illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.\n\nThere are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.\n\nYou can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:\n\n- Human\n  - `--genome GRCh37`\n  - `--genome GRCh38`\n- Mouse *\n  - `--genome GRCm38`\n- _Drosophila_ *\n  - `--genome BDGP6`\n- _S. cerevisiae_ *\n  - `--genome 'R64-1-1'`\n\n> \\* Not bundled with nf-core eager by default.\n\nNote that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.\n\nThe syntax for this reference configuration is as follows:\n\n```nextflow\nparams {\n  genomes {\n    'GRCh37' {\n      fasta   = '<path to the iGenomes genome fasta file>'\n    }\n    // Any number of additional genomes, key is used with --genome\n  }\n}\n**NB** Requires argument `--igenomes_ignore false` as iGenomes ignored by default in nf-core/eager\n\n```"
                 },
                 "igenomes_base": {
                     "type": "string",
@@ -181,17 +181,6 @@
                         "copyNoFollow",
                         "move"
                     ]
-                },
-                "saveTrimmed": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Turn this on if you want to keep trimmed reads.",
-                    "hidden": true
-                },
-                "saveAlignedIntermediates": {
-                    "type": "boolean",
-                    "description": "Turn this on if you want to keep intermediate alignment files (SAM, BAM, non-dedupped BAM)",
-                    "hidden": true
                 }
             },
             "fa_icon": "fas fa-cloud-download-alt"
@@ -205,13 +194,6 @@
                     "description": "Display help text.",
                     "hidden": true,
                     "fa_icon": "fas fa-question-circle"
-                },
-                "name": {
-                    "type": "string",
-                    "description": "Workflow name of run, for future reference.",
-                    "fa_icon": "fas fa-fingerprint",
-                    "hidden": true,
-                    "help_text": "A custom name for the pipeline run. Unlike the core nextflow `-name` option with one hyphen this parameter can be reused multiple times, for example if using `-resume`. Passed through to steps such as MultiQC and used for things like report filenames and titles."
                 },
                 "email": {
                     "type": "string",
@@ -261,6 +243,38 @@
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
                     "default": "${params.outdir}/pipeline_info",
                     "fa_icon": "fas fa-cogs",
+                    "hidden": true
+                },
+                "show_hidden_params": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-eye-slash",
+                    "description": "Show all params when using `--help`",
+                    "hidden": true,
+                    "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
+                },
+                "enable_conda": {
+                    "type": "boolean",
+                    "hidden": true,
+                    "description": "Parameter used for checking conda channels to be set correctly."
+                },
+                "validate_params": {
+                    "type": "boolean",
+                    "default": "true",
+                    "description": "Boolean whether to validate parameters against the schema at runtime",
+                    "fa_icon": "fab fa-angellist",
+                    "hidden": true
+                },
+                "schema_ignore_params": {
+                    "type": "string",
+                    "fa_icon": "fas fa-not-equal",
+                    "description": "String to specify ignored parameters for parameter validation",
+                    "hidden": true,
+                    "default": "genomes"
+                },
+                "config_profile_name": {
+                    "type": "string",
+                    "description": "String to describe the config profile that is run.",
+                    "fa_icon": "fas fa-id-badge",
                     "hidden": true
                 }
             },
@@ -472,9 +486,9 @@
                 },
                 "skip_collapse": {
                     "type": "boolean",
-                    "description": "Skip of merging forward and reverse reads together. Only applicable for paired-end libraries.",
+                    "description": "Skip of merging forward and reverse reads together and turns on paired-end alignment for downstream mapping. Only applicable for paired-end libraries.",
                     "fa_icon": "fas fa-fast-forward",
-                    "help_text": "Turns off the paired-end read merging.\n\nFor example\n\n```bash\n--skip_collapse  --input '*_{R1,R2}_*.fastq'\n```\n\nIt is important to use the paired-end wildcard globbing as `--skip_collapse` can only be used on paired-end data!\n\n:warning: If you run this and also with `--clip_readlength` set to something (as is by default), you may end up removing single reads from either the pair1 or pair2 file. These will be NOT be mapped when aligning with either `bwa` or `bowtie`, as both can only accept one (forward) or two (forward and reverse) FASTQs as input.\n\n> Modifies AdapterRemoval parameter: `--collapse`"
+                    "help_text": "Turns off the paired-end read merging.\n\nFor example\n\n```bash\n--skip_collapse  --input '*_{R1,R2}_*.fastq'\n```\n\nIt is important to use the paired-end wildcard globbing as `--skip_collapse` can only be used on paired-end data!\n\n:warning: If you run this and also with `--clip_readlength` set to something (as is by default), you may end up removing single reads from either the pair1 or pair2 file. These will be NOT be mapped when aligning with either `bwa` or `bowtie`, as both can only accept one (forward) or two (forward and reverse) FASTQs as input.\n\nAlso note that supplying this flag will then also cause downstream mapping steps to run in paired-end mode. This may be more suitable for modern data, or when you want to utilise mate-pair spatial information.\n\n> Modifies AdapterRemoval parameter: `--collapse`"
                 },
                 "skip_trim": {
                     "type": "boolean",
@@ -493,6 +507,13 @@
                     "description": "Only use merged reads downstream (un-merged reads and singletons are discarded).",
                     "fa_icon": "fas fa-handshake",
                     "help_text": "Specify that only merged reads are sent downstream for analysis.\n\nSingletons (i.e. reads missing a pair), or un-merged reads (where there wasn't sufficient overlap) are discarded.\n\nYou may want to use this if you want ensure only the best quality reads for your analysis, but with the penalty of potentially losing still valid data (even if some reads have slightly lower quality). It is highly recommended when using `--dedupper 'dedup'` (see below)."
+                },
+                "qualitymax": {
+                    "type": "integer",
+                    "description": "Specify the maximum Phred score used in input FASTQ files",
+                    "help_text": "Specify maximum Phred score of the quality field of FASTQ files. The quality-score range can vary depending on the machine and version (e.g. see diagram [here](https://en.wikipedia.org/wiki/FASTQ_format#Encoding), and this allows you to increase from the default AdapterRemoval value of `41`.\n\n> Modifies AdapterRemoval parameters: `--qualitymax`",
+                    "default": 41,
+                    "fa_icon": "fas fa-arrow-up"
                 }
             },
             "fa_icon": "fas fa-cut",
@@ -586,8 +607,8 @@
                 },
                 "bt2n": {
                     "type": "integer",
-                    "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity.",
                     "default": 0,
+                    "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity.",
                     "fa_icon": "fas fa-sort-numeric-down",
                     "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).\n\n> Modifies Bowtie2 parameters: `-N`",
                     "enum": [
@@ -640,7 +661,8 @@
                     "help_text": "Read removal mode. Remove mapped reads completely (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)\n\n> Modifies extract_map_reads.py parameter: `-m`",
                     "enum": [
                         "strip",
-                        "replace"
+                        "replace",
+                        "remove"
                     ]
                 }
             },
@@ -661,8 +683,8 @@
                 },
                 "bam_mapping_quality_threshold": {
                     "type": "integer",
-                    "description": "Minimum mapping quality for reads filter.",
                     "default": 0,
+                    "description": "Minimum mapping quality for reads filter.",
                     "fa_icon": "fas fa-greater-than-equal",
                     "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).\n\n> Modifies samtools view parameter: `-q`"
                 },
@@ -1007,7 +1029,7 @@
                     ]
                 },
                 "gatk_ug_keep_realign_bam": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.",
                     "fa_icon": "fas fa-align-left",
                     "help_text": "If provided when running GATK's UnifiedGenotyper, this will put into the output folder the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping.\n\nThese BAMs will be stored in the same folder as the corresponding VCF files."
@@ -1279,7 +1301,7 @@
             "properties": {
                 "run_sexdeterrmine": {
                     "type": "boolean",
-                    "description": "Turn on sex determination for human reference genomes.",
+                    "description": "Turn on sex determination for human reference genomes. This will run on single- and double-stranded variants of a library separately.",
                     "fa_icon": "fas fa-transgender-alt",
                     "help_text": "Specify to run the optional process of sex determination.\n"
                 },
@@ -1346,7 +1368,6 @@
                     "type": "string",
                     "description": "Specify which classifier to use. Options: 'malt', 'kraken'.",
                     "fa_icon": "fas fa-tools",
-                    "default": "undefined",
                     "help_text": "Specify which taxonomic classifier to use. There are two options available:\n\n- `kraken` for [Kraken2](https://ccb.jhu.edu/software/kraken2)\n- `malt` for [MALT](https://software-ab.informatik.uni-tuebingen.de/download/malt/welcome.html)\n\n:warning: **Important** It is very important to run `nextflow clean -f` on your\nNextflow run directory once completed. RMA6 files are VERY large and are\n_copied_ from a `work/` directory into the results folder. You should clean the\nwork directory with the command to ensure non-redundancy and large HDD\nfootprints!"
                 },
                 "database": {
