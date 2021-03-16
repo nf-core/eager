@@ -419,7 +419,7 @@ In some cases it maybe no output log is produced by a particular tool for MultiQ
 
 Known cases include:
 
-- Qualimap: there will be no MultiQC output if the BAM file is empty. An empty BAM file is produced we causes Qualimap to crash - this is crash is ignored by nf-core/eager (to allow the rest of the pipeline to continue) and will therefore have no log file for that particular sample/library
+- Qualimap: there will be no MultiQC output if the BAM file is empty. An empty BAM file is produced when no reads map to the reference and causes Qualimap to crash - this is crash is ignored by nf-core/eager (to allow the rest of the pipeline to continue) and will therefore have no log file for that particular sample/library
 
 ## Tutorials
 
