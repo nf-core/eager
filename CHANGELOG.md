@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- [#707](https://github.com/nf-core/eager/pull/707) - Fix typo in UnifiedGenotyper IndelRealigner command
+
 ### `Dependencies`
 
 ### `Deprecated`
