@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [dev] - Unreleased
 
 ### `Added`
+- Added option enabling platypus formatted output of pmdtools misincorporation frequencies. 
 
 ### `Fixed`
 
