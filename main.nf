@@ -2114,6 +2114,7 @@ process pmdtools {
         snpcap = ''
     }
     def size = params.large_ref ? '-c' : ''
+    def platypus = params.pmdtools_platypus ? '--platypus' : ''
     """
     #Run Filtering step 
     samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} $treatment $snpcap --header | samtools view -@ ${task.cpus} -Sb - > "${libraryid}".pmd.bam
@@ -2121,7 +2122,7 @@ process pmdtools {
     #Run Calc Range step
     ## To allow early shut off of pipe: https://github.com/nextflow-io/nextflow/issues/1564
     trap 'if [[ \$? == 141 ]]; then echo "Shutting samtools early due to -n parameter" && samtools index ${libraryid}.pmd.bam ${size}; exit 0; fi' EXIT
-    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
+    samtools calmd -b $bam $fasta | samtools view -h - | pmdtools --deamination ${platypus} --range ${params.pmdtools_range} $treatment $snpcap -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
     
     echo "Running indexing"
     samtools index ${libraryid}.pmd.bam ${size}
