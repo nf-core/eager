@@ -69,7 +69,7 @@ if("${params.fasta}".endsWith(".gz")){
         path zipped_fasta from file(params.fasta) // path doesn't like it if a string of an object is not prefaced with a root dir (/), so use file() to resolve string before parsing to `path` 
 
         output:
-        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling
+        path "$unzip" into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling
 
         script:
         unzip = zipped_fasta.toString() - '.gz'
@@ -2566,10 +2566,10 @@ process vcf2genome {
 // More complex consensus caller with additional filtering functionality (e.g. for heterozygous calls) to generate SNP tables and other things sometimes used in aDNA bacteria studies
 
 // Create input channel for MultiVCFAnalyzer, possibly mixing with pre-made VCFs.
-if (params.additional_vcf_files == '') {
-    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[7] }.collect()
+if (!params.additional_vcf_files) {
+    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[-1] }.collect()
 } else {
-    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it [7] }.collect().mix(ch_extravcfs_for_multivcfanalyzer)
+    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it [-1] }.collect().mix(ch_extravcfs_for_multivcfanalyzer)
 }
 
 process multivcfanalyzer {
@@ -2577,11 +2577,11 @@ process multivcfanalyzer {
   publishDir "${params.outdir}/multivcfanalyzer", mode: params.publish_dir_mode
 
   when:
-  params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy == '2'
+  params.genotyping_tool == 'ug' && params.run_multivcfanalyzer && params.gatk_ploidy.toString() == '2'
 
   input:
-  file vcf from ch_vcfs_for_multivcfanalyzer.collect()
-  file fasta from ch_fasta_for_multivcfanalyzer.collect()
+  file vcf from ch_vcfs_for_multivcfanalyzer
+  file fasta from ch_fasta_for_multivcfanalyzer
 
   output:
   file('fullAlignment.fasta.gz')
