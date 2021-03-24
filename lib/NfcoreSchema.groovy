@@ -125,7 +125,6 @@ class NfcoreSchema {
         // Remove anything that's in params.schema_ignore_params
         rawSchema = removeIgnoredParams(rawSchema, params)
 
-
         Schema schema = SchemaLoader.load(rawSchema)
 
         // Clean the parameters
@@ -157,7 +156,6 @@ class NfcoreSchema {
             }
             log.warn warn_msg
             log.info "- ${colors.dim}Ignore this warning: params.schema_ignore_params = \"${unexpectedParams.join(',')}\" ${colors.reset}"
-
             println ''
         }
 
@@ -378,7 +376,6 @@ class NfcoreSchema {
         */
 
         // Grouped params
-
         def params_map = new LinkedHashMap()
         schema_definitions.each { key, val ->
             def Map group = schema_definitions."$key".properties // Gets the property object of the group
@@ -570,4 +567,5 @@ class NfcoreSchema {
         output += '\n\n' + dashed_line(params.monochrome_logs)
         return output
     }
+
 }

@@ -395,7 +395,6 @@ log.info NfcoreSchema.params_summary_log(workflow, params, json_schema)
 def summary = [:]
 if (workflow.revision) summary['Pipeline Release'] = workflow.revision
 summary['Run Name']         = workflow.runName
-// TODO nf-core: Report custom parameters here
 summary['Input']            = params.input
 summary['Fasta Ref']        = params.fasta
 summary['Data Type']        = params.single_end ? 'Single-End' : 'Paired-End'
@@ -426,10 +425,10 @@ Channel.from(summary.collect{ [it.key, it.value] })
     .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
     .reduce { a, b -> return [a, b].join("\n            ") }
     .map { x -> """
-    id: '{{ name_noslash }}-summary'
+    id: 'nf-core-eager-summary'
     description: " - this information is collected when the pipeline is started."
-    section_name: '{{ name }} Workflow Summary'
-    section_href: 'https://github.com/{{ name }}'
+    section_name: 'nf-core/eager Workflow Summary'
+    section_href: 'https://github.com/nf-core/eager'
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
@@ -3035,9 +3034,9 @@ process multiqc {
 workflow.onComplete {
 
     // Set up the e-mail variables
-    def subject = "[{{ name }}] Successful: $workflow.runName"
+    def subject = "[nf-core/eager] Successful: $workflow.runName"
     if (!workflow.success) {
-        subject = "[{{ name }}] FAILED: $workflow.runName"
+        subject = "[nf-core/eager] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -3062,19 +3061,18 @@ workflow.onComplete {
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
-    // TODO nf-core: If not using MultiQC, strip out this code (including params.max_multiqc_email_size)
     // On success try attach the multiqc report
     def mqc_report = null
     try {
         if (workflow.success) {
             mqc_report = ch_multiqc_report.getVal()
             if (mqc_report.getClass() == ArrayList) {
-                log.warn "[{{ name }}] Found multiple reports from process 'multiqc', will use only one"
+                log.warn "[nf-core/eager] Found multiple reports from process 'multiqc', will use only one"
                 mqc_report = mqc_report[0]
             }
         }
     } catch (all) {
-        log.warn "[{{ name }}] Could not attach MultiQC report to summary email"
+        log.warn "[nf-core/eager] Could not attach MultiQC report to summary email"
     }
 
     // Check if we are only sending emails on failure
@@ -3106,7 +3104,7 @@ workflow.onComplete {
             if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
             // Try to send HTML e-mail using sendmail
             [ 'sendmail', '-t' ].execute() << sendmail_html
-            log.info "[{{ name }}] Sent summary e-mail to $email_address (sendmail)"
+            log.info "[nf-core/eager] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
             // Catch failures and try with plaintext
             def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
@@ -3114,7 +3112,7 @@ workflow.onComplete {
               mail_cmd += [ '-A', mqc_report ]
             }
             mail_cmd.execute() << email_html
-            log.info "[{{ name }}] Sent summary e-mail to $email_address (mail)"
+            log.info "[nf-core/eager] Sent summary e-mail to $email_address (mail)"
         }
     }
 
@@ -3140,10 +3138,10 @@ workflow.onComplete {
     }
 
     if (workflow.success) {
-        log.info "-${c_purple}[{{ name }}]${c_green} Pipeline completed successfully${c_reset}-"
+        log.info "-${c_purple}[nf-core/eager]${c_green} Pipeline completed successfully${c_reset}-"
     } else {
         checkHostname()
-        log.info "-${c_purple}[{{ name }}]${c_red} Pipeline completed with errors${c_reset}-"
+        log.info "-${c_purple}[nf-core/eager]${c_red} Pipeline completed with errors${c_reset}-"
     }
 
 }
