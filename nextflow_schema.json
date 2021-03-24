@@ -202,6 +202,13 @@
                     "help_text": "An email address to send a summary email to when the pipeline is completed.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
                 },
+                "validate_params": {
+                    "type": "boolean",
+                    "description": "Boolean whether to validate parameters against the schema at runtime",
+                    "default": true,
+                    "fa_icon": "fas fa-check-square",
+                    "hidden": true
+                },
                 "email_on_fail": {
                     "type": "string",
                     "description": "Email address for completion summary, only when pipeline fails.",
@@ -257,13 +264,6 @@
                     "hidden": true,
                     "description": "Parameter used for checking conda channels to be set correctly."
                 },
-                "validate_params": {
-                    "type": "boolean",
-                    "default": "true",
-                    "description": "Boolean whether to validate parameters against the schema at runtime",
-                    "fa_icon": "fab fa-angellist",
-                    "hidden": true
-                },
                 "schema_ignore_params": {
                     "type": "string",
                     "fa_icon": "fas fa-not-equal",
@@ -302,6 +302,7 @@
                     "description": "Maximum amount of memory that can be requested for any single job.",
                     "default": "128.GB",
                     "fa_icon": "fas fa-memory",
+                    "pattern": "^[\\d\\.]+\\s*.(K|M|G|T)?B$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
                 },
@@ -310,6 +311,7 @@
                     "description": "Maximum amount of time that can be requested for any single job.",
                     "default": "240.h",
                     "fa_icon": "far fa-clock",
+                    "pattern": "^[\\d\\.]+\\.*(s|m|h|d)$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
                 }
@@ -341,6 +343,12 @@
                 "hostnames": {
                     "type": "string",
                     "description": "Institutional configs hostname.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_name": {
+                    "type": "string",
+                    "description": "Institutional config name.",
                     "hidden": true,
                     "fa_icon": "fas fa-users-cog"
                 },
@@ -656,7 +664,6 @@
                     "fa_icon": "fas fa-mask",
                     "help_text": "Read removal mode. Remove mapped reads completely (`'remove'`) or just replace mapped reads sequence by N (`'replace'`)\n\n> Modifies extract_map_reads.py parameter: `-m`",
                     "enum": [
-                        "strip",
                         "replace",
                         "remove"
                     ]
@@ -1361,7 +1368,11 @@
                     "type": "string",
                     "description": "Specify which classifier to use. Options: 'malt', 'kraken'.",
                     "fa_icon": "fas fa-tools",
-                    "help_text": "Specify which taxonomic classifier to use. There are two options available:\n\n- `kraken` for [Kraken2](https://ccb.jhu.edu/software/kraken2)\n- `malt` for [MALT](https://software-ab.informatik.uni-tuebingen.de/download/malt/welcome.html)\n\n:warning: **Important** It is very important to run `nextflow clean -f` on your\nNextflow run directory once completed. RMA6 files are VERY large and are\n_copied_ from a `work/` directory into the results folder. You should clean the\nwork directory with the command to ensure non-redundancy and large HDD\nfootprints!"
+                    "help_text": "Specify which taxonomic classifier to use. There are two options available:\n\n- `kraken` for [Kraken2](https://ccb.jhu.edu/software/kraken2)\n- `malt` for [MALT](https://software-ab.informatik.uni-tuebingen.de/download/malt/welcome.html)\n\n:warning: **Important** It is very important to run `nextflow clean -f` on your\nNextflow run directory once completed. RMA6 files are VERY large and are\n_copied_ from a `work/` directory into the results folder. You should clean the\nwork directory with the command to ensure non-redundancy and large HDD\nfootprints!",
+                    "enum": [
+                        "malt",
+                        "kraken"
+                    ]
                 },
                 "database": {
                     "type": "string",
