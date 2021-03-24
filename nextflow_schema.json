@@ -270,12 +270,6 @@
                     "description": "String to specify ignored parameters for parameter validation",
                     "hidden": true,
                     "default": "genomes"
-                },
-                "config_profile_name": {
-                    "type": "string",
-                    "description": "String to describe the config profile that is run.",
-                    "fa_icon": "fas fa-id-badge",
-                    "hidden": true
                 }
             },
             "fa_icon": "fas fa-file-import",
