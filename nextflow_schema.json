@@ -201,6 +201,7 @@
                     "default": true,
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
+                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
