@@ -1226,7 +1226,7 @@ process bwamem {
 // CircularMapper reference preparation and mapping for circular genomes e.g. mtDNA
 
 process circulargenerator{
-    label 'sc_tiny'
+    label 'sc_medium'
     tag "$prefix"
     publishDir "${params.outdir}/reference_genome/circularmapper_index", mode: params.publish_dir_mode, saveAs: { filename -> 
             if (params.save_reference) filename 
