@@ -264,16 +264,6 @@
                     "hidden": true,
                     "description": "Parameter used for checking conda channels to be set correctly."
                 },
-<<<<<<< HEAD
-                "validate_params": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Boolean whether to validate parameters against the schema at runtime",
-                    "fa_icon": "fab fa-angellist",
-                    "hidden": true
-                },
-=======
->>>>>>> dev
                 "schema_ignore_params": {
                     "type": "string",
                     "fa_icon": "fas fa-not-equal",
