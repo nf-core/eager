@@ -199,8 +199,8 @@ if (params.fasta_index && !params.fasta_index.endsWith(".fai")) {
 }
 
 // Check if genome exists in the config file. params.genomes is from igenomes.conf, params.genome specified by user
-if ( params.genome && !params.genomes.containsKey(params.genome)) {
-    exit 1, "[nf-core/eager] error: the provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}."
+if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
+    exit 1, "The provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(', ')}"
 }
 
 // Index files provided? Then check whether they are correct and complete
