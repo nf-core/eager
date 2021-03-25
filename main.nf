@@ -11,39 +11,149 @@
 ------------------------------------------------------------------------------------------------------------
 */
 
+log.info Headers.nf_core(workflow, params.monochrome_logs)
 
-// Show help message
-params.help = false
+////////////////////////////////////////////////////
+/* --               PRINT HELP                 -- */
+////////////////////////////////////////////////////+
 def json_schema = "$projectDir/nextflow_schema.json"
 if (params.help) {
-    def command = "nextflow run nf-core/eager -profile <docker/singularity/conda> --reads'*_R{1,2}.fastq.gz' --fasta '<your_reference>.fasta'"
+    def command = "nextflow run nf-core/eager --input '*_R{1,2}.fastq.gz' -profile docker"
     log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
     exit 0
 }
 
 ////////////////////////////////////////////////////
 /* --         VALIDATE PARAMETERS              -- */
-////////////////////////////////////////////////////
-
-def unexpectedParams = []
+////////////////////////////////////////////////////+
 if (params.validate_params) {
-    unexpectedParams = NfcoreSchema.validateParameters(params, json_schema, log)
+    NfcoreSchema.validateParameters(params, json_schema, log)
 }
 
-// Info required for completion email and summary
-def multiqc_report      = []
+// Validate BAM input isn't set to paired_end
+if ( params.bam && !params.single_end ) {
+  exit 1, "[nf-core/eager] error: bams can only be specified with --single_end. Please check input command."
+}
 
-// Small console separator to make it easier to read errors after launch
-println ""
+// Validate that skip_collapse is only set to True for paired_end reads!
+if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.single_end){
+    exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
+}
 
+// Validate not trying to both skip collapse and skip trim
+if ( params.skip_collapse && params.skip_trim ) {
+  exit 1, "[nf-core/eager error]: you have specified to skip both merging and trimming of paired end samples. Use --skip_adapterremoval instead."
+}
 
+// Bedtools validation
+if(params.run_bedtools_coverage && params.anno_file == ''){
+  exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
+}
 
-////////////////////////////////////////////////////
-/* --          VALIDATE INPUTS                 -- */
-////////////////////////////////////////////////////
+// BAM filtering validation
+if (!params.run_bam_filtering && params.bam_mapping_quality_threshold != 0) {
+  exit 1, "[nf-core/eager] error: please turn on BAM filtering if you want to perform mapping quality filtering! Provide: --run_bam_filtering."
+}
 
-/**FASTA input handling
-**/ 
+if (params.dedupper == 'dedup' && !params.mergedonly) {
+    log.warn "[nf-core/eager] Warning: you are using DeDup but without specifying --mergedonly for AdapterRemoval, dedup will likely fail! See documentation for more information."
+}
+
+// Genotyping validation
+if (params.run_genotyping){
+
+  if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile == '' ) ) {
+    exit 1, "[nf-core/eager] error: please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file."
+  }
+
+  if (params.genotyping_tool == 'angsd' && ! ( params.angsd_glformat == 'text' || params.angsd_glformat == 'binary' || params.angsd_glformat == 'binary_three' || params.angsd_glformat == 'beagle' ) ) {
+    exit 1, "[nf-core/eager] error: please check your ANGSD output format! Options: 'text', 'binary', 'binary_three', 'beagle'. Found parameter: --angsd_glformat '${params.angsd_glformat}'."
+  }
+}
+
+// Consensus sequence generation validation
+if (params.run_vcf2genome) {
+    if (!params.run_genotyping) {
+      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters."
+    }
+
+    if (params.genotyping_tool != 'ug') {
+      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
+    }
+}
+
+// MultiVCFAnalyzer validation
+if (params.run_multivcfanalyzer) {
+  if (!params.run_genotyping) {
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters."
+  }
+
+  if (params.genotyping_tool != "ug") {
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
+  }
+
+  if (params.gatk_ploidy != 2) {
+    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Found parameter: --gatk_ploidy ${params.gatk_ploidy}."
+  }
+
+  if (params.additional_vcf_files != '') {
+      ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files, checkIfExists: true)
+  }
+}
+
+if (params.run_metagenomic_screening) {
+  if ( params.bam_unmapped_type == "discard" ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
+  }
+
+  if (params.bam_unmapped_type != 'fastq' ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTQ format. Please supply --bam_unmapped_type 'fastq'. Found parameter: --bam_unmapped_type '${params.bam_unmapped_type}'."
+  }
+
+  if (params.database == '' ) {
+    exit 1, "[nf-core/eager] error: metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
+  }
+
+  if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
+    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified: --metagenomic_min_support_reads."
+  }
+
+  if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
+    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified: --malt_min_support_percent."
+  }
+
+  if (!params.metagenomic_min_support_reads.toString().isInteger()){
+    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. --metagenomic_min_support_reads Found parameter: ${params.metagenomic_min_support_reads}."
+  }
+}
+
+// MaltExtract validation
+if (params.run_maltextract) {
+
+  if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
+    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'. Found parameter: --metagenomic_tool '${params.metagenomic_tool}'"
+  }
+
+  if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
+    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'. Found parameter: --metagenomic_tool '${params.metagenomic_tool}'"
+  }
+
+  if (params.maltextract_taxon_list == '') {
+    exit 1, "[nf-core/eager] error: MaltExtract requires a taxon list specifying the target taxa of interest. Specify the file with --params.maltextract_taxon_list."
+  }
+}
+
+/////////////////////////////////////////////////////////
+/* --          VALIDATE INPUT FILES                 -- */
+/////////////////////////////////////////////////////////
+
+// Set up channels for annotation file
+if (!params.run_bedtools_coverage){
+  ch_anno_for_bedtools = Channel.empty()
+} else {
+  ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
+    .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --anno_file ${params.anno_file}."}
+}
 
 if (params.fasta) {
     file(params.fasta, checkIfExists: true)
@@ -89,26 +199,8 @@ if (params.fasta_index && !params.fasta_index.endsWith(".fai")) {
 }
 
 // Check if genome exists in the config file. params.genomes is from igenomes.conf, params.genome specified by user
-if ( params.genome && !params.genomes.containsKey(params.genome)) {
-    exit 1, "[nf-core/eager] error: the provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}."
-}
-
-// Mapper validation
-if (params.mapper != 'bwaaln' && !params.mapper == 'circularmapper' && !params.mapper == 'bwamem' && !params.mapper == "bowtie2"){
-    exit 1, "[nf-core/eager] error: invalid mapper option. Options are: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'. Default: 'bwaaln'. Found parameter: --mapper '${params.mapper}'."
-}
-
-if (params.mapper == 'bowtie2' && params.bt2_alignmode != 'local' && params.bt2_alignmode != 'end-to-end' ) {
-    exit 1, "[nf-core/eager] error: invalid bowtie2 alignment mode. Options: 'local', 'end-to-end'. Found parameter: --bt2_alignmode '${params.bt2_alignmode}'"
-}
-
-if (params.mapper == 'bowtie2' && params.bt2_sensitivity != 'no-preset' && params.bt2_sensitivity != 'very-fast' && params.bt2_sensitivity != 'fast' && params.bt2_sensitivity != 'sensitive' && params.bt2_sensitivity != 'very-sensitive' ) {
-    exit 1, "[nf-core/eager] error: invalid bowtie2 sensitivity mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'. Options are for both alignmodes Found parameter: --bt2_sensitivity '${params.bt2_sensitivity}'."
-}
-
-if (params.bt2n != 0 && params.bt2n != 1) {
-    exit 1, "[nf-core/eager] error: invalid bowtie2 --bt2n (-N) parameter. Options: 0, 1. Found parameter: --bt2n ${params.bt2n}."
-
+if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
+    exit 1, "The provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(', ')}"
 }
 
 // Index files provided? Then check whether they are correct and complete
@@ -135,124 +227,11 @@ if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
     bwa_index_bwamem = Channel.empty()
 }
 
-// Validate BAM input isn't set to paired_end
-if ( params.bam && !params.single_end ) {
-  exit 1, "[nf-core/eager] error: bams can only be specified with --single_end. Please check input command."
-}
-
-// Validate that skip_collapse is only set to True for paired_end reads!
-if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.single_end){
-    exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
-}
-
-// Validate not trying to both skip collapse and skip trim
-if ( params.skip_collapse && params.skip_trim ) {
-  exit 1, "[nf-core/eager error]: you have specified to skip both merging and trimming of paired end samples. Use --skip_adapterremoval instead."
-}
-
-// Host removal mode validation
-if (params.hostremoval_input_fastq){
-    if (!(['remove','replace'].contains(params.hostremoval_mode))) {
-        exit 1, "[nf-core/eager] error: --hostremoval_mode can only be set to 'remove' or 'replace'."
-    }
-}
-
-if (params.bam_unmapped_type == '') {
-    exit 1, "[nf-core/eager] error: please specify valid unmapped read output format. Options: 'discard', 'keep', 'bam', 'fastq', 'both'. Found parameter: --bam_unmapped_type '${params.bam_unmapped_type}'."
-}
-
-// Bedtools validation
-if(params.run_bedtools_coverage && params.anno_file == ''){
-  exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
-}
-
-// Set up channels for annotation file
-if (!params.run_bedtools_coverage){
-  ch_anno_for_bedtools = Channel.empty()
-} else {
-  ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
-    .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --anno_file ${params.anno_file}."}
-}
-
-// BAM filtering validation
-if (!params.run_bam_filtering && params.bam_mapping_quality_threshold != 0) {
-  exit 1, "[nf-core/eager] error: please turn on BAM filtering if you want to perform mapping quality filtering! Provide: --run_bam_filtering."
-}
-
-if (params.run_bam_filtering && params.bam_unmapped_type != 'discard' && params.bam_unmapped_type != 'keep' && params.bam_unmapped_type != 'bam' && params.bam_unmapped_type != 'fastq' && params.bam_unmapped_type != 'both' ) {
-  exit 1, "[nf-core/eager] error: please specify how to deal with unmapped reads. Options: 'discard', 'keep', 'bam', 'fastq', 'both'."
-}
-
-// Deduplication validation
-if (params.dedupper != 'dedup' && params.dedupper != 'markduplicates') {
-  exit 1, "[nf-core/eager] error: Selected deduplication tool is not recognised. Options: 'dedup' or 'markduplicates'. Found parameter: --dedupper '${params.dedupper}'."
-}
-
-if (params.dedupper == 'dedup' && !params.mergedonly) {
-    log.warn "[nf-core/eager] Warning: you are using DeDup but without specifying --mergedonly for AdapterRemoval, dedup will likely fail! See documentation for more information."
-}
-
 // SexDetermination channel set up and bedfile validation
 if (params.sexdeterrmine_bedfile == '') {
   ch_bed_for_sexdeterrmine = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
 } else {
   ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile, checkIfExists: true)
-}
-
-// Genotyping validation
-if (params.run_genotyping){
-
-  if (params.genotyping_source != 'raw' && params.genotyping_source != 'pmd' && params.genotyping_source != 'trimmed' && params.genotyping_source != 'rescaled' ) {
-      exit 1, "[nf-core/eager] error: please specify a  valid genotyping source. Options: 'raw', 'pmd', 'trimmed', 'rescaled'. Found parameter: --genotyping_source '${params.genotyping_source}'."
-  }
-
-  if (params.genotyping_tool != 'ug' && params.genotyping_tool != 'hc' && params.genotyping_tool != 'freebayes' && params.genotyping_tool != 'pileupcaller' && params.genotyping_tool != 'angsd' ) {
-  exit 1, "[nf-core/eager] error: please specify a valid genotyper. Options: 'ug', 'hc', 'freebayes', 'pileupcaller'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
-  }
-  
-  if (params.gatk_ug_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_ug_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_ug_out_mode != 'EMIT_ALL_SITES') {
-  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Found parameter: --gatk_ug_out_mode '${params.gatk_out_mode}'."
-  }
-
-  if (params.gatk_hc_out_mode != 'EMIT_VARIANTS_ONLY' && params.gatk_hc_out_mode != 'EMIT_ALL_CONFIDENT_SITES' && params.gatk_hc_out_mode != 'EMIT_ALL_ACTIVE_SITES') {
-  exit 1, "[nf-core/eager] error: please check your GATK output mode. Options are: 'EMIT_VARIANTS_ONLY', 'EMIT_ALL_CONFIDENT_SITES', 'EMIT_ALL_SITES'. Found parameter: --gatk_out_mode '${params.gatk_out_mode}'."
-  }
-  
-  if (params.genotyping_tool == 'ug' && (params.gatk_ug_genotype_model != 'SNP' && params.gatk_ug_genotype_model != 'INDEL' && params.gatk_ug_genotype_model != 'BOTH' && params.gatk_ug_genotype_model != 'GENERALPLOIDYSNP' && params.gatk_ug_genotype_model != 'GENERALPLOIDYINDEL')) {
-    exit 1, "[nf-core/eager] error: please check your UnifiedGenotyper genotype model. Options: 'SNP', 'INDEL', 'BOTH', 'GENERALPLOIDYSNP', 'GENERALPLOIDYINDEL'. Found parameter: --gatk_ug_genotype_model '${params.gatk_ug_genotype_model}'."
-  }
-
-  if (params.genotyping_tool == 'hc' && (params.gatk_hc_emitrefconf != 'NONE' && params.gatk_hc_emitrefconf != 'GVCF' && params.gatk_hc_emitrefconf != 'BP_RESOLUTION')) {
-    exit 1, "[nf-core/eager] error: please check your HaplotyperCaller reference confidence parameter. Options: 'NONE', 'GVCF', 'BP_RESOLUTION'. Found parameter: --gatk_hc_emitrefconf '${params.gatk_hc_emitrefconf}'."
-  }
-
-  if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_method == 'randomHaploid' || params.pileupcaller_method == 'randomDiploid' || params.pileupcaller_method == 'majorityCall' ) ) {
-    exit 1, "[nf-core/eager] error: please check your pileupCaller method parameter. Options: 'randomHaploid', 'randomDiploid', 'majorityCall'. Found parameter: --pileupcaller_method '${params.pileupcaller_method}'."
-  }
-
-  if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile == '' ) ) {
-    exit 1, "[nf-core/eager] error: please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file."
-  }
-
-  if (params.genotyping_tool == 'angsd' && ! ( params.angsd_glmodel == 'samtools' || params.angsd_glmodel == 'gatk' || params.angsd_glmodel == 'soapsnp' || params.angsd_glmodel == 'syk' ) ) {
-    exit 1, "[nf-core/eager] error: please check your ANGSD genotyping model! Options: 'samtools', 'gatk', 'soapsnp', 'syk'. Found parameter: --angsd_glmodel' ${params.angsd_glmodel}'."
-  }
-
-  if (params.genotyping_tool == 'angsd' && ! ( params.angsd_glformat == 'text' || params.angsd_glformat == 'binary' || params.angsd_glformat == 'binary_three' || params.angsd_glformat == 'beagle' ) ) {
-    exit 1, "[nf-core/eager] error: please check your ANGSD output format! Options: 'text', 'binary', 'binary_three', 'beagle'. Found parameter: --angsd_glformat '${params.angsd_glformat}'."
-  }
-
-  if ( !params.angsd_createfasta && params.angsd_fastamethod != 'random' ) {
-    exit 1, "[nf-core/eager] error: to output a ANGSD FASTA file, please turn on FASTA creation with --angsd_createfasta."
-  }
-
-  if ( params.angsd_createfasta && !( params.angsd_fastamethod == 'random' || params.angsd_fastamethod == 'common' ) ) {
-    exit 1, "[nf-core/eager] error: please check your ANGSD FASTA file creation method. Options: 'random', 'common'. Found parameter: --angsd_fastamethod '${params.angsd_fastamethod}'."
-  }
-
-  if (params.genotyping_tool == 'pileupcaller' && ! ( params.pileupcaller_transitions_mode == 'AllSites' || params.pileupcaller_transitions_mode == 'TransitionsMissing' || params.pileupcaller_transitions_mode == 'SkipTransitions') ) {
-    exit 1, "[nf-core/eager] error: please check your pileupCaller transitions mode parameter. Options: 'AllSites', 'TransitionsMissing', 'SkipTransitions'. Found parameter: --pileupcaller_transitions_mode '${params.pileupcaller_transitions_mode}'"
-  }
 }
 
  // pileupCaller channel generation and input checks for 'random sampling' genotyping
@@ -268,106 +247,11 @@ if (params.pileupcaller_snpfile.isEmpty ()) {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile, checkIfExists: true)
 }
 
-// Consensus sequence generation validation
-if (params.run_vcf2genome) {
-    if (!params.run_genotyping) {
-      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Please check your genotyping parameters."
-    }
-
-    if (params.genotyping_tool != 'ug') {
-      exit 1, "[nf-core/eager] error: consensus sequence generation requires genotyping via UnifiedGenotyper on be turned on with the parameter --run_genotyping and --genotyping_tool 'ug'. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
-    }
-}
-
-// MultiVCFAnalyzer validation
-if (params.run_multivcfanalyzer) {
-  if (!params.run_genotyping) {
-    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer requires genotyping to be turned on with the parameter --run_genotyping. Please check your genotyping parameters."
-  }
-
-  if (params.genotyping_tool != "ug") {
-    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files from GATK UnifiedGenotyper. Found parameter: --genotyping_tool '${params.genotyping_tool}'."
-  }
-
-  if (params.gatk_ploidy != 2) {
-    exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Found parameter: --gatk_ploidy ${params.gatk_ploidy}."
-  }
-
-  if (params.additional_vcf_files != '') {
-      ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files, checkIfExists: true)
-  }
-}
-
-// Metagenomic validation
-
-if (params.run_metagenomic_screening) {
-  if ( params.bam_unmapped_type == "discard" ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
-  }
-
-  if (params.bam_unmapped_type != 'fastq' ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTQ format. Please supply --bam_unmapped_type 'fastq'. Found parameter: --bam_unmapped_type '${params.bam_unmapped_type}'."
-  }
-
-  if (params.metagenomic_tool != 'malt' &&  params.metagenomic_tool != 'kraken') {
-    exit 1, "[nf-core/eager] error: metagenomic classification can currently only be run with 'malt' or 'kraken' (kraken2). Please check your classifier. Found parameter: --metagenomic_tool '${params.metagenomic_tool}'."
-  }
-
-  if (params.database == '' ) {
-    exit 1, "[nf-core/eager] error: metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
-  }
-
-  if (params.metagenomic_tool == 'malt' && params.malt_mode != 'BlastN' && params.malt_mode != 'BlastP' && params.malt_mode != 'BlastX') {
-    exit 1, "[nf-core/eager] error: unknown MALT mode specified. Options: 'BlastN', 'BlastP', 'BlastX'. Found parameter: --malt_mode '${params.malt_mode}'."
-  }
-
-  if (params.metagenomic_tool == 'malt' && params.malt_alignment_mode != 'Local' && params.malt_alignment_mode != 'SemiGlobal') {
-    exit 1, "[nf-core/eager] error: unknown MALT alignment mode specified. Options: 'Local', 'SemiGlobal'. Found parameter: --malt_alignment_mode '${params.malt_alignment_mode}'."
-  }
-
-  if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'percent' && params.metagenomic_min_support_reads != 1) {
-    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Percent can only be used with --malt_min_support_percent. You modified: --metagenomic_min_support_reads."
-  }
-
-  if (params.metagenomic_tool == 'malt' && params.malt_min_support_mode == 'reads' && params.malt_min_support_percent != 0.01) {
-    exit 1, "[nf-core/eager] error: incompatible MALT min support configuration. Reads can only be used with --malt_min_supportreads. You modified: --malt_min_support_percent."
-  }
-
-  if (params.metagenomic_tool == 'malt' && params.malt_memory_mode != 'load' && params.malt_memory_mode != 'page' && params.malt_memory_mode != 'map') {
-    exit 1, "[nf-core/eager] error: unknown MALT memory mode specified. Options: 'load', 'page', 'map'. Found parameter: --malt_memory_mode '${params.malt_memory_mode}'."
-  }
-
-  if (!params.metagenomic_min_support_reads.toString().isInteger()){
-    exit 1, "[nf-core/eager] error: incompatible min_support_reads configuration. min_support_reads can only be used with integers. --metagenomic_min_support_reads Found parameter: ${params.metagenomic_min_support_reads}."
-  }
-}
-
 // Create input channel for MALT database directory, checking directory exists
 if ( params.database == '') {
     ch_db_for_malt = Channel.empty()
 } else {
     ch_db_for_malt = Channel.fromPath(params.database, checkIfExists: true)
-}
-
-// MaltExtract validation
-if (params.run_maltextract) {
-
-  if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
-    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'. Found parameter: --metagenomic_tool '${params.metagenomic_tool}'"
-  }
-
-  if (params.run_metagenomic_screening && params.metagenomic_tool != 'malt') {
-    exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'. Found parameter: --metagenomic_tool '${params.metagenomic_tool}'"
-  }
-
-  if (params.maltextract_taxon_list == '') {
-    exit 1, "[nf-core/eager] error: MaltExtract requires a taxon list specifying the target taxa of interest. Specify the file with --params.maltextract_taxon_list."
-  }
-
-  if (params.maltextract_filter != 'def_anc' && params.maltextract_filter != 'default' && params.maltextract_filter != 'ancient' && params.maltextract_filter != 'scan' && params.maltextract_filter != 'crawl' && params.maltextract_filter != 'srna') {
-    exit 1, "[nf-core/eager] error: unknown MaltExtract filter specified. Options are: 'def_anc', 'default', 'ancient', 'scan', 'crawl', 'srna'. Found parameter: --maltextract_filter '${params.maltextract_filter}'."
-  }
-
 }
 
 // Create input channel for MaltExtract taxon list, to allow downloading of taxon list, checking file exists.
@@ -384,16 +268,25 @@ if ( params.maltextract_ncbifiles == '' ) {
     ch_ncbifiles_for_maltextract = Channel.fromPath(params.maltextract_ncbifiles, checkIfExists: true)
 }
 
+////////////////////////////////////////////////////
+/* --     Collect configuration parameters     -- */
+////////////////////////////////////////////////////
 
-// Has the run name been specified by the user?
-// this has the bonus effect of catching both -name and --name
-if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
-    custom_runName = workflow.runName
+// Check if genome exists in the config file
+if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
+    exit 1, "The provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(', ')}"
 }
 
-////////////////////////////////////////////////////
-/* --          CONFIG FILES                    -- */
-////////////////////////////////////////////////////
+// Check AWS batch settings
+if (workflow.profile.contains('awsbatch')) {
+    // AWSBatch sanity checking
+    if (!params.awsqueue || !params.awsregion) exit 1, 'Specify correct --awsqueue and --awsregion parameters on AWSBatch!'
+    // Check outdir paths to be S3 buckets if running on AWSBatch
+    // related: https://github.com/nextflow-io/nextflow/issues/813
+    if (!params.outdir.startsWith('s3:')) exit 1, 'Outdir not on S3 - specify S3 Bucket to run on AWSBatch!'
+    // Prevent trace files to be stored on S3 since S3 does not support rolling files.
+    if (params.tracedir.startsWith('s3:')) exit 1, 'Specify a local tracedir or run without trace! S3 cannot be used for tracefiles.'
+}
 
 ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
@@ -416,6 +309,7 @@ tsv_path = null
 if (params.input && (has_extension(params.input, "tsv"))) tsv_path = params.input
 
 ch_input_sample = Channel.empty()
+
 if (tsv_path) {
 
     tsv_file = file(tsv_path)
@@ -490,28 +384,62 @@ ch_bam_channel
 // Also need to send raw files for lane merging, if we want to host removed fastq
 ch_fastq_channel
   .into { ch_input_for_skipconvertbam; ch_input_for_lanemerge_hostremovalfastq }
+  
+////////////////////////////////////////////////////
+/* --         PRINT PARAMETER SUMMARY          -- */
+////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////
-/* --             HEADER LOG INFO             -- */
-///////////////////////////////////////////////////
-
-//Add header
-log.info Headers.nf_core(workflow, params.monochrome_logs)
-
-//Add Summary Parameters
-def summary_params = NfcoreSchema.params_summary_map(workflow, params, json_schema)
 log.info NfcoreSchema.params_summary_log(workflow, params, json_schema)
 
-// Check that conda channels are set-up correctly
-if (params.enable_conda) {
-    Checks.check_conda_channels(log)
+// Header log info
+def summary = [:]
+if (workflow.revision) summary['Pipeline Release'] = workflow.revision
+summary['Run Name']         = workflow.runName
+summary['Input']            = params.input
+summary['Fasta Ref']        = params.fasta
+summary['Data Type']        = params.single_end ? 'Single-End' : 'Paired-End'
+summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
+if (workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
+summary['Output dir']       = params.outdir
+summary['Launch dir']       = workflow.launchDir
+summary['Working dir']      = workflow.workDir
+summary['Script dir']       = workflow.projectDir
+summary['User']             = workflow.userName
+if (workflow.profile.contains('awsbatch')) {
+    summary['AWS Region']   = params.awsregion
+    summary['AWS Queue']    = params.awsqueue
+    summary['AWS CLI']      = params.awscli
+}
+summary['Config Profile'] = workflow.profile
+if (params.config_profile_description) summary['Config Profile Description'] = params.config_profile_description
+if (params.config_profile_contact)     summary['Config Profile Contact']     = params.config_profile_contact
+if (params.config_profile_url)         summary['Config Profile URL']         = params.config_profile_url
+summary['Config Files'] = workflow.configFiles.join(', ')
+if (params.email || params.email_on_fail) {
+    summary['E-mail Address']    = params.email
+    summary['E-mail on failure'] = params.email_on_fail
+    summary['MultiQC maxsize']   = params.max_multiqc_email_size
 }
 
-// Check AWS batch settings
-Checks.aws_batch(workflow, params)
+Channel.from(summary.collect{ [it.key, it.value] })
+    .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
+    .reduce { a, b -> return [a, b].join("\n            ") }
+    .map { x -> """
+    id: 'nf-core-eager-summary'
+    description: " - this information is collected when the pipeline is started."
+    section_name: 'nf-core/eager Workflow Summary'
+    section_href: 'https://github.com/nf-core/eager'
+    plot_type: 'html'
+    data: |
+        <dl class=\"dl-horizontal\">
+            $x
+        </dl>
+    """.stripIndent() }
+    .set { ch_workflow_summary }
+
 
 // Check the hostnames against configured profiles
-Checks.hostname(workflow, params, log)
+checkHostname()
 
 log.info "Schaffa, Schaffa, Genome Baua!"
 
@@ -2335,7 +2263,7 @@ process genotyping_ug {
     """
     samtools index ${bam}
     gatk3 -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
-    gatk3 -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
+    gatk3 -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
     gatk3 -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
     $keep_realign
@@ -2987,7 +2915,9 @@ process output_documentation {
     """
 }
 
-// Collect all software versions for inclusion in MultiQC report
+/*
+ * Parse software version numbers
+ */
 
 process get_software_versions {
   label 'sc_tiny'
@@ -3044,8 +2974,9 @@ process get_software_versions {
 }
 
 // MultiQC file generation for pipeline report
-def workflow_summary = NfcoreSchema.params_summary_multiqc(workflow, summary_params)
-ch_workflow_summary = Channel.value(workflow_summary)
+//def workflow_summary = NfcoreSchema.params_summary_multiqc(workflow, summary_params)
+
+//ch_workflow_summary = Channel.value(workflow_summary)
 
 process multiqc {
     label 'sc_medium'
@@ -3102,16 +3033,125 @@ process multiqc {
 // Send completion emails if requested, so user knows data is ready
 
 workflow.onComplete {
-    Completion.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-    Completion.summary(workflow, params, log, fail_percent_mapped, pass_percent_mapped)
+
+    // Set up the e-mail variables
+    def subject = "[nf-core/eager] Successful: $workflow.runName"
+    if (!workflow.success) {
+        subject = "[nf-core/eager] FAILED: $workflow.runName"
+    }
+    def email_fields = [:]
+    email_fields['version'] = workflow.manifest.version
+    email_fields['runName'] = workflow.runName
+    email_fields['success'] = workflow.success
+    email_fields['dateComplete'] = workflow.complete
+    email_fields['duration'] = workflow.duration
+    email_fields['exitStatus'] = workflow.exitStatus
+    email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
+    email_fields['errorReport'] = (workflow.errorReport ?: 'None')
+    email_fields['commandLine'] = workflow.commandLine
+    email_fields['projectDir'] = workflow.projectDir
+    email_fields['summary'] = summary
+    email_fields['summary']['Date Started'] = workflow.start
+    email_fields['summary']['Date Completed'] = workflow.complete
+    email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
+    email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
+    if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+    if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+    if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+    email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
+    email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
+    email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
+
+    // On success try attach the multiqc report
+    def mqc_report = null
+    try {
+        if (workflow.success) {
+            mqc_report = ch_multiqc_report.getVal()
+            if (mqc_report.getClass() == ArrayList) {
+                log.warn "[nf-core/eager] Found multiple reports from process 'multiqc', will use only one"
+                mqc_report = mqc_report[0]
+            }
+        }
+    } catch (all) {
+        log.warn "[nf-core/eager] Could not attach MultiQC report to summary email"
+    }
+
+    // Check if we are only sending emails on failure
+    email_address = params.email
+    if (!params.email && params.email_on_fail && !workflow.success) {
+        email_address = params.email_on_fail
+    }
+
+    // Render the TXT template
+    def engine = new groovy.text.GStringTemplateEngine()
+    def tf = new File("$projectDir/assets/email_template.txt")
+    def txt_template = engine.createTemplate(tf).make(email_fields)
+    def email_txt = txt_template.toString()
+
+    // Render the HTML template
+    def hf = new File("$projectDir/assets/email_template.html")
+    def html_template = engine.createTemplate(hf).make(email_fields)
+    def email_html = html_template.toString()
+
+    // Render the sendmail template
+    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, projectDir: "$projectDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
+    def sf = new File("$projectDir/assets/sendmail_template.txt")
+    def sendmail_template = engine.createTemplate(sf).make(smail_fields)
+    def sendmail_html = sendmail_template.toString()
+
+    // Send the HTML e-mail
+    if (email_address) {
+        try {
+            if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
+            // Try to send HTML e-mail using sendmail
+            [ 'sendmail', '-t' ].execute() << sendmail_html
+            log.info "[nf-core/eager] Sent summary e-mail to $email_address (sendmail)"
+        } catch (all) {
+            // Catch failures and try with plaintext
+            def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
+            if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
+              mail_cmd += [ '-A', mqc_report ]
+            }
+            mail_cmd.execute() << email_html
+            log.info "[nf-core/eager] Sent summary e-mail to $email_address (mail)"
+        }
+    }
+
+    // Write summary e-mail HTML to a file
+    def output_d = new File("${params.outdir}/pipeline_info/")
+    if (!output_d.exists()) {
+        output_d.mkdirs()
+    }
+    def output_hf = new File(output_d, "pipeline_report.html")
+    output_hf.withWriter { w -> w << email_html }
+    def output_tf = new File(output_d, "pipeline_report.txt")
+    output_tf.withWriter { w -> w << email_txt }
+
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+
+    if (workflow.stats.ignoredCount > 0 && workflow.success) {
+        log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
+        log.info "-${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}-"
+        log.info "-${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}-"
+    }
+
+    if (workflow.success) {
+        log.info "-${c_purple}[nf-core/eager]${c_green} Pipeline completed successfully${c_reset}-"
+    } else {
+        checkHostname()
+        log.info "-${c_purple}[nf-core/eager]${c_red} Pipeline completed with errors${c_reset}-"
+    }
+
 }
 
 workflow.onError {
-    // Print unexpected parameters
-    for (p in unexpectedParams) {
-        log.warn "Unexpected parameter: ${p}"
-    }
+    // Print unexpected parameters - easiest is to just rerun validation
+    NfcoreSchema.validateParameters(params, json_schema, log)
 }
+
 
 /////////////////////////////////////
 /* --    AUXILARY FUNCTIONS     -- */
@@ -3279,4 +3319,25 @@ ch_reads_for_faketsv
 // Function to check length of collection in a channel closure is as expected (e.g. with .map())
 def validate_size(collection, size){
     if ( collection.size() != size ) { return false } else { return true }
+}
+
+def checkHostname() {
+    def c_reset = params.monochrome_logs ? '' : "\033[0m"
+    def c_white = params.monochrome_logs ? '' : "\033[0;37m"
+    def c_red = params.monochrome_logs ? '' : "\033[1;91m"
+    def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
+    if (params.hostnames) {
+        def hostname = 'hostname'.execute().text.trim()
+        params.hostnames.each { prof, hnames ->
+            hnames.each { hname ->
+                if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
+                    log.error '====================================================\n' +
+                            "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
+                            "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
+                            "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
+                            '============================================================'
+                }
+            }
+        }
+    }
 }

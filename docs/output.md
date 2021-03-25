@@ -1,9 +1,5 @@
 # nf-core/eager: Output
 
-## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/eager/output](https://nf-co.re/eager/output)
-
-> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
-
 ## Introduction
 
 The output of nf-core/eager primarily consists of the following main components: output alignment files (e.g. VCF, BAM or FASTQ files), and summary statistics of the whole run presented in a [`MultiQC`](https://multiqc.info) report. Intermediate files and module-specific statistics files are also retained depending on your particular run configuration.
