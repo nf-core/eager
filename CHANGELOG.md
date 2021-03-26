@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-- Added option enabling platypus formatted output of pmdtools misincorporation frequencies.
+- [#349](https://github.com/nf-core/eager/issues/349) - Added option enabling platypus formatted output of pmdtools misincorporation frequencies.
 
 ### `Fixed`
 
