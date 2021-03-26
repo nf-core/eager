@@ -1226,7 +1226,7 @@ process bwamem {
 // CircularMapper reference preparation and mapping for circular genomes e.g. mtDNA
 
 process circulargenerator{
-    label 'sc_tiny'
+    label 'sc_medium'
     tag "$prefix"
     publishDir "${params.outdir}/reference_genome/circularmapper_index", mode: params.publish_dir_mode, saveAs: { filename -> 
             if (params.save_reference) filename 
@@ -1248,7 +1248,7 @@ process circulargenerator{
     script:
     prefix = "${fasta.baseName}_${params.circularextension}.fasta"
     """
-    circulargenerator -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
+    circulargenerator -Xmx${task.memory.toGiga()}g -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
     bwa index $prefix
     """
 
@@ -1281,7 +1281,7 @@ process circularmapper{
     bwa aln -t ${task.cpus} $elongated_root $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
     bwa aln -t ${task.cpus} $elongated_root $r2 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
     bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $elongated_root ${libraryid}.r1.sai ${libraryid}.r2.sai $r1 $r2 > tmp.out
-    realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
+    realignsamfile -Xmx${task.memory.toGiga()}g -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > ${libraryid}_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size} 
     """
@@ -1289,7 +1289,7 @@ process circularmapper{
     """ 
     bwa aln -t ${task.cpus} $elongated_root $r1 -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $elongated_root ${libraryid}.sai $r1 > tmp.out
-    realignsamfile -e ${params.circularextension} -i tmp.out -r $fasta $filter 
+    realignsamfile -Xmx${task.memory.toGiga()}g -e ${params.circularextension} -i tmp.out -r $fasta $filter 
     samtools sort -@ ${task.cpus} -O bam tmp_realigned.bam > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
@@ -1495,7 +1495,7 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
     """
     samtools merge ${libraryid}_seqtypemerged.bam ${bam}
     ## Have to set validation as lenient because of BWA issue: "I see a read stands out the end of a chromosome and is flagged as unmapped (flag 0x4). [...]" http://bio-bwa.sourceforge.net/
-    picard AddOrReplaceReadGroups I=${libraryid}_seqtypemerged.bam O=${libraryid}_seqtypemerged_rg.bam RGID=1 RGLB="${libraryid}_seqtypemerged" RGPL=illumina RGPU=4410 RGSM="${libraryid}_seqtypemerged" VALIDATION_STRINGENCY=LENIENT
+    picard -Xmx${task.memory.toGiga()}g AddOrReplaceReadGroups I=${libraryid}_seqtypemerged.bam O=${libraryid}_seqtypemerged_rg.bam RGID=1 RGLB="${libraryid}_seqtypemerged" RGPL=illumina RGPU=4410 RGSM="${libraryid}_seqtypemerged" VALIDATION_STRINGENCY=LENIENT
     samtools index ${libraryid}_seqtypemerged_rg.bam ${size}
     """
     
@@ -1866,7 +1866,7 @@ process library_merge {
   """
   samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
   ## Have to set validation as lenient because of BWA issue: "I see a read stands out the end of a chromosome and is flagged as unmapped (flag 0x4). [...]" http://bio-bwa.sourceforge.net/
-  picard AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged" VALIDATION_STRINGENCY=LENIENT
+  picard -Xmx${task.memory.toGiga()}g AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged" VALIDATION_STRINGENCY=LENIENT
   samtools index ${samplename}_libmerged_rg_rmdup.bam ${size}
   """
 }
@@ -2147,7 +2147,7 @@ process additional_library_merge {
   def size = params.large_ref ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_add.bam ${bam}
-  picard AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_additionalmerged" VALIDATION_STRINGENCY=LENIENT
+  picard -Xmx${task.memory.toGiga()}g AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_additionalmerged" VALIDATION_STRINGENCY=LENIENT
   samtools index ${samplename}_libmerged_rg_add.bam ${size}
   """
 }
@@ -2485,7 +2485,7 @@ process vcf2genome {
   def fasta_head = "${params.vcf2genome_header}" == '' ? "${samplename}" : "${params.vcf2genome_header}"
   """
   pigz -f -d -p ${task.cpus} *.vcf.gz
-  vcf2genome -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
+  vcf2genome -Xmx${task.memory.toGiga()}g -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
   pigz -p ${task.cpus} *.fasta 
   pigz -p ${task.cpus} *.vcf
   """
@@ -2528,7 +2528,7 @@ process multivcfanalyzer {
   def write_freqs = params.write_allele_frequencies ? "T" : "F"
   """
   gunzip -f *.vcf.gz
-  multivcfanalyzer ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
+  multivcfanalyzer -Xmx${task.memory.toGiga()}g ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
   pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
   """
  }
@@ -2555,7 +2555,7 @@ process multivcfanalyzer {
 
   script:
   """
-  mtnucratio ${bam} "${params.mtnucratio_header}"
+  mtnucratio -Xmx${task.memory.toGiga()}g ${bam} "${params.mtnucratio_header}"
   """
  }
 
