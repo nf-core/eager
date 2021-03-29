@@ -813,6 +813,12 @@
                     "fa_icon": "fas fa-greater-than-equal",
                     "help_text": "The maximum number of reads used for damage assessment in PMDtools. Can be used to significantly reduce the amount of time required for damage assessment in PMDTools. Note that a too low value can also obtain incorrect results.\n\n> Modifies PMDTools parameter: `-n`"
                 },
+                "pmdtools_platypus": {
+                    "type": "boolean",
+                    "description": "Append big list of base frequencies for platypus to output.",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "Enables the printing of a wider list of base frequencies used by platypus as an addition to the output base misincorporation frequency table. By default turned off.\n"
+                },
                 "run_mapdamage_rescaling": {
                     "type": "boolean",
                     "fa_icon": "fas fa-map",

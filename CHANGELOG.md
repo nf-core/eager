@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#349](https://github.com/nf-core/eager/issues/349) - Added option enabling platypus formatted output of pmdtools misincorporation frequencies.
+
 ### `Fixed`
 
 - [#707](https://github.com/nf-core/eager/pull/707) - Fix typo in UnifiedGenotyper IndelRealigner command
