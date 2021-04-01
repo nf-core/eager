@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- Fix filename for bam output of `mapdamage_rescaling`
 - [#707](https://github.com/nf-core/eager/pull/707) - Fix typo in UnifiedGenotyper IndelRealigner command
 - Fixed some Java tools not following process memory specifications
 - Updated template to nf-core/tools 1.13.2
