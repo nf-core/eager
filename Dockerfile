@@ -7,10 +7,10 @@ COPY environment.yml /
 RUN conda env create --quiet -f /environment.yml && conda clean -a
 
 # Add conda installation dir to PATH (instead of doing 'conda activate')
-ENV PATH /opt/conda/envs/nf-core-eager-2.3.3dev/bin:$PATH
+ENV PATH /opt/conda/envs/nf-core-eager-2.3.3/bin:$PATH
 
 # Dump the details of the installed packages to a file for posterity
-RUN conda env export --name nf-core-eager-2.3.3dev > nf-core-eager-2.3.3dev.yml
+RUN conda env export --name nf-core-eager-2.3.3 > nf-core-eager-2.3.3.yml
 
 # Instruct R processes to use these empty files instead of clashing with a local version
 RUN touch .Rprofile
