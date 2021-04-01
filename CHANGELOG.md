@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Dev
+
+### `Fixed`
+
+- [714](https://github.com/nf-core/eager/issues/714) - Fixes bug in nuc contamination by upgrading to latest MultiQC v1.10.1 bugfix release
+
 ## [2.3.2] - 2021-03-16
 
 ### `Added`
