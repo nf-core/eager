@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed some Java tools not following process memory specifications
 - Updated template to nf-core/tools 1.13.2
 - [#711](https://github.com/nf-core/eager/pull/711) - Fix conditional execution preventing multivcfanalyze to run
+- [#714](https://github.com/nf-core/eager/issues/714) - Fixes bug in nuc contamination by upgrading to latest MultiQC v1.10.1 bugfix release
 
 ### `Dependencies`
 
