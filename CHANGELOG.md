@@ -3,11 +3,23 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Dev
+## v2.3.3dev - [date]
+
+### `Added`
+
+- [#349](https://github.com/nf-core/eager/issues/349) - Added option enabling platypus formatted output of pmdtools misincorporation frequencies.
 
 ### `Fixed`
 
-- [714](https://github.com/nf-core/eager/issues/714) - Fixes bug in nuc contamination by upgrading to latest MultiQC v1.10.1 bugfix release
+- [#707](https://github.com/nf-core/eager/pull/707) - Fix typo in UnifiedGenotyper IndelRealigner command
+- Fixed some Java tools not following process memory specifications
+- Updated template to nf-core/tools 1.13.2
+- [#711](https://github.com/nf-core/eager/pull/711) - Fix conditional execution preventing multivcfanalyze to run
+- [#714](https://github.com/nf-core/eager/issues/714) - Fixes bug in nuc contamination by upgrading to latest MultiQC v1.10.1 bugfix release
+
+### `Dependencies`
+
+### `Deprecated`
 
 ## [2.3.2] - 2021-03-16
 

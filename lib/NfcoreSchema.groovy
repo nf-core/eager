@@ -18,13 +18,12 @@ class NfcoreSchema {
     * whether the given paremeters adhere to the specificiations
     */
     /* groovylint-disable-next-line UnusedPrivateMethodParameter */
-    private static ArrayList validateParameters(params, jsonSchema, log) {
+    private static void validateParameters(params, jsonSchema, log) {
         def has_error = false
         //=====================================================================//
         // Check for nextflow core params and unexpected params
         def json = new File(jsonSchema).text
         def Map schemaParams = (Map) new JsonSlurper().parseText(json).get('definitions')
-        def specifiedParamKeys = params.keySet()
         def nf_params = [
             // Options for base `nextflow` command
             'bg',
@@ -105,7 +104,7 @@ class NfcoreSchema {
             }
         }
 
-        for (specifiedParam in specifiedParamKeys) {
+        for (specifiedParam in params.keySet()) {
             // nextflow params
             if (nf_params.contains(specifiedParam)) {
                 log.error "ERROR: You used a core Nextflow option with two hyphens: '--${specifiedParam}'. Please resubmit with '-${specifiedParam}'"
@@ -122,6 +121,10 @@ class NfcoreSchema {
         // Validate parameters against the schema
         InputStream inputStream = new File(jsonSchema).newInputStream()
         JSONObject rawSchema = new JSONObject(new JSONTokener(inputStream))
+
+        // Remove anything that's in params.schema_ignore_params
+        rawSchema = removeIgnoredParams(rawSchema, params)
+
         Schema schema = SchemaLoader.load(rawSchema)
 
         // Clean the parameters
@@ -144,26 +147,21 @@ class NfcoreSchema {
         }
 
         // Check for unexpected parameters
-        // Getting this message a lot for parameters that you *do* expect?
-        // You can make a csv list of expected params not in the schema with 'params.schema_ignore_params'
-        // for example, in your institutional config
         if (unexpectedParams.size() > 0) {
             Map colors = log_colours(params.monochrome_logs)
             println ''
             def warn_msg = 'Found unexpected parameters:'
             for (unexpectedParam in unexpectedParams) {
-                warn_msg = warn_msg + "\n* --${unexpectedParam}: ${paramsJSON[unexpectedParam].toString()}"
+                warn_msg = warn_msg + "\n* --${unexpectedParam}: ${params[unexpectedParam].toString()}"
             }
             log.warn warn_msg
-            log.info "- ${colors.dim}(Hide this message with 'params.schema_ignore_params')${colors.reset} -"
+            log.info "- ${colors.dim}Ignore this warning: params.schema_ignore_params = \"${unexpectedParams.join(',')}\" ${colors.reset}"
             println ''
         }
 
         if (has_error) {
             System.exit(1)
         }
-
-        return unexpectedParams
     }
 
     // Loop over nested exceptions and print the causingException
@@ -189,6 +187,47 @@ class NfcoreSchema {
         for (ex in causingExceptions) {
             printExceptions(ex, paramsJSON, log)
         }
+    }
+
+    // Remove an element from a JSONArray
+    private static JSONArray removeElement(jsonArray, element){
+        def list = []  
+        int len = jsonArray.length()
+        for (int i=0;i<len;i++){ 
+            list.add(jsonArray.get(i).toString())
+        } 
+        list.remove(element)
+        JSONArray jsArray = new JSONArray(list)
+        return jsArray
+    }
+
+    private static JSONObject removeIgnoredParams(rawSchema, params){
+        // Remove anything that's in params.schema_ignore_params
+        params.schema_ignore_params.split(',').each{ ignore_param ->
+            if(rawSchema.keySet().contains('definitions')){
+                rawSchema.definitions.each { definition ->
+                    for (key in definition.keySet()){
+                        if (definition[key].get("properties").keySet().contains(ignore_param)){
+                            // Remove the param to ignore
+                            definition[key].get("properties").remove(ignore_param)
+                            // If the param was required, change this
+                            if (definition[key].has("required")) {
+                                def cleaned_required = removeElement(definition[key].required, ignore_param)
+                                definition[key].put("required", cleaned_required) 
+                            }
+                        }
+                    }
+                }
+            }
+            if(rawSchema.keySet().contains('properties') && rawSchema.get('properties').keySet().contains(ignore_param)) {
+                rawSchema.get("properties").remove(ignore_param)
+            }
+            if(rawSchema.keySet().contains('required') && rawSchema.required.contains(ignore_param)) {
+                def cleaned_required = removeElement(rawSchema.required, ignore_param)
+                rawSchema.put("required", cleaned_required)
+            }
+        }
+        return rawSchema
     }
 
     private static Map cleanParameters(params) {
@@ -310,7 +349,8 @@ class NfcoreSchema {
     private static LinkedHashMap params_read(String json_schema) throws Exception {
         def json = new File(json_schema).text
         def Map schema_definitions = (Map) new JsonSlurper().parseText(json).get('definitions')
-        def Map schema_properties = (Map) new JsonSlurper().parseText(json).get('properties')        /* Tree looks like this in nf-core schema
+        def Map schema_properties = (Map) new JsonSlurper().parseText(json).get('properties')
+        /* Tree looks like this in nf-core schema
          * definitions <- this is what the first get('definitions') gets us
              group 1
                title
@@ -329,7 +369,13 @@ class NfcoreSchema {
                    parameter 1
                      type
                      description
+         * properties <- parameters can also be ungrouped, outside of definitions
+            parameter 1
+             type
+             description
         */
+
+        // Grouped params
         def params_map = new LinkedHashMap()
         schema_definitions.each { key, val ->
             def Map group = schema_definitions."$key".properties // Gets the property object of the group
@@ -520,30 +566,6 @@ class NfcoreSchema {
         output += dashed_line(params.monochrome_logs)
         output += '\n\n' + dashed_line(params.monochrome_logs)
         return output
-    }
-
-    static String params_summary_multiqc(workflow, summary) {
-        String summary_section = ''
-        for (group in summary.keySet()) {
-            def group_params = summary.get(group)  // This gets the parameters of that particular group
-            if (group_params) {
-                summary_section += "    <p style=\"font-size:110%\"><b>$group</b></p>\n"
-                summary_section += "    <dl class=\"dl-horizontal\">\n"
-                for (param in group_params.keySet()) {
-                    summary_section += "        <dt>$param</dt><dd><samp>${group_params.get(param) ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>\n"
-                }
-                summary_section += "    </dl>\n"
-            }
-        }
-
-        String yaml_file_text  = "id: '${workflow.manifest.name.replace('/','-')}-summary'\n"
-        yaml_file_text        += "description: ' - this information is collected when the pipeline is started.'\n"
-        yaml_file_text        += "section_name: '${workflow.manifest.name} Workflow Summary'\n"
-        yaml_file_text        += "section_href: 'https://github.com/${workflow.manifest.name}'\n"
-        yaml_file_text        += "plot_type: 'html'\n"
-        yaml_file_text        += "data: |\n"
-        yaml_file_text        += "${summary_section}"
-        return yaml_file_text
     }
 
 }
