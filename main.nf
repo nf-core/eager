@@ -2009,8 +2009,8 @@ process mapdamage_rescaling {
     def singlestranded = strandedness == "single" ? '--single-stranded' : ''
     def size = params.large_ref ? '-c' : ''
     """
-    mapDamage -i ${bam} -r ${fasta} --rescale --rescale-out ${bam}_rescaled.bam --rescale-length-5p ${params.rescale_length_5p} --rescale-length-3p=${params.rescale_length_3p} ${singlestranded}
-    samtools index ${bam}_rescaled.bam ${size}
+    mapDamage -i ${bam} -r ${fasta} --rescale --rescale-out ${base}_rescaled.bam --rescale-length-5p ${params.rescale_length_5p} --rescale-length-3p=${params.rescale_length_3p} ${singlestranded}
+    samtools index ${base}_rescaled.bam ${size}
     """
 
 }
