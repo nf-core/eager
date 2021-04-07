@@ -664,11 +664,11 @@ This would be translated as follows.
 
 If your parameters looked like the following
 
-Parameter       | Resolved Parameters    | institution | cluster  | my_paper
-----------------|------------------------|-------------|----------|----------
---executor      | singularity            | singularity | \<none\> | \<none\>
---max_memory    | 256GB                  | 756GB       | 256GB    | \<none\>
---bwa_aln       | 0.1                    | \<none\>    | 0.01     | 0.1
+| Parameter       | Resolved Parameters    | institution | cluster  | my_paper |
+| ----------------|------------------------|-------------|----------|----------|
+| --executor      | singularity            | singularity | \<none\> | \<none\> |
+| --max_memory    | 256GB                  | 756GB       | 256GB    | \<none\> |
+| --bwa_aln       | 0.1                    | \<none\>    | 0.01     | 0.1      |
 
 (where '\<none\>' is a parameter not defined in a given profile.)
 
@@ -743,14 +743,14 @@ the `hpc_blue` profile, but the `mapper` parameter has been changed from
 
 The order of loading of different configuration files can be seen here:
 
-Loading Order | Configuration File
--------------:|:-------------------
-1             | `nextflow.config` in your current directory,
-2             | (if using a script for `nextflow run`) a `nextflow.config` in the directory the script is located
-3             | `config` stored in your human directory under `~/.nextflow/`
-4             | `<your_file>.config` if you specify in the `nextflow run` command with `-c`
-5             | general nf-core institutional configurations stored at [nf-core/configs](https://github.com/nf-core/configs)
-6             | pipeline-specific nf-core institutional configurations at [nf-core/configs](https://github.com/nf-core/configs)
+| Loading Order | Configuration File                                                                                              |
+| -------------:|:----------------------------------------------------------------------------------------------------------------|
+| 1             | `nextflow.config` in your current directory                                                                     |
+| 2             | (if using a script for `nextflow run`) a `nextflow.config` in the directory the script is located               |
+| 3             | `config` stored in your human directory under `~/.nextflow/`                                                    |
+| 4             | `<your_file>.config` if you specify in the `nextflow run` command with `-c`                                     |
+| 5             | general nf-core institutional configurations stored at [nf-core/configs](https://github.com/nf-core/configs)    |
+| 6             | pipeline-specific nf-core institutional configurations at [nf-core/configs](https://github.com/nf-core/configs) |
 
 This loading order of these `.config` files will not normally affect the
 settings you use for the pipeline run itself; `-profiles` are normally more
@@ -1220,24 +1220,24 @@ unmapped reads.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-preserve5p \
-*-mergedonly \
-*-dedupper 'dedup' \
-*-bwaalnn 0.01 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 25 \
-*-bam_unmapped_type 'discard' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
+--bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
 <...>
 ```
 
@@ -1250,27 +1250,27 @@ fragment. We will therefore use `--bamutils_clip_half_udg_left` and
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-preserve5p \
-*-mergedonly \
-*-dedupper 'dedup' \
-*-bwaalnn 0.01 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 25 \
-*-bam_unmapped_type 'discard' \
-*-run_trim_bam \
-*-bamutils_clip_half_udg_left 2 \
-*-bamutils_clip_half_udg_right 2 \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
+--bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
 <...>
 ```
 
@@ -1286,29 +1286,29 @@ you can download the file from [here](https://github.com/nf-core/test-datasets/b
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-preserve5p \
-*-mergedonly \
-*-dedupper 'dedup' \
-*-bwaalnn 0.01 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 25 \
-*-bam_unmapped_type 'discard' \
-*-run_trim_bam \
-*-bamutils_clip_half_udg_left 2 \
-*-bamutils_clip_half_udg_right 2 \
-*-run_sexdeterrmine \
-*-sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
+--bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--run_sexdeterrmine \
+--sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
 <...>
 ```
 
@@ -1320,31 +1320,31 @@ is simply named 'X'.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-preserve5p \
-*-mergedonly \
-*-dedupper 'dedup' \
-*-bwaalnn 0.01 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 25 \
-*-bam_unmapped_type 'discard' \
-*-run_trim_bam \
-*-bamutils_clip_half_udg_left 2 \
-*-bamutils_clip_half_udg_right 2 \
-*-run_sexdeterrmine \
-*-sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
-*-run_nuclear_contamination \
-*-contamination_chrom_name 'X' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
+--bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--run_sexdeterrmine \
+--sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
+--run_nuclear_contamination \
+--contamination_chrom_name 'X' \
 <...>
 ```
 
@@ -1361,33 +1361,33 @@ providing the name of the mitochondrial DNA contig in our reference genome with
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-preserve5p \
-*-mergedonly \
-*-dedupper 'dedup' \
-*-bwaalnn 0.01 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 25 \
-*-bam_unmapped_type 'discard' \
-*-run_trim_bam \
-*-bamutils_clip_half_udg_left 2 \
-*-bamutils_clip_half_udg_right 2 \
-*-run_sexdeterrmine \
-*-sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
-*-run_nuclear_contamination \
-*-contamination_chrom_name 'X' \
-*-run_mtnucratio \
-*-mtnucratio_header 'MT' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
+--bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--run_sexdeterrmine \
+--sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
+--run_nuclear_contamination \
+--contamination_chrom_name 'X' \
+--run_mtnucratio \
+--mtnucratio_header 'MT' \
 <...>
 ```
 
@@ -1403,38 +1403,38 @@ file of these sites that is specified with `--pileupcaller_snpfile`.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-preserve5p \
-*-mergedonly \
-*-dedupper 'dedup' \
-*-bwaalnn 0.01 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 25 \
-*-bam_unmapped_type 'discard' \
-*-run_trim_bam \
-*-bamutils_clip_half_udg_left 2 \
-*-bamutils_clip_half_udg_right 2 \
-*-run_sexdeterrmine \
-*-sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
-*-run_nuclear_contamination \
-*-contamination_chrom_name 'X' \
-*-run_mtnucratio \
-*-mtnucratio_header 'MT' \
-*-run_genotyping \
-*-genotyping_source 'trimmed' \
-*-genotyping_tool 'pileupcaller' \
-*-pileupcaller_bedfile '../Reference/genome/1240k.sites.bed' \
-*-pileupcaller_snpfile '../Datasets/1240k/1240k.snp'
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
+--bwaalnn 0.01 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 25 \
+--bam_unmapped_type 'discard' \
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--run_sexdeterrmine \
+--sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
+--run_nuclear_contamination \
+--contamination_chrom_name 'X' \
+--run_mtnucratio \
+--mtnucratio_header 'MT' \
+--run_genotyping \
+--genotyping_source 'trimmed' \
+--genotyping_tool 'pileupcaller' \
+--pileupcaller_bedfile '../Reference/genome/1240k.sites.bed' \
+--pileupcaller_snpfile '../Datasets/1240k/1240k.snp'
 ```
 
 With this, we are ready to submit! If running on a remote cluster/server, Make
@@ -1645,9 +1645,9 @@ running.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_screening20200720' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_screening20200720' \
 <...>
 ```
 
@@ -1709,14 +1709,14 @@ FASTA file and the corresponding indices.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_screening20200720' \
-*-input 'screening20200720.tsv' \
-*-fasta '../Reference/genome/GRCh38.fa' \
-*-bwa_index '../Reference/genome/GRCh38/' \
-*-fasta_index '../Reference/genome/GRCh38.fa.fai' \
-*-seq_dict '../Reference/genome/GRCh38.dict' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_screening20200720' \
+--input 'screening20200720.tsv' \
+--fasta '../Reference/genome/GRCh38.fa' \
+--bwa_index '../Reference/genome/GRCh38/' \
+--fasta_index '../Reference/genome/GRCh38.fa.fai' \
+--seq_dict '../Reference/genome/GRCh38.dict' \
 <...>
 ```
 
@@ -1734,16 +1734,16 @@ directory (which contains 'intermediate' working files and directories).
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_screening20200720' \
-*-input 'screening20200720.tsv' \
-*-fasta '../Reference/genome/GRCh38.fa' \
-*-bwa_index '../Reference/genome/GRCh38/' \
-*-fasta_index '../Reference/genome/GRCh38.fa.fai' \
-*-seq_dict '../Reference/genome/GRCh38.dict' \
-*-outdir './results/' \
-* w './work/' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_screening20200720' \
+--input 'screening20200720.tsv' \
+--fasta '../Reference/genome/GRCh38.fa' \
+--bwa_index '../Reference/genome/GRCh38/' \
+--fasta_index '../Reference/genome/GRCh38.fa.fai' \
+--seq_dict '../Reference/genome/GRCh38.dict' \
+--outdir './results/' \
+-w './work/' \
 <...>
 ```
 
@@ -1763,17 +1763,17 @@ string to be clipped.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_screening20200720' \
-*-input 'screening20200720.tsv' \
-*-fasta '../Reference/genome/GRCh38.fa' \
-*-bwa_index '../Reference/genome/GRCh38/' \
-*-fasta_index '../Reference/genome/GRCh38.fa.fai' \
-*-seq_dict '../Reference/genome/GRCh38.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_screening20200720' \
+--input 'screening20200720.tsv' \
+--fasta '../Reference/genome/GRCh38.fa' \
+--bwa_index '../Reference/genome/GRCh38/' \
+--fasta_index '../Reference/genome/GRCh38.fa.fai' \
+--seq_dict '../Reference/genome/GRCh38.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
 <...>
 ```
 
@@ -1784,19 +1784,19 @@ tell nf-core/eager what to do with the off target reads from the mapping.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_screening20200720' \
-*-input 'screening20200720.tsv' \
-*-fasta '../Reference/genome/GRCh38.fa' \
-*-bwa_index '../Reference/genome/GRCh38/' \
-*-fasta_index '../Reference/genome/GRCh38.fa.fai' \
-*-seq_dict '../Reference/genome/GRCh38.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-run_bam_filtering \
-*-bam_unmapped_type 'fastq' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_screening20200720' \
+--input 'screening20200720.tsv' \
+--fasta '../Reference/genome/GRCh38.fa' \
+--bwa_index '../Reference/genome/GRCh38/' \
+--fasta_index '../Reference/genome/GRCh38.fa.fai' \
+--seq_dict '../Reference/genome/GRCh38.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--run_bam_filtering \
+--bam_unmapped_type 'fastq' \
 <...>
 ```
 
@@ -1814,23 +1814,23 @@ documentation describing each parameters can be seen in the usage
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_screening20200720' \
-*-input 'screening20200720.tsv' \
-*-fasta '../Reference/genome/GRCh38.fa' \
-*-bwa_index '../Reference/genome/GRCh38/' \
-*-fasta_index '../Reference/genome/GRCh38.fa.fai' \
-*-seq_dict '../Reference/genome/GRCh38.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-run_bam_filtering \
-*-bam_unmapped_type 'fastq' \
-*-run_metagenomic_screening \
-*-metagenomic_tool 'malt' \
-*-database '../Reference/database/refseq-bac-arch-homo-2018_11' \
-*-malt_min_support_mode 'percent' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_screening20200720' \
+--input 'screening20200720.tsv' \
+--fasta '../Reference/genome/GRCh38.fa' \
+--bwa_index '../Reference/genome/GRCh38/' \
+--fasta_index '../Reference/genome/GRCh38.fa.fai' \
+--seq_dict '../Reference/genome/GRCh38.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--run_bam_filtering \
+--bam_unmapped_type 'fastq' \
+--run_metagenomic_screening \
+--metagenomic_tool 'malt' \
+--database '../Reference/database/refseq-bac-arch-homo-2018_11' \
+--malt_min_support_mode 'percent' \
 <...>
 ```
 
@@ -1841,27 +1841,27 @@ have indicators of true aDNA, we will run 'maltExtract' of the
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_screening20200720' \
-*-input 'screening20200720.tsv' \
-*-fasta '../Reference/genome/GRCh38.fa' \
-*-bwa_index '../Reference/genome/GRCh38/' \
-*-fasta_index '../Reference/genome/GRCh38.fa.fai' \
-*-seq_dict '../Reference/genome/GRCh38.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-run_bam_filtering \
-*-bam_unmapped_type 'fastq' \
-*-run_metagenomic_screening \
-*-metagenomic_tool 'malt' \
-*-database '../Reference/database/refseq-bac-arch-homo-2018_11' \
-*-malt_min_support_mode 'percent' \
-*-run_maltextract \
-*-maltextract_taxon_list '../Reference/taxa_list/core_genera-anthropoids_hominids_panhomo-20180131.txt' \
-*-maltextract_ncbifiles '../Reference/hops' \
-*-maltextract_destackingoff
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_screening20200720' \
+--input 'screening20200720.tsv' \
+--fasta '../Reference/genome/GRCh38.fa' \
+--bwa_index '../Reference/genome/GRCh38/' \
+--fasta_index '../Reference/genome/GRCh38.fa.fai' \
+--seq_dict '../Reference/genome/GRCh38.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--run_bam_filtering \
+--bam_unmapped_type 'fastq' \
+--run_metagenomic_screening \
+--metagenomic_tool 'malt' \
+--database '../Reference/database/refseq-bac-arch-homo-2018_11' \
+--malt_min_support_mode 'percent' \
+--run_maltextract \
+--maltextract_taxon_list '../Reference/taxa_list/core_genera-anthropoids_hominids_panhomo-20180131.txt' \
+--maltextract_ncbifiles '../Reference/hops' \
+--maltextract_destackingoff
 ```
 
 In the last parameters above we've specified the path to our list of taxa. This
@@ -2112,9 +2112,9 @@ running.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
 <...>
 ```
 
@@ -2173,14 +2173,14 @@ FASTA file and the corresponding indices.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
 <...>
 ```
 
@@ -2198,16 +2198,16 @@ directory (which contains 'intermediate' working files and directories).
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
-*-outdir './results/' \
-* w './work/' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+-w './work/' \
 <...>
 ```
 
@@ -2227,17 +2227,17 @@ the default minimum length of a poly-G string to be clipped.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
 <...>
 ```
 
@@ -2251,19 +2251,19 @@ will do this with `--bwaalnn` and `--bwaalnl` respectively.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-bwaalnn 0.01 \
-*-bwaalnl 16 \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
 <...>
 ```
 
@@ -2275,22 +2275,22 @@ hard-drive footprint.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-bwaalnn 0.01 \
-*-bwaalnl 16 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 0 \
-*-bam_unmapped_type 'discard' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
 <...>
 ```
 
@@ -2305,23 +2305,23 @@ clarity.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-bwaalnn 0.01 \
-*-bwaalnl 16 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 0 \
-*-bam_unmapped_type 'discard' \
-*-dedupper 'markduplicates' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
 <...>
 ```
 
@@ -2336,25 +2336,25 @@ often a custom BED file with just genes of interest is recommended. Furthermore
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-bwaalnn 0.01 \
-*-bwaalnl 16 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 0 \
-*-bam_unmapped_type 'discard' \
-*-dedupper 'markduplicates' \
-*-run_bedtools_coverage \
-*-anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff'
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
+--run_bedtools_coverage \
+--anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff'
 <...>
 ```
 
@@ -2374,30 +2374,30 @@ we do BAM trimming instead here as another demonstration of functionality.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-bwaalnn 0.01 \
-*-bwaalnl 16 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 0 \
-*-bam_unmapped_type 'discard' \
-*-dedupper 'markduplicates' \
-*-run_bedtools_coverage \
-*-anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff'
-*-run_trim_bam \
-*-bamutils_clip_half_udg_left 2 \
-*-bamutils_clip_half_udg_right 2 \
-*-bamutils_clip_none_udg_left 3 \
-*-bamutils_clip_none_udg_right 3 \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
+--run_bedtools_coverage \
+--anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff'
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--bamutils_clip_none_udg_left 3 \
+--bamutils_clip_none_udg_right 3 \
 <...>
 ```
 
@@ -2415,36 +2415,36 @@ need to specify that we want to use the trimmed bams from the previous step.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-bwaalnn 0.01 \
-*-bwaalnl 16 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 0 \
-*-bam_unmapped_type 'discard' \
-*-dedupper 'markduplicates' \
-*-run_trim_bam \
-*-bamutils_clip_half_udg_left 2 \
-*-bamutils_clip_half_udg_right 2 \
-*-bamutils_clip_none_udg_left 3 \
-*-bamutils_clip_none_udg_right 3 \
-*-run_bedtools_coverage \
-*-anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff' \
-*-run_genotyping \
-*-genotyping_tool 'ug' \
-*-genotyping_source 'trimmed' \
-*-gatk_ploidy 2 \
-*-gatk_ug_mode 'EMIT_ALL_SITES' \
-*-gatk_ug_genotype_model 'SNP' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--bamutils_clip_none_udg_left 3 \
+--bamutils_clip_none_udg_right 3 \
+--run_bedtools_coverage \
+--anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff' \
+--run_genotyping \
+--genotyping_tool 'ug' \
+--genotyping_source 'trimmed' \
+--gatk_ploidy 2 \
+--gatk_ug_mode 'EMIT_ALL_SITES' \
+--gatk_ug_genotype_model 'SNP' \
 <...>
 ```
 
@@ -2458,42 +2458,42 @@ same settings and reference genome. We can do this as follows.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
-*-bwa_index '../Reference/genome/' \
-*-fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
-*-seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-bwaalnn 0.01 \
-*-bwaalnl 16 \
-*-run_bam_filtering \
-*-bam_mapping_quality_threshold 0 \
-*-bam_unmapped_type 'discard' \
-*-dedupper 'markduplicates' \
-*-run_trim_bam \
-*-bamutils_clip_half_udg_left 2 \
-*-bamutils_clip_half_udg_right 2 \
-*-bamutils_clip_none_udg_left 3 \
-*-bamutils_clip_none_udg_right 3 \
-*-run_bedtools_coverage \
-*-anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff' \
-*-run_genotyping \
-*-genotyping_tool 'ug' \
-*-genotyping_source 'trimmed' \
-*-gatk_ploidy 2 \
-*-gatk_ug_mode 'EMIT_ALL_SITES' \
-*-gatk_ug_genotype_model 'SNP' \
-*-run_multivcfanalyzer \
-*-write_allele_frequencies \
-*-min_base_coverage 5 \
-*-min_allele_freq_hom 0.9 \
-*-min_allele_freq_het 0.1 \
-*-additional_vcf_files '../vcfs/*.vcf.gz'
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
+--bwa_index '../Reference/genome/' \
+--fasta_index '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.fai' \
+--seq_dict '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--bwaalnn 0.01 \
+--bwaalnl 16 \
+--run_bam_filtering \
+--bam_mapping_quality_threshold 0 \
+--bam_unmapped_type 'discard' \
+--dedupper 'markduplicates' \
+--run_trim_bam \
+--bamutils_clip_half_udg_left 2 \
+--bamutils_clip_half_udg_right 2 \
+--bamutils_clip_none_udg_left 3 \
+--bamutils_clip_none_udg_right 3 \
+--run_bedtools_coverage \
+--anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff' \
+--run_genotyping \
+--genotyping_tool 'ug' \
+--genotyping_source 'trimmed' \
+--gatk_ploidy 2 \
+--gatk_ug_mode 'EMIT_ALL_SITES' \
+--gatk_ug_genotype_model 'SNP' \
+--run_multivcfanalyzer \
+--write_allele_frequencies \
+--min_base_coverage 5 \
+--min_allele_freq_hom 0.9 \
+--min_allele_freq_het 0.1 \
+--additional_vcf_files '../vcfs/*.vcf.gz'
 ```
 
 For the two `min_allele_freq` parameters we specify that anything above 90%
