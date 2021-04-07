@@ -266,13 +266,13 @@ By default, the pipeline _assumes_ you have paired-end data. If you want to run 
 For example, for a single set of FASTQs, or multiple paired-end FASTQ files in one directory, you can specify:
 
 ```bash
-*-input 'path/to/data/sample_*_{1,2}.fastq.gz'
+--input 'path/to/data/sample_*_{1,2}.fastq.gz'
 ```
 
 If you have multiple files in different directories, you can use additional wildcards (`*`) e.g.:
 
 ```bash
-*-input 'path/to/data/*/sample_*_{1,2}.fastq.gz'
+--input 'path/to/data/*/sample_*_{1,2}.fastq.gz'
 ```
 
 > :warning: It is not possible to run a mixture of single-end and paired-end files in one run with the paths `--input` method! Please see the [TSV input method](#tsv-input-method) for possibilities.
@@ -657,7 +657,7 @@ This can be illustrated as follows.
               overwrites  overwrites
                ┌──────┐   ┌──────┐
                ▼      │   ▼      │
-*profile institution,cluster,my_paper
+-profile institution,cluster,my_paper
 ```
 
 This would be translated as follows.
@@ -665,10 +665,10 @@ This would be translated as follows.
 If your parameters looked like the following
 
 Parameter       | Resolved Parameters    | institution | cluster  | my_paper
-*---------------|------------------------|-------------|----------|----------
-*-executor      | singularity            | singularity | \<none\> | \<none\>
-*-max_memory    | 256GB                  | 756GB       | 256GB    | \<none\>
-*-bwa_aln       | 0.1                    | \<none\>    | 0.01     | 0.1
+----------------|------------------------|-------------|----------|----------
+--executor      | singularity            | singularity | \<none\> | \<none\>
+--max_memory    | 256GB                  | 756GB       | 256GB    | \<none\>
+--bwa_aln       | 0.1                    | \<none\>    | 0.01     | 0.1
 
 (where '\<none\>' is a parameter not defined in a given profile.)
 
@@ -744,7 +744,7 @@ the `hpc_blue` profile, but the `mapper` parameter has been changed from
 The order of loading of different configuration files can be seen here:
 
 Loading Order | Configuration File
-*------------:|:-------------------
+-------------:|:-------------------
 1             | `nextflow.config` in your current directory,
 2             | (if using a script for `nextflow run`) a `nextflow.config` in the directory the script is located
 3             | `config` stored in your human directory under `~/.nextflow/`
@@ -1025,9 +1025,9 @@ running.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
 <...>
 ```
 
@@ -1089,14 +1089,14 @@ FASTA file and the corresponding indices.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
 <...>
 ```
 
@@ -1114,16 +1114,16 @@ directory (which contains 'intermediate' working files and directories).
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \`
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \`
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
 <...>
 ```
 
@@ -1143,17 +1143,17 @@ string to be clipped.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
 <...>
 ```
 
@@ -1168,20 +1168,20 @@ with `--dedupper`.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-preserve5p \
-*-mergedonly \
-*-dedupper 'dedup' \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
 <...>
 ```
 
@@ -1193,21 +1193,21 @@ and the reference.
 
 ```bash
 nextflow run nf-core/eager \
-*r 2.2.0 \
-*profile singularity,shh,sdag \
-*name 'projectX_preprocessing20200727' \
-*-input 'preprocessing20200727.tsv' \
-*-fasta '../Reference/genome/hs37d5.fa' \
-*-bwa_index '../Reference/genome/hs37d5/' \
-*-fasta_index '../Reference/genome/hs37d5.fa.fai' \
-*-seq_dict '../Reference/genome/hs37d5.dict' \
-*-outdir './results/' \
-* w './work/' \
-*-complexity_filter_poly_g \
-*-preserve5p \
-*-mergedonly \
-*-dedupper 'dedup' \
-*-bwaalnn 0.01 \
+-r 2.2.0 \
+-profile singularity,shh,sdag \
+-name 'projectX_preprocessing20200727' \
+--input 'preprocessing20200727.tsv' \
+--fasta '../Reference/genome/hs37d5.fa' \
+--bwa_index '../Reference/genome/hs37d5/' \
+--fasta_index '../Reference/genome/hs37d5.fa.fai' \
+--seq_dict '../Reference/genome/hs37d5.dict' \
+--outdir './results/' \
+-w './work/' \
+--complexity_filter_poly_g \
+--preserve5p \
+--mergedonly \
+--dedupper 'dedup' \
+--bwaalnn 0.01 \
 <...>
 ```
 
