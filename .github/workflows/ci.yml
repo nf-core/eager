@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['20.07.1', '']
+        nxf_ver: ['20.07.1', '21.03.0-edge']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -34,13 +34,13 @@ jobs:
 
       - name: Build new docker image
         if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/eager:2.3.2
+        run: docker build --no-cache . -t nfcore/eager:2.3.3
 
       - name: Pull docker image
         if: ${{ !env.MATCHED_FILES }}
         run: |
           docker pull nfcore/eager:dev
-          docker tag nfcore/eager:dev nfcore/eager:2.3.2
+          docker tag nfcore/eager:dev nfcore/eager:2.3.3
 
       - name: Install Nextflow
         env:
@@ -125,7 +125,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bedtools_coverage --anno_file 'https://github.com/nf-core/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.gff3'
       - name: GENOTYPING_HC Test running GATK HaplotypeCaller
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker --run_genotyping --genotyping_tool 'hc' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker --run_genotyping --genotyping_tool 'hc' --gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
       - name: GENOTYPING_FB Test running FreeBayes
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --genotyping_tool 'freebayes'
@@ -146,13 +146,13 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_pmdtools
       - name: GENOTYPING_UG AND MULTIVCFANALYZER Test running GATK UnifiedGenotyper and MultiVCFAnalyzer, additional VCFS
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --genotyping_tool 'ug' --gatk_ug_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer --additional_vcf_files 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/vcf/JK2772_CATCAGTGAGTAGA_L008_R1_001.fastq.gz.tengrand.fq.combined.fq.mapped_rmdup.bam.unifiedgenotyper.vcf.gz' --write_allele_frequencies
       - name: COMPLEX LANE/LIBRARY MERGING Test running lane and library merging prior to GATK UnifiedGenotyper and running MultiVCFAnalyzer
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker --run_genotyping --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker --run_genotyping --genotyping_tool 'ug' --gatk_ug_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP' --run_multivcfanalyzer
       - name: GENOTYPING_UG ON TRIMMED BAM Test
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --run_trim_bam --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_genotyping --run_trim_bam --genotyping_source 'trimmed' --genotyping_tool 'ug' --gatk_ug_out_mode 'EMIT_ALL_SITES' --gatk_ug_genotype_model 'SNP'
       - name: BAM_INPUT Run the basic pipeline with the bam input profile, skip AdapterRemoval as no convertBam
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_bam,docker --skip_adapterremoval
