@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
+* Removed pinning of tbb, updated PIGZ to V 2.6 to fix rare stall bug when compressing data after AdapterRemoval
+
 ### `Deprecated`
 
 ## v2.3.3 - 2021-01-06
