@@ -30,7 +30,7 @@ dependencies:
   - bioconda::pmdtools=0.60
   - bioconda::bedtools=2.29.2
   - conda-forge::libiconv=1.15
-  - conda-forge::pigz=2.3.4
+  - conda-forge::pigz=2.6
   - bioconda::sequencetools=1.4.0.6
   - bioconda::preseq=2.0.3
   - bioconda::fastp=0.20.1
@@ -49,5 +49,4 @@ dependencies:
   - bioconda::eigenstratdatabasetools=1.0.2
   - bioconda::mapdamage2=2.2.0
   - bioconda::bbmap=38.87
-  - conda-forge::tbb=2020.2 # temp for bioconda broken bowtie2, remove once patched in bioconda
 
