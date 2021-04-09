@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
+- Removed pinning of `tbb` (upstream bug in bioconda fixed)
+- Bumped `pigz` to 2.6 to fix rare stall bug when compressing data after AdapterRemoval
+- Bumped Bowtie2 to 2.4.2 to fix issues with `tbb` version
+
 ### `Deprecated`
 
 ## v2.3.3 - 2021-01-06
