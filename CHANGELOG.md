@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- Corrected explanation of the "--min_adap_overlap" parameter for AdapterRemoval in the docs
+
 ### `Dependencies`
 
 - Removed pinning of `tbb` (upstream bug in bioconda fixed)
