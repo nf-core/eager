@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Added`
 
 ### `Fixed`
+- Corrected explanation of the "--min_adap_overlap" parameter for AdapterRemoval in the docs
 
 ### `Dependencies`
 
