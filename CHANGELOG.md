@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- Re-adds gzip piping to AdapterRemovalFixPrefix to speed up process after reports of being very slow
+
 ### `Dependencies`
 
 - Removed pinning of `tbb` (upstream bug in bioconda fixed)
