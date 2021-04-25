@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#729](https://github.com/nf-core/eager/issues/729) Added Bowtie2 flag `--maxins` for PE mapping modern DNA mapping contexts 
+
 ### `Fixed`
 
 - Corrected explanation of the "--min_adap_overlap" parameter for AdapterRemoval in the docs
