@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Corrected explanation of the "--min_adap_overlap" parameter for AdapterRemoval in the docs
 - [#725](https://github.com/nf-core/eager/pull/725) `bwa_index` doc update
 - Re-adds gzip piping to AdapterRemovalFixPrefix to speed up process after reports of being very slow
+- Updated DamageProfiler citation from bioRxiv to publication
 
 ### `Dependencies`
 
