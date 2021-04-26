@@ -634,6 +634,13 @@
                     "description": "Specify number of bases to trim off from 3' (right) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
                     "help_text": "Number of bases to trim at the 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.\n\n> Modifies Bowtie2 parameters: `-bt2_trim3`"
+                },
+                "bt2_maxins": {
+                    "type": "integer",
+                    "default": 500,
+                    "fa_icon": "fas fa-exchange-alt",
+                    "description": "Specify the maximum fragment length for Bowtie2 paired-end mapping mode only.",
+                    "help_text": "The maximum fragment for valid paired-end alignments. Only for paired-end mapping (i.e. unmerged), and therefore typically only useful for modern data.\n\n See [Bowtie2 documentation](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information.\n\n>  Modifies Bowtie2 parameters: `--maxins`"
                 }
             },
             "fa_icon": "fas fa-layer-group",
