@@ -25,6 +25,7 @@ run_modules:
     - samtools
     - sexdeterrmine
     - hops
+    - bcftools
 
 extra_fn_clean_exts:
     - '_fastp'
@@ -91,6 +92,7 @@ top_modules:
     - 'mtnucratio'
     - 'qualimap'
     - 'sexdeterrmine'
+    - 'bcftools'
     - 'multivcfanalyzer':
        path_filters:
            - '*MultiVCFAnalyzer.json'
