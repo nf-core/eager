@@ -2219,16 +2219,16 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
 
 // initialise empty bcftool related empty channels
 
-if ( params.genotyping_tool == 'ug' ) {
-  ch_hc_for_bcftools_stats = Channel.empty()
-  ch_fb_for_bcftools_stats = Channel.empty()
-} else if ( params.genotyping_tool == 'hc' ) {
-  ch_ug_for_bcftools_stats = Channel.empty()
-  ch_fb_for_bcftools_stats = Channel.empty()
-} else if ( params.genotyping_tool == 'fb ') {
-  ch_ug_for_bcftools_stats = Channel.empty()
-  ch_hc_for_bcftools_stats = Channel.empty()
-}
+//if ( params.genotyping_tool == 'ug' ) {
+//  ch_hc_for_bcftools_stats = Channel.empty()
+//  ch_fb_for_bcftools_stats = Channel.empty()
+//} else if ( params.genotyping_tool == 'hc' ) {
+//  ch_ug_for_bcftools_stats = Channel.empty()
+//  ch_fb_for_bcftools_stats = Channel.empty()
+//} else if ( params.genotyping_tool == 'fb ') {
+//  ch_ug_for_bcftools_stats = Channel.empty()
+//  ch_hc_for_bcftools_stats = Channel.empty()
+//}
 
 
 process genotyping_ug {
