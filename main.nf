@@ -190,7 +190,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling,ch_fasta_for_bcftools_stats }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling;ch_fasta_for_bcftools_stats }
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -2213,7 +2213,23 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
 
 }
 
+
+
 // Unified Genotyper - although not-supported, better for aDNA (because HC does de novo assembly which requires higher coverages), and needed for MultiVCFAnalyzer
+
+// initialise empty bcftool related empty channels
+
+if ( params.genotyping_tool == 'ug' ) {
+  ch_hc_for_bcftools_stats = Channel.empty()
+  ch_fb_for_bcftools_stats = Channel.empty()
+} else if ( params.genotyping_tool == 'hc' ) {
+  ch_ug_for_bcftools_stats = Channel.empty()
+  ch_fb_for_bcftools_stats = Channel.empty()
+} else if ( params.genotyping_tool == 'fb ') {
+  ch_ug_for_bcftools_stats = Channel.empty()
+  ch_hc_for_bcftools_stats = Channel.empty()
+}
+
 
 process genotyping_ug {
   label 'mc_small'
@@ -2271,13 +2287,13 @@ process genotyping_hc {
   params.run_genotyping && params.genotyping_tool == 'hc'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_hc,ch_hc_for_bcftools_stats
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_hc
   file fasta from ch_fasta_for_genotyping_hc.collect()
   file fai from ch_fai_for_hc.collect()
   file dict from ch_dict_for_hc.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz") into ch_hc_for_bcftools_stats
 
   script:
   if (params.gatk_dbsnp == '')
@@ -2304,13 +2320,13 @@ process genotyping_freebayes {
   params.run_genotyping && params.genotyping_tool == 'freebayes'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_freebayes,ch_fb_for_bcftools_stats
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_freebayes
   file fasta from ch_fasta_for_genotyping_freebayes.collect()
   file fai from ch_fai_for_freebayes.collect()
   file dict from ch_dict_for_freebayes.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz") into ch_fb_for_bcftools_stats
   
   script:
   def skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
@@ -2461,7 +2477,7 @@ process bcftools_stats {
   params.run_bcftools_stats
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(vcf) from ch_ug_for_vcf2genome.mix(ch_hc_for_bcftools_stats,ch_fb_for_bcftools_stats)
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(vcf) from ch_ug_for_bcftools_stats.mix(ch_hc_for_bcftools_stats,ch_fb_for_bcftools_stats)
   file fasta from ch_fasta_for_bcftools_stats.collect()
 
   output:

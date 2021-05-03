@@ -49,4 +49,4 @@ dependencies:
   - bioconda::eigenstratdatabasetools=1.0.2
   - bioconda::mapdamage2=2.2.0
   - bioconda::bbmap=38.87
-  - bioconda::bcftools=1.12.1
+  - bioconda::bcftools=1.9
