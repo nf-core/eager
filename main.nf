@@ -2514,9 +2514,9 @@ process vcf2genome {
   def out = "${params.vcf2genome_outfile}" == '' ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
   def fasta_head = "${params.vcf2genome_header}" == '' ? "${samplename}" : "${params.vcf2genome_header}"
   """
-  bgzip -f -d -@ ${task.cpus} *.vcf.gz
-  vcf2genome -Xmx${task.memory.toGiga()}g -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
-  pigz -p ${task.cpus} *.fasta 
+  pigz -d -f -p ${task.cpus} ${vcf}
+  vcf2genome -Xmx${task.memory.toGiga()}g -draft ${out} -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainty.fasta
+  pigz -f -p ${task.cpus} ${out}*
   pigz -p ${task.cpus} *.vcf
   """
 }
@@ -2557,7 +2557,7 @@ process multivcfanalyzer {
   script:
   def write_freqs = params.write_allele_frequencies ? "T" : "F"
   """
-  bgzip -f -d -@ ${task.cpus} *.vcf.gz
+  pigz -d -f -p ${task.cpus} ${vcf}
   multivcfanalyzer -Xmx${task.memory.toGiga()}g ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
   pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
   """
