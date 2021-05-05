@@ -3,7 +3,28 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## v2.3.3 - 2021-01-06
+## v2.3.4 - 2021-05-05
+
+### `Added`
+
+- [#729](https://github.com/nf-core/eager/issues/729) Added Bowtie2 flag `--maxins` for PE mapping modern DNA mapping contexts
+
+### `Fixed`
+
+- Corrected explanation of the "--min_adap_overlap" parameter for AdapterRemoval in the docs
+- [#725](https://github.com/nf-core/eager/pull/725) `bwa_index` doc update
+- Re-adds gzip piping to AdapterRemovalFixPrefix to speed up process after reports of being very slow
+- Updated DamageProfiler citation from bioRxiv to publication
+
+### `Dependencies`
+
+- Removed pinning of `tbb` (upstream bug in bioconda fixed)
+- Bumped `pigz` to 2.6 to fix rare stall bug when compressing data after AdapterRemoval
+- Bumped Bowtie2 to 2.4.2 to fix issues with `tbb` version
+
+### `Deprecated`
+
+## v2.3.3 - 2021-04-08
 
 ### `Added`
 
