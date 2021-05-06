@@ -3,13 +3,25 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## v2.4dev - [unreleased]
+
+### `Added`
+
+- [#317](https://github.com/nf-core/eager/issues/317) Added bcftools stats for general genotyping statistics of VCF files
+
+### `Fixed`
+
+- Fixed some missing or incorrectly reported software versions
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.3.4dev - [unreleased]
 
 ### `Added`
 
 - [#729](https://github.com/nf-core/eager/issues/729) Added Bowtie2 flag `--maxins` for PE mapping modern DNA mapping contexts
-- [#317](https://github.com/nf-core/eager/issues/317) Added bcftools stats for general genotyping statistics of VCF files
-
 ### `Fixed`
 
 - Corrected explanation of the "--min_adap_overlap" parameter for AdapterRemoval in the docs
