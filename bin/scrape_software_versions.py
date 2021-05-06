@@ -16,7 +16,7 @@ regexes = {
     'Bowtie2': ['v_bowtie2.txt', r"bowtie2-([0-9]+\.[0-9]+\.[0-9]+) -fdebug"],
     'Qualimap': ['v_qualimap.txt', r"QualiMap v.(\S+)"],
     'GATK HaplotypeCaller': ['v_gatk.txt', r" v(\S+)"],
-    #'GATK UnifiedGenotyper': ['v_gatk3_5.txt', r"version (\S+)"],
+    'GATK UnifiedGenotyper': ['v_gatk3.txt', r"(\S+)"],
     'bamUtil' : ['v_bamutil.txt', r"Version: (\S+);"],
     'fastP': ['v_fastp.txt', r"([\d\.]+)"],
     'DamageProfiler' : ['v_damageprofiler.txt', r"DamageProfiler v(\S+)"],
@@ -37,7 +37,8 @@ regexes = {
     'kraken':['v_kraken.txt', r"Kraken version (\S+)"],
     'eigenstrat_snp_coverage':['v_eigenstrat_snp_coverage.txt',r"(\S+)"],
     'mapDamage2':['v_mapdamage.txt',r"(\S+)"],
-    'bbduk':['v_bbduk.txt',r"(\S+)"]
+    'bbduk':['v_bbduk.txt',r"(\S+\ .+)"],
+    'bcftools':['v_bcftools.txt',r"(\S+)"]
 }
 
 results = OrderedDict()
@@ -75,6 +76,7 @@ results['maltextract'] = '<span style="color:#999999;\">N/A</span>'
 results['eigenstrat_snp_coverage'] = '<span style="color:#999999;\">N/A</span>'
 results['mapDamage2'] = '<span style="color:#999999;\">N/A</span>'
 results['bbduk'] = '<span style="color:#999999;\">N/A</span>'
+results['bcftools'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
