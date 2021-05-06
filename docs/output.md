@@ -639,6 +639,7 @@ More detailed explanation of variant quality scores can be seen in the Broad Ins
 #### Indel Distribution
 
 This plot shows you the distribution of the sizes of insertion- and deletions (InDels) in the variant calling (assuming you configured your variant caller parameters to do so). Low-coverage aDNA data often will not have high enough coverage to accurately assess InDels. In cases of high-coverage data of small-genomes such as microbes, large numbers of InDels, however, may indicate your reads are actually from a _relative_ of the reference mapped to - and should be verified downstream.
+
 #### Variant depths
 
 This plot shows the distribution of depth coverages of each variant called. Typically higher coverage will result in higher quality variant calls (see Variant Quality, above), however in many cases in aDNA these may be low and unequally distributed (due to uneven mapping coverage from contamination).
