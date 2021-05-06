@@ -70,14 +70,13 @@ If you wish to contribute a new step, please use the following coding standards:
 3. Define the output channel if needed (see below).
 4. Add any new flags/options to `nextflow.config` with a default (see below).
 5. Add any new flags/options to `nextflow_schema.json` with help text (with `nf-core schema build .`).
-6. Add any new flags/options to the help message (for integer/text parameters, print to help the corresponding `nextflow.config` parameter).
-7. Add sanity checks for all relevant parameters.
-8. Add any new software to the `scrape_software_versions.py` script in `bin/` and the version command to the `scrape_software_versions` process in `main.nf`.
-9. Do local tests that the new code works properly and as expected.
-10. Add a new test command in `.github/workflow/ci.yaml`.
-11. If applicable add a [MultiQC](https://https://multiqc.info/) module.
-12. Update MultiQC config `assets/multiqc_config.yaml` so relevant suffixes, name clean up, General Statistics Table column order, and module figures are in the right order.
-13. Optional: Add any descriptions of MultiQC report sections and output files to `docs/output.md`.
+6. Add sanity checks for all relevant parameters.
+7. Add any new software to the `scrape_software_versions.py` script in `bin/` and the version command to the `scrape_software_versions` process in `main.nf`.
+8. Do local tests that the new code works properly and as expected.
+9. Add a new test command in `.github/workflow/ci.yaml`.
+10. If applicable add a [MultiQC](https://https://multiqc.info/) module.
+11. Update MultiQC config `assets/multiqc_config.yaml` so relevant suffixes, name clean up, General Statistics Table column order, and module figures are in the right order.
+12. Optional: Add any descriptions of MultiQC report sections and output files to `docs/output.md`.
 
 ### Default values
 
