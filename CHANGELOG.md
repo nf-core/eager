@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Fixed`
 
 - [#723](https://github.com/nf-core/eager/issues/723) - Fixes empty fields in TSV resulting in uninformative error
+- 
 ### `Dependencies`
 
 ### `Deprecated`
