@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## v2.3.4dev - [unreleased]
+## v2.3.4 - 2021-05-05
 
 ### `Added`
 
@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## v2.3.3 - 2021-01-06
+## v2.3.3 - 2021-04-08
 
 ### `Added`
 
