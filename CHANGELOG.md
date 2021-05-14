@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [https://github.com/nf-core/eager/issues/736] - Add printing of multiqc run report location on successful completion
+
 ### `Fixed`
 
 ### `Dependencies`
