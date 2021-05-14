@@ -5,7 +5,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## v2.3.5dev - [date]
 
+- [#722](https://github.com/nf-core/eager/issues/722) - Adds bwa `-o` flag for more flexibility in bwa parameters
+
 ### `Added`
+
+- [https://github.com/nf-core/eager/issues/736] - Add printing of multiqc run report location on successful completion
 
 ### `Fixed`
 
