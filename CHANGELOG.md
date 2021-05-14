@@ -3,6 +3,16 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## v2.4dev - [unreleased]
+
+### `Added`
+
+- [#317](https://github.com/nf-core/eager/issues/317) Added bcftools stats for general genotyping statistics of VCF files
+
+### `Fixed`
+
+- Fixed some missing or incorrectly reported software versions
+
 ## v2.3.5dev - [date]
 
 ### `Added`

@@ -618,6 +618,32 @@ If this correlation is not observed, your data is skewed towards higher coverage
   <img src="images/output/sexdeterrmine/sexdeterrmine_read_counts.png" width="75%" height = "75%">
 </p>
 
+### Bcftools
+
+### Background
+
+Bcftools is a toolkit for processing and summaries VCF files, i.e. variant call format files. nf-core/eager currently uses bcftools for the `stats` functionality. This summarises in a text file a range of statistics about VCF files, produced by GATK and FreeBayes variant callers.
+
+#### Variant Substitution Types
+
+This stack bar plot shows you the distribution of all types of point-mutation variants away from the reference nucleotide at each position, (e.g. A>C, A>G etc.).
+
+For low-coverage non-UDG treated, non-trimmed nor re-scaled aDNA data, you expect to see a C>T substitutions as the largest category, due to the most common ancient DNA damage being C to T deamination.
+
+#### Variant Quality
+
+This gives you the distribution of variant-call _qualities_ in your VCF files. Each variant will get given a 'Phred-scale' like value that represents the confidence of the variant caller that it has made the right call. The scale is very similar to that of base-call values in FASTQ files (as assessed by FastQC). Distributions that have peaks at higher variant quality scores (>= 30) suggest more confident variant calls. However, in cases of low-coverage aDNA data, these distributions may not be so good.
+
+More detailed explanation of variant quality scores can be seen in the Broad Institute's [GATK documentation](https://gatk.broadinstitute.org/hc/en-us/articles/360035531872-Phred-scaled-quality-scores).
+
+#### Indel Distribution
+
+This plot shows you the distribution of the sizes of insertion- and deletions (InDels) in the variant calling (assuming you configured your variant caller parameters to do so). Low-coverage aDNA data often will not have high enough coverage to accurately assess InDels. In cases of high-coverage data of small-genomes such as microbes, large numbers of InDels, however, may indicate your reads are actually from a _relative_ of the reference mapped to - and should be verified downstream.
+
+#### Variant depths
+
+This plot shows the distribution of depth coverages of each variant called. Typically higher coverage will result in higher quality variant calls (see Variant Quality, above), however in many cases in aDNA these may be low and unequally distributed (due to uneven mapping coverage from contamination).
+
 ### MultiVCFAnalyzer
 
 #### Background
@@ -674,3 +700,4 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 * `maltextract/`: this contains a `results` directory in which contains the output from MaltExtract - typically one folder for each filter type, an error and a log file. The characteristics of each node (e.g. damage, read lengths, edit distances - each in different txt formats) can be seen in each sub-folder of the filter folders. Output can be visualised either with the [HOPS postprocessing script](https://github.com/rhuebler/HOPS) or [MEx-IPA](https://github.com/jfy133/MEx-IPA)
 * `consensus_sequence/`: this contains three FASTA files from VCF2Genome of a consensus sequence based on the reference FASTA with each sample's unique modifications. The main FASTA is a standard file with bases not passing the specified thresholds as Ns. The two other FASTAS (`_refmod.fasta.gz`) and (`_uncertainity.fasta.gz`) are IUPAC uncertainty codes (rather than Ns) and a special number-based uncertainty system used for other downstream tools, respectively.
 * `librarymerged_bams/`: these contain the final BAM files that would go into genotyping (if genotyping is turned on). This means the files will contain all libraries of a given sample (including trimmed non-UDG or half-UDG treated libraries, if BAM trimming turned on)
+* `bcftools`: this currently contains a single directory called `stats/` that includes general statistics on variant callers producing VCF files as output by `bcftools stats`. These includethings such as the number of positions, number of transititions/transversions and depth coverage of SNPs etc. These are only produced if `--run_bcftools_stats` is supplied.
