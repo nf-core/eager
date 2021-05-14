@@ -46,7 +46,7 @@ if ( params.skip_collapse && params.skip_trim ) {
 }
 
 // Bedtools validation
-if(params.run_bedtools_coverage && params.anno_file == ''){
+if(params.run_bedtools_coverage && params.anno_file ){
   exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
 }
 
@@ -62,7 +62,7 @@ if (params.dedupper == 'dedup' && !params.mergedonly) {
 // Genotyping validation
 if (params.run_genotyping){
 
-  if (params.genotyping_tool == 'pileupcaller' && ( params.pileupcaller_bedfile == '' || params.pileupcaller_snpfile == '' ) ) {
+  if (params.genotyping_tool == 'pileupcaller' && ( !params.pileupcaller_bedfile || !params.pileupcaller_snpfile ) ) {
     exit 1, "[nf-core/eager] error: please check your pileupCaller bed file and snp file parameters. You must supply a bed file and a snp file."
   }
 
@@ -96,7 +96,7 @@ if (params.run_multivcfanalyzer) {
     exit 1, "[nf-core/eager] error: MultiVCFAnalyzer only accepts VCF files generated with a GATK ploidy set to 2. Found parameter: --gatk_ploidy ${params.gatk_ploidy}."
   }
 
-  if (params.additional_vcf_files != '') {
+  if (params.additional_vcf_files) {
       ch_extravcfs_for_multivcfanalyzer = Channel.fromPath(params.additional_vcf_files, checkIfExists: true)
   }
 }
@@ -110,7 +110,7 @@ if (params.run_metagenomic_screening) {
   exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTQ format. Please supply --bam_unmapped_type 'fastq'. Found parameter: --bam_unmapped_type '${params.bam_unmapped_type}'."
   }
 
-  if (params.database == '' ) {
+  if (!params.database) {
     exit 1, "[nf-core/eager] error: metagenomic classification requires a path to a database directory. Please specify one with --database '/path/to/database/'."
   }
 
@@ -138,7 +138,7 @@ if (params.run_maltextract) {
     exit 1, "[nf-core/eager] error: MaltExtract can only accept MALT output. Please supply --metagenomic_tool 'malt'. Found parameter: --metagenomic_tool '${params.metagenomic_tool}'"
   }
 
-  if (params.maltextract_taxon_list == '') {
+  if (!params.maltextract_taxon_list) {
     exit 1, "[nf-core/eager] error: MaltExtract requires a taxon list specifying the target taxa of interest. Specify the file with --params.maltextract_taxon_list."
   }
 }
@@ -204,7 +204,7 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
 }
 
 // Index files provided? Then check whether they are correct and complete
-if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwamem' | params.mapper == 'circularmapper')){
+if( params.bwa_index && (params.mapper == 'bwaaln' | params.mapper == 'bwamem' | params.mapper == 'circularmapper')){
     Channel
         .fromPath(params.bwa_index, checkIfExists: true)
         .ifEmpty { exit 1, "[nf-core/eager] error: bwa indices not found in: ${index_base}." }
@@ -213,7 +213,7 @@ if( params.bwa_index != '' && (params.mapper == 'bwaaln' | params.mapper == 'bwa
     bt2_index = Channel.empty()
 }
 
-if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
+if( params.bt2_index && params.mapper == 'bowtie2' ){
     lastPath = params.bt2_index.lastIndexOf(File.separator)
     bt2_dir =  params.bt2_index.substring(0,lastPath+1)
     bt2_base = params.bt2_index.substring(lastPath+1)
@@ -228,41 +228,41 @@ if( params.bt2_index != '' && params.mapper == 'bowtie2' ){
 }
 
 // SexDetermination channel set up and bedfile validation
-if (params.sexdeterrmine_bedfile == '') {
+if (!params.sexdeterrmine_bedfile) {
   ch_bed_for_sexdeterrmine = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
 } else {
   ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile, checkIfExists: true)
 }
 
  // pileupCaller channel generation and input checks for 'random sampling' genotyping
-if (params.pileupcaller_bedfile.isEmpty()) {
+if (!params.pileupcaller_bedfile) {
   ch_bed_for_pileupcaller = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
 } else {
   ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile, checkIfExists: true)
 }
 
-if (params.pileupcaller_snpfile.isEmpty ()) {
+if (!params.pileupcaller_snpfile) {
   ch_snp_for_pileupcaller = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy2.txt")
 } else {
   ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile, checkIfExists: true)
 }
 
 // Create input channel for MALT database directory, checking directory exists
-if ( params.database == '') {
+if ( !params.database ) {
     ch_db_for_malt = Channel.empty()
 } else {
     ch_db_for_malt = Channel.fromPath(params.database, checkIfExists: true)
 }
 
 // Create input channel for MaltExtract taxon list, to allow downloading of taxon list, checking file exists.
-if ( params.maltextract_taxon_list== '' ) {
+if ( !params.maltextract_taxon_list ) {
     ch_taxonlist_for_maltextract = Channel.empty()
 } else {
     ch_taxonlist_for_maltextract = Channel.fromPath(params.maltextract_taxon_list, checkIfExists: true)
 }
 
 // Create input channel for MaltExtract NCBI files, checking files exists.
-if ( params.maltextract_ncbifiles == '' ) {
+if ( !params.maltextract_ncbifiles ) {
     ch_ncbifiles_for_maltextract = Channel.empty()
 } else {
     ch_ncbifiles_for_maltextract = Channel.fromPath(params.maltextract_ncbifiles, checkIfExists: true)
@@ -300,7 +300,7 @@ where_are_my_files = file("$projectDir/assets/where_are_my_files.txt")
 ///////////////////////////////////////////////////
 
 // check if we have valid --reads or --input
-if (params.input == null) {
+if (!params.input) {
   exit 1, "[nf-core/eager] error: --input was not supplied! Please check '--help' or documentation under 'running the pipeline' for details"
 }
 
@@ -448,7 +448,7 @@ log.info "Schaffa, Schaffa, Genome Baua!"
 ///////////////////////////////////////////////////
 
 // BWA Index
-if( params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
+if( !params.bwa_index && params.fasta && (params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')){
   process makeBWAIndex {
     label 'sc_medium'
     tag "${fasta}"
@@ -477,7 +477,7 @@ if( params.bwa_index == '' && !params.fasta.isEmpty() && (params.mapper == 'bwaa
 }
 
 // bowtie2 Index
-if(params.bt2_index == '' && !params.fasta.isEmpty() && params.mapper == "bowtie2"){
+if( !params.bt2_index && params.fasta && params.mapper == "bowtie2"){
   process makeBT2Index {
     label 'sc_medium'
     tag "${fasta}"
@@ -508,7 +508,7 @@ if(params.bt2_index == '' && !params.fasta.isEmpty() && params.mapper == "bowtie
 }
 
 // FASTA Index (FAI)
-if (params.fasta_index != '') {
+if (params.fasta_index) {
   Channel
     .fromPath( params.fasta_index )
     .set { ch_fai_for_skipfastaindexing }
@@ -527,7 +527,7 @@ process makeFastaIndex {
             else null
     }
     
-    when: params.fasta_index == '' && !params.fasta.isEmpty() && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
+    when: !params.fasta_index && params.fasta && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
 
     input:
     path fasta from ch_fasta_for_faidx
@@ -548,7 +548,7 @@ ch_fai_for_skipfastaindexing.mix(ch_fasta_faidx_index)
 
 // Stage dict index file if supplied, else load it into the channel
 
-if (params.seq_dict != '') {
+if (params.seq_dict) {
   Channel
     .fromPath( params.seq_dict )
     .set { ch_dict_for_skipdict }
@@ -567,7 +567,7 @@ process makeSeqDict {
             else null
     }
     
-    when: params.seq_dict == '' && !params.fasta.isEmpty()
+    when: !params.seq_dict && params.fasta
 
     input:
     path fasta from ch_fasta_for_seqdict
@@ -1160,15 +1160,15 @@ process bwa {
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
     """
-    bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
-    bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
+    bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.r1.sai
+    bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.r2.sai
     bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${libraryid}_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     } else {
-    //PE collapsed, or SE data 
+    //PE collapsed, or SE data
     """
-    bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
+    bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
@@ -2023,8 +2023,8 @@ process pmdtools {
     script:
     //Check which treatment for the libraries was used
     def treatment = udg ? (udg == 'half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
-    if(params.snpcapture_bed != ''){
-        snpcap = (params.pmdtools_reference_mask != '') ? "--refseq ${params.pmdtools_reference_mask}" : ''
+    if(params.snpcapture_bed){
+        snpcap = (params.pmdtools_reference_mask) ? "--refseq ${params.pmdtools_reference_mask}" : ''
         log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
     } else {
         snpcap = ''
@@ -2163,7 +2163,7 @@ process qualimap {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") into ch_qualimap_results
 
     script:
-    def snpcap = params.snpcapture_bed != '' ? "-gff ${params.snpcapture_bed}" : ''
+    def snpcap = params.snpcapture_bed ? "-gff ${params.snpcapture_bed}" : ''
     """
     qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap} --java-mem-size=${task.memory.toGiga()}G
     """
@@ -2234,9 +2234,9 @@ process genotyping_ug {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.realign.{bam,bai}") optional true
 
   script:
-  def defaultbasequalities = params.gatk_ug_defaultbasequalities == '' ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
+  def defaultbasequalities = !params.gatk_ug_defaultbasequalities ? '' : " --defaultBaseQualities ${params.gatk_ug_defaultbasequalities}" 
   def keep_realign = params.gatk_ug_keep_realign_bam ? "samtools index ${samplename}.realign.bam" : "rm ${samplename}.realign.{bam,bai}"
-  if (params.gatk_dbsnp == '')
+  if (!params.gatk_dbsnp)
     """
     samtools index -b ${bam}
     gatk3 -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
@@ -2247,7 +2247,7 @@ process genotyping_ug {
     
     pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
-  else if (params.gatk_dbsnp != '')
+  else if (params.gatk_dbsnp)
     """
     samtools index ${bam}
     gatk3 -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
@@ -2280,13 +2280,13 @@ process genotyping_hc {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz")
 
   script:
-  if (params.gatk_dbsnp == '')
+  if (!params.gatk_dbsnp)
     """
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
     pigz -p ${task.cpus} ${samplename}.haplotypecaller.vcf
     """
 
-  else if (params.gatk_dbsnp != '')
+  else if (params.gatk_dbsnp)
     """
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
     pigz -p ${task.cpus} ${samplename}.haplotypecaller.vcf
@@ -2470,8 +2470,8 @@ process vcf2genome {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fasta.gz")
 
   script:
-  def out = "${params.vcf2genome_outfile}" == '' ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
-  def fasta_head = "${params.vcf2genome_header}" == '' ? "${samplename}" : "${params.vcf2genome_header}"
+  def out = !params.vcf2genome_outfile ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
+  def fasta_head = !params.vcf2genome_header ? "${samplename}" : "${params.vcf2genome_header}"
   """
   pigz -f -d -p ${task.cpus} *.vcf.gz
   vcf2genome -Xmx${task.memory.toGiga()}g -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
@@ -2691,7 +2691,7 @@ if (params.metagenomic_tool == 'malt') {
     .set {ch_input_for_metagenomic_kraken}
 
   ch_input_for_metagenomic_malt = Channel.empty()
-} else if ( params.metagenomic_tool == '' ) {
+} else if ( !params.metagenomic_tool ) {
   ch_input_for_metagenomic_malt = Channel.empty()
   ch_input_for_metagenomic_kraken = Channel.empty()
 
@@ -2811,7 +2811,7 @@ if (params.run_metagenomic_screening && params.database.endsWith(".tar.gz") && p
     """
   }
 
-} else if (! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening && params.metagenomic_tool == 'kraken') {
+} else if (params.database && ! params.database.endsWith(".tar.gz") && params.run_metagenomic_screening && params.metagenomic_tool == 'kraken') {
     ch_krakendb = Channel.fromPath(params.database).first()
 } else {
     ch_krakendb = Channel.empty()
@@ -3128,6 +3128,7 @@ workflow.onComplete {
 
     if (workflow.success) {
         log.info "-${c_purple}[nf-core/eager]${c_green} Pipeline completed successfully${c_reset}-"
+        log.info "-${c_purple}[nf-core/eager]${c_green} MultiQC run report can be found in ${params.outdir}/multiqc ${c_reset}-"
     } else {
         checkHostname()
         log.info "-${c_purple}[nf-core/eager]${c_red} Pipeline completed with errors${c_reset}-"
@@ -3157,17 +3158,17 @@ def extract_data(tsvFile) {
 
             checkNumberOfItem(row, 11)
 
-            if ( row.Sample_Name.isEmpty() ) exit 1, "[nf-core/eager] error: the Sample_Name column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.Library_ID.isEmpty() ) exit 1, "[nf-core/eager] error: the Library_ID column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.Lane.isEmpty() ) exit 1, "[nf-core/eager] error: the Lane column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.Colour_Chemistry.isEmpty() ) exit 1, "[nf-core/eager] error: the Colour_Chemistry column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.SeqType.isEmpty() ) exit 1, "[nf-core/eager] error: the SeqType column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.Organism.isEmpty() ) exit 1, "[nf-core/eager] error: the Organism column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.Strandedness.isEmpty() ) exit 1, "[nf-core/eager] error: the Strandedness column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.UDG_Treatment.isEmpty() ) exit 1, "[nf-core/eager] error: the UDG_Treatment column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.R1.isEmpty() ) exit 1, "[nf-core/eager] error: the R1 column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.R2.isEmpty() ) exit 1, "[nf-core/eager] error: the R2 column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
-            if ( row.BAM.isEmpty() ) exit 1, "[nf-core/eager] error: the BAM column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Sample_Name == null || row.Sample_Name.isEmpty() ) exit 1, "[nf-core/eager] error: the Sample_Name column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Library_ID == null || row.Library_ID.isEmpty() ) exit 1, "[nf-core/eager] error: the Library_ID column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Lane == null || row.Lane.isEmpty() ) exit 1, "[nf-core/eager] error: the Lane column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Colour_Chemistry == null || row.Colour_Chemistry.isEmpty() ) exit 1, "[nf-core/eager] error: the Colour_Chemistry column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.SeqType == null || row.SeqType.isEmpty() ) exit 1, "[nf-core/eager] error: the SeqType column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Organism == null || row.Organism.isEmpty() ) exit 1, "[nf-core/eager] error: the Organism column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.Strandedness == null || row.Strandedness.isEmpty() ) exit 1, "[nf-core/eager] error: the Strandedness column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.UDG_Treatment == null || row.UDG_Treatment.isEmpty() ) exit 1, "[nf-core/eager] error: the UDG_Treatment column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.R1 == null || row.R1.isEmpty() ) exit 1, "[nf-core/eager] error: the R1 column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.R2 == null || row.R2.isEmpty() ) exit 1, "[nf-core/eager] error: the R2 column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
+            if ( row.BAM == null || row.BAM.isEmpty() ) exit 1, "[nf-core/eager] error: the BAM column is empty. Ensure all cells are filled or contain 'NA' for optional fields. Check row:\n ${row}"
 
             def samplename = row.Sample_Name
             def libraryid  = row.Library_ID

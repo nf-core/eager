@@ -562,6 +562,13 @@
                     "fa_icon": "fas fa-ruler-horizontal",
                     "help_text": "Configures the length of the seed used in `bwa aln -l`. Default is set to be 'turned off' at the recommendation of Schubert et al. ([2012 _BMC Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with `1024`.\n\nNote: Despite being recommended, turning off seeding can result in long runtimes!\n\n> Modifies BWA aln parameter: `-l`\n"
                 },
+                "bwaalno": {
+                    "type": "integer",
+                    "default": 1,
+                    "fa_icon": "fas fa-people-arrows",
+                    "description": "Specify the -o parameter for BWA aln i.e. the number of gaps allowed.",
+                    "help_text": "Configures the number of gaps used in `bwa aln`. Default is set to `bwa` default.\n\n> Modifies BWA aln parameter: `-o`\n"
+                },
                 "circularextension": {
                     "type": "integer",
                     "default": 500,

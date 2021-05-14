@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#722](https://github.com/nf-core/eager/issues/722) - Adds bwa `-o` flag for more flexibility in bwa parameters
+- [#736](https://github.com/nf-core/eager/issues/736) - Add printing of multiqc run report location on successful completion
+
 ### `Fixed`
 
+- [#723](https://github.com/nf-core/eager/issues/723) - Fixes empty fields in TSV resulting in uninformative error
+- Updated template to nf-core/tools 1.14
 - [#688](https://github.com/nf-core/eager/issues/688) - Clarified the pipeline is not just for humans and microbes, but also plants and animals, and also for modern DNA
 
 ### `Dependencies`
