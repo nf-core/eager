@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#723](https://github.com/nf-core/eager/issues/723) - Fixes empty fields in TSV resulting in uninformative error
 - Updated template to nf-core/tools 1.14
 
-
 ### `Dependencies`
 
 ### `Deprecated`
