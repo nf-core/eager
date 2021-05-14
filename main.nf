@@ -1160,15 +1160,15 @@ process bwa {
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
     """
-    bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r1.sai
-    bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.r2.sai
+    bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.r1.sai
+    bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.r2.sai
     bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${libraryid}_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     } else {
-    //PE collapsed, or SE data 
+    //PE collapsed, or SE data
     """
-    bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -f ${libraryid}.sai
+    bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.sai
     bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
