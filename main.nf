@@ -40,7 +40,7 @@ if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.singl
     exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
 }
 
-// Validate not trying to both skip collapse -profile test_tsv,docker --run_bedtools_coverage --anno_file 'https://github.com/nf-core/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.gff3'and skip trim
+// Validate not trying to both skip collapse and skip trim
 if ( params.skip_collapse && params.skip_trim ) {
   exit 1, "[nf-core/eager error]: you have specified to skip both merging and trimming of paired end samples. Use --skip_adapterremoval instead."
 }
