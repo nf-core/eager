@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#688](https://github.com/nf-core/eager/issues/688) - Clarified the pipeline is not just for humans and microbes, but also plants and animals, and also for modern DNA
 - General code cleanup and standarisation of parameters with no default setting
 
-
 ### `Dependencies`
 
 ### `Deprecated`
