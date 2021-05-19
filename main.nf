@@ -2529,6 +2529,7 @@ process multivcfanalyzer {
 // Mitochondrial to nuclear ratio helps to evaluate quality of tissue sampled
 
  process mtnucratio {
+  label 'sc_small'
   tag "${samplename}"
   publishDir "${params.outdir}/mtnucratio", mode: params.publish_dir_mode
 
