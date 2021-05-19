@@ -14,7 +14,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [#723](https://github.com/nf-core/eager/issues/723) - Fixes empty fields in TSV resulting in uninformative error
 - Updated template to nf-core/tools 1.14
+- [#688](https://github.com/nf-core/eager/issues/688) - Clarified the pipeline is not just for humans and microbes, but also plants and animals, and also for modern DNA
 - General code cleanup and standarisation of parameters with no default setting
+
 
 ### `Dependencies`
 
@@ -24,12 +26,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-- [#729](https://github.com/nf-core/eager/issues/729) Added Bowtie2 flag `--maxins` for PE mapping modern DNA mapping contexts
+- [#729](https://github.com/nf-core/eager/issues/729) - Added Bowtie2 flag `--maxins` for PE mapping modern DNA mapping contexts
 
 ### `Fixed`
 
 - Corrected explanation of the "--min_adap_overlap" parameter for AdapterRemoval in the docs
-- [#725](https://github.com/nf-core/eager/pull/725) `bwa_index` doc update
+- [#725](https://github.com/nf-core/eager/pull/725) - `bwa_index` doc update
 - Re-adds gzip piping to AdapterRemovalFixPrefix to speed up process after reports of being very slow
 - Updated DamageProfiler citation from bioRxiv to publication
 
