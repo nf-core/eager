@@ -46,7 +46,7 @@ if ( params.skip_collapse && params.skip_trim ) {
 }
 
 // Bedtools validation
-if(params.run_bedtools_coverage && params.anno_file ){
+if(params.run_bedtools_coverage && !params.anno_file ){
   exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
 }
 
