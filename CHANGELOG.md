@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [#722](https://github.com/nf-core/eager/issues/722) - Adds bwa `-o` flag for more flexibility in bwa parameters
 - [#736](https://github.com/nf-core/eager/issues/736) - Add printing of multiqc run report location on successful completion
+- New logo that is more visible when a user is using darkmode on GitHub or nf-core website!
 
 ### `Fixed`
 
