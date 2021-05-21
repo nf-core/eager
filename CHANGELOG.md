@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#751](https://github.com/nf-core/eager/pull/751) - Added missing label to mtnucratio
 - General code cleanup and standardisation of parameters with no default setting
 - [#750](https://github.com/nf-core/eager/issues/750) - Fixed piped commands requesting the same number of CPUs at each command step
- 
+
 ### `Dependencies`
 
 ### `Deprecated`
