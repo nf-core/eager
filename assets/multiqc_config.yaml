@@ -60,13 +60,13 @@ extra_fn_clean_exts:
 
 top_modules:
     - 'fastqc':
-       name: 'FastQC (pre-AdapterRemoval)'
+       name: 'FastQC (pre-Trimming)'
        path_filters:
            - '*_raw_fastqc.zip'
     - 'fastp'
     - 'adapterRemoval'
     - 'fastqc':
-       name: 'FastQC (post-AdapterRemoval)'
+       name: 'FastQC (post-Trimming)'
        path_filters:
             - '*.truncated_fastqc.zip'
             - '*.combined*_fastqc.zip'
@@ -106,7 +106,7 @@ remove_sections:
   - sexdeterrmine-snps
 
 table_columns_visible:
-    FastQC (pre-AdapterRemoval):
+    FastQC (pre-Trimming):
         percent_duplicates: False
         percent_gc: True
         avg_sequence_length: True
@@ -117,7 +117,7 @@ table_columns_visible:
     Adapter Removal:
         aligned_total: False
         percent_aligned: True
-    FastQC (post-AdapterRemoval):
+    FastQC (post-Trimming):
         avg_sequence_length: True
         percent_duplicates: False
         total_sequences: True
@@ -180,7 +180,7 @@ table_columns_visible:
         Total_Snps: False
 
 table_columns_placement:
-    FastQC (pre-AdapterRemoval):
+    FastQC (pre-Trimming):
         total_sequences: 100
         avg_sequence_length: 110
         percent_gc: 120
@@ -188,7 +188,7 @@ table_columns_placement:
         after_filtering_gc_content: 200
     Adapter Removal:
         percent_aligned: 300
-    FastQC (post-AdapterRemoval): 
+    FastQC (post-Trimming): 
         total_sequences: 400
         avg_sequence_length: 410
         percent_gc: 420

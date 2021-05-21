@@ -932,14 +932,97 @@ if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
         .dump(tag: "AR Bypass")
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
+        .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
 } else {
     ch_fastp_for_skipadapterremoval
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
+        .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
 }
 
+// Post AR fastq trimming
+
+process post_ar_fastq_trimming {
+  label 'mc_small'
+  tag "${libraryid}"
+  publishDir "${params.outdir}/post_ar_fastq_trimmed", mode: params.publish_dir_mode
+
+  when: params.run_post_ar_trimming
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_adapterremoval_for_post_ar_trimming
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R1_postartrimmed.fq.gz") into ch_post_ar_trimming_for_lanemerge_r1
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R2_postartrimmed.fq.gz") optional true into ch_post_ar_trimming_for_lanemerge_r2
+
+  script:
+  if ( seqtype == 'SE' | (seqtype == 'PE' && !params.skip_collapse) ) {
+  """
+  fastp --in1 ${r1} --trim_front1 ${params.post_ar_trim_front} --trim_tail1 ${params.post_ar_trim_tail} -A -G -Q -L -w ${task.cpus} --out1 "${libraryid}"_R1_postartrimmed.fq.gz
+  """
+  } else if ( seqtype == 'PE' && params.skip_collapse ) {
+  """
+  fastp --in1 ${r1} --in2 ${r2}  --trim_front1 ${params.post_ar_trim_front} --trim_tail1 ${params.post_ar_trim_tail} --trim_front2 ${params.post_ar_trim_front2} --trim_tail2 ${params.post_ar_trim_tail2} -A -G -Q -L -w ${task.cpus} --out1 "${libraryid}"_R1_postartrimmed.fq.gz --out2 "${libraryid}"_R2_postartrimmed.fq.gz
+  """
+  }
+
+}
+
+// When not collapsing paired-end data, re-merge the R1 and R2 files into single map. Otherwise if SE or collapsed PE, R2 now becomes NA
+// Sort to make sure we get consistent R1 and R2 ordered when using `-resume`, even if not needed for FastQC
+if ( params.skip_collapse ){
+  ch_post_ar_trimming_for_lanemerge_r1
+    .mix(ch_post_ar_trimming_for_lanemerge_r2)
+    .groupTuple(by: [0,1,2,3,4,5,6])
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7].sort()[0])
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$projectDir/assets/nf-core_eager_dummy.txt")
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+    }
+    .set { ch_post_ar_trimming_for_lanemerge; }
+} else {
+  ch_post_ar_trimming_for_lanemerge_r1
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7])
+        def r2 = file("$projectDir/assets/nf-core_eager_dummy.txt")
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+    }
+    .set { ch_post_ar_trimming_for_lanemerge; }
+}
+
+
+// Inline barcode removal bypass when not running it 
+if (params.run_post_ar_trimming) {
+    ch_post_ar_trimming_for_lanemerge.mix(ch_adapterremoval_for_skip_post_ar_trimming)
+        .dump(tag: "Inline Removal Bypass")
+        .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
+} else {
+    ch_adapterremoval_for_skip_post_ar_trimming
+        .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
+}
+
+
+
 // Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
-ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
+ch_branched_for_lanemerge = ch_inlinebarcoderemoval_for_lanemerge
   .groupTuple(by: [0,1,3,4,5,6])
   .map {
     it ->
@@ -1100,7 +1183,7 @@ process lanemerge_hostremoval_fastq {
 
 }
 
-// Post-preprocessing QC to help user check pre-processing removed all sequencing artefacts
+// Post-preprocessing QC to help user check pre-processing removed all sequencing artefacts. If doing post-AR trimming includes this step in output.
 
 process fastqc_after_clipping {
     label 'mc_small'
@@ -1114,7 +1197,7 @@ process fastqc_after_clipping {
     when: !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_adapterremoval_for_fastqc_after_clipping
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_inlinebarcoderemoval_for_fastqc_after_clipping
 
     output:
     path("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
