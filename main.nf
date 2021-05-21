@@ -1303,6 +1303,7 @@ process bowtie2 {
     params.mapper == 'bowtie2'
 
     script:
+    def split_cpus = Math.floor(task.cpus/2)
     def size = params.large_ref ? '-c' : ''
     def fasta = "${index}/${fasta_base}"
     def trim5 = params.bt2_trim5 != 0 ? "--trim5 ${params.bt2_trim5}" : ""
@@ -1346,13 +1347,13 @@ process bowtie2 {
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
     """
-    bowtie2 -x ${fasta} -1 ${r1} -2 ${r2} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} --maxins ${params.bt2_maxins} --rg-id ILLUMINA-${libraryid} --rg SM:${libraryid} --rg PL:illumina --rg PU:ILLUMINA-${libraryid}-${seqtype} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
+    bowtie2 -x ${fasta} -1 ${r1} -2 ${r2} -p ${split_cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} --maxins ${params.bt2_maxins} --rg-id ILLUMINA-${libraryid} --rg SM:${libraryid} --rg PL:illumina --rg PU:ILLUMINA-${libraryid}-${seqtype} 2> "${libraryid}"_bt2.log | samtools sort -@ ${split_cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     } else {
     //PE collapsed, or SE data 
     """
-    bowtie2 -x ${fasta} -U ${r1} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} --rg-id ILLUMINA-${libraryid} --rg SM:${libraryid} --rg PL:illumina --rg PU:ILLUMINA-${libraryid}-${seqtype} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
+    bowtie2 -x ${fasta} -U ${r1} -p ${split_cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} --rg-id ILLUMINA-${libraryid} --rg SM:${libraryid} --rg PL:illumina --rg PU:ILLUMINA-${libraryid}-${seqtype} 2> "${libraryid}"_bt2.log | samtools sort -@ ${split_cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     }
@@ -2341,7 +2342,7 @@ ch_input_for_genotyping_pileupcaller.doubleStranded
   .set {ch_prepped_for_pileupcaller_double}
 
 process genotyping_pileupcaller {
-  label 'sc_small'
+  label 'mc_small'
   tag "${strandedness}"
   publishDir "${params.outdir}/genotyping", mode: params.publish_dir_mode
 
@@ -2575,7 +2576,7 @@ process sexdeterrmine_prep {
 
 // As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
 process sexdeterrmine {
-    label 'sc_small'
+    label 'mc_small'
     publishDir "${params.outdir}/sex_determination", mode: params.publish_dir_mode
      
     input:
@@ -2911,7 +2912,7 @@ process output_documentation {
  */
 
 process get_software_versions {
-  label 'sc_tiny'
+  label 'mc_small'
     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf(".csv") > 0) filename
