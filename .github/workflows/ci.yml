@@ -102,6 +102,9 @@ jobs:
       - name: ADAPTERREMOVAL Run the basic pipeline with preserve5p end and merged reads only options
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --preserve5p --mergedonly
+      - name: POST_AR_FASTQ_TRIMMING Run the basic pipeline post-adapterremoval FASTQ trimming
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_post_ar_trimming
       - name: MAPPER_CIRCULARMAPPER Test running with CircularMapper
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'circularmapper' --circulartarget 'NC_007596.2'

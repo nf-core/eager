@@ -113,7 +113,7 @@ When dealing with ancient DNA data the MultiQC plots for FastQC will often show 
 For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
 > **NB:** The FastQC (pre-Trimming) plots displayed in the MultiQC report shows *untrimmed* reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the FastQC (post-Trimming) section. You should expect after AdapterRemoval, that most of the artefacts are removed.
-> :warning: If you turned on `post_ar_fastq_trimming` your 'post-Trimming' report will _include_ reads that were additionally trimmed. There is no separate report for the post-AdapterRemoval trimming.
+> :warning: If you turned on `--post_ar_fastq_trimming` your 'post-Trimming' report the statistics _after_ this trimming. There is no separate report for the post-AdapterRemoval trimming.
 
 #### Sequence Counts
 
