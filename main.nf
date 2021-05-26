@@ -1162,7 +1162,7 @@ process bwa {
     """
     bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus -1} -O bam - > ${libraryid}_"${seqtype}".mapped.bam
+    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus - 1} -O bam - > ${libraryid}_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     } else {
@@ -1205,8 +1205,8 @@ process bwamem {
     """
     } else {
     """
-    bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${split_cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
-    samtools index -@ ${split_cpus} "${libraryid}"_"${seqtype}".mapped.bam ${size} 
+    bwa mem -t ${split_cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${split_cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
+    samtools index -@ ${task.cpus} "${libraryid}"_"${seqtype}".mapped.bam ${size} 
     """
     }
     
@@ -1558,14 +1558,14 @@ process samtools_filter {
         '''
     } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength == 0 ){
         '''
-        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
+        samtools view -h !{bam} -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
     } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength == 0 ){
         '''
-        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
+        samtools view -h !{bam} -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
 
         ## FASTQ
@@ -1574,8 +1574,8 @@ process samtools_filter {
         '''
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength == 0 ){
         '''
-        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
+        samtools view -h !{bam} -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         
         ## FASTQ
@@ -1596,15 +1596,15 @@ process samtools_filter {
         '''
     } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength != 0 ){
         '''
-        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h !{bam} -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
         filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
     } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength != 0 ){
         '''
-        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h !{bam} -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
         filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         samtools index !{libraryid}.filtered.bam !{size}
 
@@ -1614,8 +1614,8 @@ process samtools_filter {
         '''
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength != 0 ){
         '''
-        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h !{bam} -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
         filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         samtools index !{libraryid}.filtered.bam !{size}
         
@@ -2009,7 +2009,7 @@ process mapdamage_rescaling {
 // Optionally perform further aDNA evaluation or filtering for just reads with damage etc.
 
 process pmdtools {
-    label 'mc_small'
+    label 'mc_medium'
     tag "${libraryid}"
     publishDir "${params.outdir}/pmdtools", mode: params.publish_dir_mode
 
@@ -2036,12 +2036,12 @@ process pmdtools {
     def platypus = params.pmdtools_platypus ? '--platypus' : ''
     """
     #Run Filtering step 
-    samtools calmd -b ${bam} ${fasta} | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} ${treatment} ${snpcap} --header | samtools view -@ ${task.cpus - 1} -Sb - > "${libraryid}".pmd.bam
+    samtools calmd -b ${bam} ${fasta} | pmdtools --threshold ${params.pmdtools_threshold} ${treatment} ${snpcap} --header | samtools view -@ ${task.cpus - 2} -Sb - > "${libraryid}".pmd.bam
     
     #Run Calc Range step
     ## To allow early shut off of pipe: https://github.com/nextflow-io/nextflow/issues/1564
     trap 'if [[ \$? == 141 ]]; then echo "Shutting samtools early due to -n parameter" && samtools index ${libraryid}.pmd.bam ${size}; exit 0; fi' EXIT
-    samtools calmd -b ${bam} ${fasta} | samtools view -h - | pmdtools --deamination ${platypus} --range ${params.pmdtools_range} ${treatment} ${snpcap} -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
+    samtools calmd -b ${bam} ${fasta} | pmdtools --deamination ${platypus} --range ${params.pmdtools_range} ${treatment} ${snpcap} -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
     
     echo "Running indexing"
     samtools index ${libraryid}.pmd.bam ${size}
