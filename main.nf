@@ -1558,14 +1558,14 @@ process samtools_filter {
         '''
     } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength == 0 ){
         '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
     } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength == 0 ){
         '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
 
         ## FASTQ
@@ -1574,8 +1574,8 @@ process samtools_filter {
         '''
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength == 0 ){
         '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
         samtools index !{libraryid}.filtered.bam !{size}
         
         ## FASTQ
@@ -1596,15 +1596,15 @@ process samtools_filter {
         '''
     } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength != 0 ){
         '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
         filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         samtools index !{libraryid}.filtered.bam !{size}
         '''
     } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength != 0 ){
         '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
         filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         samtools index !{libraryid}.filtered.bam !{size}
 
@@ -1614,8 +1614,8 @@ process samtools_filter {
         '''
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength != 0 ){
         '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -f4 -o !{libraryid}.unmapped.bam
+        samtools view -h !{bam} -@ !{task.cpus - 1} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
         filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
         samtools index !{libraryid}.filtered.bam !{size}
         
