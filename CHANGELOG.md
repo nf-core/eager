@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated template to nf-core/tools 1.14
 - [#688](https://github.com/nf-core/eager/issues/688) - Clarified the pipeline is not just for humans and microbes, but also plants and animals, and also for modern DNA
 - [#751](https://github.com/nf-core/eager/pull/751) - Added missing label to mtnucratio
-- General code cleanup and standarisation of parameters with no default setting
+- General code cleanup and standardisation of parameters with no default setting
+- [#750](https://github.com/nf-core/eager/issues/750) - Fixed piped commands requesting the same number of CPUs at each command step
 
 ### `Dependencies`
 
