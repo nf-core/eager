@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#751](https://github.com/nf-core/eager/pull/751) - Added missing label to mtnucratio
 - General code cleanup and standardisation of parameters with no default setting
 - [#750](https://github.com/nf-core/eager/issues/750) - Fixed piped commands requesting the same number of CPUs at each command step
+- [#757](https://github.com/nf-core/eager/issues/757) - Removed confusing 'Data Type' variable from MultiQC workflow summary (not consistent with TSV input)
 
 ### `Dependencies`
 
