@@ -2940,6 +2940,7 @@ process get_software_versions {
     qualimap --version &> v_qualimap.txt 2>&1 || true
     preseq &> v_preseq.txt 2>&1 || true
     gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
+    gatk3 --version 2>&1 > v_gatk3.txt 2>&1 || true
     freebayes --version &> v_freebayes.txt 2>&1 || true
     bedtools --version &> v_bedtools.txt 2>&1 || true
     damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
@@ -2958,7 +2959,7 @@ process get_software_versions {
     pileupCaller --version &> v_sequencetools.txt 2>&1 || true
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
     eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
-    mapDamage2 --version > v_mapdamage.txt || true
+    mapDamage --version > v_mapdamage.txt || true
     bbduk.sh | grep 'Last modified' | cut -d' ' -f 3-99 > v_bbduk.txt || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml
