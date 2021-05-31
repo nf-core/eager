@@ -111,15 +111,6 @@ jobs:
       - name: MAPPER_BT2 Test running with BowTie2
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'bowtie2' --bt2_alignmode 'local' --bt2_sensitivity 'sensitive' --bt2n 1 --bt2l 16 --bt2_trim5 1 --bt2_trim3 1
-      - name: HOST_REMOVAL_FASTQ Run the basic pipeline with output unmapped reads as fastq
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker --hostremoval_input_fastq
-      - name: BAM_FILTERING Run basic mapping pipeline with mapping quality filtering, and unmapped export
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_mapping_quality_threshold 37  --bam_unmapped_type 'fastq'
-      - name: BAM_FILTERING Run basic mapping pipeline with post-mapping length filtering
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --clip_readlength 0 --run_bam_filtering --bam_filter_minreadlength 50
       - name: DEDUPLICATION Test with dedup
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'dedup' --dedup_all_merged
@@ -195,3 +186,54 @@ jobs:
       - name: RESCALING Run basic pipeline with basic pipeline but with mapDamage rescaling of BAM files. Note this will be slow
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_mapdamage_rescaling --run_genotyping --genotyping_tool hc --genotyping_source 'rescaled'
+bamfilter:
+    name: Run workflow tests - BAM filtering only
+    # Only run on push if this is the nf-core dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/eager') }}
+    runs-on: ubuntu-latest
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    strategy:
+      matrix:
+        # Nextflow versions: check pipeline minimum and current latest
+        nxf_ver: ['20.07.1', '']
+    steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@v2
+
+      - name: Check if Dockerfile or Conda environment changed
+        uses: technote-space/get-diff-action@v4
+        with:
+          FILES: |
+            Dockerfile
+            environment.yml
+
+      - name: Build new docker image
+        if: env.MATCHED_FILES
+        run: docker build --no-cache . -t nfcore/eager:dev
+
+      - name: Pull docker image
+        if: ${{ !env.MATCHED_FILES }}
+        run: |
+          docker pull nfcore/eager:dev
+          docker tag nfcore/eager:dev nfcore/eager:dev
+
+      - name: Install Nextflow
+        env:
+          CAPSULE_LOG: none
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: HELPTEXT Run with the help flag
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} --help
+      - name: HOST_REMOVAL_FASTQ Run the basic pipeline with output unmapped reads as fastq
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_complex,docker --hostremoval_input_fastq
+      - name: BAM_FILTERING Run basic mapping pipeline with mapping quality filtering, and unmapped export
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_bam_filtering --bam_mapping_quality_threshold 37  --bam_unmapped_type 'fastq'
+      - name: BAM_FILTERING Run basic mapping pipeline with post-mapping length filtering
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --clip_readlength 0 --run_bam_filtering --bam_filter_minreadlength 50
