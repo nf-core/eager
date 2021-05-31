@@ -186,7 +186,7 @@ jobs:
       - name: RESCALING Run basic pipeline with basic pipeline but with mapDamage rescaling of BAM files. Note this will be slow
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_mapdamage_rescaling --run_genotyping --genotyping_tool hc --genotyping_source 'rescaled'
-bamfilter:
+  bamfilter:
     name: Run workflow tests - BAM filtering only
     # Only run on push if this is the nf-core dev branch (merged PRs)
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/eager') }}
