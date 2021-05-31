@@ -17,7 +17,7 @@ dependencies:
   - bioconda::adapterremovalfixprefix=0.0.5
   - bioconda::bwa=0.7.17
   - bioconda::picard=2.22.9
-  - bioconda::samtools=1.9
+  - bioconda::samtools=1.10.3
   - bioconda::dedup=0.12.8
   - bioconda::angsd=0.933
   - bioconda::circularmapper=1.93.5
