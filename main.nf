@@ -1547,18 +1547,18 @@ process samtools_filter {
     // Unmapped/MAPQ Filtering WITHOUT min-length filtering
     if ( "${params.bam_unmapped_type}" == "keep"  && params.bam_filter_minreadlength == 0 ) {
         """
-        samtools view -h -b ${bam} -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools view -h -b ${bam} -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} > ${libraryid}.filtered.bam
         samtools index ${libraryid}.filtered.bam ${size}
         """
     } else if ( "${params.bam_unmapped_type}" == "discard" && params.bam_filter_minreadlength == 0 ){
         """
-        samtools view -h -b ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools view -h -b ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} > ${libraryid}.filtered.bam
         samtools index ${libraryid}.filtered.bam ${size}
         """
     } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength == 0 ){
         """
-        samtools view -h ${bam} -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o ${libraryid}.filtered.bam
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > ${libraryid}.filtered.bam
         samtools index ${libraryid}.filtered.bam ${size}
         """
     } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength == 0 ){
@@ -1566,7 +1566,7 @@ process samtools_filter {
         echo "Samtools Filter Mapped"
         samtools view -h ${bam} -@ ${task.cpus} -f4 -b -o ${libraryid}.unmapped.bam
         echo "Samtools Filter Unmapped"
-        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b -o ${libraryid}.filtered.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > ${libraryid}.filtered.bam
         echo "Samtools Indexing"
         samtools index ${libraryid}.filtered.bam ${size}
 
@@ -1577,8 +1577,8 @@ process samtools_filter {
         """
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength == 0 ){
         """
-        samtools view -h ${bam} -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b -o ${libraryid}.filtered.bam
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > ${libraryid}.filtered.bam
         samtools index ${libraryid}.filtered.bam ${size}
         
         ## FASTQ
@@ -1588,35 +1588,35 @@ process samtools_filter {
     } else if ( "${params.bam_unmapped_type}" == "keep" && params.bam_filter_minreadlength != 0 ) {
         """
         echo "Samtools quality filtering"
-        samtools view -h -b ${bam} -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h -b ${bam} -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} > tmp_mapped.bam
         echo "Length filtering"
-        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -b -o ${libraryid} tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} > ${libraryid} tmp_mapped.bam
         echo "Indexing"
         samtools index ${libraryid}.filtered.bam ${size}
         """
     } else if ( "${params.bam_unmapped_type}" == "discard" && params.bam_filter_minreadlength != 0 ){
         """
-        samtools view -h -b ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -o ${libraryid} tmp_mapped.bam
+        samtools view -h -b ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} > tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} > ${libraryid} tmp_mapped.bam
         samtools index ${libraryid}.filtered.bam ${size}
         """
     } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength != 0 ){
         """
-        samtools view -h ${bam} -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
-        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -o ${libraryid} tmp_mapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} > ${libraryid} tmp_mapped.bam
         samtools index ${libraryid}.filtered.bam ${size}
         """
     } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength != 0 ){
         """
         echo "Samtools Filter Mapped"
-        samtools view -h ${bam} -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
         echo "Samtools Filter Unmapped"
 
-        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > tmp_mapped.bam
 
         echo "Samtools Fragment Length Filtering"
-        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -o ${libraryid} tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} > ${libraryid} tmp_mapped.bam
 
         echo "Samtools Indexing"
         samtools index ${libraryid}.filtered.bam ${size}
@@ -1629,11 +1629,11 @@ process samtools_filter {
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength != 0 ){
         """
         echo "Samtools Filter Mapped"
-        samtools view -h ${bam} -@ ${task.cpus} -f4 -o ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
         echo "Samtools Filter Unmapped"
-        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > tmp_mapped.bam
         echo "Samtools Fragment Length Filtering"
-        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -o ${libraryid} tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} > ${libraryid} tmp_mapped.bam
         echo "Samtools Indexing"
         samtools index ${libraryid}.filtered.bam ${size}
         echo "Samtools BAM2FASTQ"
