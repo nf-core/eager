@@ -1587,8 +1587,11 @@ process samtools_filter {
     // Unmapped/MAPQ Filtering WITH min-length filtering
     } else if ( "${params.bam_unmapped_type}" == "keep" && params.bam_filter_minreadlength != 0 ) {
         """
+        echo "Samtools quality filtering"
         samtools view -h -b ${bam} -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -o tmp_mapped.bam
+        echo "Length filtering"
         filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -b -o ${libraryid} tmp_mapped.bam
+        echo "Indexing"
         samtools index ${libraryid}.filtered.bam ${size}
         """
     } else if ( "${params.bam_unmapped_type}" == "discard" && params.bam_filter_minreadlength != 0 ){
