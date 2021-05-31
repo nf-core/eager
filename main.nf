@@ -1564,9 +1564,9 @@ process samtools_filter {
     } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength == 0 ){
         '''
         echo "Samtools Filter Mapped"
-        samtools view -h !{bam} -@ !{task.cpus} -f4 -b -o !{libraryid}.unmapped.bam  --verbosity 9
+        samtools view -h !{bam} -@ !{task.cpus} -f4 -b -o !{libraryid}.unmapped.bam
         echo "Samtools Filter Unmapped"
-        samtools view -h !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -b -o !{libraryid}.filtered.bam --verbosity 9
+        samtools view -h !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -b -o !{libraryid}.filtered.bam
         echo "Samtools Indexing"
         samtools index !{libraryid}.filtered.bam !{size}
 
