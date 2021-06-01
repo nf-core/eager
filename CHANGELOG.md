@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#750](https://github.com/nf-core/eager/issues/750) - Fixed piped commands requesting the same number of CPUs at each command step
 - [#757](https://github.com/nf-core/eager/issues/757) - Removed confusing 'Data Type' variable from MultiQC workflow summary (not consistent with TSV input)
 - [#759](https://github.com/nf-core/eager/pull/759) - Fixed malformed software scraping regex that resulted in N/A in MultiQC report
+- [#761](https://github.com/nf-core/eager/pull/759) - Fixed issues related to instability of samtools filtering related CI tests
 
 ### `Dependencies`
 
