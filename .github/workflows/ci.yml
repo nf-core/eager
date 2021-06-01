@@ -241,6 +241,7 @@ jobs:
         run: |
           zip -r work work/
       - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
         with:
           name: failed-run-dir-upload
           path: work.zip
