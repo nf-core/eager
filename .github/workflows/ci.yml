@@ -237,7 +237,10 @@ jobs:
       - name: BAM_FILTERING Run basic mapping pipeline with post-mapping length filtering
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --clip_readlength 0 --run_bam_filtering --bam_filter_minreadlength 50
+      - name: prep upload
+        run: |
+          zip -r work work/
       - uses: actions/upload-artifact@v2
         with:
           name: failed-run-dir-upload
-          path: ./work/
+          path: work.zip
