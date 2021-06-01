@@ -217,6 +217,7 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --clip_readlength 0 --run_bam_filtering --bam_filter_minreadlength 50
       - name: prep upload
+        if: ${{ always() }}
         run: |
           zip -r work work/
       - uses: actions/upload-artifact@v2
@@ -285,6 +286,7 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_kraken,docker --run_bam_filtering  --bam_unmapped_type 'fastq'
       - name: prep upload
+        if: ${{ always() }}
         run: |
           zip -r work work/
       - uses: actions/upload-artifact@v2
