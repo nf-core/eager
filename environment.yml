@@ -1,6 +1,6 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-name: nf-core-eager-2.3.5dev
+name: nf-core-eager-2.3.5
 channels:
   - conda-forge
   - bioconda
@@ -49,4 +49,3 @@ dependencies:
   - bioconda::eigenstratdatabasetools=1.0.2
   - bioconda::mapdamage2=2.2.0
   - bioconda::bbmap=38.87
-
