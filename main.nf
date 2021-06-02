@@ -290,7 +290,7 @@ if (workflow.profile.contains('awsbatch')) {
 
 ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-ch_eager_logo = file("$projectDir/docs/images/nf-core_eager_logo.png")
+ch_eager_logo = file("$projectDir/docs/images/nf-core_eager_logo_outline_drop.png")
 ch_output_docs = file("$projectDir/docs/output.md", checkIfExists: true)
 ch_output_docs_images = file("$projectDir/docs/images/", checkIfExists: true)
 where_are_my_files = file("$projectDir/assets/where_are_my_files.txt")
