@@ -1539,7 +1539,6 @@ process samtools_filter {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic,ch_metagenomic_for_skipentropyfilter
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
-    // Using shell block rather than script because we are playing with awk
     script:
     
     def size = params.large_ref ? '-c' : ''
@@ -2034,7 +2033,6 @@ process pmdtools {
     def size = params.large_ref ? '-c' : ''
     def platypus = params.pmdtools_platypus ? '--platypus' : ''
     """
-    ## Note all `samtools view` steps ARE required for some reason
     #Run Filtering step 
     samtools calmd ${bam} ${fasta} | pmdtools --threshold ${params.pmdtools_threshold} ${treatment} ${snpcap} --header | samtools view -Sb - > "${libraryid}".pmd.bam
     
