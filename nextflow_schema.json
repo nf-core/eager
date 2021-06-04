@@ -102,7 +102,7 @@
                 "igenomes_base": {
                     "type": "string",
                     "description": "Directory / URL base for iGenomes references.",
-                    "default": "s3://ngi-igenomes/igenomes/",
+                    "default": "s3://ngi-igenomes/igenomes",
                     "fa_icon": "fas fa-cloud-download-alt",
                     "hidden": true
                 },
@@ -296,7 +296,7 @@
                     "description": "Maximum amount of memory that can be requested for any single job.",
                     "default": "128.GB",
                     "fa_icon": "fas fa-memory",
-                    "pattern": "^[\\d\\.]+\\s*.(K|M|G|T)?B$",
+                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
                 },
@@ -305,7 +305,7 @@
                     "description": "Maximum amount of time that can be requested for any single job.",
                     "default": "240.h",
                     "fa_icon": "far fa-clock",
-                    "pattern": "^(\\d+(\\.\\d+)?(?:\\s*|\\.?)(s|m|h|d)\\s*)+$",
+                    "pattern": "^(\\d+\\.?\\s*(s|m|h|day)\\s*)+$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
                 }
@@ -562,6 +562,13 @@
                     "fa_icon": "fas fa-ruler-horizontal",
                     "help_text": "Configures the length of the seed used in `bwa aln -l`. Default is set to be 'turned off' at the recommendation of Schubert et al. ([2012 _BMC Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with `1024`.\n\nNote: Despite being recommended, turning off seeding can result in long runtimes!\n\n> Modifies BWA aln parameter: `-l`\n"
                 },
+                "bwaalno": {
+                    "type": "integer",
+                    "default": 1,
+                    "fa_icon": "fas fa-people-arrows",
+                    "description": "Specify the -o parameter for BWA aln i.e. the number of gaps allowed.",
+                    "help_text": "Configures the number of gaps used in `bwa aln`. Default is set to `bwa` default.\n\n> Modifies BWA aln parameter: `-o`\n"
+                },
                 "circularextension": {
                     "type": "integer",
                     "default": 500,
@@ -609,6 +616,7 @@
                 },
                 "bt2n": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity.",
                     "fa_icon": "fas fa-sort-numeric-down",
                     "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).\n\n> Modifies Bowtie2 parameters: `-N`",
@@ -619,18 +627,21 @@
                 },
                 "bt2l": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity.",
                     "fa_icon": "fas fa-ruler-horizontal",
                     "help_text": "The length of the seed sub-string to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).\n\n> Modifies Bowtie2 parameters: `-L`"
                 },
                 "bt2_trim5": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Specify number of bases to trim off from 5' (left) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
                     "help_text": "Number of bases to trim at the 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0\n\n> Modifies Bowtie2 parameters: `-bt2_trim5`"
                 },
                 "bt2_trim3": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Specify number of bases to trim off from 3' (right) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
                     "help_text": "Number of bases to trim at the 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.\n\n> Modifies Bowtie2 parameters: `-bt2_trim3`"
@@ -688,12 +699,14 @@
                 },
                 "bam_mapping_quality_threshold": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Minimum mapping quality for reads filter.",
                     "fa_icon": "fas fa-greater-than-equal",
                     "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).\n\n> Modifies samtools view parameter: `-q`"
                 },
                 "bam_filter_minreadlength": {
                     "type": "integer",
+                    "default": 0,
                     "fa_icon": "fas fa-ruler-horizontal",
                     "description": "Specify minimum read length to be kept after mapping.",
                     "help_text": "Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.\n\nIf used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artificially small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct denominator of all reads, for the endogenous DNA calculation.\n\n> Modifies filter_bam_fragment_length.py parameter: `-l`"
@@ -1058,6 +1071,7 @@
                 },
                 "freebayes_g": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C.",
                     "fa_icon": "fab fa-think-peaks",
                     "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.\n\n> Modifies freebayes parameter: `-g`"

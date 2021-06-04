@@ -1,4 +1,4 @@
-FROM nfcore/base:1.13.3
+FROM nfcore/base:1.14
 LABEL authors="The nf-core/eager community" \
       description="Docker image containing all software requirements for the nf-core/eager pipeline"
 
@@ -7,11 +7,7 @@ COPY environment.yml /
 RUN conda env create --quiet -f /environment.yml && conda clean -a
 
 # Add conda installation dir to PATH (instead of doing 'conda activate')
-ENV PATH /opt/conda/envs/nf-core-eager-2.3.4/bin:$PATH
+ENV PATH /opt/conda/envs/nf-core-eager-2.3.5/bin:$PATH
 
 # Dump the details of the installed packages to a file for posterity
-RUN conda env export --name nf-core-eager-2.3.4 > nf-core-eager-2.3.4.yml
-
-# Instruct R processes to use these empty files instead of clashing with a local version
-RUN touch .Rprofile
-RUN touch .Renviron
+RUN conda env export --name nf-core-eager-2.3.5 > nf-core-eager-2.3.5.yml
