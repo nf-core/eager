@@ -11,3 +11,4 @@ ENV PATH /opt/conda/envs/nf-core-eager-2.4dev/bin:$PATH
 
 # Dump the details of the installed packages to a file for posterity
 RUN conda env export --name nf-core-eager-2.4dev > nf-core-eager-2.4dev.yml
+
