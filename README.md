@@ -1,4 +1,4 @@
-# ![nf-core/eager](docs/images/nf-core_eager_logo.png)
+# ![nf-core/eager](docs/images/nf-core_eager_logo_outline_drop.png)
 
 **A fully reproducible and state-of-the-art ancient DNA analysis pipeline**.
 
@@ -17,7 +17,7 @@
 ## Introduction
 
 <!-- nf-core: Write a 1-2 sentence summary of what data the pipeline is for and what it does -->
-**nf-core/eager** is a bioinformatics best-practise analysis pipeline for NGS sequencing based ancient DNA (aDNA) data analysis.
+**nf-core/eager** is a scalable and reproducible bioinformatics best-practise processing pipeline for genomic NGS sequencing data, with a focus on ancient DNA (aDNA) data. It is ideal for the (palaeo)genomic analysis of humans, animals, plants, microbes and even microbiomes.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible. The pipeline pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 

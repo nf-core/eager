@@ -37,7 +37,7 @@ regexes = {
     'kraken':['v_kraken.txt', r"Kraken version (\S+)"],
     'eigenstrat_snp_coverage':['v_eigenstrat_snp_coverage.txt',r"(\S+)"],
     'mapDamage2':['v_mapdamage.txt',r"(\S+)"],
-    'bbduk':['v_bbduk.txt',r"(\S+\ .+)"],
+    'bbduk':['v_bbduk.txt',r"(.*)"]
     'bcftools':['v_bcftools.txt',r"(\S+)"]
 }
 
