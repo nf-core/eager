@@ -105,6 +105,9 @@ jobs:
       - name: POST_AR_FASTQ_TRIMMING Run the basic pipeline post-adapterremoval FASTQ trimming
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_post_ar_trimming
+      - name: POST_AR_FASTQ_TRIMMING Run the basic pipeline post-adapterremoval FASTQ trimming, but skip adapterremoval
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --run_post_ar_trimming --skip_adapterremoval
       - name: MAPPER_CIRCULARMAPPER Test running with CircularMapper
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'circularmapper' --circulartarget 'NC_007596.2'
