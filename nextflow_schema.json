@@ -465,6 +465,12 @@
                     "fa_icon": "fas fa-cut",
                     "help_text": "Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.\n\n> Modifies AdapterRemoval parameter: `--adapter2`"
                 },
+                "clip_adapters_list": {
+                    "type": "string",
+                    "description": "Path to AdapterRemoval adapter list file. Overrides `--clip_*_adaptor` parameters",
+                    "fa_icon": "fas fa-cut",
+                    "help_text": "Allows to supply a file with a list of adapter (combinations) to remove from all files. **Overrides** the `--clip_*_adaptor` parameters . First column represents forward strand, second column for reverse strand. You must supply all possibly combinations, one per line, and this list is applied to all files. See [AdapterRemoval documentation](https://adapterremoval.readthedocs.io/en/latest/manpage.html) for more information.\n\n> Modifies AdapterRemoval parameter: `--adapter-list`"
+                },
                 "clip_readlength": {
                     "type": "integer",
                     "default": 30,
@@ -1568,7 +1574,7 @@
                 "maltextract_percentidentity": {
                     "type": "number",
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
-                    "default": 85,
+                    "default": 85.0,
                     "fa_icon": "fas fa-id-card",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--minPI`"
                 },
@@ -1662,5 +1668,11 @@
         {
             "$ref": "#/definitions/metagenomic_authentication"
         }
-    ]
+    ],
+    "properties": {
+        "adapters_list": {
+            "type": "string",
+            "default": "null"
+        }
+    }
 }
