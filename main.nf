@@ -229,7 +229,7 @@ if( params.bt2_index && params.mapper == 'bowtie2' ){
 
 // Adapter removal adapter-list setup
 if ( !params.clip_adapters_list ) {
-    ch_adapterlist = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
+    ch_adapterlist = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy2.txt")
 } else {
     ch_adapterlist = Channel.fromPath(params.clip_adapters_list, checkIfExists: true)
 }
