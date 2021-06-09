@@ -930,11 +930,13 @@ if ( params.skip_collapse ){
 // AdapterRemoval bypass when not running it
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
+        .dump(tag: "post_ar_adapterremoval_decision_skipar")
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
         .dump(tag: "ar_bypass")
         .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
 } else {
     ch_fastp_for_skipadapterremoval
+        .dump(tag: "post_ar_adapterremoval_decision_withar")
         .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
 }
 
@@ -1011,15 +1013,13 @@ if ( params.skip_collapse ){
 
 // Inline barcode removal bypass when not running it 
 if (params.run_post_ar_trimming) {
-    ch_post_ar_trimming_for_lanemerge.mix(ch_adapterremoval_for_skip_post_ar_trimming)
+    ch_adapterremoval_for_skip_post_ar_trimming
         .dump(tag: "inline_removal_bypass")
         .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
 } else {
     ch_adapterremoval_for_skip_post_ar_trimming
         .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
 }
-
-
 
 // Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
 ch_branched_for_lanemerge = ch_inlinebarcoderemoval_for_lanemerge
