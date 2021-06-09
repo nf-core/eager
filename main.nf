@@ -229,10 +229,17 @@ if( params.bt2_index && params.mapper == 'bowtie2' ){
 
 // Adapter removal adapter-list setup
 if ( !params.clip_adapters_list ) {
-    ch_adapterlist = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy2.txt")
+    Channel
+      .fromPath("$projectDir/assets/nf-core_eager_dummy2.txt", checkIfExists: true)
+      .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
+      .into {ch_adapterlist}
 } else {
-    ch_adapterlist = Channel.fromPath(params.clip_adapters_list, checkIfExists: true)
+    Channel
+      .fromPath("${params.clip_adapters_list}", checkIfExists: true)
+      .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
+      .into {ch_adapterlist}
 }
+
 
 // SexDetermination channel set up and bedfile validation
 if (!params.sexdeterrmine_bedfile) {
@@ -772,14 +779,13 @@ process adapter_removal {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
-    path(adapterlist) from ch_adapterlist
+    path adapterlist from ch_adapterlist.collect().dump(tag: "Adapter list")
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*pair2.truncated.gz") optional true into ch_output_from_adapterremoval_r2
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*.settings") into ch_adapterremoval_logs
     
-
     when: 
     !params.skip_adapterremoval
 
