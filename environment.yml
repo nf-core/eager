@@ -1,51 +1,51 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-name: nf-core-eager-2.3.6dev
+name: nf-core-eager-2.4dev
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - conda-forge::python=3.7.3
-  - conda-forge::markdown=3.2.2 #Don't upgrade anymore
-  - conda-forge::pymdown-extensions=7.1
-  - conda-forge::pygments=2.6.1
+  - conda-forge::python=3.9.4
+  - conda-forge::markdown=3.3.4
+  - conda-forge::pymdown-extensions=8.2
+  - conda-forge::pygments=2.9.0
   - bioconda::rename=1.601
   - conda-forge::openjdk=8.0.144 # Don't upgrade - required for GATK
   - bioconda::fastqc=0.11.9
-  - bioconda::adapterremoval=2.3.1
+  - bioconda::adapterremoval=2.3.2
   - bioconda::adapterremovalfixprefix=0.0.5
   - bioconda::bwa=0.7.17
-  - bioconda::picard=2.22.9
-  - bioconda::samtools=1.9
+  - bioconda::picard=2.25.5
+  - bioconda::samtools=1.12
   - bioconda::dedup=0.12.8
-  - bioconda::angsd=0.933
+  - bioconda::angsd=0.935
   - bioconda::circularmapper=1.93.5
-  - bioconda::gatk4=4.1.7.0
+  - bioconda::gatk4=4.2.0.0
   - bioconda::gatk=3.5 ## Don't upgrade - required for MultiVCFAnalyzer
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
   - bioconda::damageprofiler=0.4.9 # Don't upgrade - later versions don't allow java 8
   - bioconda::multiqc=1.10.1
   - bioconda::pmdtools=0.60
-  - bioconda::bedtools=2.29.2
-  - conda-forge::libiconv=1.15
+  - bioconda::bedtools=2.30.0
+  - conda-forge::libiconv=1.16
   - conda-forge::pigz=2.6
   - bioconda::sequencetools=1.4.0.6
-  - bioconda::preseq=2.0.3
+  - bioconda::preseq=3.1.2
   - bioconda::fastp=0.20.1
-  - bioconda::bamutil=1.0.14
+  - bioconda::bamutil=1.0.15
   - bioconda::mtnucratio=0.7
-  - bioconda::pysam=0.15.4 #Says python3.7 or less
-  - bioconda::kraken2=2.1.1
-  - conda-forge::pandas=1.0.4 #.4 is python3.8+ compatible
-  - bioconda::freebayes=1.3.2 #should be fine with python 3.8, but says <3.7 on webpage
+  - bioconda::pysam=0.16.0 #Says python3.7 or less
+  - bioconda::kraken2=2.1.2
+  - conda-forge::pandas=1.2.4 #.4 is python3.8+ compatible
+  - bioconda::freebayes=1.3.5 #should be fine with python 3.8, but says <3.7 on webpage
   - bioconda::sexdeterrmine=1.1.2
   - bioconda::multivcfanalyzer=0.85.2
   - bioconda::hops=0.35
-  - conda-forge::biopython=1.76
-  - conda-forge::xopen=0.9.0
-  - bioconda::bowtie2=2.4.2
+  - conda-forge::biopython=1.79
+  - conda-forge::xopen=1.1.0
+  - bioconda::bowtie2=2.4.4
   - bioconda::eigenstratdatabasetools=1.0.2
-  - bioconda::mapdamage2=2.2.0
-  - bioconda::bbmap=38.87
+  - bioconda::mapdamage2=2.2.1
+  - bioconda::bbmap=38.90
