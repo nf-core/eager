@@ -348,7 +348,10 @@ will have the following effects:
 Note the following important points and limitations for setting up:
 
 * The TSV must use actual tabs (not spaces) between cells.
+* The input FASTQ filenames are discarded after FastQC, all other downstream results files are based on `Sample_Name`, `Library_ID` and `Lane` columns for filenames.
 * *File* names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
+  * At different stages of the merging process, (as above) nf-core/eager will use as output filenames the information from the `Sample_Name`, `Library_ID` and `Lane` column columns for filenames.
+  * In other words, your .tsv file must not have rows with `Library1` and `Library1` for both `SampleA` and `SampleB`. While nf-core/eager would not try to _merge_ these, in some stages of the pipeline output files names would be the same, and would overwrite the other if the files are output to the same `results/` subdirectory.
   * If it is 'too late' and you already have duplicate file names, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
 * Lane IDs must be unique for each sequencing of each library.
   * If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
