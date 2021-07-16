@@ -361,11 +361,11 @@ Note the following important points and limitations for setting up:
 * nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
 * Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 * Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes
-  * **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.
+  * **Important** running deduplication using DeDup (via `--dedupper 'dedup'`) in this context is not recommended, as PE and SE data at the same position will not be evaluated as duplicates. Therefore not all duplicates will be removed.
   * When you wish to run PE/SE data together `-dedupper markduplicates` is therefore preferred.
   * An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
   * If you truly want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
-  * If you _regularly_ want to run the situation above, please leave a feature     request on github.
+  * If you _regularly_ want to run the situation above, please leave a feature request on github.
 * DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).
 * nf-core/eager functionality such as `--run_trim_bam` will be applied to only   non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries. - Qualimap is run on each sample, after merging of libraries (i.e. your values   will reflect the values of all libraries combined - after being damage trimmed   etc.).
 * Genotyping will be typically performed on each `sample` independently, as normally all libraries will have been merged together. However, if you have a   mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS   libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file  collision` error in steps such as `sexdeterrmine`, and then you will need to   merge these yourself. We will consider changing this behaviour in the future   if there is enough interest.
