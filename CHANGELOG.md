@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
-- Improved output documentation for MultiQC general stats table (thanks to @KathrinNaegele)
+- Improved output documentation for MultiQC general stats table (thanks to @KathrinNaegele and @esalmela)
 
 ### `Dependencies`
 
