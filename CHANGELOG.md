@@ -3,6 +3,19 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## v2.4dev - [unreleased]
+
+### `Added`
+
+- [#642](https://github.com/nf-core/eager/issues/642) and [#431](https://github.com/nf-core/eager/issues/431) adds post-adapter removal barcode/fastq trimming
+### `Fixed`
+
+- [#771](https://github.com/nf-core/eager/issues/771) Remove legacy code
+- Improved output documentation for MultiQC general stats table (thanks to @KathrinNaegele and @esalmela)
+
+### `Dependencies`
+
+### `Deprecated`
 ## v2.3.5dev - [date]
 
 ### `Added`
