@@ -16,7 +16,6 @@
             "properties": {
                 "input": {
                     "type": "string",
-                    "default": "null",
                     "description": "Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs. Alternatively, a path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.",
                     "fa_icon": "fas fa-dna",
                     "help_text": "There are two possible ways of supplying input sequencing data to nf-core/eager. The most efficient but more simplistic is supplying direct paths (with wildcards) to your FASTQ or BAM files, with each file or pair being considered a single library and each one run independently  (e.g. for paired-end data: `--input '/<path>/<to>/*_{R1,R2}_*.fq.gz'`). TSV input requires creation of an extra file by the user (`--input '/<path>/<to>/eager_data.tsv'`) and extra metadata, but allows more powerful lane and library merging.  Please see [usage docs](https://nf-co.re/eager/docs/usage#input-specifications) for detailed instructions and specifications."
@@ -1574,7 +1573,7 @@
                 "maltextract_percentidentity": {
                     "type": "number",
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
-                    "default": 85.0,
+                    "default": 85,
                     "fa_icon": "fas fa-id-card",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--minPI`"
                 },
@@ -1668,11 +1667,5 @@
         {
             "$ref": "#/definitions/metagenomic_authentication"
         }
-    ],
-    "properties": {
-        "adapters_list": {
-            "type": "string",
-            "default": "null"
-        }
-    }
+    ]
 }
