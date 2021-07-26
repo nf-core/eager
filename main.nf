@@ -290,7 +290,7 @@ if (workflow.profile.contains('awsbatch')) {
 
 ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-ch_eager_logo = file("$projectDir/docs/images/nf-core_eager_logo.png")
+ch_eager_logo = file("$projectDir/docs/images/nf-core_eager_logo_outline_drop.png")
 ch_output_docs = file("$projectDir/docs/output.md", checkIfExists: true)
 ch_output_docs_images = file("$projectDir/docs/images/", checkIfExists: true)
 where_are_my_files = file("$projectDir/assets/where_are_my_files.txt")
@@ -397,7 +397,6 @@ if (workflow.revision) summary['Pipeline Release'] = workflow.revision
 summary['Run Name']         = workflow.runName
 summary['Input']            = params.input
 summary['Fasta Ref']        = params.fasta
-summary['Data Type']        = params.single_end ? 'Single-End' : 'Paired-End'
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if (workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Output dir']       = params.outdir
@@ -791,7 +790,7 @@ process adapter_removal {
     mv *.settings output/
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
     """
     //PE mode, collapse and trim, outputting all reads, preserving 5p
     } else if (seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly && params.preserve5p) {
@@ -805,7 +804,7 @@ process adapter_removal {
     mv *.settings output/
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
     """
     // PE mode, collapse and trim but only output collapsed reads
     } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && !params.preserve5p ) {
@@ -816,7 +815,7 @@ process adapter_removal {
     cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
         
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
 
     mv *.settings output/
     """
@@ -829,7 +828,7 @@ process adapter_removal {
     cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g  output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g  output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
 
     mv *.settings output/
     """
@@ -843,7 +842,7 @@ process adapter_removal {
     cat *.collapsed.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
         
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
 
     mv *.settings output/
     """
@@ -857,7 +856,7 @@ process adapter_removal {
     cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
 
     mv *.settings output/
     """
@@ -1245,14 +1244,14 @@ process bwa {
     """
     bwa aln -t ${task.cpus} $fasta ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.r1.sai
     bwa aln -t ${task.cpus} $fasta ${r2} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.r2.sai
-    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus} -O bam - > ${libraryid}_"${seqtype}".mapped.bam
+    bwa sampe -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.r1.sai ${libraryid}.r2.sai ${r1} ${r2} | samtools sort -@ ${task.cpus - 1} -O bam - > ${libraryid}_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     } else {
     //PE collapsed, or SE data
     """
     bwa aln -t ${task.cpus} ${fasta} ${r1} -n ${params.bwaalnn} -l ${params.bwaalnl} -k ${params.bwaalnk} -o ${params.bwaalno} -f ${libraryid}.sai
-    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.sai $r1 | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
+    bwa samse -r "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" $fasta ${libraryid}.sai $r1 | samtools sort -@ ${task.cpus - 1} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     }
@@ -1277,17 +1276,18 @@ process bwamem {
     params.mapper == 'bwamem'
 
     script:
+    def split_cpus = Math.floor(task.cpus/2)
     def fasta = "${index}/${fasta_base}"
     def size = params.large_ref ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse){
     """
-    bwa mem -t ${task.cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
+    bwa mem -t ${split_cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${split_cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index ${size} -@ ${task.cpus} "${libraryid}".mapped.bam
     """
     } else {
     """
-    bwa mem -t ${task.cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${task.cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
+    bwa mem -t ${split_cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${split_cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index -@ ${task.cpus} "${libraryid}"_"${seqtype}".mapped.bam ${size} 
     """
     }
@@ -1385,6 +1385,7 @@ process bowtie2 {
     params.mapper == 'bowtie2'
 
     script:
+    def split_cpus = Math.floor(task.cpus/2)
     def size = params.large_ref ? '-c' : ''
     def fasta = "${index}/${fasta_base}"
     def trim5 = params.bt2_trim5 != 0 ? "--trim5 ${params.bt2_trim5}" : ""
@@ -1428,13 +1429,13 @@ process bowtie2 {
     //PE data without merging, PE data without any AR applied
     if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
     """
-    bowtie2 -x ${fasta} -1 ${r1} -2 ${r2} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} --maxins ${params.bt2_maxins} --rg-id ILLUMINA-${libraryid} --rg SM:${libraryid} --rg PL:illumina --rg PU:ILLUMINA-${libraryid}-${seqtype} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
+    bowtie2 -x ${fasta} -1 ${r1} -2 ${r2} -p ${split_cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} --maxins ${params.bt2_maxins} --rg-id ILLUMINA-${libraryid} --rg SM:${libraryid} --rg PL:illumina --rg PU:ILLUMINA-${libraryid}-${seqtype} 2> "${libraryid}"_bt2.log | samtools sort -@ ${split_cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     } else {
     //PE collapsed, or SE data 
     """
-    bowtie2 -x ${fasta} -U ${r1} -p ${task.cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} --rg-id ILLUMINA-${libraryid} --rg SM:${libraryid} --rg PL:illumina --rg PU:ILLUMINA-${libraryid}-${seqtype} 2> "${libraryid}"_bt2.log | samtools sort -@ ${task.cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
+    bowtie2 -x ${fasta} -U ${r1} -p ${split_cpus} ${sensitivity} ${bt2n} ${bt2l} ${trim5} ${trim3} --rg-id ILLUMINA-${libraryid} --rg SM:${libraryid} --rg PL:illumina --rg PU:ILLUMINA-${libraryid}-${seqtype} 2> "${libraryid}"_bt2.log | samtools sort -@ ${split_cpus} -O bam > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index "${libraryid}"_"${seqtype}".mapped.bam ${size}
     """
     }
@@ -1621,87 +1622,87 @@ process samtools_filter {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.fastq.gz") optional true into ch_bam_filtering_for_metagenomic,ch_metagenomic_for_skipentropyfilter
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.unmapped.bam") optional true
 
-    // Using shell block rather than script because we are playing with awk
-    shell:
-    size = !{params.large_ref} ? '-c' : ''
+    script:
+    
+    def size = params.large_ref ? '-c' : ''
     
     // Unmapped/MAPQ Filtering WITHOUT min-length filtering
     if ( "${params.bam_unmapped_type}" == "keep"  && params.bam_filter_minreadlength == 0 ) {
-        '''
-        samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
-        samtools index !{libraryid}.filtered.bam !{size}
-        '''
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -b > ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size}
+        """
     } else if ( "${params.bam_unmapped_type}" == "discard" && params.bam_filter_minreadlength == 0 ){
-        '''
-        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
-        samtools index !{libraryid}.filtered.bam !{size}
-        '''
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size}
+        """
     } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength == 0 ){
-        '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
-        samtools index !{libraryid}.filtered.bam !{size}
-        '''
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size}
+        """
     } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength == 0 ){
-        '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
-        samtools index !{libraryid}.filtered.bam !{size}
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size}
 
         ## FASTQ
-        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
-        rm !{libraryid}.unmapped.bam
-        '''
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
+        rm ${libraryid}.unmapped.bam
+        """
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength == 0 ){
-        '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o !{libraryid}.filtered.bam
-        samtools index !{libraryid}.filtered.bam !{size}
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > ${libraryid}.filtered.bam
+        samtools index ${libraryid}.filtered.bam ${size}
         
         ## FASTQ
-        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
-        '''
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus -1} > ${libraryid}.unmapped.fastq.gz
+        """
     // Unmapped/MAPQ Filtering WITH min-length filtering
     } else if ( "${params.bam_unmapped_type}" == "keep" && params.bam_filter_minreadlength != 0 ) {
-        '''
-        samtools view -h -b !{bam} -@ !{task.cpus} -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        samtools index !{libraryid}.filtered.bam !{size}
-        '''
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -q ${params.bam_mapping_quality_threshold} -b > tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -o ${libraryid} tmp_mapped.bam
+        samtools index ${libraryid}.filtered.bam ${size}
+        """
     } else if ( "${params.bam_unmapped_type}" == "discard" && params.bam_filter_minreadlength != 0 ){
-        '''
-        samtools view -h -b !{bam} -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        samtools index !{libraryid}.filtered.bam !{size}
-        '''
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -o ${libraryid} tmp_mapped.bam
+        samtools index ${libraryid}.filtered.bam ${size}
+        """
     } else if ( "${params.bam_unmapped_type}" == "bam" && params.bam_filter_minreadlength != 0 ){
-        '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        samtools index !{libraryid}.filtered.bam !{size}
-        '''
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -o ${libraryid} tmp_mapped.bam
+        samtools index ${libraryid}.filtered.bam ${size}
+        """
     } else if ( "${params.bam_unmapped_type}" == "fastq" && params.bam_filter_minreadlength != 0 ){
-        '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        samtools index !{libraryid}.filtered.bam !{size}
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -o ${libraryid} tmp_mapped.bam
+        samtools index ${libraryid}.filtered.bam ${size}
 
         ## FASTQ
-        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
-        rm !{libraryid}.unmapped.bam
-        '''
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
+        rm ${libraryid}.unmapped.bam
+        """
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength != 0 ){
-        '''
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -f4 -o !{libraryid}.unmapped.bam
-        samtools view -h !{bam} | samtools view - -@ !{task.cpus} -F4 -q !{params.bam_mapping_quality_threshold} -o tmp_mapped.bam
-        filter_bam_fragment_length.py -a -l !{params.bam_filter_minreadlength} -o !{libraryid} tmp_mapped.bam
-        samtools index !{libraryid}.filtered.bam !{size}
+        """
+        samtools view -h ${bam} -@ ${task.cpus} -f4 -b > ${libraryid}.unmapped.bam
+        samtools view -h ${bam} -@ ${task.cpus} -F4 -q ${params.bam_mapping_quality_threshold} -b > tmp_mapped.bam
+        filter_bam_fragment_length.py -a -l ${params.bam_filter_minreadlength} -o ${libraryid} tmp_mapped.bam
+        samtools index ${libraryid}.filtered.bam ${size}
         
         ## FASTQ
-        samtools fastq -tn !{libraryid}.unmapped.bam | pigz -p !{task.cpus} > !{libraryid}.unmapped.fastq.gz
-        '''
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
+        """
     }
 }
 
@@ -2019,8 +2020,8 @@ process bedtools {
 
   script:
   """
-  bedtools coverage -nonamecheck -a ${anno_file} -b $bam | pigz -p ${task.cpus} > "${bam.baseName}".breadth.gz
-  bedtools coverage -nonamecheck -a ${anno_file} -b $bam -mean | pigz -p ${task.cpus} > "${bam.baseName}".depth.gz
+  bedtools coverage -nonamecheck -a ${anno_file} -b $bam | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
+  bedtools coverage -nonamecheck -a ${anno_file} -b $bam -mean | pigz -p ${task.cpus - 1} > "${bam.baseName}".depth.gz
   """
 }
 
@@ -2089,7 +2090,7 @@ process mapdamage_rescaling {
 // Optionally perform further aDNA evaluation or filtering for just reads with damage etc.
 
 process pmdtools {
-    label 'mc_small'
+    label 'mc_medium'
     tag "${libraryid}"
     publishDir "${params.outdir}/pmdtools", mode: params.publish_dir_mode
 
@@ -2116,14 +2117,13 @@ process pmdtools {
     def platypus = params.pmdtools_platypus ? '--platypus' : ''
     """
     #Run Filtering step 
-    samtools calmd -b ${bam} ${fasta} | samtools view -h - | pmdtools --threshold ${params.pmdtools_threshold} ${treatment} ${snpcap} --header | samtools view -@ ${task.cpus} -Sb - > "${libraryid}".pmd.bam
+    samtools calmd ${bam} ${fasta} | pmdtools --threshold ${params.pmdtools_threshold} ${treatment} ${snpcap} --header | samtools view -Sb - > "${libraryid}".pmd.bam
     
     #Run Calc Range step
     ## To allow early shut off of pipe: https://github.com/nextflow-io/nextflow/issues/1564
     trap 'if [[ \$? == 141 ]]; then echo "Shutting samtools early due to -n parameter" && samtools index ${libraryid}.pmd.bam ${size}; exit 0; fi' EXIT
-    samtools calmd -b ${bam} ${fasta} | samtools view -h - | pmdtools --deamination ${platypus} --range ${params.pmdtools_range} ${treatment} ${snpcap} -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
+    samtools calmd ${bam} ${fasta} | pmdtools --deamination ${platypus} --range ${params.pmdtools_range} ${treatment} ${snpcap} -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
     
-    echo "Running indexing"
     samtools index ${libraryid}.pmd.bam ${size}
     """
 }
@@ -2656,7 +2656,7 @@ process sexdeterrmine_prep {
 
 // As we collect all files for a single sex_deterrmine run, we DO NOT use the normal input/output tuple
 process sexdeterrmine {
-    label 'sc_small'
+    label 'mc_small'
     publishDir "${params.outdir}/sex_determination", mode: params.publish_dir_mode
      
     input:
@@ -2992,7 +2992,7 @@ process output_documentation {
  */
 
 process get_software_versions {
-  label 'sc_tiny'
+  label 'mc_small'
     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf(".csv") > 0) filename
@@ -3020,6 +3020,7 @@ process get_software_versions {
     qualimap --version &> v_qualimap.txt 2>&1 || true
     preseq &> v_preseq.txt 2>&1 || true
     gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
+    gatk3 --version 2>&1 > v_gatk3.txt 2>&1 || true
     freebayes --version &> v_freebayes.txt 2>&1 || true
     bedtools --version &> v_bedtools.txt 2>&1 || true
     damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
@@ -3038,7 +3039,7 @@ process get_software_versions {
     pileupCaller --version &> v_sequencetools.txt 2>&1 || true
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
     eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
-    mapDamage2 --version > v_mapdamage.txt || true
+    mapDamage --version > v_mapdamage.txt || true
     bbduk.sh | grep 'Last modified' | cut -d' ' -f 3-99 > v_bbduk.txt || true
 
     scrape_software_versions.py &> software_versions_mqc.yaml

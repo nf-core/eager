@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Added`
 
 - [#642](https://github.com/nf-core/eager/issues/642) and [#431](https://github.com/nf-core/eager/issues/431) adds post-adapter removal barcode/fastq trimming
+
 ### `Fixed`
 
 - [#771](https://github.com/nf-core/eager/issues/771) Remove legacy code
@@ -16,12 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Dependencies`
 
 ### `Deprecated`
-## v2.3.5dev - [date]
+
+## v2.3.5 - 2021-06-03
 
 ### `Added`
 
 - [#722](https://github.com/nf-core/eager/issues/722) - Adds bwa `-o` flag for more flexibility in bwa parameters
 - [#736](https://github.com/nf-core/eager/issues/736) - Add printing of multiqc run report location on successful completion
+- New logo that is more visible when a user is using darkmode on GitHub or nf-core website!
 
 ### `Fixed`
 
@@ -29,7 +32,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated template to nf-core/tools 1.14
 - [#688](https://github.com/nf-core/eager/issues/688) - Clarified the pipeline is not just for humans and microbes, but also plants and animals, and also for modern DNA
 - [#751](https://github.com/nf-core/eager/pull/751) - Added missing label to mtnucratio
-- General code cleanup and standarisation of parameters with no default setting
+- General code cleanup and standardisation of parameters with no default setting
+- [#750](https://github.com/nf-core/eager/issues/750) - Fixed piped commands requesting the same number of CPUs at each command step
+- [#757](https://github.com/nf-core/eager/issues/757) - Removed confusing 'Data Type' variable from MultiQC workflow summary (not consistent with TSV input)
+- [#759](https://github.com/nf-core/eager/pull/759) - Fixed malformed software scraping regex that resulted in N/A in MultiQC report
+- [#761](https://github.com/nf-core/eager/pull/759) - Fixed issues related to instability of samtools filtering related CI tests
 
 ### `Dependencies`
 
