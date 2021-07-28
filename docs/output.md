@@ -333,7 +333,7 @@ Ancient DNA samples typically have low endogenous DNA values, as most of the DNA
   <img src="images/output/bowtie2/bowtie2_alignment_scores.png" width="75%" height = "75%">
 </p>
 
-The main additional useful information compared to [Samtools](#samtools) is that these plots can inform you how many reads had multiple places on the reference the read could align to. This can occur with low complexity reads or reads derived from e.g. repetitive regions on the genome. If you have large amounts of multi-mapping reads, this can be a warning flag that there is an issue either with the reference genome or library itself (e.g. over-amplification of low-complexity regions or library construction artefacts). You should investigate cases like this more closely before using the data downstream.
+The main additional useful information compared to [Samtools](#samtools) is that these plots can inform you how many reads had multiple places on the reference the read could align to. This can occur with low complexity reads or reads derived from e.g. repetitive regions on the genome. If you have large amounts of multi-mapping reads, this can be a warning flag that there is an issue either with the reference genome or library itself (e.g. library construction artefacts). You should investigate cases like this more closely before using the data downstream.
 
 ### MALT
 
