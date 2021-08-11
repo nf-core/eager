@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [#771](https://github.com/nf-core/eager/issues/771) Remove legacy code
 - Improved output documentation for MultiQC general stats table (thanks to @KathrinNaegele and @esalmela)
+- Improved output documentation for BowTie2 (thanks to @isinaltinkaya)
 
 ### `Dependencies`
 
