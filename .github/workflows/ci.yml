@@ -102,6 +102,12 @@ jobs:
       - name: ADAPTERREMOVAL Run the basic pipeline with preserve5p end and merged reads only options
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --preserve5p --mergedonly
+      - name: ADAPTER LIST Run the basic pipeline using an adapter list
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --clip_adapters_list 'https://github.com/nf-core/test-datasets/raw/eager/databases/adapters/adapter-list.txt'
+      - name: ADAPTER LIST Run the basic pipeline using an adapter list, skipping adapter removal
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --clip_adapters_list 'https://github.com/nf-core/test-datasets/raw/eager/databases/adapters/adapter-list.txt' --skip_adapterremoval 
       - name: MAPPER_CIRCULARMAPPER Test running with CircularMapper
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --mapper 'circularmapper' --circulartarget 'NC_007596.2'

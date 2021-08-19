@@ -464,6 +464,12 @@
                     "fa_icon": "fas fa-cut",
                     "help_text": "Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.\n\n> Modifies AdapterRemoval parameter: `--adapter2`"
                 },
+                "clip_adapters_list": {
+                    "type": "string",
+                    "description": "Path to AdapterRemoval adapter list file. Overrides `--clip_*_adaptor` parameters",
+                    "fa_icon": "fas fa-cut",
+                    "help_text": "Allows to supply a file with a list of adapter (combinations) to remove from all files. **Overrides** the `--clip_*_adaptor` parameters . First column represents forward strand, second column for reverse strand. You must supply all possibly combinations, one per line, and this list is applied to all files. See [AdapterRemoval documentation](https://adapterremoval.readthedocs.io/en/latest/manpage.html) for more information.\n\n> Modifies AdapterRemoval parameter: `--adapter-list`"
+                },
                 "clip_readlength": {
                     "type": "integer",
                     "default": 30,
