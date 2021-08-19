@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Added`
 
 - [#651](https://github.com/nf-core/eager/issues/651) - Adds removal of adapters specified in an AdapterRemoval adapter list file
+- [#769](https://github.com/nf-core/eager/issues/769) - Adds lc_extrap mode to preseq (requested by @roberta-davidson)
 
 ### `Fixed`
 

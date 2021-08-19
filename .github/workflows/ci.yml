@@ -126,6 +126,9 @@ jobs:
       - name: BAM_FILTERING Run basic mapping pipeline with post-mapping length filtering
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --clip_readlength 0 --run_bam_filtering --bam_filter_minreadlength 50
+      - name: PRESEQ Run basic mapping pipeline with different preseq mode
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --preseq_mode 'lc_extrap' --preseq_maxextrap 10000 --preseq_bootstrap 10
       - name: DEDUPLICATION Test with dedup
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv,docker --dedupper 'dedup' --dedup_all_merged

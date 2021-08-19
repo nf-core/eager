@@ -767,12 +767,51 @@
             "description": "Options for calculating library complexity (i.e. how many unique reads are present).",
             "default": "",
             "properties": {
+                "preseq_mode": {
+                    "type": "string",
+                    "default": "c_curve",
+                    "description": "Specify which mode of preseq to run.",
+                    "fa_icon": "fas fa-toggle-on",
+                    "help_text": "Specify which mode of preseq to run.\n\nFrom the [PreSeq documentation](http://smithlabresearch.org/wp-content/uploads/manual.pdf): \n\n`c curve` is used to compute the expected complexity curve of a mapped read file with a hypergeometric\nformula\n\n`lc extrap` is used to generate the expected yield for theoretical larger experiments and bounds on the\nnumber of distinct reads in the library and the associated confidence intervals, which is computed by\nbootstrapping the observed duplicate counts histogram",
+                    "enum": [
+                        "c_curve",
+                        "lc_extrap"
+                    ]
+                },
                 "preseq_step_size": {
                     "type": "integer",
                     "default": 1000,
                     "description": "Specify the step size of Preseq.",
                     "fa_icon": "fas fa-shoe-prints",
                     "help_text": "Can be used to configure the step size of Preseq's `c_curve` method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.\n\n> Modifies preseq c_curve parameter: `-s`"
+                },
+                "preseq_maxextrap": {
+                    "type": "integer",
+                    "default": 10000000000,
+                    "description": "Specify the maximum extrapolation (lc_extrap mode only)",
+                    "fa_icon": "fas fa-ban",
+                    "help_text": "Specify the maximum extrapolation that `lc_extrap` mode will perform.\n\n> Modifies preseq lc_extrap parameter: `-e`"
+                },
+                "preseq_terms": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Specify the maximum number of terms for extrapolation (lc_extrap mode only)",
+                    "fa_icon": "fas fa-sort-numeric-up-alt",
+                    "help_text": "Specify the maximum number of terms that `lc_extrap` mode will use.\n\n> Modifies preseq lc_extrap parameter: `-x`"
+                },
+                "preseq_bootstrap": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Specify number of bootstraps to perform (lc_extrap mode only)",
+                    "fa_icon": "fab fa-bootstrap",
+                    "help_text": "Specify the number of bootstraps `lc_extrap` mode will perform to calculate confidence intervals.\n\n> Modifies preseq lc_extrap parameter: `-n`"
+                },
+                "preseq_cval": {
+                    "type": "number",
+                    "default": 0.95,
+                    "description": "Specify confidence interval level (lc_extrap mode only)",
+                    "fa_icon": "fas fa-check-circle",
+                    "help_text": "Specify the allowed level of confidence intervals used for `lc_extrap` mode.\n\n> Modifies preseq lc_extrap parameter: `-c`"
                 }
             },
             "fa_icon": "fas fa-bezier-curve",
