@@ -3,13 +3,18 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## v2.3.6dev - [unreleased]
+## v2.4dev - [unreleased]
 
 ### `Added`
 
+- [#651](https://github.com/nf-core/eager/issues/651) - Adds removal of adapters specified in an AdapterRemoval adapter list file
 - [#769](https://github.com/nf-core/eager/issues/769) - Adds lc_extrap mode to preseq (requested by @roberta-davidson)
 
 ### `Fixed`
+
+- [#771](https://github.com/nf-core/eager/issues/771) Remove legacy code
+- Improved output documentation for MultiQC general stats table (thanks to @KathrinNaegele and @esalmela)
+- Improved output documentation for BowTie2 (thanks to @isinaltinkaya)
 
 ### `Dependencies`
 

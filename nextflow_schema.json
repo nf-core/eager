@@ -16,7 +16,6 @@
             "properties": {
                 "input": {
                     "type": "string",
-                    "default": "null",
                     "description": "Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs. Alternatively, a path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.",
                     "fa_icon": "fas fa-dna",
                     "help_text": "There are two possible ways of supplying input sequencing data to nf-core/eager. The most efficient but more simplistic is supplying direct paths (with wildcards) to your FASTQ or BAM files, with each file or pair being considered a single library and each one run independently  (e.g. for paired-end data: `--input '/<path>/<to>/*_{R1,R2}_*.fq.gz'`). TSV input requires creation of an extra file by the user (`--input '/<path>/<to>/eager_data.tsv'`) and extra metadata, but allows more powerful lane and library merging.  Please see [usage docs](https://nf-co.re/eager/docs/usage#input-specifications) for detailed instructions and specifications."
@@ -464,6 +463,12 @@
                     "description": "Specify adapter sequence to be clipped off (reverse strand).",
                     "fa_icon": "fas fa-cut",
                     "help_text": "Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.\n\n> Modifies AdapterRemoval parameter: `--adapter2`"
+                },
+                "clip_adapters_list": {
+                    "type": "string",
+                    "description": "Path to AdapterRemoval adapter list file. Overrides `--clip_*_adaptor` parameters",
+                    "fa_icon": "fas fa-cut",
+                    "help_text": "Allows to supply a file with a list of adapter (combinations) to remove from all files. **Overrides** the `--clip_*_adaptor` parameters . First column represents forward strand, second column for reverse strand. You must supply all possibly combinations, one per line, and this list is applied to all files. See [AdapterRemoval documentation](https://adapterremoval.readthedocs.io/en/latest/manpage.html) for more information.\n\n> Modifies AdapterRemoval parameter: `--adapter-list`"
                 },
                 "clip_readlength": {
                     "type": "integer",
