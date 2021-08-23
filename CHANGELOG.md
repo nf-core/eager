@@ -8,16 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Added`
 
 - [#317](https://github.com/nf-core/eager/issues/317) Added bcftools stats for general genotyping statistics of VCF files
+- [#651](https://github.com/nf-core/eager/issues/651) - Adds removal of adapters specified in an AdapterRemoval adapter list file
+- [#642](https://github.com/nf-core/eager/issues/642) and [#431](https://github.com/nf-core/eager/issues/431) adds post-adapter removal barcode/fastq trimming
+- [#769](https://github.com/nf-core/eager/issues/769) - Adds lc_extrap mode to preseq (requested by @roberta-davidson)
 
 ### `Fixed`
 
 - Fixed some missing or incorrectly reported software versions
-- [#651](https://github.com/nf-core/eager/issues/651) - Adds removal of adapters specified in an AdapterRemoval adapter list file
-- [#769](https://github.com/nf-core/eager/issues/769) - Adds lc_extrap mode to preseq (requested by @roberta-davidson)
-- [#642](https://github.com/nf-core/eager/issues/642) and [#431](https://github.com/nf-core/eager/issues/431) adds post-adapter removal barcode/fastq trimming
-
-### `Fixed`
-
 - [#771](https://github.com/nf-core/eager/issues/771) Remove legacy code
 - Improved output documentation for MultiQC general stats table (thanks to @KathrinNaegele and @esalmela)
 - Improved output documentation for BowTie2 (thanks to @isinaltinkaya)
