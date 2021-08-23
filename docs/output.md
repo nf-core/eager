@@ -622,7 +622,7 @@ If this correlation is not observed, your data is skewed towards higher coverage
 
 ### Background
 
-Bcftools is a toolkit for processing and summaries VCF files, i.e. variant call format files. nf-core/eager currently uses bcftools for the `stats` functionality. This summarises in a text file a range of statistics about VCF files, produced by GATK and FreeBayes variant callers.
+Bcftools is a toolkit for processing and summarising of VCF files, i.e. variant call format files. nf-core/eager currently uses bcftools for the `stats` functionality. This summarises in a text file a range of statistics about VCF files, produced by GATK and FreeBayes variant callers.
 
 #### Variant Substitution Types
 
