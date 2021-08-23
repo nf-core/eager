@@ -46,8 +46,13 @@ if ( params.skip_collapse && params.skip_trim ) {
 }
 
 // Bedtools validation
-if(params.run_bedtools_coverage && !params.anno_file ){
+if( params.run_bedtools_coverage && !params.anno_file ){
   exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
+}
+
+// Bedtools validation
+if( !params.skip_preseq && !( params.preseq_mode == 'c_curve' || params.preseq_mode == 'lc_extrap' ) ) {
+  exit 1, "[nf-core/eager] error: you are running preseq with a unsupported mode. See documentation for more information. You gave: ${params.preseq_mode}."
 }
 
 // BAM filtering validation
@@ -226,6 +231,20 @@ if( params.bt2_index && params.mapper == 'bowtie2' ){
     bwa_index = Channel.empty()
     bwa_index_bwamem = Channel.empty()
 }
+
+// Adapter removal adapter-list setup
+if ( !params.clip_adapters_list ) {
+    Channel
+      .fromPath("$projectDir/assets/nf-core_eager_dummy2.txt", checkIfExists: true)
+      .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
+      .into {ch_adapterlist}
+} else {
+    Channel
+      .fromPath("${params.clip_adapters_list}", checkIfExists: true)
+      .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
+      .into {ch_adapterlist}
+}
+
 
 // SexDetermination channel set up and bedfile validation
 if (!params.sexdeterrmine_bedfile) {
@@ -765,17 +784,19 @@ process adapter_removal {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
+    path adapterlist from ch_adapterlist.collect().dump(tag: "Adapter list")
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*pair2.truncated.gz") optional true into ch_output_from_adapterremoval_r2
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*.settings") into ch_adapterremoval_logs
-
+    
     when: 
     !params.skip_adapterremoval
 
     script:
-    base = "${r1.baseName}_L${lane}"
+    def base = "${r1.baseName}_L${lane}"
+    def adapters_to_remove = !params.clip_adapters_list ? "--adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor}" : "--adapter-list ${adapterlist}"
     //This checks whether we skip trimming and defines a variable respectively
     def preserve5p = params.preserve5p ? '--preserve5p' : '' // applies to any AR command - doesn't affect output file combination
     
@@ -783,7 +804,7 @@ process adapter_removal {
     """
     mkdir -p output
 
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
 
     cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
     
@@ -797,7 +818,7 @@ process adapter_removal {
     """
     mkdir -p output
 
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
 
     cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
 
@@ -810,7 +831,7 @@ process adapter_removal {
     } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && !params.preserve5p ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     
     cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
         
@@ -823,7 +844,7 @@ process adapter_removal {
     } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && params.preserve5p ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     
     cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     
@@ -864,7 +885,7 @@ process adapter_removal {
     } else if ( seqtype == 'PE'  && params.skip_collapse && !params.skip_trim ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     
     mv ${base}.pe.pair*.truncated.gz *.settings output/
     """
@@ -872,7 +893,7 @@ process adapter_removal {
     //SE, collapse not possible, trim reads only
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     mv *.settings *.se.truncated.gz output/
     """
     } else if ( seqtype != 'PE' && params.skip_trim ) {
@@ -929,16 +950,99 @@ if ( params.skip_collapse ){
 // AdapterRemoval bypass when not running it
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
+        .dump(tag: "post_ar_adapterremoval_decision_skipar")
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
-        .dump(tag: "AR Bypass")
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
+        .dump(tag: "ar_bypass")
+        .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
 } else {
     ch_fastp_for_skipadapterremoval
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
+        .dump(tag: "post_ar_adapterremoval_decision_withar")
+        .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
+}
+
+// Post AR fastq trimming
+
+process post_ar_fastq_trimming {
+  label 'mc_small'
+  tag "${libraryid}"
+  publishDir "${params.outdir}/post_ar_fastq_trimmed", mode: params.publish_dir_mode
+
+  when: params.run_post_ar_trimming
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_adapterremoval_for_post_ar_trimming
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R1_postartrimmed.fq.gz") into ch_post_ar_trimming_for_lanemerge_r1
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R2_postartrimmed.fq.gz") optional true into ch_post_ar_trimming_for_lanemerge_r2
+
+  script:
+  if ( seqtype == 'SE' | (seqtype == 'PE' && !params.skip_collapse) ) {
+  """
+  fastp --in1 ${r1} --trim_front1 ${params.post_ar_trim_front} --trim_tail1 ${params.post_ar_trim_tail} -A -G -Q -L -w ${task.cpus} --out1 "${libraryid}"_L"${lane}"_R1_postartrimmed.fq.gz
+  """
+  } else if ( seqtype == 'PE' && params.skip_collapse ) {
+  """
+  fastp --in1 ${r1} --in2 ${r2}  --trim_front1 ${params.post_ar_trim_front} --trim_tail1 ${params.post_ar_trim_tail} --trim_front2 ${params.post_ar_trim_front2} --trim_tail2 ${params.post_ar_trim_tail2} -A -G -Q -L -w ${task.cpus} --out1 "${libraryid}"_L"${lane}"_R1_postartrimmed.fq.gz --out2 "${libraryid}"_L"${lane}"_R2_postartrimmed.fq.gz
+  """
+  }
+
+}
+
+// When not collapsing paired-end data, re-merge the R1 and R2 files into single map. Otherwise if SE or collapsed PE, R2 now becomes NA
+// Sort to make sure we get consistent R1 and R2 ordered when using `-resume`, even if not needed for FastQC
+if ( params.skip_collapse ){
+  ch_post_ar_trimming_for_lanemerge_r1
+    .mix(ch_post_ar_trimming_for_lanemerge_r2)
+    .groupTuple(by: [0,1,2,3,4,5,6])
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7].sort()[0])
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$projectDir/assets/nf-core_eager_dummy.txt")
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+    }
+    .set { ch_post_ar_trimming_for_lanemerge; }
+} else {
+  ch_post_ar_trimming_for_lanemerge_r1
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7])
+        def r2 = file("$projectDir/assets/nf-core_eager_dummy.txt")
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+    }
+    .set { ch_post_ar_trimming_for_lanemerge; }
+}
+
+
+// Inline barcode removal bypass when not running it 
+if (params.run_post_ar_trimming) {
+    ch_adapterremoval_for_skip_post_ar_trimming
+        .dump(tag: "inline_removal_bypass")
+        .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
+} else {
+    ch_adapterremoval_for_skip_post_ar_trimming
+        .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
 }
 
 // Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
-ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
+ch_branched_for_lanemerge = ch_inlinebarcoderemoval_for_lanemerge
   .groupTuple(by: [0,1,3,4,5,6])
   .map {
     it ->
@@ -955,7 +1059,7 @@ ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
   }
-  .dump(tag: "LaneMerge Bypass")
+  .dump(tag: "lanemerge_bypass_decision")
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -976,7 +1080,7 @@ ch_branched_for_lanemerge_skipme = ch_branched_for_lanemerge.skip_merge
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
   }
-  .dump(tag: "LaneMerge Reconfigure")
+  .dump(tag: "lanemerge_reconfigure")
 
 
 ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
@@ -1004,7 +1108,7 @@ process lanemerge {
   publishDir "${params.outdir}/lanemerging", mode: params.publish_dir_mode
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge_ready
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge_ready.dump(tag: "lange_merge_input")
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R1_lanemerged.fq.gz") into ch_lanemerge_for_mapping_r1
@@ -1028,7 +1132,7 @@ process lanemerge {
 // Ensuring always valid R2 file even if doesn't exist for AWS
 if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
   ch_lanemerge_for_mapping_r1
-    .dump(tag: "Post LaneMerge Reconfigure")
+    .dump(tag: "post_lanemerge_reconfigure")
     .mix(ch_lanemerge_for_mapping_r2)
     .groupTuple(by: [0,1,2,3,4,5,6])
     .map{
@@ -1099,7 +1203,7 @@ process lanemerge_hostremoval_fastq {
 
 }
 
-// Post-preprocessing QC to help user check pre-processing removed all sequencing artefacts
+// Post-preprocessing QC to help user check pre-processing removed all sequencing artefacts. If doing post-AR trimming includes this step in output.
 
 process fastqc_after_clipping {
     label 'mc_small'
@@ -1113,7 +1217,7 @@ process fastqc_after_clipping {
     when: !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_adapterremoval_for_fastqc_after_clipping
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_inlinebarcoderemoval_for_fastqc_after_clipping
 
     output:
     path("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
@@ -1143,7 +1247,7 @@ process bwa {
     publishDir "${params.outdir}/mapping/bwa", mode: params.publish_dir_mode
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_lanemerge_for_bwa.dump(tag: "input_tuple")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_lanemerge_for_bwa.dump(tag: "bwa_input_reads")
     path index from bwa_index.collect().dump(tag: "input_index")
 
     output:
@@ -1462,7 +1566,7 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
       [ samplename, libraryid, lane, seqtype_new, organism, strandedness, udg, r1, r2 ]
 
   }
-  .dump(tag: "Seqtype")
+  .dump(tag: "pre_seqtype_decision")
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -1845,7 +1949,7 @@ process library_merge {
   publishDir "${params.outdir}/merged_bams/initial", mode: params.publish_dir_mode
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump(tag: "Input Tuple Library Merge")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump(tag: "library_merge_input")
 
   output:
   tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_rmdup.bam"), path("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
@@ -1899,21 +2003,33 @@ process preseq {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input) from ch_input_for_preseq
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${input.baseName}.ccurve") into ch_preseq_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${input.baseName}.preseq") into ch_preseq_for_multiqc
 
     script:
     pe_mode = params.skip_collapse && seqtype == "PE" ? '-P' : ''
-    if(!params.skip_deduplication && params.dedupper == "dedup"){
+    if(!params.skip_deduplication && params.preseq_mode == 'c_curve' && params.dedupper == "dedup"){
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -H ${input}
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.preseq -H ${input}
     """
-    } else if( !params.skip_deduplication && params.dedupper == "markduplicates"){
+    } else if( !params.skip_deduplication && params.preseq_mode == 'c_curve' && params.dedupper == "markduplicates"){
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B ${input} ${pe_mode}
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.preseq -B ${input} ${pe_mode}
     """
-    } else if ( params.skip_deduplication ) {
+    } else if ( params.skip_deduplication && params.preseq_mode == 'c_curve' ) {
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B ${input} ${pe_mode}
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.preseq -B ${input} ${pe_mode}
+    """
+    } else if(!params.skip_deduplication && params.preseq_mode == 'lc_extrap' && params.dedupper == "dedup"){
+    """
+    preseq lc_extrap -s ${params.preseq_step_size} -o ${input.baseName}.preseq -H ${input} -n ${params.preseq_bootstrap} -e ${params.preseq_maxextrap} -cval ${params.preseq_cval} -x ${params.preseq_terms}
+    """
+    } else if( !params.skip_deduplication && params.preseq_mode == 'lc_extrap' && params.dedupper == "markduplicates"){
+    """
+    preseq lc_extrap -s ${params.preseq_step_size} -o ${input.baseName}.preseq -B ${input} ${pe_mode} -n ${params.preseq_bootstrap} -e ${params.preseq_maxextrap} -cval ${params.preseq_cval} -x ${params.preseq_terms}
+    """
+    } else if ( params.skip_deduplication && params.preseq_mode == 'lc_extrap' ) {
+    """
+    preseq lc_extrap -s ${params.preseq_step_size} -o ${input.baseName}.preseq -B ${input} ${pe_mode} -n ${params.preseq_bootstrap} -e ${params.preseq_maxextrap} -cval ${params.preseq_cval} -x ${params.preseq_terms}
     """
     }
 }
@@ -2352,7 +2468,7 @@ process genotyping_pileupcaller {
   file fai from ch_fai_for_pileupcaller.collect()
   file dict from ch_dict_for_pileupcaller.collect()
   path(bed) from ch_bed_for_pileupcaller.collect()
-  path(snp) from ch_snp_for_pileupcaller.collect().dump(tag: "Pileupcaller SNP file")
+  path(snp) from ch_snp_for_pileupcaller.collect().dump(tag: "pileupcaller_snp_file")
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("pileupcaller.${strandedness}.*") into ch_for_eigenstrat_snp_coverage
