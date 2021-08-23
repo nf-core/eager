@@ -16,7 +16,7 @@ dependencies:
   - bioconda::adapterremoval=2.3.2
   - bioconda::adapterremovalfixprefix=0.0.5
   - bioconda::bwa=0.7.17
-  - bioconda::picard=2.25.5
+  - bioconda::picard=2.26.0
   - bioconda::samtools=1.12
   - bioconda::dedup=0.12.8
   - bioconda::angsd=0.935
@@ -26,7 +26,7 @@ dependencies:
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
   - bioconda::damageprofiler=0.4.9 # Don't upgrade - later versions don't allow java 8
-  - bioconda::multiqc=1.10.1
+  - bioconda::multiqc=1.11
   - bioconda::pmdtools=0.60
   - bioconda::bedtools=2.30.0
   - conda-forge::libiconv=1.16
@@ -48,5 +48,5 @@ dependencies:
   - bioconda::bowtie2=2.4.4
   - bioconda::eigenstratdatabasetools=1.0.2
   - bioconda::mapdamage2=2.2.1
-  - bioconda::bbmap=38.90
-  - bioconda::bcftools=1.12
+  - bioconda::bbmap=38.92
+  - bioconda::bcftools=1.13
