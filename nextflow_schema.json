@@ -521,6 +521,35 @@
                     "help_text": "Specify maximum Phred score of the quality field of FASTQ files. The quality-score range can vary depending on the machine and version (e.g. see diagram [here](https://en.wikipedia.org/wiki/FASTQ_format#Encoding), and this allows you to increase from the default AdapterRemoval value of `41`.\n\n> Modifies AdapterRemoval parameters: `--qualitymax`",
                     "default": 41,
                     "fa_icon": "fas fa-arrow-up"
+                },
+                "run_post_ar_trimming": {
+                    "type": "boolean",
+                    "description": "Turn on trimming of inline barcodes (i.e. internal barcodes after adapter removal)",
+                    "help_text": "In some cases, you may want to additionally trim reads in a FASTQ file after adapter removal.\n\nThis could be to remove short 'inline' or 'internal' barcodes that are ligated directly onto DNA molecules prior ligation of adapters and indicies (the former of which allow ultra-multiplexing and/or checks for barcode hopping).\n\nIn other cases, you may wish to already remove known high-frequency damage bases to allow stricter mapping.\n\nTurning on this module uses `fastp` to trim one, or both ends of a merged read, or in cases where you have not collapsed your read, R1 and R2.\n"
+                },
+                "post_ar_trim_front": {
+                    "type": "integer",
+                    "default": 7,
+                    "description": "Specify the number of bases to trim off the front of a merged read or R1",
+                    "help_text": "Specify the number of bases to trim off the start of a read in a merged- or forward read FASTQ file.\n\n> Modifies fastp parameters: `--trim_front1`"
+                },
+                "post_ar_trim_tail": {
+                    "type": "integer",
+                    "default": 7,
+                    "description": "Specify the number of bases to trim off the tail of of a merged read or R1",
+                    "help_text": "Specify the number of bases to trim off the end of a read in a merged- or forward read FASTQ file.\n\n> Modifies fastp parameters: `--trim_tail1`"
+                },
+                "post_ar_trim_front2": {
+                    "type": "integer",
+                    "default": 7,
+                    "description": "Specify the number of bases to trim off the front of R2",
+                    "help_text": "Specify the number of bases to trim off the start of a read in an unmerged forward read (R1) FASTQ file.\n\n> Modifies fastp parameters: `--trim_front2`"
+                },
+                "post_ar_trim_tail2": {
+                    "type": "integer",
+                    "default": 7,
+                    "description": "Specify the number of bases to trim off the tail of R2",
+                    "help_text": "Specify the number of bases to trim off the end of a read in an unmerged reverse read (R2) FASTQ file.\n\n> Modifies fastp parameters: `--trim_tail2`"
                 }
             },
             "fa_icon": "fas fa-cut",
@@ -621,7 +650,6 @@
                 },
                 "bt2n": {
                     "type": "integer",
-                    "default": 0,
                     "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity.",
                     "fa_icon": "fas fa-sort-numeric-down",
                     "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).\n\n> Modifies Bowtie2 parameters: `-N`",
@@ -632,21 +660,18 @@
                 },
                 "bt2l": {
                     "type": "integer",
-                    "default": 0,
                     "description": "Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity.",
                     "fa_icon": "fas fa-ruler-horizontal",
                     "help_text": "The length of the seed sub-string to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).\n\n> Modifies Bowtie2 parameters: `-L`"
                 },
                 "bt2_trim5": {
                     "type": "integer",
-                    "default": 0,
                     "description": "Specify number of bases to trim off from 5' (left) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
                     "help_text": "Number of bases to trim at the 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0\n\n> Modifies Bowtie2 parameters: `-bt2_trim5`"
                 },
                 "bt2_trim3": {
                     "type": "integer",
-                    "default": 0,
                     "description": "Specify number of bases to trim off from 3' (right) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
                     "help_text": "Number of bases to trim at the 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.\n\n> Modifies Bowtie2 parameters: `-bt2_trim3`"
@@ -704,14 +729,12 @@
                 },
                 "bam_mapping_quality_threshold": {
                     "type": "integer",
-                    "default": 0,
                     "description": "Minimum mapping quality for reads filter.",
                     "fa_icon": "fas fa-greater-than-equal",
                     "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).\n\n> Modifies samtools view parameter: `-q`"
                 },
                 "bam_filter_minreadlength": {
                     "type": "integer",
-                    "default": 0,
                     "fa_icon": "fas fa-ruler-horizontal",
                     "description": "Specify minimum read length to be kept after mapping.",
                     "help_text": "Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.\n\nIf used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artificially small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct denominator of all reads, for the endogenous DNA calculation.\n\n> Modifies filter_bam_fragment_length.py parameter: `-l`"
@@ -1115,7 +1138,6 @@
                 },
                 "freebayes_g": {
                     "type": "integer",
-                    "default": 0,
                     "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C.",
                     "fa_icon": "fab fa-think-peaks",
                     "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.\n\n> Modifies freebayes parameter: `-g`"

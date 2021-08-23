@@ -66,7 +66,7 @@ By default the pipeline currently performs the following:
 
 * Create reference genome indices for mapping (`bwa`, `samtools`, and `picard`)
 * Sequencing quality control (`FastQC`)
-* Sequencing adapter removal and for paired end data merging (`AdapterRemoval`)
+* Sequencing adapter removal, paired-end data merging (`AdapterRemoval`)
 * Read mapping to reference using (`bwa aln`, `bwa mem`, `CircularMapper`, or `bowtie2`)
 * Post-mapping processing, statistics and conversion to bam (`samtools`)
 * Ancient DNA C-to-T damage pattern visualisation (`DamageProfiler`)
@@ -86,6 +86,7 @@ Additional functionality contained by the pipeline currently includes:
 #### Preprocessing
 
 * Illumina two-coloured sequencer poly-G tail removal (`fastp`)
+* Post-AdapterRemoval trimming of FASTQ files prior mapping (`fastp`)
 * Automatic conversion of unmapped reads to FASTQ (`samtools`)
 * Host DNA (mapped reads) stripping from input FASTQ files (for sensitive samples)
 
