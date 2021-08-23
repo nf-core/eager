@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#771](https://github.com/nf-core/eager/issues/771) Remove legacy code
 - Improved output documentation for MultiQC general stats table (thanks to @KathrinNaegele and @esalmela)
 - Improved output documentation for BowTie2 (thanks to @isinaltinkaya)
+- [#612](https://github.com/nf-core/eager/issues/612) Updated BAM trimming defaults to 0 to ensure no unwanted trimming when mixing half-UDG with no-UDG (thanks to @scarlhoff)
+- [#722](https://github.com/nf-core/eager/issues/722) Updated BWA mapping mapping parameters to latest recommendations - primarily alnn back to 0.01 and aln0 to 2 as per Oliva et al. 2021 (10.1093/bib/bbab076)
 
 ### `Dependencies`
 
