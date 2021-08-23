@@ -86,7 +86,9 @@ top_modules:
             - '*_postfilterflagstat.stats'
     - 'dedup'
     - 'picard'
-    - 'preseq'
+    - 'preseq':
+       path_filters:
+           - '*.preseq'
     - 'damageprofiler'
     - 'mtnucratio'
     - 'qualimap'
