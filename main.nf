@@ -2213,23 +2213,7 @@ if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
 
 }
 
-
-
 // Unified Genotyper - although not-supported, better for aDNA (because HC does de novo assembly which requires higher coverages), and needed for MultiVCFAnalyzer
-
-// initialise empty bcftool related empty channels
-
-//if ( params.genotyping_tool == 'ug' ) {
-//  ch_hc_for_bcftools_stats = Channel.empty()
-//  ch_fb_for_bcftools_stats = Channel.empty()
-//} else if ( params.genotyping_tool == 'hc' ) {
-//  ch_ug_for_bcftools_stats = Channel.empty()
-//  ch_fb_for_bcftools_stats = Channel.empty()
-//} else if ( params.genotyping_tool == 'fb ') {
-//  ch_ug_for_bcftools_stats = Channel.empty()
-//  ch_hc_for_bcftools_stats = Channel.empty()
-//}
-
 
 process genotyping_ug {
   label 'mc_small'
@@ -2517,7 +2501,7 @@ process vcf2genome {
   pigz -d -f -p ${task.cpus} ${vcf}
   vcf2genome -Xmx${task.memory.toGiga()}g -draft ${out} -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainty.fasta
   pigz -f -p ${task.cpus} ${out}*
-  pigz -p ${task.cpus} *.vcf
+  bgzip -@ ${task.cpus} *.vcf
   """
 }
 
@@ -2560,6 +2544,7 @@ process multivcfanalyzer {
   pigz -d -f -p ${task.cpus} ${vcf}
   multivcfanalyzer -Xmx${task.memory.toGiga()}g ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
   pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
+  bgzip -@ ${task.cpus} *.vcf
   """
  }
 
@@ -2616,7 +2601,7 @@ process sexdeterrmine_prep {
 process sexdeterrmine {
     label 'mc_small'
     publishDir "${params.outdir}/sex_determination", mode: params.publish_dir_mode
-     
+
     input:
     path bam from ch_prepped_for_sexdeterrmine.collect()
     path(bed) from ch_bed_for_sexdeterrmine
