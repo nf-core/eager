@@ -184,7 +184,7 @@ if("${params.fasta}".endsWith(".gz")){
         path zipped_fasta from file(params.fasta) // path doesn't like it if a string of an object is not prefaced with a root dir (/), so use file() to resolve string before parsing to `path` 
 
         output:
-        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling
+        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling,ch_fasta_for_bcftools_stats
 
         script:
         unzip = zipped_fasta.toString() - '.gz'
@@ -195,7 +195,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling;ch_fasta_for_bcftools_stats }
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -2346,7 +2346,7 @@ process genotyping_ug {
   file dict from ch_dict_for_ug.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome,ch_ug_for_bcftools_stats
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.realign.{bam,bai}") optional true
 
   script:
@@ -2361,7 +2361,7 @@ process genotyping_ug {
     
     $keep_realign
     
-    pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
+    bgzip -@ ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
   else if (params.gatk_dbsnp)
     """
@@ -2372,7 +2372,7 @@ process genotyping_ug {
     
     $keep_realign
     
-    pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
+    bgzip -@  ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
 }
 
@@ -2393,19 +2393,19 @@ process genotyping_hc {
   file dict from ch_dict_for_hc.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz") into ch_hc_for_bcftools_stats
 
   script:
   if (!params.gatk_dbsnp)
     """
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${samplename}.haplotypecaller.vcf
+    bgzip -@ ${task.cpus} ${samplename}.haplotypecaller.vcf
     """
 
   else if (params.gatk_dbsnp)
     """
     gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${samplename}.haplotypecaller.vcf
+    bgzip -@  ${task.cpus} ${samplename}.haplotypecaller.vcf
     """
 }
 
@@ -2426,13 +2426,13 @@ process genotyping_freebayes {
   file dict from ch_dict_for_freebayes.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz") into ch_fb_for_bcftools_stats
   
   script:
   def skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
   """
   freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${samplename}.freebayes.vcf
-  pigz -p ${task.cpus} ${samplename}.freebayes.vcf
+  bgzip -@  ${task.cpus} ${samplename}.freebayes.vcf
   """
 }
 
@@ -2565,6 +2565,31 @@ process genotyping_angsd {
 }
 
 ////////////////////////////////////
+/* --    GENOTYPING STATS     -- */
+////////////////////////////////////
+
+process bcftools_stats {
+  label  'mc_small'
+  tag "${samplename}"
+  publishDir "${params.outdir}/bcftools/stats", mode: params.publish_dir_mode
+
+  when: 
+  params.run_bcftools_stats
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(vcf) from ch_ug_for_bcftools_stats.mix(ch_hc_for_bcftools_stats,ch_fb_for_bcftools_stats)
+  file fasta from ch_fasta_for_bcftools_stats.collect()
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.vcf.stats") into ch_bcftools_stats_for_multiqc
+
+  script:
+  """
+  bcftools stats *.vcf.gz -F ${fasta} > ${samplename}.vcf.stats
+  """
+}
+
+////////////////////////////////////
 /* --    CONSENSUS CALLING     -- */
 ////////////////////////////////////
 
@@ -2589,10 +2614,10 @@ process vcf2genome {
   def out = !params.vcf2genome_outfile ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
   def fasta_head = !params.vcf2genome_header ? "${samplename}" : "${params.vcf2genome_header}"
   """
-  pigz -f -d -p ${task.cpus} *.vcf.gz
-  vcf2genome -Xmx${task.memory.toGiga()}g -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
-  pigz -p ${task.cpus} *.fasta 
-  pigz -p ${task.cpus} *.vcf
+  pigz -d -f -p ${task.cpus} ${vcf}
+  vcf2genome -Xmx${task.memory.toGiga()}g -draft ${out} -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainty.fasta
+  pigz -f -p ${task.cpus} ${out}*
+  bgzip -@ ${task.cpus} *.vcf
   """
 }
 
@@ -2632,9 +2657,10 @@ process multivcfanalyzer {
   script:
   def write_freqs = params.write_allele_frequencies ? "T" : "F"
   """
-  gunzip -f *.vcf.gz
+  pigz -d -f -p ${task.cpus} ${vcf}
   multivcfanalyzer -Xmx${task.memory.toGiga()}g ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
   pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
+  bgzip -@ ${task.cpus} *.vcf
   """
  }
 
@@ -2691,7 +2717,7 @@ process sexdeterrmine_prep {
 process sexdeterrmine {
     label 'mc_small'
     publishDir "${params.outdir}/sex_determination", mode: params.publish_dir_mode
-     
+
     input:
     path bam from ch_prepped_for_sexdeterrmine.collect()
     path(bed) from ch_bed_for_sexdeterrmine
@@ -3053,7 +3079,7 @@ process get_software_versions {
     qualimap --version &> v_qualimap.txt 2>&1 || true
     preseq &> v_preseq.txt 2>&1 || true
     gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
-    gatk3 --version 2>&1 > v_gatk3.txt 2>&1 || true
+    gatk3 --version 2>&1 | head -n 1 > v_gatk3.txt 2>&1 || true
     freebayes --version &> v_freebayes.txt 2>&1 || true
     bedtools --version &> v_bedtools.txt 2>&1 || true
     damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
@@ -3073,8 +3099,8 @@ process get_software_versions {
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
     eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
     mapDamage --version > v_mapdamage.txt || true
-    bbduk.sh | grep 'Last modified' | cut -d' ' -f 3-99 > v_bbduk.txt || true
-
+    bbduk.sh | grep 'Last modified' | cut -d ' ' -f 3-99 > v_bbduk.txt || true
+    bcftools --version | grep 'bcftools' | cut -d ' ' -f 2 > v_bcftools.txt || true
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
@@ -3116,6 +3142,7 @@ process multiqc {
     file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
     file ('nuclear_contamination/*') from ch_nuclear_contamination_for_multiqc.collect().ifEmpty([])
     file ('genotyping/*') from ch_eigenstrat_snp_cov_for_multiqc.collect().ifEmpty([])
+    file ('bcftools_stats') from ch_bcftools_stats_for_multiqc.collect().ifEmpty([])
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
     output:

@@ -1227,6 +1227,13 @@
                         "random",
                         "common"
                     ]
+                },
+                "run_bcftools_stats": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Turn on bcftools stats generation for VCF based variant calling statistics",
+                    "help_text": "Runs `bcftools stats` against VCF files from GATK and FreeBayes genotypers.\n\nIt will automatically include the FASTA reference for INDEL-related statistics.",
+                    "fa_icon": "far fa-chart-bar"
                 }
             },
             "fa_icon": "fas fa-sliders-h",
