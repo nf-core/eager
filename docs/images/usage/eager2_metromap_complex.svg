@@ -146,8 +146,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.3238356"
-     inkscape:cx="770.45266"
-     inkscape:cy="288.72675"
+     inkscape:cx="406.07024"
+     inkscape:cy="-143.59138"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -197,6 +197,17 @@
        height="170.04657"
        x="-1.99229"
        y="17.807598" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="72.69239"
+       y="163.2347"
+       id="text884-7-7-9-1-1-1-9-1-5-3-3"><tspan
+         sodipodi:role="line"
+         x="72.69239"
+         y="163.2347"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52778px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;stroke-width:0.264583"
+         id="tspan3054-5-9-5-6">v2.4</tspan></text>
     <g
        id="g2162-7-6"
        transform="rotate(-90,221.46072,49.1247)">
