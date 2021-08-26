@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#317](https://github.com/nf-core/eager/issues/317) Added bcftools stats for general genotyping statistics of VCF files
 - [#651](https://github.com/nf-core/eager/issues/651) - Adds removal of adapters specified in an AdapterRemoval adapter list file
 - [#642](https://github.com/nf-core/eager/issues/642) and [#431](https://github.com/nf-core/eager/issues/431) adds post-adapter removal barcode/fastq trimming
-- [#769](https://github.com/nf-core/eager/issues/769) - Adds lc_extrap mode to preseq (requested by @roberta-davidson)
+- [#769](https://github.com/nf-core/eager/issues/769) - Adds lc_extrap mode to preseq (suggested by @roberta-davidson)
 
 ### `Fixed`
 
@@ -19,9 +19,35 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Improved output documentation for MultiQC general stats table (thanks to @KathrinNaegele and @esalmela)
 - Improved output documentation for BowTie2 (thanks to @isinaltinkaya)
 - [#612](https://github.com/nf-core/eager/issues/612) Updated BAM trimming defaults to 0 to ensure no unwanted trimming when mixing half-UDG with no-UDG (thanks to @scarlhoff)
-- [#722](https://github.com/nf-core/eager/issues/722) Updated BWA mapping mapping parameters to latest recommendations - primarily alnn back to 0.01 and aln0 to 2 as per Oliva et al. 2021 (10.1093/bib/bbab076)
+- [#722](https://github.com/nf-core/eager/issues/722) Updated BWA mapping mapping parameters to latest recommendations - primarily alnn back to 0.01 and alno to 2 as per Oliva et al. 2021 (10.1093/bib/bbab076)
+- Updated workflow diagrams to reflect latest functionality
 
 ### `Dependencies`
+
+- Bumped python: 3.7.3 -> 3.9.4
+- Bumped markdown: 3.2.2 -> 3.3.4
+- Bumped pymdown-extensions: 7.1 -> 8.2
+- Bumped pyments: 2.6.1 -> 2.9.0
+- Bumped adapterremoval: 2.3.1 -> 2.3.2
+- Bumped picard: 2.22.9 -> 2.26.0
+- Bumped samtools 1.9 -> 1.12
+- Bumped angsd: 0.933 -> 0.935
+- Bumped gatk4: 4.1.7.0 -> 4.2.0.0
+- Bumped multiqc: 1.10.1 -> 1.11
+- Bumped bedtools 2.29.2 -> 2.30.0
+- Bumped libiconv: 1.15 -> 1.16
+- Bumped preseq: 2.0.3 -> 3.1.2
+- Bumped bamutil: 1.0.14 -> 1.0.15
+- Bumped pysam: 0.15.4 -> 0.16.0
+- Bumped kraken2: 2.1.1 -> 2.1.2
+- Bumped pandas: 1.0.4 -> 1.2.4
+- Bumped freebayes: 1.3.2 -> 1.3.5
+- Bumped biopython: 1.76 -> 1.79
+- Bumped xopen: 0.9.0 -> 1.1.0
+- Bumped bowtie2: 2.4.2 -> 2.4.4
+- Bumped mapdamage2: 2.2.0 -> 2.2.1
+- Bumped bbmap: 38.87 -> 38.92
+- Added bcftools: 1.12
 
 ### `Deprecated`
 
