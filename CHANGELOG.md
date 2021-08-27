@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## v2.4dev - [unreleased]
+## [2.4.0] - 20201-08-31
 
 ### `Added`
 
@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## v2.3.5 - 2021-06-03
+## [2.3.5] - 2021-06-03
 
 ### `Added`
 
@@ -75,7 +75,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## v2.3.4 - 2021-05-05
+## [2.3.4] - 2021-05-05
 
 ### `Added`
 
@@ -96,7 +96,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## v2.3.3 - 2021-04-08
+## [2.3.3] - 2021-04-08
 
 ### `Added`
 
