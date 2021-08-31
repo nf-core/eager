@@ -169,6 +169,7 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Ido Bar](https://github.com/IdoBar)
 * [Irina Velsko](https://github.com/ivelsko)
 * [Işın Altınkaya](https://github.com/isinaltinkaya)
+* [Johan Nylander](https://github.com/nylander)
 * [Katerine Eaton](https://github.com/ktmeaton)
 * [Katrin Nägele](https://github.com/KathrinNaegele)
 * [Luc Venturini](https://github.com/lucventurini)
