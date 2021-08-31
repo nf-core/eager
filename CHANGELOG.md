@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#612](https://github.com/nf-core/eager/issues/612) Updated BAM trimming defaults to 0 to ensure no unwanted trimming when mixing half-UDG with no-UDG (thanks to @scarlhoff)
 - [#722](https://github.com/nf-core/eager/issues/722) Updated BWA mapping mapping parameters to latest recommendations - primarily alnn back to 0.01 and alno to 2 as per Oliva et al. 2021 (10.1093/bib/bbab076)
 - Updated workflow diagrams to reflect latest functionality
+- [#787](https://github.com/nf-core/eager/issues/787) Adds memory specification flags for the GATK UnifiedGenotyper and HaplotyperCaller steps.
+- Fixed issue where MultiVCFAnalyzer would not pick up newly generated VCF files, when specifying additional VCF files.
 
 ### `Dependencies`
 
