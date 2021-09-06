@@ -1525,14 +1525,14 @@ process hostremoval_input_fastq {
         out_fwd = bam.baseName+'.hostremoved.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${r1} -m ${params.hostremoval_mode} -of $out_fwd -p ${task.cpus}
+        extract_map_reads.py $bam ${r1} -m ${params.hostremoval_mode} -of $out_fwd -t ${task.cpus}
         """
     } else {
         out_fwd = bam.baseName+'.hostremoved.fwd.fq.gz'
         out_rev = bam.baseName+'.hostremoved.rev.fq.gz'
         """
         samtools index $bam
-        extract_map_reads.py $bam ${r1} -rev ${r2} -m  ${params.hostremoval_mode} -of $out_fwd -or $out_rev -p ${task.cpus}
+        extract_map_reads.py $bam ${r1} -rev ${r2} -m  ${params.hostremoval_mode} -of $out_fwd -or $out_rev -t ${task.cpus}
         """ 
     }
     
