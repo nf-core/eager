@@ -9,8 +9,6 @@ import pysam
 from xopen import xopen
 from functools import partial
 import sys
-from Bio.SeqIO.QualityIO import FastqGeneralIterator
-from io import StringIO
 
 
 def _get_args():
@@ -146,39 +144,10 @@ def parse_write_fq(
                     fout.write(f"{entry}\n")
 
 
-def get_mapped_reads(fq_dict, mapped_reads):
-    """Sort mapped reads from dictionary of fastq reads
-    Args:
-        fq_dict(dict) dictionary with read names as keys, seq and quality as values
-        in a list
-        mapped_reads(list) list of mapped reads
-    Returns:
-        fqd(dict) dictionary with read names as key, unmapped/mapped (u|m),
-        seq and quality as values in a list
-    """
-
-    def intersection(list1, list2):
-        return set(list1).intersection(list2)
-
-    def difference(list1, list2):
-        return set(list1).difference(list2)
-
-    fqd = {}
-    all_reads = list(fq_dict.keys())
-    mapped = intersection(all_reads, mapped_reads)
-    unmapped = difference(all_reads, mapped_reads)
-
-    for rm in mapped:
-        fqd[rm] = ["m"] + fq_dict[rm]
-    for ru in unmapped:
-        fqd[ru] = ["u"] + fq_dict[ru]
-
-    return fqd
-
-
 def check_remove_mode(mode):
     if mode.lower() not in ["replace", "remove"]:
         print(f"Mode must be {' or '.join(mode)}")
+        sys.exit(1)
     return mode.lower()
 
 
@@ -201,7 +170,9 @@ if __name__ == "__main__":
     # FORWARD OR SE FILE
     print(f"- Extracting mapped reads from {BAM}")
     mapped_reads = extract_mapped(BAMFILE, threads=THREADS)
-    print(f"Comparing mapped reads with forward fastq files and writing to disk")
+    print(
+        f"- Comparing mapped reads with forward fastq files and writing {OUT_FWD} to disk "
+    )
     parse_write_fq(
         IN_FWD,
         OUT_FWD,
@@ -211,7 +182,9 @@ if __name__ == "__main__":
         threads=THREADS,
     )
     if IN_REV:
-        print(f"Comparing mapped reads with forward fastq files and writing to disk")
+        print(
+            f"- Comparing mapped reads with reverse fastq files and writing {OUT_REV} to disk"
+        )
         parse_write_fq(
             IN_REV,
             OUT_REV,
