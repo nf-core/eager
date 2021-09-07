@@ -101,50 +101,49 @@ def extract_mapped(BAMFILE, threads):
     return result
 
 
-def parse_fq(fq):
-    """Parse a FASTQ file
+def parse_write_fq(
+    fq_in_path, fq_out_path, mapped_reads, write_mode, remove_mode, threads
+):
+    """Parse Fastq, compares to mapped reads, and writes cleaned fastq to disk
+
     Args:
-        fq(str): path to fastq file
-    Returns:
-        fqd(dict): dictionary with read names as keys, seq and quality as values
-        in a list
+        fq_in_path (str): path to input fastq file
+        fq_out_path (str): path to output fastq file
+        mapped_reads (list): list of the name of mapped reads
+        write_mode (str): writing mode ('w' or 'wb')
+        remove_mode (str): remove mode ('replace' or 'remove')
+        threads (int): number of threads for parallel write compression by xopen
     """
-
-    def get_fq_reads(allreads):
-        read_dict = {}
-        for title, seq, qual in FastqGeneralIterator(allreads):
-            # NEED TO ONLY KEEP THE FIRST PART OF THE FASTQ READ NAME FOR CROSS
-            # REFERENCING WITH BAM FILE: ONLY THIS INFORMATION IS KEPT WHEN
-            # COLLAPSING READS WITH ADAPTERREMOVAL
-
-            # Until fastq format 1.8
-            # Split after slash
-            # @HWUSI-EAS100R:6:73:941:1973#0/1
-            suf_title = ""
-            title_space = title.split()
-            if len(title_space) > 1:
-                title = title_space[0]
-                suf_title = f" {title_space[1]}"
-
-            # From fastq format 1.8
-            # Split after space
-            # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-            title_slash = title.split("/")
-            if len(title_slash) > 1:
-                title = title_slash[0]
-                suf_title = f"/{title_slash[1]}"
-
-            read_dict[title] = [suf_title, seq, "+", qual]
-        return read_dict
-
-    if fq.endswith(".gz"):
-        with xopen(fq, "r") as allreads:
-            fqd = get_fq_reads(allreads)
+    if write_mode == "wb":
+        with pysam.FastqFile(fq_in_path) as fin, xopen(
+            fq_out_path, mode="wb", threads=threads
+        ) as fout:
+            for entry in fin:
+                if entry.name in mapped_reads:
+                    if remove_mode == "remove":
+                        continue
+                    else:
+                        entry.set_sequence(
+                            sequence="N" * len(entry.sequence),
+                            quality=entry.quality,
+                        )
+                        fout.write(f"{entry}\n".encode())
+                else:
+                    fout.write(f"{entry}\n".encode())
     else:
-        with open(fq, "r") as allreads:
-            fqd = get_fq_reads(allreads)
-
-    return fqd
+        with pysam.FastqFile(fq_in_path) as fin, open(fq_out_path, mode="w") as fout:
+            for entry in fin:
+                if entry.name in mapped_reads:
+                    if remove_mode == "remove":
+                        continue
+                    else:
+                        entry.set_sequence(
+                            sequence="N" * len(entry.sequence),
+                            quality=entry.quality,
+                        )
+                        fout.write(f"{entry}\n")
+                else:
+                    fout.write(f"{entry}\n")
 
 
 def get_mapped_reads(fq_dict, mapped_reads):
@@ -177,65 +176,6 @@ def get_mapped_reads(fq_dict, mapped_reads):
     return fqd
 
 
-def write_fq(fq_dict, fname, write_mode, remove_mode, threads):
-    """Write to fastq file
-    Args:
-        fq_dict(dict): fq_dict with unmapped read names as keys,
-            unmapped/mapped (u|m), seq, and quality as values in a list
-        fname(string) Path to output fastq file
-        write_mode (str): 'rb' or 'r'
-        remove_mode (str): remove (remove read) or replace (replace read sequence) by Ns
-        threads(int) number of threads
-    """
-    fq_dict_keys = list(fq_dict.keys())
-    if write_mode == "wb":
-        with xopen(fname, mode="wb", threads=threads) as fw:
-            for fq_dict_key in fq_dict_keys:
-                wstring = ""
-                if remove_mode == "remove":
-                    if fq_dict[fq_dict_key][0] == "u":
-                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
-                        for i in fq_dict[fq_dict_key][2:]:
-                            wstring += f"{i}\n"
-                elif remove_mode == "replace":
-                    # if unmapped, write all the read lines
-                    if fq_dict[fq_dict_key][0] == "u":
-                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
-                        for i in fq_dict[fq_dict_key][2:]:
-                            wstring += f"{i}\n"
-                    # if mapped, write all the read lines, but replace sequence
-                    # by N*(len(sequence))
-                    elif fq_dict[fq_dict_key][0] == "m":
-                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
-                        wstring += f"{'N'*len(fq_dict[fq_dict_key][2])}\n"
-                        for i in fq_dict[fq_dict_key][3:]:
-                            wstring += f"{i}\n"
-                fw.write(wstring.encode())
-    else:
-        with open(fname, "w") as fw:
-            for fq_dict_key in fq_dict_keys:
-                wstring = ""
-                if remove_mode == "remove":
-                    if fq_dict[fq_dict_key][0] == "u":
-                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
-                        for i in fq_dict[fq_dict_key][2:]:
-                            wstring += f"{i}\n"
-                elif remove_mode == "replace":
-                    # if unmapped, write all the read lines
-                    if fq_dict[fq_dict_key][0] == "u":
-                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
-                        for i in fq_dict[fq_dict_key][2:]:
-                            wstring += f"{i}\n"
-                    # if mapped, write all the read lines, but replace sequence
-                    # by N*(len(sequence))
-                    elif fq_dict[fq_dict_key][0] == "m":
-                        wstring += f"@{fq_dict_key+fq_dict[fq_dict_key][1]}\n"
-                        wstring += f"{'N'*len(fq_dict[fq_dict_key][2])}\n"
-                        for i in fq_dict[fq_dict_key][3:]:
-                            wstring += f"{i}\n"
-                fw.write(wstring)
-
-
 def check_remove_mode(mode):
     if mode.lower() not in ["replace", "remove"]:
         print(f"Mode must be {' or '.join(mode)}")
@@ -261,34 +201,21 @@ if __name__ == "__main__":
     # FORWARD OR SE FILE
     print(f"- Extracting mapped reads from {BAM}")
     mapped_reads = extract_mapped(BAMFILE, threads=THREADS)
-    print(f"- Parsing forward fq file {IN_FWD}")
-    fqd_fwd = parse_fq(IN_FWD)
-    print("- Cross referencing mapped reads in forward fq")
-    fq_dict_fwd = get_mapped_reads(fqd_fwd, mapped_reads)
-    # print(fq_dict_fwd)
-    print(f"- Writing forward fq to {out_fwd}")
-    write_fq(
-        fq_dict=fq_dict_fwd,
-        fname=out_fwd,
+    print(f"Comparing mapped reads with forward fastq files and writing to disk")
+    parse_write_fq(
+        IN_FWD,
+        OUT_FWD,
+        mapped_reads,
         write_mode=write_mode,
         remove_mode=remove_mode,
         threads=THREADS,
     )
-
-    # REVERSE FILE
     if IN_REV:
-        if OUT_REV == None:
-            out_rev = f"{IN_REV.split('/')[-1].split('.')[0]}.r2.fq.gz"
-        else:
-            out_rev = OUT_REV
-        print(f"- Parsing reverse fq file {IN_REV}")
-        fqd_rev = parse_fq(IN_REV)
-        print("- Cross referencing mapped reads in reverse fq")
-        fq_dict_rev = get_mapped_reads(fqd_rev, mapped_reads)
-        print(f"- Writing reverse fq to {out_rev}")
-        write_fq(
-            fq_dict=fq_dict_rev,
-            fname=out_rev,
+        print(f"Comparing mapped reads with forward fastq files and writing to disk")
+        parse_write_fq(
+            IN_REV,
+            OUT_REV,
+            mapped_reads,
             write_mode=write_mode,
             remove_mode=remove_mode,
             threads=THREADS,
