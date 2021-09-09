@@ -237,12 +237,12 @@ if ( !params.clip_adapters_list ) {
     Channel
       .fromPath("$projectDir/assets/nf-core_eager_dummy2.txt", checkIfExists: true)
       .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
-      .into {ch_adapterlist}
+      .set {ch_adapterlist}
 } else {
     Channel
       .fromPath("${params.clip_adapters_list}", checkIfExists: true)
       .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
-      .into {ch_adapterlist}
+      .set {ch_adapterlist}
 }
 
 
@@ -2977,7 +2977,7 @@ process kraken {
   tuple prefix, path("*.kraken2_report") into ch_kraken_report, ch_kraken_for_multiqc
 
   script:
-  prefix = fastq.basename
+  prefix = fastq.baseName
   out = prefix+".kraken.out"
   kreport = prefix+".kraken2_report"
   kreport_old = prefix+".kreport"
