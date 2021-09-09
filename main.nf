@@ -811,7 +811,8 @@ process adapter_removal {
     mv *.settings output/
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
     """
     //PE mode, collapse and trim, outputting all reads, preserving 5p
     } else if (seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly && params.preserve5p) {
@@ -825,7 +826,8 @@ process adapter_removal {
     mv *.settings output/
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
     """
     // PE mode, collapse and trim but only output collapsed reads
     } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && !params.preserve5p ) {
@@ -836,7 +838,8 @@ process adapter_removal {
     cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
         
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz >  output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -849,7 +852,8 @@ process adapter_removal {
     cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g  output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g  output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -863,7 +867,8 @@ process adapter_removal {
     cat *.collapsed.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
         
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -877,7 +882,8 @@ process adapter_removal {
     cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """

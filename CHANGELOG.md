@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#787](https://github.com/nf-core/eager/issues/787) Adds memory specification flags for the GATK UnifiedGenotyper and HaplotyperCaller steps (thanks to @nylander)
 - Fixed issue where MultiVCFAnalyzer would not pick up newly generated VCF files, when specifying additional VCF files.
 - [#790](https://github.com/nf-core/eager/issues/790) Fixed kraken2 report file-name collision when sample names have `.` in them
+- [#792](https://github.com/nf-core/eager/issues/792) Fixed java error messages for AdapterRemovalFixPrefix being hidden in output
 
 ### `Dependencies`
 
