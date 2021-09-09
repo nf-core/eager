@@ -2977,7 +2977,7 @@ process kraken {
   tuple prefix, path("*.kraken2_report") into ch_kraken_report, ch_kraken_for_multiqc
 
   script:
-  prefix = fastq.toString().tokenize('.')[0]
+  prefix = fastq.basename
   out = prefix+".kraken.out"
   kreport = prefix+".kraken2_report"
   kreport_old = prefix+".kreport"
