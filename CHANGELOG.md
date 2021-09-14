@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed issue where MultiVCFAnalyzer would not pick up newly generated VCF files, when specifying additional VCF files.
 - [#790](https://github.com/nf-core/eager/issues/790) Fixed kraken2 report file-name collision when sample names have `.` in them
 - [#792](https://github.com/nf-core/eager/issues/792) Fixed java error messages for AdapterRemovalFixPrefix being hidden in output
+- [#794](https://github.com/nf-core/eager/issues/794) Aligned default test profile with nf-core standards (`test_tsv` is now `test`)
 
 ### `Dependencies`
 
