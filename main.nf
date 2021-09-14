@@ -46,8 +46,13 @@ if ( params.skip_collapse && params.skip_trim ) {
 }
 
 // Bedtools validation
-if(params.run_bedtools_coverage && !params.anno_file ){
+if( params.run_bedtools_coverage && !params.anno_file ){
   exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
+}
+
+// Bedtools validation
+if( !params.skip_preseq && !( params.preseq_mode == 'c_curve' || params.preseq_mode == 'lc_extrap' ) ) {
+  exit 1, "[nf-core/eager] error: you are running preseq with a unsupported mode. See documentation for more information. You gave: ${params.preseq_mode}."
 }
 
 // BAM filtering validation
@@ -179,7 +184,7 @@ if("${params.fasta}".endsWith(".gz")){
         path zipped_fasta from file(params.fasta) // path doesn't like it if a string of an object is not prefaced with a root dir (/), so use file() to resolve string before parsing to `path` 
 
         output:
-        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling
+        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling,ch_fasta_for_bcftools_stats
 
         script:
         unzip = zipped_fasta.toString() - '.gz'
@@ -190,7 +195,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling;ch_fasta_for_bcftools_stats }
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -226,6 +231,20 @@ if( params.bt2_index && params.mapper == 'bowtie2' ){
     bwa_index = Channel.empty()
     bwa_index_bwamem = Channel.empty()
 }
+
+// Adapter removal adapter-list setup
+if ( !params.clip_adapters_list ) {
+    Channel
+      .fromPath("$projectDir/assets/nf-core_eager_dummy2.txt", checkIfExists: true)
+      .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
+      .set {ch_adapterlist}
+} else {
+    Channel
+      .fromPath("${params.clip_adapters_list}", checkIfExists: true)
+      .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
+      .set {ch_adapterlist}
+}
+
 
 // SexDetermination channel set up and bedfile validation
 if (!params.sexdeterrmine_bedfile) {
@@ -765,17 +784,19 @@ process adapter_removal {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
+    path adapterlist from ch_adapterlist.collect().dump(tag: "Adapter list")
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*pair2.truncated.gz") optional true into ch_output_from_adapterremoval_r2
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*.settings") into ch_adapterremoval_logs
-
+    
     when: 
     !params.skip_adapterremoval
 
     script:
-    base = "${r1.baseName}_L${lane}"
+    def base = "${r1.baseName}_L${lane}"
+    def adapters_to_remove = !params.clip_adapters_list ? "--adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor}" : "--adapter-list ${adapterlist}"
     //This checks whether we skip trimming and defines a variable respectively
     def preserve5p = params.preserve5p ? '--preserve5p' : '' // applies to any AR command - doesn't affect output file combination
     
@@ -783,39 +804,42 @@ process adapter_removal {
     """
     mkdir -p output
 
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
 
     cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
     
     mv *.settings output/
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
     """
     //PE mode, collapse and trim, outputting all reads, preserving 5p
     } else if (seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly && params.preserve5p) {
     """
     mkdir -p output
 
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
 
     cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
 
     mv *.settings output/
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
     """
     // PE mode, collapse and trim but only output collapsed reads
     } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && !params.preserve5p ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     
     cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
         
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz >  output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -823,12 +847,13 @@ process adapter_removal {
     } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && params.preserve5p ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe  --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} --collapse ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     
     cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g  output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g  output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -842,7 +867,8 @@ process adapter_removal {
     cat *.collapsed.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
         
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -856,7 +882,8 @@ process adapter_removal {
     cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1}  > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -864,7 +891,7 @@ process adapter_removal {
     } else if ( seqtype == 'PE'  && params.skip_collapse && !params.skip_trim ) {
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --file2 ${r2} --basename ${base}.pe --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     
     mv ${base}.pe.pair*.truncated.gz *.settings output/
     """
@@ -872,7 +899,7 @@ process adapter_removal {
     //SE, collapse not possible, trim reads only
     """
     mkdir -p output
-    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} ${preserve5p} --trimns --trimqualities --adapter1 ${params.clip_forward_adaptor} --adapter2 ${params.clip_reverse_adaptor} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
+    AdapterRemoval --file1 ${r1} --basename ${base}.se --gzip --threads ${task.cpus} --qualitymax ${params.qualitymax} ${preserve5p} --trimns --trimqualities ${adapters_to_remove} --minlength ${params.clip_readlength} --minquality ${params.clip_min_read_quality} --minadapteroverlap ${params.min_adap_overlap}
     mv *.settings *.se.truncated.gz output/
     """
     } else if ( seqtype != 'PE' && params.skip_trim ) {
@@ -929,16 +956,99 @@ if ( params.skip_collapse ){
 // AdapterRemoval bypass when not running it
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
+        .dump(tag: "post_ar_adapterremoval_decision_skipar")
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
-        .dump(tag: "AR Bypass")
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
+        .dump(tag: "ar_bypass")
+        .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
 } else {
     ch_fastp_for_skipadapterremoval
-        .into { ch_adapterremoval_for_fastqc_after_clipping; ch_adapterremoval_for_lanemerge; } 
+        .dump(tag: "post_ar_adapterremoval_decision_withar")
+        .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
+}
+
+// Post AR fastq trimming
+
+process post_ar_fastq_trimming {
+  label 'mc_small'
+  tag "${libraryid}"
+  publishDir "${params.outdir}/post_ar_fastq_trimmed", mode: params.publish_dir_mode
+
+  when: params.run_post_ar_trimming
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_adapterremoval_for_post_ar_trimming
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R1_postartrimmed.fq.gz") into ch_post_ar_trimming_for_lanemerge_r1
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R2_postartrimmed.fq.gz") optional true into ch_post_ar_trimming_for_lanemerge_r2
+
+  script:
+  if ( seqtype == 'SE' | (seqtype == 'PE' && !params.skip_collapse) ) {
+  """
+  fastp --in1 ${r1} --trim_front1 ${params.post_ar_trim_front} --trim_tail1 ${params.post_ar_trim_tail} -A -G -Q -L -w ${task.cpus} --out1 "${libraryid}"_L"${lane}"_R1_postartrimmed.fq.gz
+  """
+  } else if ( seqtype == 'PE' && params.skip_collapse ) {
+  """
+  fastp --in1 ${r1} --in2 ${r2}  --trim_front1 ${params.post_ar_trim_front} --trim_tail1 ${params.post_ar_trim_tail} --trim_front2 ${params.post_ar_trim_front2} --trim_tail2 ${params.post_ar_trim_tail2} -A -G -Q -L -w ${task.cpus} --out1 "${libraryid}"_L"${lane}"_R1_postartrimmed.fq.gz --out2 "${libraryid}"_L"${lane}"_R2_postartrimmed.fq.gz
+  """
+  }
+
+}
+
+// When not collapsing paired-end data, re-merge the R1 and R2 files into single map. Otherwise if SE or collapsed PE, R2 now becomes NA
+// Sort to make sure we get consistent R1 and R2 ordered when using `-resume`, even if not needed for FastQC
+if ( params.skip_collapse ){
+  ch_post_ar_trimming_for_lanemerge_r1
+    .mix(ch_post_ar_trimming_for_lanemerge_r2)
+    .groupTuple(by: [0,1,2,3,4,5,6])
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7].sort()[0])
+        def r2 = seqtype == "PE" ? file(it[7].sort()[1]) : file("$projectDir/assets/nf-core_eager_dummy.txt")
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+
+    }
+    .set { ch_post_ar_trimming_for_lanemerge; }
+} else {
+  ch_post_ar_trimming_for_lanemerge_r1
+    .map{
+      it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def r1 = file(it[7])
+        def r2 = file("$projectDir/assets/nf-core_eager_dummy.txt")
+
+        [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
+    }
+    .set { ch_post_ar_trimming_for_lanemerge; }
+}
+
+
+// Inline barcode removal bypass when not running it 
+if (params.run_post_ar_trimming) {
+    ch_adapterremoval_for_skip_post_ar_trimming
+        .dump(tag: "inline_removal_bypass")
+        .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
+} else {
+    ch_adapterremoval_for_skip_post_ar_trimming
+        .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
 }
 
 // Lane merging for libraries sequenced over multiple lanes (e.g. NextSeq)
-ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
+ch_branched_for_lanemerge = ch_inlinebarcoderemoval_for_lanemerge
   .groupTuple(by: [0,1,3,4,5,6])
   .map {
     it ->
@@ -955,7 +1065,7 @@ ch_branched_for_lanemerge = ch_adapterremoval_for_lanemerge
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
   }
-  .dump(tag: "LaneMerge Bypass")
+  .dump(tag: "lanemerge_bypass_decision")
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -976,7 +1086,7 @@ ch_branched_for_lanemerge_skipme = ch_branched_for_lanemerge.skip_merge
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
   }
-  .dump(tag: "LaneMerge Reconfigure")
+  .dump(tag: "lanemerge_reconfigure")
 
 
 ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
@@ -1004,7 +1114,7 @@ process lanemerge {
   publishDir "${params.outdir}/lanemerging", mode: params.publish_dir_mode
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge_ready
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge_ready.dump(tag: "lange_merge_input")
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R1_lanemerged.fq.gz") into ch_lanemerge_for_mapping_r1
@@ -1028,7 +1138,7 @@ process lanemerge {
 // Ensuring always valid R2 file even if doesn't exist for AWS
 if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
   ch_lanemerge_for_mapping_r1
-    .dump(tag: "Post LaneMerge Reconfigure")
+    .dump(tag: "post_lanemerge_reconfigure")
     .mix(ch_lanemerge_for_mapping_r2)
     .groupTuple(by: [0,1,2,3,4,5,6])
     .map{
@@ -1099,7 +1209,7 @@ process lanemerge_hostremoval_fastq {
 
 }
 
-// Post-preprocessing QC to help user check pre-processing removed all sequencing artefacts
+// Post-preprocessing QC to help user check pre-processing removed all sequencing artefacts. If doing post-AR trimming includes this step in output.
 
 process fastqc_after_clipping {
     label 'mc_small'
@@ -1113,7 +1223,7 @@ process fastqc_after_clipping {
     when: !params.skip_adapterremoval && !params.skip_fastqc
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_adapterremoval_for_fastqc_after_clipping
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_inlinebarcoderemoval_for_fastqc_after_clipping
 
     output:
     path("*_fastqc.{zip,html}") into ch_fastqc_after_clipping
@@ -1143,7 +1253,7 @@ process bwa {
     publishDir "${params.outdir}/mapping/bwa", mode: params.publish_dir_mode
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_lanemerge_for_bwa.dump(tag: "input_tuple")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_lanemerge_for_bwa.dump(tag: "bwa_input_reads")
     path index from bwa_index.collect().dump(tag: "input_index")
 
     output:
@@ -1462,7 +1572,7 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
       [ samplename, libraryid, lane, seqtype_new, organism, strandedness, udg, r1, r2 ]
 
   }
-  .dump(tag: "Seqtype")
+  .dump(tag: "pre_seqtype_decision")
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -1845,7 +1955,7 @@ process library_merge {
   publishDir "${params.outdir}/merged_bams/initial", mode: params.publish_dir_mode
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump(tag: "Input Tuple Library Merge")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump(tag: "library_merge_input")
 
   output:
   tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_rmdup.bam"), path("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
@@ -1899,21 +2009,33 @@ process preseq {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(input) from ch_input_for_preseq
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${input.baseName}.ccurve") into ch_preseq_for_multiqc
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${input.baseName}.preseq") into ch_preseq_for_multiqc
 
     script:
     pe_mode = params.skip_collapse && seqtype == "PE" ? '-P' : ''
-    if(!params.skip_deduplication && params.dedupper == "dedup"){
+    if(!params.skip_deduplication && params.preseq_mode == 'c_curve' && params.dedupper == "dedup"){
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -H ${input}
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.preseq -H ${input}
     """
-    } else if( !params.skip_deduplication && params.dedupper == "markduplicates"){
+    } else if( !params.skip_deduplication && params.preseq_mode == 'c_curve' && params.dedupper == "markduplicates"){
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B ${input} ${pe_mode}
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.preseq -B ${input} ${pe_mode}
     """
-    } else if ( params.skip_deduplication ) {
+    } else if ( params.skip_deduplication && params.preseq_mode == 'c_curve' ) {
     """
-    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.ccurve -B ${input} ${pe_mode}
+    preseq c_curve -s ${params.preseq_step_size} -o ${input.baseName}.preseq -B ${input} ${pe_mode}
+    """
+    } else if(!params.skip_deduplication && params.preseq_mode == 'lc_extrap' && params.dedupper == "dedup"){
+    """
+    preseq lc_extrap -s ${params.preseq_step_size} -o ${input.baseName}.preseq -H ${input} -n ${params.preseq_bootstrap} -e ${params.preseq_maxextrap} -cval ${params.preseq_cval} -x ${params.preseq_terms}
+    """
+    } else if( !params.skip_deduplication && params.preseq_mode == 'lc_extrap' && params.dedupper == "markduplicates"){
+    """
+    preseq lc_extrap -s ${params.preseq_step_size} -o ${input.baseName}.preseq -B ${input} ${pe_mode} -n ${params.preseq_bootstrap} -e ${params.preseq_maxextrap} -cval ${params.preseq_cval} -x ${params.preseq_terms}
+    """
+    } else if ( params.skip_deduplication && params.preseq_mode == 'lc_extrap' ) {
+    """
+    preseq lc_extrap -s ${params.preseq_step_size} -o ${input.baseName}.preseq -B ${input} ${pe_mode} -n ${params.preseq_bootstrap} -e ${params.preseq_maxextrap} -cval ${params.preseq_cval} -x ${params.preseq_terms}
     """
     }
 }
@@ -2230,7 +2352,7 @@ process genotyping_ug {
   file dict from ch_dict_for_ug.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*vcf.gz") into ch_ug_for_multivcfanalyzer,ch_ug_for_vcf2genome,ch_ug_for_bcftools_stats
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.realign.{bam,bai}") optional true
 
   script:
@@ -2239,24 +2361,24 @@ process genotyping_ug {
   if (!params.gatk_dbsnp)
     """
     samtools index -b ${bam}
-    gatk3 -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
-    gatk3 -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
-    gatk3 -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    gatk3 -Xmx${task.memory.toGiga()}g -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
+    gatk3 -Xmx${task.memory.toGiga()}g -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplename}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
+    gatk3 -Xmx${task.memory.toGiga()}g -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
     $keep_realign
     
-    pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
+    bgzip -@ ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
   else if (params.gatk_dbsnp)
     """
     samtools index ${bam}
-    gatk3 -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
-    gatk3 -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
-    gatk3 -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
+    gatk3 -Xmx${task.memory.toGiga()}g -T RealignerTargetCreator -R ${fasta} -I ${bam} -nt ${task.cpus} -o ${samplename}.intervals ${defaultbasequalities}
+    gatk3 -Xmx${task.memory.toGiga()}g -T IndelRealigner -R ${fasta} -I ${bam} -targetIntervals ${samplenane}.intervals -o ${samplename}.realign.bam ${defaultbasequalities}
+    gatk3 -Xmx${task.memory.toGiga()}g -T UnifiedGenotyper -R ${fasta} -I ${samplename}.realign.bam -o ${samplename}.unifiedgenotyper.vcf -nt ${task.cpus} --dbsnp ${params.gatk_dbsnp} --genotype_likelihoods_model ${params.gatk_ug_genotype_model} -stand_call_conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} -dcov ${params.gatk_downsample} --output_mode ${params.gatk_ug_out_mode} ${defaultbasequalities}
     
     $keep_realign
     
-    pigz -p ${task.cpus} ${samplename}.unifiedgenotyper.vcf
+    bgzip -@  ${task.cpus} ${samplename}.unifiedgenotyper.vcf
     """
 }
 
@@ -2277,19 +2399,19 @@ process genotyping_hc {
   file dict from ch_dict_for_hc.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz") into ch_hc_for_bcftools_stats
 
   script:
   if (!params.gatk_dbsnp)
     """
-    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${samplename}.haplotypecaller.vcf
+    gatk HaplotypeCaller --java-options "-Xmx${task.memory.toGiga()}G" -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf -stand-call-conf ${params.gatk_call_conf} --sample-ploidy ${params.gatk_ploidy} --output-mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
+    bgzip -@ ${task.cpus} ${samplename}.haplotypecaller.vcf
     """
 
   else if (params.gatk_dbsnp)
     """
-    gatk HaplotypeCaller -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
-    pigz -p ${task.cpus} ${samplename}.haplotypecaller.vcf
+    gatk HaplotypeCaller --java-options "-Xmx${task.memory.toGiga()}G" -R ${fasta} -I ${bam} -O ${samplename}.haplotypecaller.vcf --dbsnp ${params.gatk_dbsnp} -stand-call-conf ${params.gatk_call_conf} --sample_ploidy ${params.gatk_ploidy} --output_mode ${params.gatk_hc_out_mode} --emit-ref-confidence ${params.gatk_hc_emitrefconf}
+    bgzip -@  ${task.cpus} ${samplename}.haplotypecaller.vcf
     """
 }
 
@@ -2310,13 +2432,13 @@ process genotyping_freebayes {
   file dict from ch_dict_for_freebayes.collect()
 
   output: 
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*vcf.gz") into ch_fb_for_bcftools_stats
   
   script:
   def skip_coverage = "${params.freebayes_g}" == 0 ? "" : "-g ${params.freebayes_g}"
   """
   freebayes -f ${fasta} -p ${params.freebayes_p} -C ${params.freebayes_C} ${skip_coverage} ${bam} > ${samplename}.freebayes.vcf
-  pigz -p ${task.cpus} ${samplename}.freebayes.vcf
+  bgzip -@  ${task.cpus} ${samplename}.freebayes.vcf
   """
 }
 
@@ -2352,7 +2474,7 @@ process genotyping_pileupcaller {
   file fai from ch_fai_for_pileupcaller.collect()
   file dict from ch_dict_for_pileupcaller.collect()
   path(bed) from ch_bed_for_pileupcaller.collect()
-  path(snp) from ch_snp_for_pileupcaller.collect().dump(tag: "Pileupcaller SNP file")
+  path(snp) from ch_snp_for_pileupcaller.collect().dump(tag: "pileupcaller_snp_file")
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("pileupcaller.${strandedness}.*") into ch_for_eigenstrat_snp_coverage
@@ -2449,6 +2571,31 @@ process genotyping_angsd {
 }
 
 ////////////////////////////////////
+/* --    GENOTYPING STATS     -- */
+////////////////////////////////////
+
+process bcftools_stats {
+  label  'mc_small'
+  tag "${samplename}"
+  publishDir "${params.outdir}/bcftools/stats", mode: params.publish_dir_mode
+
+  when: 
+  params.run_bcftools_stats
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(vcf) from ch_ug_for_bcftools_stats.mix(ch_hc_for_bcftools_stats,ch_fb_for_bcftools_stats)
+  file fasta from ch_fasta_for_bcftools_stats.collect()
+
+  output:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.vcf.stats") into ch_bcftools_stats_for_multiqc
+
+  script:
+  """
+  bcftools stats *.vcf.gz -F ${fasta} > ${samplename}.vcf.stats
+  """
+}
+
+////////////////////////////////////
 /* --    CONSENSUS CALLING     -- */
 ////////////////////////////////////
 
@@ -2473,10 +2620,10 @@ process vcf2genome {
   def out = !params.vcf2genome_outfile ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
   def fasta_head = !params.vcf2genome_header ? "${samplename}" : "${params.vcf2genome_header}"
   """
-  pigz -f -d -p ${task.cpus} *.vcf.gz
-  vcf2genome -Xmx${task.memory.toGiga()}g -draft ${out}.fasta -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainy.fasta
-  pigz -p ${task.cpus} *.fasta 
-  pigz -p ${task.cpus} *.vcf
+  pigz -d -f -p ${task.cpus} ${vcf}
+  vcf2genome -Xmx${task.memory.toGiga()}g -draft ${out} -draftname "${fasta_head}" -in ${vcf.baseName} -minc ${params.vcf2genome_minc} -minfreq ${params.vcf2genome_minfreq} -minq ${params.vcf2genome_minq} -ref ${fasta} -refMod ${out}_refmod.fasta -uncertain ${out}_uncertainty.fasta
+  pigz -f -p ${task.cpus} ${out}*
+  bgzip -@ ${task.cpus} *.vcf
   """
 }
 
@@ -2486,7 +2633,7 @@ process vcf2genome {
 if (!params.additional_vcf_files) {
     ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[-1] }.collect()
 } else {
-    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it [-1] }.collect().mix(ch_extravcfs_for_multivcfanalyzer)
+    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[-1] }.mix(ch_extravcfs_for_multivcfanalyzer).collect().dump(tag: "postmix")
 }
 
 process multivcfanalyzer {
@@ -2516,9 +2663,10 @@ process multivcfanalyzer {
   script:
   def write_freqs = params.write_allele_frequencies ? "T" : "F"
   """
-  gunzip -f *.vcf.gz
+  pigz -d -f -p ${task.cpus} ${vcf}
   multivcfanalyzer -Xmx${task.memory.toGiga()}g ${params.snp_eff_results} ${fasta} ${params.reference_gff_annotations} . ${write_freqs} ${params.min_genotype_quality} ${params.min_base_coverage} ${params.min_allele_freq_hom} ${params.min_allele_freq_het} ${params.reference_gff_exclude} *.vcf
   pigz -p ${task.cpus} *.tsv *.txt snpAlignment.fasta snpAlignmentIncludingRefGenome.fasta fullAlignment.fasta
+  bgzip -@ ${task.cpus} *.vcf
   """
  }
 
@@ -2575,7 +2723,7 @@ process sexdeterrmine_prep {
 process sexdeterrmine {
     label 'mc_small'
     publishDir "${params.outdir}/sex_determination", mode: params.publish_dir_mode
-     
+
     input:
     path bam from ch_prepped_for_sexdeterrmine.collect()
     path(bed) from ch_bed_for_sexdeterrmine
@@ -2835,7 +2983,7 @@ process kraken {
   tuple prefix, path("*.kraken2_report") into ch_kraken_report, ch_kraken_for_multiqc
 
   script:
-  prefix = fastq.toString().tokenize('.')[0]
+  prefix = fastq.baseName
   out = prefix+".kraken.out"
   kreport = prefix+".kraken2_report"
   kreport_old = prefix+".kreport"
@@ -2937,7 +3085,7 @@ process get_software_versions {
     qualimap --version &> v_qualimap.txt 2>&1 || true
     preseq &> v_preseq.txt 2>&1 || true
     gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
-    gatk3 --version 2>&1 > v_gatk3.txt 2>&1 || true
+    gatk3 --version 2>&1 | head -n 1 > v_gatk3.txt 2>&1 || true
     freebayes --version &> v_freebayes.txt 2>&1 || true
     bedtools --version &> v_bedtools.txt 2>&1 || true
     damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
@@ -2957,8 +3105,8 @@ process get_software_versions {
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
     eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
     mapDamage --version > v_mapdamage.txt || true
-    bbduk.sh | grep 'Last modified' | cut -d' ' -f 3-99 > v_bbduk.txt || true
-
+    bbduk.sh | grep 'Last modified' | cut -d ' ' -f 3-99 > v_bbduk.txt || true
+    bcftools --version | grep 'bcftools' | cut -d ' ' -f 2 > v_bcftools.txt || true
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
@@ -3000,6 +3148,7 @@ process multiqc {
     file ('hops/*') from ch_hops_for_multiqc.collect().ifEmpty([])
     file ('nuclear_contamination/*') from ch_nuclear_contamination_for_multiqc.collect().ifEmpty([])
     file ('genotyping/*') from ch_eigenstrat_snp_cov_for_multiqc.collect().ifEmpty([])
+    file ('bcftools_stats') from ch_bcftools_stats_for_multiqc.collect().ifEmpty([])
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
     output:
