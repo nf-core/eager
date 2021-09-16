@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## [2.4.0] - 20201-09-14
+## [2.4.0] - Wangen - 20201-09-14
 
 ### `Added`
 
@@ -178,7 +178,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## [2.3.0] - 2021-01-11 - "Aalen"
+## [2.3.0] - Aalen - 2021-01-11 
 
 ### `Added`
 
@@ -311,7 +311,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Latest version of Sex.DetERRmine (1.1.2)
 - Latest version of endorS.py (0.4)
 
-## [2.1.0] - 2020-03-05 - "Ravensburg"
+## [2.1.0] - Ravensburg - 2020-03-05
 
 ### `Added`
 
