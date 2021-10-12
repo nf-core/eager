@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#794](https://github.com/nf-core/eager/issues/794) Aligned default test profile with nf-core standards (`test_tsv` is now `test`)
 
 ### `Improved`
+
 - Speed and memory optimization of the `extract_map_reads.py` script.
 
 ### `Dependencies`
