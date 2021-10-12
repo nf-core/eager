@@ -4,7 +4,7 @@
 # See git repository (https://github.com/nf-core/eager) for full license text.
 
 import argparse
-from multiprocessing.pool import ThreadPool
+from multiprocessing import Pool
 import pysam
 from xopen import xopen
 from functools import partial
@@ -52,96 +52,144 @@ def _get_args():
     return (bam, in_fwd, in_rev, out_fwd, out_rev, mode, threads)
 
 
-def extract_mapped_chr(chr, BAMFILE):
+def extract_mapped_chr(chr, bam):
     """
     Get mapped reads per chromosome
     Args:
         chr(str): chromosome
-        BAMFILE(pysam alignement): PySam alignment file object
+        bam(str): path to bamfile
     Returns:
         res(list): list of mapped reads (str) name per chromosome
     """
     res = []
-    reads = BAMFILE.fetch(chr, multiple_iterators=True)
+    BAMFILE = pysam.AlignmentFile(bam, "rb")
+    reads = BAMFILE.fetch(chr)
     for read in reads:
-        if read.is_unmapped == False:
+        if read.is_unmapped is False:
             if read.query_name.startswith("M_"):
                 read_name = read.query_name.replace("M_", "").split()[0].split("/")[0]
             else:
                 read_name = read.query_name.split()[0].split("/")[0]
             res.append(read_name)
+    del BAMFILE
     return res
 
 
-def extract_mapped(BAMFILE, threads):
+def extract_mapped(threads, bam):
     """Get mapped reads in parallel
     Args:
-        BAMFILE(pysam alignement): PySam alignment file object
         threads(int): number of threads to use
+        bam(str): path to bamfile
     Returns:
 
     """
+    BAMFILE = pysam.AlignmentFile(bam, "rb", threads=threads)
     try:
         chrs = BAMFILE.references
     except ValueError as e:
         print(e)
+    del BAMFILE
 
     # Returns empty list if not reads mapped (because not ref match in bam)
     if len(chrs) == 0:
         return []
-
     # Checking that nb_process is not > nb_chromosomes
     threads = min(threads, len(chrs))
-    extract_mapped_chr_partial = partial(extract_mapped_chr, BAMFILE=BAMFILE)
-    with ThreadPool(threads) as t:
-        res = t.map(extract_mapped_chr_partial, chrs)
+    extract_mapped_chr_partial = partial(extract_mapped_chr, bam=bam)
+    with Pool(threads) as p:
+        res = p.map(extract_mapped_chr_partial, chrs)
     result = [i for ares in res for i in ares if len(i) > 0]
     return result
 
 
-def parse_write_fq(
-    fq_in_path, fq_out_path, mapped_reads, write_mode, remove_mode, threads
-):
-    """Parse Fastq, compares to mapped reads, and writes cleaned fastq to disk
+def compare_mapped_reads(all_read_dict, mapped_reads):
+    """Sort mapped reads from dictionary of fastq reads
+    Args:
+        all_reads(dict) dict of all reads
+        mapped_reads(list) list of mapped reads
+    Returns:
+        (dict) dictionary with read names as key, list of [unmapped/mapped (u|m),
+        ,read entry] as value
+    """
+
+    fqd = dict()
+
+    def intersection(list1, list2):
+        return list(set(list1).intersection(set(list2)))
+
+    def difference(list1, list2):
+        return list(set(list1).difference(set(list2)))
+
+    mapped = intersection(all_read_dict.keys(), mapped_reads)
+    unmapped = difference(all_read_dict.keys(), mapped_reads)
+
+    for rm in mapped:
+        fqd[rm] = ["m", all_read_dict[rm]]
+    for ru in unmapped:
+        fqd[ru] = ["u", all_read_dict[ru]]
+
+    return fqd
+
+
+def parse_fq(fq_in_path):
+    """Parse Fastq
 
     Args:
         fq_in_path (str): path to input fastq file
+    Returns:
+        (dict) dictionary with read names as key, read entry as value
+    """
+    all_read_dict = dict()
+    with pysam.FastqFile(fq_in_path) as fin:
+        for entry in fin:
+            all_read_dict[entry.name] = entry
+    return all_read_dict
+
+
+def write_fq(fq_out_path, read_dict, write_mode, remove_mode, threads):
+    """Writes cleaned fastq to disk
+
+    Args:
         fq_out_path (str): path to output fastq file
-        mapped_reads (list): list of the name of mapped reads
+        read_dict (dict): dictionary with read names as key, list of [unmapped/mapped (u|m),
+        ,read entry] as value
         write_mode (str): writing mode ('w' or 'wb')
         remove_mode (str): remove mode ('replace' or 'remove')
         threads (int): number of threads for parallel write compression by xopen
     """
     if write_mode == "wb":
-        with pysam.FastqFile(fq_in_path) as fin, xopen(
-            fq_out_path, mode="wb", threads=threads
-        ) as fout:
-            for entry in fin:
-                if entry.name in mapped_reads:
+        with xopen(fq_out_path, mode="wb", threads=threads) as fout:
+            for entry in read_dict:
+                if read_dict[entry][0] == "u":
+                    fout.write(f"{read_dict[entry][1]}\n".encode())
+                else:
                     if remove_mode == "remove":
                         continue
                     else:
-                        entry.set_sequence(
-                            sequence="N" * len(entry.sequence),
-                            quality=entry.quality,
+                        read_dict[entry][1].set_sequence(
+                            sequence="N" * len(read_dict[entry][1].sequence),
+                            quality=read_dict[entry][1].quality,
                         )
-                        fout.write(f"{entry}\n".encode())
-                else:
-                    fout.write(f"{entry}\n".encode())
+                        fout.write(f"{read_dict[entry][1]}\n".encode())
     else:
-        with pysam.FastqFile(fq_in_path) as fin, open(fq_out_path, mode="w") as fout:
-            for entry in fin:
-                if entry.name in mapped_reads:
+        with open(fq_out_path, mode="w") as fout:
+            for entry in read_dict:
+                if read_dict[entry][0] == "u":
+                    fout.write(f"{read_dict[entry][1]}\n")
+                else:
                     if remove_mode == "remove":
                         continue
                     else:
-                        entry.set_sequence(
-                            sequence="N" * len(entry.sequence),
-                            quality=entry.quality,
+                        read_dict[entry][1].set_sequence(
+                            sequence="N" * len(read_dict[entry][1].sequence),
+                            quality=read_dict[entry][1].quality,
                         )
-                        fout.write(f"{entry}\n")
-                else:
-                    fout.write(f"{entry}\n")
+                        fout.write(f"{read_dict[entry][1]}\n")
+
+
+def format_fastq_record(name, comment, sequence, quality):
+    sequence = "N" * len(sequence)
+    return f"{name} {comment}\n{sequence}\n+\n{quality}\n"
 
 
 def check_remove_mode(mode):
@@ -154,7 +202,7 @@ def check_remove_mode(mode):
 if __name__ == "__main__":
     BAM, IN_FWD, IN_REV, OUT_FWD, OUT_REV, MODE, THREADS = _get_args()
 
-    if OUT_FWD == None:
+    if OUT_FWD is None:
         out_fwd = f"{IN_FWD.split('/')[-1].split('.')[0]}.r1.fq.gz"
     else:
         out_fwd = OUT_FWD
@@ -165,31 +213,49 @@ if __name__ == "__main__":
         write_mode = "w"
 
     remove_mode = check_remove_mode(MODE)
-    BAMFILE = pysam.AlignmentFile(BAM, mode="r", threads=THREADS)
+
+    if IN_REV:
+        total_steps = 3
+    else:
+        total_steps = 2
 
     # FORWARD OR SE FILE
-    print(f"- Extracting mapped reads from {BAM}")
-    mapped_reads = extract_mapped(BAMFILE, threads=THREADS)
+    print(f"* Step 1/{total_steps}: Extracting mapped reads from {BAM}")
+    mapped_reads = extract_mapped(bam=BAM, threads=THREADS)
     print(
-        f"- Comparing mapped reads with forward fastq files and writing {OUT_FWD} to disk "
+        f"* Step 2/{total_steps}: Comparing mapped reads with forward fastq files and writing {OUT_FWD} to disk "
     )
-    parse_write_fq(
-        IN_FWD,
+    print("\t - Step 2.1: Reading forward fastq")
+    all_fwd_reads = parse_fq(IN_FWD)
+    print("\t - Step 2.2: Comparing forward fastq")
+    all_fwd_reads_checked = compare_mapped_reads(all_fwd_reads, mapped_reads)
+    del all_fwd_reads
+    print("\t - Step 2.3: Writing forward fastq")
+    write_fq(
         OUT_FWD,
-        mapped_reads,
+        all_fwd_reads_checked,
         write_mode=write_mode,
         remove_mode=remove_mode,
         threads=THREADS,
     )
+
+    del all_fwd_reads_checked
+
     if IN_REV:
         print(
-            f"- Comparing mapped reads with reverse fastq files and writing {OUT_REV} to disk"
+            f"* Step 3/{total_steps}: Comparing mapped reads with reverse fastq files and writing {OUT_REV} to disk"
         )
-        parse_write_fq(
-            IN_REV,
+        print("\t - Step 3.1: Reading reverse fastq")
+        all_rev_reads = parse_fq(IN_REV)
+        print("\t - Step 3.2: Comparing reverse fastq")
+        all_rev_reads_checked = compare_mapped_reads(all_rev_reads, mapped_reads)
+        del all_rev_reads
+        print("\t - Step 3.3: Writing reverse fastq")
+        write_fq(
             OUT_REV,
-            mapped_reads,
+            all_rev_reads_checked,
             write_mode=write_mode,
             remove_mode=remove_mode,
             threads=THREADS,
         )
+        del all_rev_reads_checked
