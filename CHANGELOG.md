@@ -3,7 +3,17 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.4.0] - 20201-08-31
+## [dev]
+
+### `Added`
+
+### `Fixed`
+
+### `Dependencies`
+
+### `Deprecated`
+
+## [2.4.0] - Wangen - 20201-09-14
 
 ### `Added`
 
@@ -23,7 +33,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated workflow diagrams to reflect latest functionality
 - [#787](https://github.com/nf-core/eager/issues/787) Adds memory specification flags for the GATK UnifiedGenotyper and HaplotyperCaller steps (thanks to @nylander)
 - Fixed issue where MultiVCFAnalyzer would not pick up newly generated VCF files, when specifying additional VCF files.
-- Switch hostremoval_input_fastq from multiprocessing to multithreading because of memory concerns [#789](https://github.com/nf-core/eager/issues/789)
+- [#790](https://github.com/nf-core/eager/issues/790) Fixed kraken2 report file-name collision when sample names have `.` in them
+- [#792](https://github.com/nf-core/eager/issues/792) Fixed java error messages for AdapterRemovalFixPrefix being hidden in output
+- [#794](https://github.com/nf-core/eager/issues/794) Aligned default test profile with nf-core standards (`test_tsv` is now `test`)
 
 ### `Dependencies`
 
@@ -166,7 +178,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## [2.3.0] - 2021-01-11 - "Aalen"
+## [2.3.0] - Aalen - 2021-01-11 
 
 ### `Added`
 
@@ -299,7 +311,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Latest version of Sex.DetERRmine (1.1.2)
 - Latest version of endorS.py (0.4)
 
-## [2.1.0] - 2020-03-05 - "Ravensburg"
+## [2.1.0] - Ravensburg - 2020-03-05
 
 ### `Added`
 

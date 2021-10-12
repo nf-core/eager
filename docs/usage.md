@@ -111,7 +111,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
   * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
   * Pulls most software from [Bioconda](https://bioconda.github.io/)
-* `test_tsv`
+* `test`
   * A profile with a complete configuration for automated testing
   * Includes links to test data so needs no other parameters
 
@@ -350,9 +350,9 @@ Note the following important points and limitations for setting up:
 * The TSV must use actual tabs (not spaces) between cells.
 * The input FASTQ filenames are discarded after FastQC, all other downstream results files are based on `Sample_Name`, `Library_ID` and `Lane` columns for filenames.
 * *File* names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
-  * At different stages of the merging process, (as above) nf-core/eager will use as output filenames the information from the `Sample_Name`, `Library_ID` and `Lane` column columns for filenames.
-  * In other words, your .tsv file must not have rows with `Library1` and `Library1` for both `SampleA` and `SampleB`. While nf-core/eager would not try to _merge_ these, in some stages of the pipeline output files names would be the same, and would overwrite the other if the files are output to the same `results/` subdirectory.
-  * If it is 'too late' and you already have duplicate file names, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
+  * At different stages of the merging process, (as above) nf-core/eager will use as output filenames the information from the `Sample_Name`, `Library_ID` and/or `Lane` columns for filenames.
+  * Library_IDs must be unique (other than if they are spread across multiple lanes). For example, your .tsv file must not have rows with both the strings in the Library_ID column as `Library1` and `Library1`, for **both** `SampleA` and `SampleB` in the Sample_ID column, otherwise the two `Library1.fq.gz` files may result in a filename collision.
+  * If it is 'too late' and you already have duplicated FASTQ file names before starting a run, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
 * Lane IDs must be unique for each sequencing of each library.
   * If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
   * This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.
@@ -367,8 +367,8 @@ Note the following important points and limitations for setting up:
   * If you truly want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
   * If you _regularly_ want to run the situation above, please leave a feature request on github.
 * DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).
-* nf-core/eager functionality such as `--run_trim_bam` will be applied to only   non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries. - Qualimap is run on each sample, after merging of libraries (i.e. your values   will reflect the values of all libraries combined - after being damage trimmed   etc.).
-* Genotyping will be typically performed on each `sample` independently, as normally all libraries will have been merged together. However, if you have a   mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS   libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file  collision` error in steps such as `sexdeterrmine`, and then you will need to   merge these yourself. We will consider changing this behaviour in the future   if there is enough interest.
+* nf-core/eager functionality such as `--run_trim_bam` will be applied to only   non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries. - Qualimap is run on each sample, after merging of libraries (i.e. your values   will reflect the values of all libraries combined - after being damage trimmed etc.).
+* Genotyping will be typically performed on each `sample` independently, as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file collision` error in steps such as `sexdeterrmine`, and then you will need to merge these yourself. We will consider changing this behaviour in the future if there is enough interest.
 
 ## Clean up
 
