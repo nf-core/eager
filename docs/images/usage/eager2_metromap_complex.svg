@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   width="316.84647mm"
-   height="170.04657mm"
-   viewBox="0 0 316.84646 170.04657"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="297.05508mm"
+   height="170.45857mm"
+   viewBox="0 0 297.05508 170.45857"
    version="1.1"
    id="svg8"
-   inkscape:version="1.1 (1:1.1+202105261517+ce6663b3b7)"
-   sodipodi:docname="eager2_metromap_complex.svg"
-   inkscape:export-filename="/home/jfellows/Documents/git/nf-core/eager/docs/images/usage/eager2_metromap_complex.png"
+   inkscape:version="1.0.1 (1.0.1+r74)"
+   sodipodi:docname="eager2_metromap_complex_v2.svg"
+   inkscape:export-filename="/home/jfellows/Documents/graphics/diagrams/eager2_metromap_complex_v2.png"
    inkscape:export-xdpi="300"
-   inkscape:export-ydpi="300"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/">
+   inkscape:export-ydpi="300">
   <defs
      id="defs2">
     <marker
@@ -145,9 +145,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.3238356"
-     inkscape:cx="406.07024"
-     inkscape:cy="-143.59138"
+     inkscape:zoom="0.4579727"
+     inkscape:cx="-108.7639"
+     inkscape:cy="568.17229"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -155,24 +155,23 @@
      inkscape:snap-bbox="true"
      inkscape:bbox-nodes="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1016"
+     inkscape:window-height="1043"
      inkscape:window-x="0"
-     inkscape:window-y="27"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:snap-bbox-midpoints="false"
+     inkscape:snap-bbox-midpoints="true"
      inkscape:snap-global="true"
      inkscape:snap-nodes="false"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
-     fit-margin-bottom="0"
-     inkscape:pagecheckerboard="0">
+     fit-margin-bottom="0">
     <inkscape:grid
        type="xygrid"
        id="grid10"
        dotted="true"
-       originx="1.9922901"
-       originy="-17.8076" />
+       originx="0.32694881"
+       originy="-15.312377" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -182,6 +181,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -189,62 +189,14 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(1.99229,-17.807598)">
+     transform="translate(0.32694882,-15.312377)">
     <rect
-       style="fill:#ffffff;stroke:none;stroke-width:0.582692;stroke-linecap:round"
+       style="fill:#ffffff;stroke:none;stroke-width:0.564883;stroke-linecap:round"
        id="rect1194"
-       width="316.84647"
-       height="170.04657"
-       x="-1.99229"
-       y="17.807598" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="72.69239"
-       y="163.2347"
-       id="text884-7-7-9-1-1-1-9-1-5-3-3"><tspan
-         sodipodi:role="line"
-         x="72.69239"
-         y="163.2347"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52778px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;stroke-width:0.264583"
-         id="tspan3054-5-9-5-6">v2.4</tspan></text>
-    <g
-       id="g2162-7-6"
-       transform="rotate(-90,221.46072,49.1247)">
-      <g
-         id="g1624-0-2-1-4-7-7-5-5-4-66-0-2"
-         transform="rotate(90,253.54359,57.21363)"
-         style="stroke:#cc3333;stroke-opacity:1">
-        <g
-           id="g1887-4-9-9"
-           style="stroke:#cc3333;stroke-opacity:1">
-          <g
-             id="g1624-0-2-1-4-7-7-5-5-95-3-1"
-             transform="translate(24.347494,-30.1984)"
-             style="stroke:#cc3333;stroke-opacity:1">
-            <path
-               style="fill:none;stroke:#cc3333;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-               d="m 278.87083,170.65625 h -6.35 c -0.98604,0 -1.94859,-0.62568 -2.64583,-1.32292 l -13.22917,-13.22916"
-               id="path1105-2-3-6-0-5-7-7-3-6-5-0-6-2"
-               sodipodi:nodetypes="cssc" />
-          </g>
-          <path
-             style="fill:none;stroke:#ffcc00;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-             d="m 303.22483,139.45942 -6.28941,-0.003 c -1.06239,-5.1e-4 -1.85471,-0.87854 -2.48329,-1.50742 l -12.75077,-12.75707"
-             id="path1105-2-3-6-0-5-7-7-3-6-5-7-48-0-7"
-             sodipodi:nodetypes="cssc" />
-        </g>
-      </g>
-      <g
-         id="g1926-8-8-4-7-6-0"
-         transform="matrix(1.3999991,0,0,1,-77.381202,-58.205016)">
-        <path
-           style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-           d="m 175.94791,165.1 h 2.64584"
-           id="path975-3-6-3-6-4-8-4-5-1-2-9"
-           sodipodi:nodetypes="cc" />
-      </g>
-    </g>
+       width="297.05508"
+       height="170.45857"
+       x="-1.7567509"
+       y="17.763466" />
     <g
        id="g1624-0-2-1-4-7-7-5-5-4-6-9"
        transform="rotate(45,334.85781,16.326373)"
@@ -709,7 +661,7 @@
     <text
        xml:space="preserve"
        id="text886"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.5833px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';white-space:pre;shape-inside:url(#rect888);fill:#000000;fill-opacity:1;stroke:none"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.5833px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';white-space:pre;shape-inside:url(#rect888);fill:#000000;fill-opacity:1;stroke:none;"
        transform="translate(0,-15.345837)" />
     <text
        xml:space="preserve"
@@ -748,6 +700,22 @@
          y="81.819687"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:end;text-anchor:end;stroke-width:0.264583"
          id="tspan928-7">Bowtie2</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="282.81982"
+       y="90.384033"
+       id="text884-7-7-9-7-9-4-8"><tspan
+         sodipodi:role="line"
+         x="282.81982"
+         y="90.384033"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
+         id="tspan1073-2-6">VCF2Genome</tspan><tspan
+         sodipodi:role="line"
+         x="282.81982"
+         y="94.793747"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
+         id="tspan1140-0">MultiVCFAnalyzer</tspan></text>
     <path
        style="fill:none;stroke:#ffcc00;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 285.22085,83.34375 v 2.645833"
@@ -941,7 +909,7 @@
          x="159.092"
          y="88.98996"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
-         id="tspan1868-2-6-0">Samtools' </tspan><tspan
+         id="tspan1868-2-6-0">samtools' </tspan><tspan
          sodipodi:role="line"
          x="159.092"
          y="93.399673"
@@ -962,7 +930,7 @@
          x="143.71013"
          y="112.16133"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
-         id="tspan1552">Samtools' </tspan><tspan
+         id="tspan1552">samtools' </tspan><tspan
          sodipodi:role="line"
          x="143.71013"
          y="116.57104"
@@ -1039,7 +1007,7 @@
          x="128.75439"
          y="76.729164"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
-         id="tspan928-5-7-7-4">Samtools</tspan><tspan
+         id="tspan928-5-7-7-4">samtools</tspan><tspan
          sodipodi:role="line"
          x="128.75439"
          y="81.138878"
@@ -1105,17 +1073,6 @@
          y="69.843277"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
          id="tspan3054-5-9">FastQC</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="288.34293"
-       y="101.73052"
-       id="text884-7-7-9-1-1-1-9-1-5-3"><tspan
-         sodipodi:role="line"
-         x="288.34293"
-         y="101.73052"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
-         id="tspan3054-5-9-5">BCFtools</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
@@ -1488,7 +1445,7 @@
          id="tspan1902">Example analysis pathways</tspan></text>
     <g
        id="g1832"
-       transform="translate(207.39814,125.44903)">
+       transform="translate(187.81897,125.44903)">
       <g
          id="g2397"
          transform="translate(16.598689,31.20781)">
@@ -1690,11 +1647,11 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:8.46667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="193.34064"
+       x="173.76143"
        y="163.56329"
        id="text1592-5"><tspan
          sodipodi:role="line"
-         x="193.34064"
+         x="173.76143"
          y="163.56329"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.46667px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';stroke-width:0.264583"
          id="tspan1902-4">Legend</tspan></text>
@@ -1751,50 +1708,34 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="255.52397"
-       y="64.791168"
+       x="256.08231"
+       y="64.026581"
        id="text884-7-7-9-1-4-7-8-5-6-3"><tspan
          sodipodi:role="line"
-         x="255.52397"
-         y="64.791168"
+         x="256.08231"
+         y="64.026581"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:start;text-anchor:start;stroke-width:0.264583"
          id="tspan1224-5">GATK's UnifiedGenotyper</tspan><tspan
          sodipodi:role="line"
-         x="255.52397"
-         y="68.759918"
+         x="256.08231"
+         y="67.995331"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:start;text-anchor:start;stroke-width:0.264583"
          id="tspan1288">GATK's HaplotypeCaller</tspan><tspan
          sodipodi:role="line"
-         x="255.52397"
-         y="72.728668"
+         x="256.08231"
+         y="71.964081"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:start;text-anchor:start;stroke-width:0.264583"
          id="tspan1290">sequenceTool's pileupCaller</tspan><tspan
          sodipodi:role="line"
-         x="255.52397"
-         y="76.697418"
+         x="256.08231"
+         y="75.932831"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:start;text-anchor:start;stroke-width:0.264583"
          id="tspan1292">freebayes</tspan><tspan
          sodipodi:role="line"
-         x="255.52397"
-         y="80.666168"
+         x="256.08231"
+         y="79.901581"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:start;text-anchor:start;stroke-width:0.264583"
          id="tspan1294">ANGSD</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="288.33234"
-       y="84.16713"
-       id="text884-7-7-9-1-4-7-8-5-6-3-3"><tspan
-         sodipodi:role="line"
-         x="288.33234"
-         y="84.16713"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:start;text-anchor:start;stroke-width:0.264583"
-         id="tspan1294-6">VCF2Genome</tspan><tspan
-         sodipodi:role="line"
-         x="288.33234"
-         y="88.13588"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:start;text-anchor:start;stroke-width:0.264583"
-         id="tspan31539">MultiVCFAnalyzer</tspan></text>
     <circle
        style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path12-3-5-93-2-6"

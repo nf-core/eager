@@ -18,8 +18,7 @@ Please delete this text and anything that's not relevant from the template below
 I have checked the following places for your error:
 
 - [ ] [nf-core website: troubleshooting](https://nf-co.re/usage/troubleshooting)
-- [ ] [nf-core/eager pipeline documentation](https://nf-co.re/nf-core/eager/usage)
-      - nf-core/eager FAQ/troubleshooting can be found [here](https://nf-co.re/eager/usage#troubleshooting-and-faqs)
+- [ ] [nf-core/eager pipeline documentation](https://nf-co.re/eager/usage)
 
 ## Description of the bug
 
@@ -29,8 +28,8 @@ I have checked the following places for your error:
 
 Steps to reproduce the behaviour:
 
-1. Command line: `nextflow run ...`
-2. See error: _Please provide your error message_
+1. Command line: <!-- [e.g. `nextflow run ...`] -->
+2. See error: <!-- [Please provide your error message] -->
 
 ## Expected behaviour
 
@@ -42,7 +41,6 @@ Have you provided the following extra information/files:
 
 - [ ] The command used to run the pipeline
 - [ ] The `.nextflow.log` file <!-- this is a hidden file in the directory where you launched the pipeline -->
-- [ ] The exact error: <!-- [Please provide your error message] -->
 
 ## System
 
@@ -53,13 +51,12 @@ Have you provided the following extra information/files:
 
 ## Nextflow Installation
 
-- Version: <!-- [e.g. 19.10.0] -->
+- Version: <!-- [e.g. 21.04.0] -->
 
 ## Container engine
 
 - Engine: <!-- [e.g. Conda, Docker, Singularity, Podman, Shifter or Charliecloud] -->
 - version: <!-- [e.g. 1.0.0] -->
-- Image tag: <!-- [e.g. nfcore/eager:1.0.0] -->
 
 ## Additional context
 
