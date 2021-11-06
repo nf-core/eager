@@ -3,14 +3,32 @@
     "homePage": "https://github.com/nf-core/eager",
     "repos": {
         "nf-core/modules": {
+            "bowtie2/build": {
+                "git_sha": "3aacd46da2b221ed47aaa05c413a828538d2c2ae"
+            },
+            "bwa/index": {
+                "git_sha": "3aacd46da2b221ed47aaa05c413a828538d2c2ae"
+            },
             "custom/dumpsoftwareversions": {
                 "git_sha": "84f2302920078b0cf7716b2a2e5fcc0be5c4531d"
             },
             "fastqc": {
                 "git_sha": "7b3315591a149609e27914965f858c9a7e071564"
             },
+            "gatk4/createsequencedictionary": {
+                "git_sha": "3aacd46da2b221ed47aaa05c413a828538d2c2ae"
+            },
+            "gunzip": {
+                "git_sha": "e560fbbc3ed68e62bc810a50f552394056f81762"
+            },
             "multiqc": {
                 "git_sha": "7b3315591a149609e27914965f858c9a7e071564"
+            },
+            "samtools/faidx": {
+                "git_sha": "3aacd46da2b221ed47aaa05c413a828538d2c2ae"
+            },
+            "samtools/index": {
+                "git_sha": "3aacd46da2b221ed47aaa05c413a828538d2c2ae"
             }
         }
     }

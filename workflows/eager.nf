@@ -11,11 +11,18 @@ WorkflowEager.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [
+        params.input, params.multiqc_config, params.fasta,
+        params.bwa_index_dir, params.bt2_index_dir, params.fasta_fai,
+        params.fasta_dict
+    ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+// Stage dummy file to be used as an optional input where required
+ch_dummy_file = file("$projectDir/assets/nf-core_eager_dummy.txt", checkIfExists: true)
 
 /*
 ========================================================================================
@@ -38,7 +45,23 @@ def modules = params.modules.clone()
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check' addParams( options: [:] )
+
+// Set reference indexing output directory if user wishes to save reference
+def gunzip_options                           = params.save_reference ? [publish_dir: 'reference'] : [publish_files: false]
+def bwa_index_options                        = params.save_reference ? [publish_dir: 'reference'] : [publish_files: false]
+def bowtie2_build_options                    = params.save_reference ? [publish_dir: 'reference'] : [publish_files: false]
+def samtools_faidx_options                   = params.save_reference ? [publish_dir: 'reference'] : [publish_files: false]
+def gatk4_createsequencedictionary_options   = params.save_reference ? [publish_dir: 'reference'] : [publish_files: false]
+
+// Set additional custom parameters from modules config (no def as already defined above)
+gunzip_options                           = modules['fasta_gunzip']
+bwa_index_options                        = modules['bwa_index_options']
+bowtie2_build_options                    = modules['bowtie2_build_options']
+samtools_faidx_options                   = modules['samtools_faidx_options']
+gatk4_createsequencedictionary_options   = modules['gatk4_createsequencedictionary_options']
+
+include { INPUT_CHECK  } from '../subworkflows/local/input_check' addParams( options: [:] )
+include { INDEX_FASTA  } from '../subworkflows/local/index_fasta' addParams( gunzip_options: gunzip_options, bwa_index_options: bwa_index_options, bowtie2_build_options: bowtie2_build_options, samtools_faidx_options: samtools_faidx_options, gatk4_createsequencedictionary_options: gatk4_createsequencedictionary_options )
 
 /*
 ========================================================================================
@@ -76,6 +99,10 @@ workflow EAGER {
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+
+    INDEX_FASTA (
+        ch_dummy_file
+    )
 
     //
     // MODULE: Run FastQC
