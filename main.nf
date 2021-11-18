@@ -1587,7 +1587,7 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_branched_for_seqtypemerge.merge_me
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_seqtypemerged_rg.bam"), file("*_seqtypemerged_rg*.{bai,csi}")  into ch_seqtypemerge_for_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_seqtypemerged.bam"), file("*_seqtypemerged*.{bai,csi}")  into ch_seqtypemerge_for_filtering
 
     script:
     def size = params.large_ref ? '-c' : ''
@@ -1958,7 +1958,7 @@ process library_merge {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump(tag: "library_merge_input")
 
   output:
-  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_rmdup.bam"), path("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rmdup.bam"), path("*_libmerged_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
 
   script:
   def size = params.large_ref ? '-c' : ''
@@ -2252,7 +2252,7 @@ process additional_library_merge {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_trimmed_formerge.merge_me
 
   output:
-  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_add.bam"), path("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_add.bam"), path("*_libmerged_add.bam.{bai,csi}") into ch_output_from_trimmerge
 
   script:
   def size = params.large_ref ? '-c' : ''
