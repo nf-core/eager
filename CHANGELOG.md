@@ -180,7 +180,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## [2.3.0] - Aalen - 2021-01-11 
+## [2.3.0] - Aalen - 2021-01-11
 
 ### `Added`
 
