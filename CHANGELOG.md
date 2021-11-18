@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] - 2021-11-18
+
+### `Added`
+
+- [#805](https://github.com/nf-core/eager/issues/805) Changes to bam_trim options to allow flexible trimming by library strandedness (in addition to UDG treatment).
+
 ## [2.4.0] - 20201-09-14
 
 ### `Added`
