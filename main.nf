@@ -2488,10 +2488,13 @@ process genotyping_pileupcaller {
   def ssmode = strandedness == "single" ? "--singleStrandMode" : ""
   def bam_list = bam.flatten().join(" ")
   def sample_names = samplename.flatten().join(",")
+  def map_q = params.pileupcaller_min_map_quality
+  def base_q = params.pileupcaller_min_base_quality
+
   """
-  samtools mpileup -B -q 30 -Q 30 ${use_bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} ${use_snp} -e pileupcaller.${strandedness}
+  samtools mpileup -B --ignore-RG -q ${map_q} -Q ${base_q} ${use_bed} -f ${fasta} ${bam_list} | pileupCaller ${caller} ${ssmode} ${transitions_mode} --sampleNames ${sample_names} ${use_snp} -e pileupcaller.${strandedness}
   """
-}
+}}
 
 process eigenstrat_snp_coverage {
   label 'mc_tiny'
