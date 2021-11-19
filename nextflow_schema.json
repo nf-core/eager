@@ -1185,6 +1185,20 @@
                         "SkipTransitions"
                     ]
                 },
+                "pileupcaller_min_map_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "The minimum mapping quality to be used for genotyping.",
+                    "fa_icon": "fas fa-filter",
+                    "help_text": "The minimum mapping quality to be used for genotyping. Affects the `samtools pileup` output that is used by pileupcaller. Affects `-q` parameter of samtools mpileup."
+                },
+                "pileupcaller_min_base_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "The minimum base quality to be used for genotyping.",
+                    "fa_icon": "fas fa-filter",
+                    "help_text": "The minimum base quality to be used for genotyping. Affects the `samtools pileup` output that is used by pileupcaller. Affects `-Q` parameter of samtools mpileup."
+                },
                 "angsd_glmodel": {
                     "type": "string",
                     "default": "samtools",
@@ -1641,7 +1655,7 @@
                 "maltextract_percentidentity": {
                     "type": "number",
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
-                    "default": 85,
+                    "default": 85.0,
                     "fa_icon": "fas fa-id-card",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--minPI`"
                 },
