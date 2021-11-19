@@ -1587,7 +1587,7 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_branched_for_seqtypemerge.merge_me
 
     output:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_seqtypemerged_rg.bam"), file("*_seqtypemerged_rg*.{bai,csi}")  into ch_seqtypemerge_for_filtering
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*_seqtypemerged.bam"), file("*_seqtypemerged*.{bai,csi}")  into ch_seqtypemerge_for_filtering
 
     script:
     def size = params.large_ref ? '-c' : ''
@@ -1595,7 +1595,7 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
     samtools merge ${libraryid}_seqtypemerged.bam ${bam}
     ## Have to set validation as lenient because of BWA issue: "I see a read stands out the end of a chromosome and is flagged as unmapped (flag 0x4). [...]" http://bio-bwa.sourceforge.net/
     # picard -Xmx${task.memory.toGiga()}g AddOrReplaceReadGroups I=${libraryid}_seqtypemerged.bam O=${libraryid}_seqtypemerged_rg.bam RGID=1 RGLB="${libraryid}_seqtypemerged" RGPL=illumina RGPU=4410 RGSM="${libraryid}_seqtypemerged" VALIDATION_STRINGENCY=LENIENT
-    samtools index ${libraryid}_seqtypemerged_rg.bam ${size}
+    samtools index ${libraryid}_seqtypemerged.bam ${size}
     """
     
   }
@@ -1958,7 +1958,7 @@ process library_merge {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump(tag: "library_merge_input")
 
   output:
-  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_rmdup.bam"), path("*_libmerged_rg_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rmdup.bam"), path("*_libmerged_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
 
   script:
   def size = params.large_ref ? '-c' : ''
@@ -1966,7 +1966,7 @@ process library_merge {
   samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
   ## Have to set validation as lenient because of BWA issue: "I see a read stands out the end of a chromosome and is flagged as unmapped (flag 0x4). [...]" http://bio-bwa.sourceforge.net/
   # picard -Xmx${task.memory.toGiga()}g AddOrReplaceReadGroups I=${samplename}_libmerged_rmdup.bam O=${samplename}_libmerged_rg_rmdup.bam RGID=1 RGLB="${samplename}_merged" RGPL=illumina RGPU=4410 RGSM="${samplename}_merged" VALIDATION_STRINGENCY=LENIENT
-  samtools index ${samplename}_libmerged_rg_rmdup.bam ${size}
+  samtools index ${samplename}_libmerged_rmdup.bam ${size}
   """
 }
 
@@ -2252,14 +2252,14 @@ process additional_library_merge {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_trimmed_formerge.merge_me
 
   output:
-  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rg_add.bam"), path("*_libmerged_rg_add.bam.{bai,csi}") into ch_output_from_trimmerge
+  tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_add.bam"), path("*_libmerged_add.bam.{bai,csi}") into ch_output_from_trimmerge
 
   script:
   def size = params.large_ref ? '-c' : ''
   """
   samtools merge ${samplename}_libmerged_add.bam ${bam}
   # picard -Xmx${task.memory.toGiga()}g AddOrReplaceReadGroups I=${samplename}_libmerged_add.bam O=${samplename}_libmerged_rg_add.bam RGID=1 RGLB="${samplename}_additionalmerged" RGPL=illumina RGPU=4410 RGSM="${samplename}_additionalmerged" VALIDATION_STRINGENCY=LENIENT
-  samtools index ${samplename}_libmerged_rg_add.bam ${size}
+  samtools index ${samplename}_libmerged_add.bam ${size}
   """
 }
 
