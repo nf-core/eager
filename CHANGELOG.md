@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#805](https://github.com/nf-core/eager/issues/805) Changes to bam_trim options to allow flexible trimming by library strandedness (in addition to UDG treatment).
 - [#808](https://github.com/nf-core/eager/issues/808) Retain read group information across bam merges. Sample set to sample name (rather than library name) in bwa output 'RG' readgroup tag.
 - Map and base quality filters prior to genotyping with pileupcaller can now be specified.
 
