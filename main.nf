@@ -2204,8 +2204,11 @@ process bam_trim {
     script:
     def softclip = params.bamutils_softclip ? '-c' : '' 
     def size = params.large_ref ? '-c' : ''
-    def left_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_left}" : "${params.bamutils_clip_none_udg_left}"
-    def right_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_right}" : "${params.bamutils_clip_none_udg_right}"
+    def left_clipping = strandedness == "double" ? (udg == "half" ? "${params.bamutils_clip_double_stranded_half_udg_left}" : "${params.bamutils_clip_double_stranded_none_udg_left}") : (udg == "half" ? "${params.bamutils_clip_single_stranded_half_udg_left}" : "${params.bamutils_clip_single_stranded_none_udg_left}")
+    def right_clipping = strandedness == "double" ? (udg == "half" ? "${params.bamutils_clip_double_stranded_half_udg_right}" : "${params.bamutils_clip_double_stranded_none_udg_right}") : (udg == "half" ? "${params.bamutils_clip_single_stranded_half_udg_right}" : "${params.bamutils_clip_single_stranded_none_udg_right}")
+
+    // def left_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_left}" : "${params.bamutils_clip_none_udg_left}"
+    // def right_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_right}" : "${params.bamutils_clip_none_udg_right}"
     """
     bam trimBam $bam tmp.bam -L ${left_clipping} -R ${right_clipping} ${softclip}
     samtools sort -@ ${task.cpus} tmp.bam -o ${libraryid}.trimmed.bam 
