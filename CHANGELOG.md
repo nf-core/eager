@@ -3,9 +3,13 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## v2.3.5dev - [date]
+## [dev]
 
 ### `Added`
+
+- [#805](https://github.com/nf-core/eager/issues/805) Changes to bam_trim options to allow flexible trimming by library strandedness (in addition to UDG treatment).
+- [#808](https://github.com/nf-core/eager/issues/808) Retain read group information across bam merges. Sample set to sample name (rather than library name) in bwa output 'RG' readgroup tag.
+- Map and base quality filters prior to genotyping with pileupcaller can now be specified.
 
 ### `Fixed`
 
@@ -13,16 +17,93 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## v2.3.4 - 2021-05-05
+## [2.4.0] - Wangen - 20201-09-14
 
 ### `Added`
 
-- [#729](https://github.com/nf-core/eager/issues/729) Added Bowtie2 flag `--maxins` for PE mapping modern DNA mapping contexts
+- [#317](https://github.com/nf-core/eager/issues/317) Added bcftools stats for general genotyping statistics of VCF files
+- [#651](https://github.com/nf-core/eager/issues/651) - Adds removal of adapters specified in an AdapterRemoval adapter list file
+- [#642](https://github.com/nf-core/eager/issues/642) and [#431](https://github.com/nf-core/eager/issues/431) adds post-adapter removal barcode/fastq trimming
+- [#769](https://github.com/nf-core/eager/issues/769) - Adds lc_extrap mode to preseq (suggested by @roberta-davidson)
+
+### `Fixed`
+
+- Fixed some missing or incorrectly reported software versions
+- [#771](https://github.com/nf-core/eager/issues/771) Remove legacy code
+- Improved output documentation for MultiQC general stats table (thanks to @KathrinNaegele and @esalmela)
+- Improved output documentation for BowTie2 (thanks to @isinaltinkaya)
+- [#612](https://github.com/nf-core/eager/issues/612) Updated BAM trimming defaults to 0 to ensure no unwanted trimming when mixing half-UDG with no-UDG (thanks to @scarlhoff)
+- [#722](https://github.com/nf-core/eager/issues/722) Updated BWA mapping mapping parameters to latest recommendations - primarily alnn back to 0.01 and alno to 2 as per Oliva et al. 2021 (10.1093/bib/bbab076)
+- Updated workflow diagrams to reflect latest functionality
+- [#787](https://github.com/nf-core/eager/issues/787) Adds memory specification flags for the GATK UnifiedGenotyper and HaplotyperCaller steps (thanks to @nylander)
+- Fixed issue where MultiVCFAnalyzer would not pick up newly generated VCF files, when specifying additional VCF files.
+- [#790](https://github.com/nf-core/eager/issues/790) Fixed kraken2 report file-name collision when sample names have `.` in them
+- [#792](https://github.com/nf-core/eager/issues/792) Fixed java error messages for AdapterRemovalFixPrefix being hidden in output
+- [#794](https://github.com/nf-core/eager/issues/794) Aligned default test profile with nf-core standards (`test_tsv` is now `test`)
+
+### `Dependencies`
+
+- Bumped python: 3.7.3 -> 3.9.4
+- Bumped markdown: 3.2.2 -> 3.3.4
+- Bumped pymdown-extensions: 7.1 -> 8.2
+- Bumped pyments: 2.6.1 -> 2.9.0
+- Bumped adapterremoval: 2.3.1 -> 2.3.2
+- Bumped picard: 2.22.9 -> 2.26.0
+- Bumped samtools 1.9 -> 1.12
+- Bumped angsd: 0.933 -> 0.935
+- Bumped gatk4: 4.1.7.0 -> 4.2.0.0
+- Bumped multiqc: 1.10.1 -> 1.11
+- Bumped bedtools 2.29.2 -> 2.30.0
+- Bumped libiconv: 1.15 -> 1.16
+- Bumped preseq: 2.0.3 -> 3.1.2
+- Bumped bamutil: 1.0.14 -> 1.0.15
+- Bumped pysam: 0.15.4 -> 0.16.0
+- Bumped kraken2: 2.1.1 -> 2.1.2
+- Bumped pandas: 1.0.4 -> 1.2.4
+- Bumped freebayes: 1.3.2 -> 1.3.5
+- Bumped biopython: 1.76 -> 1.79
+- Bumped xopen: 0.9.0 -> 1.1.0
+- Bumped bowtie2: 2.4.2 -> 2.4.4
+- Bumped mapdamage2: 2.2.0 -> 2.2.1
+- Bumped bbmap: 38.87 -> 38.92
+- Added bcftools: 1.12
+
+### `Deprecated`
+
+## [2.3.5] - 2021-06-03
+
+### `Added`
+
+- [#722](https://github.com/nf-core/eager/issues/722) - Adds bwa `-o` flag for more flexibility in bwa parameters
+- [#736](https://github.com/nf-core/eager/issues/736) - Add printing of multiqc run report location on successful completion
+- New logo that is more visible when a user is using darkmode on GitHub or nf-core website!
+
+### `Fixed`
+
+- [#723](https://github.com/nf-core/eager/issues/723) - Fixes empty fields in TSV resulting in uninformative error
+- Updated template to nf-core/tools 1.14
+- [#688](https://github.com/nf-core/eager/issues/688) - Clarified the pipeline is not just for humans and microbes, but also plants and animals, and also for modern DNA
+- [#751](https://github.com/nf-core/eager/pull/751) - Added missing label to mtnucratio
+- General code cleanup and standardisation of parameters with no default setting
+- [#750](https://github.com/nf-core/eager/issues/750) - Fixed piped commands requesting the same number of CPUs at each command step
+- [#757](https://github.com/nf-core/eager/issues/757) - Removed confusing 'Data Type' variable from MultiQC workflow summary (not consistent with TSV input)
+- [#759](https://github.com/nf-core/eager/pull/759) - Fixed malformed software scraping regex that resulted in N/A in MultiQC report
+- [#761](https://github.com/nf-core/eager/pull/759) - Fixed issues related to instability of samtools filtering related CI tests
+
+### `Dependencies`
+
+### `Deprecated`
+
+## [2.3.4] - 2021-05-05
+
+### `Added`
+
+- [#729](https://github.com/nf-core/eager/issues/729) - Added Bowtie2 flag `--maxins` for PE mapping modern DNA mapping contexts
 
 ### `Fixed`
 
 - Corrected explanation of the "--min_adap_overlap" parameter for AdapterRemoval in the docs
-- [#725](https://github.com/nf-core/eager/pull/725) `bwa_index` doc update
+- [#725](https://github.com/nf-core/eager/pull/725) - `bwa_index` doc update
 - Re-adds gzip piping to AdapterRemovalFixPrefix to speed up process after reports of being very slow
 - Updated DamageProfiler citation from bioRxiv to publication
 
@@ -34,7 +115,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## v2.3.3 - 2021-04-08
+## [2.3.3] - 2021-04-08
 
 ### `Added`
 
@@ -101,7 +182,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## [2.3.0] - 2021-01-11 - "Aalen"
+## [2.3.0] - Aalen - 2021-01-11
 
 ### `Added`
 
@@ -234,7 +315,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Latest version of Sex.DetERRmine (1.1.2)
 - Latest version of endorS.py (0.4)
 
-## [2.1.0] - 2020-03-05 - "Ravensburg"
+## [2.1.0] - Ravensburg - 2020-03-05
 
 ### `Added`
 

@@ -1,4 +1,4 @@
-# ![nf-core/eager](docs/images/nf-core_eager_logo.png)
+# ![nf-core/eager](docs/images/nf-core_eager_logo_outline_drop.png)
 
 **A fully reproducible and state-of-the-art ancient DNA analysis pipeline**.
 
@@ -7,6 +7,7 @@
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A520.07.1-brightgreen.svg)](https://www.nextflow.io/)
 [![nf-core](https://img.shields.io/badge/nf--core-pipeline-brightgreen.svg)](https://nf-co.re/)
 [![DOI](https://zenodo.org/badge/135918251.svg)](https://zenodo.org/badge/latestdoi/135918251)
+[![Published in PeerJ](https://img.shields.io/badge/peerj-published-%2300B2FF)](https://peerj.com/articles/10947/)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/eager.svg)](https://hub.docker.com/r/nfcore/eager)
@@ -17,7 +18,7 @@
 ## Introduction
 
 <!-- nf-core: Write a 1-2 sentence summary of what data the pipeline is for and what it does -->
-**nf-core/eager** is a bioinformatics best-practise analysis pipeline for NGS sequencing based ancient DNA (aDNA) data analysis.
+**nf-core/eager** is a scalable and reproducible bioinformatics best-practise processing pipeline for genomic NGS sequencing data, with a focus on ancient DNA (aDNA) data. It is ideal for the (palaeo)genomic analysis of humans, animals, plants, microbes and even microbiomes.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible. The pipeline pre-processes raw data from FASTQ inputs, or preprocessed BAM inputs. It can align reads and performs extensive general NGS and aDNA specific quality-control on the results. It comes with docker, singularity or conda containers making installation trivial and results highly reproducible.
 
@@ -34,7 +35,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
     ```bash
-    nextflow run nf-core/eager -profile test_tsv,<docker/singularity/podman/shifter/charliecloud/conda/institute>
+    nextflow run nf-core/eager -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
     ```
 
     > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
@@ -65,7 +66,7 @@ By default the pipeline currently performs the following:
 
 * Create reference genome indices for mapping (`bwa`, `samtools`, and `picard`)
 * Sequencing quality control (`FastQC`)
-* Sequencing adapter removal and for paired end data merging (`AdapterRemoval`)
+* Sequencing adapter removal, paired-end data merging (`AdapterRemoval`)
 * Read mapping to reference using (`bwa aln`, `bwa mem`, `CircularMapper`, or `bowtie2`)
 * Post-mapping processing, statistics and conversion to bam (`samtools`)
 * Ancient DNA C-to-T damage pattern visualisation (`DamageProfiler`)
@@ -85,6 +86,7 @@ Additional functionality contained by the pipeline currently includes:
 #### Preprocessing
 
 * Illumina two-coloured sequencer poly-G tail removal (`fastp`)
+* Post-AdapterRemoval trimming of FASTQ files prior mapping (`fastp`)
 * Automatic conversion of unmapped reads to FASTQ (`samtools`)
 * Host DNA (mapped reads) stripping from input FASTQ files (for sensitive samples)
 
@@ -160,17 +162,22 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 
 * [Alexandre Gilardet](https://github.com/alexandregilardet)
 * Arielle Munters
-* [Charles Plessy](https://github.com/charles-plessy)
 * [Åshild Vågene](https://github.com/ashildv)
+* [Charles Plessy](https://github.com/charles-plessy)
+* [Elina Salmela](https://github.com/esalmela)
 * [Hester van Schalkwyk](https://github.com/hesterjvs)
 * [Ido Bar](https://github.com/IdoBar)
 * [Irina Velsko](https://github.com/ivelsko)
+* [Işın Altınkaya](https://github.com/isinaltinkaya)
+* [Johan Nylander](https://github.com/nylander)
 * [Katerine Eaton](https://github.com/ktmeaton)
+* [Katrin Nägele](https://github.com/KathrinNaegele)
 * [Luc Venturini](https://github.com/lucventurini)
 * [Marcel Keller](https://github.com/marcel-keller)
 * [Pierre Lindenbaum](https://github.com/lindenb)
 * [Pontus Skoglund](https://github.com/pontussk)
 * [Raphael Eisenhofer](https://github.com/EisenRa)
+* [Roberta Davidson](https://github.com/roberta-davidson)
 * [Torsten Günter](https://bitbucket.org/tguenther/)
 * [Kevin Lord](https://github.com/lordkev)
 * [He Yu](https://github.com/paulayu)

@@ -111,7 +111,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
   * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
   * Pulls most software from [Bioconda](https://bioconda.github.io/)
-* `test_tsv
+* `test`
   * A profile with a complete configuration for automated testing
   * Includes links to test data so needs no other parameters
 
@@ -348,8 +348,11 @@ will have the following effects:
 Note the following important points and limitations for setting up:
 
 * The TSV must use actual tabs (not spaces) between cells.
+* The input FASTQ filenames are discarded after FastQC, all other downstream results files are based on `Sample_Name`, `Library_ID` and `Lane` columns for filenames.
 * *File* names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
-  * If it is 'too late' and you already have duplicate file names, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
+  * At different stages of the merging process, (as above) nf-core/eager will use as output filenames the information from the `Sample_Name`, `Library_ID` and/or `Lane` columns for filenames.
+  * Library_IDs must be unique (other than if they are spread across multiple lanes). For example, your .tsv file must not have rows with both the strings in the Library_ID column as `Library1` and `Library1`, for **both** `SampleA` and `SampleB` in the Sample_ID column, otherwise the two `Library1.fq.gz` files may result in a filename collision.
+  * If it is 'too late' and you already have duplicated FASTQ file names before starting a run, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
 * Lane IDs must be unique for each sequencing of each library.
   * If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
   * This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.
@@ -357,15 +360,15 @@ Note the following important points and limitations for setting up:
   * You should provide a small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actually need a reference genome for any downstream analyses.
 * nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
 * Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
-* Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes
-  * **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.
-  * When you wish to run PE/SE data together `-dedupper markduplicates` is therefore preferred.
+* nf-core/eager is able to correctly handle libraries that are sequenced multiple times on different sequencing configurations (i.e mixtures of single- and paired-end data). These will be merged after mapping and considered 'paired-end' during downstream processes.
+  * **Important** we do not recommend choosing to use DeDup (i.e. `--dedupper 'dedup'`) when mixing PE and SE data, as SE data will not necessarily have the correct end position of the read, and DeDup requires both ends of the molecule to remove a duplicate read. Therefore you may end up with inflated (false-positive) coverages due to suboptimal deduplication.
+  * When you wish to run PE/SE data together, the default `-dedupper markduplicates` is therefore preferred, as it only looks at the first position. While more conservative (i.e. it'll remove more reads even if not technically duplicates, because it assumes it can't see the true ends of molecules), it is more consistent.
   * An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
   * If you truly want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
-  * If you _regularly_ want to run the situation above, please leave a feature     request on github.
+  * If you _regularly_ want to run the situation above, please leave a feature request on github.
 * DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).
-* nf-core/eager functionality such as `--run_trim_bam` will be applied to only   non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries. - Qualimap is run on each sample, after merging of libraries (i.e. your values   will reflect the values of all libraries combined - after being damage trimmed   etc.).
-* Genotyping will be typically performed on each `sample` independently, as normally all libraries will have been merged together. However, if you have a   mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS   libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file  collision` error in steps such as `sexdeterrmine`, and then you will need to   merge these yourself. We will consider changing this behaviour in the future   if there is enough interest.
+* nf-core/eager functionality such as `--run_trim_bam` will be applied to only   non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries. - Qualimap is run on each sample, after merging of libraries (i.e. your values   will reflect the values of all libraries combined - after being damage trimmed etc.).
+* Genotyping will be typically performed on each `sample` independently, as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file collision` error in steps such as `sexdeterrmine`, and then you will need to merge these yourself. We will consider changing this behaviour in the future if there is enough interest.
 
 ## Clean up
 
@@ -930,11 +933,11 @@ can use yourself, or upload alongside your publication for others to use.
 To use the profile you just need to specify the file containing the profile you
 wish to use, and then the profile itself.
 
-For example, Aida (Andrades Valtueña) on her cluster `sdag` at the MPI-SHH
-(`shh`) in Jena could run the following:
+For example, Aida (Andrades Valtueña) at the MPI-SHH (`shh`) in Jena could run
+the following:
 
 ```bash
-nextflow run nf-core/eager -c /<path>/<to>/AndradesValtuena2018.config -profile shh,sdag,AndradesValtuena2018 --input '/<path>/<to>/<some_input>/' <...>
+nextflow run nf-core/eager -c /<path>/<to>/AndradesValtuena2018.config -profile shh,AndradesValtuena2018 --input '/<path>/<to>/<some_input>/' <...>
 ```
 
 Then a colleague at a different institution, such as the SciLifeLab, could run
@@ -1026,7 +1029,7 @@ running.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 <...>
 ```
@@ -1034,8 +1037,8 @@ nextflow run nf-core/eager \
 For the `-profile` parameter, I have indicated that I wish to use Singularity as
 my software container environment, and I will use the MPI-SHH institutional
 config as listed on
-[nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config),
- using the profile for the 'sdag' cluster. These profiles specify settings
+[nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config).
+These profiles specify settings
 optimised for the specific cluster/institution, such as maximum memory available
 or which scheduler queues to submit to. More explanations about configs and
 profiles can be seen in the [nf-core
@@ -1090,7 +1093,7 @@ FASTA file and the corresponding indices.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1115,7 +1118,7 @@ directory (which contains 'intermediate' working files and directories).
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \`
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1144,7 +1147,7 @@ string to be clipped.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1169,7 +1172,7 @@ with `--dedupper`.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1194,7 +1197,7 @@ and the reference.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1221,7 +1224,7 @@ unmapped reads.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1251,7 +1254,7 @@ fragment. We will therefore use `--bamutils_clip_half_udg_left` and
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1287,7 +1290,7 @@ you can download the file from [here](https://github.com/nf-core/test-datasets/b
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1321,7 +1324,7 @@ is simply named 'X'.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1362,7 +1365,7 @@ providing the name of the mitochondrial DNA contig in our reference genome with
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1404,7 +1407,7 @@ file of these sites that is specified with `--pileupcaller_snpfile`.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/hs37d5.fa' \
@@ -1646,7 +1649,7 @@ running.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_screening20200720' \
 <...>
 ```
@@ -1654,8 +1657,8 @@ nextflow run nf-core/eager \
 For the `-profile` parameter, I have indicated that I wish to use Singularity as
 my software container environment, and I will use the MPI-SHH institutional
 config as listed on
-[nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config),
-and using the profile for the 'sdag' cluster. These profiles specify settings
+[nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config).
+These profiles specify settings
 optimised for the specific cluster/institution, such as maximum memory available
 or which scheduler queues to submit to. More explanations about configs and
 profiles can be seen in the [nf-core
@@ -1710,7 +1713,7 @@ FASTA file and the corresponding indices.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1735,7 +1738,7 @@ directory (which contains 'intermediate' working files and directories).
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1764,7 +1767,7 @@ string to be clipped.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1785,7 +1788,7 @@ tell nf-core/eager what to do with the off target reads from the mapping.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1815,7 +1818,7 @@ documentation describing each parameters can be seen in the usage
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -1842,7 +1845,7 @@ have indicators of true aDNA, we will run 'maltExtract' of the
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_screening20200720' \
 --input 'screening20200720.tsv' \
 --fasta '../Reference/genome/GRCh38.fa' \
@@ -2113,7 +2116,7 @@ running.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 <...>
 ```
@@ -2121,8 +2124,8 @@ nextflow run nf-core/eager \
 For the `-profile` parameter, I have indicated that I wish to use Singularity as
 my software container environment, and I will use the MPI-SHH institutional
 config as listed on
-[nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config),
-and using the profile for the 'sdag' cluster. These profiles specify settings
+[nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config).
+These profiles specify settings
 optimised for the specific cluster/institution, such as maximum memory available
 or which scheduler queues to submit to. More explanations about configs and
 profiles can be seen in the [nf-core
@@ -2174,7 +2177,7 @@ FASTA file and the corresponding indices.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2199,7 +2202,7 @@ directory (which contains 'intermediate' working files and directories).
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2228,7 +2231,7 @@ the default minimum length of a poly-G string to be clipped.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2252,7 +2255,7 @@ will do this with `--bwaalnn` and `--bwaalnl` respectively.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2276,7 +2279,7 @@ hard-drive footprint.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2306,7 +2309,7 @@ clarity.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2337,7 +2340,7 @@ often a custom BED file with just genes of interest is recommended. Furthermore
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2375,7 +2378,7 @@ we do BAM trimming instead here as another demonstration of functionality.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2416,7 +2419,7 @@ need to specify that we want to use the trimmed bams from the previous step.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \
@@ -2459,7 +2462,7 @@ same settings and reference genome. We can do this as follows.
 ```bash
 nextflow run nf-core/eager \
 -r 2.2.0 \
--profile singularity,shh,sdag \
+-profile singularity,shh \
 -name 'projectX_preprocessing20200727' \
 --input 'preprocessing20200727.tsv' \
 --fasta '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.fa' \

@@ -16,7 +16,6 @@
             "properties": {
                 "input": {
                     "type": "string",
-                    "default": "null",
                     "description": "Either paths or URLs to FASTQ/BAM data (must be surrounded with quotes). For paired end data, the path must use '{1,2}' notation to specify read pairs. Alternatively, a path to a TSV file (ending .tsv) containing file paths and sequencing/sample metadata. Allows for merging of multiple lanes/libraries/samples. Please see documentation for template.",
                     "fa_icon": "fas fa-dna",
                     "help_text": "There are two possible ways of supplying input sequencing data to nf-core/eager. The most efficient but more simplistic is supplying direct paths (with wildcards) to your FASTQ or BAM files, with each file or pair being considered a single library and each one run independently  (e.g. for paired-end data: `--input '/<path>/<to>/*_{R1,R2}_*.fq.gz'`). TSV input requires creation of an extra file by the user (`--input '/<path>/<to>/eager_data.tsv'`) and extra metadata, but allows more powerful lane and library merging.  Please see [usage docs](https://nf-co.re/eager/docs/usage#input-specifications) for detailed instructions and specifications."
@@ -465,6 +464,12 @@
                     "fa_icon": "fas fa-cut",
                     "help_text": "Defines the adapter sequence to be used for the reverse read in paired end sequencing projects. This is set to `'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'` by default.\n\n> Modifies AdapterRemoval parameter: `--adapter2`"
                 },
+                "clip_adapters_list": {
+                    "type": "string",
+                    "description": "Path to AdapterRemoval adapter list file. Overrides `--clip_*_adaptor` parameters",
+                    "fa_icon": "fas fa-cut",
+                    "help_text": "Allows to supply a file with a list of adapter (combinations) to remove from all files. **Overrides** the `--clip_*_adaptor` parameters . First column represents forward strand, second column for reverse strand. You must supply all possibly combinations, one per line, and this list is applied to all files. See [AdapterRemoval documentation](https://adapterremoval.readthedocs.io/en/latest/manpage.html) for more information.\n\n> Modifies AdapterRemoval parameter: `--adapter-list`"
+                },
                 "clip_readlength": {
                     "type": "integer",
                     "default": 30,
@@ -516,6 +521,35 @@
                     "help_text": "Specify maximum Phred score of the quality field of FASTQ files. The quality-score range can vary depending on the machine and version (e.g. see diagram [here](https://en.wikipedia.org/wiki/FASTQ_format#Encoding), and this allows you to increase from the default AdapterRemoval value of `41`.\n\n> Modifies AdapterRemoval parameters: `--qualitymax`",
                     "default": 41,
                     "fa_icon": "fas fa-arrow-up"
+                },
+                "run_post_ar_trimming": {
+                    "type": "boolean",
+                    "description": "Turn on trimming of inline barcodes (i.e. internal barcodes after adapter removal)",
+                    "help_text": "In some cases, you may want to additionally trim reads in a FASTQ file after adapter removal.\n\nThis could be to remove short 'inline' or 'internal' barcodes that are ligated directly onto DNA molecules prior ligation of adapters and indicies (the former of which allow ultra-multiplexing and/or checks for barcode hopping).\n\nIn other cases, you may wish to already remove known high-frequency damage bases to allow stricter mapping.\n\nTurning on this module uses `fastp` to trim one, or both ends of a merged read, or in cases where you have not collapsed your read, R1 and R2.\n"
+                },
+                "post_ar_trim_front": {
+                    "type": "integer",
+                    "default": 7,
+                    "description": "Specify the number of bases to trim off the front of a merged read or R1",
+                    "help_text": "Specify the number of bases to trim off the start of a read in a merged- or forward read FASTQ file.\n\n> Modifies fastp parameters: `--trim_front1`"
+                },
+                "post_ar_trim_tail": {
+                    "type": "integer",
+                    "default": 7,
+                    "description": "Specify the number of bases to trim off the tail of of a merged read or R1",
+                    "help_text": "Specify the number of bases to trim off the end of a read in a merged- or forward read FASTQ file.\n\n> Modifies fastp parameters: `--trim_tail1`"
+                },
+                "post_ar_trim_front2": {
+                    "type": "integer",
+                    "default": 7,
+                    "description": "Specify the number of bases to trim off the front of R2",
+                    "help_text": "Specify the number of bases to trim off the start of a read in an unmerged forward read (R1) FASTQ file.\n\n> Modifies fastp parameters: `--trim_front2`"
+                },
+                "post_ar_trim_tail2": {
+                    "type": "integer",
+                    "default": 7,
+                    "description": "Specify the number of bases to trim off the tail of R2",
+                    "help_text": "Specify the number of bases to trim off the end of a read in an unmerged reverse read (R2) FASTQ file.\n\n> Modifies fastp parameters: `--trim_tail2`"
                 }
             },
             "fa_icon": "fas fa-cut",
@@ -543,7 +577,7 @@
                 },
                 "bwaalnn": {
                     "type": "number",
-                    "default": 0.04,
+                    "default": 0.01,
                     "description": "Specify the -n parameter for BWA aln, i.e. amount of allowed mismatches in the alignment.",
                     "fa_icon": "fas fa-sort-numeric-down",
                     "help_text": "Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. By default set to `0.04` (following recommendations of [Schubert et al. (2012 _BMC Genomics_)](https://doi.org/10.1186/1471-2164-13-178)), if you're uncertain what to set check out [this](https://apeltzer.shinyapps.io/bwa-mismatches/) Shiny App for more information on how to set this parameter efficiently.\n\n> Modifies bwa aln parameter: `-n`"
@@ -561,6 +595,13 @@
                     "description": "Specify the -l parameter for BWA aln i.e. the length of seeds to be used.",
                     "fa_icon": "fas fa-ruler-horizontal",
                     "help_text": "Configures the length of the seed used in `bwa aln -l`. Default is set to be 'turned off' at the recommendation of Schubert et al. ([2012 _BMC Genomics_](https://doi.org/10.1186/1471-2164-13-178)) for ancient DNA with `1024`.\n\nNote: Despite being recommended, turning off seeding can result in long runtimes!\n\n> Modifies BWA aln parameter: `-l`\n"
+                },
+                "bwaalno": {
+                    "type": "integer",
+                    "default": 2,
+                    "fa_icon": "fas fa-people-arrows",
+                    "description": "Specify the -o parameter for BWA aln i.e. the number of gaps allowed.",
+                    "help_text": "Configures the number of gaps used in `bwa aln`. Default is set to `bwa` default.\n\n> Modifies BWA aln parameter: `-o`\n"
                 },
                 "circularextension": {
                     "type": "integer",
@@ -749,12 +790,51 @@
             "description": "Options for calculating library complexity (i.e. how many unique reads are present).",
             "default": "",
             "properties": {
+                "preseq_mode": {
+                    "type": "string",
+                    "default": "c_curve",
+                    "description": "Specify which mode of preseq to run.",
+                    "fa_icon": "fas fa-toggle-on",
+                    "help_text": "Specify which mode of preseq to run.\n\nFrom the [PreSeq documentation](http://smithlabresearch.org/wp-content/uploads/manual.pdf): \n\n`c curve` is used to compute the expected complexity curve of a mapped read file with a hypergeometric\nformula\n\n`lc extrap` is used to generate the expected yield for theoretical larger experiments and bounds on the\nnumber of distinct reads in the library and the associated confidence intervals, which is computed by\nbootstrapping the observed duplicate counts histogram",
+                    "enum": [
+                        "c_curve",
+                        "lc_extrap"
+                    ]
+                },
                 "preseq_step_size": {
                     "type": "integer",
                     "default": 1000,
                     "description": "Specify the step size of Preseq.",
                     "fa_icon": "fas fa-shoe-prints",
                     "help_text": "Can be used to configure the step size of Preseq's `c_curve` method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.\n\n> Modifies preseq c_curve parameter: `-s`"
+                },
+                "preseq_maxextrap": {
+                    "type": "integer",
+                    "default": 10000000000,
+                    "description": "Specify the maximum extrapolation (lc_extrap mode only)",
+                    "fa_icon": "fas fa-ban",
+                    "help_text": "Specify the maximum extrapolation that `lc_extrap` mode will perform.\n\n> Modifies preseq lc_extrap parameter: `-e`"
+                },
+                "preseq_terms": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Specify the maximum number of terms for extrapolation (lc_extrap mode only)",
+                    "fa_icon": "fas fa-sort-numeric-up-alt",
+                    "help_text": "Specify the maximum number of terms that `lc_extrap` mode will use.\n\n> Modifies preseq lc_extrap parameter: `-x`"
+                },
+                "preseq_bootstrap": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Specify number of bootstraps to perform (lc_extrap mode only)",
+                    "fa_icon": "fab fa-bootstrap",
+                    "help_text": "Specify the number of bootstraps `lc_extrap` mode will perform to calculate confidence intervals.\n\n> Modifies preseq lc_extrap parameter: `-n`"
+                },
+                "preseq_cval": {
+                    "type": "number",
+                    "default": 0.95,
+                    "description": "Specify confidence interval level (lc_extrap mode only)",
+                    "fa_icon": "fas fa-check-circle",
+                    "help_text": "Specify the allowed level of confidence intervals used for `lc_extrap` mode.\n\n> Modifies preseq lc_extrap parameter: `-c`"
                 }
             },
             "fa_icon": "fas fa-bezier-curve",
@@ -884,33 +964,61 @@
                     "fa_icon": "fas fa-power-off",
                     "help_text": "Turns on the BAM trimming method. Trims off `[n]` bases from reads in the deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only be performed on libraries indicated as `--udg_type 'none'` or `--udg_type 'half'`. Complete UDG treatment ('full') should have removed all damage. The amount of bases that will be trimmed off can be set separately for libraries with `--udg_type` `'none'` and `'half'`  (see `--bamutils_clip_half_udg_left` / `--bamutils_clip_half_udg_right` / `--bamutils_clip_none_udg_left` / `--bamutils_clip_none_udg_right`).\n\n> Note: additional artefacts such as bar-codes or adapters that could potentially also be trimmed should be removed prior mapping."
                 },
-                "bamutils_clip_half_udg_left": {
+                "bamutils_clip_double_stranded_half_udg_left": {
                     "type": "integer",
-                    "default": 1,
+                    "default": 0,
                     "fa_icon": "fas fa-ruler-combined",
-                    "description": "Specify the number of bases to clip off reads from 'left' end of read for half-UDG libraries.",
-                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for double-stranded half-UDG libraries.",
+                    "help_text": "Default set to `0` and clips off no bases on the left or right side of reads from double_stranded libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
                 },
-                "bamutils_clip_half_udg_right": {
+                "bamutils_clip_double_stranded_half_udg_right": {
                     "type": "integer",
-                    "default": 1,
+                    "default": 0,
                     "fa_icon": "fas fa-ruler",
-                    "description": "Specify the number of bases to clip off reads from 'right' end of read for half-UDG libraries.",
-                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for double-stranded half-UDG libraries.",
+                    "help_text": "Default set to `0` and clips off no bases on the left or right side of reads from double_stranded libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
                 },
-                "bamutils_clip_none_udg_left": {
+                "bamutils_clip_double_stranded_none_udg_left": {
                     "type": "integer",
-                    "default": 1,
+                    "default": 0,
                     "fa_icon": "fas fa-ruler-combined",
-                    "description": "Specify the number of bases to clip off reads from 'left' end of read for non-UDG libraries.",
-                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for double-stranded non-UDG libraries.",
+                    "help_text": "Default set to `0` and clips off no bases on the left or right side of reads from double_stranded libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
                 },
-                "bamutils_clip_none_udg_right": {
+                "bamutils_clip_double_stranded_none_udg_right": {
                     "type": "integer",
-                    "default": 1,
+                    "default": 0,
                     "fa_icon": "fas fa-ruler",
-                    "description": "Specify the number of bases to clip off reads from 'right' end of read for non-UDG libraries.",
-                    "help_text": "Default set to `1` and clips off one base of the left or right side of reads from libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for double-stranded non-UDG libraries.",
+                    "help_text": "Default set to `0` and clips off no bases on the left or right side of reads from double_stranded libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
+                },
+                "bamutils_clip_single_stranded_half_udg_left": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler-combined",
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for single-stranded half-UDG libraries.",
+                    "help_text": "Default set to `0` and clips off no bases on the left or right side of reads from single-stranded libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
+                },
+                "bamutils_clip_single_stranded_half_udg_right": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler",
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for single-stranded half-UDG libraries.",
+                    "help_text": "Default set to `0` and clips off no bases on the left or right side of reads from single-stranded libraries whose UDG treatment is set to `half`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
+                },
+                "bamutils_clip_single_stranded_none_udg_left": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler-combined",
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for single-stranded non-UDG libraries.",
+                    "help_text": "Default set to `0` and clips off no bases on the left or right side of reads from single-stranded libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
+                },
+                "bamutils_clip_single_stranded_none_udg_right": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler",
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for single-stranded non-UDG libraries.",
+                    "help_text": "Default set to `0` and clips off no bases on the left or right side of reads from single-stranded libraries whose UDG treatment is set to `none`. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L -R`"
                 },
                 "bamutils_softclip": {
                     "type": "boolean",
@@ -1105,6 +1213,20 @@
                         "SkipTransitions"
                     ]
                 },
+                "pileupcaller_min_map_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "The minimum mapping quality to be used for genotyping.",
+                    "fa_icon": "fas fa-filter",
+                    "help_text": "The minimum mapping quality to be used for genotyping. Affects the `samtools pileup` output that is used by pileupcaller. Affects `-q` parameter of samtools mpileup."
+                },
+                "pileupcaller_min_base_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "The minimum base quality to be used for genotyping.",
+                    "fa_icon": "fas fa-filter",
+                    "help_text": "The minimum base quality to be used for genotyping. Affects the `samtools pileup` output that is used by pileupcaller. Affects `-Q` parameter of samtools mpileup."
+                },
                 "angsd_glmodel": {
                     "type": "string",
                     "default": "samtools",
@@ -1147,6 +1269,13 @@
                         "random",
                         "common"
                     ]
+                },
+                "run_bcftools_stats": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Turn on bcftools stats generation for VCF based variant calling statistics",
+                    "help_text": "Runs `bcftools stats` against VCF files from GATK and FreeBayes genotypers.\n\nIt will automatically include the FASTA reference for INDEL-related statistics.",
+                    "fa_icon": "far fa-chart-bar"
                 }
             },
             "fa_icon": "fas fa-sliders-h",
@@ -1554,7 +1683,7 @@
                 "maltextract_percentidentity": {
                     "type": "number",
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
-                    "default": 85,
+                    "default": 85.0,
                     "fa_icon": "fas fa-id-card",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--minPI`"
                 },
