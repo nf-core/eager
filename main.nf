@@ -497,7 +497,7 @@ if( !params.bwa_index && params.fasta && (params.mapper == 'bwaaln' || params.ma
 // bowtie2 Index
 if( !params.bt2_index && params.fasta && params.mapper == "bowtie2"){
   process makeBT2Index {
-    label 'sc_medium'
+    label 'mc_medium'
     tag "${fasta}"
     publishDir path: "${params.outdir}/reference_genome/bt2_index", mode: params.publish_dir_mode, saveAs: { filename -> 
             if (params.save_reference) filename 
@@ -515,7 +515,7 @@ if( !params.bt2_index && params.fasta && params.mapper == "bowtie2"){
 
     script:
     """
-    bowtie2-build $fasta $fasta
+    bowtie2-build --threads ${task.cpus} $fasta $fasta
     mkdir BT2Index && mv ${fasta}* BT2Index
     """
     }
