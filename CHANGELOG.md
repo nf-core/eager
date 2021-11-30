@@ -7,15 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-- [#805](https://github.com/nf-core/eager/issues/805) Changes to bam_trim options to allow flexible trimming by library strandedness (in addition to UDG treatment).
-- [#808](https://github.com/nf-core/eager/issues/808) Retain read group information across bam merges. Sample set to sample name (rather than library name) in bwa output 'RG' readgroup tag.
-- Map and base quality filters prior to genotyping with pileupcaller can now be specified.
-- [#774](https://github.com/nf-core/eager/issues/774) Added support for multi-threaded Bowtie2 build reference genome indexing
-- [#804](https://github.com/nf-core/eager/issues/804) Improved output documentation description to add how 'cluster factor' is calculated
+- [#805](https://github.com/nf-core/eager/issues/805) Changes to bam_trim options to allow flexible trimming by library strandedness (in addition to UDG treatment). (@TCLamnidis)
+- [#808](https://github.com/nf-core/eager/issues/808) Retain read group information across bam merges. Sample set to sample name (rather than library name) in bwa output 'RG' readgroup tag. (@TCLamnidis)
+- Map and base quality filters prior to genotyping with pileupcaller can now be specified. (@TCLamnidis)
+- [#774](https://github.com/nf-core/eager/issues/774) Added support for multi-threaded Bowtie2 build reference genome indexing (@jfy133)
+- [#804](https://github.com/nf-core/eager/issues/804) Improved output documentation description to add how 'cluster factor' is calculated (thanks to @meganemichel)
 
 ### `Fixed`
 
-- [#803](https://github.com/nf-core/eager/issues/803) Fixed mistake in metro-map diagram (`samtools index` is now correctly `samtools faidx`)
+- [#803](https://github.com/nf-core/eager/issues/803) Fixed mistake in metro-map diagram (`samtools index` is now correctly `samtools faidx`) (@jfy133)
 
 ### `Dependencies`
 
