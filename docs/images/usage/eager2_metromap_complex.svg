@@ -5,9 +5,9 @@
    viewBox="0 0 316.84646 170.04657"
    version="1.1"
    id="svg8"
-   inkscape:version="1.1 (1:1.1+202105261517+ce6663b3b7)"
+   inkscape:version="1.1.1 (1:1.1+202109281949+c3084ef5ed)"
    sodipodi:docname="eager2_metromap_complex.svg"
-   inkscape:export-filename="/home/jfellows/Documents/git/nf-core/eager/docs/images/usage/eager2_metromap_complex.png"
+   inkscape:export-filename="eager2_metromap_complex.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -145,9 +145,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.3238356"
-     inkscape:cx="406.07024"
-     inkscape:cy="-143.59138"
+     inkscape:zoom="0.55881334"
+     inkscape:cx="695.2232"
+     inkscape:cy="571.74726"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -193,7 +193,7 @@
     <rect
        style="fill:#ffffff;stroke:none;stroke-width:0.582692;stroke-linecap:round"
        id="rect1194"
-       width="316.84647"
+       width="316.84601"
        height="170.04657"
        x="-1.99229"
        y="17.807598" />
@@ -967,7 +967,7 @@
          x="143.71013"
          y="116.57104"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
-         id="tspan1556">index</tspan></text>
+         id="tspan1556">faidx</tspan></text>
     <circle
        style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path12-3-5-93-2"
@@ -1033,16 +1033,16 @@
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="128.75439"
-       y="76.729164"
+       y="75.141663"
        id="text884-7-7-9-1-1-0"><tspan
          sodipodi:role="line"
          x="128.75439"
-         y="76.729164"
+         y="75.141663"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
-         id="tspan928-5-7-7-4">Samtools</tspan><tspan
+         id="tspan928-5-7-7-4">Samtools'</tspan><tspan
          sodipodi:role="line"
          x="128.75439"
-         y="81.138878"
+         y="79.551376"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro';text-align:center;text-anchor:middle;stroke-width:0.264583"
          id="tspan2638-4">flagstat</tspan></text>
     <text

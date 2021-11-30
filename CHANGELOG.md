@@ -3,7 +3,25 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.4.0] - 20201-09-14
+## [2.4.1] - 2021-11-30
+
+### `Added`
+
+- [#805](https://github.com/nf-core/eager/issues/805) Changes to bam_trim options to allow flexible trimming by library strandedness (in addition to UDG treatment). (@TCLamnidis)
+- [#808](https://github.com/nf-core/eager/issues/808) Retain read group information across bam merges. Sample set to sample name (rather than library name) in bwa output 'RG' readgroup tag. (@TCLamnidis)
+- Map and base quality filters prior to genotyping with pileupcaller can now be specified. (@TCLamnidis)
+- [#774](https://github.com/nf-core/eager/issues/774) Added support for multi-threaded Bowtie2 build reference genome indexing (@jfy133)
+- [#804](https://github.com/nf-core/eager/issues/804) Improved output documentation description to add how 'cluster factor' is calculated (thanks to @meganemichel)
+
+### `Fixed`
+
+- [#803](https://github.com/nf-core/eager/issues/803) Fixed mistake in metro-map diagram (`samtools index` is now correctly `samtools faidx`) (@jfy133)
+
+### `Dependencies`
+
+### `Deprecated`
+
+## [2.4.0] - Wangen - 2021-09-14
 
 ### `Added`
 
@@ -168,7 +186,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Deprecated`
 
-## [2.3.0] - 2021-01-11 - "Aalen"
+## [2.3.0] - Aalen - 2021-01-11
 
 ### `Added`
 
@@ -301,7 +319,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Latest version of Sex.DetERRmine (1.1.2)
 - Latest version of endorS.py (0.4)
 
-## [2.1.0] - 2020-03-05 - "Ravensburg"
+## [2.1.0] - Ravensburg - 2020-03-05
 
 ### `Added`
 
