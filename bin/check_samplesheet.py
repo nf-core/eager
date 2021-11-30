@@ -38,35 +38,32 @@ def print_error(error, context="Line", context_str=""):
     sys.exit(1)
 
 
-# TODO nf-core: Update the check_samplesheet function
 def check_samplesheet(file_in, file_out):
     """
     This function checks that the samplesheet follows the following structure:
-
-    sample,fastq_1,fastq_2
-    SAMPLE_PE,SAMPLE_PE_RUN1_1.fastq.gz,SAMPLE_PE_RUN1_2.fastq.gz
-    SAMPLE_PE,SAMPLE_PE_RUN2_1.fastq.gz,SAMPLE_PE_RUN2_2.fastq.gz
-    SAMPLE_SE,SAMPLE_SE_RUN1_1.fastq.gz,
+    sample_id	library_id	lane	colour_chemistry	pairment	strandedness	damage_treatment	r1	r2	bam
+    Sample1	Sample1_Lib1	1	4	PE	double	full	Sample1_Lib1_L008_R1_001.fq.gz	Sample1_Lib1_L008_R2_001.fq.gz	NA
+    Sample2	Sample2_Lib1	2	2	SE	double	full	Sample2_Lib1_L008_R1_001.fq.gz	NA	NA
+    Sample3	Sample3_Lib1	9	4	SE	single	none	NA	NA	Sample3_Lib1.bam
 
     For an example see:
-    https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
+    https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/mammoth_design_fastq_bam_dsl2.tsv
     """
 
     sample_mapping_dict = {}
     with open(file_in, "r") as fin:
 
         ## Check header
-        MIN_COLS = 2
-        # TODO nf-core: Update the column names for the input samplesheet
-        HEADER = ["sample", "fastq_1", "fastq_2"]
-        header = [x.strip('"') for x in fin.readline().strip().split(",")]
+        MIN_COLS = 10
+        HEADER = ["sample_id", "library_id", "lane", "colour_chemistry", "pairment", "strandedness", "damage_treatment", "r1", "r2", "bam"]
+        header = [x.strip('"') for x in fin.readline().strip().split("\t")]
         if header[: len(HEADER)] != HEADER:
-            print("ERROR: Please check samplesheet header -> {} != {}".format(",".join(header), ",".join(HEADER)))
+            print("ERROR: Please check samplesheet header -> {} != {}".format("\t".join(header), "\t".join(HEADER)))
             sys.exit(1)
 
         ## Check sample entries
         for line in fin:
-            lspl = [x.strip().strip('"') for x in line.strip().split(",")]
+            lspl = [x.strip().strip('"') for x in line.strip().split("\t")]
 
             # Check valid number of columns per row
             if len(lspl) < len(HEADER):
@@ -84,26 +81,33 @@ def check_samplesheet(file_in, file_out):
                 )
 
             ## Check sample name entries
-            sample, fastq_1, fastq_2 = lspl[: len(HEADER)]
-            sample = sample.replace(" ", "_")
-            if not sample:
-                print_error("Sample entry has not been specified!", "Line", line)
+            sample_id, library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam = lspl[: len(HEADER)]
 
-            ## Check FastQ file extension
-            for fastq in [fastq_1, fastq_2]:
-                if fastq:
-                    if fastq.find(" ") != -1:
-                        print_error("FastQ file contains spaces!", "Line", line)
-                    if not fastq.endswith(".fastq.gz") and not fastq.endswith(".fq.gz"):
+            sample_id = sample_id.replace(" ", "_")
+            if not sample_id:
+                print_error("[nf-core/eager] error: sample_id entry has not been specified!", "Line", line)
+
+            library_id = library_id.replace(" ", "_")
+            if not library_id:
+                print_error("[nf-core/eager] error: library_id entry has not been specified!", "Line", line)
+
+            ## Check input file extensions
+            for reads in [r1, r2, bam]:
+                if reads:
+                    if reads.find(" ") != -1:
+                        print_error("[nf-core/eager] error: FASTQ or BAM file(s) contains spaces!", "Line", line)
+                    if not reads.endswith(".fastq.gz") and not reads.endswith(".fq.gz") and not reads.endswith(".bam") and not reads.endswith("NA"):
                         print_error(
-                            "FastQ file does not have extension '.fastq.gz' or '.fq.gz'!",
+                            "[nf-core/eager] error: FASTQ or BAM file(s) do not have extension '.fastq.gz', '.fq.gz', or '.bam'!",
                             "Line",
                             line,
                         )
 
+            ## TODO UP TO HERE
             ## Auto-detect paired-end/single-end
             sample_info = []  ## [single_end, fastq_1, fastq_2]
-            if sample and fastq_1 and fastq_2:  ## Paired-end short reads
+
+            if sample_id and fastq_1 and fastq_2:  ## Paired-end short reads
                 sample_info = ["0", fastq_1, fastq_2]
             elif sample and fastq_1 and not fastq_2:  ## Single-end short reads
                 sample_info = ["1", fastq_1, fastq_2]
