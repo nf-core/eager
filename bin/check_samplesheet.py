@@ -8,7 +8,6 @@ import sys
 import errno
 import argparse
 
-
 def parse_args(args=None):
     Description = "Reformat nf-core/eager samplesheet file and check its contents."
     Epilog = "Example usage: python check_samplesheet.py <FILE_IN> <FILE_OUT>"
@@ -148,7 +147,8 @@ def check_samplesheet(file_in, file_out):
             for sample_id in sorted(sample_mapping_dict.keys()):
                 ## TODO check that multiple runs of the same sample are of the same datatype [need to improve this, e.g. could be used for checking that SS vs DS libs don't have the same sample name, don't have duplicate lane IDs for same library?]
                 if not all(x[0] == sample_mapping_dict[sample_id][0][0] for x in sample_mapping_dict[sample_id]):
-                    print_error("Libraries of a sample must be of the same strandedness!", "Sample", sample_id)
+                    print(sample_mapping_dict[sample_id][0][0])
+                    print_error("sample_ids for single- and double- stranded libraries of the same sample must be unique", "Sample", sample_id)
 
                 for idx, val in enumerate(sample_mapping_dict[sample_id]):
                     fout.write("\t".join(["{}_T{}".format(sample_id, idx + 1)] + val) + "\n")
