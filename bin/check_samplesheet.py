@@ -8,6 +8,23 @@ import sys
 import errno
 import argparse
 
+def isNAstr(var):
+    x=False
+    if isinstance(var, str) and var == "NA":
+        x=True
+    return x
+
+def detect_multistrandedness(all_info_dict):
+    for sample in all_info_dict.keys():
+        lib_strands=[]
+        for lib in all_info_dict[sample].keys():
+            for lane in all_info_dict[sample][lib].keys():
+                ## all_info_dict[sample][lib][lane] = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+                lib_strands.append(all_info_dict[sample][lib][lane][2])
+        if len(set(lib_strands)) > 1:
+            print_error("Cannot have both single- and double-stranded libraries with the same sample_id.", "Sample", sample)
+
+
 def parse_args(args=None):
     Description = "Reformat nf-core/eager samplesheet file and check its contents."
     Epilog = "Example usage: python check_samplesheet.py <FILE_IN> <FILE_OUT>"
@@ -90,7 +107,7 @@ def check_samplesheet(file_in, file_out):
             if not library_id:
                 print_error("library_id entry has not been specified!", "Line:", line)
 
-            if lane.isnumeric() == False:
+            if not lane.isnumeric():
                 print_error("lane number is not numeric!", "Line:", line)
 
             if colour_chemistry not in ['2', '4']:
@@ -109,36 +126,52 @@ def check_samplesheet(file_in, file_out):
             for reads in [r1, r2, bam]:
                 if reads.find(" ") != -1:
                     print_error("FASTQ or BAM file(s) contains spaces! Please rename.", "Line", line)
-                if not reads.endswith(".fastq.gz") and not reads.endswith(".fq.gz") and not reads.endswith(".bam") and not reads == "NA":
+                if not reads.endswith(".fastq.gz") and not reads.endswith(".fq.gz") and not reads.endswith(".bam") and not isNAstr(reads):
                     print_error(
                         "FASTQ or BAM file(s) have unrecognised extension. Options: .fastq.gz, .fq.gz, or .bam!",
                         "Line",
                         line,
                     )
 
-            ## Prepare meta
-            sample_info = []  ## [single_end, fastq_1, fastq_2]
+            if not isNAstr(bam) and not pairment == 'single':
+                print_error("Pairment for BAM input can only be 'single'.", "Line", line)
 
-            ## TODO Thiseas: write isNA() function
-            ## TODO Thiseas: improve check so can't supply FASTQ(s) and BAM on same line
-            if sample_id and r1 and r2 and not bam == "NA":
-                sample_info = [library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
-            elif sample_id and r1 and not r2 and not bam == "NA":
-                sample_info = [library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
-            elif sample_id and bam and not r1 == "NA" and not r2 == "NA":
-                sample_info = [library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+            ## Prepare meta
+            lane_info = []  ## [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+
+            if sample_id and not isNAstr(r1) and isNAstr(r2) and isNAstr(bam): ## R1 only
+                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+            elif sample_id and not isNAstr(r1) and not isNAstr(r2) and isNAstr(bam): ## R1 and R2 only
+                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+            elif sample_id and isNAstr(r1) and isNAstr(r2) and not isNAstr(bam): ## BAM only
+                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
             else:
                 print_error("Invalid combination of columns provided!", "Line", line)
 
-            ## Create sample mapping dictionary = { sample: [ library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam ] }
-            ## TODO Thiseas: check whether this can work with sample_id and library_id
-            if sample_id not in sample_mapping_dict:
-                sample_mapping_dict[sample_id] = [sample_info]
-            else:
-                if sample_info in sample_mapping_dict[sample_id]:
-                    print_error("Samplesheet contains duplicate rows!", "Line", line)
-                else:
-                    sample_mapping_dict[sample_id].append(sample_info)
+            ## Create a complex structure of dictionaries
+            ## sample mapping dictionary = { sample1: [{ library1: [ { lane1: [ colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam ] }] }] }
+            ## Each sample contains a dictionary that has library IDs as keys, and a dictionary of dictionaries as value. The library ID values are dictionaries with lanes as keys and the lane info as values
+            sample_mapping_dict.setdefault(sample_id, {}) ## Add the sample id as key with an empty dictionary value if it doesnt exist, else do nothing. 
+            sample_mapping_dict[sample_id].setdefault(library_id, {}) ## Add the library id as key with an empty dictionary value if it doesnt exist, else do nothing. 
+            # sample_mapping_dict[sample_id][library_id].setdefault(lane, {}) ## Add the lane as key with an empty dictionary value if it doesnt exist, else do nothing. 
+            
+            ## Throw error if the sample_id/library_id/lane combination already exists.
+            if lane in sample_mapping_dict[sample_id][library_id].keys():
+                print_error("Samplesheet contains duplicate rows!", "Line", line)
+            sample_mapping_dict[sample_id][library_id][lane] = lane_info ## Add lane_info to lane within library within sample.
+
+    ## Ensure a single library strandedness per sample.
+    detect_multistrandedness(sample_mapping_dict)
+
+            # ## Create sample mapping dictionary = { sample: [ library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam ] }
+            # ## TODO Thiseas: check whether this can work with sample_id and library_id
+            # if sample_id not in sample_mapping_dict:
+            #     sample_mapping_dict[sample_id] = [sample_info]
+            # else:
+            #     if sample_info in sample_mapping_dict[sample_id]:
+            #         print_error("Samplesheet contains duplicate rows!", "Line", line)
+            #     else:
+            #         sample_mapping_dict[sample_id].append(sample_info)
 
     ## Write validated samplesheet with appropriate columns
     if len(sample_mapping_dict) > 0:
@@ -147,18 +180,9 @@ def check_samplesheet(file_in, file_out):
         with open(file_out, "w") as fout:
             fout.write("\t".join(["sample_id", "library_id", "lane", "colour_chemistry", "pairment", "strandedness", "damage_treatment", "r1", "r2", "bam"]) + "\n")
             for sample_id in sorted(sample_mapping_dict.keys()):
-                ## TODO Thiseas: update so checks for file name collisions
-                #   1. Check that you single-stranded and double-stranded library from the same sample does not have
-                #      the same sample ID (e.g. must be Sample1_SS, Sample2_DS, as we don't allow merging of SS/DS libs)
-                #   2. Don't have duplicate lane IDs for same library (i.e., a library sequenced on Lane 8 of two HiSeq
-                #      runs will clash with our naming scheme, so we want to give fake lane IDs for each subsequent run)
-                if not all(x[0] == sample_mapping_dict[sample_id][0][0] for x in sample_mapping_dict[sample_id]):
-                    print(sample_mapping_dict[sample_id][0][0])
-                    print_error("sample_ids for single- and double- stranded libraries of the same sample must be unique", "Sample", sample_id)
-
-                ## TODO Thiseas: evaluate whether we need this, or replace with simple `write` execution of the line
-                for idx, val in enumerate(sample_mapping_dict[sample_id]):
-                    fout.write("\t".join(["{}_T{}".format(sample_id, idx + 1)] + val) + "\n")
+                for library_id in sorted(sample_mapping_dict[sample_id].keys()):
+                    for lane in sorted(sample_mapping_dict[sample_id][library_id].keys()):
+                        fout.write("\t".join([sample_id, library_id, lane, *sample_mapping_dict[sample_id][library_id][lane]]) + "\n")
     else:
         print_error("No entries to process!", "Samplesheet: {}".format(file_in))
 
