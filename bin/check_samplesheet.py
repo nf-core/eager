@@ -57,7 +57,7 @@ def check_samplesheet(file_in, file_out):
         HEADER = ["sample_id", "library_id", "lane", "colour_chemistry", "pairment", "strandedness", "damage_treatment", "r1", "r2", "bam"]
         header = [x.strip('"') for x in fin.readline().strip().split("\t")]
         if header[: len(HEADER)] != HEADER:
-            print("Please check samplesheet header -> {} != {}".format("\t".join(header), "\t".join(HEADER)))
+            print("Please check samplesheet header: {} != {}".format("\t".join(header), "\t".join(HEADER)))
             sys.exit(1)
 
         ## Check sample entries
@@ -107,29 +107,31 @@ def check_samplesheet(file_in, file_out):
 
             ## Check input file extensions
             for reads in [r1, r2, bam]:
-                if reads:
-                    if reads.find(" ") != -1:
-                        print_error("FASTQ or BAM file(s) contains spaces! Please rename.", "Line", line)
-                    if not reads.endswith(".fastq.gz") and not reads.endswith(".fq.gz") and not reads.endswith(".bam") and not reads.endswith("NA"):
-                        print_error(
-                            "FASTQ or BAM file(s) have unrecognised extension. Options: .fastq.gz, .fq.gz, or .bam!",
-                            "Line",
-                            line,
-                        )
+                if reads.find(" ") != -1:
+                    print_error("FASTQ or BAM file(s) contains spaces! Please rename.", "Line", line)
+                if not reads.endswith(".fastq.gz") and not reads.endswith(".fq.gz") and not reads.endswith(".bam") and not reads == "NA":
+                    print_error(
+                        "FASTQ or BAM file(s) have unrecognised extension. Options: .fastq.gz, .fq.gz, or .bam!",
+                        "Line",
+                        line,
+                    )
 
             ## Prepare meta
             sample_info = []  ## [single_end, fastq_1, fastq_2]
 
-            if sample_id and r1 and r2:
+            ## TODO Thiseas: write isNA() function
+            ## TODO Thiseas: improve check so can't supply FASTQ(s) and BAM on same line
+            if sample_id and r1 and r2 and not bam == "NA":
                 sample_info = [library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
-            elif sample_id and r1 and not r2:
+            elif sample_id and r1 and not r2 and not bam == "NA":
                 sample_info = [library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
-            elif sample_id and bam and not r1 and not r2:
+            elif sample_id and bam and not r1 == "NA" and not r2 == "NA":
                 sample_info = [library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
             else:
                 print_error("Invalid combination of columns provided!", "Line", line)
 
             ## Create sample mapping dictionary = { sample: [ library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam ] }
+            ## TODO Thiseas: check whether this can work with sample_id and library_id
             if sample_id not in sample_mapping_dict:
                 sample_mapping_dict[sample_id] = [sample_info]
             else:
@@ -145,11 +147,16 @@ def check_samplesheet(file_in, file_out):
         with open(file_out, "w") as fout:
             fout.write("\t".join(["sample_id", "library_id", "lane", "colour_chemistry", "pairment", "strandedness", "damage_treatment", "r1", "r2", "bam"]) + "\n")
             for sample_id in sorted(sample_mapping_dict.keys()):
-                ## TODO check that multiple runs of the same sample are of the same datatype [need to improve this, e.g. could be used for checking that SS vs DS libs don't have the same sample name, don't have duplicate lane IDs for same library?]
+                ## TODO Thiseas: update so checks for file name collisions
+                #   1. Check that you single-stranded and double-stranded library from the same sample does not have
+                #      the same sample ID (e.g. must be Sample1_SS, Sample2_DS, as we don't allow merging of SS/DS libs)
+                #   2. Don't have duplicate lane IDs for same library (i.e., a library sequenced on Lane 8 of two HiSeq
+                #      runs will clash with our naming scheme, so we want to give fake lane IDs for each subsequent run)
                 if not all(x[0] == sample_mapping_dict[sample_id][0][0] for x in sample_mapping_dict[sample_id]):
                     print(sample_mapping_dict[sample_id][0][0])
                     print_error("sample_ids for single- and double- stranded libraries of the same sample must be unique", "Sample", sample_id)
 
+                ## TODO Thiseas: evaluate whether we need this, or replace with simple `write` execution of the line
                 for idx, val in enumerate(sample_mapping_dict[sample_id]):
                     fout.write("\t".join(["{}_T{}".format(sample_id, idx + 1)] + val) + "\n")
     else:
