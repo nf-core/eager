@@ -174,6 +174,7 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Katrin Nägele](https://github.com/KathrinNaegele)
 * [Luc Venturini](https://github.com/lucventurini)
 * [Marcel Keller](https://github.com/marcel-keller)
+* [Megan Michel](https://github.com/meganemichel)
 * [Pierre Lindenbaum](https://github.com/lindenb)
 * [Pontus Skoglund](https://github.com/pontussk)
 * [Raphael Eisenhofer](https://github.com/EisenRa)
