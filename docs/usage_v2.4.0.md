@@ -127,7 +127,7 @@ the [nf-core/configs](https://github.com/nf-core/configs) repository.
 * `uzh`
     * A profile for the University of Zurich Research Cloud
     * Loads Singularity and defines appropriate resources for running the
-      pipeline.
+    pipeline.
 * `binac`
     * A profile for the BinAC cluster at the University of Tuebingen 0 Loads
     Singularity and defines appropriate resources for running the pipeline
@@ -181,9 +181,9 @@ following config:
 
 ```nextflow
 process {
-  withName: bwa {
-    memory = 32.GB
-  }
+    withName: bwa {
+        memory = 32.GB
+    }
 }
 ```
 
@@ -283,9 +283,9 @@ If you have multiple files in different directories, you can use additional wild
 2. The path **must** be enclosed in quotes
 3. The path must have at least one `*` wildcard character
 4. When using the pipeline with **paired end data**, the path must use `{1,2}`
-   notation to specify read pairs.
+    notation to specify read pairs.
 5. Files names must be unique, having files with the same name, but in different directories is _not_ sufficient
-   * This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
+    * This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
 6. Due to limitations of downstream tools (e.g. FastQC), sample IDs may be truncated after the first `.` in the name, Ensure file names are unique prior to this!
 7. For input BAM files you should provide a small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actually need a reference genome for any downstream analyses.
 
@@ -294,7 +294,7 @@ If you have multiple files in different directories, you can use additional wild
 Alternatively to the [direct input method](#direct-input-method), you can supply to `--input` a path to a TSV file that contains paths to FASTQ/BAM files and additional metadata. This allows for more complex procedures such as merging of sequencing data across lanes, sequencing runs, sequencing configuration types, and samples.
 
 <p align="center">
-  <img src="https://github.com/nf-core/eager/raw/master/docs/images/usage/merging_files.png" alt="Schematic diagram indicating merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
+    <img src="https://github.com/nf-core/eager/raw/master/docs/images/usage/merging_files.png" alt="Schematic diagram indicating merging points of different types of libraries, given a TSV input. Dashed boxes are optional library-specific processes" width="70%">
 </p>
 
 > Only different libraries from a single sample that have been BAM trimmed will be merged together. Rescaled or PMD filtered libraries will not be merged prior genotyping as each library _may_ have a different model applied to it and have their own biases (i.e. users may need to play around with settings to get the damage-removal optimal).
@@ -411,7 +411,7 @@ files you will likely receive an error such as
 ```bash
 Error executing process > 'library_merge (JK2782)'
 Caused by:
-  Process `library_merge` input file name collision -- There are multiple input files for each of the following file names: JK2782.mapped_rmdup.bam.csi, JK2782.mapped_rmdup.bam
+    Process `library_merge` input file name collision -- There are multiple input files for each of the following file names: JK2782.mapped_rmdup.bam.csi, JK2782.mapped_rmdup.bam
 Tip: you can try to figure out what's wrong by changing to the process work dir and showing the script file named `.command.sh`
 Execution cancelled -- Finishing pending tasks before exit
 ```
@@ -455,21 +455,21 @@ itself.
 ERROR ~ Error executing process > 'circulargenerator (hg19_complete_500.fasta)'
 
 Caused by:
-  Process `circulargenerator (hg19_complete_500.fasta)` terminated with an error exit status (1)
+     Process `circulargenerator (hg19_complete_500.fasta)` terminated with an error exit status (1)
 
 Command executed:
 
-  circulargenerator -e 500 -i hg19_complete.fasta -s MT
-  bwa index hg19_complete_500.fasta
+    circulargenerator -e 500 -i hg19_complete.fasta -s MT
+    bwa index hg19_complete_500.fasta
 
 Command exit status:
-  1
+    1
 
 Command output:
-  (empty)
+    (empty)
 
 Command error:
-  Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+    Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
         at java.util.Arrays.copyOf(Arrays.java:3332)
         at java.lang.AbstractStringBuilder.ensureCapacityInternal(AbstractStringBuilder.java:124)
         at java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:448)
@@ -478,11 +478,11 @@ Command error:
         at CircularGenerator.main(CircularGenerator.java:119)
 
 Work dir:
-  /projects1/microbiome_calculus/RIII/03-preprocessing/mtCap_preprocessing/work/7f/52f33fdd50ed2593d3d62e7c74e408
+    /projects1/microbiome_calculus/RIII/03-preprocessing/mtCap_preprocessing/work/7f/52f33fdd50ed2593d3d62e7c74e408
 
 Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
 
- -- Check '.nextflow.log' file for details
+-- Check '.nextflow.log' file for details
 ```
 
 If you find it is a common error try and fix it yourself by changing your
@@ -500,7 +500,7 @@ would be a 'process fails' and it looks like the following.
 ```bash
 Error executing process > 'library_merge (JK2782)'
 Caused by:
-  Process `library_merge` input file name collision -- There are multiple input files for each of the following file names: JK2782.mapped_rmdup.bam.csi, JK2782.mapped_rmdup.bam
+    Process `library_merge` input file name collision -- There are multiple input files for each of the following file names: JK2782.mapped_rmdup.bam.csi, JK2782.mapped_rmdup.bam
 Tip: you can try to figure out what's wrong by changing to the process work dir and showing the script file named `.command.sh`
 Execution cancelled -- Finishing pending tasks before exit
 ```
@@ -533,7 +533,7 @@ see the following line
 
 ```bash
 Work dir:
-  /projects1/microbiome_calculus/RIII/03-preprocessing/mtCap_preprocessing/work/7f/52f33fdd50ed2593d3d62e7c74e408
+    /projects1/microbiome_calculus/RIII/03-preprocessing/mtCap_preprocessing/work/7f/52f33fdd50ed2593d3d62e7c74e408
 ```
 
 > A shortened version of the 'hash' directory ID can also be seen in your
@@ -545,15 +545,13 @@ of normal files, symbolic links (symlinks) and hidden files (indicated with `.`
 at the beginning of the file name).
 
 * Symbolic links: are typically input files from previous processes.
-* Normal files: are typically successfully completed output files from some of
-  some of the commands in the process
-* Hidden files are Nextflow generated files and include the submission commands
-  as well as log files
+* Normal files: are typically successfully completed output files from some of some of the commands in the process
+* Hidden files are Nextflow generated files and include the submission commands as well as log files
 
 When you have an error run, you can firstly check the contents of the output
 files to see if they are empty or not (e.g. with `cat` or `zcat`),
 interpretation of which will depend on the program thus dependent on the user
-knowledge.
+knowledge.:
 
 Next, you can investigate `.command.err` and `.command.out`, or `.command.log`.
 These represent the standard out or error (in the case of `.log`, both combined)
@@ -604,10 +602,8 @@ DNA to map and cause false positive SNP calls.
 
 Within nf-core, there are two main levels of configs
 
-* Institutional-level profiles: these normally define things like paths to
-  common storage, resource maximums, scheduling system
-* Pipeline-level profiles: these normally define parameters specifically for a
-  pipeline (such as mapping parameters, turning specific modules on or off)
+* Institutional-level profiles: these normally define things like paths to common storage, resource maximums, scheduling system
+* Pipeline-level profiles: these normally define parameters specifically for a pipeline (such as mapping parameters, turning specific modules on or off)
 
 As well as allowing more efficiency and control at cluster or Institutional
 levels in terms of memory usage, pipeline-level profiles can also assist in
@@ -654,7 +650,7 @@ first and second will be overwritten everything in a third.
 This can be illustrated as follows.
 
 ```bash
-              overwrites  overwrites
+            overwrites  overwrites
                ┌──────┐   ┌──────┐
                ▼      │   ▼      │
 -profile institution,cluster,my_paper
