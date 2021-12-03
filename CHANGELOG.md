@@ -130,7 +130,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Added`
 
 - Added large scale 'stress-test' profile for AWS (using de Barros Damgaard et al. 2018's 137 ancient human genomes).
-  - This will now be run automatically for every release. All processed data will be available on the nf-core website: <https://nf-co.re/eager/results>
+    - This will now be run automatically for every release. All processed data will be available on the nf-core website: <https://nf-co.re/eager/results>
     - You can run this yourself using `-profile test_full`
 
 ### `Fixed`
@@ -165,10 +165,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **Major** Re-wrote input logic to accept a TSV 'map' file in addition to direct paths to FASTQ files
 - **Major** Added JSON Schema, enabling web GUI for configuration of pipeline available [here](https://nf-co.re/launch?pipeline=eager&release=2.2.0)
 - **Major** Lane and library merging implemented
-  - When using TSV input, one library with the multiple _lanes_ will be merged together, before mapping
-  - Strip FASTQ will also produce a lane merged 'raw' but 'stripped' FASTQ file
-  - When using TSV input, one sample with multiple (same treatment) libraries will be merged together
-  - Important: direct FASTQ paths will not have this functionality. TSV is required.
+    - When using TSV input, one library with the multiple _lanes_ will be merged together, before mapping
+    - Strip FASTQ will also produce a lane merged 'raw' but 'stripped' FASTQ file
+    - When using TSV input, one sample with multiple (same treatment) libraries will be merged together
+    - Important: direct FASTQ paths will not have this functionality. TSV is required.
 - [#40](https://github.com/nf-core/eager/issues/40) - Added the pileupCaller genotyper from [sequenceTools](https://github.com/stschiff/sequenceTools)
 - Added validation check and clearer error message when `--fasta_index` is provided and filepath does not end in `.fai`.
 - Improved error messages

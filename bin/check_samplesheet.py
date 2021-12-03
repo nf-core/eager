@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# TODO nf-core: Update the script to check the samplesheet
 # This script is based on the example at: https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
 import os
@@ -161,9 +160,9 @@ def check_samplesheet(file_in, file_out):
             ## Create a complex structure of dictionaries
             ## sample mapping dictionary = { sample1: [{ library1: [ { lane1: [ colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam ] }] }] }
             ## Each sample contains a dictionary that has library IDs as keys, and a dictionary of dictionaries as value. The library ID values are dictionaries with lanes as keys and the lane info as values
-            sample_mapping_dict.setdefault(sample_id, {}) ## Add the sample id as key with an empty dictionary value if it doesnt exist, else do nothing. 
-            sample_mapping_dict[sample_id].setdefault(library_id, {}) ## Add the library id as key with an empty dictionary value if it doesnt exist, else do nothing. 
-            # sample_mapping_dict[sample_id][library_id].setdefault(lane, {}) ## Add the lane as key with an empty dictionary value if it doesnt exist, else do nothing. 
+            sample_mapping_dict.setdefault(sample_id, {}) ## Add the sample id as key with an empty dictionary value if it doesnt exist, else do nothing.
+            sample_mapping_dict[sample_id].setdefault(library_id, {}) ## Add the library id as key with an empty dictionary value if it doesnt exist, else do nothing.
+            # sample_mapping_dict[sample_id][library_id].setdefault(lane, {}) ## Add the lane as key with an empty dictionary value if it doesnt exist, else do nothing.
 
             ## Throw error if the sample_id/library_id/lane combination already exists.
             if lane in sample_mapping_dict[sample_id][library_id].keys():

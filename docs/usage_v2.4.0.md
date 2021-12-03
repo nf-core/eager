@@ -93,27 +93,27 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
 
 * `docker`
-  * A generic configuration profile to be used with [Docker](https://docker.com/)
-  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+    * A generic configuration profile to be used with [Docker](https://docker.com/)
+    * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
 * `singularity`
-  * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+    * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+    * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
 * `podman`
-  * A generic configuration profile to be used with [Podman](https://podman.io/)
-  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+    * A generic configuration profile to be used with [Podman](https://podman.io/)
+    * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
 * `shifter`
-  * A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
-  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+    * A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
+    * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
 * `charliecloud`
-  * A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
-  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+    * A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
+    * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
 * `conda`
-  * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
-  * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
-  * Pulls most software from [Bioconda](https://bioconda.github.io/)
+    * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
+    * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
+    * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `test_tsv
-  * A profile with a complete configuration for automated testing
-  * Includes links to test data so needs no other parameters
+    * A profile with a complete configuration for automated testing
+    * Includes links to test data so needs no other parameters
 
 > *Important*: If running nf-core/eager on a cluster - ask your system
 > administrator what profile to use.
@@ -125,16 +125,16 @@ regular users of nf-core/eager, if you don't see your own institution here check
 the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
 * `uzh`
-  * A profile for the University of Zurich Research Cloud
-  * Loads Singularity and defines appropriate resources for running the
-    pipeline.
+    * A profile for the University of Zurich Research Cloud
+    * Loads Singularity and defines appropriate resources for running the
+      pipeline.
 * `binac`
-  * A profile for the BinAC cluster at the University of Tuebingen 0 Loads
+    * A profile for the BinAC cluster at the University of Tuebingen 0 Loads
     Singularity and defines appropriate resources for running the pipeline
 * `shh`
-  * A profile for the S/CDAG cluster at the Department of Archaeogenetics of
+    * A profile for the S/CDAG cluster at the Department of Archaeogenetics of
     the Max Planck Institute for the Science of Human History
-  * Loads Singularity and defines appropriate resources for running the pipeline
+    * Loads Singularity and defines appropriate resources for running the pipeline
 
 **Pipeline Specific Institution Profiles** There are also pipeline-specific
 institution profiles. I.e., we can also offer a profile which sets special
@@ -146,9 +146,9 @@ pipelines. This can be seen at
 We currently offer a nf-core/eager specific profile for
 
 * `shh`
-  * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of
+    * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of
     the Max Planck Institute for the Science of Human History
-  * In addition to the nf-core wide profile, this also sets the MALT resources
+    * In addition to the nf-core wide profile, this also sets the MALT resources
     to match our commonly used databases
 
 Further institutions can be added at
@@ -259,7 +259,7 @@ There are two possible ways of supplying input sequencing data to nf-core/eager.
 
 This method is where you specify with `--input`, the path locations of FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to the [TSV input method](#tsv-input-method), which is used for more complex input configurations such as lane and library merging.
 
-When using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.  
+When using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.
 
 By default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')
 
@@ -349,20 +349,20 @@ Note the following important points and limitations for setting up:
 
 * The TSV must use actual tabs (not spaces) between cells.
 * *File* names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
-  * If it is 'too late' and you already have duplicate file names, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
+    * If it is 'too late' and you already have duplicate file names, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
 * Lane IDs must be unique for each sequencing of each library.
-  * If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
-  * This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.
+    * If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
+    * This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.
 * All _BAM_ files must be specified as `SE` under `SeqType`.
-  * You should provide a small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actually need a reference genome for any downstream analyses.
+    * You should provide a small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actually need a reference genome for any downstream analyses.
 * nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
 * Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
 * Same libraries that are sequenced on different sequencing configurations (i.e single- and paired-end data), will be merged after mapping and will _always_ be considered 'paired-end' during downstream processes
-  * **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.
-  * When you wish to run PE/SE data together `-dedupper markduplicates` is therefore preferred.
-  * An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
-  * If you truly want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
-  * If you _regularly_ want to run the situation above, please leave a feature     request on github.
+    * **Important** running DeDup in this context is _not_ recommended, as PE and SE data at the same position will _not_ be evaluated as duplicates. Therefore not all duplicates will be removed.
+    * When you wish to run PE/SE data together `-dedupper markduplicates` is therefore preferred.
+    * An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
+    * If you truly want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
+    * If you _regularly_ want to run the situation above, please leave a feature     request on github.
 * DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).
 * nf-core/eager functionality such as `--run_trim_bam` will be applied to only   non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries. - Qualimap is run on each sample, after merging of libraries (i.e. your values   will reflect the values of all libraries combined - after being damage trimmed   etc.).
 * Genotyping will be typically performed on each `sample` independently, as normally all libraries will have been merged together. However, if you have a   mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS   libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file  collision` error in steps such as `sexdeterrmine`, and then you will need to   merge these yourself. We will consider changing this behaviour in the future   if there is enough interest.
@@ -779,7 +779,7 @@ params {
   // Specific nf-core/configs params
   config_profile_contact = 'James Fellows Yates (@jfy133)'
   config_profile_description = 'nf-core/eager SHH profile provided by nf-core/configs'
-  
+
   // default BWA
    bwaalnn = 0.04
    bwaalnl = 32
@@ -1507,9 +1507,9 @@ DeDup/Picard MarkDuplicates:
 DamageProfiler:
 
 * Do I see evidence of damage on human DNA?
-  * High numbers of mapped reads but no damage may indicate significant
+    * High numbers of mapped reads but no damage may indicate significant
     modern contamination.
-  * Was the read trimming I specified enough to overcome damage effects?
+    * Was the read trimming I specified enough to overcome damage effects?
 
 SexDetERRmine:
 
@@ -1937,10 +1937,10 @@ FastQC (post-AdapterRemoval):
 MALT:
 
 * Do I have a reasonable level of mappability?
-  * Somewhere between 10-30% can be pretty normal for aDNA, whereas e.g. <1%
+    * Somewhere between 10-30% can be pretty normal for aDNA, whereas e.g. <1%
     requires careful manual assessment
 * Do I have a reasonable taxonomic assignment success?
-  * You hope to have a large number of the mapped reads (from the mappability
+    * You hope to have a large number of the mapped reads (from the mappability
     plot) that also have taxonomic assignment.
 
 Samtools Flagstat (pre/post Filter):
@@ -1958,7 +1958,7 @@ DamageProfiler:
 * Do I see evidence of damage on human DNA? Note this is just a
   rule-of-thumb/corroboration of any signals you might find in the metagenomic
   screening and not essential.
-  * If you have high numbers of human DNA reads but no damage may indicate
+    * If you have high numbers of human DNA reads but no damage may indicate
     significant modern contamination.
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
