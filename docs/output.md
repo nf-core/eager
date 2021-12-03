@@ -353,7 +353,7 @@ Due to low 'endogenous' content of aDNA, and the high biodiversity of modern or 
     <img src="images/output/malt/malt_metagenomic_mappability.png" width="75%" height = "75%">
 </p>
 
- This can also be influenced by the type of database you supplied — many databases have an over-abundance of taxa of clinical or economic interest, so when you have a large amount of uncharacterised environmental taxa, this may also result in low mappability.
+This can also be influenced by the type of database you supplied — many databases have an over-abundance of taxa of clinical or economic interest, so when you have a large amount of uncharacterised environmental taxa, this may also result in low mappability.
 
 #### Taxonomic assignment success
 

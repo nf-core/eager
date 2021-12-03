@@ -455,7 +455,7 @@ itself.
 ERROR ~ Error executing process > 'circulargenerator (hg19_complete_500.fasta)'
 
 Caused by:
-     Process `circulargenerator (hg19_complete_500.fasta)` terminated with an error exit status (1)
+    Process `circulargenerator (hg19_complete_500.fasta)` terminated with an error exit status (1)
 
 Command executed:
 
@@ -651,8 +651,8 @@ This can be illustrated as follows.
 
 ```bash
             overwrites  overwrites
-               ┌──────┐   ┌──────┐
-               ▼      │   ▼      │
+                ┌──────┐   ┌──────┐
+                ▼      │   ▼      │
 -profile institution,cluster,my_paper
 ```
 
@@ -690,7 +690,7 @@ will then overwrite any that have been changed from the original.
 This can be visualised here
 
 <p align="center">
-  <img src="images/tutorials/profiles/config_profile_inheritence.png" width="75%" height = "75%">
+    <img src="images/tutorials/profiles/config_profile_inheritence.png" width="75%" height = "75%">
 </p>
 
 Using the example given in the [background](#tutorial-profiles---background), if
@@ -772,26 +772,26 @@ we are running eager, and that we specified the profile as `shh`.
 ```txt
 // global 'fallback' parameters
 params {
-  // Specific nf-core/configs params
-  config_profile_contact = 'James Fellows Yates (@jfy133)'
-  config_profile_description = 'nf-core/eager SHH profile provided by nf-core/configs'
+    // Specific nf-core/configs params
+    config_profile_contact = 'James Fellows Yates (@jfy133)'
+    config_profile_description = 'nf-core/eager SHH profile provided by nf-core/configs'
 
-  // default BWA
-   bwaalnn = 0.04
-   bwaalnl = 32
+    // default BWA
+     bwaalnn = 0.04
+     bwaalnl = 32
 }
 
 }
 
 // profile specific parameters
 profiles {
-  pathogen_loose {
-    params {
-      config_profile_description = 'Pathogen (loose) MPI-SHH profile, provided by nf-core/configs.'
-      bwaalnn = 0.01
-      bwaalnl = 16
+    pathogen_loose {
+        params {
+            config_profile_description = 'Pathogen (loose) MPI-SHH profile, provided by nf-core/configs.'
+            bwaalnn = 0.01
+            bwaalnl = 16
+        }
     }
-  }
 }
 
 ```
@@ -854,9 +854,9 @@ Next we need to define the name of the profile. This is what we would write in
 
 ```txt
 profiles {
-  AndradesValtuena2018 {
+    AndradesValtuena2018 {
 
-  }
+    }
 }
 ```
 
@@ -874,11 +874,11 @@ computer/clusters.
 
 ```txt
 profiles {
-  AndradesValtuena2018 {
-    params {
+    AndradesValtuena2018 {
+        params {
 
+        }
     }
-  }
 }
 ```
 
@@ -891,12 +891,12 @@ can put what you like.
 
 ```txt
 profiles {
-  AndradesValtuena2018 {
-    params {
-        config_profile_description = 'non-UDG parameters used in Andrades Valtuena et al. 2018 Curr. Bio.'
-        config_profile_contact = 'Aida Andrades Valtueña (@aidaanva)'
+    AndradesValtuena2018 {
+        params {
+            config_profile_description = 'non-UDG parameters used in Andrades Valtuena et al. 2018 Curr. Bio.'
+            config_profile_contact = 'Aida Andrades Valtueña (@aidaanva)'
+        }
     }
-  }
 }
 ```
 
@@ -905,18 +905,18 @@ mapping and deduplication parameters in nf-core/eager.
 
 ```txt
 profiles {
-  AndradesValtuena2018 {
-    params {
-        config_profile_description = 'non-UDG parameters used in Andrades Valtuena et al. 2018 Curr. Bio.'
-        config_profile_contact = 'Aida Andrades Valtueña (@aidaanva)'
-        fasta = 'https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/009/065/GCF_000009065.1_ASM906v1/GCF_000009065.1_ASM906v1_genomic.fna.gz'
-        bwaalnn = 0.01
-        bwaalnl = 16
-        run_bam_filtering = true
-        bam_mapping_quality_threshold = 37
-        dedupper = 'markduplicates'
+    AndradesValtuena2018 {
+        params {
+            config_profile_description = 'non-UDG parameters used in Andrades Valtuena et al. 2018 Curr. Bio.'
+            config_profile_contact = 'Aida Andrades Valtueña (@aidaanva)'
+            fasta = 'https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/009/065/GCF_000009065.1_ASM906v1/GCF_000009065.1_ASM906v1_genomic.fna.gz'
+            bwaalnn = 0.01
+            bwaalnl = 16
+            run_bam_filtering = true
+            bam_mapping_quality_threshold = 37
+            dedupper = 'markduplicates'
+        }
     }
-  }
 }
 ```
 
@@ -1031,7 +1031,7 @@ For the `-profile` parameter, I have indicated that I wish to use Singularity as
 my software container environment, and I will use the MPI-SHH institutional
 config as listed on
 [nf-core/configs](https://github.com/nf-core/configs/blob/master/conf/shh.config),
- using the profile for the 'sdag' cluster. These profiles specify settings
+using the profile for the 'sdag' cluster. These profiles specify settings
 optimised for the specific cluster/institution, such as maximum memory available
 or which scheduler queues to submit to. More explanations about configs and
 profiles can be seen in the [nf-core
@@ -1460,22 +1460,15 @@ For example, I normally look for things like:
 
 General Stats Table:
 
-* Do I see the expected number of raw sequencing reads (summed across each set
-  of FASTQ files per library) that was requested for sequencing?
-* Does the percentage of trimmed reads look normal for aDNA, and do lengths
-  after trimming look short as expected of aDNA?
-* Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively)
-  suggesting over-amplified or badly preserved samples?
-* Do the mapped reads show increased frequency of C>Ts on the 5' end of
-  molecules?
-* Is the number of SNPs used for nuclear contamination really low for any
-  individuals (e.g. < 100)? If so, then the estimates might not be very
-  accurate.
+* Do I see the expected number of raw sequencing reads (summed across each set of FASTQ files per library) that was requested for sequencing?
+* Does the percentage of trimmed reads look normal for aDNA, and do lengths after trimming look short as expected of aDNA?
+* Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively) suggesting over-amplified or badly preserved samples?
+* Do the mapped reads show increased frequency of C>Ts on the 5' end of molecules?
+* Is the number of SNPs used for nuclear contamination really low for any individuals (e.g. < 100)? If so, then the estimates might not be very accurate.
 
 FastQC (pre-AdapterRemoval):
 
-* Do I see any very early drop off of sequence quality scores suggesting a
-  problematic sequencing run?
+* Do I see any very early drop off of sequence quality scores suggesting a problematic sequencing run?
 * Do I see outlier GC content distributions?
 * Do I see high sequence duplication levels?
 
@@ -1490,15 +1483,11 @@ FastQC (post-AdapterRemoval):
 
 Samtools Flagstat (pre/post Filter):
 
-* Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
-  of contamination) that require downstream closer assessment? Are your samples
-  exceptionally preserved? If not, a value higher than e.g. 50% might require
-  your attention.
+* Do I see outliers, e.g. with unusually high levels of human DNA, (indicative of contamination) that require downstream closer assessment? Are your samples exceptionally preserved? If not, a value higher than e.g. 50% might require your attention.
 
 DeDup/Picard MarkDuplicates:
 
-* Do I see large numbers of duplicates being removed, possibly indicating
-  over-amplified or badly preserved samples?
+* Do I see large numbers of duplicates being removed, possibly indicating over-amplified or badly preserved samples?
 
 DamageProfiler:
 
@@ -1509,11 +1498,9 @@ DamageProfiler:
 
 SexDetERRmine:
 
-* Do the relative coverages on the X and Y chromosome fall within the expected
-  areas of the plot?
+* Do the relative coverages on the X and Y chromosome fall within the expected areas of the plot?
 * Do all individuals have enough data for accurate sex determination?
-* Do the proportions of autosomal/X/Y reads make sense? If there is an
-  overrepresentation of reads within one bin, is the data enriched for that bin?
+* Do the proportions of autosomal/X/Y reads make sense? If there is an overrepresentation of reads within one bin, is the data enriched for that bin?
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
 > the the 'Documentation' folder of the results directory or here in the [output
@@ -1599,15 +1586,10 @@ reads from this mapping using MALT, and perform aDNA authentication with HOPS.
 Prior setting up an nf-core/eager run for metagenomic screening, we will need:
 
 1. Raw sequencing data in FASTQ format
-2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools`
-   and `picard SequenceDictionary` indices
-3. A MALT database of your choice (see [MALT
-   manual](https://software-ab.informatik.uni-tuebingen.de/download/malt/manual.pdf)
-   for set-up)
-4. A list of (NCBI) taxa containing well-known taxa of your microbiome (see
-   below)
-5. HOPS resources `.map` and `.tre` files (available
-   [here](https://github.com/rhuebler/HOPS/tree/external/Resources))
+2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools` and `picard SequenceDictionary` indices
+3. A MALT database of your choice (see [MALT manual](https://software-ab.informatik.uni-tuebingen.de/download/malt/manual.pdf) for set-up)
+4. A list of (NCBI) taxa containing well-known taxa of your microbiome (see below)
+5. HOPS resources `.map` and `.tre` files (available [here](https://github.com/rhuebler/HOPS/tree/external/Resources))
 
 We should also ensure we have the very latest version of the nf-core/eager
 pipeline so we have all latest bugfixes etc. In this case we will be using
@@ -1903,21 +1885,14 @@ For example, I normally look for things like:
 
 General Stats Table:
 
-* Do I see the expected number of raw sequencing reads (summed across each set
-  of FASTQ files per library) that was requested for sequencing?
-* Does the percentage of trimmed reads look normal for aDNA, and do lengths
-  after trimming look short as expected of aDNA?
-* Does ClusterFactor or 'Dups' look high suggesting over-amplified or
-  badly preserved samples (e.g. >2 or >10% respectively - however
-  given this is on the human reads this is just a rule of thumb and may not
-  reflect the quality of the metagenomic profile) ?
-* Does the human DNA show increased frequency of C>Ts on the 5' end of
-  molecules?
+* Do I see the expected number of raw sequencing reads (summed across each set of FASTQ files per library) that was requested for sequencing?
+* Does the percentage of trimmed reads look normal for aDNA, and do lengths after trimming look short as expected of aDNA?
+* Does ClusterFactor or 'Dups' look high suggesting over-amplified or badly preserved samples (e.g. >2 or >10% respectively - however given this is on the human reads this is just a rule of thumb and may not reflect the quality of the metagenomic profile) ?
+* Does the human DNA show increased frequency of C>Ts on the 5' end of molecules?
 
 FastQC (pre-AdapterRemoval):
 
-* Do I see any very early drop off of sequence quality scores suggesting
-  problematic sequencing run?
+* Do I see any very early drop off of sequence quality scores suggesting problematic sequencing run?
 * Do I see outlier GC content distributions?
 * Do I see high sequence duplication levels?
 
@@ -1933,27 +1908,21 @@ FastQC (post-AdapterRemoval):
 MALT:
 
 * Do I have a reasonable level of mappability?
-    * Somewhere between 10-30% can be pretty normal for aDNA, whereas e.g. <1%
-    requires careful manual assessment
+    * Somewhere between 10-30% can be pretty normal for aDNA, whereas e.g. <1% requires careful manual assessment
 * Do I have a reasonable taxonomic assignment success?
-    * You hope to have a large number of the mapped reads (from the mappability
-    plot) that also have taxonomic assignment.
+    * You hope to have a large number of the mapped reads (from the mappability plot) that also have taxonomic assignment.
 
 Samtools Flagstat (pre/post Filter):
 
-* Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
-  of contamination) that require downstream closer assessment?
+* Do I see outliers, e.g. with unusually high levels of human DNA, (indicative of contamination) that require downstream closer assessment?
 
 DeDup/Picard MarkDuplicates:
 
-* Do I see large numbers of duplicates being removed, possibly indicating
-  over-amplified or badly preserved samples?
+* Do I see large numbers of duplicates being removed, possibly indicating over-amplified or badly preserved samples?
 
 DamageProfiler:
 
-* Do I see evidence of damage on human DNA? Note this is just a
-  rule-of-thumb/corroboration of any signals you might find in the metagenomic
-  screening and not essential.
+* Do I see evidence of damage on human DNA? Note this is just a rule-of-thumb/corroboration of any signals you might find in the metagenomic screening and not essential.
     * If you have high numbers of human DNA reads but no damage may indicate
     significant modern contamination.
 
@@ -2067,14 +2036,9 @@ command explained below.
 Prior setting up the nf-core/eager run, we will need:
 
 1. Raw sequencing data in FASTQ format
-2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools`
-   and `picard SequenceDictionary` indices (however note these can be made for
-   you with nf-core/eager, but this can make a pipeline run take much longer!)
-3. A GFF file of gene sequence annotations (normally supplied with reference
-   genomes downloaded from NCBI Genomes, in this context from
-   [here](https://www.ncbi.nlm.nih.gov/genome/?term=Yersinia+pestis))
-4. [Optional] Previously made VCF GATK 3.5 files (see below for settings), of
-   previously published _Y. pestis_ genomes.
+2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools` and `picard SequenceDictionary` indices (however note these can be made for you with nf-core/eager, but this can make a pipeline run take much longer!)
+3. A GFF file of gene sequence annotations (normally supplied with reference genomes downloaded from NCBI Genomes, in this context from [here](https://www.ncbi.nlm.nih.gov/genome/?term=Yersinia+pestis))
+4. [Optional] Previously made VCF GATK 3.5 files (see below for settings), of previously published _Y. pestis_ genomes.
 
 We should also ensure we have the very latest version of the nf-core/eager
 pipeline so we have all latest bugfixes etc. In this case we will be using
@@ -2525,34 +2489,19 @@ results. For example, I normally look for things like:
 
 General Stats Table:
 
-* Do I see the expected number of raw sequencing reads (summed across each set
-  of FASTQ files per library) that was requested for sequencing?
-* Does the percentage of trimmed reads look normal for aDNA, and do lengths
-  after trimming look short as expected of aDNA?
-* Does the Endogenous DNA (%) columns look reasonable (high enough to indicate
-  you have received enough coverage for downstream, and/or do you lose an
-  unusually high reads after filtering )
-* Does ClusterFactor or '% Dups' look high (e.g. >2 or >10% respectively -  high
-  values suggesting over-amplified or badly preserved samples i.e. low
-  complexity; note that genome-enrichment libraries may by their nature look
-  higher).
-* Do you see an increased frequency of C>Ts on the 5' end of molecules in the
-  mapped reads?
-* Do median read lengths look relatively low (normally <= 100 bp) indicating
-  typically fragmented aDNA?
-* Does the % coverage decrease relatively gradually at each depth coverage, and
-  does not drop extremely drastically
-* Does the Median coverage and percent >3x (or whatever you set) show sufficient
-  coverage for reliable SNP calls and that a good proportion of the genome is
-  covered indicating you have the right reference genome?
-* Do you see a high proportion of % Hets, indicating many multi-allelic sites
-  (and possibly presence of cross-mapping from other species, that may lead to
-  false positive or less confident SNP calls)?
+* Do I see the expected number of raw sequencing reads (summed across each set of FASTQ files per library) that was requested for sequencing?
+* Does the percentage of trimmed reads look normal for aDNA, and do lengths after trimming look short as expected of aDNA?
+* Does the Endogenous DNA (%) columns look reasonable (high enough to indicate you have received enough coverage for downstream, and/or do you lose an unusually high reads after filtering )
+* Does ClusterFactor or '% Dups' look high (e.g. >2 or >10% respectively -  high values suggesting over-amplified or badly preserved samples i.e. low complexity; note that genome-enrichment libraries may by their nature look higher).
+* Do you see an increased frequency of C>Ts on the 5' end of molecules in the mapped reads?
+* Do median read lengths look relatively low (normally <= 100 bp) indicating typically fragmented aDNA?
+* Does the % coverage decrease relatively gradually at each depth coverage, and does not drop extremely drastically
+* Does the Median coverage and percent >3x (or whatever you set) show sufficient coverage for reliable SNP calls and that a good proportion of the genome is covered indicating you have the right reference genome?
+* Do you see a high proportion of % Hets, indicating many multi-allelic sites (and possibly presence of cross-mapping from other species, that may lead to false positive or less confident SNP calls)?
 
 FastQC (pre-AdapterRemoval):
 
-* Do I see any very early drop off of sequence quality scores suggesting
-  problematic sequencing run?
+* Do I see any very early drop off of sequence quality scores suggesting problematic sequencing run?
 * Do I see outlier GC content distributions?
 * Do I see high sequence duplication levels?
 
@@ -2567,39 +2516,29 @@ FastQC (post-AdapterRemoval):
 
 Samtools Flagstat (pre/post Filter):
 
-* Do I see outliers, e.g. with unusually low levels of mapped reads, (indicative
-  of badly preserved samples) that require downstream closer assessment?
+* Do I see outliers, e.g. with unusually low levels of mapped reads, (indicative of badly preserved samples) that require downstream closer assessment?
 
 DeDup/Picard MarkDuplicates:
 
-* Do I see large numbers of duplicates being removed, possibly indicating
-  over-amplified or badly preserved samples?
+* Do I see large numbers of duplicates being removed, possibly indicating over-amplified or badly preserved samples?
 
 PreSeq:
 
-* Do I see a large drop off of a sample's curve away from the theoretical
-  complexity? If so, this may indicate it's not worth performing deeper
-  sequencing as you will get few unique reads (vs. duplicates that are not any
-  more informative than the reads you've already sequenced)
+* Do I see a large drop off of a sample's curve away from the theoretical complexity? If so, this may indicate it's not worth performing deeper sequencing as you will get few unique reads (vs. duplicates that are not any more informative than the reads you've already sequenced)
 
 DamageProfiler:
 
-* Do I see evidence of damage on the microbial DNA (i.e. a % C>T of more than ~5% in
-  the first few nucleotide positions?) ? If not, possibly your mapped
-  reads are deriving from modern contamination.
+* Do I see evidence of damage on the microbial DNA (i.e. a % C>T of more than ~5% in the first few nucleotide positions?) ? If not, possibly your mapped reads are deriving from modern contamination.
 
 QualiMap:
 
-* Do you see a peak of coverage (X) at a good level, e.g. >= 3x, indicating
-  sufficient coverage for reliable SNP calls?
+* Do you see a peak of coverage (X) at a good level, e.g. >= 3x, indicating sufficient coverage for reliable SNP calls?
 
 MultiVCFAnalyzer:
 
-* Do I have a good number of called SNPs that suggest the samples have genomes
-  with sufficient nucleotide diversity to inform phylogenetic analysis?
+* Do I have a good number of called SNPs that suggest the samples have genomes with sufficient nucleotide diversity to inform phylogenetic analysis?
 * Do you have a large number of discarded SNP calls?
-* Are the % Hets very high indicating possible cross-mapping from off-target
-  organisms that may confounding variant calling?
+* Are the % Hets very high indicating possible cross-mapping from off-target organisms that may confounding variant calling?
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
 > the the 'Documentation' folder of the results directory or here in the [output
