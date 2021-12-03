@@ -777,8 +777,8 @@ params {
     config_profile_description = 'nf-core/eager SHH profile provided by nf-core/configs'
 
     // default BWA
-     bwaalnn = 0.04
-     bwaalnl = 32
+    bwaalnn = 0.04
+    bwaalnl = 32
 }
 
 }
@@ -983,9 +983,7 @@ this example.
 Prior setting up the nf-core/eager run, we will need:
 
 1. Raw sequencing data in FASTQ format
-2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools`
-   and `picard SequenceDictionary` indices (however note these can be made for
-   you with nf-core/eager, but this can make a pipeline run take much longer!)
+2. Reference genome in FASTA format, with associated pre-made `bwa`, `samtools` and `picard SequenceDictionary` indices (however note these can be made for you with nf-core/eager, but this can make a pipeline run take much longer!)
 3. A BED file with the positions of the sites of interest.
 4. An eigenstrat formatted `.snp` file for the positions of interest.
 
