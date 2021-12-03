@@ -60,29 +60,29 @@ extra_fn_clean_exts:
 
 top_modules:
     - 'fastqc':
-       name: 'FastQC (pre-AdapterRemoval)'
-       path_filters:
-           - '*_raw_fastqc.zip'
+        name: 'FastQC (pre-AdapterRemoval)'
+        path_filters:
+            - '*_raw_fastqc.zip'
     - 'fastp'
     - 'adapterRemoval'
     - 'fastqc':
-       name: 'FastQC (post-AdapterRemoval)'
-       path_filters:
+        name: 'FastQC (post-AdapterRemoval)'
+        path_filters:
             - '*.truncated_fastqc.zip'
             - '*.combined*_fastqc.zip'
     - 'bowtie2':
-       path_filters:
+        path_filters:
             - '*_bt2.log'
     - 'malt'
     - 'hops'
     - 'kraken'
     - 'samtools':
-       name: 'Samtools Flagstat (pre-samtools filter)'
-       path_filters:
+        name: 'Samtools Flagstat (pre-samtools filter)'
+        path_filters:
             - '*_flagstat.stats'
     - 'samtools':
-       name: 'Samtools Flagstat (post-samtools filter)'
-       path_filters:
+        name: 'Samtools Flagstat (post-samtools filter)'
+        path_filters:
             - '*_postfilterflagstat.stats'
     - 'dedup'
     - 'picard'
@@ -92,8 +92,8 @@ top_modules:
     - 'qualimap'
     - 'sexdeterrmine'
     - 'multivcfanalyzer':
-       path_filters:
-           - '*MultiVCFAnalyzer.json'
+        path_filters:
+            - '*MultiVCFAnalyzer.json'
 qualimap_config:
     general_stats_coverage:
         - 1
@@ -151,7 +151,7 @@ table_columns_visible:
         3 Prime2: False
         mean_readlength: True
         median: True
-    mtnucratio: 
+    mtnucratio:
         mt_nuc_ratio: True
     QualiMap:
         mapped_reads: True
@@ -188,7 +188,7 @@ table_columns_placement:
         after_filtering_gc_content: 200
     Adapter Removal:
         percent_aligned: 300
-    FastQC (post-AdapterRemoval): 
+    FastQC (post-AdapterRemoval):
         total_sequences: 400
         avg_sequence_length: 410
         percent_gc: 420

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Written by Maxime Borry and released under the MIT license. 
+# Written by Maxime Borry and released under the MIT license.
 # See git repository (https://github.com/nf-core/eager) for full license text.
 
 import argparse
@@ -91,7 +91,7 @@ if __name__ == '__main__':
         read_outfile = _get_basename(INFILE)+".read_kraken_parsed.csv"
     else:
         read_outfile = readout
-    if not kmerout:    
+    if not kmerout:
         kmer_outfile = _get_basename(INFILE)+".kmer_kraken_parsed.csv"
     else:
         kmer_outfile = kmerout

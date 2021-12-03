@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Written by Thiseas C. Lamnidis and released under the MIT license. 
+# Written by Thiseas C. Lamnidis and released under the MIT license.
 # See git repository (https://github.com/nf-core/eager) for full license text.
 
 import sys, re, json
@@ -22,7 +22,7 @@ def make_float(x):
             output[i]=float(x[i])
         except:
             output[i]=x[i]
-    
+
     return(tuple(output))
 
 
@@ -74,7 +74,7 @@ jsonOut = {"plot_type": "generalstats", "id": "nuclear_contamination",
         "Method2_MOM_SE" : {"title": "Estimate Error (Method2_MOM)"},
         "Method2_ML_estimate" : {"title": "Contamination Estimate (Method2_ML)"},
         "Method2_ML_SE" : {"title": "Estimate Error (Method2_ML)"}
-    }, 
+    },
     "data" : data
 }
 with open('nuclear_contamination_mqc.json', 'w') as outfile:
