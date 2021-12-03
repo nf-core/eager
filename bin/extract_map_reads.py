@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Written by Maxime Borry and released under the MIT license. 
+# Written by Maxime Borry and released under the MIT license.
 # See git repository (https://github.com/nf-core/eager) for full license text.
 
 import argparse
@@ -263,7 +263,7 @@ if __name__ == "__main__":
     remove_mode = check_remove_mode(MODE)
     BAMFILE = pysam.AlignmentFile(BAM, 'r')
 
-   # FORWARD OR SE FILE
+    # FORWARD OR SE FILE
     print(f"- Extracting mapped reads from {BAM}")
     mapped_reads = extract_mapped(proc=PROC)
     print(f"- Parsing forward fq file {IN_FWD}")
@@ -273,7 +273,7 @@ if __name__ == "__main__":
     # print(fq_dict_fwd)
     print(f"- Writing forward fq to {out_fwd}")
     write_fq(fq_dict=fq_dict_fwd, fname=out_fwd,
-             write_mode=write_mode, remove_mode=remove_mode, proc=PROC)
+            write_mode=write_mode, remove_mode=remove_mode, proc=PROC)
 
     # REVERSE FILE
     if IN_REV:
@@ -287,4 +287,4 @@ if __name__ == "__main__":
         fq_dict_rev = get_mapped_reads(fqd_rev, mapped_reads)
         print(f"- Writing reverse fq to {out_rev}")
         write_fq(fq_dict=fq_dict_rev, fname=out_rev,
-                 write_mode=write_mode, remove_mode=remove_mode, proc=PROC)
+                write_mode=write_mode, remove_mode=remove_mode, proc=PROC)

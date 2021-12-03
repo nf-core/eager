@@ -1,6 +1,6 @@
 F="ASW CEU CHB CHD GIH JPT LWK MEX MKK TSI YRI"
 for f in $F
-do 
+do
     echo $f
     wget http://hapmap.ncbi.nlm.nih.gov/downloads/frequencies/2010-08_phaseII+III/allele_freqs_chrX_${f}_r28_nr.b36_fwd.txt.gz
 done
