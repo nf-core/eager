@@ -171,7 +171,7 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Işın Altınkaya](https://github.com/isinaltinkaya)
 * [Johan Nylander](https://github.com/nylander)
 * [Katerine Eaton](https://github.com/ktmeaton)
-* [Katrin Nägele](https://github.com/KathrinNaegele)
+* [Kathrin Nägele](https://github.com/KathrinNaegele)
 * [Luc Venturini](https://github.com/lucventurini)
 * [Marcel Keller](https://github.com/marcel-keller)
 * [Megan Michel](https://github.com/meganemichel)
