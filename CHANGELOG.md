@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
-- [#822](https://github.com/nf-core/eager/issues/822) Fixed post-adapterrmoeval trimmied files not being lane-merged and included in downstream analyses
+- [#822](https://github.com/nf-core/eager/issues/822) Fixed post-adapterremoval trimmed files not being lane-merged and included in downstream analyses
 
 ### `Dependencies`
 
