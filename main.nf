@@ -1040,7 +1040,7 @@ if ( params.skip_collapse ){
 // Inline barcode removal bypass when not running it 
 if (params.run_post_ar_trimming) {
     ch_adapterremoval_for_skip_post_ar_trimming
-        .dump(tag: "inline_removal_bypass")
+        .mix( ch_post_ar_trimming_for_lanemerge )
         .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
 } else {
     ch_adapterremoval_for_skip_post_ar_trimming
