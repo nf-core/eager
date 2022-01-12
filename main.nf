@@ -2055,7 +2055,7 @@ process bedtools {
   script:
   """
   ## Create genome file from bam header
-  samtools view -H ${bam} | grep @SQ | sed 's/@SQ\tSN:\|LN://g' > genome.txt
+  samtools view -H ${bam} | grep '@SQ' | sed 's#@SQ\tSN:\\|LN:##g' > genome.txt
   
   ##  Run bedtools
   bedtools coverage -nonamecheck -g genome.txt -sorted -a ${anno_file} -b ${bam} | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
