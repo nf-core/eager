@@ -2054,8 +2054,12 @@ process bedtools {
 
   script:
   """
-  bedtools coverage -nonamecheck -a ${anno_file} -b $bam | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
-  bedtools coverage -nonamecheck -a ${anno_file} -b $bam -mean | pigz -p ${task.cpus - 1} > "${bam.baseName}".depth.gz
+  ## Create genome file from bam header
+  samtools view -H ${bam} | grep @SQ | sed 's/@SQ\tSN:\|LN://g' > genome.txt
+  
+  ##  Run bedtools
+  bedtools coverage -nonamecheck -g genome.txt -sorted -a ${anno_file} -b ${bam} | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
+  bedtools coverage -nonamecheck -g genome.txt -sorted -a ${anno_file} -b ${bam} -mean | pigz -p ${task.cpus - 1} > "${bam.baseName}".depth.gz
   """
 }
 
