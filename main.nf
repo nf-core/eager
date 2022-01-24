@@ -3088,7 +3088,7 @@ process get_software_versions {
     ( exec 7>&1; picard MarkDuplicates --version 2>&1 >&7 | grep -v '/' >&2 ) 2> v_markduplicates.txt || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
     preseq &> v_preseq.txt 2>&1 || true
-    gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
+    gatk --version 2>&1 | grep '(GATK)' > v_gatk.txt 2>&1 || true
     gatk3 --version 2>&1 | head -n 1 > v_gatk3.txt 2>&1 || true
     freebayes --version &> v_freebayes.txt 2>&1 || true
     bedtools --version &> v_bedtools.txt 2>&1 || true

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [#824](https://github.com/nf-core/eager/issues/824) Fixes large memory footprint of bedtools coverage calculation.
 - [#822](https://github.com/nf-core/eager/issues/822) Fixed post-adapterremoval trimmed files not being lane-merged and included in downstream analyses
+- Fixed a couple of software version reporting commands
 
 ### `Dependencies`
 
