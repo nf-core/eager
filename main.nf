@@ -1039,8 +1039,7 @@ if ( params.skip_collapse ){
 
 // Inline barcode removal bypass when not running it 
 if (params.run_post_ar_trimming) {
-    ch_adapterremoval_for_skip_post_ar_trimming
-        .dump(tag: "inline_removal_bypass")
+    ch_post_ar_trimming_for_lanemerge
         .into { ch_inlinebarcoderemoval_for_fastqc_after_clipping; ch_inlinebarcoderemoval_for_lanemerge; } 
 } else {
     ch_adapterremoval_for_skip_post_ar_trimming
@@ -2055,8 +2054,12 @@ process bedtools {
 
   script:
   """
-  bedtools coverage -nonamecheck -a ${anno_file} -b $bam | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
-  bedtools coverage -nonamecheck -a ${anno_file} -b $bam -mean | pigz -p ${task.cpus - 1} > "${bam.baseName}".depth.gz
+  ## Create genome file from bam header
+  samtools view -H ${bam} | grep '@SQ' | sed 's#@SQ\tSN:\\|LN:##g' > genome.txt
+  
+  ##  Run bedtools
+  bedtools coverage -nonamecheck -g genome.txt -sorted -a ${anno_file} -b ${bam} | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
+  bedtools coverage -nonamecheck -g genome.txt -sorted -a ${anno_file} -b ${bam} -mean | pigz -p ${task.cpus - 1} > "${bam.baseName}".depth.gz
   """
 }
 
@@ -3085,7 +3088,7 @@ process get_software_versions {
     ( exec 7>&1; picard MarkDuplicates --version 2>&1 >&7 | grep -v '/' >&2 ) 2> v_markduplicates.txt || true
     qualimap --version &> v_qualimap.txt 2>&1 || true
     preseq &> v_preseq.txt 2>&1 || true
-    gatk --version 2>&1 | head -n 1 > v_gatk.txt 2>&1 || true
+    gatk --version 2>&1 | grep '(GATK)' > v_gatk.txt 2>&1 || true
     gatk3 --version 2>&1 | head -n 1 > v_gatk3.txt 2>&1 || true
     freebayes --version &> v_freebayes.txt 2>&1 || true
     bedtools --version &> v_bedtools.txt 2>&1 || true

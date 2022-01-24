@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.4.2] - 2022-01-24
+
+### `Added`
+
+### `Fixed`
+
+- [#824](https://github.com/nf-core/eager/issues/824) Fixes large memory footprint of bedtools coverage calculation.
+- [#822](https://github.com/nf-core/eager/issues/822) Fixed post-adapterremoval trimmed files not being lane-merged and included in downstream analyses
+- Fixed a couple of software version reporting commands
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.4.1] - 2021-11-30
 
 ### `Added`
