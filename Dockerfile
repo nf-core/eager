@@ -7,7 +7,7 @@ COPY environment.yml /
 RUN conda env create --quiet -f /environment.yml && conda clean -a
 
 # Add conda installation dir to PATH (instead of doing 'conda activate')
-ENV PATH /opt/conda/envs/nf-core-eager-2.4.2/bin:$PATH
+ENV PATH /opt/conda/envs/nf-core-eager-2.4.3dev/bin:$PATH
 
 # Dump the details of the installed packages to a file for posterity
-RUN conda env export --name nf-core-eager-2.4.2 > nf-core-eager-2.4.2.yml
+RUN conda env export --name nf-core-eager-2.4.3dev > nf-core-eager-2.4.3dev.yml
