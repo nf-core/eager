@@ -90,7 +90,11 @@ workflow EAGER {
 
     ch_fastq_for_readprep = Channel.empty()
 
-    // TODO Insert samtools fastq to convert to BAM
+    // TODO add fake lane ID for converted BAMs, or have BAM input have all
+    // fields in input_check.nf? Would probably need most later if convert to
+    // FQ
+    // TODO: problem with output as need to have `meta.endedness` for some 
+    // reason... need to work out how to specify to make sure correct output
     if ( params.convert_bam_to_fastq ) {
         SAMTOOLS_FASTQ ( INPUT_CHECK.out.bams )
         ch_fastq_for_readprep = INPUT_CHECK.out.fastqs.mix( SAMTOOLS_FASTQ.out.fastq )
@@ -101,8 +105,9 @@ workflow EAGER {
     //
     // MODULE: Run FastQC
     //
+    // TODO make optional?
     FASTQC (
-        INPUT_CHECK.out.fastqs
+        ch_fastq_for_readprep
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 

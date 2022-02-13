@@ -70,6 +70,8 @@ top_modules:
     - 'fastqc':
         name: 'FastQC (pre-AdapterRemoval)'
         path_filters:
+            - '*_raw_1_fastqc.zip'
+            - '*_raw_2_fastqc.zip'
             - '*_raw_fastqc.zip'
     - 'fastp'
     - 'adapterRemoval'
