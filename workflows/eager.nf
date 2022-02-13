@@ -44,6 +44,7 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
+
 include { INDEX_FASTA  } from '../subworkflows/local/index_fasta'
 
 /*
@@ -58,6 +59,8 @@ include { INDEX_FASTA  } from '../subworkflows/local/index_fasta'
 include { FASTQC                      } from '../modules/nf-core/modules/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/modules/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+
+include { SAMTOOLS_FASTQ              } from '../modules/nf-core/modules/samtools/fastq/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,11 +81,22 @@ workflow EAGER {
     INPUT_CHECK (
         ch_input
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
 
     INDEX_FASTA (
         ch_dummy_file
     )
+    ch_versions = ch_versions.mix( INDEX_FASTA.out.versions )
+
+    ch_fastq_for_readprep = Channel.empty()
+
+    // TODO Insert samtools fastq to convert to BAM
+    if ( params.convert_bam_to_fastq ) {
+        SAMTOOLS_FASTQ ( INPUT_CHECK.out.bams )
+        ch_fastq_for_readprep = INPUT_CHECK.out.fastqs.mix( SAMTOOLS_FASTQ.out.fastq )
+    } else {
+        ch_fastq_for_readprep = INPUT_CHECK.out.fastqs
+    }
 
     //
     // MODULE: Run FastQC
@@ -95,6 +109,9 @@ workflow EAGER {
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
+
+    // TODO BAMS TO START HERE (to mix with post-mapped BAMs mixing with non-converted input BAMS)
+    INPUT_CHECK.out.bams
 
     //
     // MODULE: MultiQC
