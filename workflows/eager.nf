@@ -93,7 +93,7 @@ workflow EAGER {
     // TODO add fake lane ID for converted BAMs, or have BAM input have all
     // fields in input_check.nf? Would probably need most later if convert to
     // FQ
-    // TODO: problem with output as need to have `meta.endedness` for some 
+    // TODO problem with output as need to have `meta.endedness` for some
     // reason... need to work out how to specify to make sure correct output
     if ( params.convert_bam_to_fastq ) {
         SAMTOOLS_FASTQ ( INPUT_CHECK.out.bams )

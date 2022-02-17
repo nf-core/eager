@@ -64,7 +64,7 @@ workflow INDEX_FASTA {
     fasta           = ch_fasta
     bwa_index       = ch_bwa_index
     bt2_index       = ch_bt2_build
-    //samtools_faidx  = ch_samtools_faidx
+    samtools_faidx  = ch_samtools_faidx
     gatk_seqdict    = ch_gatk_seqdict
     versions        = ch_versions
 }
