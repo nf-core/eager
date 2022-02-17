@@ -78,8 +78,9 @@ top_modules:
     - 'fastqc':
         name: 'FastQC (post-AdapterRemoval)'
         path_filters:
-            - '*.truncated_fastqc.zip'
-            - '*.combined*_fastqc.zip'
+            - '*_processed_1_fastqc.zip'
+            - '*_processed_2_fastqc.zip'
+            - '*_processed_fastqc.zip'
     - 'bowtie2':
         path_filters:
             - '*_bt2.log'

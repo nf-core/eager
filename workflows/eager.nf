@@ -45,7 +45,8 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
-include { INDEX_FASTA  } from '../subworkflows/local/index_fasta'
+include { INDEX_FASTA       } from '../subworkflows/local/index_fasta'
+include { FASTQ_PROCESSING  } from '../subworkflows/local/fastq_processing'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,11 +57,13 @@ include { INDEX_FASTA  } from '../subworkflows/local/index_fasta'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/modules/fastqc/main'
-include { MULTIQC                     } from '../modules/nf-core/modules/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+include { FASTQC                             } from '../modules/nf-core/modules/fastqc/main'
+include { MULTIQC                            } from '../modules/nf-core/modules/multiqc/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS        } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
-include { SAMTOOLS_FASTQ              } from '../modules/nf-core/modules/samtools/fastq/main'
+include { SAMTOOLS_FASTQ                     } from '../modules/nf-core/modules/samtools/fastq/main'
+include { FASTQC as FASTQC_AFTER_PROCESSING  } from '../modules/nf-core/modules/fastqc/main'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,7 +96,7 @@ workflow EAGER {
     // TODO add fake lane ID for converted BAMs, or have BAM input have all
     // fields in input_check.nf? Would probably need most later if convert to
     // FQ
-    // TODO: problem with output as need to have `meta.endedness` for some 
+    // TODO: problem with output as need to have `meta.endedness` for some
     // reason... need to work out how to specify to make sure correct output
     if ( params.convert_bam_to_fastq ) {
         SAMTOOLS_FASTQ ( INPUT_CHECK.out.bams )
@@ -115,6 +118,14 @@ workflow EAGER {
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
 
+    //
+    // FASTQ PROCESSING
+    //
+    FASTQ_PROCESSING ( ch_fastq_for_readprep )
+
+    // TODO to make optional
+    FASTQC_AFTER_PROCESSING ( FASTQ_PROCESSING.out.fastq )
+
     // TODO BAMS TO START HERE (to mix with post-mapped BAMs mixing with non-converted input BAMS)
     INPUT_CHECK.out.bams
 
@@ -129,7 +140,9 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC_AFTER_PROCESSING.out.mqc.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+
 
     MULTIQC (
         ch_multiqc_files.collect()

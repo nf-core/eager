@@ -1,8 +1,8 @@
 // Prepare various reference FASTA index files for downstream steps
-include { GUNZIP as GUNZIP_FASTA }          from '../../modules/nf-core/modules/gunzip/main'
-include { BWA_INDEX }                       from '../../modules/nf-core/modules/bwa/index/main'
-include { BOWTIE2_BUILD }                   from '../../modules/nf-core/modules/bowtie2/build/main'
-include { SAMTOOLS_FAIDX }                  from '../../modules/nf-core/modules/samtools/faidx/main'
+include { GUNZIP as GUNZIP_FASTA         }  from '../../modules/nf-core/modules/gunzip/main'
+include { BWA_INDEX                      }  from '../../modules/nf-core/modules/bwa/index/main'
+include { BOWTIE2_BUILD                  }  from '../../modules/nf-core/modules/bowtie2/build/main'
+include { SAMTOOLS_FAIDX                 }  from '../../modules/nf-core/modules/samtools/faidx/main'
 include { GATK4_CREATESEQUENCEDICTIONARY }  from '../../modules/nf-core/modules/gatk4/createsequencedictionary/main'
 
 workflow INDEX_FASTA {
@@ -64,7 +64,7 @@ workflow INDEX_FASTA {
     fasta           = ch_fasta
     bwa_index       = ch_bwa_index
     bt2_index       = ch_bt2_build
-    //samtools_faidx  = ch_samtools_faidx
+    samtools_faidx  = ch_samtools_faidx
     gatk_seqdict    = ch_gatk_seqdict
     versions        = ch_versions
 }
