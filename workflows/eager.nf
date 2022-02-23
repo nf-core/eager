@@ -62,7 +62,6 @@ include { MULTIQC                            } from '../modules/nf-core/modules/
 include { CUSTOM_DUMPSOFTWAREVERSIONS        } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
 include { SAMTOOLS_FASTQ                     } from '../modules/nf-core/modules/samtools/fastq/main'
-include { FASTQC as FASTQC_AFTER_PROCESSING  } from '../modules/nf-core/modules/fastqc/main'
 
 
 /*
@@ -109,25 +108,32 @@ workflow EAGER {
     // MODULE: Run FastQC
     //
     // TODO make optional?
-    FASTQC (
-        ch_fastq_for_readprep
-    )
+    FASTQC ( ch_fastq_for_readprep )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+
+
+     //
+    // FASTQ PROCESSING
+    //
+    FASTQ_PROCESSING ( ch_fastq_for_readprep )
+    ch_versions = ch_versions.mix(FASTQ_PROCESSING.out.versions).dump(tag: "fastq_processing_versions_wf")
+
+    //
+    // Mapping
+    //
+
+    //
+    // BAM filtering
+    //
+
+
+
+    // TODO BAMS TO START HERE (to mix with post-mapped BAMs mixing with non-converted input BAMS)
+    INPUT_CHECK.out.bams
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
-
-    //
-    // FASTQ PROCESSING
-    //
-    FASTQ_PROCESSING ( ch_fastq_for_readprep )
-
-    // TODO to make optional
-    FASTQC_AFTER_PROCESSING ( FASTQ_PROCESSING.out.fastq )
-
-    // TODO BAMS TO START HERE (to mix with post-mapped BAMs mixing with non-converted input BAMS)
-    INPUT_CHECK.out.bams
 
     //
     // MODULE: MultiQC
@@ -140,9 +146,8 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC_AFTER_PROCESSING.out.mqc.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
-
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQ_PROCESSING.out.mqc.dump(tag: "fq_proc_mqc").collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect()
