@@ -112,7 +112,7 @@ workflow EAGER {
         ch_versions = ch_versions.mix(FASTQC.out.versions.first())
     }
 
-     //
+    //
     // FASTQ PROCESSING
     //
     FASTQ_PROCESSING ( ch_fastq_for_readprep )
