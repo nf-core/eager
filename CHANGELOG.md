@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Written the entire pipeline into Nextflow DSL2
 - Improved input TSV validation
+- Added poly-X trimming capability with fastp
 
 ### `Fixed`
 

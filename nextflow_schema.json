@@ -122,6 +122,55 @@
                 }
             }
         },
+        "skip_steps": {
+            "title": "Skip Steps",
+            "type": "object",
+            "description": "Allow skipping of certain steps of the pipeline",
+            "default": "",
+            "properties": {
+                "skip_fastqc": {
+                    "type": "boolean",
+                    "description": "Skip any FastQC steps",
+                    "fa_icon": "fas fa-forward"
+                }
+            },
+            "fa_icon": "fas fa-forward"
+        },
+        "complexity_filtering": {
+            "title": "Complexity filtering",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-filter",
+            "properties": {
+                "fastp_trim_polyg_run": {
+                    "type": "boolean",
+                    "description": "Turn on running poly-G tail removal on FASTQ files. Will only be performed on 2 colour chemistry machine sequenced libraries.",
+                    "help_text": "Performs a poly-G tail removal step in the beginning of the pipeline using fastp, if turned on. This can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.\n\n> Effects Fastp parameters: -A -g -Q -L",
+                    "fa_icon": "fas fa-power-off"
+                },
+                "fastp_trim_polyg_length": {
+                    "type": "integer",
+                    "default": 10,
+                    "fa_icon": "fas fa-ruler-horizontal",
+                    "description": "Specify minimum length of poly-G tail for clipping to be performed.",
+                    "help_text": "This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.\n\n> Modifies fastp parameter: `--poly_g_min_len`"
+                },
+                "fastp_trim_polyx_run": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-power-off",
+                    "description": "Turn on running poly-X tail (i.e. any nucleotide) removal on FASTQ files.",
+                    "help_text": "Performs a poly-X tail removal step in the beginning of the pipeline using fastp, if turned on. This can be useful for trimming poly-nucleotide artefacts deriving from some library construction and/or sequencing techniques\n\n> Effects Fastp parameters: -A -x -Q -L"
+                },
+                "fastp_trim_polyx_length": {
+                    "type": "integer",
+                    "default": 10,
+                    "fa_icon": "fas fa-ruler-horizontal",
+                    "description": "Specify minimum length of poly-X tail for clipping to be performed.",
+                    "help_text": "This option can be used to define the minimum length of a poly-X tail to begin low complexity trimming. By default, this is set to a value of `10` unless the user has chosen something specifically using this option.\n\n> Modifies fastp parameter: `--poly_x_min_len`"
+                }
+            }
+        },
         "mapping_options": {
             "title": "Mapping options",
             "type": "object",
@@ -311,6 +360,12 @@
         },
         {
             "$ref": "#/definitions/reference_genome_options"
+        },
+        {
+            "$ref": "#/definitions/skip_steps"
+        },
+        {
+            "$ref": "#/definitions/complexity_filtering"
         },
         {
             "$ref": "#/definitions/mapping_options"

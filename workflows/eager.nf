@@ -107,10 +107,10 @@ workflow EAGER {
     //
     // MODULE: Run FastQC
     //
-    // TODO make optional?
-    FASTQC ( ch_fastq_for_readprep )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
-
+    if ( !params.skip_fastqc ) {
+        FASTQC ( ch_fastq_for_readprep )
+        ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    }
 
      //
     // FASTQ PROCESSING
@@ -146,12 +146,15 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+
+    if (!params.skip_fastqc) {
+        ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    }
+
     ch_multiqc_files = ch_multiqc_files.mix(FASTQ_PROCESSING.out.mqc.dump(tag: "fq_proc_mqc").collect{it[1]}.ifEmpty([]))
 
-    MULTIQC (
-        ch_multiqc_files.collect()
-    )
+    MULTIQC ( ch_multiqc_files.collect() )
+
     multiqc_report = MULTIQC.out.report.toList()
     ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 }
