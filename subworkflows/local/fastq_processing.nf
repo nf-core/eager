@@ -2,8 +2,10 @@
 
 include { FASTP as FASTP_POLYG_TRIM         } from '../../modules/nf-core/modules/fastp/main'
 include { FASTP as FASTP_POLYX_TRIM         } from '../../modules/nf-core/modules/fastp/main'
-include { ADAPTERREMOVAL                    } from '../../modules/nf-core/modules/adapterremoval/main'
-include { LEEHOM                            } from '../../modules/nf-core/modules/leehom/main'
+
+include { CLIPMERGE_LH                      } from './lh.nf'
+include { CLIPMERGE_AR                      } from './ar.nf'
+
 // TODO add fastp as an actual trim/merger?
 include { FASTP as FASTP_ENDTRIM            } from '../../modules/nf-core/modules/fastp/main'
 include { FASTQC as FASTQC_AFTER_PROCESSING } from '../../modules/nf-core/modules/fastqc/main'
@@ -43,7 +45,7 @@ workflow FASTQ_PROCESSING {
 
     ch_fastq_for_polygtrim.fourcol
         .mix( FASTP_POLYG_TRIM.out.reads )
-        .dump(tag: "post_fastp_pg_mix")
+        .dump(tag: "out_mix_post_fastp_pg")
         .set{ ch_polyg_for_polyx }
 
     // Trim poly X tails when any data requested
@@ -56,7 +58,33 @@ workflow FASTQ_PROCESSING {
         ch_polyx_out = ch_polyg_for_polyx
     }
 
-    ch_final_fastq = ch_polyx_out
+    // Adapter removing and merging
+    // TODO Adapterremoval
+    // TODO LeeHom
+    // TODO FastP
+    // Switch to when? As secondary processes (cat/fixprefix) only exectued if files go in anyway?
+    //ADAPTERREMOVAL( ch_polyx_out )
+        //ADAPTERREMOVAL_COMBINE () // to write
+        //if ( params.deduplication_tool = 'dedup' ) // missingmodule
+
+    if ( params.clipmerge_tool == 'adapterremoval' ) {
+        CLIPMERGE_AR ( ch_polyx_out )
+        ch_clipmerge_out = CLIPMERGE_AR.out.reads
+
+        ch_versions = ch_versions.mix( CLIPMERGE_AR.out.versions )
+        ch_logs_for_mqc = ch_logs_for_mqc.mix( CLIPMERGE_AR.out.mqc )
+    } else if ( params.clipmerge_tool == 'leehom' ) {
+        CLIPMERGE_LH ( ch_polyx_out )
+        ch_clipmerge_out = CLIPMERGE_LH.out.reads
+
+        ch_versions = ch_versions.mix( CLIPMERGE_LH.out.versions )
+        ch_logs_for_mqc = ch_logs_for_mqc.mix( CLIPMERGE_LH.out.mqc )
+    }
+
+
+    // Final stats
+    ch_final_fastq = ch_clipmerge_out
+    ch_final_fastq.dump(tag: "out_clipmerge")
 
     if ( !params.skip_fastqc ) {
         FASTQC_AFTER_PROCESSING ( ch_final_fastq )

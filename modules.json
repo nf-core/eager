@@ -4,13 +4,16 @@
     "repos": {
         "nf-core/modules": {
             "adapterremoval": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+                "git_sha": "0816df1e8b9cb523e7eebe4da55961189117fe34"
             },
             "bowtie2/build": {
                 "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
             },
             "bwa/index": {
                 "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
+            },
+            "cat/fastq": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "custom/dumpsoftwareversions": {
                 "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
