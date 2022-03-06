@@ -12,7 +12,7 @@ process CAT_ADAPTERREMOVAL {
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path("*.combined.fastq.gz"), emit: reads
+    tuple val(meta), path("${prefix}.combined.fq.gz"), emit: reads
     path "versions.yml"                         , emit: versions
 
     when:
@@ -39,7 +39,7 @@ process CAT_ADAPTERREMOVAL {
     if ( meta.single_end  ) {
             // single
             """
-            cat *.truncated.gz > ${prefix}.combined.fastq.gz
+            cat ${prefix}.truncated.gz > ${prefix}.combined.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -49,7 +49,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, merge, trim, preserve5p
             """
-            cat *.collapsed.gz > ${prefix}.combined.fastq.gz
+            cat ${prefix}.collapsed.gz > ${prefix}.combined.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -59,7 +59,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, mergedonly, merge, trim, clip5p
             """
-            cat *.collapsed.gz *.collapsed.truncated.gz > ${prefix}.combined.fastq.gz
+            cat ${prefix}.collapsed.gz ${prefix}.collapsed.truncated.gz > ${prefix}.combined.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -69,7 +69,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, merge, skiptrim, clip5p
             """
-            cat *.collapsed.gz *.pair1.truncated.gz *.pair2.truncated.gz > ${prefix}.combined.fastq.gz
+            cat ${prefix}.collapsed.gz ${prefix}.pair1.truncated.gz ${prefix}.pair2.truncated.gz > ${prefix}.combined.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -79,8 +79,8 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, nomerge, trim, clip5p
             """
-            cat *.pair1.truncated.gz > ${prefix}_1.combined.fastq.gz
-            cat *.pair2.truncated.gz > ${prefix}_2.combined.fastq.gz
+            cat ${prefix}.pair1.truncated.gz > ${prefix}_1.combined.fq.gz
+            cat ${prefix}.pair2.truncated.gz > ${prefix}_2.combined.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -90,7 +90,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, merge, trim, preserve5p
             """
-            cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${prefix}.combined.fq.gz
+            cat ${prefix}.collapsed.gz ${prefix}.singleton.truncated.gz ${prefix}.pair1.truncated.gz ${prefix}.pair2.truncated.gz > output/${prefix}.combined.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -100,7 +100,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, merge, trim, clip5p
             """
-            cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${prefix}.combined.fq.gz
+            cat ${prefix}.collapsed.gz ${prefix}.collapsed.truncated.gz ${prefix}.singleton.truncated.gz ${prefix}.pair1.truncated.gz ${prefix}.pair2.truncated.gz > output/${prefix}.combined.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":

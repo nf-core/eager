@@ -89,7 +89,7 @@ workflow FASTQ_PROCESSING {
     if ( !params.skip_fastqc ) {
         FASTQC_AFTER_PROCESSING ( ch_final_fastq )
         ch_logs_for_mqc = ch_logs_for_mqc.mix( FASTQC_AFTER_PROCESSING.out.zip )
-        ch_versions = ch_versions.mix( FASTQC_AFTER_PROCESSING.out.versions ).dump(tag: "fastq_processing_versions")
+        ch_versions = ch_versions.mix( FASTQC_AFTER_PROCESSING.out.versions )
     }
 
     emit:

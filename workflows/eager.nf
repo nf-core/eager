@@ -116,7 +116,7 @@ workflow EAGER {
     // FASTQ PROCESSING
     //
     FASTQ_PROCESSING ( ch_fastq_for_readprep )
-    ch_versions = ch_versions.mix(FASTQ_PROCESSING.out.versions).dump(tag: "fastq_processing_versions_wf")
+    ch_versions = ch_versions.mix(FASTQ_PROCESSING.out.versions)
 
     //
     // Mapping

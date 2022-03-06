@@ -23,6 +23,7 @@ workflow CLIPMERGE_AR {
     .groupTuple()
     .dump(tag: "in_cat_ar")
 
+
     CAT_ADAPTERREMOVAL ( ch_adapterremoval_into_cat )
     ch_reads_out = CAT_ADAPTERREMOVAL.out.reads
     ch_versions = ch_versions.mix(CAT_ADAPTERREMOVAL.out.versions)

@@ -16,6 +16,7 @@ custom_logo_title: 'nf-core/eager'
 
 run_modules:
     - adapterRemoval
+    - leehom
     - bowtie2
     - custom_content
     - damageprofiler
@@ -75,6 +76,7 @@ top_modules:
             - '*_raw_fastqc.zip'
     - 'fastp'
     - 'adapterRemoval'
+    - 'leehom'
     - 'fastqc':
         name: 'FastQC (post-AdapterRemoval)'
         path_filters:
