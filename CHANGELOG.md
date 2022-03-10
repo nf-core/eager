@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- [#843](https://github.com/nf-core/eager/issues/843) Re-add direct piping of AdapterRemovalFixPrefix to pigz
+
 ### `Dependencies`
 
 ### `Deprecated`
