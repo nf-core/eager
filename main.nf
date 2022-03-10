@@ -251,8 +251,8 @@ if ( params.snpcapture_bed ) {
     ch_snpcapture_bed = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
 }
 
-if ( params.pmdtoolsmask ) {
-    ch_pmdtoolsmask = Channel.fromPath(params.pmdtoolsmask, checkIfExists: true)
+if ( params.pmdtools_reference_mask ) {
+    ch_pmdtoolsmask = Channel.fromPath(params.pmdtools_reference_mask, checkIfExists: true)
 } else {
     ch_pmdtoolsmask = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
 }
@@ -2157,8 +2157,8 @@ process pmdtools {
     script:
     //Check which treatment for the libraries was used
     def treatment = udg ? (udg == 'half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
-    def snpcap = pmdtools_reference_mask.getName() != 'nf-core_eager_dummy.txt' ? "--refseq ${pmdtools_reference_mask}" : ''
-    if ( !params.pmdtools_reference_mask ) { log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!" }
+    def snpcap = snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' ? "--refseq ${pmdtools_reference_mask}" : ''
+    if ( snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' && !params.pmdtools_reference_mask ) { log.info "[nf-core/eager] warn: No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!" }
     def size = params.large_ref ? '-c' : ''
     def platypus = params.pmdtools_platypus ? '--platypus' : ''
     """
