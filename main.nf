@@ -245,6 +245,13 @@ if ( !params.clip_adapters_list ) {
       .set {ch_adapterlist}
 }
 
+if ( params.snpcapture_bed ) {
+    snpcapture_bed = file(params.snpcapture_bed, checkIfExists: true)
+}
+
+if ( params.pmdtools_reference_mask ) {
+    pmdtoolsmask = file(params.pmdtools_reference_mask, checkIfExists: true)
+}
 
 // SexDetermination channel set up and bedfile validation
 if (!params.sexdeterrmine_bedfile) {
@@ -2145,12 +2152,14 @@ process pmdtools {
     script:
     //Check which treatment for the libraries was used
     def treatment = udg ? (udg == 'half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
-    if(params.snpcapture_bed){
-        snpcap = (params.pmdtools_reference_mask) ? "--refseq ${params.pmdtools_reference_mask}" : ''
+    
+    if( params.pmdtools_reference_mask ){
+        snpcap = (params.pmdtools_reference_mask) ? "--refseq ${pmdtools_reference_mask}" : ''
         log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
     } else {
         snpcap = ''
     }
+    
     def size = params.large_ref ? '-c' : ''
     def platypus = params.pmdtools_platypus ? '--platypus' : ''
     """
@@ -2286,7 +2295,7 @@ process qualimap {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") into ch_qualimap_results
 
     script:
-    def snpcap = params.snpcapture_bed ? "-gff ${params.snpcapture_bed}" : ''
+    def snpcap = params.snpcapture_bed ? "-gff ${snpcapture_bed}" : ''
     """
     qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap} --java-mem-size=${task.memory.toGiga()}G
     """
