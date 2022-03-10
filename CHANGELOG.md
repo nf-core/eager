@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- [#845](https://github.com/nf-core/eager/issues/845) Updates parameter documention to specify `-s` preseq parameter also applies to lc_extrap
+
 ### `Dependencies`
 
 ### `Deprecated`
