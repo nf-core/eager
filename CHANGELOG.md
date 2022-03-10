@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- [#828](https://github.com/nf-core/eager/issues/828) Improved error message if required metagenomic screening parameters not set correctly
+
 ### `Dependencies`
 
 ### `Deprecated`

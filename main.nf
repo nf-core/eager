@@ -107,12 +107,13 @@ if (params.run_multivcfanalyzer) {
 }
 
 if (params.run_metagenomic_screening) {
-  if ( params.bam_unmapped_type == "discard" ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
+
+  if ( !params.run_bam_filtering ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --run_bam_filtering --bam_unmapped_type 'fastq'."
   }
 
-  if (params.bam_unmapped_type != 'fastq' ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTQ format. Please supply --bam_unmapped_type 'fastq'. Found parameter: --bam_unmapped_type '${params.bam_unmapped_type}'."
+  if ( params.bam_unmapped_type != "fastq" ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
   }
 
   if (!params.database) {
