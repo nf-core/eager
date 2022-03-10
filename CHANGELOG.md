@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- [#836](https://github.com/nf-core/eager/issues/836) Remove deprecated parameters from test profiles
+
 ### `Dependencies`
 
 ### `Deprecated`
