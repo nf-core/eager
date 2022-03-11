@@ -246,9 +246,9 @@ if ( !params.clip_adapters_list ) {
 }
 
 if ( params.snpcapture_bed ) {
-    Channel.fromPath(params.snpcapture_bed, checkIfExists: true).into { ch_snpcapture_bed, ch_snpcapture_bed_pmd }
+    Channel.fromPath(params.snpcapture_bed, checkIfExists: true).into { ch_snpcapture_bed; ch_snpcapture_bed_pmd }
 } else {
-    Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").into { ch_snpcapture_bed, ch_snpcapture_bed_pmd }
+    Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").into { ch_snpcapture_bed; ch_snpcapture_bed_pmd }
 }
 
 if ( params.pmdtools_reference_mask ) {
@@ -2148,7 +2148,7 @@ process pmdtools {
     input: 
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_pmdtools
     file fasta from ch_fasta_for_pmdtools.collect()
-    path snpcapture_bed from ch_snpcapture_bed 
+    path snpcapture_bed from ch_snpcapture_bed_pmd
     path pmdtools_reference_mask from ch_pmdtoolsmask
 
     output:
