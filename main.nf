@@ -246,9 +246,9 @@ if ( !params.clip_adapters_list ) {
 }
 
 if ( params.snpcapture_bed ) {
-    ch_snpcapture_bed = Channel.fromPath(params.snpcapture_bed, checkIfExists: true)
+    Channel.fromPath(params.snpcapture_bed, checkIfExists: true).into { ch_snpcapture_bed, ch_snpcapture_bed_pmd }
 } else {
-    ch_snpcapture_bed = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
+    Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").into { ch_snpcapture_bed, ch_snpcapture_bed_pmd }
 }
 
 if ( params.pmdtools_reference_mask ) {
