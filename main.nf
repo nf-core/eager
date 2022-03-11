@@ -2148,6 +2148,7 @@ process pmdtools {
     input: 
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_pmdtools
     file fasta from ch_fasta_for_pmdtools.collect()
+    path snpcapture_bed from ch_snpcapture_bed 
     path pmdtools_reference_mask from ch_pmdtoolsmask
 
     output:
@@ -2157,7 +2158,7 @@ process pmdtools {
     script:
     //Check which treatment for the libraries was used
     def treatment = udg ? (udg == 'half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
-    def snpcap = snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' ? "--refseq ${pmdtools_reference_mask}" : ''
+    def snpcap = snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' ? "--refseq ${pmdtools_reference_mask} --basecomposition" : ''
     if ( snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' && !params.pmdtools_reference_mask ) { log.info "[nf-core/eager] warn: No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!" }
     def size = params.large_ref ? '-c' : ''
     def platypus = params.pmdtools_platypus ? '--platypus' : ''
