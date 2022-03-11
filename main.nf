@@ -254,7 +254,7 @@ if ( params.snpcapture_bed ) {
 if ( params.pmdtools_reference_mask ) {
     ch_pmdtoolsmask = Channel.fromPath(params.pmdtools_reference_mask, checkIfExists: true)
 } else {
-    ch_pmdtoolsmask = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
+    ch_pmdtoolsmask = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy2.txt")
 }
 
 // SexDetermination channel set up and bedfile validation
