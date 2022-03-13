@@ -60,7 +60,7 @@ workflow FASTQ_PROCESSING {
 
     // Adapter removing and merging
     // TODO Adapterremoval
-    // TODO LeeHom
+    // DONE LeeHom
     // TODO FastP
     // Switch to when? As secondary processes (cat/fixprefix) only exectued if files go in anyway?
     //ADAPTERREMOVAL( ch_polyx_out )

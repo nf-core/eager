@@ -14,6 +14,7 @@ workflow CLIPMERGE_AR {
     ch_versions = ch_versions.mix(ADAPTERREMOVAL.out.versions)
     ch_logs_for_mqc = ch_logs_for_mqc.mix(ADAPTERREMOVAL.out.log)
 
+    // TODO Fix AR module and check output here
     ch_adapterremoval_into_cat = ADAPTERREMOVAL.out.singles_truncated.mix(
         ADAPTERREMOVAL.out.pair1_truncated,
         ADAPTERREMOVAL.out.pair2_truncated,
@@ -21,6 +22,10 @@ workflow CLIPMERGE_AR {
         ADAPTERREMOVAL.out.collapsed_truncated
     )
     .groupTuple()
+    .map {meta, reads ->
+        def new_reads = reads.flatten()
+        [ meta, new_reads ]
+    }
     .dump(tag: "in_cat_ar")
 
 
