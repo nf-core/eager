@@ -14,7 +14,7 @@ WorkflowEager.initialise(params, log)
 def checkPathParamList = [
         params.input, params.multiqc_config, params.fasta,
         params.index_bwa_index_dir, params.index_bt2_index_dir, params.index_fasta_fai,
-        params.index_fasta_dict
+        params.index_fasta_dict, params.clipmerge_adapterlist
     ]
 
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
@@ -115,7 +115,8 @@ workflow EAGER {
     //
     // FASTQ PROCESSING
     //
-    FASTQ_PROCESSING ( ch_fastq_for_readprep )
+    adapterlist = params.clipmerge_adapterlist != "$projectDir/assets/nf-core_eager_dummy.txt" ? file(params.clipmerge_adapterlist) : []
+    FASTQ_PROCESSING ( ch_fastq_for_readprep, adapterlist )
     ch_versions = ch_versions.mix(FASTQ_PROCESSING.out.versions)
 
     //

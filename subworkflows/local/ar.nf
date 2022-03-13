@@ -5,12 +5,13 @@ workflow CLIPMERGE_AR {
 
     take:
     fastq // [ meta, fastqs ]
+    adapterlist
 
     main:
     ch_versions = Channel.empty()
     ch_logs_for_mqc     = Channel.empty()
 
-    ADAPTERREMOVAL ( fastq )
+    ADAPTERREMOVAL ( fastq, adapterlist )
     ch_versions = ch_versions.mix(ADAPTERREMOVAL.out.versions)
     ch_logs_for_mqc = ch_logs_for_mqc.mix(ADAPTERREMOVAL.out.log)
 

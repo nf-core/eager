@@ -5,6 +5,7 @@ include { FASTP as FASTP_POLYX_TRIM         } from '../../modules/nf-core/module
 
 include { CLIPMERGE_LH                      } from './lh.nf'
 include { CLIPMERGE_AR                      } from './ar.nf'
+include { CLIPMERGE_FP                      } from './fp.nf'
 
 // TODO add fastp as an actual trim/merger?
 include { FASTP as FASTP_ENDTRIM            } from '../../modules/nf-core/modules/fastp/main'
@@ -15,6 +16,7 @@ workflow FASTQ_PROCESSING {
 
     take:
     fastq
+    adapterlist
 
     main:
     // Set versions channel
@@ -68,7 +70,7 @@ workflow FASTQ_PROCESSING {
         //if ( params.deduplication_tool = 'dedup' ) // missingmodule
 
     if ( params.clipmerge_tool == 'adapterremoval' ) {
-        CLIPMERGE_AR ( ch_polyx_out )
+        CLIPMERGE_AR ( ch_polyx_out, adapterlist )
         ch_clipmerge_out = CLIPMERGE_AR.out.reads
 
         ch_versions = ch_versions.mix( CLIPMERGE_AR.out.versions )
@@ -79,8 +81,13 @@ workflow FASTQ_PROCESSING {
 
         ch_versions = ch_versions.mix( CLIPMERGE_LH.out.versions )
         ch_logs_for_mqc = ch_logs_for_mqc.mix( CLIPMERGE_LH.out.mqc )
-    }
+    } else if ( params.clipmerge_tool == 'fastp' ) {
+        CLIPMERGE_FP ( ch_polyx_out )
+        ch_clipmerge_out = CLIPMERGE_FP.out.reads
 
+        ch_versions = ch_versions.mix( CLIPMERGE_FP.out.versions )
+        ch_logs_for_mqc = ch_logs_for_mqc.mix( CLIPMERGE_FP.out.mqc )
+    }
 
     // Final stats
     ch_final_fastq = ch_clipmerge_out
