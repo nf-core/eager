@@ -76,7 +76,7 @@ process CAT_ADAPTERREMOVAL {
                 cat: \$(echo \$(cat --version 2>&1) | sed 's/^.*coreutils) //; s/ .*\$//')
             END_VERSIONS
             """
-    } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
+    } else if ( !meta.single_end && !params.clipmerge_mergedonly && params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, nomerge, trim, clip5p
             """
             cat ${prefix}.pair1.truncated.gz > ${prefix}_1.combined.fq.gz
