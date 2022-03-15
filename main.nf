@@ -184,7 +184,7 @@ if("${params.fasta}".endsWith(".gz")){
         path zipped_fasta from file(params.fasta) // path doesn't like it if a string of an object is not prefaced with a root dir (/), so use file() to resolve string before parsing to `path` 
 
         output:
-        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling,ch_fasta_for_bcftools_stats
+        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_unmasked_fasta_for_masking,ch_unmasked_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling,ch_fasta_for_bcftools_stats
 
         script:
         unzip = zipped_fasta.toString() - '.gz'
@@ -195,7 +195,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling;ch_fasta_for_bcftools_stats }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_unmasked_fasta_for_masking; ch_unmasked_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling;ch_fasta_for_bcftools_stats }
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -245,6 +245,12 @@ if ( !params.clip_adapters_list ) {
       .set {ch_adapterlist}
 }
 
+// Set up channel with pmdtools reference mask bedfile
+if (!params.pmdtools_reference_mask) {
+  ch_bedfile_for_reference_masking = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
+} else {
+  ch_bedfile_for_reference_masking = Channel.fromPath(params.pmdtools_reference_mask, checkIfExists: true)
+}
 
 // SexDetermination channel set up and bedfile validation
 if (!params.sexdeterrmine_bedfile) {
@@ -2126,6 +2132,33 @@ process mapdamage_rescaling {
 }
 
 // Optionally perform further aDNA evaluation or filtering for just reads with damage etc.
+
+process mask_reference_for_pmdtools {
+    label 'sc_tiny'
+    tag "${fasta}"
+    publishDir "${params.outdir}/reference_genome/masked_reference", mode: params.publish_dir_mode
+
+    when: (params.pmdtools_reference_mask && params.run_pmdtools)
+
+    input:
+    file fasta from ch_unmasked_fasta_for_masking.collect()
+    file bedfile from ch_bedfile_for_reference_masking
+
+    output:
+    file "${fasta.baseName}_masked.fa" into ch_masked_fasta_for_pmdtools
+
+    script:
+    """
+    bedtools maskfasta -fi ${fasta} -bed ${bedfile} -fo ${fasta.baseName}_masked.fa
+    """
+}
+
+// If masking was requested, use masked reference for pmdtools, else use original reference
+if (params.pmdtools_reference_mask) {
+  ch_masked_fasta_for_pmdtools.set{ch_fasta_for_pmdtools}
+} else {
+  ch_unmasked_fasta_for_pmdtools.set{ch_fasta_for_pmdtools}
+}
 
 process pmdtools {
     label 'mc_medium'
