@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
+- Bumped python: 1.11 -> 1.12 (for run-time optimisation and tool citation information)
+
 ### `Deprecated`
 
 ## [2.4.1] - 2021-11-30
