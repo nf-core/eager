@@ -1961,8 +1961,8 @@ process library_merge {
   script:
   def size = params.large_ref ? '-c' : ''
   """
-  samtools merge ${samplename}_${udg}_libmerged_rmdup.bam ${bam}
-  samtools index ${samplename}_${udg}_libmerged_rmdup.bam ${size}
+  samtools merge ${samplename}_udg${udg}_libmerged_rmdup.bam ${bam}
+  samtools index ${samplename}_udg${udg}_libmerged_rmdup.bam ${size}
   """
 }
 
