@@ -1944,6 +1944,7 @@ ch_input_for_librarymerging.merge_me
 
       [it[0], libraryid, it[2], seqtype, it[4], it[5], it[6], bam, bai ]
     }
+  .dump(tag: "input_for lib_merging")
   .set { ch_fixedinput_for_librarymerging }
 
 process library_merge {
@@ -1960,8 +1961,8 @@ process library_merge {
   script:
   def size = params.large_ref ? '-c' : ''
   """
-  samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
-  samtools index ${samplename}_libmerged_rmdup.bam ${size}
+  samtools merge ${samplename}_${udg}_libmerged_rmdup.bam ${bam}
+  samtools index ${samplename}_${udg}_libmerged_rmdup.bam ${size}
   """
 }
 
