@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- [#844](https://github.com/nf-core/eager/issues/844) Fixed reference masking prior to pmdtools.
+
 ### `Dependencies`
+
+- [#829](https://github.com/nf-core/eager/issues/829) Bumped sequencetools: 1.4.0.5 -> 1.5.2
 
 ### `Deprecated`
 
