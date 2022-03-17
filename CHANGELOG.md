@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- [#851](https://github.com/nf-core/eager/issues/851) Fixes a file-name clash during additional_library_merge, post-BAM trimming of different UDG treated libraries of a sample
+
 ### `Dependencies`
 
 ### `Deprecated`
