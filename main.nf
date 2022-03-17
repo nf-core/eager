@@ -107,12 +107,13 @@ if (params.run_multivcfanalyzer) {
 }
 
 if (params.run_metagenomic_screening) {
-  if ( params.bam_unmapped_type == "discard" ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
+
+  if ( !params.run_bam_filtering ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --run_bam_filtering --bam_unmapped_type 'fastq'."
   }
 
-  if (params.bam_unmapped_type != 'fastq' ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTQ format. Please supply --bam_unmapped_type 'fastq'. Found parameter: --bam_unmapped_type '${params.bam_unmapped_type}'."
+  if ( params.bam_unmapped_type != "fastq" ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
   }
 
   if (!params.database) {
@@ -1956,6 +1957,7 @@ ch_input_for_librarymerging.merge_me
 
       [it[0], libraryid, it[2], seqtype, it[4], it[5], it[6], bam, bai ]
     }
+  .dump(tag: "input_for_lib_merging")
   .set { ch_fixedinput_for_librarymerging }
 
 process library_merge {
@@ -1972,8 +1974,8 @@ process library_merge {
   script:
   def size = params.large_ref ? '-c' : ''
   """
-  samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
-  samtools index ${samplename}_libmerged_rmdup.bam ${size}
+  samtools merge ${samplename}_udg${udg}_libmerged_rmdup.bam ${bam}
+  samtools index ${samplename}_udg${udg}_libmerged_rmdup.bam ${size}
   """
 }
 

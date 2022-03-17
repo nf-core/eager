@@ -806,7 +806,7 @@
                     "default": 1000,
                     "description": "Specify the step size of Preseq.",
                     "fa_icon": "fas fa-shoe-prints",
-                    "help_text": "Can be used to configure the step size of Preseq's `c_curve` method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.\n\n> Modifies preseq c_curve parameter: `-s`"
+                    "help_text": "Can be used to configure the step size of Preseq's `c_curve` and `lc_extrap` method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.\n\n> Modifies preseq c_curve and lc_extrap parameter: `-s`"
                 },
                 "preseq_maxextrap": {
                     "type": "integer",
