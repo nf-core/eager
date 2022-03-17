@@ -11,8 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [#838] Fix --snpcapture_bed files not being picked up by Nextflow
 - Fix PMDtools reference mask not being picked up by Nextflow, and it's use being evaluated against --snpcapture_bed rather than --pmdtools_reference_mask
+- Renamed a range of MultiQC general stats table headers to improve clarity, documentation has been updated accordingly. 
 
 ### `Dependencies`
+
+- Bumped MultiQC: 1.11 -> 1.12 (for run-time optimisation and tool citation information)
 
 ### `Deprecated`
 
