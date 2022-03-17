@@ -674,6 +674,7 @@ This section gives a brief summary of where to look for what files for downstrea
 Each module has it's own output directory which sit alongside the `MultiQC/` directory from which you opened the report.
 
 * `reference_genome/`: this directory contains the indexing files  of your input reference genome (i.e. the various `bwa` indices, a `samtools`' `.fai` file, and a picard `.dict`), if you used the `--saveReference` flag.
+  * When masking of the reference is requested prior to running pmdtools, an additional directory `reference_genome/masked_genome` will be found here, containing the masked reference.
 * `fastqc/`: this contains the original per-FASTQ FastQC reports that are summarised with MultiQC. These occur in both `html` (the report) and `.zip` format (raw data). The `after_clipping` folder contains the same but for after AdapterRemoval.
 * `adapterremoval/`: this contains the log files (ending with `.settings`) with raw trimming (and merging) statistics after AdapterRemoval. In the `output` sub-directory, are the output trimmed (and merged) `fastq` files. These you can use for downstream applications such as taxonomic binning for metagenomic studies.
 * `post_ar_fastq_trimmed`: this contains `fastq` files that have been additionally trimmed after AdapterRemoval (if turned on). These reads are usually that had internal barcodes, or damage that needed to be removed before mapping.
