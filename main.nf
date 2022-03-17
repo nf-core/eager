@@ -2154,6 +2154,7 @@ process mask_reference_for_pmdtools {
     file "${fasta.baseName}_masked.fa" into ch_masked_fasta_for_pmdtools
 
     script:
+    log.info "[nf-core/eager]: Masking reference \'${fasta}\' at positions found in \'${bedfile}\'. Masked reference will be used for pmdtools."
     """
     bedtools maskfasta -fi ${fasta} -bed ${bedfile} -fo ${fasta.baseName}_masked.fa
     """
@@ -2176,8 +2177,6 @@ process pmdtools {
     input: 
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_pmdtools
     file fasta from ch_fasta_for_pmdtools.collect()
-    path snpcapture_bed from ch_snpcapture_bed_pmd
-    path pmdtools_reference_mask from ch_pmdtoolsmask
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.pmd.bam"), path("*.pmd.bam.{bai,csi}") into ch_output_from_pmdtools
@@ -2186,18 +2185,16 @@ process pmdtools {
     script:
     //Check which treatment for the libraries was used
     def treatment = udg ? (udg == 'half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
-    def snpcap = snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' ? "--refseq ${pmdtools_reference_mask} --basecomposition" : ''
-    if ( snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' && !params.pmdtools_reference_mask ) { log.info "[nf-core/eager] warn: No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!" }
     def size = params.large_ref ? '-c' : ''
     def platypus = params.pmdtools_platypus ? '--platypus' : ''
     """
     #Run Filtering step 
-    samtools calmd ${bam} ${fasta} | pmdtools --threshold ${params.pmdtools_threshold} ${treatment} ${snpcap} --header | samtools view -Sb - > "${libraryid}".pmd.bam
+    samtools calmd ${bam} ${fasta} | pmdtools --threshold ${params.pmdtools_threshold} ${treatment} --header | samtools view -Sb - > "${libraryid}".pmd.bam
     
     #Run Calc Range step
     ## To allow early shut off of pipe: https://github.com/nextflow-io/nextflow/issues/1564
     trap 'if [[ \$? == 141 ]]; then echo "Shutting samtools early due to -n parameter" && samtools index ${libraryid}.pmd.bam ${size}; exit 0; fi' EXIT
-    samtools calmd ${bam} ${fasta} | pmdtools --deamination ${platypus} --range ${params.pmdtools_range} ${treatment} ${snpcap} -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
+    samtools calmd ${bam} ${fasta} | pmdtools --deamination ${platypus} --range ${params.pmdtools_range} ${treatment} -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
     
     samtools index ${libraryid}.pmd.bam ${size}
     """
