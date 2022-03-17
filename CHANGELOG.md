@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- Renamed a range of MultiQC general stats table headers to improve clarity, documentation updated accordingly. 
+
 ### `Dependencies`
+
+- Bumped MultiQC: 1.11 -> 1.12 (for run-time optimisation and tool citation information)
 
 ### `Deprecated`
 
@@ -24,8 +28,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed a couple of software version reporting commands
 
 ### `Dependencies`
-
-- Bumped python: 1.11 -> 1.12 (for run-time optimisation and tool citation information)
 
 ### `Deprecated`
 
