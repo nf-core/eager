@@ -889,9 +889,9 @@
                 },
                 "pmdtools_reference_mask": {
                     "type": "string",
-                    "description": "Specify a path to reference mask for PMDTools.",
+                    "description": "Specify a bedfile to be used to mask the reference fasta prior to running pmdtools.",
                     "fa_icon": "fas fa-mask",
-                    "help_text": "Can be used to set a path to a reference genome mask for PMDTools."
+                    "help_text": "Activates masking of the reference fasta prior to running pmdtools. Positions that are in the provided bedfile will be replaced by Ns in the reference genome. This is useful for capture data, where you might not want the allele of a SNP to be counted as damage when it is a transition. Masking of the reference is done using `bedtools maskfasta`."
                 },
                 "pmdtools_max_reads": {
                     "type": "integer",
