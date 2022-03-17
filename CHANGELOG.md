@@ -16,7 +16,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#844](https://github.com/nf-core/eager/issues/844) Fixed reference masking prior to pmdtools
 - [#845](https://github.com/nf-core/eager/issues/845) Updates parameter documention to specify `-s` preseq parameter also applies to lc_extrap
 - [#851](https://github.com/nf-core/eager/issues/851) Fixes a file-name clash during additional_library_merge, post-BAM trimming of different UDG treated libraries of a sample
-- Fix PMDtools reference mask not being picked up by Nextflow, and it's use being evaluated against --snpcapture_bed rather than --pmdtools_reference_mask
 - Renamed a range of MultiQC general stats table headers to improve clarity, documentation has been updated accordingly
 
 ### `Dependencies`
