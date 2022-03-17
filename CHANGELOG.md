@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- [#838] Fix --snpcapture_bed files not being picked up by Nextflow
+- Fix PMDtools reference mask not being picked up by Nextflow, and it's use being evaluated against --snpcapture_bed rather than --pmdtools_reference_mask
+
 ### `Dependencies`
 
 ### `Deprecated`
