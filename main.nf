@@ -2141,7 +2141,7 @@ process mask_reference_for_pmdtools {
     when: (params.pmdtools_reference_mask && params.run_pmdtools)
 
     input:
-    file fasta from ch_unmasked_fasta_for_masking.collect()
+    file fasta from ch_unmasked_fasta_for_masking
     file bedfile from ch_bedfile_for_reference_masking
 
     output:
