@@ -245,6 +245,12 @@ if ( !params.clip_adapters_list ) {
       .set {ch_adapterlist}
 }
 
+if ( params.snpcapture_bed ) {
+    Channel.fromPath(params.snpcapture_bed, checkIfExists: true).set { ch_snpcapture_bed }
+} else {
+    Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").set { ch_snpcapture_bed }
+}
+
 // Set up channel with pmdtools reference mask bedfile
 if (!params.pmdtools_reference_mask) {
   ch_bedfile_for_reference_masking = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
@@ -2170,6 +2176,8 @@ process pmdtools {
     input: 
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_pmdtools
     file fasta from ch_fasta_for_pmdtools.collect()
+    path snpcapture_bed from ch_snpcapture_bed_pmd
+    path pmdtools_reference_mask from ch_pmdtoolsmask
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.pmd.bam"), path("*.pmd.bam.{bai,csi}") into ch_output_from_pmdtools
@@ -2178,12 +2186,8 @@ process pmdtools {
     script:
     //Check which treatment for the libraries was used
     def treatment = udg ? (udg == 'half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
-    if(params.snpcapture_bed){
-        snpcap = (params.pmdtools_reference_mask) ? "--refseq ${params.pmdtools_reference_mask}" : ''
-        log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
-    } else {
-        snpcap = ''
-    }
+    def snpcap = snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' ? "--refseq ${pmdtools_reference_mask} --basecomposition" : ''
+    if ( snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' && !params.pmdtools_reference_mask ) { log.info "[nf-core/eager] warn: No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!" }
     def size = params.large_ref ? '-c' : ''
     def platypus = params.pmdtools_platypus ? '--platypus' : ''
     """
@@ -2314,12 +2318,13 @@ process qualimap {
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_addlibmerge_for_qualimap
     file fasta from ch_fasta_for_qualimap.collect()
+    path snpcapture_bed from ch_snpcapture_bed 
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") into ch_qualimap_results
 
     script:
-    def snpcap = params.snpcapture_bed ? "-gff ${params.snpcapture_bed}" : ''
+    def snpcap = snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' ? "-gff ${snpcapture_bed}" : ''
     """
     qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap} --java-mem-size=${task.memory.toGiga()}G
     """

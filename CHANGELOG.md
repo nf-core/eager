@@ -10,10 +10,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Fixed`
 
 - [#844](https://github.com/nf-core/eager/issues/844) Fixed reference masking prior to pmdtools.
+- [#836](https://github.com/nf-core/eager/issues/836) Remove deprecated parameters from test profiles
+- [#838](https://github.com/nf-core/eager/issues/836) Fix --snpcapture_bed files not being picked up by Nextflow
+- Fix PMDtools reference mask not being picked up by Nextflow, and it's use being evaluated against --snpcapture_bed rather than --pmdtools_reference_mask
+- Renamed a range of MultiQC general stats table headers to improve clarity, documentation has been updated accordingly. 
 
 ### `Dependencies`
 
 - [#829](https://github.com/nf-core/eager/issues/829) Bumped sequencetools: 1.4.0.5 -> 1.5.2
+- Bumped MultiQC: 1.11 -> 1.12 (for run-time optimisation and tool citation information)
 
 ### `Deprecated`
 
