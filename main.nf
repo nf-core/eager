@@ -2549,11 +2549,11 @@ process eigenstrat_snp_coverage {
   /* 
   The following code block can be swapped in once the eigenstratdatabasetools MultiQC module becomes available.
   """
-  eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
+  eigenstrat_snp_coverage -i pileupcaller.${strandedness} >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
   """
   */
   """
-  eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt
+  eigenstrat_snp_coverage -i pileupcaller.${strandedness} >${strandedness}_eigenstrat_coverage.txt
   parse_snp_cov.py ${strandedness}_eigenstrat_coverage.txt
   """
 }
