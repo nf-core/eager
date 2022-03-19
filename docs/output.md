@@ -106,7 +106,7 @@ For other non-default columns (activated under 'Configure Columns'), hover over 
 
 You will receive output for each supplied FASTQ file.
 
-When dealing with ancient DNA data the MultiQC plots for FastQC will often show lots of 'warning' or 'failed' samples. You generally can discard this sort of information as we are dealing with very degraded and metagenomic samples which have artefacts that violate the FastQC 'quality definitions', while still being valid data for aDNA researchers. Instead you will *normally* be looking for 'global' patterns across all samples of a sequencing run to check for library construction or sequencing failures. Decision on whether a individual sample has 'failed' or not should be made by the user after checking all the plots themselves (e.g. if the sample is consistently an outlier to all others in the run).
+When dealing with ancient DNA data the MultiQC plots for FastQC will often show lots of 'warning' or 'failed' samples. You generally can discard this sort of information as we are dealing with very degraded and metagenomic samples which have artefacts that violate the FastQC 'quality definitions', while still being valid data for aDNA researchers. Instead you will _normally_ be looking for 'global' patterns across all samples of a sequencing run to check for library construction or sequencing failures. Decision on whether a individual sample has 'failed' or not should be made by the user after checking all the plots themselves (e.g. if the sample is consistently an outlier to all others in the run).
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -115,7 +115,7 @@ When dealing with ancient DNA data the MultiQC plots for FastQC will often show 
     * `*_fastqc.html`: FastQC report containing quality metrics.
     * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
-> **NB:** The FastQC (pre-AdapterRemoval) plots displayed in the MultiQC report shows *untrimmed* reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the FastQC (post-AdapterRemoval). You should expect after AdapterRemoval, that most of the artefacts are removed.
+> **NB:** The FastQC (pre-AdapterRemoval) plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the FastQC (post-AdapterRemoval). You should expect after AdapterRemoval, that most of the artefacts are removed.
 
 #### Sequence Counts
 
@@ -285,7 +285,7 @@ You will receive output for each FASTQ file supplied for single end data, or for
 
 These stacked bars plots are unfortunately a little confusing, when displayed in MultiQC. However are relatively straight-forward once you understand each category. They can be displayed as counts of reads per AdapterRemoval read-category, or as percentages of the same values. Each forward(/reverse) file combination are displayed once.
 
-The most important value is the **Retained Read Pairs** which gives you the final number of reads output into the file that goes into mapping. Note, however, this section of the stack bar *includes* the other categories displayed (see below) in the calculation.
+The most important value is the **Retained Read Pairs** which gives you the final number of reads output into the file that goes into mapping. Note, however, this section of the stack bar _includes_ the other categories displayed (see below) in the calculation.
 
 Other Categories:
 
@@ -324,7 +324,7 @@ With paired-end ancient DNA sequencing runs You expect to see a slight increase 
 
 This module provides information on mapping when running the Bowtie2 aligner. Bowtie2, like bwa, takes raw FASTQ reads and finds the most likely place on the reference genome it derived from. While this module is somewhat redundant with the [Samtools](#samtools) (which reports mapping statistics for bwa) and the endorSp.y endogenous DNA value in the general statistics table, it does provide some details that could be useful in certain contexts.
 
-You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
 
 #### Single/Paired-end alignments
 
@@ -344,7 +344,7 @@ The main additional useful information compared to [Samtools](#samtools) is that
 
 MALT is a metagenomic aligner (equivalent to BLAST, but much faster). It produces direct alignments of sequencing reads in a reference genome. It is often used for metagenomic profiling or pathogen screening, and specifically in nf-core/eager, of off-target reads from genome mapping.
 
-You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
 
 #### Metagenomic Mappability
 
@@ -379,7 +379,7 @@ Kraken is another metagenomic classifier, but takes a different approach to alig
 
 It is useful when you do not have large computing power or you want very rapid but rough approximation of the metagenomic profile of your sample.
 
-You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
 
 #### Top Taxa
 
@@ -397,7 +397,7 @@ However for screening for specific metagenomic profiles, such as ancient microbi
 
 This module provides numbers in raw counts of the mapping of your DNA reads to your reference genome.
 
-You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes in one value.
 
 #### Flagstat Plot
 
@@ -417,7 +417,7 @@ The remaining rows will be 0 when running `bwa aln` as these characteristics of 
 
 ### DeDup
 
-You will receive output for each *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
+You will receive output for each _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Background
 
@@ -477,7 +477,7 @@ There are two algorithms from the tools we use: `c_curve` and `lc_extrap`. The f
 
 Due to endogenous DNA being so low when doing initial screening, the maths behind `lc_extrap` often fails as there is not enough data. Therefore nf-core/eager sticks with `c_curve` which gives a similar approximation of the library complexity, but is more robust to smaller datasets.
 
-You will receive output for each deduplicated *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Complexity Curve
 
@@ -507,7 +507,7 @@ Therefore, three main characteristics of ancient DNA are:
 * Elevated G and As (purines) just before strand breaks
 * Increased C and Ts at ends of fragments
 
-You will receive output for each deduplicated *library*. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
+You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
 
 #### Misincorporation Plots
 
@@ -548,7 +548,7 @@ Qualimap is a tool which provides statistics on the quality of the mapping of yo
 
 Note that many of the statistics from this module are displayed in the General Stats table (see above), as they represent single values that are not plottable.
 
-You will receive output for each *sample*. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
+You will receive output for each _sample_. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
 
 :warning: If your library has no reads mapping to the reference, this will result in an empty BAM file. Qualimap will therefore not produce any output even if a BAM exists!
 
@@ -645,7 +645,7 @@ If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to the s
 
 ## Output Files
 
-This section gives a brief summary of where to look for what files for downstream analysis. This covers *all* modules.
+This section gives a brief summary of where to look for what files for downstream analysis. This covers _all_ modules.
 
 Each module has it's own output directory which sit alongside the `MultiQC/` directory from which you opened the report.
 
@@ -670,7 +670,7 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 * `metagenomic_complexity_filter`: this contains the output from filtering of input reads to metagenomic classification of low-sequence complexity reads as performed by `bbduk`. This will include the filtered FASTQ files (`*_lowcomplexityremoved.fq.gz`) and also the run-time log (`_bbduk.stats`) for each sample. **Note:** there are no sections in the MultiQC report for this module, therefore you must check the `._bbduk.stats` files to get summary statistics of the filtering.
 * `metagenomic_classification/`: this contains the output for a given metagenomic classifier.
     * Running MALT will contain RMA6 files that can be loaded into MEGAN6 or MaltExtract for phylogenetic visualisation of read taxonomic assignments and aDNA characteristics respectively. Additional a `malt.log` file is provided which gives additional information such as run-time, memory usage and per-sample statistics of numbers of alignments with taxonomic assignment etc. This will also include gzip SAM files if requested.
-    * Running kraken will contain the Kraken output and report files, as well as a merged Taxon count table. You will also get a Kraken kmer duplication table, in a [KrakenUniq](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1568-0) fashion. This is very useful to check for breadth of coverage and detect read stacking. A small number of aligned reads (low coverage) and a kmer duplication >1 is usually a sign of read stacking, usually indicative of a false positive hit (e.g. from over-amplified libraries). *Kmer duplication is defined as: number of kmers / number of unique kmers*. You will find two kraken reports formats available:
+    * Running kraken will contain the Kraken output and report files, as well as a merged Taxon count table. You will also get a Kraken kmer duplication table, in a [KrakenUniq](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1568-0) fashion. This is very useful to check for breadth of coverage and detect read stacking. A small number of aligned reads (low coverage) and a kmer duplication >1 is usually a sign of read stacking, usually indicative of a false positive hit (e.g. from over-amplified libraries). _Kmer duplication is defined as: number of kmers / number of unique kmers_. You will find two kraken reports formats available:
         * the `*.kreport` which is the old report format, without distinct minimizer count information, used by some tools such as [Pavian](https://github.com/fbreitwieser/pavian)
         * the `*.kraken2_report` which is the new kraken report format, with the distinct minimizer count information.
         * finally, the `*.kraken.out` file are the direct output of Kraken2

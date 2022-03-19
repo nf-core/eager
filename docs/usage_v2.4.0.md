@@ -115,7 +115,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
     * A profile with a complete configuration for automated testing
     * Includes links to test data so needs no other parameters
 
-> *Important*: If running nf-core/eager on a cluster - ask your system
+> _Important_: If running nf-core/eager on a cluster - ask your system
 > administrator what profile to use.
 
 **Institution Specific Profiles** These are profiles specific to certain **HPC
@@ -348,7 +348,7 @@ will have the following effects:
 Note the following important points and limitations for setting up:
 
 * The TSV must use actual tabs (not spaces) between cells.
-* *File* names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
+* _File_ names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
     * If it is 'too late' and you already have duplicate file names, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
 * Lane IDs must be unique for each sequencing of each library.
     * If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
@@ -581,7 +581,7 @@ the #eager channel).
 
 #### Tutorial Profiles - Background
 
-A useful feature of Nextflow is the ability to use configuration *profiles* that
+A useful feature of Nextflow is the ability to use configuration _profiles_ that
 can specify many default parameters and other settings on how to run your
 pipeline.
 
@@ -610,7 +610,7 @@ levels in terms of memory usage, pipeline-level profiles can also assist in
 facilitating reproducible science by giving a way for researchers to 'publish'
 their exact pipeline parameters in way other users can automatically re-run the
 pipeline with the pipeline parameters used in the original publication but on
-their *own* cluster.
+their _own_ cluster.
 
 To illustrate this, lets say we analysed our data on a HPC called 'blue' for
 which an institutional profile already exists, and for our analysis we defined a
@@ -682,7 +682,7 @@ defined in the `cluster` profile.
 > institutional-level profiles. Otherwise please skip to [Writing your own profile](#tutorial-profiles---writing-your-own-profile)
 
 In actuality, a nf-core/eager run already contains many configs and profiles,
-and will normally use *multiple* configs profiles in a single run. Multiple
+and will normally use _multiple_ configs profiles in a single run. Multiple
 configuration and profiles files can be used, and each new one selected will
 inherit all the previous one's parameters, and the parameters in the new one
 will then overwrite any that have been changed from the original.
@@ -720,7 +720,7 @@ nextflow run nf-core/eager -c old_dna_profile.config -profile hpc_blue,old_dna <
 
 In the background, any parameters in the pipeline's `nextflow.config`
 (containing default parameters) will be overwritten by the
-`old_dna_profile.config`. In addition, the `old_dna` *profile* will overwrite
+`old_dna_profile.config`. In addition, the `old_dna` _profile_ will overwrite
 any parameters set in the config but outside the profile definition of
 `old_dna_profile.config`.
 
@@ -757,7 +757,7 @@ if your run does not use the parameters you expect.
 > specifying a custom `.config` file by using `-C` (capital C) instead of `-c`
 > (which inherits previously specify parameters)
 
-Another thing that is important to note is that if a specific *profile* is
+Another thing that is important to note is that if a specific _profile_ is
 specified in `nextflow run`, this replaces any 'global' parameter that is
 specified within the config file (but outside a profile) itself - **regardless**
 of profile order (see above).
