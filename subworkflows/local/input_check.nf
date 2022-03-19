@@ -1,5 +1,5 @@
 //
-// Check input samplesheet and get read channels
+// Check input samplesheet and get read channel
 //
 
 include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
@@ -18,8 +18,8 @@ workflow INPUT_CHECK {
             fastq: it
         }.set { reads }
 
-    reads.fastq.map { create_fastq_channels(it) }.dump(tag: "samplesheetcheck_fastqs").set { fastqs }
-    reads.bam.map { create_bam_channels(it) }.dump(tag: "samplesheetcheck_bams").set { bams }
+    reads.fastq.map { create_fastq_channel(it) }.dump(tag: "samplesheetcheck_fastqs").set { fastqs }
+    reads.bam.map { create_bam_channel(it) }.dump(tag: "samplesheetcheck_bams").set { bams }
 
     //reads.fastq.set{ fastqs }
     //reads.bam.dump(tag: "samplesheetcheck_bams").set{ bams }
@@ -60,7 +60,7 @@ def create_fastq_channel(LinkedHashMap row) {
     return array
 }
 
-def create_bam_channels(LinkedHashMap row) {
+def create_bam_channel(LinkedHashMap row) {
     def meta = [:]
     // TODO create spanning main metadata
     meta.id                 = [ row.sample_id, row.library_id ].join("_").trim()
@@ -76,5 +76,5 @@ def create_bam_channels(LinkedHashMap row) {
     } else {
         array = [ meta, file(row.bam) ]
     }
-    return fastq_meta
+    return array
 }
