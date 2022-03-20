@@ -2,12 +2,9 @@
 
 include { FASTP as FASTP_POLYG_TRIM         } from '../../modules/nf-core/modules/fastp/main'
 include { FASTP as FASTP_POLYX_TRIM         } from '../../modules/nf-core/modules/fastp/main'
-
 include { CLIPMERGE_LH                      } from './lh.nf'
 include { CLIPMERGE_AR                      } from './ar.nf'
 include { CLIPMERGE_FP                      } from './fp.nf'
-
-// TODO add fastp as an actual trim/merger?
 include { FASTP as FASTP_ENDTRIM            } from '../../modules/nf-core/modules/fastp/main'
 include { FASTQC as FASTQC_AFTER_PROCESSING } from '../../modules/nf-core/modules/fastqc/main'
 
@@ -61,17 +58,11 @@ workflow FASTQ_PROCESSING {
     }
 
     // Adapter removing and merging
-    // TODO Adapterremoval
-    // DONE LeeHom
-    // TODO FastP
-    // Switch to when? As secondary processes (cat/fixprefix) only exectued if files go in anyway?
-    //ADAPTERREMOVAL( ch_polyx_out )
-        //ADAPTERREMOVAL_COMBINE () // to write
-        //if ( params.deduplication_tool = 'dedup' ) // missingmodule
-
     if ( params.clipmerge_tool == 'adapterremoval' ) {
         CLIPMERGE_AR ( ch_polyx_out, adapterlist )
         ch_clipmerge_out = CLIPMERGE_AR.out.reads
+
+        // TODO AdapterRemovalFixPrefix
 
         ch_versions = ch_versions.mix( CLIPMERGE_AR.out.versions )
         ch_logs_for_mqc = ch_logs_for_mqc.mix( CLIPMERGE_AR.out.mqc )
@@ -88,6 +79,8 @@ workflow FASTQ_PROCESSING {
         ch_versions = ch_versions.mix( CLIPMERGE_FP.out.versions )
         ch_logs_for_mqc = ch_logs_for_mqc.mix( CLIPMERGE_FP.out.mqc )
     }
+
+    // TODO Barcode trimming
 
     // Final stats
     ch_final_fastq = ch_clipmerge_out

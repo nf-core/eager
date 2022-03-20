@@ -25,6 +25,8 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/nf-core_eager_dummy.txt", checkIfExists: true)
 
+// TODO add input param validation
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES

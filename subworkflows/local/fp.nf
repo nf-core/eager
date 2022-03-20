@@ -41,8 +41,6 @@ workflow CLIPMERGE_FP {
 
     }
 
-    // TODO Barcode trimming
-
     emit:
     reads    = ch_reads_out
     versions = ch_versions

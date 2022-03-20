@@ -1,5 +1,5 @@
 process CAT_ADAPTERREMOVAL {
-    //tag "${meta.id}" TODO WORK OUT WHY CAN'T FIND META?
+    tag "${meta.id}"
     label 'process_low'
 
     conda (params.enable_conda ? "conda-forge::sed=4.7" : null)
@@ -8,11 +8,10 @@ process CAT_ADAPTERREMOVAL {
         'biocontainers/biocontainers:v1.2.0_cv1' }"
 
     input:
-    // TODO Doesn't like a list going into reads for some reason? Should do tho?
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path("${prefix}.combined.fq.gz"), emit: reads
+    tuple val(meta), path("*.clippmerge.fq.gz"), emit: reads
     path "versions.yml"                         , emit: versions
 
     when:
@@ -30,7 +29,7 @@ process CAT_ADAPTERREMOVAL {
     T if PE           merged_only preserve 5p                          ONLY collapsed (combined with above)
     T if PE           merged_only,                                     ONLY collapsd, collapsed_tuncated
     T if PE skip_trim,                                                 ONLY collpased, pair1 trunc, pair2_trun (pair files, generated, so including but expect empty)
-    T if PE                                   skip_collapse,           ONLY pair1, pair2 !!SEPARATE (no merging! paired-end output/mapping)
+    T if PE                                   skip_collapse,           ONLY pair1, pair2 !!SEPARATE (no merging! paired-end channelmapping)
     T if PE                       preserve5p,                          all EXCEPT collpased_truncated
     T if PE merge trim                                                 all!
 
@@ -39,7 +38,7 @@ process CAT_ADAPTERREMOVAL {
     if ( meta.single_end  ) {
             // single
             """
-            cat ${prefix}.truncated.gz > ${prefix}.combined.fq.gz
+            cat *.truncated.gz > ${prefix}.clippmerge.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -49,7 +48,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, merge, trim, preserve5p
             """
-            cat ${prefix}.collapsed.gz > ${prefix}.combined.fq.gz
+            cat *.collapsed.gz > ${prefix}.clippmerge.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -59,7 +58,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, mergedonly, merge, trim, clip5p
             """
-            cat ${prefix}.collapsed.gz ${prefix}.collapsed.truncated.gz > ${prefix}.combined.fq.gz
+            cat *.collapsed.gz *.collapsed.truncated.gz > ${prefix}.clippmerge.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -69,7 +68,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, merge, skiptrim, clip5p
             """
-            cat ${prefix}.collapsed.gz ${prefix}.pair1.truncated.gz ${prefix}.pair2.truncated.gz > ${prefix}.combined.fq.gz
+            cat *.collapsed.gz *.pair1.truncated.gz *.pair2.truncated.gz > ${prefix}.clippmerge.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -79,8 +78,8 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, nomerge, trim, clip5p
             """
-            cat ${prefix}.pair1.truncated.gz > ${prefix}_1.combined.fq.gz
-            cat ${prefix}.pair2.truncated.gz > ${prefix}_2.combined.fq.gz
+            cat *.pair1.truncated.gz > ${prefix}_1.clippmerge.fq.gz
+            cat *.pair2.truncated.gz > ${prefix}_2.clippmerge.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -90,7 +89,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, merge, trim, preserve5p
             """
-            cat ${prefix}.collapsed.gz ${prefix}.singleton.truncated.gz ${prefix}.pair1.truncated.gz ${prefix}.pair2.truncated.gz > output/${prefix}.combined.fq.gz
+            cat *.collapsed.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > ${prefix}.clippmerge.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
@@ -100,7 +99,7 @@ process CAT_ADAPTERREMOVAL {
     } else if ( !meta.single_end && !params.clipmerge_mergedonly && !params.clipmerge_skipcollapse && !params.clipmerge_skiptrim && !params.clipmerge_adapterremoval_preserve5p  ) {
             // paired, all, merge, trim, clip5p
             """
-            cat ${prefix}.collapsed.gz ${prefix}.collapsed.truncated.gz ${prefix}.singleton.truncated.gz ${prefix}.pair1.truncated.gz ${prefix}.pair2.truncated.gz > output/${prefix}.combined.fq.gz
+            cat *.collapsed.gz *.truncated.gz > ${prefix}.clippmerge.fq.gz
 
             cat <<-END_VERSIONS > versions.yml
             "${task.process}":
