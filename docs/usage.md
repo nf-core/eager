@@ -1272,8 +1272,8 @@ nextflow run nf-core/eager \
 --bam_mapping_quality_threshold 25 \
 --bam_unmapped_type 'discard' \
 --run_trim_bam \
---bamutils_clip_half_udg_left 2 \
---bamutils_clip_half_udg_right 2 \
+--bamutils_clip_double_stranded_half_udg_left 2 \
+--bamutils_clip_double_stranded_half_udg_right 2 \
 <...>
 ```
 
@@ -1342,8 +1342,8 @@ nextflow run nf-core/eager \
 --bam_mapping_quality_threshold 25 \
 --bam_unmapped_type 'discard' \
 --run_trim_bam \
---bamutils_clip_half_udg_left 2 \
---bamutils_clip_half_udg_right 2 \
+--bamutils_clip_double_stranded_half_udg_left 2 \
+--bamutils_clip_double_stranded_half_udg_right 2 \
 --run_sexdeterrmine \
 --sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
 --run_nuclear_contamination \
@@ -1383,8 +1383,8 @@ nextflow run nf-core/eager \
 --bam_mapping_quality_threshold 25 \
 --bam_unmapped_type 'discard' \
 --run_trim_bam \
---bamutils_clip_half_udg_left 2 \
---bamutils_clip_half_udg_right 2 \
+--bamutils_clip_double_stranded_half_udg_left 2 \
+--bamutils_clip_double_stranded_half_udg_right 2 \
 --run_sexdeterrmine \
 --sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
 --run_nuclear_contamination \
@@ -1425,8 +1425,8 @@ nextflow run nf-core/eager \
 --bam_mapping_quality_threshold 25 \
 --bam_unmapped_type 'discard' \
 --run_trim_bam \
---bamutils_clip_half_udg_left 2 \
---bamutils_clip_half_udg_right 2 \
+--bamutils_clip_double_stranded_half_udg_left 2 \
+--bamutils_clip_double_stranded_half_udg_right 2 \
 --run_sexdeterrmine \
 --sexdeterrmine_bedfile '../Reference/genome/1240k.sites.bed' \
 --run_nuclear_contamination \
@@ -2397,10 +2397,10 @@ nextflow run nf-core/eager \
 --run_bedtools_coverage \
 --anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff'
 --run_trim_bam \
---bamutils_clip_half_udg_left 2 \
---bamutils_clip_half_udg_right 2 \
---bamutils_clip_none_udg_left 3 \
---bamutils_clip_none_udg_right 3 \
+--bamutils_clip_double_stranded_half_udg_left 2 \
+--bamutils_clip_double_stranded_half_udg_right 2 \
+--bamutils_clip_double_stranded_none_udg_left 3 \
+--bamutils_clip_double_stranded_none_udg_right 3 \
 <...>
 ```
 
@@ -2436,10 +2436,10 @@ nextflow run nf-core/eager \
 --bam_unmapped_type 'discard' \
 --dedupper 'markduplicates' \
 --run_trim_bam \
---bamutils_clip_half_udg_left 2 \
---bamutils_clip_half_udg_right 2 \
---bamutils_clip_none_udg_left 3 \
---bamutils_clip_none_udg_right 3 \
+--bamutils_clip_double_stranded_half_udg_left 2 \
+--bamutils_clip_double_stranded_half_udg_right 2 \
+--bamutils_clip_double_stranded_none_udg_left 3 \
+--bamutils_clip_double_stranded_none_udg_right 3 \
 --run_bedtools_coverage \
 --anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff' \
 --run_genotyping \
@@ -2479,10 +2479,10 @@ nextflow run nf-core/eager \
 --bam_unmapped_type 'discard' \
 --dedupper 'markduplicates' \
 --run_trim_bam \
---bamutils_clip_half_udg_left 2 \
---bamutils_clip_half_udg_right 2 \
---bamutils_clip_none_udg_left 3 \
---bamutils_clip_none_udg_right 3 \
+--bamutils_clip_double_stranded_half_udg_left 2 \
+--bamutils_clip_double_stranded_half_udg_right 2 \
+--bamutils_clip_double_stranded_none_udg_left 3 \
+--bamutils_clip_double_stranded_none_udg_right 3 \
 --run_bedtools_coverage \
 --anno_file '../Reference/genome/Yersinia_pestis_C092_GCF_000009065.1_ASM906v1.gff' \
 --run_genotyping \
