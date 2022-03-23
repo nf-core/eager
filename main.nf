@@ -638,7 +638,7 @@ process convertBam {
     script:
     base = "${bam.baseName}"
     """
-    samtools fastq -tn ${bam} | pigz -p ${task.cpus} > ${base}.converted.fastq.gz
+    samtools fastq -t ${bam} | pigz -p ${task.cpus} > ${base}.converted.fastq.gz
     """ 
 }
 
@@ -1683,7 +1683,7 @@ process samtools_filter {
         samtools index ${libraryid}.filtered.bam ${size}
 
         ## FASTQ
-        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
+        samtools fastq -tN ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
         rm ${libraryid}.unmapped.bam
         """
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength == 0 ){
@@ -1693,7 +1693,7 @@ process samtools_filter {
         samtools index ${libraryid}.filtered.bam ${size}
         
         ## FASTQ
-        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus -1} > ${libraryid}.unmapped.fastq.gz
+        samtools fastq -tN ${libraryid}.unmapped.bam | pigz -p ${task.cpus -1} > ${libraryid}.unmapped.fastq.gz
         """
     // Unmapped/MAPQ Filtering WITH min-length filtering
     } else if ( "${params.bam_unmapped_type}" == "keep" && params.bam_filter_minreadlength != 0 ) {
@@ -1723,7 +1723,7 @@ process samtools_filter {
         samtools index ${libraryid}.filtered.bam ${size}
 
         ## FASTQ
-        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
+        samtools fastq -tN ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
         rm ${libraryid}.unmapped.bam
         """
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength != 0 ){
@@ -1734,7 +1734,7 @@ process samtools_filter {
         samtools index ${libraryid}.filtered.bam ${size}
         
         ## FASTQ
-        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
+        samtools fastq -tN ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
         """
     }
 }
