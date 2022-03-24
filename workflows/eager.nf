@@ -75,7 +75,7 @@ workflow EAGER {
     // MODULE: Run FastQC
     //
     FASTQC (
-        INPUT_CHECK.out.reads
+        INPUT_CHECK.out.fastqs
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
