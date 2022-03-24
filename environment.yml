@@ -26,12 +26,12 @@ dependencies:
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
   - bioconda::damageprofiler=0.4.9 # Don't upgrade - later versions don't allow java 8
-  - bioconda::multiqc=1.12
+  - bioconda::multiqc=1.11
   - bioconda::pmdtools=0.60
   - bioconda::bedtools=2.30.0
   - conda-forge::libiconv=1.16
   - conda-forge::pigz=2.6
-  - bioconda::sequencetools=1.5.2
+  - bioconda::sequencetools=1.4.0.6
   - bioconda::preseq=3.1.2
   - bioconda::fastp=0.20.1
   - bioconda::bamutil=1.0.15

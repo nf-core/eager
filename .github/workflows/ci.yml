@@ -201,10 +201,6 @@ jobs:
       - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into Kraken
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_kraken,docker --run_bam_filtering  --bam_unmapped_type 'fastq'
-      - name: SNPCAPTURE Run the basic pipeline with the bam input profile, generating statistics with a SNP capture bed
-        run: |
-          wget https://github.com/nf-core/test-datasets/raw/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz && gunzip 1240K.pos.list_hs37d5.0based.bed.gz
-          nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --skip_fastqc --skip_adapterremoval --skip_deduplication --snpcapture_bed 1240K.pos.list_hs37d5.0based.bed
       - name: SEXDETERMINATION Run the basic pipeline with the bam input profile, but don't convert BAM, skip everything but sex determination
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_humanbam,docker --skip_fastqc --skip_adapterremoval --skip_deduplication --skip_qualimap --run_sexdeterrmine
