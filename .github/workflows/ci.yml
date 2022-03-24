@@ -119,7 +119,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --mapper 'circularmapper' --circulartarget 'NC_007596.2'
       - name: MAPPER_BWAMEM Test running with BWA Mem
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --mapper 'bwamem'
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --mapper 'bwamem' --skip_collapse
       - name: MAPPER_BT2 Test running with BowTie2
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --mapper 'bowtie2' --bt2_alignmode 'local' --bt2_sensitivity 'sensitive' --bt2n 1 --bt2l 16 --bt2_trim5 1 --bt2_trim3 1
