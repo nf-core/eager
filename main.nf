@@ -1318,7 +1318,7 @@ process bwamem {
     if (!params.single_end && params.skip_collapse){
     """
     bwa mem -t ${split_cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${libraryid}\\tSM:${samplename}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${split_cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
-    samtools index ${size} -@ ${task.cpus} "${libraryid}".mapped.bam
+    samtools index ${size} -@ ${task.cpus} "${libraryid}"_"${seqtype}".mapped.bam
     """
     } else {
     """

@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Renamed a range of MultiQC general stats table headers to improve clarity, documentation has been updated accordingly
 - [#857](https://github.com/nf-core/eager/issues/857) Corrected samtools fastq flag to _retain_ read-pair information when converting off-target BAM files to fastq in paired-end mapping (❤ to @alexhbnr for reporting)
 - [#858](https://github.com/nf-core/eager/pull/858) Corrected tutorials to reflect updated BAM trimming flags (❤ to @marcel-keller for reporting)
+- [#858](https://github.com/nf-core/eager/pull/858) Corrected tutorials to reflect updated BAM trimming flags (❤ to @marcel-keller for reporting)
 
 ### `Dependencies`
 
