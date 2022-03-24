@@ -107,13 +107,12 @@ if (params.run_multivcfanalyzer) {
 }
 
 if (params.run_metagenomic_screening) {
-
-  if ( !params.run_bam_filtering ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --run_bam_filtering --bam_unmapped_type 'fastq'."
+  if ( params.bam_unmapped_type == "discard" ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
   }
 
-  if ( params.bam_unmapped_type != "fastq" ) {
-  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads. Please supply --bam_unmapped_type 'fastq'. Supplied: --bam_unmapped_type '${params.bam_unmapped_type}'."
+  if (params.bam_unmapped_type != 'fastq' ) {
+  exit 1, "[nf-core/eager] error: metagenomic classification can only run on unmapped reads in FASTQ format. Please supply --bam_unmapped_type 'fastq'. Found parameter: --bam_unmapped_type '${params.bam_unmapped_type}'."
   }
 
   if (!params.database) {
@@ -185,7 +184,7 @@ if("${params.fasta}".endsWith(".gz")){
         path zipped_fasta from file(params.fasta) // path doesn't like it if a string of an object is not prefaced with a root dir (/), so use file() to resolve string before parsing to `path` 
 
         output:
-        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_unmasked_fasta_for_masking,ch_unmasked_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling,ch_fasta_for_bcftools_stats
+        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling,ch_fasta_for_bcftools_stats
 
         script:
         unzip = zipped_fasta.toString() - '.gz'
@@ -196,7 +195,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_unmasked_fasta_for_masking; ch_unmasked_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling;ch_fasta_for_bcftools_stats }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer;ch_fasta_for_genotyping_angsd;ch_fasta_for_damagerescaling;ch_fasta_for_bcftools_stats }
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -246,18 +245,6 @@ if ( !params.clip_adapters_list ) {
       .set {ch_adapterlist}
 }
 
-if ( params.snpcapture_bed ) {
-    Channel.fromPath(params.snpcapture_bed, checkIfExists: true).set { ch_snpcapture_bed }
-} else {
-    Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").set { ch_snpcapture_bed }
-}
-
-// Set up channel with pmdtools reference mask bedfile
-if (!params.pmdtools_reference_mask) {
-  ch_bedfile_for_reference_masking = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
-} else {
-  ch_bedfile_for_reference_masking = Channel.fromPath(params.pmdtools_reference_mask, checkIfExists: true)
-}
 
 // SexDetermination channel set up and bedfile validation
 if (!params.sexdeterrmine_bedfile) {
@@ -638,7 +625,7 @@ process convertBam {
     script:
     base = "${bam.baseName}"
     """
-    samtools fastq -t ${bam} | pigz -p ${task.cpus} > ${base}.converted.fastq.gz
+    samtools fastq -tn ${bam} | pigz -p ${task.cpus} > ${base}.converted.fastq.gz
     """ 
 }
 
@@ -824,8 +811,8 @@ process adapter_removal {
     mv *.settings output/
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
-    
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
     """
     //PE mode, collapse and trim, outputting all reads, preserving 5p
     } else if (seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim  && !params.mergedonly && params.preserve5p) {
@@ -839,8 +826,8 @@ process adapter_removal {
     mv *.settings output/
 
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
-
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
     """
     // PE mode, collapse and trim but only output collapsed reads
     } else if ( seqtype == 'PE'  && !params.skip_collapse && !params.skip_trim && params.mergedonly && !params.preserve5p ) {
@@ -851,7 +838,8 @@ process adapter_removal {
     cat *.collapsed.gz *.collapsed.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
         
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz >  output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -864,7 +852,8 @@ process adapter_removal {
     cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g  output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -878,7 +867,8 @@ process adapter_removal {
     cat *.collapsed.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/${base}.pe.combined.tmp.fq.gz
         
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -892,7 +882,8 @@ process adapter_removal {
     cat *.collapsed.gz > output/${base}.pe.combined.tmp.fq.gz
     
     ## Add R_ and L_ for unmerged reads for DeDup compatibility
-    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz | pigz -p ${task.cpus - 1} > output/${base}.pe.combined.fq.gz
+    AdapterRemovalFixPrefix -Xmx${task.memory.toGiga()}g output/${base}.pe.combined.tmp.fq.gz > output/${base}.pe.combined.fq
+    pigz -p ${task.cpus - 1} output/${base}.pe.combined.fq
 
     mv *.settings output/
     """
@@ -1683,7 +1674,7 @@ process samtools_filter {
         samtools index ${libraryid}.filtered.bam ${size}
 
         ## FASTQ
-        samtools fastq -tN ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
         rm ${libraryid}.unmapped.bam
         """
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength == 0 ){
@@ -1693,7 +1684,7 @@ process samtools_filter {
         samtools index ${libraryid}.filtered.bam ${size}
         
         ## FASTQ
-        samtools fastq -tN ${libraryid}.unmapped.bam | pigz -p ${task.cpus -1} > ${libraryid}.unmapped.fastq.gz
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus -1} > ${libraryid}.unmapped.fastq.gz
         """
     // Unmapped/MAPQ Filtering WITH min-length filtering
     } else if ( "${params.bam_unmapped_type}" == "keep" && params.bam_filter_minreadlength != 0 ) {
@@ -1723,7 +1714,7 @@ process samtools_filter {
         samtools index ${libraryid}.filtered.bam ${size}
 
         ## FASTQ
-        samtools fastq -tN ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus - 1} > ${libraryid}.unmapped.fastq.gz
         rm ${libraryid}.unmapped.bam
         """
     } else if ( "${params.bam_unmapped_type}" == "both" && params.bam_filter_minreadlength != 0 ){
@@ -1734,7 +1725,7 @@ process samtools_filter {
         samtools index ${libraryid}.filtered.bam ${size}
         
         ## FASTQ
-        samtools fastq -tN ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
+        samtools fastq -tn ${libraryid}.unmapped.bam | pigz -p ${task.cpus} > ${libraryid}.unmapped.fastq.gz
         """
     }
 }
@@ -1953,7 +1944,6 @@ ch_input_for_librarymerging.merge_me
 
       [it[0], libraryid, it[2], seqtype, it[4], it[5], it[6], bam, bai ]
     }
-  .dump(tag: "input_for_lib_merging")
   .set { ch_fixedinput_for_librarymerging }
 
 process library_merge {
@@ -1970,8 +1960,8 @@ process library_merge {
   script:
   def size = params.large_ref ? '-c' : ''
   """
-  samtools merge ${samplename}_udg${udg}_libmerged_rmdup.bam ${bam}
-  samtools index ${samplename}_udg${udg}_libmerged_rmdup.bam ${size}
+  samtools merge ${samplename}_libmerged_rmdup.bam ${bam}
+  samtools index ${samplename}_libmerged_rmdup.bam ${size}
   """
 }
 
@@ -2137,34 +2127,6 @@ process mapdamage_rescaling {
 
 // Optionally perform further aDNA evaluation or filtering for just reads with damage etc.
 
-process mask_reference_for_pmdtools {
-    label 'sc_tiny'
-    tag "${fasta}"
-    publishDir "${params.outdir}/reference_genome/masked_reference", mode: params.publish_dir_mode
-
-    when: (params.pmdtools_reference_mask && params.run_pmdtools)
-
-    input:
-    file fasta from ch_unmasked_fasta_for_masking
-    file bedfile from ch_bedfile_for_reference_masking
-
-    output:
-    file "${fasta.baseName}_masked.fa" into ch_masked_fasta_for_pmdtools
-
-    script:
-    log.info "[nf-core/eager]: Masking reference \'${fasta}\' at positions found in \'${bedfile}\'. Masked reference will be used for pmdtools."
-    """
-    bedtools maskfasta -fi ${fasta} -bed ${bedfile} -fo ${fasta.baseName}_masked.fa
-    """
-}
-
-// If masking was requested, use masked reference for pmdtools, else use original reference
-if (params.pmdtools_reference_mask) {
-  ch_masked_fasta_for_pmdtools.set{ch_fasta_for_pmdtools}
-} else {
-  ch_unmasked_fasta_for_pmdtools.set{ch_fasta_for_pmdtools}
-}
-
 process pmdtools {
     label 'mc_medium'
     tag "${libraryid}"
@@ -2183,16 +2145,22 @@ process pmdtools {
     script:
     //Check which treatment for the libraries was used
     def treatment = udg ? (udg == 'half' ? '--UDGhalf' : '--CpG') : '--UDGminus'
+    if(params.snpcapture_bed){
+        snpcap = (params.pmdtools_reference_mask) ? "--refseq ${params.pmdtools_reference_mask}" : ''
+        log.info"######No reference mask specified for PMDtools, therefore ignoring that for downstream analysis!"
+    } else {
+        snpcap = ''
+    }
     def size = params.large_ref ? '-c' : ''
     def platypus = params.pmdtools_platypus ? '--platypus' : ''
     """
     #Run Filtering step 
-    samtools calmd ${bam} ${fasta} | pmdtools --threshold ${params.pmdtools_threshold} ${treatment} --header | samtools view -Sb - > "${libraryid}".pmd.bam
+    samtools calmd ${bam} ${fasta} | pmdtools --threshold ${params.pmdtools_threshold} ${treatment} ${snpcap} --header | samtools view -Sb - > "${libraryid}".pmd.bam
     
     #Run Calc Range step
     ## To allow early shut off of pipe: https://github.com/nextflow-io/nextflow/issues/1564
     trap 'if [[ \$? == 141 ]]; then echo "Shutting samtools early due to -n parameter" && samtools index ${libraryid}.pmd.bam ${size}; exit 0; fi' EXIT
-    samtools calmd ${bam} ${fasta} | pmdtools --deamination ${platypus} --range ${params.pmdtools_range} ${treatment} -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
+    samtools calmd ${bam} ${fasta} | pmdtools --deamination ${platypus} --range ${params.pmdtools_range} ${treatment} ${snpcap} -n ${params.pmdtools_max_reads} > "${libraryid}".cpg.range."${params.pmdtools_range}".txt
     
     samtools index ${libraryid}.pmd.bam ${size}
     """
@@ -2313,13 +2281,12 @@ process qualimap {
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_addlibmerge_for_qualimap
     file fasta from ch_fasta_for_qualimap.collect()
-    path snpcapture_bed from ch_snpcapture_bed 
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") into ch_qualimap_results
 
     script:
-    def snpcap = snpcapture_bed.getName() != 'nf-core_eager_dummy.txt' ? "-gff ${snpcapture_bed}" : ''
+    def snpcap = params.snpcapture_bed ? "-gff ${params.snpcapture_bed}" : ''
     """
     qualimap bamqc -bam $bam -nt ${task.cpus} -outdir . -outformat "HTML" ${snpcap} --java-mem-size=${task.memory.toGiga()}G
     """
@@ -2549,11 +2516,11 @@ process eigenstrat_snp_coverage {
   /* 
   The following code block can be swapped in once the eigenstratdatabasetools MultiQC module becomes available.
   """
-  eigenstrat_snp_coverage -i pileupcaller.${strandedness} >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
+  eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt -j ${strandedness}_eigenstrat_coverage_mqc.json
   """
   */
   """
-  eigenstrat_snp_coverage -i pileupcaller.${strandedness} >${strandedness}_eigenstrat_coverage.txt
+  eigenstrat_snp_coverage -i pileupcaller.${strandedness} -s ".txt" >${strandedness}_eigenstrat_coverage.txt
   parse_snp_cov.py ${strandedness}_eigenstrat_coverage.txt
   """
 }
