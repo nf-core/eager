@@ -1,10 +1,6 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-<<<<<<< HEAD
-name: nf-core-eager-2.4.2
-=======
 name: nf-core-eager-2.4.3dev
->>>>>>> parent of bf36c54 (Bump Versions)
 channels:
   - conda-forge
   - bioconda
