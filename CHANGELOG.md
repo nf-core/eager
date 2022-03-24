@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [dev]
+## [2.4.3] - 2022-03-24
 
 ### `Added`
 
@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [#828](https://github.com/nf-core/eager/issues/828) Improved error message if required metagenomic screening parameters not set correctly
 - [#836](https://github.com/nf-core/eager/issues/836) Remove deprecated parameters from test profiles
-- [#838](https://github.com/nf-core/eager/issues/836) Fix --snpcapture_bed files not being picked up by Nextflow (❤ to @meganemichel for reporting)
+- [#838](https://github.com/nf-core/eager/issues/838) Fix --snpcapture_bed files not being picked up by Nextflow (❤ to @meganemichel for reporting)
 - [#843](https://github.com/nf-core/eager/issues/843) Re-add direct piping of AdapterRemovalFixPrefix to pigz
 - [#844](https://github.com/nf-core/eager/issues/844) Fixed reference masking prior to pmdtools
 - [#845](https://github.com/nf-core/eager/issues/845) Updates parameter documention to specify `-s` preseq parameter also applies to lc_extrap
@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#857](https://github.com/nf-core/eager/issues/857) Corrected samtools fastq flag to _retain_ read-pair information when converting off-target BAM files to fastq in paired-end mapping (❤ to @alexhbnr for reporting)
 - [#858](https://github.com/nf-core/eager/pull/858) Corrected tutorials to reflect updated BAM trimming flags (❤ to @marcel-keller for reporting)
 - [#866](https://github.com/nf-core/eager/issues/866) Fixed a typo in the indexing step of BWA mem when not-collapsing (❤ to @alexhbnr for reporting)
+- Corrected tutorials to reflect updated BAM trimming flags (❤ to @marcel-keller for reporting and correcting)
 
 ### `Dependencies`
 
