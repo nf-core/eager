@@ -66,7 +66,7 @@ The nf-core/eager pipeline comes with documentation about the pipeline [usage](h
 
 ## Credits
 
-nf-core/eager was originally written by The nf-core/eager community.
+nf-core/eager was originally written by Alexander Peltzer.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
