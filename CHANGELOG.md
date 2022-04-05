@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
+- Fixed some auxiliary files (adapater list, snpcapture/pileupcaller/sexdeterrmine BED files, and pileupCaller SNP file, PMD reference mask) in some cases only be used against one sample
+
 ### `Dependencies`
 
 ### `Deprecated`
