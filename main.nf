@@ -238,45 +238,47 @@ if ( !params.clip_adapters_list ) {
     Channel
       .fromPath("$projectDir/assets/nf-core_eager_dummy2.txt", checkIfExists: true)
       .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
+      .collect()
       .set {ch_adapterlist}
 } else {
     Channel
       .fromPath("${params.clip_adapters_list}", checkIfExists: true)
       .ifEmpty { exit 1, "[nf-core/eager] error: adapters list file not found. Please check input. Supplied: --clip_adapters_list '${params.clip_adapters_list}'." }
+      .collect()
       .set {ch_adapterlist}
 }
 
 if ( params.snpcapture_bed ) {
-    Channel.fromPath(params.snpcapture_bed, checkIfExists: true).set { ch_snpcapture_bed }
+    ch_snpcapture_bed = Channel.fromPath(params.snpcapture_bed, checkIfExists: true).collect()
 } else {
-    Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").set { ch_snpcapture_bed }
+    ch_snpcapture_bed = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").collect()
 }
 
 // Set up channel with pmdtools reference mask bedfile
 if (!params.pmdtools_reference_mask) {
-  ch_bedfile_for_reference_masking = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
+  ch_bedfile_for_reference_masking = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").collect()
 } else {
-  ch_bedfile_for_reference_masking = Channel.fromPath(params.pmdtools_reference_mask, checkIfExists: true)
+  ch_bedfile_for_reference_masking = Channel.fromPath(params.pmdtools_reference_mask, checkIfExists: true).collect()
 }
 
 // SexDetermination channel set up and bedfile validation
 if (!params.sexdeterrmine_bedfile) {
-  ch_bed_for_sexdeterrmine = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
+  ch_bed_for_sexdeterrmine = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").collect()
 } else {
-  ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile, checkIfExists: true)
+  ch_bed_for_sexdeterrmine = Channel.fromPath(params.sexdeterrmine_bedfile, checkIfExists: true).collect()
 }
 
  // pileupCaller channel generation and input checks for 'random sampling' genotyping
 if (!params.pileupcaller_bedfile) {
-  ch_bed_for_pileupcaller = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt")
+  ch_bed_for_pileupcaller = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy.txt").collect()
 } else {
-  ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile, checkIfExists: true)
+  ch_bed_for_pileupcaller = Channel.fromPath(params.pileupcaller_bedfile, checkIfExists: true).collect()
 }
 
 if (!params.pileupcaller_snpfile) {
-  ch_snp_for_pileupcaller = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy2.txt")
+  ch_snp_for_pileupcaller = Channel.fromPath("$projectDir/assets/nf-core_eager_dummy2.txt").collect()
 } else {
-  ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile, checkIfExists: true)
+  ch_snp_for_pileupcaller = Channel.fromPath(params.pileupcaller_snpfile, checkIfExists: true).collect()
 }
 
 // Create input channel for MALT database directory, checking directory exists
