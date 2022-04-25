@@ -10,6 +10,7 @@
  For a list of authors and contributors, see: https://github.com/nf-core/eager/tree/dev#authors-alphabetical
 ------------------------------------------------------------------------------------------------------------
 */
+nextflow.enable.dsl=1
 
 log.info Headers.nf_core(workflow, params.monochrome_logs)
 
