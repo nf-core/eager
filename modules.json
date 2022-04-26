@@ -10,19 +10,19 @@
                 "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
             },
             "custom/dumpsoftwareversions": {
-                "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "fastqc": {
-                "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "multiqc": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "gatk4/createsequencedictionary": {
                 "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
             },
             "gunzip": {
                 "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
-            },
-            "multiqc": {
-                "git_sha": "d1f33be04f5d3e402398707037f56f13166df4fe"
             },
             "samtools/faidx": {
                 "git_sha": "e20e57f90b6787ac9a010a980cf6ea98bd990046"
