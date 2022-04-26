@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [dev]
+
+### `Added`
+
+### `Fixed`
+
+- [#882](https://github.com/nf-core/eager/pull/882) Define DSL1 execution explicitly, as new versions Nextflow made DSL2 default (♥ to & fix from @Lehmann-Fabian)
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.4.4] - 2022-04-08
 
 ### `Added`
