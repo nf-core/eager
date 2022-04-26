@@ -121,12 +121,7 @@
                     "default": "bwaaln",
                     "description": "Specify which mapper to use for read alignment against  --fasta.",
                     "help_text": "BWA aln is the default and highly suited for short-read ancient DNA ([Oliva et al. 2021, Ecol. Evol](http://dx.doi.org/10.1002/ece3.8297)). BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances  the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see [Peltzer et al 2016, Genome Biology](http://dx.doi.org/10.1186/s13059-016-0918-z) for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020, Front. Eco. Evo.](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). \n\nDefault is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)",
-                    "enum": [
-                        "bwaaln",
-                        "bwamem",
-                        "circularmapper",
-                        "bowtie2"
-                    ]
+                    "enum": ["bwaaln", "bwamem", "circularmapper", "bowtie2"]
                 }
             },
             "help_text": "If using TSV input, mapping is performed at the library level, i.e. after lane merging. With direct FASTQ/BAM input mapping is performed on read-pair/file level with no merging."
