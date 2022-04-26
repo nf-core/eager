@@ -703,7 +703,7 @@ process fastqc {
     """
     } else {
     """
-    fastqc -q $r1
+    fastqc -t ${task.cpus} -q $r1
     rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
     rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
