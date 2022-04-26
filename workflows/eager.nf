@@ -11,11 +11,19 @@ WorkflowEager.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [
+        params.input, params.multiqc_config, params.fasta,
+        params.index_bwa_index_dir, params.index_bt2_index_dir, params.index_fasta_fai,
+        params.index_fasta_dict
+    ]
+
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+// Stage dummy file to be used as an optional input where required
+ch_dummy_file = file("$projectDir/assets/nf-core_eager_dummy.txt", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,6 +44,7 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { INDEX_FASTA  } from '../subworkflows/local/index_fasta'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,6 +79,10 @@ workflow EAGER {
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+
+    INDEX_FASTA (
+        ch_dummy_file
+    )
 
     //
     // MODULE: Run FastQC

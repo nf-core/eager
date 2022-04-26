@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- Written the entire pipeline into Nextflow DSL2
+- Improved input TSV validation
+
 ### `Fixed`
 
 ### `Dependencies`
