@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Written by Maxime Borry and released under the MIT license. 
+# Written by Maxime Borry and released under the MIT license.
 # See git repository (https://github.com/nf-core/eager) for full license text.
 
 import argparse
@@ -12,13 +12,14 @@ from pathlib import Path
 
 
 def _get_args():
-    '''This function parses and return arguments passed in'''
+    """This function parses and return arguments passed in"""
     parser = argparse.ArgumentParser(
-        prog='extract_mapped_reads',
+        prog="extract_mapped_reads",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="Remove mapped in bam file from fastq files")
-    parser.add_argument('bam_file', help="path to bam file")
-    parser.add_argument('fwd', help='path to forward fastq file')
+        description="Remove mapped in bam file from fastq files",
+    )
+    parser.add_argument("bam_file", help="path to bam file")
+    parser.add_argument("fwd", help="path to forward fastq file")
     parser.add_argument(
         '-merged', 
         dest='merged',
@@ -47,10 +48,19 @@ def _get_args():
         help='Read removal mode: remove reads (remove) or replace sequence by N (replace). Default = remove'
     )
     parser.add_argument(
-        '-p',
-        dest='process',
-        default=4,
-        help='Number of parallel processes'
+        "-of", dest="out_fwd", default=None, help="path to forward output fastq file"
+    )
+    parser.add_argument(
+        "-or", dest="out_rev", default=None, help="path to forward output fastq file"
+    )
+    parser.add_argument(
+        "-m",
+        dest="mode",
+        default="remove",
+        help="Read removal mode: remove reads (remove) or replace sequence by N (replace)",
+    )
+    parser.add_argument(
+        "-t", dest="threads", default=4, help="Number of parallel threads"
     )
 
     args = parser.parse_args()
@@ -62,13 +72,16 @@ def _get_args():
     out_fwd = args.out_fwd
     out_rev = args.out_rev
     mode = args.mode
-    proc = int(args.process)
+    threads = int(args.threads)
 
     return(bam, in_fwd, merged, in_rev, out_fwd, out_rev, mode, proc)
 
 
 def extract_mapped(bamfile, merged):
     """Get mapped reads in parallel
+    Args:
+        threads(int): number of threads to use
+        bam(str): path to bamfile
     Returns:
         bamfile(str): path to bam alignment file
         result(set): list of mapped reads name (str)
