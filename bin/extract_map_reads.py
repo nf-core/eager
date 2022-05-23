@@ -21,31 +21,14 @@ def _get_args():
     parser.add_argument("bam_file", help="path to bam file")
     parser.add_argument("fwd", help="path to forward fastq file")
     parser.add_argument(
-        '-merged', 
-        dest='merged',
+        "-merged",
+        dest="merged",
         default=False,
-        action='store_true',
-        help='specify if bam file was created from merged fastq files')
+        action="store_true",
+        help="specify if bam file was created from merged fastq files",
+    )
     parser.add_argument(
-        '-rev',
-        dest="rev",
-        default=None,
-        help="path to reverse fastq file")
-    parser.add_argument(
-        '-of',
-        dest="out_fwd",
-        default=None,
-        help="path to forward output fastq file")
-    parser.add_argument(
-        '-or',
-        dest="out_rev",
-        default=None,
-        help="path to forward output fastq file")
-    parser.add_argument(
-        '-m',
-        dest='mode',
-        default='remove',
-        help='Read removal mode: remove reads (remove) or replace sequence by N (replace). Default = remove'
+        "-rev", dest="rev", default=None, help="path to reverse fastq file"
     )
     parser.add_argument(
         "-of", dest="out_fwd", default=None, help="path to forward output fastq file"
@@ -57,7 +40,7 @@ def _get_args():
         "-m",
         dest="mode",
         default="remove",
-        help="Read removal mode: remove reads (remove) or replace sequence by N (replace)",
+        help="Read removal mode: remove reads (remove) or replace sequence by N (replace). Default = remove",
     )
     parser.add_argument(
         "-t", dest="threads", default=4, help="Number of parallel threads"
@@ -74,7 +57,7 @@ def _get_args():
     mode = args.mode
     threads = int(args.threads)
 
-    return(bam, in_fwd, merged, in_rev, out_fwd, out_rev, mode, proc)
+    return (bam, in_fwd, merged, in_rev, out_fwd, out_rev, mode, proc)
 
 
 def extract_mapped(bamfile, merged):
@@ -87,9 +70,9 @@ def extract_mapped(bamfile, merged):
         result(set): list of mapped reads name (str)
     """
     if bamfile.endswith(".bam") or bamfile.endswith(".gz"):
-        read_mode = 'rb'
+        read_mode = "rb"
     else:
-        read_mode = 'r'
+        read_mode = "r"
     mapped_reads = set()
     bamfile = pysam.AlignmentFile(bamfile, mode=read_mode)
     for read in bamfile.fetch():
@@ -129,15 +112,15 @@ def read_write_fq(fq_in, fq_out, mapped_reads, mode, write_mode, proc):
                 all_reads.add(read.name)
                 try:
                     if read.name in mapped_reads:
-                        if mode == 'replace':
-                            read.sequence = "N"*len(read.sequence)
-                            read = str(read)+"\n"
+                        if mode == "replace":
+                            read.sequence = "N" * len(read.sequence)
+                            read = str(read) + "\n"
                             if write_mode == "w":
                                 fh_out.write(read)
                             elif write_mode == "wb":
                                 fh_out.write(read.encode())
                     else:
-                        read = str(read)+"\n"
+                        read = str(read) + "\n"
                         if write_mode == "w":
                             fh_out.write(read)
                         elif write_mode == "wb":
@@ -145,13 +128,13 @@ def read_write_fq(fq_in, fq_out, mapped_reads, mode, write_mode, proc):
                 except Exception as e:
                     logging.error(f"Problem with {str(read)}")
                     logging.error(e)
-    return(all_reads)
+    return all_reads
 
 
 def check_remove_mode(mode):
-    if mode.lower() not in ['replace', 'remove']:
+    if mode.lower() not in ["replace", "remove"]:
         logging.info(f"Mode must be {' or '.join(mode)}")
-    return(mode.lower())
+    return mode.lower()
 
 
 if __name__ == "__main__":
@@ -160,7 +143,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     if OUT_FWD == None:
-        out_fwd = os.path.join(os.getcwd(), Path(IN_FWD).stem+".r1.fq.gz")
+        out_fwd = os.path.join(os.getcwd(), Path(IN_FWD).stem + ".r1.fq.gz")
     else:
         out_fwd = OUT_FWD
 
@@ -171,7 +154,7 @@ if __name__ == "__main__":
 
     remove_mode = check_remove_mode(MODE)
 
-   # FORWARD OR SE FILE
+    # FORWARD OR SE FILE
     logging.info(f"- Extracting mapped reads from {BAM}")
     mapped_reads = extract_mapped(BAM, merged=MERGED)
     logging.info(f"- Checking forward fq file {IN_FWD}")
@@ -180,14 +163,15 @@ if __name__ == "__main__":
         fq_out=out_fwd,
         mapped_reads=mapped_reads,
         mode=remove_mode,
-        write_mode = write_mode,
-        proc=PROC)
+        write_mode=write_mode,
+        proc=PROC,
+    )
     logging.info(f"- Cleaned forward FastQ file written to {out_fwd}")
 
     # REVERSE FILE
     if IN_REV:
         if OUT_REV == None:
-            out_rev = os.path.join(os.getcwd(), Path(IN_REV).stem+".r2.fq.gz")
+            out_rev = os.path.join(os.getcwd(), Path(IN_REV).stem + ".r2.fq.gz")
         else:
             out_rev = OUT_REV
         logging.info(f"- Checking reverse fq file {IN_FWD}")
@@ -196,6 +180,7 @@ if __name__ == "__main__":
             fq_out=out_rev,
             mapped_reads=mapped_reads,
             mode=remove_mode,
-            write_mode = write_mode,
-            proc=PROC)
+            write_mode=write_mode,
+            proc=PROC,
+        )
         logging.info(f"- Cleaned reverse FastQ file written to {out_rev}")
