@@ -3145,7 +3145,7 @@ process get_software_versions {
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
     eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
     mapDamage --version > v_mapdamage.txt || true
-    bbduk.sh -Xmx${task.memory.toGiga()}g | grep 'Last modified' | cut -d ' ' -f 3-99 > v_bbduk.txt || true
+    bbversion.sh > v_bbduk.txt || true
     bcftools --version | grep 'bcftools' | cut -d ' ' -f 2 > v_bcftools.txt || true
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
