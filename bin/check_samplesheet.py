@@ -56,7 +56,6 @@ def print_error(error, context="Line", context_str="", error_counter=0):
     error_counter += 1
     return error_counter
 
-
 def check_samplesheet(file_in, file_out):
     """
     This function checks that the samplesheet follows the following structure:
