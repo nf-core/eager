@@ -3320,6 +3320,7 @@ workflow.onComplete {
     if (workflow.success) {
         log.info "-${c_purple}[nf-core/eager]${c_green} Pipeline completed successfully${c_reset}-"
         log.info "-${c_purple}[nf-core/eager]${c_green} MultiQC run report can be found in ${params.outdir}/multiqc ${c_reset}-"
+        log.info "-${c_purple}[nf-core/eager]${c_green} Further output documentation can be seen at https://nf-core/eager/output ${c_reset}-"
     } else {
         checkHostname()
         log.info "-${c_purple}[nf-core/eager]${c_red} Pipeline completed with errors${c_reset}-"
