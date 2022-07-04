@@ -475,7 +475,7 @@
                     "default": 30,
                     "description": "Specify read minimum length to be kept for downstream analysis.",
                     "fa_icon": "fas fa-ruler",
-                    "help_text": "Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.\n\nNote that performing read length filtering at this step is not reliable for correct endogenous DNA calculation, when you have a large percentage of very short reads in your library - such as retrieved in single-stranded library protocols. When you have very few reads passing this length filter, it will artificially inflate your endogenous DNA by creating a very small denominator. In these cases it is recommended to set this to 0, and use `--bam_filter_minreadlength` instead, to filter out 'un-usable' short reads after mapping.\n\n> Modifies AdapterRemoval parameter: `--minlength`\n"
+                    "help_text": "Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.\n\nNote that when you have a large percentage of very short reads in your library (< 20 bp) - such as retrieved in single-stranded library protocols - that performing read length filtering at this step is not _always_ reliable for correct endogenous DNA calculation.  When you have very few reads passing this length filter, it will artificially inflate your 'endogenous DNA' value by creating a very small denominator. \n\nIf you notice you have ultra short reads (< 20 bp), it is recommended to set this parameter to 0, and use `--bam_filter_minreadlength` instead, to filter out 'un-usable' short reads after mapping. A caveat, however, is that this will cause a very large increase in computational run time, due to all reads in the library will be being mapped.\n\n> Modifies AdapterRemoval parameter: `--minlength`\n"
                 },
                 "clip_min_read_quality": {
                     "type": "integer",
@@ -1683,7 +1683,7 @@
                 "maltextract_percentidentity": {
                     "type": "number",
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
-                    "default": 85.0,
+                    "default": 85,
                     "fa_icon": "fas fa-id-card",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--minPI`"
                 },
