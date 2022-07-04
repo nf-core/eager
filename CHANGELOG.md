@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [#882](https://github.com/nf-core/eager/pull/882) Define DSL1 execution explicitly, as new versions Nextflow made DSL2 default (♥ to & fix from @Lehmann-Fabian)
 - [#879](https://github.com/nf-core/eager/issues/879) Add missing threads parameter for pre-clipping FastQC for single end data that caused insufficient memory in some cases (♥ to @marcel-keller for reporting)
+- [#885](https://github.com/nf-core/eager/issues/885) Specify task memory for all tools in get_software_versions to account for incompatibilty of java with some SGE clusters causing hanging of the process (♥ to @maxibor for reporting)
 - [#889](https://github.com/nf-core/eager/issues/889) Remove/updated parameters from benchmarking test profiles (♥ to @TCLamnidis for reporting)
 
 ### `Dependencies`
