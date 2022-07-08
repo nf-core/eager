@@ -3019,8 +3019,8 @@ process kraken {
   path(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out
-  tuple prefix, path("*.kraken2_report") into ch_kraken_report, ch_kraken_for_multiqc
+  file "*.kraken.out" optional true into ch_kraken_out
+  tuple prefix, path("*.kraken2_report") optional true into ch_kraken_report, ch_kraken_for_multiqc
 
   script:
   prefix = fastq.baseName

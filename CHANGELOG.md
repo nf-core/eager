@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#887](https://github.com/nf-core/eager/issues/887) Clarify what is considered 'ultra-short' reads in the help text of clip_readlength, for when you may wish to turn of length filtering during AdapterRemoval (♥ to @TCLamnidis for reporting)
 - [#889](https://github.com/nf-core/eager/issues/889) Remove/updated parameters from benchmarking test profiles (♥ to @TCLamnidis for reporting)
 - [#895](https://github.com/nf-core/eager/issues/895) Output documentation typo fix and added location of output docs in pipeline summary (♥ to @RodrigoBarquera for reporting)
+- [#897](https://github.com/nf-core/eager/issues/897) Fix pipeline crashing if no Kraken2 results generated (♥ to @alexandregilardet for reporting)
 
 ### `Dependencies`
 
