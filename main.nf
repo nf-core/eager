@@ -769,7 +769,7 @@ ch_input_for_fastp.fourcol
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
     }
- .set { ch_skipfastp_for_merge }
+  .set { ch_skipfastp_for_merge }
 
 ch_output_from_fastp
   .map{
@@ -1062,7 +1062,7 @@ ch_branched_for_lanemerge = ch_inlinebarcoderemoval_for_lanemerge
     it ->
       def samplename = it[0]
       def libraryid  = it[1]
-      def lane = it[2]
+      def lane = 0
       def seqtype = it[3]
       def organism = it[4]
       def strandedness = it[5]
@@ -1100,7 +1100,7 @@ ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
       it -> 
         def samplename = it[0]
         def libraryid  = it[1]
-        def lane = it[2]
+        def lane = 0
         def seqtype = it[3]
         def organism = it[4]
         def strandedness = it[5]
@@ -1150,7 +1150,7 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
       it -> 
         def samplename = it[0]
         def libraryid  = it[1]
-        def lane = it[2]
+        def lane = 0
         def seqtype = it[3]
         def organism = it[4]
         def strandedness = it[5]
@@ -1169,7 +1169,7 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
       it -> 
         def samplename = it[0]
         def libraryid  = it[1]
-        def lane = it[2]
+        def lane = 0
         def seqtype = it[3]
         def organism = it[4]
         def strandedness = it[5]
@@ -1557,7 +1557,7 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
     it ->
       def samplename = it[0]
       def libraryid  = it[1]
-      def lane = it[2]
+      def lane = 0
       def seqtype = it[3].unique() // How to deal with this?
       def organism = it[4]
       def strandedness = it[5]
@@ -1565,9 +1565,13 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
       def r1 = it[7]
       def r2 = it[8]
 
-      // We will assume if mixing it is better to set as PE as this is informative
+      // 1. We will assume if mixing it is better to set as PE as this is informative
       // for DeDup (and markduplicates doesn't care), but will throw a warning!
-      def seqtype_new = seqtype.flatten().size() > 1 ? 'PE' : seqtype 
+      // 2. We will also flatten to a single value to address problems with 'unstable' 
+      // Nextflow ArrayBag object types not allowing the .join to work between resumes
+      // See: https://github.com/nf-core/eager/issues/880
+
+      def seqtype_new = seqtype.flatten().size() > 1 ? 'PE' : seqtype.flatten()[0] 
                       
       if ( seqtype.flatten().size() > 1 &&  params.dedupper == 'dedup' ) {
         log.warn "[nf-core/eager] Warning: you are running DeDup on BAMs with a mixture of PE/SE data for library: ${libraryid}. DeDup is designed for PE data only, deduplication maybe suboptimal!"
@@ -1771,6 +1775,19 @@ process samtools_flagstat_after_filter {
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
     .join(ch_bam_filtered_flagstat_for_endorspy, by: [0,1,2,3,4,5,6])
+    .map { it -> 
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]     
+        def stats = file(it[7])
+        def poststats = file(it[8])
+
+      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] 
+    }
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
@@ -1787,7 +1804,8 @@ if (params.run_bam_filtering) {
         def stats = file(it[7])
         def poststats = file("$projectDir/assets/nf-core_eager_dummy.txt")
 
-      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] }
+      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] 
+    }
     .set{ ch_allflagstats_for_endorspy }
 }
 
