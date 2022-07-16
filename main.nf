@@ -1062,7 +1062,7 @@ ch_branched_for_lanemerge = ch_inlinebarcoderemoval_for_lanemerge
     it ->
       def samplename = it[0]
       def libraryid  = it[1]
-      def lane = 0
+      def lane = it[2]
       def seqtype = it[3]
       def organism = it[4]
       def strandedness = it[5]
@@ -1100,7 +1100,7 @@ ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
       it -> 
         def samplename = it[0]
         def libraryid  = it[1]
-        def lane = 0
+        def lane = it[2]
         def seqtype = it[3]
         def organism = it[4]
         def strandedness = it[5]
@@ -1128,7 +1128,7 @@ process lanemerge {
 
   script:
   if ( seqtype == 'PE' && ( params.skip_collapse || params.skip_adapterremoval ) ){
-  lane = 0
+  def lane = 0
   """
   cat ${r1} > "${libraryid}"_R1_lanemerged.fq.gz
   cat ${r2} > "${libraryid}"_R2_lanemerged.fq.gz
@@ -1150,7 +1150,7 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
       it -> 
         def samplename = it[0]
         def libraryid  = it[1]
-        def lane = 0
+        def lane = it[2]
         def seqtype = it[3]
         def organism = it[4]
         def strandedness = it[5]
@@ -1775,19 +1775,6 @@ process samtools_flagstat_after_filter {
 if (params.run_bam_filtering) {
   ch_flagstat_for_endorspy
     .join(ch_bam_filtered_flagstat_for_endorspy, by: [0,1,2,3,4,5,6])
-    .map { it -> 
-        def samplename = it[0]
-        def libraryid  = it[1]
-        def lane = it[2]
-        def seqtype = it[3]
-        def organism = it[4]
-        def strandedness = it[5]
-        def udg = it[6]     
-        def stats = file(it[7])
-        def poststats = file(it[8])
-
-      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, stats, poststats ] 
-    }
     .set{ ch_allflagstats_for_endorspy }
 
 } else {
