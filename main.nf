@@ -800,7 +800,7 @@ process adapter_removal {
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(r1), file(r2) from ch_fastp_for_adapterremoval
-    path adapterlist from ch_adapterlist.collect().dump(tag: "Adapter list")
+    path adapterlist from ch_adapterlist.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("output/*{combined.fq,.se.truncated,pair1.truncated}.gz") into ch_output_from_adapterremoval_r1
@@ -968,13 +968,10 @@ if ( params.skip_collapse ){
 // AdapterRemoval bypass when not running it
 if (!params.skip_adapterremoval) {
     ch_output_from_adapterremoval.mix(ch_fastp_for_skipadapterremoval)
-        .dump(tag: "post_ar_adapterremoval_decision_skipar")
         .filter { it =~/.*combined.fq.gz|.*truncated.gz/ }
-        .dump(tag: "ar_bypass")
         .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
 } else {
     ch_fastp_for_skipadapterremoval
-        .dump(tag: "post_ar_adapterremoval_decision_withar")
         .into { ch_adapterremoval_for_post_ar_trimming; ch_adapterremoval_for_skip_post_ar_trimming; } 
 }
 
@@ -1076,7 +1073,6 @@ ch_branched_for_lanemerge = ch_inlinebarcoderemoval_for_lanemerge
       [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
 
   }
-  .dump(tag: "lanemerge_bypass_decision")
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -1097,7 +1093,6 @@ ch_branched_for_lanemerge_skipme = ch_branched_for_lanemerge.skip_merge
 
         [ samplename, libraryid, lane, seqtype, organism, strandedness, udg, r1, r2 ]
   }
-  .dump(tag: "lanemerge_reconfigure")
 
 
 ch_branched_for_lanemerge_ready = ch_branched_for_lanemerge.merge_me
@@ -1125,7 +1120,7 @@ process lanemerge {
   publishDir "${params.outdir}/lanemerging", mode: params.publish_dir_mode
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge_ready.dump(tag: "lange_merge_input")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_branched_for_lanemerge_ready
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*_R1_lanemerged.fq.gz") into ch_lanemerge_for_mapping_r1
@@ -1149,7 +1144,6 @@ process lanemerge {
 // Ensuring always valid R2 file even if doesn't exist for AWS
 if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
   ch_lanemerge_for_mapping_r1
-    .dump(tag: "post_lanemerge_reconfigure")
     .mix(ch_lanemerge_for_mapping_r2)
     .groupTuple(by: [0,1,2,3,4,5,6])
     .map{
@@ -1264,8 +1258,8 @@ process bwa {
     publishDir "${params.outdir}/mapping/bwa", mode: params.publish_dir_mode
 
     input:
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_lanemerge_for_bwa.dump(tag: "bwa_input_reads")
-    path index from bwa_index.collect().dump(tag: "input_index")
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(r1), path(r2) from ch_lanemerge_for_bwa
+    path index from bwa_index.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.mapped.bam"), path("*.{bai,csi}") into ch_output_from_bwa   
@@ -1582,7 +1576,6 @@ ch_branched_for_seqtypemerge = ch_mapping_for_seqtype_merging
       [ samplename, libraryid, lane, seqtype_new, organism, strandedness, udg, r1, r2 ]
 
   }
-  .dump(tag: "pre_seqtype_decision")
   .branch {
     skip_merge: it[7].size() == 1 // Can skip merging if only single lanes
     merge_me: it[7].size() > 1
@@ -1955,7 +1948,6 @@ ch_input_for_librarymerging.merge_me
 
       [it[0], libraryid, it[2], seqtype, it[4], it[5], it[6], bam, bai ]
     }
-  .dump(tag: "input_for_lib_merging")
   .set { ch_fixedinput_for_librarymerging }
 
 process library_merge {
@@ -1964,7 +1956,7 @@ process library_merge {
   publishDir "${params.outdir}/merged_bams/initial", mode: params.publish_dir_mode
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging.dump(tag: "library_merge_input")
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_fixedinput_for_librarymerging
 
   output:
   tuple samplename, val("${samplename}_libmerged"), lane, seqtype, organism, strandedness, udg, path("*_libmerged_rmdup.bam"), path("*_libmerged_rmdup.bam.{bai,csi}") into ch_output_from_librarymerging
@@ -2510,7 +2502,7 @@ process genotyping_pileupcaller {
   file fai from ch_fai_for_pileupcaller.collect()
   file dict from ch_dict_for_pileupcaller.collect()
   path(bed) from ch_bed_for_pileupcaller.collect()
-  path(snp) from ch_snp_for_pileupcaller.collect().dump(tag: "pileupcaller_snp_file")
+  path(snp) from ch_snp_for_pileupcaller.collect()
 
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("pileupcaller.${strandedness}.*") into ch_for_eigenstrat_snp_coverage
@@ -2541,7 +2533,7 @@ process eigenstrat_snp_coverage {
   params.run_genotyping && params.genotyping_tool == 'pileupcaller'
   
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") from ch_for_eigenstrat_snp_coverage.dump(tag:'eigenstrat_input')
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*") from ch_for_eigenstrat_snp_coverage
   
   output:
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.json") into ch_eigenstrat_snp_cov_for_multiqc
@@ -2672,7 +2664,7 @@ process vcf2genome {
 if (!params.additional_vcf_files) {
     ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[-1] }.collect()
 } else {
-    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[-1] }.mix(ch_extravcfs_for_multivcfanalyzer).collect().dump(tag: "postmix")
+    ch_vcfs_for_multivcfanalyzer = ch_ug_for_multivcfanalyzer.map{ it[-1] }.mix(ch_extravcfs_for_multivcfanalyzer).collect()
 }
 
 process multivcfanalyzer {
@@ -3341,7 +3333,6 @@ workflow.onError {
 def extract_data(tsvFile) {
     Channel.fromPath(tsvFile)
         .splitCsv(header: true, sep: '\t')
-        .dump(tag:'tsv_extract')
         .map { row ->
 
             def expected_keys = ['Sample_Name', 'Library_ID', 'Lane', 'Colour_Chemistry', 'SeqType', 'Organism', 'Strandedness', 'UDG_Treatment', 'R1', 'R2', 'BAM']
