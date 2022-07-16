@@ -1169,7 +1169,7 @@ if ( ( params.skip_collapse || params.skip_adapterremoval ) ) {
       it -> 
         def samplename = it[0]
         def libraryid  = it[1]
-        def lane = 0
+        def lane = it[2]
         def seqtype = it[3]
         def organism = it[4]
         def strandedness = it[5]
