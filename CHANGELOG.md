@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-
 ### `Fixed`
 
 - [#882](https://github.com/nf-core/eager/pull/882) Define DSL1 execution explicitly, as new versions Nextflow made DSL2 default (♥ to & fix from @Lehmann-Fabian)
@@ -18,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#895](https://github.com/nf-core/eager/issues/895) Output documentation typo fix and added location of output docs in pipeline summary (♥ to @RodrigoBarquera for reporting)
 - [#897](https://github.com/nf-core/eager/issues/897) Fix pipeline crash if no Kraken2 results generated (♥ to @alexandregilardet for reporting)
 - [#899](https://github.com/nf-core/eager/issues/897) Fix pipeline crash for circulargenerator if reference file does not end in .fasta (♥ to @scarlhoff for reporting)
+- Fixed some missing default values in the nextflow parameter schema JSON
 
 ### `Dependencies`
 
