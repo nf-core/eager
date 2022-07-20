@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#899](https://github.com/nf-core/eager/issues/897) Fix pipeline crash for circulargenerator if reference file does not end in .fasta (♥ to @scarlhoff for reporting)
 - Fixed some missing default values in the nextflow parameter schema JSON
 
+### `Improved`
+
+- [#905](https://github.com/nf-core/eager/pull/905) Speed and memory optimization of the `extract_map_reads.py` script.
+
 ### `Dependencies`
 
 ### `Deprecated`
@@ -115,10 +119,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#790](https://github.com/nf-core/eager/issues/790) Fixed kraken2 report file-name collision when sample names have `.` in them
 - [#792](https://github.com/nf-core/eager/issues/792) Fixed java error messages for AdapterRemovalFixPrefix being hidden in output
 - [#794](https://github.com/nf-core/eager/issues/794) Aligned default test profile with nf-core standards (`test_tsv` is now `test`)
-
-### `Improved`
-
-- Speed and memory optimization of the `extract_map_reads.py` script.
 
 ### `Dependencies`
 
