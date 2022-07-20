@@ -57,7 +57,7 @@ def _get_args():
     mode = args.mode
     threads = int(args.threads)
 
-    return (bam, in_fwd, merged, in_rev, out_fwd, out_rev, mode, proc)
+    return (bam, in_fwd, merged, in_rev, out_fwd, out_rev, mode, threads)
 
 
 def extract_mapped(bamfile, merged):
