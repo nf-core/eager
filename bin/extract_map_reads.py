@@ -101,7 +101,6 @@ def read_write_fq(fq_in, fq_out, mapped_reads, mode, write_mode, proc):
         proc(int): number of parallel processes
         merged(bool): True if bam file was created from merged fastq files
     """
-    all_reads = set()
     if write_mode == "w":
         cm = open(fq_out, write_mode)
     elif write_mode == "wb":
@@ -109,7 +108,6 @@ def read_write_fq(fq_in, fq_out, mapped_reads, mode, write_mode, proc):
     with pysam.FastxFile(fq_in) as fh:
         with cm as fh_out:
             for read in fh:
-                all_reads.add(read.name)
                 try:
                     if read.name in mapped_reads:
                         if mode == "replace":
@@ -128,8 +126,6 @@ def read_write_fq(fq_in, fq_out, mapped_reads, mode, write_mode, proc):
                 except Exception as e:
                     logging.error(f"Problem with {str(read)}")
                     logging.error(e)
-    return all_reads
-
 
 def check_remove_mode(mode):
     if mode.lower() not in ["replace", "remove"]:
@@ -158,7 +154,7 @@ if __name__ == "__main__":
     logging.info(f"- Extracting mapped reads from {BAM}")
     mapped_reads = extract_mapped(BAM, merged=MERGED)
     logging.info(f"- Checking forward fq file {IN_FWD}")
-    fqd_fwd = read_write_fq(
+    read_write_fq(
         fq_in=IN_FWD,
         fq_out=out_fwd,
         mapped_reads=mapped_reads,
