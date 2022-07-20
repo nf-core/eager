@@ -703,7 +703,7 @@ process fastqc {
     """
     } else {
     """
-    fastqc -q $r1
+    fastqc -t ${task.cpus} -q $r1
     rename 's/_fastqc\\.zip\$/_raw_fastqc.zip/' *_fastqc.zip
     rename 's/_fastqc\\.html\$/_raw_fastqc.html/' *_fastqc.html
     """
@@ -1343,7 +1343,6 @@ process circulargenerator{
             else null
     }
 
-
     input:
     file fasta from ch_fasta_for_circulargenerator
 
@@ -1355,7 +1354,7 @@ process circulargenerator{
     params.mapper == 'circularmapper'
 
     script:
-    prefix = "${fasta.baseName}_${params.circularextension}.fasta"
+    prefix = "${fasta.baseName}_${params.circularextension}.${fasta.extension}"
     """
     circulargenerator -Xmx${task.memory.toGiga()}g -e ${params.circularextension} -i $fasta -s ${params.circulartarget}
     bwa index $prefix
@@ -1382,7 +1381,7 @@ process circularmapper{
 
     script:
     def filter = params.circularfilter ? '-f true -x true' : ''
-    def elongated_root = "${fasta.baseName}_${params.circularextension}.fasta"
+    def elongated_root = "${fasta.baseName}_${params.circularextension}.${fasta.extension}"
     def size = params.large_ref ? '-c' : ''
 
     if (!params.single_end && params.skip_collapse ){
@@ -3020,8 +3019,8 @@ process kraken {
   path(krakendb) from ch_krakendb
 
   output:
-  file "*.kraken.out" into ch_kraken_out
-  tuple prefix, path("*.kraken2_report") into ch_kraken_report, ch_kraken_for_multiqc
+  file "*.kraken.out" optional true into ch_kraken_out
+  tuple prefix, path("*.kraken2_report") optional true into ch_kraken_report, ch_kraken_for_multiqc
 
   script:
   prefix = fastq.baseName
@@ -3114,31 +3113,31 @@ process get_software_versions {
     echo $workflow.manifest.version &> v_pipeline.txt
     echo $workflow.nextflow.version &> v_nextflow.txt
     
-    fastqc --version &> v_fastqc.txt 2>&1 || true
+    fastqc -t ${task.cpus} --version &> v_fastqc.txt 2>&1 || true
     AdapterRemoval --version  &> v_adapterremoval.txt 2>&1 || true
     fastp --version &> v_fastp.txt 2>&1 || true
     bwa &> v_bwa.txt 2>&1 || true
-    circulargenerator --help | head -n 1 &> v_circulargenerator.txt 2>&1 || true
+    circulargenerator -Xmx${task.memory.toGiga()}g --help | head -n 1 &> v_circulargenerator.txt 2>&1 || true
     samtools --version &> v_samtools.txt 2>&1 || true
-    dedup -v &> v_dedup.txt 2>&1 || true
+    dedup -Xmx${task.memory.toGiga()}g -v &> v_dedup.txt 2>&1 || true
     ## bioconda recipe of picard is incorrectly set up and extra warning made with stderr, this ugly command ensures only version exported
-    ( exec 7>&1; picard MarkDuplicates --version 2>&1 >&7 | grep -v '/' >&2 ) 2> v_markduplicates.txt || true
-    qualimap --version &> v_qualimap.txt 2>&1 || true
+    ( exec 7>&1; picard -Xmx${task.memory.toMega()}M MarkDuplicates --version 2>&1 >&7 | grep -v '/' >&2 ) 2> v_markduplicates.txt || true
+    qualimap --version --java-mem-size=${task.memory.toGiga()}G &> v_qualimap.txt 2>&1 || true
     preseq &> v_preseq.txt 2>&1 || true
-    gatk --version 2>&1 | grep '(GATK)' > v_gatk.txt 2>&1 || true
-    gatk3 --version 2>&1 | head -n 1 > v_gatk3.txt 2>&1 || true
+    gatk --java-options "-Xmx${task.memory.toGiga()}G" --version 2>&1 | grep '(GATK)' > v_gatk.txt 2>&1 || true
+    gatk3 -Xmx${task.memory.toGiga()}g  --version 2>&1 | head -n 1 > v_gatk3.txt 2>&1 || true
     freebayes --version &> v_freebayes.txt 2>&1 || true
     bedtools --version &> v_bedtools.txt 2>&1 || true
-    damageprofiler --version &> v_damageprofiler.txt 2>&1 || true
+    damageprofiler -Xmx${task.memory.toGiga()}g --version &> v_damageprofiler.txt 2>&1 || true
     bam --version &> v_bamutil.txt 2>&1 || true
     pmdtools --version &> v_pmdtools.txt 2>&1 || true
     angsd -h |& head -n 1 | cut -d ' ' -f3-4 &> v_angsd.txt 2>&1 || true 
-    multivcfanalyzer --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
-    malt-run --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d ',' &> v_malt.txt 2>&1 || true
-    MaltExtract --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
+    multivcfanalyzer -Xmx${task.memory.toGiga()}g --help | head -n 1 &> v_multivcfanalyzer.txt 2>&1 || true
+    malt-run -J-Xmx${task.memory.toGiga()}g --help |& tail -n 3 | head -n 1 | cut -f 2 -d'(' | cut -f 1 -d ',' &> v_malt.txt 2>&1 || true
+    MaltExtract -Xmx${task.memory.toGiga()}g --help | head -n 2 | tail -n 1 &> v_maltextract.txt 2>&1 || true
     multiqc --version &> v_multiqc.txt 2>&1 || true
-    vcf2genome -h |& head -n 1 &> v_vcf2genome.txt || true
-    mtnucratio --help &> v_mtnucratiocalculator.txt || true
+    vcf2genome -Xmx${task.memory.toGiga()}g -h |& head -n 1 &> v_vcf2genome.txt || true
+    mtnucratio -Xmx${task.memory.toGiga()}g --help &> v_mtnucratiocalculator.txt || true
     sexdeterrmine --version &> v_sexdeterrmine.txt || true
     kraken2 --version | head -n 1 &> v_kraken.txt || true
     endorS.py --version &> v_endorSpy.txt || true
@@ -3146,7 +3145,7 @@ process get_software_versions {
     bowtie2 --version | grep -a 'bowtie2-.* -fdebug' > v_bowtie2.txt || true
     eigenstrat_snp_coverage --version | cut -d ' ' -f2 >v_eigenstrat_snp_coverage.txt || true
     mapDamage --version > v_mapdamage.txt || true
-    bbduk.sh | grep 'Last modified' | cut -d ' ' -f 3-99 > v_bbduk.txt || true
+    bbversion.sh > v_bbduk.txt || true
     bcftools --version | grep 'bcftools' | cut -d ' ' -f 2 > v_bcftools.txt || true
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -3321,6 +3320,7 @@ workflow.onComplete {
     if (workflow.success) {
         log.info "-${c_purple}[nf-core/eager]${c_green} Pipeline completed successfully${c_reset}-"
         log.info "-${c_purple}[nf-core/eager]${c_green} MultiQC run report can be found in ${params.outdir}/multiqc ${c_reset}-"
+        log.info "-${c_purple}[nf-core/eager]${c_green} Further output documentation can be seen at https://nf-core/eager/output ${c_reset}-"
     } else {
         checkHostname()
         log.info "-${c_purple}[nf-core/eager]${c_red} Pipeline completed with errors${c_reset}-"

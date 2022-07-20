@@ -475,7 +475,7 @@
                     "default": 30,
                     "description": "Specify read minimum length to be kept for downstream analysis.",
                     "fa_icon": "fas fa-ruler",
-                    "help_text": "Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.\n\nNote that performing read length filtering at this step is not reliable for correct endogenous DNA calculation, when you have a large percentage of very short reads in your library - such as retrieved in single-stranded library protocols. When you have very few reads passing this length filter, it will artificially inflate your endogenous DNA by creating a very small denominator. In these cases it is recommended to set this to 0, and use `--bam_filter_minreadlength` instead, to filter out 'un-usable' short reads after mapping.\n\n> Modifies AdapterRemoval parameter: `--minlength`\n"
+                    "help_text": "Defines the minimum read length that is required for reads after merging to be considered for downstream analysis after read merging. Default is `30`.\n\nNote that when you have a large percentage of very short reads in your library (< 20 bp) - such as retrieved in single-stranded library protocols - that performing read length filtering at this step is not _always_ reliable for correct endogenous DNA calculation.  When you have very few reads passing this length filter, it will artificially inflate your 'endogenous DNA' value by creating a very small denominator. \n\nIf you notice you have ultra short reads (< 20 bp), it is recommended to set this parameter to 0, and use `--bam_filter_minreadlength` instead, to filter out 'un-usable' short reads after mapping. A caveat, however, is that this will cause a very large increase in computational run time, due to all reads in the library will be being mapped.\n\n> Modifies AdapterRemoval parameter: `--minlength`\n"
                 },
                 "clip_min_read_quality": {
                     "type": "integer",
@@ -653,28 +653,28 @@
                     "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity.",
                     "fa_icon": "fas fa-sort-numeric-down",
                     "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with `--bt2_sensitivity`. Can either be 0 or 1. Default: 0 (i.e. use`--bt2_sensitivity` defaults).\n\n> Modifies Bowtie2 parameters: `-N`",
-                    "enum": [
-                        0,
-                        1
-                    ]
+                    "default": 0
                 },
                 "bt2l": {
                     "type": "integer",
                     "description": "Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity.",
                     "fa_icon": "fas fa-ruler-horizontal",
-                    "help_text": "The length of the seed sub-string to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).\n\n> Modifies Bowtie2 parameters: `-L`"
+                    "help_text": "The length of the seed sub-string to use during seeding. This will override any values set with `--bt2_sensitivity`. Default: 0 (i.e. use`--bt2_sensitivity` defaults: [20 for local and 22 for end-to-end](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line).\n\n> Modifies Bowtie2 parameters: `-L`",
+                    "default": 0
                 },
                 "bt2_trim5": {
                     "type": "integer",
                     "description": "Specify number of bases to trim off from 5' (left) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
-                    "help_text": "Number of bases to trim at the 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0\n\n> Modifies Bowtie2 parameters: `-bt2_trim5`"
+                    "help_text": "Number of bases to trim at the 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0\n\n> Modifies Bowtie2 parameters: `-bt2_trim5`",
+                    "default": 0
                 },
                 "bt2_trim3": {
                     "type": "integer",
                     "description": "Specify number of bases to trim off from 3' (right) end of read before alignment.",
                     "fa_icon": "fas fa-cut",
-                    "help_text": "Number of bases to trim at the 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.\n\n> Modifies Bowtie2 parameters: `-bt2_trim3`"
+                    "help_text": "Number of bases to trim at the 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.\n\n> Modifies Bowtie2 parameters: `-bt2_trim3`",
+                    "default": 0
                 },
                 "bt2_maxins": {
                     "type": "integer",
@@ -731,13 +731,15 @@
                     "type": "integer",
                     "description": "Minimum mapping quality for reads filter.",
                     "fa_icon": "fas fa-greater-than-equal",
-                    "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).\n\n> Modifies samtools view parameter: `-q`"
+                    "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis. By default keeps all reads and is therefore set to `0` (basically doesn't filter anything).\n\n> Modifies samtools view parameter: `-q`",
+                    "default": 0
                 },
                 "bam_filter_minreadlength": {
                     "type": "integer",
                     "fa_icon": "fas fa-ruler-horizontal",
                     "description": "Specify minimum read length to be kept after mapping.",
-                    "help_text": "Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.\n\nIf used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artificially small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct denominator of all reads, for the endogenous DNA calculation.\n\n> Modifies filter_bam_fragment_length.py parameter: `-l`"
+                    "help_text": "Specify minimum length of mapped reads. This filtering will apply at the same time as mapping quality filtering.\n\nIf used _instead_ of minimum length read filtering at AdapterRemoval, this can be useful to get more realistic endogenous DNA percentages, when most of your reads are very short (e.g. in single-stranded libraries) and would otherwise be discarded by AdapterRemoval (thus making an artificially small denominator for a typical endogenous DNA calculation). Note in this context you should not perform mapping quality filtering nor discarding of unmapped reads to ensure a correct denominator of all reads, for the endogenous DNA calculation.\n\n> Modifies filter_bam_fragment_length.py parameter: `-l`",
+                    "default": 0
                 },
                 "bam_unmapped_type": {
                     "type": "string",
@@ -1168,7 +1170,8 @@
                     "type": "integer",
                     "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified in --freebayes_C.",
                     "fa_icon": "fab fa-think-peaks",
-                    "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.\n\n> Modifies freebayes parameter: `-g`"
+                    "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified C. Not set by default.\n\n> Modifies freebayes parameter: `-g`",
+                    "default": 0
                 },
                 "freebayes_p": {
                     "type": "integer",
@@ -1683,7 +1686,7 @@
                 "maltextract_percentidentity": {
                     "type": "number",
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
-                    "default": 85.0,
+                    "default": 85,
                     "fa_icon": "fas fa-id-card",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85.0`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--minPI`"
                 },
