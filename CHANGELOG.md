@@ -18,10 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#897](https://github.com/nf-core/eager/issues/897) Fix pipeline crash if no Kraken2 results generated (♥ to @alexandregilardet for reporting)
 - [#899](https://github.com/nf-core/eager/issues/897) Fix pipeline crash for circulargenerator if reference file does not end in .fasta (♥ to @scarlhoff for reporting)
 - Fixed some missing default values in the nextflow parameter schema JSON
-
-### `Improved`
-
-- [#905](https://github.com/nf-core/eager/pull/905) Speed and memory optimization of the `extract_map_reads.py` script.
+- [#789](https://github.com/nf-core/eager/issues/789) Substantial speed and memory optimisation of the `extract_map_reads.py` script (♥ to @ivelsko for reporting, @maxibor for optimisation)
 
 ### `Dependencies`
 
