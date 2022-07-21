@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
+- Updated MultiQC to latest stable alpha version on bioconda, correcting the previously nonsensical AdapterRemoval plots (♥ to @NiemannJ for fixing in MultiQC)
+
 ### `Deprecated`
 
 ## [2.4.4] - 2022-04-08
