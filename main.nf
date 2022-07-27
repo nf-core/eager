@@ -2502,7 +2502,7 @@ process genotyping_pileupcaller {
   params.run_genotyping && params.genotyping_tool == 'pileupcaller'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai from ch_prepped_for_pileupcaller_double.mix(ch_prepped_for_pileupcaller_single)
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_prepped_for_pileupcaller_double.mix(ch_prepped_for_pileupcaller_single)
   file fasta from ch_fasta_for_genotyping_pileupcaller.collect()
   file fai from ch_fai_for_pileupcaller.collect()
   file dict from ch_dict_for_pileupcaller.collect()
