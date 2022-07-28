@@ -1787,7 +1787,7 @@ if (params.run_bam_filtering) {
         def seqtype = it[3]
         def organism = it[4]
         def strandedness = it[5]
-        def udg = it[6]     
+        def udg = it[6]
         def stats = file(it[7])
         def poststats = file("$projectDir/assets/nf-core_eager_dummy.txt")
 
@@ -2229,7 +2229,7 @@ process bam_trim {
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_bamutils_decision.totrim
 
     output: 
-    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file("*.trimmed.bam"), file("*.trimmed.bam.{bai,csi}") into ch_trimmed_from_bamutils
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.trimmed.bam"), path("*.trimmed.bam.{bai,csi}") into ch_trimmed_from_bamutils
 
     script:
     def softclip = params.bamutils_softclip ? '-c' : '' 
@@ -2261,7 +2261,7 @@ ch_trimmed_formerge = ch_bamutils_decision.notrim
         def seqtype = it[3]
         def organism = it[4]
         def strandedness = it[5]
-        def udg = it[6]     
+        def udg = it[6]
         def bam = it[7].flatten()
         def bai = it[8].flatten()
 
@@ -2487,10 +2487,36 @@ ch_damagemanipulation_for_genotyping_pileupcaller
  // Create pileupcaller input tuples
 ch_input_for_genotyping_pileupcaller.singleStranded
   .groupTuple(by:[5])
+  .map{
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def bam = it[7].flatten()
+        def bai = it[8].flatten()
+
+      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai ]
+  }
   .set {ch_prepped_for_pileupcaller_single}
 
 ch_input_for_genotyping_pileupcaller.doubleStranded
   .groupTuple(by:[5])
+  .map{
+        def samplename = it[0]
+        def libraryid  = it[1]
+        def lane = it[2]
+        def seqtype = it[3]
+        def organism = it[4]
+        def strandedness = it[5]
+        def udg = it[6]
+        def bam = it[7].flatten()
+        def bai = it[8].flatten()
+
+      [samplename, libraryid, lane, seqtype, organism, strandedness, udg, bam, bai ]
+  }
   .set {ch_prepped_for_pileupcaller_double}
 
 process genotyping_pileupcaller {
