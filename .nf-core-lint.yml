@@ -3,5 +3,4 @@ files_unchanged:
   - .github/CONTRIBUTING.md
   - .github/ISSUE_TEMPLATE/bug_report.md
   - docs/README.md
-  - .github/workflows/linting.yml
 
