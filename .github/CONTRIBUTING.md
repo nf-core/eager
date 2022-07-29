@@ -16,7 +16,7 @@ Contributions to the code are even more welcome ;)
 If you'd like to write some code for nf-core/eager, the standard workflow is as follows:
 
 1. Check that there isn't already an issue about your idea in the [nf-core/eager issues](https://github.com/nf-core/eager/issues) to avoid duplicating work
-    * If there isn't one already, please create one so that others know you're working on this
+   - If there isn't one already, please create one so that others know you're working on this
 2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [nf-core/eager repository](https://github.com/nf-core/eager) to your GitHub account
 3. Make the necessary changes / additions within your forked repository following [Pipeline conventions](#pipeline-contribution-conventions)
 4. Use `nf-core schema build .` and add any new parameters to the pipeline JSON schema (requires [nf-core tools](https://github.com/nf-core/tools) >= 1.10).
@@ -49,9 +49,9 @@ These tests are run both with the latest available version of `Nextflow` and als
 
 :warning: Only in the unlikely and regretful event of a release happening with a bug.
 
-* On your own fork, make a new branch `patch` based on `upstream/master`.
-* Fix the bug, and bump version (X.Y.Z+1).
-* A PR should be made on `master` from patch to directly this particular bug.
+- On your own fork, make a new branch `patch` based on `upstream/master`.
+- Fix the bug, and bump version (X.Y.Z+1).
+- A PR should be made on `master` from patch to directly this particular bug.
 
 ## Getting help
 
@@ -96,9 +96,9 @@ The process resources can be passed on to the tool dynamically within the proces
 
 Please use the following naming schemes, to make it easy to understand what is going where.
 
-* initial process channel: `ch_output_from_<process>`
-* intermediate and terminal channels: `ch_<previousprocess>_for_<nextprocess>`
-* skipped process output: `ch_<previousstage>_for_<skipprocess>`(this goes out of the bypass statement described above)
+- initial process channel: `ch_output_from_<process>`
+- intermediate and terminal channels: `ch_<previousprocess>_for_<nextprocess>`
+- skipped process output: `ch_<previousstage>_for_<skipprocess>`(this goes out of the bypass statement described above)
 
 ### Nextflow version bumping
 
@@ -135,18 +135,18 @@ For all internal nf-core/eager documentation images we are using the 'Kalam' fon
 
 We are providing a highly configurable pipeline, with many options to turn on and off different processes in different combinations. This can make a very complex graph structure that can cause a large amount of duplicated channels coming out of every process to account for each possible combination.
 
-The EAGER pipeline can currently be broken down into the following 'stages', where a stage is a collection of  non-terminal mutually exclusive processes, which is the output of which is used for another file reporting module (but not reporting!) .
+The EAGER pipeline can currently be broken down into the following 'stages', where a stage is a collection of non-terminal mutually exclusive processes, which is the output of which is used for another file reporting module (but not reporting!) .
 
-* Input
-* Convert BAM
-* PolyG Clipping
-* AdapterRemoval
-* Mapping (either `bwa`, `bwamem`, or `circularmapper`)
-* BAM Filtering
-* Deduplication (either `dedup` or `markduplicates`)
-* BAM Trimming
-* PMDtools
-* Genotyping
+- Input
+- Convert BAM
+- PolyG Clipping
+- AdapterRemoval
+- Mapping (either `bwa`, `bwamem`, or `circularmapper`)
+- BAM Filtering
+- Deduplication (either `dedup` or `markduplicates`)
+- BAM Trimming
+- PMDtools
+- Genotyping
 
 Every step can potentially be skipped, therefore the output of a previous stage must be able to be passed to the next stage, if the given stage is not run.
 
@@ -154,16 +154,16 @@ To somewhat simplify this logic, we have implemented the following structure.
 
 The concept is as follows:
 
-* Every 'stage' of the pipeline (i.e. collection of mutually exclusive processes) must always have a if else statement following it.
-* This if else 'bypass' statement collects and standardises all possible input files into single channel(s) for the next stage.
-* Importantly - within the bypass statement, a channel from the previous stage's bypass mixes into these output channels. This additional channel is named `ch_previousstage_for_skipcurrentstage`. This contains the output from the previous stage, i.e. not the modified version from the current stage.
-* The bypass statement works as follows:
-  * If the current stage is turned on: will mix the previous stage and current stage output and filter for file suffixes unique to the current stage output
-  * If the current stage is turned off or skipped: will mix the previous stage and current stage output. However as there there is no files in the output channel from the current stage, no filtering is required and the files in the 'ch_XXX_for_skipXXX' stage will be used.
-  
- This ensures the same channel inputs to the next stage is 'homogeneous' - i.e. all comes from the same source (the bypass statement)
-  
- An example schematic can be given as follows
+- Every 'stage' of the pipeline (i.e. collection of mutually exclusive processes) must always have a if else statement following it.
+- This if else 'bypass' statement collects and standardises all possible input files into single channel(s) for the next stage.
+- Importantly - within the bypass statement, a channel from the previous stage's bypass mixes into these output channels. This additional channel is named `ch_previousstage_for_skipcurrentstage`. This contains the output from the previous stage, i.e. not the modified version from the current stage.
+- The bypass statement works as follows:
+  - If the current stage is turned on: will mix the previous stage and current stage output and filter for file suffixes unique to the current stage output
+  - If the current stage is turned off or skipped: will mix the previous stage and current stage output. However as there there is no files in the output channel from the current stage, no filtering is required and the files in the 'ch_XXX_for_skipXXX' stage will be used.
+
+This ensures the same channel inputs to the next stage is 'homogeneous' - i.e. all comes from the same source (the bypass statement)
+
+An example schematic can be given as follows
 
 ```nextflow
  // PREVIOUS STAGE OUTPUT
@@ -191,7 +191,7 @@ process fastp {
 
     script:
     """
-    echo "I have been fastp'd" > ${fq}  
+    echo "I have been fastp'd" > ${fq}
     mv ${fq} ${fq}.pG.fq
     """
 }
@@ -206,4 +206,4 @@ if (params.run_fastp) {
         .into { ch_fastp_for_adapterremoval; ch_fastp_for_skipadapterremoval }
 }
 
- ```
+```
