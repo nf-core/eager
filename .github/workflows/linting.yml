@@ -50,9 +50,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '10'
+      - uses: actions/setup-node@v2
+
       - name: Install yaml-lint
         run: npm install -g yaml-lint
       - name: Run yaml-lint
