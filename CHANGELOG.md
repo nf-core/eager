@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#895](https://github.com/nf-core/eager/issues/895) Output documentation typo fix and added location of output docs in pipeline summary (♥ to @RodrigoBarquera for reporting)
 - [#897](https://github.com/nf-core/eager/issues/897) Fix pipeline crash if no Kraken2 results generated (♥ to @alexandregilardet for reporting)
 - [#899](https://github.com/nf-core/eager/issues/897) Fix pipeline crash for circulargenerator if reference file does not end in .fasta (♥ to @scarlhoff for reporting)
+- Fix staging of input bams for genotyping_pileupcaller process. Downstream changes from changes introduced when fixing endorspy caching.
 
 ### `Dependencies`
 
