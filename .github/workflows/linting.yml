@@ -45,7 +45,6 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           allow-repeats: false
 
-
   YAML:
     runs-on: ubuntu-latest
     steps:
@@ -55,7 +54,7 @@ jobs:
       - name: Install yaml-lint
         run: npm install -g yaml-lint
       - name: Run yaml-lint
-        run: yamllint $(find ${GITHUB_WORKSPACE} -type f -name "*.yml" -o -name "*.yaml")
+        run: yamllint $(find ${GITHUB_WORKSPACE} -type f -name "*.yml" -o -name "*.yaml") --config .github/yamllint.yml
 
       # If the above check failed, post a comment on the PR explaining the failure
       - name: Post PR comment
@@ -82,11 +81,9 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           allow-repeats: false
 
-
   nf-core:
     runs-on: ubuntu-latest
     steps:
-
       - name: Check out pipeline code
         uses: actions/checkout@v2
 
@@ -99,8 +96,8 @@ jobs:
 
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.6'
-          architecture: 'x64'
+          python-version: "3.6"
+          architecture: "x64"
 
       - name: Install dependencies
         run: |
@@ -127,4 +124,3 @@ jobs:
             lint_log.txt
             lint_results.md
             PR_number.txt
-

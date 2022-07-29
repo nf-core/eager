@@ -1,0 +1,7 @@
+rules:
+  document-start: disable
+  comments: disable
+  truthy: disable
+  line-length: disable
+  empty-lines: disable
+  
