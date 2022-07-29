@@ -36,7 +36,8 @@ results         # Finished results (configurable, see below)
                 # Other Nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-To see the the nf-core/eager pipeline help message run: `nextflow run nf-core/eager --help`
+To see the the nf-core/eager pipeline help message run: `nextflow run
+nf-core/eager --help`
 
 If you want to configure your pipeline interactively using a graphical user
 interface, please visit [nf-co.re
@@ -91,30 +92,30 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
 
-- `docker`
-  - A generic configuration profile to be used with [Docker](https://docker.com/)
-  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
-- `singularity`
-  - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
-- `podman`
-  - A generic configuration profile to be used with [Podman](https://podman.io/)
-  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
-- `shifter`
-  - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
-  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
-- `charliecloud`
-  - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
-  - Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
-- `conda`
-  - Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
-  - A generic configuration profile to be used with [Conda](https://conda.io/docs/)
-  - Pulls most software from [Bioconda](https://bioconda.github.io/)
-- `test`
-  - A profile with a complete configuration for automated testing
-  - Includes links to test data so needs no other parameters
+* `docker`
+  * A generic configuration profile to be used with [Docker](https://docker.com/)
+  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+* `singularity`
+  * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+* `podman`
+  * A generic configuration profile to be used with [Podman](https://podman.io/)
+  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+* `shifter`
+  * A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
+  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+* `charliecloud`
+  * A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
+  * Pulls software from Docker Hub: [`nfcore/eager`](https://hub.docker.com/r/nfcore/eager/)
+* `conda`
+  * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
+  * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
+  * Pulls most software from [Bioconda](https://bioconda.github.io/)
+* `test`
+  * A profile with a complete configuration for automated testing
+  * Includes links to test data so needs no other parameters
 
-> _Important_: If running nf-core/eager on a cluster - ask your system
+> *Important*: If running nf-core/eager on a cluster - ask your system
 > administrator what profile to use.
 
 **Institution Specific Profiles** These are profiles specific to certain **HPC
@@ -123,17 +124,17 @@ clusters**, and are centrally maintained at
 regular users of nf-core/eager, if you don't see your own institution here check
 the [nf-core/configs](https://github.com/nf-core/configs) repository.
 
-- `uzh`
-  - A profile for the University of Zurich Research Cloud
-  - Loads Singularity and defines appropriate resources for running the
+* `uzh`
+  * A profile for the University of Zurich Research Cloud
+  * Loads Singularity and defines appropriate resources for running the
     pipeline.
-- `binac`
-  - A profile for the BinAC cluster at the University of Tuebingen 0 Loads
+* `binac`
+  * A profile for the BinAC cluster at the University of Tuebingen 0 Loads
     Singularity and defines appropriate resources for running the pipeline
-- `shh`
-  - A profile for the S/CDAG cluster at the Department of Archaeogenetics of
+* `shh`
+  * A profile for the S/CDAG cluster at the Department of Archaeogenetics of
     the Max Planck Institute for the Science of Human History
-  - Loads Singularity and defines appropriate resources for running the pipeline
+  * Loads Singularity and defines appropriate resources for running the pipeline
 
 **Pipeline Specific Institution Profiles** There are also pipeline-specific
 institution profiles. I.e., we can also offer a profile which sets special
@@ -144,10 +145,10 @@ pipelines. This can be seen at
 
 We currently offer a nf-core/eager specific profile for
 
-- `shh`
-  - A profiler for the S/CDAG cluster at the Department of Archaeogenetics of
+* `shh`
+  * A profiler for the S/CDAG cluster at the Department of Archaeogenetics of
     the Max Planck Institute for the Science of Human History
-  - In addition to the nf-core wide profile, this also sets the MALT resources
+  * In addition to the nf-core wide profile, this also sets the MALT resources
     to match our commonly used databases
 
 Further institutions can be added at
@@ -258,7 +259,7 @@ There are two possible ways of supplying input sequencing data to nf-core/eager.
 
 This method is where you specify with `--input`, the path locations of FASTQ (optionally gzipped) or BAM file(s). This option is mutually exclusive to the [TSV input method](#tsv-input-method), which is used for more complex input configurations such as lane and library merging.
 
-When using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.
+When using the direct method of `--input` you can specify one or multiple samples in one or more directories files. File names **must be unique**, even if in different directories.  
 
 By default, the pipeline _assumes_ you have paired-end data. If you want to run single-end data you must specify [`--single_end`]('#single_end')
 
@@ -284,7 +285,7 @@ If you have multiple files in different directories, you can use additional wild
 4. When using the pipeline with **paired end data**, the path must use `{1,2}`
    notation to specify read pairs.
 5. Files names must be unique, having files with the same name, but in different directories is _not_ sufficient
-   - This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
+   * This can happen when a library has been sequenced across two sequencers on the same lane. Either rename the file, try a symlink with a unique name, or merge the two FASTQ files prior input.
 6. Due to limitations of downstream tools (e.g. FastQC), sample IDs may be truncated after the first `.` in the name, Ensure file names are unique prior to this!
 7. For input BAM files you should provide a small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actually need a reference genome for any downstream analyses.
 
@@ -302,8 +303,8 @@ The use of the TSV `--input` method is recommended when performing more complex 
 
 This TSV should look like the following:
 
-| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                                                                                                                                                                                                                                         | R2                                                                                                                                                                                                                                                                         | BAM |
-| ----------- | ---------- | ---- | ---------------- | ------- | -------- | ------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1 | R2 | BAM |
+|-------------|------------|------|------------------|--------|----------|--------------|---------------|----|----|-----|
 | JK2782      | JK2782     | 1    | 4                | PE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |
 | JK2802      | JK2802     | 2    | 2                | SE      | Mammoth  | double       | full          | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R1_001.fastq.gz.tengrand.fq.gz) | [https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz](https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2802_AGAATAACCTACCA_L008_R2_001.fastq.gz.tengrand.fq.gz) | NA  |
 
@@ -316,22 +317,22 @@ When using TSV_input, nf-core/eager will merge FASTQ files of libraries with the
 
 Column descriptions are as follows:
 
-- **Sample_Name:** A text string containing the name of a given sample of which there can be multiple libraries. All libraries with the same sample name and same SeqType will be merged after deduplication.
-- **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).
-- **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (and different SeqType) will be concatenated after read clipping and merging.
-- **Colour Chemistry** A number indicating whether the Illumina sequencer the library was sequenced on was a 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq) colour chemistry machine. This informs whether poly-G trimming (if turned on) should be performed.
-- **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [forward], or BAM). This will affect lane merging if different per library.
-- **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
-- **Strandedness:** A text string indicating whether the library type is'single' or 'double'. This will affect lane/library merging if different per library.
-- **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.
-- **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column. File names **must be unique**, even if they are in different directories.
-- **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column. File names **must be unique**, even if they are in different directories.
-- **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'
+* **Sample_Name:** A text string containing the name of a given sample of which there can be multiple libraries. All libraries with the same sample name and same SeqType will be merged after deduplication.
+* **Library_ID:** A text string containing a given library, which there can be multiple sequencing lanes (with the same SeqType).
+* **Lane:** A number indicating which lane the library was sequenced on. Files from the libraries sequenced on different lanes (and different SeqType) will be concatenated after read clipping and merging.
+* **Colour Chemistry** A number indicating whether the Illumina sequencer the library was sequenced on was a 2 (e.g. Next/NovaSeq) or 4 (Hi/MiSeq) colour chemistry machine. This informs whether poly-G trimming (if turned on) should be performed.
+* **SeqType:** A text string of either 'PE' or 'SE', specifying paired end (with both an R1 [or forward] and R2 [or reverse]) and single end data (only R1 [forward], or BAM). This will affect lane merging if different per library.
+* **Organism:** A text string of the organism name of the sample or 'NA'. This currently has no functionality and can be set to 'NA', but will affect lane/library merging if different per library
+* **Strandedness:** A text string indicating whether the library type is'single' or 'double'. This will affect lane/library merging if different per library.
+* **UDG_Treatment:** A text string indicating whether the library was generated with UDG treatment - either 'full', 'half' or 'none'. Will affect lane/library merging if different per library.
+* **R1:** A text string of a file path pointing to a forward or R1 FASTQ file. This can be used with the R2 column. File names **must be unique**, even if they are in different directories.
+* **R2:** A text string of a file path pointing to a reverse or R2 FASTQ file, or 'NA' when single end data. This can be used with the R1 column. File names **must be unique**, even if they are in different directories.
+* **BAM:** A text string of a file path pointing to a BAM file, or 'NA'. Cannot be specified at the same time as R1 or R2, both of which should be set to 'NA'
 
 For example, the following TSV table:
 
 | Sample_Name | Library_ID | Lane | Colour_Chemistry | SeqType | Organism | Strandedness | UDG_Treatment | R1                                                             | R2                                                             | BAM |
-| ----------- | ---------- | ---- | ---------------- | ------- | -------- | ------------ | ------------- | -------------------------------------------------------------- | -------------------------------------------------------------- | --- |
+|-------------|------------|------|------------------|---------|----------|--------------|---------------|----------------------------------------------------------------|----------------------------------------------------------------|-----|
 | JK2782      | JK2782     | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |
 | JK2782      | JK2782     | 8    | 4                | PE      | Mammoth  | double       | full          | data/JK2782_TGGCCGATCAACGA_L008_R1_001.fastq.gz.tengrand.fq.gz | data/JK2782_TGGCCGATCAACGA_L008_R2_001.fastq.gz.tengrand.fq.gz | NA  |
 | JK2802      | JK2802     | 7    | 4                | PE      | Mammoth  | double       | full          | data/JK2802_AGAATAACCTACCA_L007_R1_001.fastq.gz.tengrand.fq.gz | data/JK2802_AGAATAACCTACCA_L007_R2_001.fastq.gz.tengrand.fq.gz | NA  |
@@ -339,35 +340,35 @@ For example, the following TSV table:
 
 will have the following effects:
 
-- After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**.
-- After mapping, and prior BAM filtering, BAM files with different `SeqType` (but with all other metadata columns the same) will be merged together for each **Library**.
-- After duplicate removal, BAM files with different `Library_ID`s but with the same `Sample_Name` and the same `UDG_Treatment` will be merged together.
-- If BAM trimming is turned on, all post-trimming BAMs (i.e. non-UDG and half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the same `Sample_Name`.
+* After AdapterRemoval, and prior to mapping, FASTQ files from lane 7 and lane 8 _with the same `SeqType`_ (and all other _metadata_ columns) will be concatenated together for each **Library**.
+* After mapping, and prior BAM filtering, BAM files with different `SeqType` (but with all other metadata columns the same) will be merged together for each **Library**.
+* After duplicate removal, BAM files with different `Library_ID`s but with the same  `Sample_Name` and the same `UDG_Treatment` will be merged together.
+* If BAM trimming is turned on, all post-trimming BAMs (i.e. non-UDG and half-UDG ) will be merged with UDG-treated (untreated) BAMs, if they have the same `Sample_Name`.
 
 Note the following important points and limitations for setting up:
 
-- The TSV must use actual tabs (not spaces) between cells.
-- The input FASTQ filenames are discarded after FastQC, all other downstream results files are based on `Sample_Name`, `Library_ID` and `Lane` columns for filenames.
-- _File_ names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
-  - At different stages of the merging process, (as above) nf-core/eager will use as output filenames the information from the `Sample_Name`, `Library_ID` and/or `Lane` columns for filenames.
-  - Library_IDs must be unique (other than if they are spread across multiple lanes). For example, your .tsv file must not have rows with both the strings in the Library_ID column as `Library1` and `Library1`, for **both** `SampleA` and `SampleB` in the Sample_ID column, otherwise the two `Library1.fq.gz` files may result in a filename collision.
-  - If it is 'too late' and you already have duplicated FASTQ file names before starting a run, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
-- Lane IDs must be unique for each sequencing of each library.
-  - If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
-  - This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.
-- All _BAM_ files must be specified as `SE` under `SeqType`.
-  - You should provide a small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actually need a reference genome for any downstream analyses.
-- nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
-- Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
-- nf-core/eager is able to correctly handle libraries that are sequenced multiple times on different sequencing configurations (i.e mixtures of single- and paired-end data). These will be merged after mapping and considered 'paired-end' during downstream processes.
-  - **Important** we do not recommend choosing to use DeDup (i.e. `--dedupper 'dedup'`) when mixing PE and SE data, as SE data will not necessarily have the correct end position of the read, and DeDup requires both ends of the molecule to remove a duplicate read. Therefore you may end up with inflated (false-positive) coverages due to suboptimal deduplication.
-  - When you wish to run PE/SE data together, the default `-dedupper markduplicates` is therefore preferred, as it only looks at the first position. While more conservative (i.e. it'll remove more reads even if not technically duplicates, because it assumes it can't see the true ends of molecules), it is more consistent.
-  - An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
-  - If you truly want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
-  - If you _regularly_ want to run the situation above, please leave a feature request on github.
-- DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).
-- nf-core/eager functionality such as `--run_trim_bam` will be applied to only non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries. - Qualimap is run on each sample, after merging of libraries (i.e. your values will reflect the values of all libraries combined - after being damage trimmed etc.).
-- Genotyping will be typically performed on each `sample` independently, as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file collision` error in steps such as `sexdeterrmine`, and then you will need to merge these yourself. We will consider changing this behaviour in the future if there is enough interest.
+* The TSV must use actual tabs (not spaces) between cells.
+* The input FASTQ filenames are discarded after FastQC, all other downstream results files are based on `Sample_Name`, `Library_ID` and `Lane` columns for filenames.
+* *File* names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
+  * At different stages of the merging process, (as above) nf-core/eager will use as output filenames the information from the `Sample_Name`, `Library_ID` and/or `Lane` columns for filenames.
+  * Library_IDs must be unique (other than if they are spread across multiple lanes). For example, your .tsv file must not have rows with both the strings in the Library_ID column as `Library1` and `Library1`, for **both** `SampleA` and `SampleB` in the Sample_ID column, otherwise the two `Library1.fq.gz` files may result in a filename collision.
+  * If it is 'too late' and you already have duplicated FASTQ file names before starting a run, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
+* Lane IDs must be unique for each sequencing of each library.
+  * If you have a library sequenced e.g. on Lane 8 of two HiSeq runs, you can give a fake lane ID (e.g. 20) for one of the FASTQs, and the libraries will still be processed correctly.
+  * This also applies to the SeqType column, i.e. with the example above, if one run is PE and one run is SE, you need to give fake lane IDs to one of the runs as well.
+* All _BAM_ files must be specified as `SE` under `SeqType`.
+  * You should provide a small decoy reference genome with pre-made indices, e.g. the human mtDNA or phiX genome, for the mandatory parameter `--fasta` in order to avoid long computational time for generating the index files of the reference genome, even if you do not actually need a reference genome for any downstream analyses.
+* nf-core/eager will only merge multiple _lanes_ of sequencing runs with the same single-end or paired-end configuration
+* Accordingly nf-core/eager will not merge _lanes_ of FASTQs with BAM files (unless you use `--run_convertbam`), as only FASTQ files are lane-merged together.
+* nf-core/eager is able to correctly handle libraries that are sequenced multiple times on different sequencing configurations (i.e mixtures of single- and paired-end data). These will be merged after mapping and considered 'paired-end' during downstream processes.
+  * **Important** we do not recommend choosing to use DeDup (i.e. `--dedupper 'dedup'`) when mixing PE and SE data, as SE data will not necessarily have the correct end position of the read, and DeDup requires both ends of the molecule to remove a duplicate read. Therefore you may end up with inflated (false-positive) coverages due to suboptimal deduplication.
+  * When you wish to run PE/SE data together, the default `-dedupper markduplicates` is therefore preferred, as it only looks at the first position. While more conservative (i.e. it'll remove more reads even if not technically duplicates, because it assumes it can't see the true ends of molecules), it is more consistent.
+  * An error will be thrown if you try to merge both PE and SE and also supply `--skip_merging`.
+  * If you truly want to mix SE data and PE data but using mate-pair info for PE mapping, please run FASTQ preprocessing mapping manually and supply BAM files for downstream processing by nf-core/eager
+  * If you _regularly_ want to run the situation above, please leave a feature request on github.
+* DamageProfiler, NuclearContamination, MTtoNucRatio and PreSeq are performed on each unique library separately after deduplication (but prior same-treated library merging).
+* nf-core/eager functionality such as `--run_trim_bam` will be applied to only   non-UDG (UDG_Treatment: none) or half-UDG (UDG_Treatment: half) libraries. - Qualimap is run on each sample, after merging of libraries (i.e. your values   will reflect the values of all libraries combined - after being damage trimmed etc.).
+* Genotyping will be typically performed on each `sample` independently, as normally all libraries will have been merged together. However, if you have a mixture of single-stranded and double-stranded libraries, you will normally need to genotype separately. In this case you **must** give each the SS and DS libraries _distinct_ `Sample_IDs`; otherwise you will receive a `file collision` error in steps such as `sexdeterrmine`, and then you will need to merge these yourself. We will consider changing this behaviour in the future if there is enough interest.
 
 ## Clean up
 
@@ -407,7 +408,7 @@ hard drive footprint of the run, so be sure to do this!
 
 When using TSV input, nf-core/eager will attempt to merge all `Lanes` of a
 `Library_ID`, or all files with the same `Library_ID` or `Sample_ID`. However,
-if you have specified the same `Lane` or `Library_ID` for two sets of FASTQ
+if you have specified the same `Lane` or  `Library_ID` for two sets of FASTQ
 files you will likely receive an error such as
 
 ```bash
@@ -429,7 +430,7 @@ In some cases it maybe no output log is produced by a particular tool for MultiQ
 
 Known cases include:
 
-- Qualimap: there will be no MultiQC output if the BAM file is empty. An empty BAM file is produced when no reads map to the reference and causes Qualimap to crash - this is crash is ignored by nf-core/eager (to allow the rest of the pipeline to continue) and will therefore have no log file for that particular sample/library
+* Qualimap: there will be no MultiQC output if the BAM file is empty. An empty BAM file is produced when no reads map to the reference and causes Qualimap to crash - this is crash is ignored by nf-core/eager (to allow the rest of the pipeline to continue) and will therefore have no log file for that particular sample/library
 
 ## Tutorials
 
@@ -546,10 +547,10 @@ If you change into this with `cd` and run `ls -la` you should see a collection
 of normal files, symbolic links (symlinks) and hidden files (indicated with `.`
 at the beginning of the file name).
 
-- Symbolic links: are typically input files from previous processes.
-- Normal files: are typically successfully completed output files from some of
+* Symbolic links: are typically input files from previous processes.
+* Normal files: are typically successfully completed output files from some of
   some of the commands in the process
-- Hidden files are Nextflow generated files and include the submission commands
+* Hidden files are Nextflow generated files and include the submission commands
   as well as log files
 
 When you have an error run, you can firstly check the contents of the output
@@ -564,7 +565,9 @@ screen if you were running the command/program yourself. Again, view these with
 e.g. `cat` and see if you can identify the error of the program itself.
 
 Finally, you can also try running the commands _yourself_. You can firstly try
-to do this by loading your given nf-core/eager environment (e.g. `singularity shell /\<path\>/\<to\>/nf-core-eager-X-X-X.img` or `conda activate nf-core-eager-X.X.X`), then running `bash .command.sh`.
+to do this by loading your given nf-core/eager environment (e.g. `singularity
+shell /\<path\>/\<to\>/nf-core-eager-X-X-X.img` or `conda activate
+nf-core-eager-X.X.X`), then running `bash .command.sh`.
 
 If this doesn't work, this suggests either there is something wrong with the
 nf-core/eager environment configuration, _or_ there is still a problem with the
@@ -583,7 +586,7 @@ the #eager channel).
 
 #### Tutorial Profiles - Background
 
-A useful feature of Nextflow is the ability to use configuration _profiles_ that
+A useful feature of Nextflow is the ability to use configuration *profiles* that
 can specify many default parameters and other settings on how to run your
 pipeline.
 
@@ -604,9 +607,9 @@ DNA to map and cause false positive SNP calls.
 
 Within nf-core, there are two main levels of configs
 
-- Institutional-level profiles: these normally define things like paths to
+* Institutional-level profiles: these normally define things like paths to
   common storage, resource maximums, scheduling system
-- Pipeline-level profiles: these normally define parameters specifically for a
+* Pipeline-level profiles: these normally define parameters specifically for a
   pipeline (such as mapping parameters, turning specific modules on or off)
 
 As well as allowing more efficiency and control at cluster or Institutional
@@ -614,7 +617,7 @@ levels in terms of memory usage, pipeline-level profiles can also assist in
 facilitating reproducible science by giving a way for researchers to 'publish'
 their exact pipeline parameters in way other users can automatically re-run the
 pipeline with the pipeline parameters used in the original publication but on
-their _own_ cluster.
+their *own* cluster.
 
 To illustrate this, lets say we analysed our data on a HPC called 'blue' for
 which an institutional profile already exists, and for our analysis we defined a
@@ -664,11 +667,11 @@ This would be translated as follows.
 
 If your parameters looked like the following
 
-| Parameter    | Resolved Parameters | institution | cluster  | my_paper |
-| ------------ | ------------------- | ----------- | -------- | -------- |
-| --executor   | singularity         | singularity | \<none\> | \<none\> |
-| --max_memory | 256GB               | 756GB       | 256GB    | \<none\> |
-| --bwa_aln    | 0.1                 | \<none\>    | 0.01     | 0.1      |
+| Parameter       | Resolved Parameters    | institution | cluster  | my_paper |
+| ----------------|------------------------|-------------|----------|----------|
+| --executor      | singularity            | singularity | \<none\> | \<none\> |
+| --max_memory    | 256GB                  | 756GB       | 256GB    | \<none\> |
+| --bwa_aln       | 0.1                    | \<none\>    | 0.01     | 0.1      |
 
 (where '\<none\>' is a parameter not defined in a given profile.)
 
@@ -686,7 +689,7 @@ defined in the `cluster` profile.
 > institutional-level profiles. Otherwise please skip to [Writing your own profile](#tutorial-profiles---writing-your-own-profile)
 
 In actuality, a nf-core/eager run already contains many configs and profiles,
-and will normally use _multiple_ configs profiles in a single run. Multiple
+and will normally use *multiple* configs profiles in a single run. Multiple
 configuration and profiles files can be used, and each new one selected will
 inherit all the previous one's parameters, and the parameters in the new one
 will then overwrite any that have been changed from the original.
@@ -724,7 +727,7 @@ nextflow run nf-core/eager -c old_dna_profile.config -profile hpc_blue,old_dna <
 
 In the background, any parameters in the pipeline's `nextflow.config`
 (containing default parameters) will be overwritten by the
-`old_dna_profile.config`. In addition, the `old_dna` _profile_ will overwrite
+`old_dna_profile.config`. In addition, the `old_dna` *profile* will overwrite
 any parameters set in the config but outside the profile definition of
 `old_dna_profile.config`.
 
@@ -744,13 +747,13 @@ the `hpc_blue` profile, but the `mapper` parameter has been changed from
 The order of loading of different configuration files can be seen here:
 
 | Loading Order | Configuration File                                                                                              |
-| ------------: | :-------------------------------------------------------------------------------------------------------------- |
-|             1 | `nextflow.config` in your current directory                                                                     |
-|             2 | (if using a script for `nextflow run`) a `nextflow.config` in the directory the script is located               |
-|             3 | `config` stored in your human directory under `~/.nextflow/`                                                    |
-|             4 | `<your_file>.config` if you specify in the `nextflow run` command with `-c`                                     |
-|             5 | general nf-core institutional configurations stored at [nf-core/configs](https://github.com/nf-core/configs)    |
-|             6 | pipeline-specific nf-core institutional configurations at [nf-core/configs](https://github.com/nf-core/configs) |
+| -------------:|:----------------------------------------------------------------------------------------------------------------|
+| 1             | `nextflow.config` in your current directory                                                                     |
+| 2             | (if using a script for `nextflow run`) a `nextflow.config` in the directory the script is located               |
+| 3             | `config` stored in your human directory under `~/.nextflow/`                                                    |
+| 4             | `<your_file>.config` if you specify in the `nextflow run` command with `-c`                                     |
+| 5             | general nf-core institutional configurations stored at [nf-core/configs](https://github.com/nf-core/configs)    |
+| 6             | pipeline-specific nf-core institutional configurations at [nf-core/configs](https://github.com/nf-core/configs) |
 
 This loading order of these `.config` files will not normally affect the
 settings you use for the pipeline run itself; `-profiles` are normally more
@@ -761,7 +764,7 @@ if your run does not use the parameters you expect.
 > specifying a custom `.config` file by using `-C` (capital C) instead of `-c`
 > (which inherits previously specify parameters)
 
-Another thing that is important to note is that if a specific _profile_ is
+Another thing that is important to note is that if a specific *profile* is
 specified in `nextflow run`, this replaces any 'global' parameter that is
 specified within the config file (but outside a profile) itself - **regardless**
 of profile order (see above).
@@ -779,7 +782,7 @@ params {
   // Specific nf-core/configs params
   config_profile_contact = 'James Fellows Yates (@jfy133)'
   config_profile_description = 'nf-core/eager SHH profile provided by nf-core/configs'
-
+  
   // default BWA
    bwaalnn = 0.04
    bwaalnl = 32
@@ -801,7 +804,8 @@ profiles {
 ```
 
 If you run with `nextflow run -profile shh` to specify to use an
-institutional-level nf-core config, the parameters will be read as `--bwaalnn 0.04` and `--bwaalnl 32` as these are the default 'fall back' params as
+institutional-level nf-core config, the parameters will be read as `--bwaalnn
+0.04` and `--bwaalnl 32` as these are the default 'fall back' params as
 indicated in the example above.
 
 If you specify as `nextflow run -profile shh,pathogen_loose`, as expected
@@ -1463,59 +1467,59 @@ For example, I normally look for things like:
 
 General Stats Table:
 
-- Do I see the expected number of raw sequencing reads (summed across each set
+* Do I see the expected number of raw sequencing reads (summed across each set
   of FASTQ files per library) that was requested for sequencing?
-- Does the percentage of trimmed reads look normal for aDNA, and do lengths
+* Does the percentage of trimmed reads look normal for aDNA, and do lengths
   after trimming look short as expected of aDNA?
-- Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively)
+* Does ClusterFactor or 'Dups' look high (e.g. >2 or >10% respectively)
   suggesting over-amplified or badly preserved samples?
-- Do the mapped reads show increased frequency of C>Ts on the 5' end of
+* Do the mapped reads show increased frequency of C>Ts on the 5' end of
   molecules?
-- Is the number of SNPs used for nuclear contamination really low for any
+* Is the number of SNPs used for nuclear contamination really low for any
   individuals (e.g. < 100)? If so, then the estimates might not be very
   accurate.
 
 FastQC (pre-AdapterRemoval):
 
-- Do I see any very early drop off of sequence quality scores suggesting a
+* Do I see any very early drop off of sequence quality scores suggesting a
   problematic sequencing run?
-- Do I see outlier GC content distributions?
-- Do I see high sequence duplication levels?
+* Do I see outlier GC content distributions?
+* Do I see high sequence duplication levels?
 
 AdapterRemoval:
 
-- Do I see high numbers of singletons or discarded read pairs?
+* Do I see high numbers of singletons or discarded read pairs?
 
 FastQC (post-AdapterRemoval):
 
-- Do I see improved sequence quality scores along the length of reads?
-- Do I see reduced adapter content levels?
+* Do I see improved sequence quality scores along the length of reads?
+* Do I see reduced adapter content levels?
 
 Samtools Flagstat (pre/post Filter):
 
-- Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
+* Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
   of contamination) that require downstream closer assessment? Are your samples
   exceptionally preserved? If not, a value higher than e.g. 50% might require
   your attention.
 
 DeDup/Picard MarkDuplicates:
 
-- Do I see large numbers of duplicates being removed, possibly indicating
+* Do I see large numbers of duplicates being removed, possibly indicating
   over-amplified or badly preserved samples?
 
 DamageProfiler:
 
-- Do I see evidence of damage on human DNA?
-  - High numbers of mapped reads but no damage may indicate significant
+* Do I see evidence of damage on human DNA?
+  * High numbers of mapped reads but no damage may indicate significant
     modern contamination.
-  - Was the read trimming I specified enough to overcome damage effects?
+  * Was the read trimming I specified enough to overcome damage effects?
 
 SexDetERRmine:
 
-- Do the relative coverages on the X and Y chromosome fall within the expected
+* Do the relative coverages on the X and Y chromosome fall within the expected
   areas of the plot?
-- Do all individuals have enough data for accurate sex determination?
-- Do the proportions of autosomal/X/Y reads make sense? If there is an
+* Do all individuals have enough data for accurate sex determination?
+* Do the proportions of autosomal/X/Y reads make sense? If there is an
   overrepresentation of reads within one bin, is the data enriched for that bin?
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
@@ -1615,7 +1619,7 @@ Prior setting up an nf-core/eager run for metagenomic screening, we will need:
 We should also ensure we have the very latest version of the nf-core/eager
 pipeline so we have all latest bugfixes etc. In this case we will be using
 nf-core/eager version 2.2.0. You should always check on the
-[nf-core](https://nf-co.re/eager) website whether a newer release has been made
+[nf-core](https://nf-co.re/eager) website  whether a newer release has been made
 (particularly point releases e.g. 2.2.1).
 
 ```bash
@@ -1906,58 +1910,58 @@ For example, I normally look for things like:
 
 General Stats Table:
 
-- Do I see the expected number of raw sequencing reads (summed across each set
+* Do I see the expected number of raw sequencing reads (summed across each set
   of FASTQ files per library) that was requested for sequencing?
-- Does the percentage of trimmed reads look normal for aDNA, and do lengths
+* Does the percentage of trimmed reads look normal for aDNA, and do lengths
   after trimming look short as expected of aDNA?
-- Does ClusterFactor or 'Dups' look high suggesting over-amplified or
+* Does ClusterFactor or 'Dups' look high suggesting over-amplified or
   badly preserved samples (e.g. >2 or >10% respectively - however
   given this is on the human reads this is just a rule of thumb and may not
   reflect the quality of the metagenomic profile) ?
-- Does the human DNA show increased frequency of C>Ts on the 5' end of
+* Does the human DNA show increased frequency of C>Ts on the 5' end of
   molecules?
 
 FastQC (pre-AdapterRemoval):
 
-- Do I see any very early drop off of sequence quality scores suggesting
+* Do I see any very early drop off of sequence quality scores suggesting
   problematic sequencing run?
-- Do I see outlier GC content distributions?
-- Do I see high sequence duplication levels?
+* Do I see outlier GC content distributions?
+* Do I see high sequence duplication levels?
 
 AdapterRemoval:
 
-- Do I see high numbers of singletons or discarded read pairs?
+* Do I see high numbers of singletons or discarded read pairs?
 
 FastQC (post-AdapterRemoval):
 
-- Do I see improved sequence quality scores along the length of reads?
-- Do I see reduced adapter content levels?
+* Do I see improved sequence quality scores along the length of reads?
+* Do I see reduced adapter content levels?
 
 MALT:
 
-- Do I have a reasonable level of mappability?
-  - Somewhere between 10-30% can be pretty normal for aDNA, whereas e.g. <1%
+* Do I have a reasonable level of mappability?
+  * Somewhere between 10-30% can be pretty normal for aDNA, whereas e.g. <1%
     requires careful manual assessment
-- Do I have a reasonable taxonomic assignment success?
-  - You hope to have a large number of the mapped reads (from the mappability
+* Do I have a reasonable taxonomic assignment success?
+  * You hope to have a large number of the mapped reads (from the mappability
     plot) that also have taxonomic assignment.
 
 Samtools Flagstat (pre/post Filter):
 
-- Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
+* Do I see outliers, e.g. with unusually high levels of human DNA, (indicative
   of contamination) that require downstream closer assessment?
 
 DeDup/Picard MarkDuplicates:
 
-- Do I see large numbers of duplicates being removed, possibly indicating
+* Do I see large numbers of duplicates being removed, possibly indicating
   over-amplified or badly preserved samples?
 
 DamageProfiler:
 
-- Do I see evidence of damage on human DNA? Note this is just a
+* Do I see evidence of damage on human DNA? Note this is just a
   rule-of-thumb/corroboration of any signals you might find in the metagenomic
   screening and not essential.
-  - If you have high numbers of human DNA reads but no damage may indicate
+  * If you have high numbers of human DNA reads but no damage may indicate
     significant modern contamination.
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
@@ -2082,7 +2086,7 @@ Prior setting up the nf-core/eager run, we will need:
 We should also ensure we have the very latest version of the nf-core/eager
 pipeline so we have all latest bugfixes etc. In this case we will be using
 nf-core/eager version 2.2.0. You should always check on the
-[nf-core](https://nf-co.re/eager) website whether a newer release has been made
+[nf-core](https://nf-co.re/eager) website  whether a newer release has been made
 (particularly point releases e.g. 2.2.1).
 
 ```bash
@@ -2528,80 +2532,80 @@ results. For example, I normally look for things like:
 
 General Stats Table:
 
-- Do I see the expected number of raw sequencing reads (summed across each set
+* Do I see the expected number of raw sequencing reads (summed across each set
   of FASTQ files per library) that was requested for sequencing?
-- Does the percentage of trimmed reads look normal for aDNA, and do lengths
+* Does the percentage of trimmed reads look normal for aDNA, and do lengths
   after trimming look short as expected of aDNA?
-- Does the Endogenous DNA (%) columns look reasonable (high enough to indicate
+* Does the Endogenous DNA (%) columns look reasonable (high enough to indicate
   you have received enough coverage for downstream, and/or do you lose an
   unusually high reads after filtering )
-- Does ClusterFactor or '% Dups' look high (e.g. >2 or >10% respectively - high
+* Does ClusterFactor or '% Dups' look high (e.g. >2 or >10% respectively -  high
   values suggesting over-amplified or badly preserved samples i.e. low
   complexity; note that genome-enrichment libraries may by their nature look
   higher).
-- Do you see an increased frequency of C>Ts on the 5' end of molecules in the
+* Do you see an increased frequency of C>Ts on the 5' end of molecules in the
   mapped reads?
-- Do median read lengths look relatively low (normally <= 100 bp) indicating
+* Do median read lengths look relatively low (normally <= 100 bp) indicating
   typically fragmented aDNA?
-- Does the % coverage decrease relatively gradually at each depth coverage, and
+* Does the % coverage decrease relatively gradually at each depth coverage, and
   does not drop extremely drastically
-- Does the Median coverage and percent >3x (or whatever you set) show sufficient
+* Does the Median coverage and percent >3x (or whatever you set) show sufficient
   coverage for reliable SNP calls and that a good proportion of the genome is
   covered indicating you have the right reference genome?
-- Do you see a high proportion of % Hets, indicating many multi-allelic sites
+* Do you see a high proportion of % Hets, indicating many multi-allelic sites
   (and possibly presence of cross-mapping from other species, that may lead to
   false positive or less confident SNP calls)?
 
 FastQC (pre-AdapterRemoval):
 
-- Do I see any very early drop off of sequence quality scores suggesting
+* Do I see any very early drop off of sequence quality scores suggesting
   problematic sequencing run?
-- Do I see outlier GC content distributions?
-- Do I see high sequence duplication levels?
+* Do I see outlier GC content distributions?
+* Do I see high sequence duplication levels?
 
 AdapterRemoval:
 
-- Do I see high numbers of singletons or discarded read pairs?
+* Do I see high numbers of singletons or discarded read pairs?
 
 FastQC (post-AdapterRemoval):
 
-- Do I see improved sequence quality scores along the length of reads?
-- Do I see reduced adapter content levels?
+* Do I see improved sequence quality scores along the length of reads?
+* Do I see reduced adapter content levels?
 
 Samtools Flagstat (pre/post Filter):
 
-- Do I see outliers, e.g. with unusually low levels of mapped reads, (indicative
+* Do I see outliers, e.g. with unusually low levels of mapped reads, (indicative
   of badly preserved samples) that require downstream closer assessment?
 
 DeDup/Picard MarkDuplicates:
 
-- Do I see large numbers of duplicates being removed, possibly indicating
+* Do I see large numbers of duplicates being removed, possibly indicating
   over-amplified or badly preserved samples?
 
 PreSeq:
 
-- Do I see a large drop off of a sample's curve away from the theoretical
+* Do I see a large drop off of a sample's curve away from the theoretical
   complexity? If so, this may indicate it's not worth performing deeper
   sequencing as you will get few unique reads (vs. duplicates that are not any
   more informative than the reads you've already sequenced)
 
 DamageProfiler:
 
-- Do I see evidence of damage on the microbial DNA (i.e. a % C>T of more than ~5% in
+* Do I see evidence of damage on the microbial DNA (i.e. a % C>T of more than ~5% in
   the first few nucleotide positions?) ? If not, possibly your mapped
   reads are deriving from modern contamination.
 
 QualiMap:
 
-- Do you see a peak of coverage (X) at a good level, e.g. >= 3x, indicating
+* Do you see a peak of coverage (X) at a good level, e.g. >= 3x, indicating
   sufficient coverage for reliable SNP calls?
 
 MultiVCFAnalyzer:
 
-- Do I have a good number of called SNPs that suggest the samples have genomes
+* Do I have a good number of called SNPs that suggest the samples have genomes
   with sufficient nucleotide diversity to inform phylogenetic analysis?
-- Do you have a large number of discarded SNP calls?
-- Are the % Hets very high indicating possible cross-mapping from off-target
+* Do you have a large number of discarded SNP calls?
+* Are the % Hets very high indicating possible cross-mapping from off-target
   organisms that may confounding variant calling?
 
 > Detailed documentation and descriptions for all MultiQC modules can be seen in
