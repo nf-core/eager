@@ -530,7 +530,7 @@ and investigate the log and error messages that are produced by each command of
 the process.
 
 For example, in the error in
-[1a](#1a-nextflow-reports-an-error-executing-process-with-command-error) you can
+[1a](#1a-Nextflow-reports-an-error-executing-process-with-command-error) you can
 see the following line
 
 ```bash
@@ -1443,7 +1443,7 @@ signal drop or want to log off, Nextflow will not crash.
 #### Tutorial Human Pop-Gen - Results
 
 Assuming the run completed without any crashes (if problems do occur, check
-against [the parameters documentation](https://nf-co.re/eager/parameters) that all parameters are as expected, or
+against [#usage](#pipeline-options) that all parameters are as expected, or
 check the [FAQ](#troubleshooting-and-faqs)), we can now check our results in
 `results/`.
 
@@ -1699,7 +1699,7 @@ each `Lane`, but the `Sample_Name` and `Library_ID` columns identify and group
 them together accordingly. Secondly, as we have NextSeq data, we have specified
 we have `2` for `Colour_Chemistry`, which is important for downstream processing
 (see below). The other columns are less important for this particular context of
-metagenomic screening. See the nf-core/eager [the parameters documentation](https://nf-co.re/eager/parameters)
+metagenomic screening. See the nf-core/eager [usage](#pipeline-options)
 documentation for more specifications on how to set up a TSV file (e.g. why
 despite NextSeqs only having 4 lanes, we go up to 8 in the example above).
 
@@ -1802,7 +1802,7 @@ nextflow run nf-core/eager \
 nf-core/eager will now take all unmapped reads after mapping and convert the BAM
 file back to FASTQ, which can be accepted by MALT. But of course, we also then
 need to tell nf-core/eager we actually want to run MALT. We will also specify
-the location of the [pre-built database](#tutorial-metagenomics---preparation) and which 'min support'
+the location of the [pre-built database](#preparation) and which 'min support'
 method we want to use (this specifies the minimum number of alignments is needed
 to a particular taxonomic node to be 'kept' in the MALT output files). Otherwise
 we will keep all other parameters as default. For example using BlastN mode,
@@ -1874,7 +1874,7 @@ Porphyromonas
 ```
 
 We have also specified the path to the HOPS resources [downloaded
-earlier](#tutorial-metagenomics---preparation), and that I want to turn off 'destacking' (removal of any
+earlier](#preparation), and that I want to turn off 'destacking' (removal of any
 read that overlaps the positions of another - something only recommended to keep
 on when you have high coverage data).
 
@@ -1885,7 +1885,7 @@ signal drop or want to log off, Nextflow will not crash.
 #### Tutorial Metagenomics - Results
 
 Assuming the run completed without any crashes (if problems do occur, check
-against [the parameters documentation](https://nf-co.re/eager/parameters) that all parameters are as expected, or check
+against [usage](#pipeline-options) that all parameters are as expected, or check
 the [FAQ](#troubleshooting-and-faqs)), we can now check our results in
 `results/`.
 
@@ -2511,7 +2511,7 @@ signal drop or want to log off, Nextflow will not crash.
 #### Tutorial Pathogen Genomics - Results
 
 Assuming the run completed without any crashes (if problems do occur, check
-against [the parameters documentation](https://nf-co.re/eager/parameters) that all parameters are as expected, or
+against [#usage](#pipeline-options) that all parameters are as expected, or
 check the [FAQ](#troubleshooting-and-faqs)), we can now check our results in
 `results/`.
 
