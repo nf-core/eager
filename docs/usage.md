@@ -115,7 +115,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   * A profile with a complete configuration for automated testing
   * Includes links to test data so needs no other parameters
 
-> *Important*: If running nf-core/eager on a cluster - ask your system
+> _Important_: If running nf-core/eager on a cluster - ask your system
 > administrator what profile to use.
 
 **Institution Specific Profiles** These are profiles specific to certain **HPC
@@ -349,7 +349,7 @@ Note the following important points and limitations for setting up:
 
 * The TSV must use actual tabs (not spaces) between cells.
 * The input FASTQ filenames are discarded after FastQC, all other downstream results files are based on `Sample_Name`, `Library_ID` and `Lane` columns for filenames.
-* *File* names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
+* _File_ names must be unique regardless of file path, due to risk of over-writing (see: [https://github.com/nextflow-io/nextflow/issues/470](https://github.com/nextflow-io/nextflow/issues/470)).
   * At different stages of the merging process, (as above) nf-core/eager will use as output filenames the information from the `Sample_Name`, `Library_ID` and/or `Lane` columns for filenames.
   * Library_IDs must be unique (other than if they are spread across multiple lanes). For example, your .tsv file must not have rows with both the strings in the Library_ID column as `Library1` and `Library1`, for **both** `SampleA` and `SampleB` in the Sample_ID column, otherwise the two `Library1.fq.gz` files may result in a filename collision.
   * If it is 'too late' and you already have duplicated FASTQ file names before starting a run, a workaround is to concatenate the FASTQ files together and supply this to a nf-core/eager run. The only downside is that you will not get independent FASTQC results for each file.
@@ -586,7 +586,7 @@ the #eager channel).
 
 #### Tutorial Profiles - Background
 
-A useful feature of Nextflow is the ability to use configuration *profiles* that
+A useful feature of Nextflow is the ability to use configuration _profiles_ that
 can specify many default parameters and other settings on how to run your
 pipeline.
 
@@ -617,7 +617,7 @@ levels in terms of memory usage, pipeline-level profiles can also assist in
 facilitating reproducible science by giving a way for researchers to 'publish'
 their exact pipeline parameters in way other users can automatically re-run the
 pipeline with the pipeline parameters used in the original publication but on
-their *own* cluster.
+their _own_ cluster.
 
 To illustrate this, lets say we analysed our data on a HPC called 'blue' for
 which an institutional profile already exists, and for our analysis we defined a
@@ -689,7 +689,7 @@ defined in the `cluster` profile.
 > institutional-level profiles. Otherwise please skip to [Writing your own profile](#tutorial-profiles---writing-your-own-profile)
 
 In actuality, a nf-core/eager run already contains many configs and profiles,
-and will normally use *multiple* configs profiles in a single run. Multiple
+and will normally use _multiple_ configs profiles in a single run. Multiple
 configuration and profiles files can be used, and each new one selected will
 inherit all the previous one's parameters, and the parameters in the new one
 will then overwrite any that have been changed from the original.
@@ -727,7 +727,7 @@ nextflow run nf-core/eager -c old_dna_profile.config -profile hpc_blue,old_dna <
 
 In the background, any parameters in the pipeline's `nextflow.config`
 (containing default parameters) will be overwritten by the
-`old_dna_profile.config`. In addition, the `old_dna` *profile* will overwrite
+`old_dna_profile.config`. In addition, the `old_dna` _profile_ will overwrite
 any parameters set in the config but outside the profile definition of
 `old_dna_profile.config`.
 
@@ -764,7 +764,7 @@ if your run does not use the parameters you expect.
 > specifying a custom `.config` file by using `-C` (capital C) instead of `-c`
 > (which inherits previously specify parameters)
 
-Another thing that is important to note is that if a specific *profile* is
+Another thing that is important to note is that if a specific _profile_ is
 specified in `nextflow run`, this replaces any 'global' parameter that is
 specified within the config file (but outside a profile) itself - **regardless**
 of profile order (see above).
@@ -1806,7 +1806,7 @@ nextflow run nf-core/eager \
 nf-core/eager will now take all unmapped reads after mapping and convert the BAM
 file back to FASTQ, which can be accepted by MALT. But of course, we also then
 need to tell nf-core/eager we actually want to run MALT. We will also specify
-the location of the [pre-built database](##tutorial-metagenomics---preparation) and which 'min support'
+the location of the [pre-built database](#tutorial-metagenomics---preparation) and which 'min support'
 method we want to use (this specifies the minimum number of alignments is needed
 to a particular taxonomic node to be 'kept' in the MALT output files). Otherwise
 we will keep all other parameters as default. For example using BlastN mode,

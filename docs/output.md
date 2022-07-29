@@ -670,7 +670,7 @@ If you ran with `--min_allele_freq_hom` and `--min_allele_freq_het` set to the s
 
 ## Output Files
 
-This section gives a brief summary of where to look for what files for downstream analysis. This covers *all* modules.
+This section gives a brief summary of where to look for what files for downstream analysis. This covers _all_ modules.
 
 Each module has it's own output directory which sit alongside the `MultiQC/` directory from which you opened the report.
 
@@ -697,7 +697,7 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 * `metagenomic_complexity_filter`: this contains the output from filtering of input reads to metagenomic classification of low-sequence complexity reads as performed by `bbduk`. This will include the filtered FASTQ files (`*_lowcomplexityremoved.fq.gz`) and also the run-time log (`_bbduk.stats`) for each sample. **Note:** there are no sections in the MultiQC report for this module, therefore you must check the `._bbduk.stats` files to get summary statistics of the filtering.
 * `metagenomic_classification/`: this contains the output for a given metagenomic classifier.
   * Running MALT will contain RMA6 files that can be loaded into MEGAN6 or MaltExtract for phylogenetic visualisation of read taxonomic assignments and aDNA characteristics respectively. Additional a `malt.log` file is provided which gives additional information such as run-time, memory usage and per-sample statistics of numbers of alignments with taxonomic assignment etc. This will also include gzip SAM files if requested.
-  * Running kraken will contain the Kraken output and report files, as well as a merged Taxon count table. You will also get a Kraken kmer duplication table, in a [KrakenUniq](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1568-0) fashion. This is very useful to check for breadth of coverage and detect read stacking. A small number of aligned reads (low coverage) and a kmer duplication >1 is usually a sign of read stacking, usually indicative of a false positive hit (e.g. from over-amplified libraries). *Kmer duplication is defined as: number of kmers / number of unique kmers*. You will find two kraken reports formats available:  
+  * Running kraken will contain the Kraken output and report files, as well as a merged Taxon count table. You will also get a Kraken kmer duplication table, in a [KrakenUniq](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1568-0) fashion. This is very useful to check for breadth of coverage and detect read stacking. A small number of aligned reads (low coverage) and a kmer duplication >1 is usually a sign of read stacking, usually indicative of a false positive hit (e.g. from over-amplified libraries). _Kmer duplication is defined as: number of kmers / number of unique kmers_. You will find two kraken reports formats available:  
     * the `*.kreport` which is the old report format, without distinct minimizer count information, used by some tools such as [Pavian](https://github.com/fbreitwieser/pavian)
     * the `*.kraken2_report` which is the new kraken report format, with the distinct minimizer count information.  
     * finally, the `*.kraken.out` file are the direct output of Kraken2
