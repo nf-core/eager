@@ -44,7 +44,7 @@ The safety officer in consultation with the nf-core core team have the right and
 
 Members of the core team or the safety officer who violate the CoC will be required to recuse themselves pending investigation. They will not have access to any reports of the violations and be subject to the same actions as others in violation of the CoC.
 
-## When are where does this Code of Conduct apply?
+## When are where does this Code of Conduct apply
 
 Participation in the nf-core community is contingent on following these guidelines in all our workspaces and events. This includes but is not limited to the following listed alphabetically and therefore in no order of preference:
 
