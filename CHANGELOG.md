@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed some missing default values in the nextflow parameter schema JSON
 - [#789](https://github.com/nf-core/eager/issues/789) Substantial speed and memory optimisation of the `extract_map_reads.py` script (♥ to @ivelsko for reporting, @maxibor for optimisation)
 - Fix staging of input bams for genotyping_pileupcaller process. Downstream changes from changes introduced when fixing endorspy caching.
+- Made slight correction on metro map diagram regarding input data to SexDeterrmine (only BAM trimming output files)
 
 ### `Dependencies`
 
