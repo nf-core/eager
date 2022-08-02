@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#880](https://github.com/nf-core/eager/issues/880) Fix failure of endorSpy to be cached or reexecuted on resume (♥ to @KathrinNaegele, @TCLamnidis, & @mahesh-panchal for reporting and debugging)
 - [#885](https://github.com/nf-core/eager/issues/885) Specify task memory for all tools in get_software_versions to account for incompatibilty of java with some SGE clusters causing hanging of the process (♥ to @maxibor for reporting)
 - [#887](https://github.com/nf-core/eager/issues/887) Clarify what is considered 'ultra-short' reads in the help text of clip_readlength, for when you may wish to turn of length filtering during AdapterRemoval (♥ to @TCLamnidis for reporting)
-- [#889](https://github.com/nf-core/eager/issues/889) Remove/updated parameters from benchmarking test profiles (♥ to @TCLamnidis for reporting)
+- [#889](https://github.com/nf-core/eager/issues/889) Remove/update parameters from benchmarking test profiles (♥ to @TCLamnidis for reporting)
 - [#895](https://github.com/nf-core/eager/issues/895) Output documentation typo fix and added location of output docs in pipeline summary (♥ to @RodrigoBarquera for reporting)
 - [#897](https://github.com/nf-core/eager/issues/897) Fix pipeline crash if no Kraken2 results generated (♥ to @alexandregilardet for reporting)
 - [#899](https://github.com/nf-core/eager/issues/897) Fix pipeline crash for circulargenerator if reference file does not end in .fasta (♥ to @scarlhoff for reporting)
