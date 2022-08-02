@@ -3,6 +3,32 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.4.5] - 2022-07-39
+
+### `Added`
+
+### `Fixed`
+
+- [#882](https://github.com/nf-core/eager/pull/882) Define DSL1 execution explicitly, as new versions Nextflow made DSL2 default (♥ to & fix from @Lehmann-Fabian)
+- [#879](https://github.com/nf-core/eager/issues/879) Add missing threads parameter for pre-clipping FastQC for single end data that caused insufficient memory in some cases (♥ to @marcel-keller for reporting)
+- [#880](https://github.com/nf-core/eager/issues/880) Fix failure of endorSpy to be cached or reexecuted on resume (♥ to @KathrinNaegele, @TCLamnidis, & @mahesh-panchal for reporting and debugging)
+- [#885](https://github.com/nf-core/eager/issues/885) Specify task memory for all tools in get_software_versions to account for incompatibilty of java with some SGE clusters causing hanging of the process (♥ to @maxibor for reporting)
+- [#887](https://github.com/nf-core/eager/issues/887) Clarify what is considered 'ultra-short' reads in the help text of clip_readlength, for when you may wish to turn of length filtering during AdapterRemoval (♥ to @TCLamnidis for reporting)
+- [#889](https://github.com/nf-core/eager/issues/889) Remove/update parameters from benchmarking test profiles (♥ to @TCLamnidis for reporting)
+- [#895](https://github.com/nf-core/eager/issues/895) Output documentation typo fix and added location of output docs in pipeline summary (♥ to @RodrigoBarquera for reporting)
+- [#897](https://github.com/nf-core/eager/issues/897) Fix pipeline crash if no Kraken2 results generated (♥ to @alexandregilardet for reporting)
+- [#899](https://github.com/nf-core/eager/issues/897) Fix pipeline crash for circulargenerator if reference file does not end in .fasta (♥ to @scarlhoff for reporting)
+- Fixed some missing default values in the nextflow parameter schema JSON
+- [#789](https://github.com/nf-core/eager/issues/789) Substantial speed and memory optimisation of the `extract_map_reads.py` script (♥ to @ivelsko for reporting, @maxibor for optimisation)
+- Fix staging of input bams for genotyping_pileupcaller process. Downstream changes from changes introduced when fixing endorspy caching.
+- Made slight correction on metro map diagram regarding input data to SexDeterrmine (only BAM trimming output files)
+
+### `Dependencies`
+
+- Updated MultiQC to latest stable alpha version on bioconda, correcting the previously nonsensical AdapterRemoval plots (♥ to @NiemannJ for fixing in MultiQC)
+
+### `Deprecated`
+
 ## [2.4.4] - 2022-04-08
 
 ### `Added`
