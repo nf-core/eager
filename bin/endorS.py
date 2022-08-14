@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Written by Aida Andrades Valtueña and released under GPL v3 license. 
+# Written by Aida Andrades Valtueña and released under MIT license. 
 # See git repository (https://github.com/aidaanva/endorS.py) for full license text.
 
 """Script to calculate the endogenous DNA in a sample from samtools flag stats.
