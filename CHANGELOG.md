@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Fixed`
 
 - Changed endors.py license from GPL to MIT (by @aidaanva)
+- Removed erroneous R2 in single-end example in input TSV of usage docs (by @aidaanva)
 
 ### `Dependencies`
 
