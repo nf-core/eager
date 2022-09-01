@@ -8,6 +8,10 @@
 
 > Di Tommaso P, Chatzou M, Floden EW, Barja PP, Palumbo E, Notredame C. Nextflow enables reproducible computational workflows. Nat Biotechnol. 2017 Apr 11;35(4):316-319. doi: 10.1038/nbt.3820. PubMed PMID: 28398311.
 
+## [nf-core/eager](https://doi.org/10.7717/peerj.10947)
+
+> Fellows Yates JA, Lamnidis TC, Borry M, Andrades Valtueña A, Fagernäs Z, Clayton S, Garcia MU, Neukamm J, & Peltzer A. Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager. PeerJ 2021 9:e10947. doi:10.7717/peerj.10947 PubMed PMID: 33777521
+
 ## Pipeline tools
 
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)

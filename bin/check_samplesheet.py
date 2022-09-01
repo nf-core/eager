@@ -1,261 +1,203 @@
 #!/usr/bin/env python
 
+# This script is based on the example at: https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
-"""Provide a command line tool to validate and transform tabular samplesheets."""
-
-
-import argparse
-import csv
-import logging
+import os
 import sys
-from collections import Counter
-from pathlib import Path
+import errno
+import argparse
 
-logger = logging.getLogger()
+def isNAstr(var):
+    x=False
+    if isinstance(var, str) and var == "NA":
+        x=True
+    return x
 
-
-class RowChecker:
-    """
-    Define a service that can validate and transform each given row.
-
-    Attributes:
-        modified (list): A list of dicts, where each dict corresponds to a previously
-            validated and transformed row. The order of rows is maintained.
-
-    """
-
-    VALID_FORMATS = (
-        ".fq.gz",
-        ".fastq.gz",
-    )
-
-    def __init__(
-        self,
-        sample_col="sample",
-        first_col="fastq_1",
-        second_col="fastq_2",
-        single_col="single_end",
-        **kwargs,
-    ):
-        """
-        Initialize the row checker with the expected column names.
-
-        Args:
-            sample_col (str): The name of the column that contains the sample name
-                (default "sample").
-            first_col (str): The name of the column that contains the first (or only)
-                FASTQ file path (default "fastq_1").
-            second_col (str): The name of the column that contains the second (if any)
-                FASTQ file path (default "fastq_2").
-            single_col (str): The name of the new column that will be inserted and
-                records whether the sample contains single- or paired-end sequencing
-                reads (default "single_end").
-
-        """
-        super().__init__(**kwargs)
-        self._sample_col = sample_col
-        self._first_col = first_col
-        self._second_col = second_col
-        self._single_col = single_col
-        self._seen = set()
-        self.modified = []
-
-    def validate_and_transform(self, row):
-        """
-        Perform all validations on the given row and insert the read pairing status.
-
-        Args:
-            row (dict): A mapping from column headers (keys) to elements of that row
-                (values).
-
-        """
-        self._validate_sample(row)
-        self._validate_first(row)
-        self._validate_second(row)
-        self._validate_pair(row)
-        self._seen.add((row[self._sample_col], row[self._first_col]))
-        self.modified.append(row)
-
-    def _validate_sample(self, row):
-        """Assert that the sample name exists and convert spaces to underscores."""
-        if len(row[self._sample_col]) <= 0:
-            raise AssertionError("Sample input is required.")
-        # Sanitize samples slightly.
-        row[self._sample_col] = row[self._sample_col].replace(" ", "_")
-
-    def _validate_first(self, row):
-        """Assert that the first FASTQ entry is non-empty and has the right format."""
-        if len(row[self._first_col]) <= 0:
-            raise AssertionError("At least the first FASTQ file is required.")
-        self._validate_fastq_format(row[self._first_col])
-
-    def _validate_second(self, row):
-        """Assert that the second FASTQ entry has the right format if it exists."""
-        if len(row[self._second_col]) > 0:
-            self._validate_fastq_format(row[self._second_col])
-
-    def _validate_pair(self, row):
-        """Assert that read pairs have the same file extension. Report pair status."""
-        if row[self._first_col] and row[self._second_col]:
-            row[self._single_col] = False
-            first_col_suffix = Path(row[self._first_col]).suffixes[-2:]
-            second_col_suffix = Path(row[self._second_col]).suffixes[-2:]
-            if first_col_suffix != second_col_suffix:
-                raise AssertionError("FASTQ pairs must have the same file extensions.")
-        else:
-            row[self._single_col] = True
-
-    def _validate_fastq_format(self, filename):
-        """Assert that a given filename has one of the expected FASTQ extensions."""
-        if not any(filename.endswith(extension) for extension in self.VALID_FORMATS):
-            raise AssertionError(
-                f"The FASTQ file has an unrecognized extension: {filename}\n"
-                f"It should be one of: {', '.join(self.VALID_FORMATS)}"
-            )
-
-    def validate_unique_samples(self):
-        """
-        Assert that the combination of sample name and FASTQ filename is unique.
-
-        In addition to the validation, also rename all samples to have a suffix of _T{n}, where n is the
-        number of times the same sample exist, but with different FASTQ files, e.g., multiple runs per experiment.
-
-        """
-        if len(self._seen) != len(self.modified):
-            raise AssertionError("The pair of sample name and FASTQ must be unique.")
-        seen = Counter()
-        for row in self.modified:
-            sample = row[self._sample_col]
-            seen[sample] += 1
-            row[self._sample_col] = f"{sample}_T{seen[sample]}"
+def detect_multistrandedness(all_info_dict, error_counter):
+    for sample in all_info_dict.keys():
+        lib_strands=[]
+        for lib in all_info_dict[sample].keys():
+            for lane in all_info_dict[sample][lib].keys():
+                ## all_info_dict[sample][lib][lane] = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+                lib_strands.append(all_info_dict[sample][lib][lane][2])
+        if len(set(lib_strands)) > 1:
+            error_counter = print_error("Cannot have both single- and double-stranded libraries with the same sample_id.", "Sample", sample, error_counter)
+    return error_counter
 
 
-def read_head(handle, num_lines=10):
-    """Read the specified number of lines from the current position in the file."""
-    lines = []
-    for idx, line in enumerate(handle):
-        if idx == num_lines:
-            break
-        lines.append(line)
-    return "".join(lines)
+def parse_args(args=None):
+    Description = "Reformat nf-core/eager samplesheet file and check its contents."
+    Epilog = "Example usage: python check_samplesheet.py <FILE_IN> <FILE_OUT>"
+
+    parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
+    parser.add_argument("FILE_IN", help="Input samplesheet file.")
+    parser.add_argument("FILE_OUT", help="Output file.")
+    return parser.parse_args(args)
 
 
-def sniff_format(handle):
-    """
-    Detect the tabular format.
+def make_dir(path):
+    if len(path) > 0:
+        try:
+            os.makedirs(path)
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise exception
 
-    Args:
-        handle (text file): A handle to a `text file`_ object. The read position is
-        expected to be at the beginning (index 0).
 
-    Returns:
-        csv.Dialect: The detected tabular format.
-
-    .. _text file:
-        https://docs.python.org/3/glossary.html#term-text-file
-
-    """
-    peek = read_head(handle)
-    handle.seek(0)
-    sniffer = csv.Sniffer()
-    if not sniffer.has_header(peek):
-        logger.critical("The given sample sheet does not appear to contain a header.")
-        sys.exit(1)
-    dialect = sniffer.sniff(peek)
-    return dialect
-
+def print_error(error, context="Line", context_str="", error_counter=0):
+    if isinstance(context_str, str):
+        context_str="'{}'".format(context_str.strip())
+    error_str = "[check_samplesheet.py] Error in samplesheet: {}".format(error)
+    if context != "" and context_str != "":
+        error_str = "[check_samplesheet.py] Error in samplesheet @ {} {}: {}".format(
+            context.strip(), context_str, error
+        )
+    print(error_str)
+    error_counter += 1
+    return error_counter
 
 def check_samplesheet(file_in, file_out):
     """
-    Check that the tabular samplesheet has the structure expected by nf-core pipelines.
+    This function checks that the samplesheet follows the following structure:
+    sample_id	library_id	lane	colour_chemistry	pairment	strandedness	damage_treatment	r1	r2	bam
+    Sample1	Sample1_Lib1	1	4	paired	double	full	Sample1_Lib1_L008_R1_001.fq.gz	Sample1_Lib1_L008_R2_001.fq.gz	NA
+    Sample2	Sample2_Lib1	2	2	single	double	full	Sample2_Lib1_L008_R1_001.fq.gz	NA	NA
+    Sample3	Sample3_Lib1	9	4	single	single	none	NA	NA	Sample3_Lib1.bam
 
-    Validate the general shape of the table, expected columns, and each row. Also add
-    an additional column which records whether one or two FASTQ reads were found.
-
-    Args:
-        file_in (pathlib.Path): The given tabular samplesheet. The format can be either
-            CSV, TSV, or any other format automatically recognized by ``csv.Sniffer``.
-        file_out (pathlib.Path): Where the validated and transformed samplesheet should
-            be created; always in CSV format.
-
-    Example:
-        This function checks that the samplesheet follows the following structure,
-        see also the `viral recon samplesheet`_::
-
-            sample,fastq_1,fastq_2
-            SAMPLE_PE,SAMPLE_PE_RUN1_1.fastq.gz,SAMPLE_PE_RUN1_2.fastq.gz
-            SAMPLE_PE,SAMPLE_PE_RUN2_1.fastq.gz,SAMPLE_PE_RUN2_2.fastq.gz
-            SAMPLE_SE,SAMPLE_SE_RUN1_1.fastq.gz,
-
-    .. _viral recon samplesheet:
-        https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
-
+    For an example see:
+    https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/mammoth_design_fastq_bam_dsl2.tsv
     """
-    required_columns = {"sample", "fastq_1", "fastq_2"}
-    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
-    with file_in.open(newline="") as in_handle:
-        reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
-        # Validate the existence of the expected header columns.
-        if not required_columns.issubset(reader.fieldnames):
-            req_cols = ", ".join(required_columns)
-            logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
+
+    error_counter=0
+    sample_mapping_dict = {}
+    with open(file_in, "r") as fin:
+
+        ## Check header
+        MIN_COLS = 10
+        HEADER = ["sample_id", "library_id", "lane", "colour_chemistry", "pairment", "strandedness", "damage_treatment", "r1", "r2", "bam"]
+        header = [x.strip('"') for x in fin.readline().strip().split("\t")]
+        if header[: len(HEADER)] != HEADER:
+            print("Please check samplesheet header: {} != {}".format("\t".join(header), "\t".join(HEADER)))
             sys.exit(1)
-        # Validate each row.
-        checker = RowChecker()
-        for i, row in enumerate(reader):
-            try:
-                checker.validate_and_transform(row)
-            except AssertionError as error:
-                logger.critical(f"{str(error)} On line {i + 2}.")
-                sys.exit(1)
-        checker.validate_unique_samples()
-    header = list(reader.fieldnames)
-    header.insert(1, "single_end")
-    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
-    with file_out.open(mode="w", newline="") as out_handle:
-        writer = csv.DictWriter(out_handle, header, delimiter=",")
-        writer.writeheader()
-        for row in checker.modified:
-            writer.writerow(row)
+
+        ## Check sample entries
+        for line_num, line in enumerate(fin):
+            line_num+=2 ## From 0-based to 1-based. Add an extra 1 for the header line
+            lspl = [x.strip().strip('"') for x in line.strip().split("\t")]
+
+            # Check valid number of columns per row
+            if len(lspl) < len(HEADER):
+                error_counter = print_error(
+                    "Invalid number of columns (minimum = {})!".format(len(HEADER)),
+                    "Line",
+                    line,
+                    error_counter
+                )
+            num_cols = len([x for x in lspl if x])
+            if num_cols < MIN_COLS:
+                error_counter = print_error(
+                    "Invalid number of populated columns (minimum = {})!".format(MIN_COLS),
+                    "Line",
+                    line,
+                    error_counter
+                )
+
+            ## Check sample name entries
+            sample_id, library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam = lspl[: len(HEADER)]
+
+            sample_id = sample_id.replace(" ", "_")
+            if not sample_id:
+                error_counter = print_error("sample_id entry has not been specified!", "Line", line_num, error_counter)
+
+            library_id = library_id.replace(" ", "_")
+            if not library_id:
+                error_counter = print_error("library_id entry has not been specified!", "Line", line_num, error_counter)
+
+            if not lane.isnumeric():
+                error_counter = print_error("lane number is not numeric!", "Line", line_num, error_counter)
+
+            if colour_chemistry not in ['2', '4']:
+                error_counter = print_error("colour_chemistry is not recognised (e.g. 2 for Illumina NextSeq/NovaSeq or 4 Illumina MiSeq/HiSeq/BGI)! Options: 2, 4.", "Line", line_num, error_counter)
+
+            if pairment not in ['paired', 'single']:
+                error_counter = print_error("pairment is not recognised. Options: paired, single.", "Line", line_num, error_counter)
+
+            if strandedness not in ['double', 'single']:
+                error_counter = print_error("strandedness is not recognised. Options: double, single", "Line", line_num, error_counter)
+
+            if damage_treatment not in ['none', 'half', 'full']:
+                error_counter = print_error("damage_treatment is not recognised. Corresponds to UDG treatment. Options: none, half, full.", "Line", line_num, error_counter)
+
+            ## Check input file extensions
+            for reads in [r1, r2, bam]:
+                if reads.find(" ") != -1:
+                    error_counter = print_error("FASTQ or BAM file(s) contains spaces! Please rename.", "Line", line_num, error_counter)
+                if not reads.endswith(".fastq.gz") and not reads.endswith(".fq.gz") and not reads.endswith(".bam") and not isNAstr(reads):
+                    error_counter = print_error(
+                        "FASTQ or BAM file(s) have unrecognised extension. Options: .fastq.gz, .fq.gz, or .bam!",
+                        "Line",
+                        line,
+                        error_counter
+                    )
+
+            if not isNAstr(bam) and not pairment == 'single':
+                error_counter = print_error("Pairment for BAM input can only be 'single'.", "Line", line_num, error_counter)
+
+            ## Prepare meta
+            lane_info = []  ## [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+
+            if sample_id and pairment == 'single' and not isNAstr(r1) and isNAstr(r2) and isNAstr(bam): ## SE: R1 only
+                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+            elif sample_id and pairment == 'paired' and not isNAstr(r1) and not isNAstr(r2) and isNAstr(bam): ## PE: R1 and R2 only
+                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+            elif sample_id and pairment == 'single' and isNAstr(r1) and isNAstr(r2) and not isNAstr(bam): ## bam input(SE): BAM only
+                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+            ## Print errors only when pairment is valid but input files don't match pairment
+            elif pairment in ['single','paired']:
+                error_counter = print_error("Input files don't match pairment. 'single' pairment requires a valid r1 or bam (but not both). 'paired' pairment requires valid r1 and r2.", "Line", line_num, error_counter)
+
+            ## Create a complex structure of dictionaries
+            ## sample mapping dictionary = { sample1: [{ library1: [ { lane1: [ colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam ] }] }] }
+            ## Each sample contains a dictionary that has library IDs as keys, and a dictionary of dictionaries as value. The library ID values are dictionaries with lanes as keys and the lane info as values
+            sample_mapping_dict.setdefault(sample_id, {}) ## Add the sample id as key with an empty dictionary value if it doesnt exist, else do nothing.
+            sample_mapping_dict[sample_id].setdefault(library_id, {}) ## Add the library id as key with an empty dictionary value if it doesnt exist, else do nothing.
+            # sample_mapping_dict[sample_id][library_id].setdefault(lane, {}) ## Add the lane as key with an empty dictionary value if it doesnt exist, else do nothing.
+
+            ## Throw error if the sample_id/library_id/lane combination already exists.
+            if lane in sample_mapping_dict[sample_id][library_id].keys():
+                error_counter = print_error("Each combination of Sample_Id, Library_Id and Lane must be unique!", "Line", line_num, error_counter)
+            sample_mapping_dict[sample_id][library_id][lane] = lane_info ## Add lane_info to lane within library within sample.
+
+    ## If formatting errors have occurred print their number and fail.
+    if error_counter > 0:
+        print("[Formatting check] {} formatting error(s) were detected in the input file. Please check samplesheet.".format(error_counter))
+        sys.exit(1)
+
+    ## Ensure a single library strandedness per sample.
+    error_counter = detect_multistrandedness(sample_mapping_dict, error_counter)
+
+    ## If content validation errors have occurred print their number and fail. (e.g. same sample/lib/lane combination appears multiple times, or a line is duplicated.)
+    if error_counter > 0:
+        print("[Strandedness validation] {} validation error(s) were detected in the input file. Please check samplesheet.".format(error_counter))
+        sys.exit(1)
+
+    ## Write validated samplesheet with appropriate columns
+    if len(sample_mapping_dict) > 0:
+        out_dir = os.path.dirname(file_out)
+        make_dir(out_dir)
+        with open(file_out, "w") as fout:
+            fout.write("\t".join(["sample_id", "library_id", "lane", "colour_chemistry", "pairment", "strandedness", "damage_treatment", "r1", "r2", "bam"]) + "\n")
+            for sample_id in sorted(sample_mapping_dict.keys()):
+                for library_id in sorted(sample_mapping_dict[sample_id].keys()):
+                    for lane in sorted(sample_mapping_dict[sample_id][library_id].keys()):
+                        fout.write("\t".join([sample_id, library_id, lane, *sample_mapping_dict[sample_id][library_id][lane]]) + "\n")
+    else:
+        error_counter = print_error("No entries to process!", "", "", error_counter)
 
 
-def parse_args(argv=None):
-    """Define and immediately parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Validate and transform a tabular samplesheet.",
-        epilog="Example: python check_samplesheet.py samplesheet.csv samplesheet.valid.csv",
-    )
-    parser.add_argument(
-        "file_in",
-        metavar="FILE_IN",
-        type=Path,
-        help="Tabular input samplesheet in CSV or TSV format.",
-    )
-    parser.add_argument(
-        "file_out",
-        metavar="FILE_OUT",
-        type=Path,
-        help="Transformed output samplesheet in CSV format.",
-    )
-    parser.add_argument(
-        "-l",
-        "--log-level",
-        help="The desired log level (default WARNING).",
-        choices=("CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"),
-        default="WARNING",
-    )
-    return parser.parse_args(argv)
-
-
-def main(argv=None):
-    """Coordinate argument parsing and program execution."""
-    args = parse_args(argv)
-    logging.basicConfig(level=args.log_level, format="[%(levelname)s] %(message)s")
-    if not args.file_in.is_file():
-        logger.error(f"The given input file {args.file_in} was not found!")
-        sys.exit(2)
-    args.file_out.parent.mkdir(parents=True, exist_ok=True)
-    check_samplesheet(args.file_in, args.file_out)
+def main(args=None):
+    args = parse_args(args)
+    check_samplesheet(args.FILE_IN, args.FILE_OUT)
 
 
 if __name__ == "__main__":
