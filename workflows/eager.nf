@@ -25,6 +25,7 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+ch_multiqc_logo          = file("$projectDir/docs/images/nf-core_eager_logo_outline_drop.png"), checkIfExists: true
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,7 +98,9 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
-        ch_multiqc_files.collect()
+        ch_multiqc_files.collect(),
+        ch_multiqc_custom_config,
+        ch_multiqc_logo
     )
     multiqc_report = MULTIQC.out.report.toList()
     ch_versions    = ch_versions.mix(MULTIQC.out.versions)
