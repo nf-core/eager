@@ -19,9 +19,10 @@ authors:
     given-names: Judith
   - family-names: Peltzer
     given-names: Alexander
-cversion: 3.0.0
+title: "Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager"
+version: 3.0.0
 doi: 10.7717/peerj.10947
-date-released: 2022-00-00
+date-released: 2022-08-02
 url: https://github.com/nf-core/eager
 prefered-citation:
   type: article
