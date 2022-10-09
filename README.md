@@ -2,7 +2,7 @@
 
 **A fully reproducible and state-of-the-art ancient DNA analysis pipeline.**
 
-[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/eager/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.1465061-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.1465061)
+[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/eager/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.10.3-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
@@ -21,6 +21,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources.The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/eager/results).
 
 ## Pipeline summary
+
+<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
 - (Optionally) create reference genome indices for mapping (`bwa`, `samtools`, and `picard`)
 - Sequencing quality control (`FastQC`)
@@ -103,7 +105,7 @@ A graphical overview of suggested routes through the pipeline depending on conte
 
 4. Start running your own analysis!
 
-   <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
+      <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
 
    ```bash
    nextflow run nf-core/eager --input samplesheet.csv --outdir <OUTDIR> --reference '<your_reference>.fasta' -profile <docker/singularity/podman/shifter/charliecloud/conda/institute>
@@ -125,11 +127,13 @@ This pipeline was established by Alexander Peltzer ([apeltzer](https://github.co
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
+- [Alex Hübner](https://github.com/alexhbnr)
 - [Alexandre Gilardet](https://github.com/alexandregilardet)
 - Arielle Munters
 - [Åshild Vågene](https://github.com/ashildv)
 - [Charles Plessy](https://github.com/charles-plessy)
 - [Elina Salmela](https://github.com/esalmela)
+- [Fabian Lehmann](https://github.com/Lehmann-Fabian)
 - [He Yu](https://github.com/paulayu)
 - [Hester van Schalkwyk](https://github.com/hesterjvs)
 - [Ido Bar](https://github.com/IdoBar)
@@ -141,15 +145,16 @@ We thank the following people for their extensive assistance in the development 
 - [Kathrin Nägele](https://github.com/KathrinNaegele)
 - [Kevin Lord](https://github.com/lordkev)
 - [Luc Venturini](https://github.com/lucventurini)
-- [Marcel Keller](https://github.com/marcel-keller)
 - [Mahesh Binzer-Panchal](https://github.com/mahesh-panchal)
+- [Marcel Keller](https://github.com/marcel-keller)
 - [Megan Michel](https://github.com/meganemichel)
 - [Pierre Lindenbaum](https://github.com/lindenb)
 - [Pontus Skoglund](https://github.com/pontussk)
 - [Raphael Eisenhofer](https://github.com/EisenRa)
 - [Roberta Davidson](https://github.com/roberta-davidson)
+- [Rodrigo Barquera](https://github.com/RodrigoBarquera)
 - [Selina Carlhoff](https://github.com/scarlhoff)
-- [Torsten Günter](https://bitbucket.org/tguenther/)
+- [Torsten Günter](https://bitbucket.org/tguenther)
 
 ## Contributions and Support
 
@@ -159,9 +164,17 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
+<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
+
+# <!-- If you use  nf-core/eager for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+
 If you use nf-core/eager for your analysis, please cite it using the following:
 
 > Fellows Yates JA, Lamnidis TC, Borry M, Valtueña Andrades A, Fagernäs Z, Clayton S, Garcia MU, Neukamm J, Peltzer A. 2021. Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager. PeerJ 9:e10947. DOI: [10.7717/peerj.10947](https://doi.org/10.7717/peerj.10947).
+
+<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
+
+An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
 <!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
