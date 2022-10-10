@@ -42,7 +42,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     // Generate DICT if not supplied, and if supplied generate meta
     if ( !fasta_dict ) {
-        ch_fasta_dict = PICARD_CREATESEQUENCEDICTIONARY ( ch_ungz_ref ).fasta_dict.map{[ [id: clean_name - '.fai'], it[1] ] }
+        ch_fasta_dict = PICARD_CREATESEQUENCEDICTIONARY ( ch_ungz_ref ).reference_dict.map{[ [id: clean_name - '.fai'], it[1] ] }
     } else {
         ch_fasta_dict = Channel.fromPath(ch_fasta_dict).map{[[id: clean_name], it ]}
     }
