@@ -66,13 +66,13 @@
                 "fasta_dict": {
                     "type": "string",
                     "default": "None",
-                    "description": "Path to picard sequence dictionary file (typically ending in '.dict'). If not supplied will be made for you..",
+                    "description": "Path to picard sequence dictionary file (typically ending in '.dict'). If not supplied will be made for you.",
                     "help_text": "If you want to use a pre-existing `picard CreateSequenceDictionary` dictionary file, use this to specify the required `.dict` file for the selected reference genome."
                 },
                 "fasta_mapperindexdir": {
                     "type": "string",
                     "default": "None",
-                    "description": "Path to directory containing index files of the FASTA for a given mapper..",
+                    "description": "Path to directory containing index files of the FASTA for a given mapper.",
                     "help_text": "For most people this will likely be the same directory that contains the file you provided to `--fasta`.\n\nIf you want to use pre-existing `bwa index` indices, the directory should contain files ending in '.amb' '.ann' '.bwt'. If you want to use pre-existing `bowtie2 build` indices, the directory should contain files ending in'.1.bt2', '.2.bt2', '.rev.1.bt2'. \n\nIn any case do not include the files themselves in the path.  nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa index`/`bowtie2 build` file suffixes.  If not supplied will be made for you.\n\n"
                 },
                 "mapping_tool": {
