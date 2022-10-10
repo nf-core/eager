@@ -1,1 +1,0 @@
-This is a second dummy file for when we need a 'fake' file to satisfy all nextflow channel inputs being filled, even if we actually only use one.
