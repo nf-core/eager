@@ -89,6 +89,7 @@ workflow EAGER {
     //
 
     REFERENCE_INDEXING ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir )
+    ch_versions = ch_versions.mix( REFERENCE_INDEXING.out.versions )
 
     //
     // MODULE: Run FastQC
