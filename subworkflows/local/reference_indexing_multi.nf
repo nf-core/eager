@@ -88,6 +88,8 @@ def create_index_channel(LinkedHashMap row) {
     // TODO create spanning main metadata
     meta.id                 = [ row.sample_id, row.library_id ].join("_").trim()
 
+    // MOVE FILE TYPE TO META AND TRANSPOSE TO SINGLE FILES?
+
     meta.sample_id          = row.sample_id
     meta.library_id         = row.library_id
     meta.strandedness       = row.strandedness
