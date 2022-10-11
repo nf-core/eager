@@ -39,6 +39,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'
 include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -104,6 +105,18 @@ workflow EAGER {
     )
 
     //
+    // SUBWORKFLOW: Read preprocessing (clipping, merging, fastq trimming etc. )
+    //
+
+    if ( !params.skip_preprocessing ) {
+        ch_reads_for_mapping = PREPROCESSING ( INPUT_CHECK.out.fastqs )
+        ch_versions          = ch_versions.mix(PREPROCESSING.out.versions)
+        ch_multiqc_files     = ch_versions.mix(PREPROCESSING.out.mqc)
+    } else {
+        ch_reads_for_mapping = INPUT_CHECK.out.fastqs
+    }
+
+    //
     // MODULE: MultiQC
     //
     workflow_summary    = WorkflowEager.paramsSummaryMultiqc(workflow, summary_params)
@@ -118,7 +131,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
-        ch_multiqc_files.collect(),
+        ch_multiqc_files.map{it[1]}.collect(),
         ch_multiqc_config.collect().ifEmpty([]),
         ch_multiqc_custom_config.collect().ifEmpty([]),
         ch_multiqc_logo.collect().ifEmpty([])
