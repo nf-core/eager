@@ -76,6 +76,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // INDEXING: fai
     //
 
+    // Separate out non-faidxed references
     ch_fasta_for_faidx = ch_fasta_for_faiindexing
         .branch {
             meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
@@ -83,6 +84,7 @@ workflow REFERENCE_INDEXING_MULTI {
                 skip: true
         }
 
+    // Split channel to ensure cardindality matching
     ch_faidx_input = ch_fasta_for_faidx
         .forfaidx
         .multiMap {
@@ -93,6 +95,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     SAMTOOLS_FAIDX ( ch_faidx_input.faidx )
 
+    // Rejoin output channel with main reference indicies channel elements
     // TODO this FAIDX was producing a nested ID for some reason, should work out why:  [['id':['id':'mammoth']], so we can drop the first map
     ch_faidxed_formix =  SAMTOOLS_FAIDX.out.fai
                             .map {
@@ -109,7 +112,7 @@ workflow REFERENCE_INDEXING_MULTI {
                             }
                             .dump(tag: "ch_faidx_input_remainder_map")
 
-
+    // Mix back newly faidx'd references with the pre-indexed ones
     ch_faidxed_formix.dump(tag: "ch_faidxed_formix")
     ch_fasta_for_dictindexing = ch_fasta_for_faidx.skip.mix(ch_faidxed_formix).dump(tag: "ch_fasta_for_faidx_skip_mix")
 
