@@ -578,7 +578,7 @@ process makeFastaIndex {
 }
 
 ch_fai_for_skipfastaindexing.mix(ch_fasta_faidx_index) 
-  .into { ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes; ch_fai_for_pileupcaller; ch_fai_for_angsd }
+  .into { ch_fai_for_damageprofiler; ch_fai_for_ug; ch_fai_for_hc; ch_fai_for_freebayes; ch_fai_for_pileupcaller; ch_fai_for_angsd }
 
 // Stage dict index file if supplied, else load it into the channel
 
@@ -2091,6 +2091,7 @@ process damageprofiler {
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_damageprofiler
     file fasta from ch_fasta_for_damageprofiler.collect()
+    file fai from ch_fai_for_damageprofiler.collect()
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("${base}/*.txt") optional true
