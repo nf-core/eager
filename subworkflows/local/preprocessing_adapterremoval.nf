@@ -29,9 +29,10 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
      * has to be exported in a separate channel and we must manually recombine when necessary.
      */
 
-     // TODO Compare against eager1, I have a feeling we are missing the `--preserve5p` linking
+     // TODO Compare against eager2, I have a feeling we are missing the `--preserve5p` linking
 
-    if ( params.preprocessing_mergepairs && !params.preprocessing_excludeunmerged ) {
+    // Merge and keep singletons
+    if ( !params.preprocessing_skipmerging && !params.preprocessing_excludeunmerged ) {
 
         ch_concat_fastq = Channel.empty()
             .mix(
@@ -56,7 +57,8 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
         ch_adapterremoval_reads_prepped = CAT_FASTQ.out.reads
             .mix(ADAPTERREMOVAL_SINGLE.out.singles_truncated)
 
-    } else if ( params.preprocessing_mergepairs && params.preprocessing_excludeunmerged ) {
+    // Merge and exclude singletons
+    } else if ( !params.preprocessing_skipmerging && params.preprocessing_excludeunmerged ) {
 
         ch_concat_fastq = Channel.empty()
             .mix(
@@ -77,6 +79,7 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
         ch_adapterremoval_reads_prepped = CAT_FASTQ.out.reads
             .mix(ADAPTERREMOVAL_SINGLE.out.singles_truncated)
 
+    // Don't merge (no singletons will exist)
     } else {
 
         ch_adapterremoval_reads_prepped = ADAPTERREMOVAL_PAIRED.out.paired_truncated

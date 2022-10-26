@@ -22,6 +22,10 @@ jobs:
         NXF_VER:
           - "21.10.3"
           - "latest-everything"
+        PARAMS:
+          - "--preprocessing_tool fastp"
+          - "--preprocessing_tool adapterremoval"
+          - "--skip_preprocessing"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
