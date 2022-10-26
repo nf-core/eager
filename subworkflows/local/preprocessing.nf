@@ -11,6 +11,7 @@ include { FASTQC as FASTQC_PROCESSED } from '../../modules/nf-core/fastqc/main'
 workflow PREPROCESSING {
     take:
     reads //  [ [ meta ], [ reads ] ]
+    adapterlist
 
     main:
     ch_versions       = Channel.empty()
@@ -21,7 +22,7 @@ workflow PREPROCESSING {
         ch_versions        =  ch_versions.mix( PREPROCESSING_FASTP.out.versions )
         ch_multiqc_files   =  ch_multiqc_files.mix( PREPROCESSING_FASTP.out.mqc )
     } else if ( params.preprocessing_tool == "adapterremoval" ) {
-        ch_processed_reads = PREPROCESSING_ADAPTERREMOVAL ( reads ).reads
+        ch_processed_reads = PREPROCESSING_ADAPTERREMOVAL ( reads, adapterlist ).reads
         ch_versions        = ch_versions.mix( PREPROCESSING_ADAPTERREMOVAL.out.versions )
         ch_multiqc_files   = ch_multiqc_files.mix( PREPROCESSING_ADAPTERREMOVAL.out.mqc )
     } else {

@@ -76,6 +76,8 @@ workflow EAGER {
     fasta_fai            = params.fasta_fai ? file(params.fasta_fai, checkIfExists: true) : []
     fasta_dict           = params.fasta_dict ? file(params.fasta_dict, checkIfExists: true) : []
     fasta_mapperindexdir = params.fasta_mapperindexdir ? file(params.fasta_mapperindexdir, checkIfExists: true) : []
+    adapterlist          = params.preprocessing_adapterlist ? file(params.preprocessing_adapterlist, checkIfExists: true) : []
+
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -109,7 +111,7 @@ workflow EAGER {
     //
 
     if ( !params.skip_preprocessing ) {
-        ch_reads_for_mapping = PREPROCESSING ( INPUT_CHECK.out.fastqs )
+        ch_reads_for_mapping = PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist )
         ch_versions          = ch_versions.mix(PREPROCESSING.out.versions)
         ch_multiqc_files     = ch_versions.mix(PREPROCESSING.out.mqc)
     } else {

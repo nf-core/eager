@@ -10,6 +10,7 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
 
     take:
     reads // [[meta], [reads]]
+    adapterlist
 
     main:
     ch_versions = Channel.empty()
@@ -21,8 +22,8 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
                                         paired: !it[0].single_end
                                     }
 
-    ADAPTERREMOVAL_SINGLE ( ch_input_for_adapterremoval.single, [] )
-    ADAPTERREMOVAL_PAIRED ( ch_input_for_adapterremoval.paired, [] )
+    ADAPTERREMOVAL_SINGLE ( ch_input_for_adapterremoval.single, adapterlist )
+    ADAPTERREMOVAL_PAIRED ( ch_input_for_adapterremoval.paired, adapterlist )
 
     /*
      * Due to the ~slightly~ very ugly output implementation of the current AdapterRemoval2 version, each file
@@ -32,7 +33,7 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
      // TODO Compare against eager2, I have a feeling we are missing the `--preserve5p` linking
 
     // Merge and keep singletons
-    if ( !params.preprocessing_skipmerging && !params.preprocessing_excludeunmerged ) {
+    if ( !params.preprocessing_skippairmerging && !params.preprocessing_excludeunmerged ) {
 
         ch_concat_fastq = Channel.empty()
             .mix(
@@ -58,7 +59,7 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
             .mix(ADAPTERREMOVAL_SINGLE.out.singles_truncated)
 
     // Merge and exclude singletons
-    } else if ( !params.preprocessing_skipmerging && params.preprocessing_excludeunmerged ) {
+    } else if ( !params.preprocessing_skippairmerging && params.preprocessing_excludeunmerged ) {
 
         ch_concat_fastq = Channel.empty()
             .mix(
