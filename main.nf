@@ -2333,41 +2333,71 @@ process qualimap {
 // Reroute files for genotyping; we have to ensure to select lib-merged BAMs, as input channel will also contain the un-merged ones resulting in unwanted multi-sample VCFs
 if ( params.run_genotyping && params.genotyping_source == 'raw' ) {
     ch_output_from_bamutils
-      .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+      .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_readgroupreplacement; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" && !params.run_trim_bam )  {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'trimmed' source without running BAM trimming (--run_trim_bam)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "trimmed" && params.run_trim_bam )  {
     ch_output_from_bamutils
-        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+        .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_readgroupreplacement; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && !params.run_pmdtools )  {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'pmd' source without running pmdtools (--run_pmdtools)! Please check input parameters."
 
 } else if ( params.run_genotyping && params.genotyping_source == "pmd" && params.run_pmdtools )  {
   ch_output_from_pmdtools
-    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_readgroupreplacement; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( params.run_genotyping && params.genotyping_source == "rescaled" && params.run_mapdamage_rescaling) {
   ch_output_from_damagerescaling
-    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_readgroupreplacement; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( params.run_genotyping && params.genotyping_source == "rescaled" && !params.run_mapdamage_rescaling) {
     exit 1, "[nf-core/eager] error: Cannot run genotyping with 'rescaled' source without running damage rescaling (--run_damagescaling)! Please check input parameters."
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_readgroupreplacement; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( !params.run_genotyping && !params.run_trim_bam && params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_readgroupreplacement; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
 } else if ( !params.run_genotyping && params.run_trim_bam && !params.run_pmdtools )  {
     ch_rmdup_for_skipdamagemanipulation
-    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
+    .into { ch_damagemanipulation_for_skipgenotyping; ch_damagemanipulation_for_readgroupreplacement; ch_damagemanipulation_for_genotyping_ug; ch_damagemanipulation_for_genotyping_hc; ch_damagemanipulation_for_genotyping_freebayes; ch_damagemanipulation_for_genotyping_pileupcaller; ch_damagemanipulation_for_genotyping_angsd }
 
+}
+
+// replace readgroups to ensure single 'sample' per VCF for MultiVCFAnalyzer only
+
+process picard_addorreplacereadgroups {
+  label 'sc_tiny'
+  tag "${samplename}"
+
+  when:
+  params.run_genotyping && params.genotyping_tool == 'ug' && params.run_multivcfanalyzer
+
+  input:
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_damagemanipulation_for_readgroupreplacement
+
+  output:
+  tuple samplename, val("${samplename}"), lane, seqtype, organism, strandedness, udg, path("*rg.bam"), path("*rg.bam.{bai,csi}") into ch_readgroup_replacement_for_ug
+
+  script:
+  def size = params.large_ref ? '-c' : ''
+  """
+  picard -Xmx${task.memory.toGiga()}g AddOrReplaceReadGroups I=${bam} O=${samplename}_rg.bam RGID=1 RGLB="${samplename}_rg" RGPL=illumina RGPU=4410 RGSM="${samplename}_rg" VALIDATION_STRINGENCY=LENIENT
+  samtools index ${samplename}_rg.bam ${size}
+  """
+
+}
+
+if ( params.run_genotyping && params.genotyping_tool == 'ug' && params.run_multivcfanalyzer ) {
+  ch_input_for_ug = ch_readgroup_replacement_for_ug
+} else {
+  ch_input_for_ug = ch_damagemanipulation_for_genotyping_ug
 }
 
 // Unified Genotyper - although not-supported, better for aDNA (because HC does de novo assembly which requires higher coverages), and needed for MultiVCFAnalyzer
@@ -2381,7 +2411,7 @@ process genotyping_ug {
   params.run_genotyping && params.genotyping_tool == 'ug'
 
   input:
-  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_damagemanipulation_for_genotyping_ug
+  tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, file(bam), file(bai) from ch_input_for_ug
   file fasta from ch_fasta_for_genotyping_ug.collect()
   file fai from ch_fai_for_ug.collect()
   file dict from ch_dict_for_ug.collect()
