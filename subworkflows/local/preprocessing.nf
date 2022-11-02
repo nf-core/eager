@@ -5,7 +5,6 @@
 
 include { PREPROCESSING_FASTP          } from './preprocessing_fastp'
 include { PREPROCESSING_ADAPTERREMOVAL } from './preprocessing_adapterremoval'
-//include { LEEHOM                     } from './preprocessing_leehom'
 include { FASTQC as FASTQC_PROCESSED } from '../../modules/nf-core/fastqc/main'
 
 workflow PREPROCESSING {
@@ -18,7 +17,7 @@ workflow PREPROCESSING {
     ch_multiqc_files  = Channel.empty()
 
     if ( params.preprocessing_tool == "fastp" ) {
-        ch_processed_reads = PREPROCESSING_FASTP ( reads ).reads
+        ch_processed_reads = PREPROCESSING_FASTP ( reads, adapterlist ).reads
         ch_versions        =  ch_versions.mix( PREPROCESSING_FASTP.out.versions )
         ch_multiqc_files   =  ch_multiqc_files.mix( PREPROCESSING_FASTP.out.mqc )
     } else if ( params.preprocessing_tool == "adapterremoval" ) {

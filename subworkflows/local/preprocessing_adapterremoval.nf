@@ -23,10 +23,15 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
                                     }
 
     ADAPTERREMOVAL_SINGLE ( ch_input_for_adapterremoval.single, adapterlist )
+    ch_versions = ch_versions.mix( ADAPTERREMOVAL_SINGLE.out.versions.first() )
+    ch_multiqc_files = ch_multiqc_files.mix(ADAPTERREMOVAL_SINGLE.out.settings)
+
     ADAPTERREMOVAL_PAIRED ( ch_input_for_adapterremoval.paired, adapterlist )
+    ch_versions = ch_versions.mix( ADAPTERREMOVAL_PAIRED.out.versions.first() )
+    ch_multiqc_files = ch_multiqc_files.mix(ADAPTERREMOVAL_PAIRED.out.settings)
 
     /*
-     * Due to the ~slightly~ very ugly output implementation of the current AdapterRemoval2 version, each file
+     * Due to the ugly output implementation of the current AdapterRemoval2 version, each file
      * has to be exported in a separate channel and we must manually recombine when necessary.
      */
 
@@ -87,14 +92,6 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
             .mix(ADAPTERREMOVAL_SINGLE.out.singles_truncated)
 
     }
-
-    ch_versions = ch_versions.mix( ADAPTERREMOVAL_SINGLE.out.versions.first() )
-    ch_versions = ch_versions.mix( ADAPTERREMOVAL_PAIRED.out.versions.first() )
-
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ADAPTERREMOVAL_PAIRED.out.settings,
-        ADAPTERREMOVAL_SINGLE.out.settings
-    )
 
     emit:
     reads    = ch_adapterremoval_reads_prepped  // channel: [ val(meta), [ reads ] ]

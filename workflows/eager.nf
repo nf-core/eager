@@ -72,12 +72,19 @@ workflow EAGER {
     // Input file checks
     //
 
+    // Reference
     fasta                = file(params.fasta, checkIfExists: true)
     fasta_fai            = params.fasta_fai ? file(params.fasta_fai, checkIfExists: true) : []
     fasta_dict           = params.fasta_dict ? file(params.fasta_dict, checkIfExists: true) : []
     fasta_mapperindexdir = params.fasta_mapperindexdir ? file(params.fasta_mapperindexdir, checkIfExists: true) : []
+
+    // Preprocessing
     adapterlist          = params.preprocessing_adapterlist ? file(params.preprocessing_adapterlist, checkIfExists: true) : []
 
+    if ( params.preprocessing_adapterlist ) {
+        if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
+        if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
+    }
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
