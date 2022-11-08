@@ -43,6 +43,7 @@ dependencies:
   - bioconda::sexdeterrmine=1.1.2
   - bioconda::multivcfanalyzer=0.85.2
   - bioconda::hops=0.35
+  - bioconda::malt=0.61
   - conda-forge::biopython=1.79
   - conda-forge::xopen=1.1.0
   - bioconda::bowtie2=2.4.4
