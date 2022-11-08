@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
+- Updated MultiQC to official 1.13 version (rather than alpha)
+- Added pinned MALT dependency to ensure working version in future versions of eager
+
 ### `Deprecated`
 
 ## [2.4.5] - 2022-08-02
