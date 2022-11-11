@@ -19,7 +19,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed parameter documentation for `--snpcapture_bed` regarding on-target SNP stats to state these stats currently not displayed in MultiQC only in the Qualimap results (♥ to @meganemichel and @TCLamnidis for reporting)
 - [#934](https://github.com/nf-core/eager/issues/934) Fixed broken parameter setting in mapDamage2 rescale length (♥ to @ashildv for reporting)
 
-
 ### `Dependencies`
 
 - Updated MultiQC to official 1.13 version (rather than alpha)
