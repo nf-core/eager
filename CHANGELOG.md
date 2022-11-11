@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
-- Changed endors.py license from GPL to MIT (by @aidaanva)
-- Removed erroneous R2 in single-end example in input TSV of usage docs (by @aidaanva)
+- Changed endors.py license from GPL to MIT (♥ to @aidaanva for fixing)
+- Removed erroneous R2 in single-end example in input TSV of usage docs (♥ to @aidaanva for fixing)
 - [#928](https://github.com/nf-core/eager/issues/928) Fixed read group incompatibility by re-adding picard AddOrReplaceReadGroups for MultiVCFAnalyzer (♥ to @aidaanva, @meganemichel for reporting)
 - Fixed edge case of DamageProfiler occasionally requiring FASTA index (♥ to @asmaa-a-abdelwahab for reporting)
+- [#834](https://github.com/nf-core/eager/issues/834) Increased significance values in general stats table for Qualimap mean/median coverages (♥ to @neija2611 for reporting)
+- Fixed parameter documentation for `--snpcapture_bed` regarding on-target SNP stats to state these stats currently not displayed in MultiQC only in the Qualimap results (♥ to @meganemichel and @TCLamnidis for reporting)
 
 ### `Dependencies`
 
