@@ -2129,8 +2129,10 @@ process mapdamage_rescaling {
     def base = "${bam.baseName}"
     def singlestranded = strandedness == "single" ? '--single-stranded' : ''
     def size = params.large_ref ? '-c' : ''
+    def rescale_length_3p = params.rescale_length_3p != 0 ? "--rescale-length-3p=${params.rescale_length_3p}" : ""
+    def rescale_length_5p = params.rescale_length_5p != 0 ? "--rescale-length-5p=${params.rescale_length_5p}" : ""
     """
-    mapDamage -i ${bam} -r ${fasta} --rescale --rescale-out ${base}_rescaled.bam --rescale-length-5p ${params.rescale_length_5p} --rescale-length-3p=${params.rescale_length_3p} ${singlestranded}
+    mapDamage -i ${bam} -r ${fasta} --rescale --rescale-out="${base}_rescaled.bam" --seq-length=${params.rescale_seqlength} ${rescale_length_5p} ${rescale_length_3p} ${singlestranded}
     samtools index ${base}_rescaled.bam ${size}
     """
 

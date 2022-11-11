@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#933](https://github.com/nf-core/eager/issues/933) Added support for customising --seq-length in mapDamage rescaling (♥ to @ashildv for requesting)
+
 ### `Fixed`
 
 - Changed endors.py license from GPL to MIT (by @aidaanva)
 - Removed erroneous R2 in single-end example in input TSV of usage docs (by @aidaanva)
 - [#928](https://github.com/nf-core/eager/issues/928) Fixed read group incompatibility by re-adding picard AddOrReplaceReadGroups for MultiVCFAnalyzer (♥ to @aidaanva, @meganemichel for reporting)
 - Fixed edge case of DamageProfiler occasionally requiring FASTA index (♥ to @asmaa-a-abdelwahab for reporting)
+- [#934](https://github.com/nf-core/eager/issues/934) Fixed broken parameter setting in mapDamage2 rescale length (♥ to @ashildv for reporting)
 
 ### `Dependencies`
 

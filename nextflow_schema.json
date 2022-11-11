@@ -914,18 +914,25 @@
                     "description": "Turn on damage rescaling of BAM files using mapDamage2 to probabilistically remove damage.",
                     "help_text": "Turns on mapDamage2's BAM rescaling functionality. This probablistically replaces Ts back to Cs depending on the likelihood this reference-mismatch was originally caused by damage. If the library is specified to be single stranded, this will automatically use the `--single-stranded` mode.\n\nThis functionality does not have any MultiQC output.\n\n:warning: rescaled libraries will not be merged with non-scaled libraries of the same sample for downstream genotyping, as the model may be different for each library. If you wish to merge these, please do this manually and re-run nf-core/eager using the merged BAMs as input. \n\n> Modifies the `--rescale` parameter of mapDamage2"
                 },
-                "rescale_length_5p": {
+                "rescale_seqlength": {
                     "type": "integer",
                     "default": 12,
+                    "fa_icon": "fas fa-ruler-horizontal",
+                    "description": "Length of read sequence to use from each side for rescaling. Can be overridden by --rescale_length_*p.",
+                    "help_text": "Specify the length from the end of the read that mapDamage should rescale at both ends.\n\n> Modifies the `--seq-length` parameter of mapDamage2."
+                },
+                "rescale_length_5p": {
+                    "type": "integer",
+                    "default": 0,
                     "fa_icon": "fas fa-balance-scale-right",
-                    "description": "Length of read for mapDamage2 to rescale from 5p end.",
-                    "help_text": "Specify the length from the end of the read that mapDamage should rescale.\n\n> Modifies the `--rescale-length-5p` parameter of mapDamage2."
+                    "description": "Length of read for mapDamage2 to rescale from 5p end.  Only used if not 0 otherwise --rescale_seqlength used.",
+                    "help_text": "Specify the length from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-5p` parameter of mapDamage2."
                 },
                 "rescale_length_3p": {
                     "type": "integer",
-                    "default": 12,
+                    "default": 0,
                     "fa_icon": "fas fa-balance-scale-left",
-                    "description": "Length of read for mapDamage2 to rescale from 3p end.",
+                    "description": "Length of read for mapDamage2 to rescale from 3p end. Only used if not 0 otherwise --rescale_seqlength used..",
                     "help_text": "Specify the length from the end of the read that mapDamage should rescale.\n\n> Modifies the `--rescale-length-3p` parameter of mapDamage2."
                 }
             },
