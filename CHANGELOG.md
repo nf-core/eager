@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#933](https://github.com/nf-core/eager/issues/933) Added support for customising --seq-length in mapDamage rescaling (♥ to @ashildv for requesting)
+
 ### `Fixed`
 
 - Changed endors.py license from GPL to MIT (♥ to @aidaanva for fixing)
@@ -15,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed edge case of DamageProfiler occasionally requiring FASTA index (♥ to @asmaa-a-abdelwahab for reporting)
 - [#834](https://github.com/nf-core/eager/issues/834) Increased significance values in general stats table for Qualimap mean/median coverages (♥ to @neija2611 for reporting)
 - Fixed parameter documentation for `--snpcapture_bed` regarding on-target SNP stats to state these stats currently not displayed in MultiQC only in the Qualimap results (♥ to @meganemichel and @TCLamnidis for reporting)
+- [#934](https://github.com/nf-core/eager/issues/934) Fixed broken parameter setting in mapDamage2 rescale length (♥ to @ashildv for reporting)
 
 ### `Dependencies`
 
