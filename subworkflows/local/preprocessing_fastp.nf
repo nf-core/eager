@@ -25,7 +25,7 @@ workflow PREPROCESSING_FASTP {
     ch_multiqc_files = ch_multiqc_files.mix( FASTP_SINGLE.out.json )
 
     // Last parameter here turns on merging of PE data
-    FASTP_PAIRED ( ch_input_for_fastp.paired, adapterlist, false, params.preprocessing_skippairmerging )
+    FASTP_PAIRED ( ch_input_for_fastp.paired, adapterlist, false, !params.preprocessing_skippairmerging )
     ch_versions = ch_versions.mix(FASTP_PAIRED.out.versions.first())
     ch_multiqc_files = ch_multiqc_files.mix( FASTP_PAIRED.out.json )
 

@@ -364,25 +364,19 @@
                     "default": 15,
                     "description": "Specify the minimum length reads must have to be retained."
                 },
+                "preprocessing_trim5p": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify number of bases to hard-trim from 5 prime or front of reads. Exact behaviour varies per tool, see documentation."
+                },
+                "preprocessing_trim3p": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify number of bases to hard-trim from 3 prime or tail of reads. Exact behaviour varies per tool, see documentation."
+                },
                 "preprocessing_savepreprocessedreads": {
                     "type": "boolean",
                     "description": "Specify to save the preprocessed reads in the results directory."
-                },
-                "preprocessing_fastp_postartrimfront": {
-                    "type": "integer",
-                    "default": 0
-                },
-                "preprocessing_fastp_postartrimtail": {
-                    "type": "integer",
-                    "default": 0
-                },
-                "preprocessing_fastp_postartrimfront2": {
-                    "type": "integer",
-                    "default": 0
-                },
-                "preprocessing_fastp_postartrimtail2": {
-                    "type": "integer",
-                    "default": 0
                 },
                 "preprocessing_fastp_complexityfilter": {
                     "type": "boolean",
@@ -394,11 +388,33 @@
                     "description": "Specify the complexity threshold that must be reached or exceeded to retain reads."
                 },
                 "preprocessing_adapterremoval_preserve5p": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Skip AdapterRemoval base trimming (n, quality) of 5 prime end."
+                },
+                "preprocessing_adapterremoval_skipqualitytrimming": {
+                    "type": "string",
+                    "default": "false",
+                    "description": "Skip AdapterRemoval quality and N trimming from ends of reads."
+                },
+                "preprocessing_adapterremoval_trimbasequalitymin": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "Specify AdapterRemoval minimum base quality for trimming off bases."
+                },
+                "preprocessing_adapterremoval_skipntrimming": {
+                    "type": "string",
+                    "default": "false",
+                    "description": "Skip AdapterRemoval N trimming (quality trimming only)."
                 },
                 "preprocessing_adapterremoval_adapteroverlap": {
                     "type": "integer",
-                    "default": 1
+                    "default": 1,
+                    "description": "Specify the AdapterRemoval minimum adapter overlap required for trimming."
+                },
+                "preprocessing_adapterremoval_qualitymax": {
+                    "type": "integer",
+                    "default": 41,
+                    "description": "Specify the AdapterRemoval maximum Phred score used in input FASTQ files"
                 }
             }
         }

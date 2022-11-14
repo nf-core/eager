@@ -23,7 +23,7 @@ jobs:
           - "21.10.3"
           - "latest-everything"
         PARAMS:
-          - "--preprocessing_tool fastp"
+          - "--preprocessing_tool fastp --preprocessing_adapterlist"
           - "--preprocessing_tool adapterremoval"
           - "--skip_preprocessing"
     steps:
