@@ -320,7 +320,9 @@
             "properties": {
                 "skip_preprocessing": {
                     "type": "boolean",
-                    "description": "Specify to skip all preprocessing steps (adapter removal, paired-end merging, poly-g trimming etc)."
+                    "description": "Specify to skip all preprocessing steps (adapter removal, paired-end merging, poly-g trimming etc).",
+                    "help_text": "Specify to skip all preprocessing steps (adapter removal, paired-end merging, poly-g trimming etc).\n\nThis will also mean you will only get one set of FastQC results (of the input reads).",
+                    "fa_icon": "fas fa-forward"
                 },
                 "preprocessing_tool": {
                     "type": "string",
@@ -329,19 +331,26 @@
                     "enum": [
                         "fastp",
                         "adapterremoval"
-                    ]
+                    ],
+                    "help_text": "Specify which preprocessing tool to use.\n\nAdapterRemoval is commonly used in palaeogenomics, however fastp has similar performance and has many additional functionality (including inbuilt complexity trimming) that can be often useful.",
+                    "fa_icon": "fas fa-hammer"
                 },
                 "preprocessing_skippairmerging": {
                     "type": "boolean",
-                    "description": "Specify to skip read-pair merging."
+                    "description": "Specify to skip read-pair merging.",
+                    "fa_icon": "fas fa-forward",
+                    "help_text": "Turns off the paired-end read merging, and will result in paired-end mapping modes being used during reference of reads again alignment.\n\nThis can be useful in cases where you have long ancient DNA reads, modern DNA,  or when you want to utilise mate-pair 'spatial' information..\n\n\u26a0\ufe0f If you run this and also with --preprocessing_minlength set to a value (as is by default!), you may end up removing single reads from either the pair1 or pair2 file. These reads will be NOT be mapped when aligning with either bwa or bowtie, as both can only accept one (forward) or two (forward and reverse) FASTQs as input in paired-end mode.\n\n> Modifies AdapterRemoval parameter: --collapse\n> Modifies fastp parameter: --merge"
                 },
                 "preprocessing_excludeunmerged": {
                     "type": "boolean",
-                    "description": "Specify to exclude pairs that did not overlap sufficiently for merging (i.e., keep merged reads only)."
+                    "description": "Specify to exclude pairs that did not overlap sufficiently for merging (i.e., keep merged reads only).",
+                    "fa_icon": "fas fa-trash-alt",
+                    "help_text": "Specify to exclude pairs that did not overlap sufficiently for merging (i.e., keep merged reads only), in otherwords singletons (i.e. reads missing a pair), or un-merged reads (where there wasn't sufficient overlap) are discarded.\n\nMost ancient DNA molecules are very short, and the majority are expected to merge.  Specifying this parameter can sometimes be useful when dealing with ultra-short aDNA reads to reduce the number of longer-reads you may have in your library that are derived from modern contamination. It can also speed up run time of mapping steps.\n\nYou may want to use this if you want ensure only the best quality reads for your analysis, but with the penalty of potentially losing still valid data (even if some reads have slightly lower quality and/or are longer). It is highly recommended when using 'dedup' deduplication tool."
                 },
                 "preprocessing_skipadaptertrim": {
                     "type": "boolean",
-                    "description": "Specify to skip removal of adapters."
+                    "description": "Specify to skip removal of adapters.",
+                    "help_text": "Specify to turn off trimming of adapters from reads.\n\nYou may wish to do this if you are using public data (e.g. ENA, SRA), that _should_ have all library artefacts from reads.\n\n> Modifies AdapterRemoval parameter: --adapter1 --adapter2 (sets both to an empty string)\n> Applies fastp parameter: --disable_adapter_trimming"
                 },
                 "preprocessing_adapter1": {
                     "type": "string",
