@@ -10,10 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": [
-                "input",
-                "outdir"
-            ],
+            "required": ["input", "outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -81,12 +78,7 @@
                 "mapping_tool": {
                     "type": "string",
                     "default": "bowtie2",
-                    "enum": [
-                        "bwaaln",
-                        "bwamem",
-                        "bowtie2",
-                        "circularmapper"
-                    ],
+                    "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper"],
                     "description": "Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'.",
                     "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)"
                 },
@@ -221,14 +213,7 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": [
-                        "symlink",
-                        "rellink",
-                        "link",
-                        "copy",
-                        "copyNoFollow",
-                        "move"
-                    ],
+                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
                 },
                 "email_on_fail": {
@@ -328,10 +313,7 @@
                     "type": "string",
                     "default": "fastp",
                     "description": "Specify which preprocessing tool to use.",
-                    "enum": [
-                        "fastp",
-                        "adapterremoval"
-                    ],
+                    "enum": ["fastp", "adapterremoval"],
                     "help_text": "Specify which preprocessing tool to use.\n\nAdapterRemoval is commonly used in palaeogenomics, however fastp has similar performance and has many additional functionality (including inbuilt complexity trimming) that can be often useful.",
                     "fa_icon": "fas fa-hammer"
                 },
@@ -339,7 +321,7 @@
                     "type": "boolean",
                     "description": "Specify to skip read-pair merging.",
                     "fa_icon": "fas fa-forward",
-                    "help_text": "Turns off the paired-end read merging, and will result in paired-end mapping modes being used during reference of reads again alignment.\n\nThis can be useful in cases where you have long ancient DNA reads, modern DNA,  or when you want to utilise mate-pair 'spatial' information..\n\n\u26a0\ufe0f If you run this and also with --preprocessing_minlength set to a value (as is by default!), you may end up removing single reads from either the pair1 or pair2 file. These reads will be NOT be mapped when aligning with either bwa or bowtie, as both can only accept one (forward) or two (forward and reverse) FASTQs as input in paired-end mode.\n\n> Modifies AdapterRemoval parameter: --collapse\n> Modifies fastp parameter: --merge"
+                    "help_text": "Turns off the paired-end read merging, and will result in paired-end mapping modes being used during reference of reads again alignment.\n\nThis can be useful in cases where you have long ancient DNA reads, modern DNA,  or when you want to utilise mate-pair 'spatial' information..\n\n\u26a0\ufe0f If you run this and also with --preprocessing_minlength set to a value (as is by default!), you may end up removing single reads from either the pair1 or pair2 file. These reads will be NOT be mapped when aligning with either bwa or bowtie, as both can only accept one (forward) or two (forward and reverse) FASTQs as input in paired-end mode.\n\n> Modifies AdapterRemoval parameter: `--collapse`\n> Modifies fastp parameter: `--merge`"
                 },
                 "preprocessing_excludeunmerged": {
                     "type": "boolean",
@@ -350,38 +332,50 @@
                 "preprocessing_skipadaptertrim": {
                     "type": "boolean",
                     "description": "Specify to skip removal of adapters.",
-                    "help_text": "Specify to turn off trimming of adapters from reads.\n\nYou may wish to do this if you are using public data (e.g. ENA, SRA), that _should_ have all library artefacts from reads.\n\n> Modifies AdapterRemoval parameter: --adapter1 --adapter2 (sets both to an empty string)\n> Applies fastp parameter: --disable_adapter_trimming"
+                    "help_text": "Specify to turn off trimming of adapters from reads.\n\nYou may wish to do this if you are using public data (e.g. ENA, SRA), that _should_ have all library artefacts from reads.\n\n> Modifies AdapterRemoval parameter: `--adapter1` and  `--adapter2` (sets both to an empty string)\n> Applies fastp parameter: `--disable_adapter_trimming`",
+                    "fa_icon": "fas fa-forward"
                 },
                 "preprocessing_adapter1": {
                     "type": "string",
                     "default": "None",
-                    "description": "Specify the nucleotide sequence for the forward read/R1."
+                    "description": "Specify the nucleotide sequence for the forward read/R1.",
+                    "fa_icon": "fas fa-grip-lines",
+                    "help_text": "Specify a nucleotide sequence for the forward read/R1.\n\nIf not modified by the user, the default for the particular preprocessing tool will be used. To turn off adapter trimming use `--preprocessing_skipadaptertrim`.\n\n> Modifies AdapterRemoval parameter: `--adapter1`\n> Modifies fastp parameter: `--adapter_sequence`"
                 },
                 "preprocessing_adapter2": {
                     "type": "string",
                     "default": "None",
-                    "description": "Specify the nucleotide sequence for the forward read/R2."
+                    "description": "Specify the nucleotide sequence for the forward read/R2.",
+                    "fa_icon": "fas fa-grip-lines",
+                    "help_text": "Specify a nucleotide sequence for the forward read/R2.\n\nIf not modified by the user, the default for the particular preprocessing tool will be used. To turn off adapter trimming use `--preprocessing_skipadaptertrim`.\n\n> Modifies AdapterRemoval parameter: `--adapter2`\n> Modifies fastp parameter: `--adapter_sequence_r2`"
                 },
                 "preprocessing_adapterlist": {
                     "type": "string",
                     "default": "None",
                     "description": "Specify a list of all possible adapters to trim. Overrides --preprocessing_adapter1/2. Formats: .txt (AdapterRemoval) or .fasta. (fastp).",
-                    "help_text": "Allows to supply a file with a list of adapter (combinations) to remove from all files. \n\nOverrides the --preprocessing_adapter1/--preprocessing_adapter2 parameters . \n\nFor AdapterRemoval this consists of a two column table with a `.txt` extension: first column represents forward strand, second column for reverse strand. You must supply all possibly combinations, one per line, and this list is applied to all files. See AdapterRemoval documentation for more information.\n\nFor fastp this consists of a standard FASTA format with a `.fasta`/`.fa`/`.fna`/`.fas` extension. The adapter sequence in this file should be at least 6bp long, otherwise it will be skipped. fastp trims the adapters present in the FASTA file one by one.\n\n> Modifies AdapterRemoval parameter: --adapter-list\n> Modifies fastp parameter: --adapter_fasta"
+                    "help_text": "Allows to supply a file with a list of adapter (combinations) to remove from all files. \n\nOverrides the `--preprocessing_adapter1`/`--preprocessing_adapter2` parameters . \n\nFor AdapterRemoval this consists of a two column table with a `.txt` extension: first column represents forward strand, second column for reverse strand. You must supply all possibly combinations, one per line, and this list is applied to all files. See AdapterRemoval documentation for more information.\n\nFor fastp this consists of a standard FASTA format with a `.fasta`/`.fa`/`.fna`/`.fas` extension. The adapter sequence in this file should be at least 6bp long, otherwise it will be skipped. fastp trims the adapters present in the FASTA file one by one.\n\n> Modifies AdapterRemoval parameter: `--adapter-list`\n> Modifies fastp parameter: `--adapter_fasta`",
+                    "fa_icon": "fas fa-list"
                 },
                 "preprocessing_minlength": {
                     "type": "integer",
-                    "default": 15,
-                    "description": "Specify the minimum length reads must have to be retained."
+                    "default": 25,
+                    "description": "Specify the minimum length reads must have to be retained.",
+                    "help_text": "Specify the minimum length reads must have to be retained. \n\nReads smaller than this length after trimming are discarded and not included in downstream analyses. Typically in ancient DNA users will set this to 30 or for very old samples around 25 bp - reads any shorter that this often are not specific enough to provide useful information.\n\n> Modifies AdapterRemoval parameter: `--minlength`\n> Modifies fastp parameter: `--length_required`",
+                    "fa_icon": "fas fa-ruler"
                 },
                 "preprocessing_trim5p": {
                     "type": "integer",
                     "default": 0,
-                    "description": "Specify number of bases to hard-trim from 5 prime or front of reads. Exact behaviour varies per tool, see documentation."
+                    "description": "Specify number of bases to hard-trim from 5 prime or front of reads. Exact behaviour varies per tool, see documentation.",
+                    "help_text": "Specify number of bases to hard-trim from 5 prime or front of reads. Exact behaviour varies per tool, see documentation. By default set to `0` to not perform any hard trimming. By default set to `0` to not perform any hard trimming.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n\u26a0\ufe0f when this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: this 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter).  Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior mapping (to allow more specific mappering), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 5p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore this is more suitable for hard-removal of damage prior mapping (however the Bowtie2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim5p`\n> Modifies fastp parameters: `--trim_front1` and/or `--trim_front2`\n",
+                    "fa_icon": "fas fa-cut"
                 },
                 "preprocessing_trim3p": {
                     "type": "integer",
                     "default": 0,
-                    "description": "Specify number of bases to hard-trim from 3 prime or tail of reads. Exact behaviour varies per tool, see documentation."
+                    "description": "Specify number of bases to hard-trim from 3 prime or tail of reads. Exact behaviour varies per tool, see documentation.",
+                    "fa_icon": "fas fa-cut",
+                    "help_text": "Specify number of bases to hard-trim from 3 prime or tail of reads. Exact behaviour varies per tool, see documentation.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n\u26a0\ufe0f when this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: this 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter).  Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior mapping (to allow more specific mappering), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 3p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore this is more suitable for hard-removal of damage prior mapping (however the Bowtie2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim3p`\n> Modifies fastp parameters: `--tail_front1` and/or `--trim_tail2`\n"
                 },
                 "preprocessing_savepreprocessedreads": {
                     "type": "boolean",
