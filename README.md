@@ -164,6 +164,7 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Alexandre Gilardet](https://github.com/alexandregilardet)
 * Arielle Munters
 * [Åshild Vågene](https://github.com/ashildv)
+* [Asmaa Ali](https://github.com/asmaa-a-abdelwahab)
 * [Charles Plessy](https://github.com/charles-plessy)
 * [Elina Salmela](https://github.com/esalmela)
 * [Fabian Lehmann](https://github.com/Lehmann-Fabian)
@@ -177,6 +178,7 @@ Those who have provided conceptual guidance, suggestions, bug reports etc.
 * [Katerine Eaton](https://github.com/ktmeaton)
 * [Kathrin Nägele](https://github.com/KathrinNaegele)
 * [Kevin Lord](https://github.com/lordkev)
+* [Laura Lacher](https://github.com/neija2611)
 * [Luc Venturini](https://github.com/lucventurini)
 * [Mahesh Binzer-Panchal](https://github.com/mahesh-panchal)
 * [Marcel Keller](https://github.com/marcel-keller)
