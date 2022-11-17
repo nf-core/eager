@@ -1,6 +1,6 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-name: nf-core-eager-2.4.5
+name: nf-core-eager-2.4.6
 channels:
   - conda-forge
   - bioconda
@@ -26,7 +26,7 @@ dependencies:
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
   - bioconda::damageprofiler=0.4.9 # Don't upgrade - later versions don't allow java 8
-  - bioconda::multiqc=1.13a
+  - bioconda::multiqc=1.13
   - bioconda::pmdtools=0.60
   - bioconda::bedtools=2.30.0
   - conda-forge::libiconv=1.16
@@ -43,6 +43,7 @@ dependencies:
   - bioconda::sexdeterrmine=1.1.2
   - bioconda::multivcfanalyzer=0.85.2
   - bioconda::hops=0.35
+  - bioconda::malt=0.61
   - conda-forge::biopython=1.79
   - conda-forge::xopen=1.1.0
   - bioconda::bowtie2=2.4.4

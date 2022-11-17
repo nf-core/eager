@@ -37,13 +37,13 @@ jobs:
 
       - name: Build new docker image
         if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/eager:2.4.5
+        run: docker build --no-cache . -t nfcore/eager:2.4.6
 
       - name: Pull docker image
         if: ${{ !env.MATCHED_FILES }}
         run: |
           docker pull nfcore/eager:dev
-          docker tag nfcore/eager:dev nfcore/eager:2.4.5
+          docker tag nfcore/eager:dev nfcore/eager:2.4.6
 
       - name: Install Nextflow
         env:

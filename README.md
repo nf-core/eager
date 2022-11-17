@@ -160,29 +160,36 @@ of this pipeline:
 
 Those who have provided conceptual guidance, suggestions, bug reports etc.
 
+* [Alex Hübner](https://github.com/alexhbnr)
 * [Alexandre Gilardet](https://github.com/alexandregilardet)
 * Arielle Munters
 * [Åshild Vågene](https://github.com/ashildv)
+* [Asmaa Ali](https://github.com/asmaa-a-abdelwahab)
 * [Charles Plessy](https://github.com/charles-plessy)
 * [Elina Salmela](https://github.com/esalmela)
+* [Fabian Lehmann](https://github.com/Lehmann-Fabian)
+* [He Yu](https://github.com/paulayu)
 * [Hester van Schalkwyk](https://github.com/hesterjvs)
 * [Ido Bar](https://github.com/IdoBar)
 * [Irina Velsko](https://github.com/ivelsko)
 * [Işın Altınkaya](https://github.com/isinaltinkaya)
 * [Johan Nylander](https://github.com/nylander)
+* [Jonas Niemann](https://github.com/NiemannJ)
 * [Katerine Eaton](https://github.com/ktmeaton)
 * [Kathrin Nägele](https://github.com/KathrinNaegele)
+* [Kevin Lord](https://github.com/lordkev)
+* [Laura Lacher](https://github.com/neija2611)
 * [Luc Venturini](https://github.com/lucventurini)
+* [Mahesh Binzer-Panchal](https://github.com/mahesh-panchal)
 * [Marcel Keller](https://github.com/marcel-keller)
 * [Megan Michel](https://github.com/meganemichel)
 * [Pierre Lindenbaum](https://github.com/lindenb)
 * [Pontus Skoglund](https://github.com/pontussk)
 * [Raphael Eisenhofer](https://github.com/EisenRa)
 * [Roberta Davidson](https://github.com/roberta-davidson)
-* [Torsten Günter](https://bitbucket.org/tguenther/)
-* [Kevin Lord](https://github.com/lordkev)
-* [He Yu](https://github.com/paulayu)
+* [Rodrigo Barquera](https://github.com/RodrigoBarquera)
 * [Selina Carlhoff](https://github.com/scarlhoff)
+* [Torsten Günter](https://bitbucket.org/tguenther)
 
 If you've contributed and you're missing in here, please let us know and we will add you in of course!
 
