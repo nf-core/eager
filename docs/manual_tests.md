@@ -17,6 +17,7 @@ preprocessing_adapter2                           = null
 preprocessing_adapterlist                        = null
 preprocessing_minlength                          = 25
 preprocessing_savepreprocessedreads              = false
+
 preprocessing_fastp_complexityfilter             = false
 preprocessing_trim5p                             = 0      // WARN: slightly different behaviour between fastp & adapterremoval
 preprocessing_trim3p                             = 0      // WARN: slightly different behaviour between fastp & adapterremoval
@@ -41,16 +42,16 @@ General Combinations:
 - with adapterlist ✅
 - with custom adapterseq (1&2) ✅
 - overriding order of skipping+trim/adapterlist/custom adapterseq ✅
-- with default
+- with default ✅
 
-- with/without preprocessed reads
+- with/without preprocessed reads ✅
 
 Tool Specific combinations
 
 - fastp
   - with/without complexity filtering
 - AdapterRemoval
-  - with/without quality trim skip
+  - with/without skipqualitytim
   - with/without skipntrimming
 
 ### AdapterRemoval
@@ -58,9 +59,11 @@ Tool Specific combinations
 ```bash
 ## IMPORTANT: CHECK COMMANDS IN BOTH SE/PE EXAMPLES!
 
-## numeric tests: check all numeric parameters are present and match those in the command: MISSING - trim5/3p FAILED - qualitymax
+## numeric tests: check all numeric parameters are present and match those in the command:
+##                  TODO MISSING - trim5/3p FAILED
 ##                 should also show `--collapse`, and single `_merged` file in dumped channel
 ##                 .settings should indicate two adapter sequences on lines 7/8
+##                check no other results files (i.e., FASTQs) than settings
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval' --preprocessing_minlength 30 --preprocessing_trim5p 5 --preprocessing_trim3p 3 --preprocessing_adapterremoval_adapteroverlap 3 --preprocessing_adapterremoval_trimbasequalitymin 25 --preprocessing_adapterremoval_qualitymax 47
 
 ## Skip preprocessing: no adapterremoval executed
@@ -81,13 +84,22 @@ nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv -
 ## Custom adapter trimming sequences: .command.sh should display the input sequences as does the `.settings` file
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval' --preprocessing_adapter1 AAAA --preprocessing_adapter2 AAAAAAA
 
-## Check skippting adapter trimming overrides adapterlist/sequences TODO: DOCUMENT THIS IN PARAMETERS!
+## Check skippting adapter trimming overrides adapterlist/sequences TODO: DOCUMENT OVERRIDE ORDER IN PARAMETERS!
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval' --preprocessing_skipadaptertrim --preprocessing_adapterlist 'data/adapterlist_ar.txt' --preprocessing_adapter1 AAAA --preprocessing_adapter2 AAAAAAA
 
 ## Check adapterlist overrides custom sequences
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval' --preprocessing_adapterlist 'data/adapterlist_ar.txt' --preprocessing_adapter1 AAAA --preprocessing_adapter2 AAAAAAA
 
-################ UP TO HERE - CHECK WITH DEFAULT SEQS  ###########
+## Check default trimming works: command only contains file and defaults numeric and flag parameters as specified in nextflow.config. Settings file should contain tool-default adapter sequences
+nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval'
+
+## Check saving preprocessed reads: check output directory contains preprocessed FASTQ reads for both files
+nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval' --preprocessing_savepreprocessedreads
+
+## Check quality trimming and trimm n is is turned off: flags should not be in .command.sh and settings should saythey are set as 'No'
+nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval' --preprocessing_adapterremoval_skipqualitytrimming --preprocessing_adapterremoval_skipntrimming
+
+## Check
 
 ```
 
