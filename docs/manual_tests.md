@@ -32,10 +32,10 @@ preprocessing_adapterremoval_qualitymax          = 41
 
 General Combinations:
 
-- All numeric values change ✅
+- All numeric values change ✅✅
 
-- with/without preprocessing ✅
-- with/without skipmerging ✅
+- with/without preprocessing ✅✅
+- with/without skipmerging ✅✅
 - with/without merged only ✅
 
 - with/without skip adapter trimming ✅
@@ -44,15 +44,15 @@ General Combinations:
 - overriding order of skipping+trim/adapterlist/custom adapterseq ✅
 - with default ✅
 
-- with/without preprocessed reads ✅
+- with/without preprocessed reads ✅✅
 
 Tool Specific combinations
 
 - fastp
   - with/without complexity filtering
 - AdapterRemoval
-  - with/without skipqualitytim
-  - with/without skipntrimming
+  - with/without skipqualitytim ✅
+  - with/without skipntrimming ✅
 
 ### AdapterRemoval
 
@@ -60,7 +60,6 @@ Tool Specific combinations
 ## IMPORTANT: CHECK COMMANDS IN BOTH SE/PE EXAMPLES!
 
 ## numeric tests: check all numeric parameters are present and match those in the command:
-##                  TODO MISSING - trim5/3p FAILED
 ##                 should also show `--collapse`, and single `_merged` file in dumped channel
 ##                 .settings should indicate two adapter sequences on lines 7/8
 ##                check no other results files (i.e., FASTQs) than settings
@@ -98,13 +97,26 @@ nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv -
 
 ## Check quality trimming and trimm n is is turned off: flags should not be in .command.sh and settings should saythey are set as 'No'
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval' --preprocessing_adapterremoval_skipqualitytrimming --preprocessing_adapterremoval_skipntrimming
-
-## Check
-
 ```
 
 ### fastp
 
 ```bash
+## numeric tests: check all numeric parameters are present and match those in the command:
+##                 should also show `-m`, and single `_merged` file in dumped channel for PqE data
+##                 should see warning that --include_unmerged is specified so not dumping to separate file
+##                 .log should indicate two default Illumrina read1/read2 adapter sequences
+##                 should see 'Merged and filtered' section
+##                check no other results files (i.e., FASTQs) than settings
+##                  Should see command right at the end of log has correct numberic values
+nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'fastp' --preprocessing_minlength 30 --preprocessing_trim5p 5 --preprocessing_trim3p 3
 
+## Check saving preprocessed reads: check output directory contains preprocessed FASTQ reads for both files
+nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'fastp' --preprocessing_minlength 30 --preprocessing_trim5p 5 --preprocessing_trim3p 3 --preprocessing_savepreprocessedreads
+
+## Skip preprocessing: no adapterremoval executed
+nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'fastp' --skip_preprocessing
+
+## Skip merging: command for paired does not have `-m`, and  a.dump() on preprocessing out shows two FASTQs, single end unmodified
+nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'fastp' --preprocessing_skippairmerging
 ```

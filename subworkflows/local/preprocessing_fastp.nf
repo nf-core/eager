@@ -29,7 +29,7 @@ workflow PREPROCESSING_FASTP {
     ch_versions = ch_versions.mix(FASTP_PAIRED.out.versions.first())
     ch_multiqc_files = ch_multiqc_files.mix( FASTP_PAIRED.out.json )
 
-    if ( params.preprocessing_skippairmerging ) {
+    if ( !params.preprocessing_skippairmerging ) {
         ch_fastp_reads_prepped_pe = FASTP_PAIRED.out.reads_merged
                                         .map {
                                             meta, reads ->
