@@ -127,7 +127,7 @@ workflow EAGER {
     if ( !params.skip_preprocessing ) {
         ch_reads_for_mapping = PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist ).reads
         ch_versions          = ch_versions.mix(PREPROCESSING.out.versions)
-        ch_multiqc_files     = ch_versions.mix(PREPROCESSING.out.mqc)
+        ch_multiqc_files     = ch_versions.mix(PREPROCESSING.out.mqc).collect{it[1]}.ifEmpty([])
     } else {
         ch_reads_for_mapping = INPUT_CHECK.out.fastqs
     }
@@ -147,7 +147,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
-        ch_multiqc_files.map{it[1]}.collect(),
+        ch_multiqc_files.collect(),
         ch_multiqc_config.collect().ifEmpty([]),
         ch_multiqc_custom_config.collect().ifEmpty([]),
         ch_multiqc_logo.collect().ifEmpty([])
