@@ -69,6 +69,8 @@ def multiqc_report = []
 
 workflow EAGER {
 
+    log.info "Schaffa, Schaffa, Genome Baua!"
+
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
@@ -129,8 +131,6 @@ workflow EAGER {
     } else {
         ch_reads_for_mapping = INPUT_CHECK.out.fastqs
     }
-
-    ch_reads_for_mapping.dump(tag: "ch_reads_for_mapping")
 
     //
     // MODULE: MultiQC

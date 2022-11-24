@@ -350,7 +350,7 @@
                 "preprocessing_skipadaptertrim": {
                     "type": "boolean",
                     "description": "Specify to skip removal of adapters.",
-                    "help_text": "Specify to turn off trimming of adapters from reads.\n\nYou may wish to do this if you are using public data (e.g. ENA, SRA), that _should_ have all library artefacts from reads.\n\n> Modifies AdapterRemoval parameter: `--adapter1` and  `--adapter2` (sets both to an empty string)\n> Applies fastp parameter: `--disable_adapter_trimming`",
+                    "help_text": "Specify to turn off trimming of adapters from reads.\n\nYou may wish to do this if you are using public data (e.g. ENA, SRA), that _should_ have all library artefacts from reads.\n\nThis will override any other adapter parameters provided (i.e, `--preprocessing_adapterlist` and or/ `--preprocessing_adapter{1,2}` will be ignored)!\n\n> Modifies AdapterRemoval parameter: `--adapter1` and  `--adapter2` (sets both to an empty string)\n> Applies fastp parameter: `--disable_adapter_trimming`",
                     "fa_icon": "fas fa-forward"
                 },
                 "preprocessing_adapter1": {
@@ -358,7 +358,7 @@
                     "default": "None",
                     "description": "Specify the nucleotide sequence for the forward read/R1.",
                     "fa_icon": "fas fa-grip-lines",
-                    "help_text": "Specify a nucleotide sequence for the forward read/R1.\n\nIf not modified by the user, the default for the particular preprocessing tool will be used. To turn off adapter trimming use `--preprocessing_skipadaptertrim`.\n\n> Modifies AdapterRemoval parameter: `--adapter1`\n> Modifies fastp parameter: `--adapter_sequence`"
+                    "help_text": "Specify a nucleotide sequence for the forward read/R1.\n\nIf not modified by the user, the default for the particular preprocessing tool will be used. Therefore, to turn off adapter trimming use `--preprocessing_skipadaptertrim`.\n\n> Modifies AdapterRemoval parameter: `--adapter1`\n> Modifies fastp parameter: `--adapter_sequence`"
                 },
                 "preprocessing_adapter2": {
                     "type": "string",
@@ -371,7 +371,7 @@
                     "type": "string",
                     "default": "None",
                     "description": "Specify a list of all possible adapters to trim. Overrides --preprocessing_adapter1/2. Formats: .txt (AdapterRemoval) or .fasta. (fastp).",
-                    "help_text": "Allows to supply a file with a list of adapter (combinations) to remove from all files. \n\nOverrides the `--preprocessing_adapter1`/`--preprocessing_adapter2` parameters . \n\nFor AdapterRemoval this consists of a two column table with a `.txt` extension: first column represents forward strand, second column for reverse strand. You must supply all possibly combinations, one per line, and this list is applied to all files. See AdapterRemoval documentation for more information.\n\nFor fastp this consists of a standard FASTA format with a `.fasta`/`.fa`/`.fna`/`.fas` extension. The adapter sequence in this file should be at least 6bp long, otherwise it will be skipped. fastp trims the adapters present in the FASTA file one by one.\n\n> Modifies AdapterRemoval parameter: `--adapter-list`\n> Modifies fastp parameter: `--adapter_fasta`",
+                    "help_text": "Allows to supply a file with a list of adapter (combinations) to remove from all files. \n\nOverrides the `--preprocessing_adapter1`/`--preprocessing_adapter2` parameters . \n\nNote that the two tools have slightly different behaviours.\n\nFor AdapterRemoval this consists of a two column table with a `.txt` extension: first column represents forward strand, second column for reverse strand. You must supply all possibly combinations, one per line, and this list is applied to all files. Only Adapters in this list will be screened for and removed. See AdapterRemoval documentation for more information.\n\nFor fastp this consists of a standard FASTA format with a `.fasta`/`.fa`/`.fna`/`.fas` extension. The adapter sequence in this file should be at least 6bp long, otherwise it will be skipped. fastp first will perform auto-detection of reads and will be removed , and then _additionally_ adapters present in the FASTA file one by one will be removed.\n\n> Modifies AdapterRemoval parameter: `--adapter-list`\n> Modifies fastp parameter: `--adapter_fasta`",
                     "fa_icon": "fas fa-list"
                 },
                 "preprocessing_minlength": {
@@ -397,43 +397,61 @@
                 },
                 "preprocessing_savepreprocessedreads": {
                     "type": "boolean",
-                    "description": "Specify to save the preprocessed reads in the results directory."
+                    "description": "Specify to save the preprocessed reads in the results directory.",
+                    "fa_icon": "fas fa-save",
+                    "help_text": "Specify to save the preprocessed reads in FASTQ format the results directory. \n\nThis can be useful for re-analysing in FASTQ files manually, or uploading to public data repositories such as ENA/SRA (provided you don't do length filtering nor merging)."
                 },
                 "preprocessing_fastp_complexityfilter": {
                     "type": "boolean",
-                    "description": "Specify to turn on sequence complexity filtering of reads with fastp."
+                    "description": "Specify to turn on sequence complexity filtering of reads with fastp.",
+                    "help_text": "Performs a poly-G tail removal step in the beginning of the pipeline using fastp.\n\nThis can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs or NovaSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.\n\n> Modifies fastp parameter: `--trim_poly_g`",
+                    "fa_icon": "fas fa-cut"
                 },
                 "preprocessing_fastp_complexityfilter_threshold": {
                     "type": "integer",
-                    "default": 30,
-                    "description": "Specify the complexity threshold that must be reached or exceeded to retain reads."
+                    "default": 10,
+                    "description": "Specify the complexity threshold that must be reached or exceeded to retain reads.",
+                    "help_text": "This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming. By default, this is set to a value of 10 unless the user has chosen something specifically using this option.\n\n> Modifies fastp parameter: `--poly_g_min_len`",
+                    "fa_icon": "fas fa-ruler"
                 },
                 "preprocessing_adapterremoval_preserve5p": {
                     "type": "boolean",
-                    "description": "Skip AdapterRemoval base trimming (n, quality) of 5 prime end."
+                    "description": "Skip AdapterRemoval base trimming (n, quality) of 5 prime end.",
+                    "help_text": "Turns off quality based trimming at the 5p end of reads when any of the AdapterRemoval quality or N trimming options are used. Only 3p end of reads will be removed.\n\nThis also entirely disables quality based trimming of collapsed reads, since both ends of these are informative for PCR duplicate filtering. For more information see the AdapterRemoval [documentation](https://adapterremoval.readthedocs.io/en/stable/manpage.html#cmdoption-adapterremoval-preserve5p).\n\n> Modifies AdapterRemoval parameters: `--preserve5p`",
+                    "fa_icon": "fas fa-shield-alt"
                 },
                 "preprocessing_adapterremoval_skipqualitytrimming": {
                     "type": "boolean",
-                    "description": "Skip AdapterRemoval quality and N trimming from ends of reads."
+                    "description": "Skip AdapterRemoval quality and N trimming from ends of reads.",
+                    "help_text": "Turns off AdapterRemoval quality trimming from ends of reads. \n\nThis can be useful to reduce runtime when running public data that has already been processed.\n\n> Modifies AdapterRemoval parameters: `--trimqualities` ",
+                    "fa_icon": "fas fa-forward"
                 },
                 "preprocessing_adapterremoval_trimbasequalitymin": {
                     "type": "integer",
                     "default": 20,
-                    "description": "Specify AdapterRemoval minimum base quality for trimming off bases."
+                    "description": "Specify AdapterRemoval minimum base quality for trimming off bases.",
+                    "help_text": "Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off. Default is set to 20.\n\n> Modifies AdapterRemoval parameter: `--minquality`",
+                    "fa_icon": "fas fa-ruler-vertical"
                 },
                 "preprocessing_adapterremoval_skipntrimming": {
                     "type": "boolean",
-                    "description": "Skip AdapterRemoval N trimming (quality trimming only)."
+                    "description": "Skip AdapterRemoval N trimming (quality trimming only).",
+                    "help_text": "Turns off AdapterRemoval N trimming from ends of reads. \n\nThis can be useful to reduce runtime when running public data that has already been processed.\n\n> Modifies AdapterRemoval parameters: `--trimns` ",
+                    "fa_icon": "fas fa-forward"
                 },
                 "preprocessing_adapterremoval_adapteroverlap": {
                     "type": "integer",
                     "default": 1,
-                    "description": "Specify the AdapterRemoval minimum adapter overlap required for trimming."
+                    "description": "Specify the AdapterRemoval minimum adapter overlap required for trimming.",
+                    "fa_icon": "fas fa-ruler-horizontal",
+                    "help_text": "Specifies a minimum number of bases that overlap with the adapter sequence before AdapterRemoval trims adapters sequences from reads.\n\n> Modifies AdapterRemoval parameter: `--minadapteroverlap`"
                 },
                 "preprocessing_adapterremoval_qualitymax": {
                     "type": "integer",
                     "default": 41,
-                    "description": "Specify the AdapterRemoval maximum Phred score used in input FASTQ files"
+                    "description": "Specify the AdapterRemoval maximum Phred score used in input FASTQ files",
+                    "help_text": "Specify maximum Phred score of the quality field of FASTQ files. \n\nThe quality-score range can vary depending on the machine and version (e.g. see diagram [here](https://en.wikipedia.org/wiki/FASTQ_format#Encoding), and this allows you to increase from the default AdapterRemoval value of 41. \n\nNote that while this theoretically can provide you with more confident and precise base call information, many downstream tools only accept FASTQ files with Phred scores limited to a max of 41, and therefore increasing the default for this parameter may make the resulting preprocessed files incompatible with some downstream tools.\n\n> Modifies AdapterRemoval parameters: `--qualitymax`",
+                    "fa_icon": "fas fa-tachometer-alt"
                 }
             }
         }

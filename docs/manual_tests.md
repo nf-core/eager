@@ -83,7 +83,7 @@ nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv -
 ## Custom adapter trimming sequences: .command.sh should display the input sequences as does the `.settings` file
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval' --preprocessing_adapter1 AAAA --preprocessing_adapter2 AAAAAAA
 
-## Check skippting adapter trimming overrides adapterlist/sequences TODO: DOCUMENT OVERRIDE ORDER IN PARAMETERS!
+## Check skipping adapter trimming overrides adapterlist/sequences
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'adapterremoval' --preprocessing_skipadaptertrim --preprocessing_adapterlist 'data/adapterlist_ar.txt' --preprocessing_adapter1 AAAA --preprocessing_adapter2 AAAAAAA
 
 ## Check adapterlist overrides custom sequences
@@ -133,10 +133,10 @@ nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv -
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'fastp' --preprocessing_minlength 30 --preprocessing_trim5p 5 --preprocessing_trim3p 3 --preprocessing_savepreprocessedreads
 7d/dd2a00
 
-## Check skippting adapter trimming overrides adapterlist/sequences, i.e. no adapter trimming references in log and --disabled in command! TODO: DOCUMENT OVERRIDE ORDER IN PARAMETERS!
+## Check skippting adapter trimming overrides adapterlist/sequences, i.e. no adapter trimming references in log and --disabled in command!
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'fastp' --preprocessing_skipadaptertrim --preprocessing_adapterlist 'data/adapterlist_fastp.fa' --preprocessing_adapter1 AAAA --preprocessing_adapter2 AAAAAAA
 
-## TODO Check adapterlist overrides custom sequences: no custom sequences in log/command, only adapter list (auto-detection allowed)
+## Check adapterlist overrides custom sequences: no custom sequences in log/command, only adapter list (auto-detection allowed)
 nextflow run ../main.nf -profile test,singularity --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --outdir ./results -ansi-log false -dump-channels --preprocessing_tool 'fastp' --preprocessing_adapterlist 'data/adapterlist_fastp.fa' --preprocessing_adapter1 AAAA --preprocessing_adapter2 AAAAAAA
 
 ## Check default trimming works: command only contains --detect_adpater_for_pe (no other adapter related stuff). Log file should contain tool-default auto-detection (PE only)
