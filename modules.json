@@ -5,23 +5,35 @@
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
+                    "adapterremoval": {
+                        "branch": "master",
+                        "git_sha": "ce7cf27e377fdacf7ebe8e75903ec70405ea1659"
+                    },
                     "bowtie2/build": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
+                        "git_sha": "e797efb47b0d3b2124753beb55dc83ab9512bceb",
                         "patch": "modules/nf-core/bowtie2/build/bowtie2-build.diff"
                     },
                     "bwa/index": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
+                        "git_sha": "9518fa4f65f3fb8cde24fde7d40333b39ec8fd65",
                         "patch": "modules/nf-core/bwa/index/bwa-index.diff"
+                    },
+                    "cat/fastq": {
+                        "branch": "master",
+                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
                     },
                     "custom/dumpsoftwareversions": {
                         "branch": "master",
                         "git_sha": "8022c68e7403eecbd8ba9c49496f69f8c49d50f0"
                     },
+                    "fastp": {
+                        "branch": "master",
+                        "git_sha": "1e49f31e93c56a3832833eef90a02d3cde5a3f7e"
+                    },
                     "fastqc": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "f6a11408536fbee6cbea1f5977605011873de3ca"
                     },
                     "gunzip": {
                         "branch": "master",
