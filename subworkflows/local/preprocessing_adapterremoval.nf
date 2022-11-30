@@ -35,8 +35,6 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
      * has to be exported in a separate channel and we must manually recombine when necessary.
      */
 
-     // TODO Compare against eager2, I have a feeling we are missing the `--preserve5p` linking
-
     // Merge and keep singletons
     if ( !params.preprocessing_skippairmerging && !params.preprocessing_excludeunmerged ) {
 
