@@ -7,11 +7,13 @@
                 "nf-core": {
                     "adapterremoval": {
                         "branch": "master",
-                        "git_sha": "ce7cf27e377fdacf7ebe8e75903ec70405ea1659"
+                        "git_sha": "ce7cf27e377fdacf7ebe8e75903ec70405ea1659",
+                        "installed_by": ["modules"]
                     },
                     "bowtie2/build": {
                         "branch": "master",
                         "git_sha": "e797efb47b0d3b2124753beb55dc83ab9512bceb",
+                        "installed_by": ["modules"],
                         "patch": "modules/nf-core/bowtie2/build/bowtie2-build.diff"
                     },
                     "bwa/aln": {
@@ -22,11 +24,6 @@
                     "bwa/index": {
                         "branch": "master",
                         "git_sha": "9518fa4f65f3fb8cde24fde7d40333b39ec8fd65",
-                        "patch": "modules/nf-core/bwa/index/bwa-index.diff"
-                    },
-                    "cat/fastq": {
-                        "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bwa/index/bwa-index.diff"
                     },
@@ -40,6 +37,12 @@
                         "git_sha": "653588be2a4aadab487b530643dbc9baf7a485c4",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
+                    "cat/fastq": {
+                        "branch": "master",
+                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/bwa/index/bwa-index.diff"
+                    },
                     "custom/dumpsoftwareversions": {
                         "branch": "master",
                         "git_sha": "8022c68e7403eecbd8ba9c49496f69f8c49d50f0",
@@ -47,7 +50,8 @@
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "1e49f31e93c56a3832833eef90a02d3cde5a3f7e"
+                        "git_sha": "1e49f31e93c56a3832833eef90a02d3cde5a3f7e",
+                        "installed_by": ["modules"]
                     },
                     "fastqc": {
                         "branch": "master",
