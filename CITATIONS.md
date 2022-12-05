@@ -24,6 +24,14 @@
 
   > Schubert, M., Lindgreen, S., & Orlando, L. (2016). AdapterRemoval v2: rapid adapter trimming, identification, and read merging. BMC Research Notes, 9, 88. doi: [10.1186/s13104-016-1900-2](https://doi.org/10.1186/s13104-016-1900-2)
 
+- [bwa](https://doi.org/10.1093/bioinformatics/btp324)
+
+  > Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics , 25(14), 1754–1760. doi: [10.1093/bioinformatics/btp324](https://doi.org/10.1093/bioinformatics/btp324)
+
+- [SAMtools](https://doi.org/10.1093/bioinformatics/btp324)
+
+  > Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., & 1000 Genome Project Data Processing Subgroup. (2009). The Sequence Alignment/Map format and SAMtools. Bioinformatics , 25(16), 2078–2079. doi: [10.1093/bioinformatics/btp352](https://doi.org/10.1093/bioinformatics/btp324)
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
