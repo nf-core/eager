@@ -39,6 +39,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'
 include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
+include { MAP                } from '../subworkflows/local/map'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
