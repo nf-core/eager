@@ -39,7 +39,7 @@ workflow INPUT_CHECK {
 def create_fastq_channel(LinkedHashMap row) {
     // create meta map
     def meta = [:]
-    // TODO create spanning main metadata
+
     meta.id                 = [ row.sample_id, row.library_id, "L" + row.lane ].join("_").trim()
 
     meta.sample_id          = row.sample_id
@@ -67,7 +67,7 @@ def create_fastq_channel(LinkedHashMap row) {
 
 def create_bam_channel(LinkedHashMap row) {
     def meta = [:]
-    // TODO create spanning main metadata
+
     meta.id                 = [ row.sample_id, row.library_id ].join("_").trim()
 
     meta.sample_id          = row.sample_id
