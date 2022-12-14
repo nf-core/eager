@@ -11,7 +11,7 @@ workflow MAP {
     index // [ [meta], [ index ] ]
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
     ch_input_for_mapping = reads

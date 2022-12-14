@@ -4,6 +4,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+println("$workflow.commandLine")
+
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
@@ -58,6 +60,7 @@ include { MAP                } from '../subworkflows/local/map'
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { SAMTOOLS_VIEW               } from '../modules/nf-core/samtools/view/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -129,11 +132,29 @@ workflow EAGER {
         ch_reads_for_mapping = INPUT_CHECK.out.fastqs
     }
 
+    //
+    // SUBWORKFLOW: Reference mapping
+    //
+
     MAP ( ch_reads_for_mapping, REFERENCE_INDEXING.out.reference.map{meta, fasta, fai, dict, index -> [meta, index]} )
     ch_versions       = ch_versions.mix( MAP.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
 
-    ch_reads_for_deduplication = MAP.out.bam.join(MAP.out.bai)
+    //
+    // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
+    //
+
+    // TODO Mix in BAM inputs
+    if ( params.run_bamfiltering ) {
+        ch_mapped_for_bamfilter = MAP.out.bam.join(MAP.out.bai)
+        BAM_FILTER ( ch_mapped_for_bamfilter )
+        ch_bamfiltered_for_deduplication = BAM_FILTER.out.genomics
+        ch_bamfiltered_for_metagenomics  = BAM_FILTER.out.metagenomics
+    } else {
+        ch_bamfiltered_for_deduplication = MAP.out.bam.join(MAP.out.bai)
+    }
+
+    ch_reads_for_deduplication = ch_bamfiltered_for_deduplication
 
     //
     // MODULE: MultiQC
