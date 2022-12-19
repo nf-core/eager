@@ -44,6 +44,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'
 include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
 include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
+include { MAP                } from '../subworkflows/local/map'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,25 +117,33 @@ workflow EAGER {
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique{ it.text }.collectFile(name: 'collated_versions.yml')
-    )
-
     //
     // SUBWORKFLOW: Read preprocessing (clipping, merging, fastq trimming etc. )
     //
 
     if ( !params.skip_preprocessing ) {
-        ch_reads_for_mapping = PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist ).reads
+        PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist )
+        ch_reads_for_mapping = PREPROCESSING.out.reads
         ch_versions          = ch_versions.mix(PREPROCESSING.out.versions)
-        ch_multiqc_files     = ch_versions.mix(PREPROCESSING.out.mqc).collect{it[1]}.ifEmpty([])
+        ch_multiqc_files     = ch_multiqc_files.mix(PREPROCESSING.out.mqc).collect{it[1]}.ifEmpty([])
     } else {
         ch_reads_for_mapping = INPUT_CHECK.out.fastqs
     }
 
+    MAP ( ch_reads_for_mapping, REFERENCE_INDEXING.out.reference.map{meta, fasta, fai, dict, index -> [meta, index]} )
+    ch_versions       = ch_versions.mix( MAP.out.versions )
+    ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
+
+    ch_reads_for_deduplication = MAP.out.bam.join(MAP.out.bai)
+
     //
     // MODULE: MultiQC
     //
+
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+
     workflow_summary    = WorkflowEager.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
 
