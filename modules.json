@@ -73,6 +73,11 @@
                         "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
                         "installed_by": ["modules"]
                     },
+                    "picard/markduplicates": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "installed_by": ["modules"]
+                    },
                     "samtools/faidx": {
                         "branch": "master",
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
@@ -83,15 +88,35 @@
                         "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01",
                         "installed_by": ["modules"]
                     },
+                    "samtools/idxstats": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "installed_by": ["modules"]
+                    },
                     "samtools/index": {
                         "branch": "master",
-                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01",
-                        "installed_by": ["fastq_align_bwaaln"]
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "installed_by": ["bam_split_by_region", "fastq_align_bwaaln"]
+                    },
+                    "samtools/merge": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/view": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "installed_by": ["modules", "bam_split_by_region"]
                     }
                 }
             },
             "subworkflows": {
                 "nf-core": {
+                    "bam_split_by_region": {
+                        "branch": "master",
+                        "git_sha": "f4bbd81636426c4060ce7ff421f4500c5a831e29",
+                        "installed_by": ["subworkflows"]
+                    },
                     "fastq_align_bwaaln": {
                         "branch": "master",
                         "git_sha": "9aa47d46aa13d96d78c1d26528cf6aaa44fb2db5",
