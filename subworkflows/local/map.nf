@@ -18,7 +18,9 @@ workflow MAP {
                             .combine(index)
                             .multiMap {
                                 meta, reads, meta2, index ->
-                                    reads: [ meta, reads ]
+                                    new_meta = meta.clone()
+                                    new_meta.reference = meta2.id
+                                    reads: [ new_meta, reads ]
                                     index: [ meta2, index]
                             }
 
