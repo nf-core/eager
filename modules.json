@@ -114,7 +114,7 @@
                 "nf-core": {
                     "bam_split_by_region": {
                         "branch": "master",
-                        "git_sha": "f4bbd81636426c4060ce7ff421f4500c5a831e29",
+                        "git_sha": "cb519b4da8bc644f5dd4820d83d7f7416d519d26",
                         "installed_by": ["subworkflows"]
                     },
                     "fastq_align_bwaaln": {
