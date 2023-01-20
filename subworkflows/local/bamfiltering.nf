@@ -62,7 +62,7 @@ workflow BAM_FILTER {
 
     // (Filtered) Mapped FASTQ Generation
     if ( params.bamfiltering_generatefastq ) {
-        ch_bam_for_genomics = SAMTOOLS_FASTQ_MAPPED ( ch_bam_for_mappedfqconvert )
+        ch_bam_for_genomics = SAMTOOLS_FASTQ_MAPPED ( ch_bam_for_mappedfqconvert, false )
         ch_versions = ch_versions.mix(SAMTOOLS_FASTQ_MAPPED.out.versions)
     } else {
         ch_bam_for_genomics = ch_bam_for_mappedfqconvert
@@ -83,7 +83,7 @@ workflow BAM_FILTER {
 
     // (Filtered) Unmapped FASTQ Generation
     if ( params.bamfiltering_generatefastq ) {
-        ch_unmapped_fastq = SAMTOOLS_FASTQ_UNMAPPED ( ch_unmapped_bam )
+        ch_unmapped_fastq = SAMTOOLS_FASTQ_UNMAPPED ( ch_unmapped_bam, false )
         ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_UNMAPPED.out.versions )
     } else {
         // Metagenomic screening requires FASTQ files
