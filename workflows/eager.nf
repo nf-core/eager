@@ -116,7 +116,7 @@ workflow EAGER {
         INPUT_CHECK.out.fastqs
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
-    
+
     //
     // SUBWORKFLOW: Read preprocessing (clipping, merging, fastq trimming etc. )
     //
@@ -135,10 +135,6 @@ workflow EAGER {
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
 
     ch_reads_for_deduplication = MAP.out.bam.join(MAP.out.bai)
-
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
 
     //
     // MODULE: MultiQC
