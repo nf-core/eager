@@ -7,18 +7,19 @@ process BUILD_INTERVALS {
         'quay.io/biocontainers/gawk:5.1.0' }"
 
     input:
-    tuple val(meta), path(idxstats)
+    tuple val(meta), path(index)
 
     output:
-    tuple val(meta), path("${idxstats.baseName}.bed")  , emit: bed
-    path "versions.yml"                                , emit: versions
+    tuple val(meta), path("${meta.id}.bed")  , emit: bed
+    path "versions.yml"                             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     """
-    awk -v FS='\t' -v OFS='\t' '\$3 > 0 { print \$1 }' ${idxstats} > ${idxstats.baseName}.bed
+    awk -v FS='\t' -v OFS='\t' '{ print \$1 }' ${index} > ${meta.id}.bed
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         gawk: \$(awk -Wversion | sed '1!d; s/.*Awk //; s/,.*//')
