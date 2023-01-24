@@ -485,6 +485,23 @@
                 }
             },
             "fa_icon": "fas fa-layer-group"
+        },
+        "deduplication": {
+            "title": "Deduplication",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "deduplication_tool": {
+                    "type": "string",
+                    "default": "markduplicates",
+                    "description": "Specify which tool to use for deduplication. Options: 'markduplicates', 'dedup'"
+                },
+                "skip_deduplication": {
+                    "type": "boolean",
+                    "description": "Specify to skip the removal of PCR duplicates."
+                }
+            }
         }
     },
     "allOf": [
@@ -508,6 +525,9 @@
         },
         {
             "$ref": "#/definitions/mapping"
+        },
+        {
+            "$ref": "#/definitions/deduplication"
         }
     ]
 }
