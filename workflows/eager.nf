@@ -45,6 +45,7 @@ include { INPUT_CHECK        } from '../subworkflows/local/input_check'
 include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
 include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
 include { MAP                } from '../subworkflows/local/map'
+include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,7 +101,7 @@ workflow EAGER {
     INPUT_CHECK (
         ch_input
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
 
     //
     // SUBWORKFLOW: Indexing of reference files
@@ -115,7 +116,7 @@ workflow EAGER {
     FASTQC (
         INPUT_CHECK.out.fastqs
     )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
 
     //
     // SUBWORKFLOW: Read preprocessing (clipping, merging, fastq trimming etc. )
@@ -124,8 +125,8 @@ workflow EAGER {
     if ( !params.skip_preprocessing ) {
         PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist )
         ch_reads_for_mapping = PREPROCESSING.out.reads
-        ch_versions          = ch_versions.mix(PREPROCESSING.out.versions)
-        ch_multiqc_files     = ch_multiqc_files.mix(PREPROCESSING.out.mqc).collect{it[1]}.ifEmpty([])
+        ch_versions          = ch_versions.mix( PREPROCESSING.out.versions )
+        ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc ).collect{it[1]}.ifEmpty([])
     } else {
         ch_reads_for_mapping = INPUT_CHECK.out.fastqs
     }
@@ -134,7 +135,25 @@ workflow EAGER {
     ch_versions       = ch_versions.mix( MAP.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
 
-    ch_reads_for_deduplication = MAP.out.bam.join(MAP.out.bai)
+    ch_fasta_for_deduplication = REFERENCE_INDEXING.out.reference
+        .multiMap{
+            meta, fasta, fai, dict, index ->
+            fasta:      [ meta, fasta ]
+            fasta_fai:  [ meta, fai ]
+        }
+
+    ch_reads_for_deduplication = MAP.out.bam
+        .join( MAP.out.bai )
+
+    if ( !params.skip_deduplication ) {
+        DEDUPLICATE( ch_reads_for_deduplication, ch_fasta_for_deduplication.fasta, ch_fasta_for_deduplication.fasta_fai )
+        ch_dedupped_bams = DEDUPLICATE.out.bam
+            .join( DEDUPLICATE.out.bai )
+        ch_versions = ch_versions.mix( DEDUPLICATE.out.versions )
+
+    } else {
+        ch_dedupped_bams = ch_reads_for_deduplication
+    }
 
     //
     // MODULE: MultiQC
