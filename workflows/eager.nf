@@ -17,8 +17,10 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
-// Report possible warnings
+// Check failing parameter combinations
+if ( params.deduplication_tool == 'dedup' && ! params.dedup_all_merged ) { exit 1, 'Cannot run dedup unless --dedup_all_merged is specified, denoting that all sequencing is paired-end, and all reads have been collapsed (merged). If this is not the case, use MarkDuplicates instead.'}
 
+// Report possible warnings
 if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
 
 /*
