@@ -492,14 +492,20 @@
             "description": "",
             "default": "",
             "properties": {
-                "deduplication_tool": {
-                    "type": "string",
-                    "default": "markduplicates",
-                    "description": "Specify which tool to use for deduplication. Options: 'markduplicates', 'dedup'"
-                },
                 "skip_deduplication": {
                     "type": "boolean",
                     "description": "Specify to skip the removal of PCR duplicates."
+                },
+                "deduplication_tool": {
+                    "type": "string",
+                    "default": "markduplicates",
+                    "description": "Specify which tool to use for deduplication. Options: 'markduplicates', 'dedup'. ",
+                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different). DeDup should only be used solely on paired-end data otherwise suboptimal deduplication can occur if applied to either single-end or a mix of single-end/paired-end data."
+                },
+                "dedup_all_merged": {
+                    "type": "boolean",
+                    "description": "Specify the -m parameter for Dedup i.e. Should all reads be treated as merged?",
+                    "help_text": "Provide the `-m` [arameter to Dedup. Dedup is specifically designed to work with paired-end data, and should not be used with single-end data. When using paired-end collapsed reads, this option should be provided. Running Dedup on single-end data is no longer supported within nf-core/eager."
                 }
             }
         }
