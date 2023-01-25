@@ -148,7 +148,7 @@ ch_input_for_samtools_merge = ch_dedupped_region_bam
     ch_versions   = ch_versions.mix( SAMTOOLS_SORT.out.versions )
 
     SAMTOOLS_INDEX ( ch_dedup_bam )
-    ch_dedup_bai  = SAMTOOLS_INDEX.out.bai
+    ch_dedup_bai  =  params.fasta_largeref ? SAMTOOLS_INDEX.out.csi : SAMTOOLS_INDEX.out.bai
     ch_versions   = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
 
     // Finally run flagstat on the dedupped bam
