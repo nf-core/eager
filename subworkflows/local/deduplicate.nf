@@ -5,6 +5,7 @@
 include { BUILD_INTERVALS        } from '../../modules/local/build_intervals'
 include { BAM_SPLIT_BY_REGION    } from '../../subworkflows/nf-core/bam_split_by_region/main'
 include { PICARD_MARKDUPLICATES  } from '../../modules/nf-core/picard/markduplicates/main'
+include { DEDUP                  } from '../../modules/nf-core/dedup/main'
 include { SAMTOOLS_MERGE         } from '../../modules/nf-core/samtools/merge/main'
 include { SAMTOOLS_SORT          } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX         } from '../../modules/nf-core/samtools/index/main'
@@ -89,11 +90,22 @@ workflow DEDUPLICATE {
             )
             ch_versions   = ch_versions.mix( PICARD_MARKDUPLICATES.out.versions.first() )
 
-            ch_dedup_multiqc_files        = ch_multiqc_files.mix( PICARD_MARKDUPLICATES.out.metrics )
+            // ch_dedup_multiqc_files        = ch_multiqc_files.mix( PICARD_MARKDUPLICATES.out.metrics )
             ch_dedupped_region_bam        = PICARD_MARKDUPLICATES.out.bam
 
-    } else {
+    } else if ( params.deduplication_tool == "dedup" ) {
         // Other deduppers go here.
+        ch_dedup_input = BAM_SPLIT_BY_REGION.out.bam_bai
+            .map{
+                meta, bam, bai ->
+                [ meta, bam ]
+            }
+
+        DEDUP( ch_dedup_input )
+        ch_versions = ch_versions.mix( DEDUP.out.versions.first() )
+
+        ch_dedupped_region_bam = DEDUP.out.bam
+
     }
 
 ch_input_for_samtools_merge = ch_dedupped_region_bam
