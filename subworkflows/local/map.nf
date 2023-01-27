@@ -2,8 +2,8 @@
 // Prepare reference indexing for downstream
 //
 
-include { FASTQ_ALIGN_BWAALN } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
-include { SAMTOOLS_FLAGSTAT  } from '../../modules/nf-core/samtools/flagstat/main'
+include { FASTQ_ALIGN_BWAALN                             } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED  } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow MAP {
     take:
@@ -33,7 +33,7 @@ workflow MAP {
 
     ch_input_for_flagstat = ch_mapped_bam.join( ch_mapped_bai, failOnMismatch: true )
 
-    SAMTOOLS_FLAGSTAT ( ch_input_for_flagstat)
+    SAMTOOLS_FLAGSTAT_MAPPED ( ch_input_for_flagstat)
     ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions )
     ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT.out.flagstat )
 
