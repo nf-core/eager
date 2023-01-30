@@ -4,6 +4,7 @@
 
 include { FASTQ_ALIGN_BWAALN } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
 include { SAMTOOLS_MERGE     } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT      } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX     } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_FLAGSTAT  } from '../../modules/nf-core/samtools/flagstat/main'
 
@@ -43,16 +44,18 @@ workflow MAP {
     }
     .groupTuple()
 
-    // TODO maybe add a sort step after merge?
     SAMTOOLS_MERGE ( ch_input_for_lane_merge, [], [] )
-    ch_mapped_bam = SAMTOOLS_MERGE.out.bam
     ch_versions.mix( SAMTOOLS_MERGE.out.versions )
+
+    SAMTOOLS_SORT ( SAMTOOLS_MERGE.out.bam )
+    ch_mapped_bam = SAMTOOLS_SORT.out.bam
+    ch_versions.mix( SAMTOOLS_SORT.out.versions )
 
     SAMTOOLS_INDEX( ch_mapped_bam )
     ch_mapped_bai =  params.fasta_largeref ? SAMTOOLS_INDEX.out.csi : SAMTOOLS_INDEX.out.bai
     ch_versions.mix( SAMTOOLS_INDEX.out.versions )
 
-    ch_input_for_flagstat = SAMTOOLS_MERGE.out.bam.join( SAMTOOLS_INDEX.out.bai, failOnMismatch: true )
+    ch_input_for_flagstat = SAMTOOLS_SORT.out.bam.join( SAMTOOLS_INDEX.out.bai, failOnMismatch: true )
 
     SAMTOOLS_FLAGSTAT ( ch_input_for_flagstat)
     ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions )
