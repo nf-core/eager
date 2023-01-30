@@ -43,6 +43,7 @@ workflow MAP {
     }
     .groupTuple()
 
+    // TODO maybe add a sort step after merge?
     SAMTOOLS_MERGE ( ch_input_for_lane_merge, [], [] )
     ch_mapped_bam = SAMTOOLS_MERGE.out.bam
     ch_versions.mix( SAMTOOLS_MERGE.out.versions )

@@ -160,7 +160,8 @@ ch_input_for_samtools_merge = ch_dedupped_region_bam
 
     emit:
     bam        = ch_dedup_bam
-    bai        = ch_dedup_bai
+    bai         = ch_dedup_bai
+    flagstat = ch_dedup_flagstat
     versions   = ch_versions
     // mqc        = ch_dedup_multiqc_files // The deduplication rate for the overall bam will come from endorspy, so nothing to pass along here.
 }
