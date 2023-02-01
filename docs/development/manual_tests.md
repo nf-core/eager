@@ -166,3 +166,57 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -dump-channels -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --preprocessing_skippairmerging
 
 ```
+
+## BAM filtering
+
+All possible parameters
+
+```
+    // BAM Filtering
+    run_bamfiltering                      = false
+    bamfiltering_minlength                = 0
+    bamfiltering_mappingquality           = 0
+    bamfiltering_generateunmappedfastq    = false
+    bamfiltering_generatemappedfastq      = false
+    bamfiltering_retainunmappedgenomicbam = false // downstream genomics only
+    bamfiltering_savequalityfilteredbam   = false // can include unmapped reads if --bamfiltering_retainunmappedgenomicbam specified
+
+    // Metagenomic Screening
+    run_metagenomicscreening   = false
+    metagenomicscreening_input = 'unmapped' // mapped, all, unmapped -> mapped vs all specified in SAMTOOLS_FASTQ_MAPPED in modules.conf, unmapped hardcoded SAMTOOLS_FASTQ_UMAPPED
+```
+
+Tests
+
+```bash
+## Check BAM filtering, mapped reads only in downstream BAM
+
+## Check BAM filtering, mapped reads only in downstream BAM with length filtering
+
+## Check BAM filtering mapped reads only in downstream BAM, no length filtering, but with quality filtering
+
+## Check BAM filtering mapped reads only in downstream BAM, length filtering and quality filtering
+
+## Check BAM filtering without length/quality filtering, with retained unmapped reads in genomic BAM
+
+## Check BAM filtering with length/quality filtering, with retained unmapped reads in genomic BAM
+
+## Check BAM filtering with unmapped FASTQ generation with length/quality filtering of genomic BAM
+
+## Check BAM filtering with mapped FASTQ generation with length/quality filtering of genomic BAM
+
+## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with unmapped reads to metagenomics
+
+## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with mapped only reads going to metagenomics
+
+## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with all reads going to metagenomics
+
+## Check BAM filtering NO LENGTH/QAULITY with metagenomics screening, with unmapped reads to metagenomics
+
+## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with mapped only reads going to metagenomics
+
+## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with all reads going to metagenomics
+
+
+
+```

@@ -503,5 +503,35 @@
         {
             "$ref": "#/definitions/mapping"
         }
-    ]
+    ],
+    "properties": {
+        "run_bamfiltering": {
+            "type": "string",
+            "default": "false"
+        },
+        "bamfiltering_minlength": {
+            "type": "integer",
+            "default": 0
+        },
+        "bamfiltering_mappingquality": {
+            "type": "integer",
+            "default": 0
+        },
+        "bamfiltering_generateunmappedfastq": {
+            "type": "string",
+            "default": "false"
+        },
+        "bamfiltering_generatemappedfastq": {
+            "type": "string",
+            "default": "false"
+        },
+        "run_metagenomicscreening": {
+            "type": "string",
+            "default": "false"
+        },
+        "metagenomicscreening_input": {
+            "type": "string",
+            "default": "unmapped"
+        }
+    }
 }

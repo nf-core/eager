@@ -18,7 +18,6 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
 // Report possible warnings
-
 if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
 
 /*
@@ -144,7 +143,7 @@ workflow EAGER {
     //
 
     // TODO Mix in BAM inputs
-    if ( params.run_bamfiltering ) {
+    if ( params.run_bamfiltering || params.run_metagenomicscreening ) {
         ch_mapped_for_bamfilter = MAP.out.bam.join(MAP.out.bai)
         BAM_FILTER ( ch_mapped_for_bamfilter )
         ch_bamfiltered_for_deduplication = BAM_FILTER.out.genomics
