@@ -506,10 +506,10 @@
     ],
     "properties": {
         "run_bamfiltering": {
-            "type": "string",
+            "type": "boolean",
             "default": "false"
         },
-        "bamfiltering_minlength": {
+        "bamfiltering_minreadlength": {
             "type": "integer",
             "default": 0
         },
@@ -518,15 +518,15 @@
             "default": 0
         },
         "bamfiltering_generateunmappedfastq": {
-            "type": "string",
+            "type": "boolean",
             "default": "false"
         },
         "bamfiltering_generatemappedfastq": {
-            "type": "string",
+            "type": "boolean",
             "default": "false"
         },
         "run_metagenomicscreening": {
-            "type": "string",
+            "type": "boolean",
             "default": "false"
         },
         "metagenomicscreening_input": {

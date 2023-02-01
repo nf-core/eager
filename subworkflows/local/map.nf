@@ -25,7 +25,7 @@ workflow MAP {
     if ( params.mapping_tool == 'bwaaln' ) {
         FASTQ_ALIGN_BWAALN ( ch_input_for_mapping.reads, ch_input_for_mapping.index )
 
-        ch_versions   = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions )
+        ch_versions   = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
         ch_mapped_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_mapped_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
@@ -33,14 +33,14 @@ workflow MAP {
 
     ch_input_for_flagstat = ch_mapped_bam.join( ch_mapped_bai, failOnMismatch: true )
 
-    SAMTOOLS_FLAGSTAT_MAPPED ( ch_input_for_flagstat)
-    ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions )
-    ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT.out.flagstat )
+    SAMTOOLS_FLAGSTAT_MAPPED ( ch_input_for_flagstat )
+    ch_versions.mix( SAMTOOLS_FLAGSTAT_MAPPED.out.versions.first() )
+    ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_MAPPED.out.flagstat )
 
     emit:
-    bam        = ch_mapped_bam                      // [ [ meta ], bam ]
-    bai        = ch_mapped_bai                      // [ [ meta ], bai ]
-    flagstat   = SAMTOOLS_FLAGSTAT.out.flagstat     // [ [ meta ], stats ]
+    bam        = ch_mapped_bam                            // [ [ meta ], bam ]
+    bai        = ch_mapped_bai                            // [ [ meta ], bai ]
+    flagstat   = SAMTOOLS_FLAGSTAT_MAPPED.out.flagstat    // [ [ meta ], stats ]
     mqc        = ch_multiqc_files
     versions   = ch_versions
 

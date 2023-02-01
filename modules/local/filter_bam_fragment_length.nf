@@ -7,14 +7,14 @@ process FILTER_BAM_FRAGMENT_LENGTH {
         'quay.io/biocontainers/pysam:0.20.0--py39h9abd093_0' }"
 
     input:
-    tuple val(meta), path(bam)
+    tuple val(meta), path(bam), path(bai)
 
     output:
-    tuple val(meta), path("*_lengthfiltered.bam")
+    tuple val(meta), path("*_lengthfiltered.bam"), emit: bam
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
-
 
     script:
     def args = task.ext.args ?: ''
@@ -22,9 +22,15 @@ process FILTER_BAM_FRAGMENT_LENGTH {
     """
     filter_bam_fragment_length.py \\
         -a \\
-        -l ${params.bam_filter_minreadlength} \\
+        $args \\
         -o ${prefix}_lengthfiltered.bam \\
         $bam
+
+    ## TODO GET ALL PACKAGES
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 
 }

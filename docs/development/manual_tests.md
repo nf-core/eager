@@ -174,12 +174,12 @@ All possible parameters
 ```
     // BAM Filtering
     run_bamfiltering                      = false
-    bamfiltering_minlength                = 0
+    bamfiltering_minreadlength                = 0
     bamfiltering_mappingquality           = 0
     bamfiltering_generateunmappedfastq    = false
     bamfiltering_generatemappedfastq      = false
     bamfiltering_retainunmappedgenomicbam = false // downstream genomics only
-    bamfiltering_savequalityfilteredbam   = false // can include unmapped reads if --bamfiltering_retainunmappedgenomicbam specified
+    bamfiltering_savefilteredbam          = false // can include unmapped reads if --bamfiltering_retainunmappedgenomicbam specified
 
     // Metagenomic Screening
     run_metagenomicscreening   = false
@@ -189,9 +189,17 @@ All possible parameters
 Tests
 
 ```bash
-## Check BAM filtering, mapped reads only in downstream BAM
+## Check no BAM filtering - expect full completion of pipeline without any bam filtering execution
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta
+
+## Check BAM filtering, mapped reads only in downstream BAM - expect to see FILTER_BAM workflow with VIEw and FLAGSTAT, no results directory
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering
+
+## Check BAM filtering, mapped reads only in downstream BAM - expect to see FILTER_BAM workflow with VIEw and FLAGSTAT, only quality filtered BAMs in results directory, `samtools view` should show only mapped reads
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams
 
 ## Check BAM filtering, mapped reads only in downstream BAM with length filtering
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50
 
 ## Check BAM filtering mapped reads only in downstream BAM, no length filtering, but with quality filtering
 

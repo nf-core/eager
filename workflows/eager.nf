@@ -40,10 +40,13 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+
+// TODO rename to active: index_reference, filter_bam etc.
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'
 include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
 include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
 include { MAP                } from '../subworkflows/local/map'
+include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,9 +148,11 @@ workflow EAGER {
     // TODO Mix in BAM inputs
     if ( params.run_bamfiltering || params.run_metagenomicscreening ) {
         ch_mapped_for_bamfilter = MAP.out.bam.join(MAP.out.bai)
-        BAM_FILTER ( ch_mapped_for_bamfilter )
-        ch_bamfiltered_for_deduplication = BAM_FILTER.out.genomics
-        ch_bamfiltered_for_metagenomics  = BAM_FILTER.out.metagenomics
+        FILTER_BAM ( ch_mapped_for_bamfilter )
+        ch_bamfiltered_for_deduplication = FILTER_BAM.out.genomics
+        ch_bamfiltered_for_metagenomics  = FILTER_BAM.out.metagenomics
+        ch_versions                      = ch_versions.mix( FILTER_BAM.out.versions )
+        ch_multiqc_files                 = ch_versions.mix( FILTER_BAM.out.mqc )
     } else {
         ch_bamfiltered_for_deduplication = MAP.out.bam.join(MAP.out.bai)
     }
