@@ -149,9 +149,11 @@ workflow EAGER {
 
     if ( !params.skip_deduplication ) {
         DEDUPLICATE( ch_reads_for_deduplication, ch_fasta_for_deduplication.fasta, ch_fasta_for_deduplication.fasta_fai )
-        ch_dedupped_bams = DEDUPLICATE.out.bam
+       
+         ch_dedupped_bams = DEDUPLICATE.out.bam
             .join( DEDUPLICATE.out.bai )
         ch_dedupped_flagstat = DEDUPLICATE.out.flagstat
+
         ch_versions = ch_versions.mix( DEDUPLICATE.out.versions )
 
     } else {

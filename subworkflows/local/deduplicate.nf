@@ -20,8 +20,9 @@ workflow DEDUPLICATE {
     main:
     ch_versions = Channel.empty()
     ch_multiqc_files  = Channel.empty()
+
     ch_refs = fasta.join(fasta_fai)
-        .map{
+        .map {
             // Create additional map containing only meta.reference for combining samples and intervals
             meta, fasta, fai ->
             meta2 = [:]
@@ -30,7 +31,7 @@ workflow DEDUPLICATE {
         }
 
     // Create genomic regions file for splitting the bam before deduplication
-    BUILD_INTERVALS(fasta_fai)
+    BUILD_INTERVALS( fasta_fai )
     ch_versions   = ch_versions.mix( BUILD_INTERVALS.out.versions )
 
     // Ensure input bam matches the regions file
@@ -42,7 +43,6 @@ workflow DEDUPLICATE {
             meta2.reference = meta.reference
             [ meta2, meta, bam, bai ]
         }
-        // .dump(tag:"bams_extra_meta", pretty: true)
         .combine(
             by: 0,
             BUILD_INTERVALS.out.bed.map{
@@ -59,7 +59,7 @@ workflow DEDUPLICATE {
         }
 
     //Split input bam by region
-    BAM_SPLIT_BY_REGION(ch_bam_for_split)
+    BAM_SPLIT_BY_REGION( ch_bam_for_split )
     ch_versions   = ch_versions.mix( BAM_SPLIT_BY_REGION.out.versions )
 
     if ( params.deduplication_tool == 'markduplicates' ) {
@@ -82,6 +82,7 @@ workflow DEDUPLICATE {
                 fasta: fasta
                 fasta_fai: fasta_fai
             }
+
             // Dedup each bam
             PICARD_MARKDUPLICATES(
                 ch_markduplicates_input.bam,
@@ -90,11 +91,9 @@ workflow DEDUPLICATE {
             )
             ch_versions   = ch_versions.mix( PICARD_MARKDUPLICATES.out.versions.first() )
 
-            // ch_dedup_multiqc_files        = ch_multiqc_files.mix( PICARD_MARKDUPLICATES.out.metrics )
             ch_dedupped_region_bam        = PICARD_MARKDUPLICATES.out.bam
 
     } else if ( params.deduplication_tool == "dedup" ) {
-        // Other deduppers go here.
         ch_dedup_input = BAM_SPLIT_BY_REGION.out.bam_bai
             .map{
                 meta, bam, bai ->
@@ -115,10 +114,10 @@ ch_input_for_samtools_merge = ch_dedupped_region_bam
         [ meta2, bam ]
     }
     .groupTuple()
-    .map{
+    .map {
         meta, bam ->
-        ref_meta = [:]
-        ref_meta.reference = meta.reference
+            ref_meta = [:]
+            ref_meta.reference = meta.reference
         [ ref_meta, meta, bam ]
     }
     .combine(
@@ -163,5 +162,4 @@ ch_input_for_samtools_merge = ch_dedupped_region_bam
     bai         = ch_dedup_bai
     flagstat = ch_dedup_flagstat
     versions   = ch_versions
-    // mqc        = ch_dedup_multiqc_files // The deduplication rate for the overall bam will come from endorspy, so nothing to pass along here.
 }
