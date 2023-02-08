@@ -25,35 +25,38 @@ workflow DEDUPLICATE {
         .map {
             // Create additional map containing only meta.reference for combining samples and intervals
             meta, fasta, fai ->
-            meta2 = [:]
-            meta2.reference = meta.id
+                meta2 = [:]
+                meta2.reference = meta.id
             [ meta2, meta, fasta, fai ]
         }
 
     // Create genomic regions file for splitting the bam before deduplication
     BUILD_INTERVALS( fasta_fai )
-    ch_versions   = ch_versions.mix( BUILD_INTERVALS.out.versions )
+    ch_versions      = ch_versions.mix( BUILD_INTERVALS.out.versions.first() )
+
+    // Prep regions for combining
+    ch_intervals_for_join = BUILD_INTERVALS.out.bed.map {
+        // Rename reference meta.id to meta.reference to allow combining with bams of specific reference
+        meta, bed ->
+            meta2 = [:]
+            meta2.reference = meta.id
+        [ meta2, bed ]
+    }
 
     // Ensure input bam matches the regions file
     ch_bam_for_split = ch_bam_bai
-        .map{
+        .map {
             // Create additional map containing only meta.reference for combining with intervals for reference
             meta, bam, bai ->
-            meta2 = [:]
-            meta2.reference = meta.reference
+                meta2 = [:]
+                meta2.reference = meta.reference
             [ meta2, meta, bam, bai ]
         }
         .combine(
             by: 0,
-            BUILD_INTERVALS.out.bed.map{
-                // Rename reference meta.id to meta.reference to allow combining with bams of specific reference
-                meta, bed ->
-                meta2 = [:]
-                meta2.reference = meta.id
-                [ meta2, bed ]
-            }
+            ch_intervals_for_join
         )
-        .map{
+        .map {
             ignore_me, meta, bam, bai, regions ->
             [ meta, bam, bai, regions ]
         }
@@ -65,11 +68,11 @@ workflow DEDUPLICATE {
     if ( params.deduplication_tool == 'markduplicates' ) {
 
         ch_markduplicates_input = BAM_SPLIT_BY_REGION.out.bam_bai
-            .map{
+            .map {
                 // Create additional map containing only meta.reference for combining with intervals for reference
                 meta, bam, bai ->
-                meta2 = [:]
-                meta2.reference = meta.reference
+                    meta2 = [:]
+                    meta2.reference = meta.reference
                 [ meta2, meta, bam, bai ]
             }
             .combine(
@@ -89,26 +92,26 @@ workflow DEDUPLICATE {
                 ch_markduplicates_input.fasta,
                 ch_markduplicates_input.fasta_fai
             )
-            ch_versions   = ch_versions.mix( PICARD_MARKDUPLICATES.out.versions.first() )
+            ch_versions             = ch_versions.mix( PICARD_MARKDUPLICATES.out.versions.first() )
 
-            ch_dedupped_region_bam        = PICARD_MARKDUPLICATES.out.bam
+            ch_dedupped_region_bam  = PICARD_MARKDUPLICATES.out.bam
 
     } else if ( params.deduplication_tool == "dedup" ) {
         ch_dedup_input = BAM_SPLIT_BY_REGION.out.bam_bai
-            .map{
+            .map {
                 meta, bam, bai ->
                 [ meta, bam ]
             }
 
         DEDUP( ch_dedup_input )
-        ch_versions = ch_versions.mix( DEDUP.out.versions.first() )
+        ch_versions            = ch_versions.mix( DEDUP.out.versions.first() )
 
         ch_dedupped_region_bam = DEDUP.out.bam
 
     }
 
 ch_input_for_samtools_merge = ch_dedupped_region_bam
-    .map{
+    .map {
         meta, bam ->
         meta2 = meta.clone().findAll{ it.key != 'genomic_region' }
         [ meta2, bam ]
@@ -143,23 +146,24 @@ ch_input_for_samtools_merge = ch_dedupped_region_bam
 
     // Sort the merged bam and index
     SAMTOOLS_SORT ( SAMTOOLS_MERGE.out.bam )
-    ch_dedup_bam  = SAMTOOLS_SORT.out.bam
     ch_versions   = ch_versions.mix( SAMTOOLS_SORT.out.versions )
+    ch_dedup_bam  = SAMTOOLS_SORT.out.bam
 
     SAMTOOLS_INDEX ( ch_dedup_bam )
-    ch_dedup_bai  =  params.fasta_largeref ? SAMTOOLS_INDEX.out.csi : SAMTOOLS_INDEX.out.bai
     ch_versions   = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+    ch_dedup_bai  =  params.fasta_largeref ? SAMTOOLS_INDEX.out.csi : SAMTOOLS_INDEX.out.bai
 
     // Finally run flagstat on the dedupped bam
     SAMTOOLS_FLAGSTAT(
         ch_dedup_bam.join( ch_dedup_bai )
     )
-    ch_dedup_flagstat = SAMTOOLS_FLAGSTAT.out.flagstat
     ch_versions       = ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions )
 
+    ch_dedup_flagstat = SAMTOOLS_FLAGSTAT.out.flagstat
+
     emit:
-    bam        = ch_dedup_bam
+    bam         = ch_dedup_bam
     bai         = ch_dedup_bai
-    flagstat = ch_dedup_flagstat
-    versions   = ch_versions
+    flagstat    = ch_dedup_flagstat
+    versions    = ch_versions
 }
