@@ -204,24 +204,35 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 
 ## Check BAM filtering mapped reads only in downstream BAM, no length filtering, but with quality filtering
 ## Expect *filtered.bam, samtools stats has < 50 bp, mapped only and samtools view -q 0 produces reads
+### TODO UPDATE MULTIQC TO PICK UP BOTH BEFORE AND AFTER FILTERING
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams
 
 ### TODO UPDATE MULTIQC TO PICK UP BOTH BEFORE AND AFTER FILTERING ###
 
 ## Check BAM filtering mapped reads only in downstream BAM, length filtering and quality filtering
-## Expect *filtered.bam, samtools stats has >= 50 bp, mapped only, and samtools stats MQ0: 0
+## Expect: *filtered.bam, samtools stats has >= 50 bp, mapped only, and samtools stats MQ0: 0
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37
 
 ## Check BAM filtering without length/quality filtering, with retained unmapped reads in genomic BAM
+## Expect: 'filtered' BAM still contains unmapped reads in samtools stats
+## TODO: Question: why would one need this? I guess if still want to generate FASTQ file; just document
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_retainunmappedgenomicbam
 
 ## Check BAM filtering with length/quality filtering, with retained unmapped reads in genomic BAM
+## Expect: filtered and length filtered BAMs, final BAM (not length only) should have min RL of 50, MQO: 0, but retain unmapped reads
+## TODO FAILED: length and quality filtered, but loss of unmapped reads [becaus equality is not 0?]; ADD A WARNING?
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_retainunmappedgenomicbam --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37
+
+## Check BAM filtering with length filtering but no quality filtering, with retained unmapped reads in genomic BAM
+## Expect: filtered and length filtered BAMs, final BAM (not length only) should have min RL of 50, MQO: >=1, but and include retain unmapped reads
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_retainunmappedgenomicbam --bamfiltering_minreadlength 50
+
+
+#### TODO DONT FORGET TO UNCOMMENT FASTQ METAGENOMIC SCREENING
 
 ## Check BAM filtering with unmapped FASTQ generation with length/quality filtering of genomic BAM
 
 ## Check BAM filtering with mapped FASTQ generation with length/quality filtering of genomic BAM
-
-
-#### TODO DONT FORGET TO UNCOMMENT METAGENOMIC SCREENING
 
 ## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with unmapped reads to metagenomics
 
@@ -235,6 +246,7 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 
 ## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with all reads going to metagenomics
 
+## TODO: DOCUMENT EVERYTHING & SCHEMA!
 
 
 ```
