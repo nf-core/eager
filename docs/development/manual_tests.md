@@ -166,3 +166,26 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -dump-channels -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --preprocessing_skippairmerging
 
 ```
+
+## Deduplication
+
+### MARKDUPLICATES
+
+```bash
+## MARKDUPLICATES with default parameters
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/markduplicates -dump-channels -ansi-log false -w ~/eager_dsl2_testing/markduplicates/work/ --deduplication_tool markduplicates -resume
+
+## Run only on merged reads
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/markduplicates_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/markduplicates_merged/work/ --deduplication_tool markduplicates --preprocessing_excludeunmerged -resume
+```
+
+### DEDUP
+```bash
+## DEDUP with default parameters
+## Fails, as expected
+# Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'.
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/dedup -dump-channels -ansi-log false -w ~/eager_dsl2_testing/dedup/work/ --deduplication_tool dedup -resume
+
+## Now with merged reads only. All other parameters are default.
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/dedup_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/dedup_merged/work/ --deduplication_tool dedup --preprocessing_excludeunmerged -resume
+```
