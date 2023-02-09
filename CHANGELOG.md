@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Deprecated`
 
+- The parameter `dedup_all_merged` has been deprecated. DeDup should NOT be ran unless the data going into it is ONLY merged reads.
+
 ## [2.4.6] - 2022-11-14
 
 ### `Added`
