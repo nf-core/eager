@@ -18,6 +18,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
 // Check failing parameter combinations
+// TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
 
 // Report possible warnings
