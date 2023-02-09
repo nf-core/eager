@@ -128,7 +128,7 @@ workflow EAGER {
         PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist )
         ch_reads_for_mapping = PREPROCESSING.out.reads
         ch_versions          = ch_versions.mix(PREPROCESSING.out.versions)
-        ch_multiqc_files     = ch_multiqc_files.mix(PREPROCESSING.out.mqc).collect{it[1]}.ifEmpty([])
+        ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
         ch_reads_for_mapping = INPUT_CHECK.out.fastqs
     }
@@ -152,7 +152,7 @@ workflow EAGER {
         ch_bamfiltered_for_deduplication = FILTER_BAM.out.genomics
         ch_bamfiltered_for_metagenomics  = FILTER_BAM.out.metagenomics
         ch_versions                      = ch_versions.mix( FILTER_BAM.out.versions )
-        ch_multiqc_files                 = ch_versions.mix( FILTER_BAM.out.mqc )
+        ch_multiqc_files                 = ch_multiqc_files.mix( FILTER_BAM.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
         ch_bamfiltered_for_deduplication = MAP.out.bam.join(MAP.out.bai)
     }

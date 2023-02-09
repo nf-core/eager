@@ -6,7 +6,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="1.2.2 (1:1.2.2+202212051552+b0a8486541)"
-   sodipodi:docname="eager2_metromap_complex.svg"
+   sodipodi:docname="eager3_metromap_complex.svg"
    inkscape:export-filename="eager2_metromap_complex.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300"
@@ -145,9 +145,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.097835"
-     inkscape:cx="493.36578"
-     inkscape:cy="178.04069"
+     inkscape:zoom="1.158434"
+     inkscape:cx="602.53755"
+     inkscape:cy="316.37537"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -2032,5 +2032,89 @@
        style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 226.99881,80.544897 -2.80633,-2.80633 1.8709,3e-5"
        id="path1499-3-6-7-2-9-1-7-1" />
+    <rect
+       style="fill:none;stroke:#008eff;stroke-width:1;stroke-linecap:round;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect3149"
+       width="23.543447"
+       height="6.1395807"
+       x="35.195007"
+       y="62.642033" />
+    <rect
+       style="fill:none;stroke:#008eff;stroke-width:1;stroke-linecap:round;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect3149-4"
+       width="23.543447"
+       height="6.1395807"
+       x="200.3913"
+       y="45.007107" />
+    <rect
+       style="fill:none;stroke:#ff1fa8;stroke-width:1;stroke-linecap:round;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect3149-4-5"
+       width="24.591751"
+       height="18.520836"
+       x="190.10536"
+       y="113.77083" />
+    <rect
+       style="fill:none;stroke:#ff1fa8;stroke-width:1;stroke-linecap:round;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect3149-4-5-06"
+       width="24.591751"
+       height="18.520836"
+       x="160.20746"
+       y="107.21486" />
+    <rect
+       style="fill:none;stroke:#697d43;stroke-width:1.15992;stroke-linecap:round;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect3149-4-5-0"
+       width="31.675777"
+       height="6.1395807"
+       x="138.57706"
+       y="44.42947" />
+    <rect
+       style="fill:none;stroke:#697d43;stroke-width:1.15992;stroke-linecap:round;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect3149-4-5-0-1"
+       width="31.675777"
+       height="6.1395807"
+       x="94.998138"
+       y="60.645687" />
+    <rect
+       style="fill:none;stroke:#a00000;stroke-width:1.15992;stroke-linecap:round;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect3149-4-5-0-3"
+       width="30.963528"
+       height="7.4103546"
+       x="117.60949"
+       y="45.799854" />
+    <rect
+       style="fill:none;stroke:#a00000;stroke-width:1.15992;stroke-linecap:round;stroke-opacity:1;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect3149-4-5-0-3-6"
+       width="27.931999"
+       height="12.990738"
+       x="116.2008"
+       y="68.590546" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#999999;stroke-width:1.44636;stroke-linecap:round;stroke-opacity:0.244651;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect6049"
+       width="204.76346"
+       height="122.17737"
+       x="156.0927"
+       y="20.932116" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#999999;stroke-width:0.728999;stroke-linecap:round;stroke-opacity:0.244651;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect6049-2"
+       width="99.639694"
+       height="63.783989"
+       x="90.071564"
+       y="93.278725" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#999999;stroke-width:0.728999;stroke-linecap:round;stroke-opacity:0.244651;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect6049-2-0"
+       width="99.639694"
+       height="63.783989"
+       x="117.52216"
+       y="40.62228" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#999999;stroke-width:0.467116;stroke-linecap:round;stroke-opacity:0.244651;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect6049-2-0-6"
+       width="92.938583"
+       height="28.076591"
+       x="-3.4650836"
+       y="93.147781" />
   </g>
 </svg>

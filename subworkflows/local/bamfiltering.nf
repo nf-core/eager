@@ -4,6 +4,8 @@
 
 include { FILTER_BAM_FRAGMENT_LENGTH                      } from '../../modules/local/filter_bam_fragment_length'
 include { SAMTOOLS_VIEW                                   } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_LENGTH_FILTER_INDEX  } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_FILTER_INDEX         } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_FILTERED } from '../../modules/nf-core/samtools/flagstat/main'
 // include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_UNMAPPED       } from '../../modules/nf-core/samtools/fastq/main'
 // include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_MAPPED         } from '../../modules/nf-core/samtools/fastq/main'
@@ -28,8 +30,13 @@ workflow FILTER_BAM {
 
     if ( params.bamfiltering_minreadlength != 0  ) {
         FILTER_BAM_FRAGMENT_LENGTH ( bam )
-        ch_bam_for_qualityfilter = FILTER_BAM_FRAGMENT_LENGTH.out.bam
         ch_versions = ch_versions.mix( FILTER_BAM_FRAGMENT_LENGTH.out.versions.first() )
+
+        SAMTOOLS_LENGTH_FILTER_INDEX ( FILTER_BAM_FRAGMENT_LENGTH.out.bam )
+        ch_versions = ch_versions.mix( SAMTOOLS_LENGTH_FILTER_INDEX.out.versions.first() )
+
+        ch_bam_for_qualityfilter = FILTER_BAM_FRAGMENT_LENGTH.out.bam.join( SAMTOOLS_LENGTH_FILTER_INDEX.out.bai )
+
     } else {
         ch_bam_for_qualityfilter = bam
     }
@@ -39,8 +46,12 @@ workflow FILTER_BAM {
     // TODO: add reference fasta in second channel?
     // TODO: document by unmapped reads always removed
     SAMTOOLS_VIEW ( ch_bam_for_qualityfilter, [], [] )
-    ch_bam_for_genomics = SAMTOOLS_VIEW.out.bam
     ch_versions = ch_versions.mix( SAMTOOLS_VIEW.out.versions.first() )
+
+    SAMTOOLS_FILTER_INDEX ( SAMTOOLS_VIEW.out.bam )
+    ch_versions = ch_versions.mix( SAMTOOLS_FILTER_INDEX.out.versions.first() )
+
+    ch_bam_for_genomics = SAMTOOLS_VIEW.out.bam.join( SAMTOOLS_FILTER_INDEX.out.bai )
 
     // Only run if we actually remove mapped reads
     if ( params.bamfiltering_mappingquality != 0 || params.bamfiltering_minreadlength != 0  ) {

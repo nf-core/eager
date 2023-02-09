@@ -1,4 +1,5 @@
 process FILTER_BAM_FRAGMENT_LENGTH {
+    tag "$meta.id"
     label 'process_single'
 
     conda "bioconda::pysam=0.20.0"
@@ -10,7 +11,7 @@ process FILTER_BAM_FRAGMENT_LENGTH {
     tuple val(meta), path(bam), path(bai)
 
     output:
-    tuple val(meta), path("*_lengthfiltered.bam"), emit: bam
+    tuple val(meta), path("*filtered.bam"), emit: bam
     path "versions.yml", emit: versions
 
     when:
@@ -23,7 +24,7 @@ process FILTER_BAM_FRAGMENT_LENGTH {
     filter_bam_fragment_length.py \\
         -a \\
         $args \\
-        -o ${prefix}_lengthfiltered.bam \\
+        -o ${prefix}_lengthonly \\
         $bam
 
     ## TODO GET ALL PACKAGES

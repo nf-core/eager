@@ -5,6 +5,52 @@
     "description": "A fully reproducible and state-of-the-art ancient DNA analysis pipeline",
     "type": "object",
     "definitions": {
+        "metagenomics": {
+            "title": "Metagenomics",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "run_metagenomicscreening": {
+                    "type": "boolean"
+                },
+                "metagenomicscreening_input": {
+                    "type": "string",
+                    "default": "unmapped"
+                }
+            }
+        },
+        "bam_filtering": {
+            "title": "BAM Filtering",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "run_bamfiltering": {
+                    "type": "boolean"
+                },
+                "bamfiltering_minreadlength": {
+                    "type": "integer",
+                    "default": 0
+                },
+                "bamfiltering_mappingquality": {
+                    "type": "integer",
+                    "default": 0
+                },
+                "bamfiltering_generateunmappedfastq": {
+                    "type": "boolean"
+                },
+                "bamfiltering_generatemappedfastq": {
+                    "type": "boolean"
+                },
+                "bamfiltering_retainunmappedgenomicbam": {
+                    "type": "boolean"
+                },
+                "bamfiltering_savefilteredbams": {
+                    "type": "boolean"
+                }
+            }
+        },
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -483,6 +529,12 @@
     },
     "allOf": [
         {
+            "$ref": "#/definitions/metagenomics"
+        },
+        {
+            "$ref": "#/definitions/bam_filtering"
+        },
+        {
             "$ref": "#/definitions/input_output_options"
         },
         {
@@ -503,35 +555,5 @@
         {
             "$ref": "#/definitions/mapping"
         }
-    ],
-    "properties": {
-        "run_bamfiltering": {
-            "type": "boolean",
-            "default": "false"
-        },
-        "bamfiltering_minreadlength": {
-            "type": "integer",
-            "default": 0
-        },
-        "bamfiltering_mappingquality": {
-            "type": "integer",
-            "default": 0
-        },
-        "bamfiltering_generateunmappedfastq": {
-            "type": "boolean",
-            "default": "false"
-        },
-        "bamfiltering_generatemappedfastq": {
-            "type": "boolean",
-            "default": "false"
-        },
-        "run_metagenomicscreening": {
-            "type": "boolean",
-            "default": "false"
-        },
-        "metagenomicscreening_input": {
-            "type": "string",
-            "default": "unmapped"
-        }
-    }
+    ]
 }
