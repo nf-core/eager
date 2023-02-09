@@ -209,7 +209,7 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 ### TODO UPDATE MULTIQC TO PICK UP BOTH BEFORE AND AFTER FILTERING ###
 
 ## Check BAM filtering mapped reads only in downstream BAM, length filtering and quality filtering
-## Expect *filtered.bam, samtools stats has >= 50 bp, mapped only, and samtools view -q 0 produces reads
+## Expect *filtered.bam, samtools stats has >= 50 bp, mapped only, and samtools stats MQ0: 0
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37
 
 ## Check BAM filtering without length/quality filtering, with retained unmapped reads in genomic BAM
