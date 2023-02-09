@@ -2,7 +2,7 @@ process BUILD_INTERVALS {
     tag "$meta.id"
     label 'process_single'
 
-    conda (params.enable_conda ? "anaconda::gawk=5.1.0" : null)
+    conda "anaconda::gawk=5.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/gawk:5.1.0' :
         'quay.io/biocontainers/gawk:5.1.0' }"
@@ -11,15 +11,17 @@ process BUILD_INTERVALS {
     tuple val(meta), path(index)
 
     output:
-    tuple val(meta), path("${meta.id}.bed")  , emit: bed
-    path "versions.yml"                             , emit: versions
+    tuple val(meta), path("*.bed")  , emit: bed
+    path "versions.yml"                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
+    prefix   = task.ext.prefix ?: "${meta.id}"
+
     """
-    awk -v FS='\t' -v OFS='\t' '{ print \$1 }' ${index} > ${meta.id}.bed
+    awk -v FS='\t' -v OFS='\t' '{ print \$1 }' ${index} > ${prefix}.bed
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
