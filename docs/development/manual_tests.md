@@ -220,6 +220,9 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 
 ## Check BAM filtering with mapped FASTQ generation with length/quality filtering of genomic BAM
 
+
+#### TODO DONT FORGET TO UNCOMMENT METAGENOMIC SCREENING
+
 ## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with unmapped reads to metagenomics
 
 ## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with mapped only reads going to metagenomics
