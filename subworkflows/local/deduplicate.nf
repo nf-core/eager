@@ -107,7 +107,6 @@ workflow DEDUPLICATE {
         ch_versions            = ch_versions.mix( DEDUP.out.versions.first() )
 
         ch_dedupped_region_bam = DEDUP.out.bam
-
     }
 
 ch_input_for_samtools_merge = ch_dedupped_region_bam
@@ -154,8 +153,10 @@ ch_input_for_samtools_merge = ch_dedupped_region_bam
     ch_dedup_bai  =  params.fasta_largeref ? SAMTOOLS_INDEX.out.csi : SAMTOOLS_INDEX.out.bai
 
     // Finally run flagstat on the dedupped bam
+    ch_input_for_samtools_flagstat = ch_dedup_bam.join( ch_dedup_bai )
+
     SAMTOOLS_FLAGSTAT(
-        ch_dedup_bam.join( ch_dedup_bai )
+        ch_input_for_samtools_flagstat
     )
     ch_versions       = ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions )
 
