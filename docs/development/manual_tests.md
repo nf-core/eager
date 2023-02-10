@@ -171,6 +171,7 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 
 ### MARKDUPLICATES
 
+#### With FastP (implicit)
 ```bash
 ## MARKDUPLICATES with default parameters
 nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/markduplicates -dump-channels -ansi-log false -w ~/eager_dsl2_testing/markduplicates/work/ --deduplication_tool markduplicates -resume
@@ -179,13 +180,35 @@ nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/markdupl
 nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/markduplicates_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/markduplicates_merged/work/ --deduplication_tool markduplicates --preprocessing_excludeunmerged -resume
 ```
 
+#### With AdapterRemoval
+```bash
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_markduplicates -dump-channels -ansi-log false -w ~/eager_dsl2_testing/AR_markduplicates/work/ --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' -resume
+
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_markduplicates_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/AR_markduplicates_merged/work/ --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
+```
+
 ### DEDUP
+
+#### With FastP (implicit)
+
 ```bash
 ## DEDUP with default parameters
 ## Fails, as expected
 # Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'.
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/dedup -dump-channels -ansi-log false -w ~/eager_dsl2_testing/dedup/work/ --deduplication_tool dedup -resume
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/dedup -dump-channels -ansi-log false -w ~/eager_dsl2_testing/dedup/work/ --deduplication_tool 'dedup' -resume
 
 ## Now with merged reads only. All other parameters are default.
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/dedup_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/dedup_merged/work/ --deduplication_tool dedup --preprocessing_excludeunmerged -resume
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/dedup_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/dedup_merged/work/ --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
+```
+
+#### With AdapterRemoval
+
+```bash
+## DEDUP with default parameters
+## Fails, as expected
+# Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'.
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_dedup -dump-channels -ansi-log false -w ~/eager_dsl2_testing/AR_dedup/work/ --preprocessing_tool 'adapterremoval' --deduplication_tool dedup -resume
+
+## Now with merged reads only. All other parameters are default.
+nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_dedup_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/AR_dedup_merged/work/ --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
