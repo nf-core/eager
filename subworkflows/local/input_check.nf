@@ -29,6 +29,23 @@ workflow INPUT_CHECK {
     fastqs = reads.fastq.map { create_fastq_channel(it) }
     bams = reads.bam.map { create_bam_channel(it) }
 
+    // Validate NO SE data allowed when using dedup
+    fastqs.map {
+        meta, reads ->
+            seq_type = meta.subMap('single_end')
+        seq_type
+    }
+    .toList()
+    .map {
+        ids ->
+            def has_se=ids.single_end.contains(true)
+
+            if ( params.deduplication_tool == 'dedup' &&  has_se ) {
+                exit 1, "Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data."
+            }
+        [ids, has_se]
+    }
+
     emit:
     fastqs    // channel: [ val(meta), [ reads ] ]
     bams      // channel  [ val(mea), bam ]
