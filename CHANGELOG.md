@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Deprecated`
 
 - The parameter `--dedup_all_merged` has been deprecated. DeDup should NOT be ran unless the data going into it is ONLY merged reads.
+- Removed support for running DeDup in runs that include any SE data. Now it can only be used exclusively on collapsed reads from PE data.
 
 ## [2.4.6] - 2022-11-14
 
