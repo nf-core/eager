@@ -80,7 +80,6 @@ def check_samplesheet(file_in, file_out):
     error_counter = 0
     sample_mapping_dict = {}
     with open(file_in, "r") as fin:
-
         ## Check header
         MIN_COLS = 10
         HEADER = [

@@ -172,6 +172,7 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 ### MARKDUPLICATES
 
 #### With FastP (implicit)
+
 ```bash
 ## MARKDUPLICATES with default parameters
 nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/markduplicates -dump-channels -ansi-log false -w ~/eager_dsl2_testing/markduplicates/work/ --deduplication_tool markduplicates -resume
@@ -181,6 +182,7 @@ nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/markdupl
 ```
 
 #### With AdapterRemoval
+
 ```bash
 nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_markduplicates -dump-channels -ansi-log false -w ~/eager_dsl2_testing/AR_markduplicates/work/ --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' -resume
 
