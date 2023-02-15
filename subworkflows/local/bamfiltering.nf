@@ -9,6 +9,9 @@ include { SAMTOOLS_INDEX as SAMTOOLS_FILTER_INDEX         } from '../../modules/
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_FILTERED } from '../../modules/nf-core/samtools/flagstat/main'
 include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_UNMAPPED       } from '../../modules/nf-core/samtools/fastq/main'
 include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_MAPPED         } from '../../modules/nf-core/samtools/fastq/main'
+include { CAT_FASTQ as CAT_FASTQ_UNMAPPED                 } from '../../modules/nf-core/cat/fastq'
+include { CAT_FASTQ as CAT_FASTQ_MAPPED                   } from '../../modules/nf-core/cat/fastq'
+
 
 workflow FILTER_BAM {
 
@@ -79,8 +82,42 @@ workflow FILTER_BAM {
         ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_MAPPED.out.versions.first() )
     }
 
-    // Routing for metagenomic screeninng
-    if ( params.run_metagenomicscreening && params.metagenomicscreening_input == 'unmapped' ) {
+    if ( ( params.run_metagenomicscreening && params.metagenomicscreening_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
+        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq
+                                    .mix(SAMTOOLS_FASTQ_UNMAPPED.out.singleton)
+                                    .mix(SAMTOOLS_FASTQ_UNMAPPED.out.other)
+                                    .groupTuple()
+                                    .map {
+                                        meta, fastqs ->
+                                            def meta_new = meta.clone()
+                                            meta_new['single_end'] = true
+                                        [ meta_new, fastqs.flatten() ]
+                                    }
+                                    .dump(tag: "what")
+        CAT_FASTQ_UNMAPPED ( ch_paired_fastq_for_cat )
+    }
+
+    if ( ( params.run_metagenomicscreening && ( params.metagenomicscreening_input == 'mapped' || params.metagenomicscreening_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
+        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq
+                                    .mix(SAMTOOLS_FASTQ_MAPPED.out.singleton)
+                                    .mix(SAMTOOLS_FASTQ_MAPPED.out.other)
+                                    .groupTuple()
+                                    .map {
+                                        meta, fastqs ->
+                                            def meta_new = meta.clone()
+                                            meta_new['single_end'] = true
+                                        [ meta_new, fastqs.flatten() ]
+                                    }
+                                    .dump(tag: "what")
+        CAT_FASTQ_MAPPED ( ch_paired_fastq_for_cat )
+    }
+
+    // Routing for metagenomic screening -> first accounting for paired-end mapping, then merged mapping, then no metagenomics
+    if ( ( params.run_metagenomicscreening && params.metagenomicscreening_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
+        ch_bam_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
+    } else if ( ( params.run_metagenomicscreening && ( params.metagenomicscreening_input == 'mapped' || params.metagenomicscreening_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
+        ch_bam_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
+    } else if ( params.run_metagenomicscreening && params.metagenomicscreening_input == 'unmapped' ) {
         ch_bam_for_metagenomics = SAMTOOLS_FASTQ_UNMAPPED.out.other
     } else if ( params.run_metagenomicscreening && ( params.metagenomicscreening_input == 'mapped' || params.metagenomicscreening_input == 'all' )) {
         ch_bam_for_metagenomics = SAMTOOLS_FASTQ_MAPPED.out.other

@@ -286,8 +286,12 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37
 
 
-## TODO: CHECK IF PAIRED-END MAPPING AND THEN GOING TO METAGENOMICS
+## Check what happens when we do paired-end merging and sending reads to metagenomics...
+## TODO: Document that if skip pair merging, sent to metagenomics is a concatenated FASTQ if you want it yourself, have to CAT the FASTQs in bam_filtering when running --generatefastq  YOURSELF!
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37 --preprocessing_skippairmerging
+
 ## TODO: DOCUMENT EVERYTHING & SCHEMA!
+
 
 
 ```
