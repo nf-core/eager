@@ -79,19 +79,19 @@ workflow FILTER_BAM {
         ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_MAPPED.out.versions.first() )
     }
 
-//     // Routing for metagenomic screeninng
-//     if ( params.run_metagenomicscreening && params.metagenomicscreening_input == 'unmapped' ) {
-//         ch_bam_for_metagenomics = SAMTOOLS_FASTQ_UNMAPPED.out.fastq
-//     } else if ( params.run_metagenomicscreening && ( params.metagenomicscreening_input == 'mapped' : params.metagenomicscreening_input == 'all' )) {
-//         ch_bam_for_metagenomics = SAMTOOLS_FASTQ_MAPPED.out.fastq
-//     } else if ( !params.run_metagenomicscreening ) {
-//         ch_bamfiltered_for_metagenomics = Channel.empty()
-//     }
+    // Routing for metagenomic screeninng
+    if ( params.run_metagenomicscreening && params.metagenomicscreening_input == 'unmapped' ) {
+        ch_bam_for_metagenomics = SAMTOOLS_FASTQ_UNMAPPED.out.other
+    } else if ( params.run_metagenomicscreening && ( params.metagenomicscreening_input == 'mapped' || params.metagenomicscreening_input == 'all' )) {
+        ch_bam_for_metagenomics = SAMTOOLS_FASTQ_MAPPED.out.other
+    } else if ( !params.run_metagenomicscreening ) {
+        ch_bamfiltered_for_metagenomics = Channel.empty()
+    }
 
     emit:
-        genomics         = Channel.empty() // ch_bam_for_genomics
-        metagenomics     = Channel.empty() // ch_bam_for_metagenomics
-        versions         = ch_versions
-        mqc              = ch_multiqc_files
+    genomics         = ch_bam_for_genomics
+    metagenomics     = ch_bam_for_metagenomics.dump(tag: "ch_bam_for_metagenomics" )
+    versions         = ch_versions
+    mqc              = ch_multiqc_files
 
 }
