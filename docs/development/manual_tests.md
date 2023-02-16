@@ -28,6 +28,9 @@ preprocessing_adapterremoval_skipqualitytrimming = false
 preprocessing_adapterremoval_trimbasequalitymin  = 20
 preprocessing_adapterremoval_skipntrimming       = false
 preprocessing_adapterremoval_qualitymax          = 41
+
+skip_deduplication                               = false
+deduplication_tool                               = 'markduplicates'
 ```
 
 General Combinations:
@@ -54,6 +57,26 @@ Tool Specific combinations
   - with/without skipqualitytim ✅
   - with/without skipntrimming ✅
 
+- Markduplicates
+  - With FastP
+    - SE&PE data ✅
+    - SE&PE data + preprocessing_excludeunmerged ✅
+    - PE_only + preprocessing_excludeunmerged ✅
+  - With AdapterRemoval
+    - With FastP
+    - SE&PE data ✅
+    - SE&PE data + preprocessing_excludeunmerged ✅
+    - PE_only + preprocessing_excludeunmerged ✅
+
+- Dedup
+  - With FastP
+    - SE&PE data ✅ (expected failure)
+    - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
+    - PE_only + preprocessing_excludeunmerged ✅
+  - With AdapterRemoval
+    - SE&PE data ✅ (expected failure)
+    - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
+    - PE_only + preprocessing_excludeunmerged ✅
 ### AdapterRemoval
 
 ```bash
@@ -168,6 +191,8 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 ```
 
 ## Deduplication
+
+In cases where deduplication is expected, check that both `mapping` and `dedup` bams exist, and that the latter contains one read less overlapping position `NC_007596.2:187-187`, where a PCR duplicate exists.
 
 ### MARKDUPLICATES
 
