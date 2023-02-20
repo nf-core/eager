@@ -203,18 +203,35 @@ In cases where deduplication is expected, check that both `mapping` and `dedup` 
 
 ```bash
 ## MARKDUPLICATES with default parameters
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/markduplicates -dump-channels -ansi-log false -w ~/eager_dsl2_testing/markduplicates/work/ --deduplication_tool markduplicates -resume
+## Expect: deduplication directory with bam,bai,flagstat for each library (6 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --outdir ./results/markduplicates -dump-channels -ansi-log false --deduplication_tool 'markduplicates' -resume
 
-## Run only on merged reads
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/markduplicates_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/markduplicates_merged/work/ --deduplication_tool markduplicates --preprocessing_excludeunmerged -resume
+## MARKDUPLICATES run only on merged reads
+## Expect: deduplication directory with bam,bai,flagstat for each library (6 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --outdir ./results/markduplicates_merged -dump-channels -ansi-log false --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
+
+#### MARKDUPLICATES run only merged only PE
+## Use as input a version of the TSV in the test profile that only includes the PE data row.
+## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/markduplicates_merged_PE_only  -dump-channels -ansi-log false --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
 ```
 
 #### With AdapterRemoval
 
 ```bash
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_markduplicates -dump-channels -ansi-log false -w ~/eager_dsl2_testing/AR_markduplicates/work/ --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' -resume
+#### MARKDUPLICATES with AR on all reads
+## Expect: deduplication directory with bam,bai,flagstat for each library (6 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --outdir ./results/AR_markduplicates -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' -resume
 
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_markduplicates_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/AR_markduplicates_merged/work/ --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
+#### MARKDUPLICATES with AR on merged reads
+## Expect: deduplication directory with bam,bai,flagstat for each library (6 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --outdir ./results/AR_markduplicates_merged -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
+
+#### MARKDUPLICATES with AR on merged reads from PE run only.
+## Use as input a version of the TSV in the test profile that only includes the PE data row.
+## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_markduplicates_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
+
 ```
 
 ### DEDUP
@@ -222,23 +239,34 @@ nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_markd
 #### With FastP (implicit)
 
 ```bash
-## DEDUP with default parameters
-## Fails, as expected
-# Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'.
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/dedup -dump-channels -ansi-log false -w ~/eager_dsl2_testing/dedup/work/ --deduplication_tool 'dedup' -resume
+#### DEDUP all reads from FastP
+## Expect: Run fails with error "Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."
+nextflow run main.nf -profile docker,test --outdir ./results/dedup -dump-channels -ansi-log false --deduplication_tool 'dedup' -resume
 
-## Now with merged reads only. All other parameters are default.
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/dedup_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/dedup_merged/work/ --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
+#### DEDUP only on merged from FastP
+## Expect: Run fails with error "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs."
+nextflow run main.nf -profile docker,test --outdir ./results/dedup_merged -dump-channels -ansi-log false --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
+
+#### DEDUP only on merged from PE runs from  FastP
+## Use as input a version of the TSV in the test profile that only includes the PE data row.
+## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/dedup_merged_PE_only -dump-channels -ansi-log false --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
+
 ```
 
 #### With AdapterRemoval
 
 ```bash
-## DEDUP with default parameters
-## Fails, as expected
-# Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'.
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_dedup -dump-channels -ansi-log false -w ~/eager_dsl2_testing/AR_dedup/work/ --preprocessing_tool 'adapterremoval' --deduplication_tool dedup -resume
+#### DEDUP on all reads from Adapter Removal
+## Expect: Run fails with error "Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."
+nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool dedup -resume
 
-## Now with merged reads only. All other parameters are default.
-nextflow run main.nf -profile docker,test --outdir ~/eager_dsl2_testing/AR_dedup_merged -dump-channels -ansi-log false -w ~/eager_dsl2_testing/AR_dedup_merged/work/ --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
+#### DEDUP only on merged from AdapterRemoval
+## Expect: Run fails with error "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs."
+nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup_merged -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
+
+#### DEDUP only on merged from PE runs from  AdapterRemoval
+## Use as input a version of the TSV in the test profile that only includes the PE data row.
+## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_dedup_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
