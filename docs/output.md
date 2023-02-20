@@ -143,8 +143,8 @@ The resulting FASTQ files will only be present in your results directory if you 
 
 #### picard MarkDuplicates
 
-  [Picard](http://broadinstitute.github.io/picard/) is a toolkit for general BAM file manipulation with many different functions. nf-core/eager most visibly uses the 'markduplicates' tool, for the removal of exact PCR duplicates that can occur during library amplification and results in false inflated coverages (and overly-confident genotyping calls).
+[Picard](http://broadinstitute.github.io/picard/) is a toolkit for general BAM file manipulation with many different functions. nf-core/eager most visibly uses the 'markduplicates' tool, for the removal of exact PCR duplicates that can occur during library amplification and results in false inflated coverages (and overly-confident genotyping calls).
 
 #### DeDup
 
-  [DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
+[DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
