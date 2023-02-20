@@ -41,7 +41,7 @@ workflow INPUT_CHECK {
             def has_se=ids.single_end.contains(true)
 
             if ( params.deduplication_tool == 'dedup' &&  has_se ) {
-                exit 1, "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs "
+                exit 1, "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs."
             }
         [ids, has_se]
     }
