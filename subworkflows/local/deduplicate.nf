@@ -159,7 +159,7 @@ workflow DEDUPLICATE {
         ch_input_for_samtools_flagstat
     )
     ch_versions       = ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions )
-
+    ch_multiqc_files  = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT.out.flagstat )
     ch_dedup_flagstat = SAMTOOLS_FLAGSTAT.out.flagstat
 
     emit:
@@ -167,4 +167,5 @@ workflow DEDUPLICATE {
     bai         = ch_dedup_bai
     flagstat    = ch_dedup_flagstat
     versions    = ch_versions
+    mqc         = ch_multiqc_files
 }
