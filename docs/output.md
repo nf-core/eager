@@ -130,8 +130,6 @@ The resulting FASTQ files will only be present in your results directory if you 
 
 ### Deduplication
 
-#### picard MarkDuplicates
-
 <details markdown="1">
 <summary>Output files</summary>
 
@@ -142,20 +140,11 @@ The resulting FASTQ files will only be present in your results directory if you 
   - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
 
   </details>bam,bai,csi
+
+#### picard MarkDuplicates
 
   [Picard](http://broadinstitute.github.io/picard/) is a toolkit for general BAM file manipulation with many different functions. nf-core/eager most visibly uses the 'markduplicates' tool, for the removal of exact PCR duplicates that can occur during library amplification and results in false inflated coverages (and overly-confident genotyping calls).
 
 #### DeDup
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `deduplication/`
-
-  - `*.dedupped.bam`: Unique reads aligned to a reference genome in BAM format.
-  - `*.dedupped.bam.{bai,csi}`: Index file corresponding to the BAM file.
-  - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
-
-  </details>bam,bai,csi
 
   [DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
