@@ -127,3 +127,24 @@ The resulting FASTQ files will only be present in your results directory if you 
   </details>bam,bai,csi
 
   [BWA](https://bio-bwa.sourceforge.net/bwa.shtml) is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome. It consists of three algorithms: BWA-backtrack (a.k.a `bwa aln`), BWA-SW and BWA-MEM. The first algorithm is designed for Illumina sequence reads up to 100bp, while the rest two for longer sequences ranged from 70bp to 1Mbp. BWA-MEM and BWA-SW share similar features such as long-read support and split alignment, but BWA-MEM, which is the latest, is generally recommended for high-quality queries as it is faster and more accurate. BWA-MEM also has better performance than BWA-backtrack for 70-100bp Illumina reads.
+
+### Deduplication
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `deduplication/`
+
+  - `*.dedupped.bam`: Unique reads aligned to a reference genome in BAM format.
+  - `*.dedupped.bam.{bai,csi}`: Index file corresponding to the BAM file.
+  - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
+
+  </details>bam,bai,csi
+
+#### picard MarkDuplicates
+
+[Picard](http://broadinstitute.github.io/picard/) is a toolkit for general BAM file manipulation with many different functions. nf-core/eager most visibly uses the 'markduplicates' tool, for the removal of exact PCR duplicates that can occur during library amplification and results in false inflated coverages (and overly-confident genotyping calls).
+
+#### DeDup
+
+[DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
