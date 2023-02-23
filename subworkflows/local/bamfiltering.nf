@@ -93,10 +93,10 @@ workflow FILTER_BAM {
                                             meta_new['single_end'] = true
                                         [ meta_new, fastqs.flatten() ]
                                     }
-                                    .dump(tag: "what")
         CAT_FASTQ_UNMAPPED ( ch_paired_fastq_for_cat )
     }
 
+    // TODO: see request https://github.com/nf-core/eager/issues/945
     if ( ( params.run_metagenomicscreening && ( params.metagenomicscreening_input == 'mapped' || params.metagenomicscreening_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
         ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq
                                     .mix(SAMTOOLS_FASTQ_MAPPED.out.singleton)
@@ -108,26 +108,25 @@ workflow FILTER_BAM {
                                             meta_new['single_end'] = true
                                         [ meta_new, fastqs.flatten() ]
                                     }
-                                    .dump(tag: "what")
         CAT_FASTQ_MAPPED ( ch_paired_fastq_for_cat )
     }
 
     // Routing for metagenomic screening -> first accounting for paired-end mapping, then merged mapping, then no metagenomics
     if ( ( params.run_metagenomicscreening && params.metagenomicscreening_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
-        ch_bam_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
+        ch_fastq_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
     } else if ( ( params.run_metagenomicscreening && ( params.metagenomicscreening_input == 'mapped' || params.metagenomicscreening_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_bam_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
+        ch_fastq_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
     } else if ( params.run_metagenomicscreening && params.metagenomicscreening_input == 'unmapped' ) {
-        ch_bam_for_metagenomics = SAMTOOLS_FASTQ_UNMAPPED.out.other
+        ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_UNMAPPED.out.other
     } else if ( params.run_metagenomicscreening && ( params.metagenomicscreening_input == 'mapped' || params.metagenomicscreening_input == 'all' )) {
-        ch_bam_for_metagenomics = SAMTOOLS_FASTQ_MAPPED.out.other
+        ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_MAPPED.out.other
     } else if ( !params.run_metagenomicscreening ) {
-        ch_bamfiltered_for_metagenomics = Channel.empty()
+        ch_fastq_for_metagenomics = Channel.empty()
     }
 
     emit:
     genomics         = ch_bam_for_genomics
-    metagenomics     = ch_bam_for_metagenomics.dump(tag: "ch_bam_for_metagenomics" )
+    metagenomics     = ch_fastq_for_metagenomics
     versions         = ch_versions
     mqc              = ch_multiqc_files
 

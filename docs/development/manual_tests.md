@@ -214,14 +214,12 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 ## Expect: *filtered.bam, samtools stats has >= 50 bp, mapped only, and samtools stats MQ0: 0
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37
 
-## Check BAM filtering without length/quality filtering, with retained unmapped reads in genomic BAM
+## Check BAM filtering without length/quality filtering, with retained unmapped reads in genomic BAM (why would one need this!? But w/e)
 ## Expect: 'filtered' BAM still contains unmapped reads in samtools stats
-## TODO: Question: why would one need this? I guess if still want to generate FASTQ file; just document
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_retainunmappedgenomicbam
 
 ## Check BAM filtering with length/quality filtering, with retained unmapped reads in genomic BAM
 ## Expect: filtered and length filtered BAMs, final BAM (not length only) should have min RL of 50, MQO: 0, but retain unmapped reads
-## TODO FAILED: length and quality filtered, but loss of unmapped reads [becaus equality is not 0?]; ADD A WARNING?
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_retainunmappedgenomicbam --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37
 
 ## Check BAM filtering with length filtering but no quality filtering, with retained unmapped reads in genomic BAM
@@ -230,7 +228,6 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 
 ## Check BAM filtering with unmapped FASTQ generation with length/quality filtering of genomic BAM
 ## Expect: BAM and unmapped FASTQ files in results, samtools stats should have RL >= 50 and MPQ:0
-## TODO: Document  that 'other' is merged reads; QUESTION: do we need to publish or just empty (as when merging/merged only 1/2/singleton files are empty) singleton/1? Or DO enforce interleaving (but what about MAG...)
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37 --bamfiltering_generateunmappedfastq
 
 ## Check BAM filtering with mapped FASTQ generation with length/quality filtering of genomic BAM
@@ -287,10 +284,9 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 
 
 ## Check what happens when we do paired-end merging and sending reads to metagenomics...
-## TODO: Document that if skip pair merging, sent to metagenomics is a concatenated FASTQ if you want it yourself, have to CAT the FASTQs in bam_filtering when running --generatefastq  YOURSELF!
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37 --preprocessing_skippairmerging
 
-## TODO: DOCUMENT EVERYTHING & SCHEMA!
+## TODO: DOCUMENT EVERYTHING
 
 
 

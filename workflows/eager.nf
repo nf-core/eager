@@ -17,6 +17,10 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
+// Report incompatible parameter combinations
+
+if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+
 // Report possible warnings
 if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
 
@@ -145,7 +149,8 @@ workflow EAGER {
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
     //
 
-    // TODO Mix in BAM inputs
+    // TODO Mix in BAM inputs once BAM input is available!
+
     if ( params.run_bamfiltering || params.run_metagenomicscreening ) {
         ch_mapped_for_bamfilter = MAP.out.bam.join(MAP.out.bai)
         FILTER_BAM ( ch_mapped_for_bamfilter )
