@@ -20,6 +20,7 @@ process FILTER_BAM_FRAGMENT_LENGTH {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def VERSION_PYSAM = '0.20.0'
     """
     filter_bam_fragment_length.py \\
         -a \\
@@ -27,10 +28,10 @@ process FILTER_BAM_FRAGMENT_LENGTH {
         -o ${prefix}_lengthonly \\
         $bam
 
-    ## TODO GET ALL PACKAGES
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
+        pysam: $VERSION_PYSAM
     END_VERSIONS
     """
 

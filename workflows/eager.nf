@@ -64,7 +64,7 @@ include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { SAMTOOLS_VIEW               } from '../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_INDEX               } from '../modules/nf-core/samtools/index/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -146,20 +146,38 @@ workflow EAGER {
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
 
     //
+    //  MODULE: indexing of user supplied input BAMs
+    //
+
+    SAMTOOLS_INDEX ( INPUT_CHECK.out.bams )
+    ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+
+    if ( params.fasta_largeref )
+        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.csi )
+    else {
+        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.bai )
+    }
+
+    //
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
     //
 
-    // TODO Mix in BAM inputs once BAM input is available!
-
     if ( params.run_bamfiltering || params.run_metagenomicscreening ) {
-        ch_mapped_for_bamfilter = MAP.out.bam.join(MAP.out.bai)
+
+        ch_mapped_for_bamfilter = MAP.out.bam
+                                    .join(MAP.out.bai)
+                                    .mix(ch_bams_from_input)
+
         FILTER_BAM ( ch_mapped_for_bamfilter )
         ch_bamfiltered_for_deduplication = FILTER_BAM.out.genomics
         ch_bamfiltered_for_metagenomics  = FILTER_BAM.out.metagenomics
         ch_versions                      = ch_versions.mix( FILTER_BAM.out.versions )
         ch_multiqc_files                 = ch_multiqc_files.mix( FILTER_BAM.out.mqc.collect{it[1]}.ifEmpty([]) )
+
     } else {
-        ch_bamfiltered_for_deduplication = MAP.out.bam.join(MAP.out.bai)
+        ch_bamfiltered_for_deduplication = MAP.out.bam
+                                                .join(MAP.out.bai)
+                                                .mix(ch_bams_from_input)
     }
 
     ch_reads_for_deduplication = ch_bamfiltered_for_deduplication

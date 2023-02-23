@@ -46,9 +46,8 @@ workflow FILTER_BAM {
 
     // Generate BAM file of quality filtered and mapped-only reads,
     // optionally retaining unmapped reads, defined in modules.config
-    // TODO: add reference fasta in second channel?
-    // TODO: document by unmapped reads always removed
-    SAMTOOLS_VIEW ( ch_bam_for_qualityfilter, [], [] )
+
+    SAMTOOLS_VIEW ( ch_bam_for_qualityfilter, [], [] ) // fasta isn't needed until we support CRAM
     ch_versions = ch_versions.mix( SAMTOOLS_VIEW.out.versions.first() )
 
     SAMTOOLS_FILTER_INDEX ( SAMTOOLS_VIEW.out.bam )
@@ -76,7 +75,7 @@ workflow FILTER_BAM {
     }
 
     // Solution to the Andrades Valtueña-Light Problem: mapped bam for metagenomics (with options for quality- and length filtered)
-    // TODO: document that BAMtoFASTQs never go through read length filtering! Only genomic BAM
+
     if ( params.bamfiltering_generatemappedfastq ||  ( params.run_metagenomicscreening && ( params.metagenomicscreening_input == 'mapped' || params.metagenomicscreening_input == 'all' ) ) ) {
         SAMTOOLS_FASTQ_MAPPED ( bam.map{[ it[0], it[1] ]}, false )
         ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_MAPPED.out.versions.first() )
