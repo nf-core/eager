@@ -36,6 +36,10 @@
 
   > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
 
+- [PreSeq](https://doi.org/10.1038/nmeth.2375)
+
+  > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
