@@ -488,14 +488,29 @@
             "properties": {
                 "skip_deduplication": {
                     "type": "boolean",
-                    "description": "Specify to skip the removal of PCR duplicates."
+                    "description": "Specify to skip the removal of PCR duplicates.",
+                    "help_text": ""
                 },
                 "deduplication_tool": {
                     "type": "string",
                     "default": "markduplicates",
                     "description": "Specify which tool to use for deduplication.",
-                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> ⚠️ DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
-                    "enum": ["markduplicates", "dedup"]
+                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> \u26a0\ufe0f DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
+                    "enum": ["markduplicates", "dedup"],
+                    "fa_icon": "fas fa-clone"
+                },
+                "deduplication_skip_preseq": {
+                    "type": "boolean",
+                    "help_text": "Turns off the computation of library complexity estimation.",
+                    "description": "Turns off the computation of library complexity estimation.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "deduplication_preseq_stepsize": {
+                    "type": "integer",
+                    "default": 1000,
+                    "description": "Specify the step size of Preseq.",
+                    "help_text": "Can be used to configure the step size of Preseq's c_curve and lc_extrap method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.\n\n\n> Modifies tool parameter(s)\n>   - preseq: `-s`",
+                    "fa_icon": "fas fa-shoe-prints"
                 }
             },
             "fa_icon": "fas fa-clone"
@@ -526,5 +541,10 @@
         {
             "$ref": "#/definitions/deduplication"
         }
-    ]
+    ],
+    "properties": {
+        "new_param_1": {
+            "type": "string"
+        }
+    }
 }
