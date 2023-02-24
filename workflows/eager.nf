@@ -18,8 +18,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
 // Check failing parameter combinations
-// TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
-if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
+if ( params.deduplication_tool == 'dedup' && ! params.dedup_all_merged ) { exit 1, 'Cannot run dedup unless --dedup_all_merged is specified, denoting that all sequencing is paired-end, and all reads have been collapsed (merged). If this is not the case, use MarkDuplicates instead.'}
 
 // Report possible warnings
 if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
@@ -62,6 +61,7 @@ include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { PRESEQ } from '../modules/nf-core/preseq/ccurve/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,14 +150,22 @@ workflow EAGER {
 
     if ( !params.skip_deduplication ) {
         DEDUPLICATE( ch_reads_for_deduplication, ch_fasta_for_deduplication.fasta, ch_fasta_for_deduplication.fasta_fai )
-        ch_versions          = ch_versions.mix( DEDUPLICATE.out.versions )
-
-        ch_dedupped_bams     = DEDUPLICATE.out.bam.join( DEDUPLICATE.out.bai )
+        ch_dedupped_bams = DEDUPLICATE.out.bam
+            .join( DEDUPLICATE.out.bai )
         ch_dedupped_flagstat = DEDUPLICATE.out.flagstat
+        ch_versions = ch_versions.mix( DEDUPLICATE.out.versions )
 
     } else {
-        ch_dedupped_bams     = ch_reads_for_deduplication
+        ch_dedupped_bams = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
+    }
+
+    // 
+    // MODULE: PreSeq
+    //
+    if ( !params.deduplication_skip_preseq == false) {
+        PRESEQ_CCURVE(ch_reads_for_deduplication)
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))
     }
 
     //
@@ -177,7 +185,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    
 
     MULTIQC (
         ch_multiqc_files.collect(),
