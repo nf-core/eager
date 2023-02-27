@@ -26,7 +26,7 @@ workflow FILTER_BAM {
     // GENOMICS BAM GENERATION
     //
 
-   // Solution to the Wang-Schiffels Problem: Generate length filtered BAM of mapped reads
+    // Solution to the Wang-Schiffels Problem: Generate length filtered BAM of mapped reads
     // - While it would be slightly more efficient to do this prior length filter
     //   as samtools will be faster, so would reduce data size into slower script,
     //   length_filter doesn't include indexing

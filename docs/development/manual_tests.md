@@ -174,7 +174,7 @@ All possible parameters
 ```
     // BAM Filtering
     run_bamfiltering                      = false
-    bamfiltering_minreadlength                = 0
+    bamfiltering_minreadlength            = 0
     bamfiltering_mappingquality           = 0
     bamfiltering_generateunmappedfastq    = false
     bamfiltering_generatemappedfastq      = false
@@ -286,7 +286,6 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 ## Check what happens when we do paired-end merging and sending reads to metagenomics...
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37 --preprocessing_skippairmerging
 
-## TODO: DOCUMENT EVERYTHING
 
 
 
