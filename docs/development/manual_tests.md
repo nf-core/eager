@@ -207,7 +207,7 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 
 ## Check BAM filtering mapped reads only in downstream BAM, no length filtering, but with quality filtering
 ## Expect: *filtered.bam, samtools stats has < 50 bp, mapped only and samtools view -q 0 produces reads
-## TODO: UPDATE MULTIQC TO PICK UP BOTH BEFORE AND AFTER FILTERING
+## TODO: BEFORE RELEASE UPDATE MULTIQC TO PICK UP BOTH BEFORE AND AFTER FILTERING
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams
 
 ## Check BAM filtering mapped reads only in downstream BAM, length filtering and quality filtering
