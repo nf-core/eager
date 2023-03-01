@@ -166,7 +166,7 @@ You may also recieve the files above if metagenomic screening is turned on.
   - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
 
 </details>bam,bai,csi
-  
+
 Deduplication is carried by two possible tools, as described below. However the expected output files are should be the same.
 
 #### picard MarkDuplicates
@@ -176,4 +176,3 @@ Deduplication is carried by two possible tools, as described below. However the 
 #### DeDup
 
 [DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
-
