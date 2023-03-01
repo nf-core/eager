@@ -506,6 +506,19 @@
                     "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis.\n\nBy default all reads are retained and is therefore set to 0 to ensure no quality filtering is performed.\n\nNote that by default the output BAM files of this step are _not_ stored in the results directory (as it is assumed that deduplicated BAM files are preferred). See `--bamfiltering_savefilteredbams` if you wish to save these.\n\n> Modifies tool parameter(s):\n> - samtools view `-q`",
                     "fa_icon": "fas fa-thermometer-full"
                 },
+                "bamfilter_genomicbamfilterflag": {
+                    "type": "integer",
+                    "default": 4,
+                    "fa_icon": "fas fa-flag",
+                    "description": "Specify the SAM format flag of reads to remove during BAM filtering for downstream genomic steps. Generally not recommended to change.",
+                    "help_text": "You can use this to customise the exact SAM format flag of reads you wish to _remove_ from your BAM file to for downstream _genomic_ analyses.\n\nYou can explore more using a tool from the Broad institute [here](https://broadinstitute.github.io/picard/explain-flags.html)\n\n> ⚠️ Modify at your own risk, alternative flags are not necessarily supported in downstream steps!\n\n> Modifies tool parameter(s):\n>     - SAMtools: `-F`"
+                },
+                "bamfiltering_retainunmappedgenomicbam": {
+                    "type": "boolean",
+                    "description": "Specify to retain unmapped reads in the BAM file used for downstream genomic analyses.",
+                    "help_text": "You can use this parameter to retain unmapped reads (optionally also length filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomicscreening_input` is set to `all`.\n\n> ⚠️ This will likely slow down run time of downstream pipeline steps!\n\n> Modifies tool parameter(s):\n> - samtools view: `-f 4` / `-F 4`",
+                    "fa_icon": "fas fa-piggy-bank"
+                },
                 "bamfiltering_generateunmappedfastq": {
                     "type": "boolean",
                     "description": "Generate FASTQ files containing only unmapped reads from the aligner generated BAM files.",
@@ -517,12 +530,6 @@
                     "description": "Generate FASTQ files containing only mapped reads from the aligner generated BAM files .",
                     "help_text": "This turns on the generation and saving of FASTQs of only the mapped reads from the mapping step in the results directory, using `samtools fastq`.\n\nThis could be useful if you wish to do other analysis of the mapped reads independently of the pipeline, such as remapping with different parameters (whereby only including mapped reads will speed up computation time during the re-mapping due to reduced input data).\n\nNote the reads in these FASTQ files have _not_ undergone length of quality filtering\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-F 4`",
                     "fa_icon": "far fa-file-alt"
-                },
-                "bamfiltering_retainunmappedgenomicbam": {
-                    "type": "boolean",
-                    "description": "Specify to retain unmapped reads in the BAM file used for downstream genomic analyses.",
-                    "help_text": "You can use this parameter to retain unmapped reads (optionally also length filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomicscreening_input` is set to `all`.\n\n> ⚠️ This will likely slow down run time of downstream pipeline steps!\n\n> Modifies tool parameter(s):\n> - samtools view: `-f 4` / `-F 4`",
-                    "fa_icon": "fas fa-piggy-bank"
                 },
                 "bamfiltering_savefilteredbams": {
                     "type": "boolean",
