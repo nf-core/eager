@@ -17,9 +17,11 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
-// Report incompatible parameter combinations
-
+// Check failing parameter combinations
 if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+
+// TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
+if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
 
 // Report possible warnings
 if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
@@ -51,6 +53,7 @@ include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
 include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
 include { MAP                } from '../subworkflows/local/map'
 include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,7 +110,7 @@ workflow EAGER {
     INPUT_CHECK (
         ch_input
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
 
     //
     // SUBWORKFLOW: Indexing of reference files
@@ -122,7 +125,7 @@ workflow EAGER {
     FASTQC (
         INPUT_CHECK.out.fastqs
     )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
 
     //
     // SUBWORKFLOW: Read preprocessing (clipping, merging, fastq trimming etc. )
@@ -181,6 +184,30 @@ workflow EAGER {
     }
 
     ch_reads_for_deduplication = ch_bamfiltered_for_deduplication
+
+    //
+    // SUBWORKFLOW: genomic BAM deduplication
+    //
+
+    ch_fasta_for_deduplication = REFERENCE_INDEXING.out.reference
+        .multiMap{
+            meta, fasta, fai, dict, index ->
+            fasta:      [ meta, fasta ]
+            fasta_fai:  [ meta, fai ]
+        }
+
+    if ( !params.skip_deduplication ) {
+        DEDUPLICATE( ch_reads_for_deduplication, ch_fasta_for_deduplication.fasta, ch_fasta_for_deduplication.fasta_fai )
+        ch_versions          = ch_versions.mix( DEDUPLICATE.out.versions )
+
+        ch_dedupped_bams     = DEDUPLICATE.out.bam.join( DEDUPLICATE.out.bai )
+        ch_dedupped_flagstat = DEDUPLICATE.out.flagstat
+
+    } else {
+        ch_dedupped_bams     = ch_reads_for_deduplication
+        ch_dedupped_flagstat = Channel.empty()
+    }
+
 
     //
     // MODULE: MultiQC

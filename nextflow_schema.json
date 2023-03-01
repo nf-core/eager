@@ -445,7 +445,7 @@
                     "type": "string",
                     "default": "bowtie2",
                     "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper"],
-                    "description": "Specify which mapper to use. Options: 'bwaaln', 'bwamem', 'circularmapper', 'bowtie2'.",
+                    "description": "Specify which mapper to use.",
                     "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)"
                 },
                 "fasta_largeref": {
@@ -555,6 +555,26 @@
                 }
             },
             "fa_icon": "fas fa-search"
+        },
+        "deduplication": {
+            "title": "Deduplication",
+            "type": "object",
+            "description": "Options for removal of PCR duplicates",
+            "default": "",
+            "properties": {
+                "skip_deduplication": {
+                    "type": "boolean",
+                    "description": "Specify to skip the removal of PCR duplicates."
+                },
+                "deduplication_tool": {
+                    "type": "string",
+                    "default": "markduplicates",
+                    "description": "Specify which tool to use for deduplication.",
+                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> ⚠️ DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
+                    "enum": ["markduplicates", "dedup"]
+                }
+            },
+            "fa_icon": "fas fa-clone"
         }
     },
     "allOf": [
@@ -584,6 +604,9 @@
         },
         {
             "$ref": "#/definitions/metagenomics"
+        },
+        }
+            "$ref": "#/definitions/deduplication"
         }
     ]
 }

@@ -153,3 +153,27 @@ If bam filtering is turned on, by default only mapped reads are retained for dow
 Please be aware, that intermediate length and mapping quality filtered genomic BAM files are _not_ saved in the results directory automatically, with the assumption that downstream deduplicated BAM files are preferred for further analyses - see the [parameters](https://nf-co.re/eager/parameters) page for more information if you wish to save these.
 
 You may also recieve the files above if metagenomic screening is turned on.
+
+### Deduplication
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `deduplication/`
+
+  - `*.dedupped.bam`: Unique reads aligned to a reference genome in BAM format.
+  - `*.dedupped.bam.{bai,csi}`: Index file corresponding to the BAM file.
+  - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
+
+</details>bam,bai,csi
+  
+Deduplication is carried by two possible tools, as described below. However the expected output files are should be the same.
+
+#### picard MarkDuplicates
+
+[Picard](http://broadinstitute.github.io/picard/) is a toolkit for general BAM file manipulation with many different functions. nf-core/eager most visibly uses the 'markduplicates' tool, for the removal of exact PCR duplicates that can occur during library amplification and results in false inflated coverages (and overly-confident genotyping calls).
+
+#### DeDup
+
+[DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
+

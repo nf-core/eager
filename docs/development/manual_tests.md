@@ -28,9 +28,12 @@ preprocessing_adapterremoval_skipqualitytrimming = false
 preprocessing_adapterremoval_trimbasequalitymin  = 20
 preprocessing_adapterremoval_skipntrimming       = false
 preprocessing_adapterremoval_qualitymax          = 41
+
+skip_deduplication                               = false
+deduplication_tool                               = 'markduplicates'
 ```
 
-General Combinations:
+General Combinations (test logging):
 
 - All numeric values change ✅✅
 
@@ -51,8 +54,31 @@ Tool Specific combinations
 - fastp
   - with/without complexity filtering ✅
 - AdapterRemoval
+
   - with/without skipqualitytim ✅
   - with/without skipntrimming ✅
+
+- Markduplicates
+
+  - With FastP
+    - SE&PE data ✅
+    - SE&PE data + preprocessing_excludeunmerged ✅
+    - PE_only + preprocessing_excludeunmerged ✅
+  - With AdapterRemoval
+    - With FastP
+    - SE&PE data ✅
+    - SE&PE data + preprocessing_excludeunmerged ✅
+    - PE_only + preprocessing_excludeunmerged ✅
+
+- Dedup
+  - With FastP
+    - SE&PE data ✅ (expected failure)
+    - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
+    - PE_only + preprocessing_excludeunmerged ✅
+  - With AdapterRemoval
+    - SE&PE data ✅ (expected failure)
+    - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
+    - PE_only + preprocessing_excludeunmerged ✅
 
 ### AdapterRemoval
 
@@ -266,7 +292,6 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 # Expect: filtered BAM (samtools stats SN quality average < 36.7 or view -q 0 vs. -q 37 is different  and  RL reads min <50), and a dump() on the ch_bam_for_metagenomics channel should report mapped_other. Nr. of reads in dumped FASTQ should be roughly matching mappd reads as calculated from results/mapping/*.flagstatt. Note: No filtered flagstat expected!
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'mapped' -dump-channels
 
-
 ## Check BAM filtering NO LENGTH/QAULITY with metagenomics screening, with all reads going to metagenomics
 # Expect: filtered BAM (samtools stats SN quality average < 36.7 or view -q 0 vs. -q 37 is different  and  RL reads min <50), and a dump() on the ch_bam_for_metagenomics channel should report mapped_other. Nr. of reads in dumped FASTQ should be roughly matching total reads as calculated from results/mapping/*.flagstatt. Note: No filtered flagstat expected!
 ## Some reads lost, not 100% why command looks OK... but not just unmapped as more than that
@@ -282,11 +307,84 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 # Expect: filtered BAM (samtools stats SN quality average < 36.7 or view -q 0 vs. -q 37 is not different  and  RL reads min <= 50), and a dump() on the ch_bam_for_metagenomics channel should report unmapped_other. Nr. of reads in dumped FASTQ should match unmapped reads as calculated from results/mapping/*.flagstat; and unmapped other fASTQ in bam_filtering directoryt.
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37
 
-
 ## Check what happens when we do paired-end merging and sending reads to metagenomics...
 nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37 --preprocessing_skippairmerging
+```
 
+## Deduplication
 
+In cases where deduplication is expected, check that both `mapping` and `dedup` bams exist, and that the latter contains one read less overlapping position `NC_007596.2:187-187`, where a PCR duplicate exists.
 
+### MARKDUPLICATES
 
+#### With FastP (implicit)
+
+```bash
+## MARKDUPLICATES with default parameters
+## Expect: deduplication directory with bam,bai,flagstat for each library (6 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --outdir ./results/markduplicates -dump-channels -ansi-log false --deduplication_tool 'markduplicates' -resume
+
+## MARKDUPLICATES run only on merged reads
+## Expect: deduplication directory with bam,bai,flagstat for each library (6 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --outdir ./results/markduplicates_merged -dump-channels -ansi-log false --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
+
+#### MARKDUPLICATES run only merged only PE
+## Use as input a version of the TSV in the test profile that only includes the PE data row.
+## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/markduplicates_merged_PE_only  -dump-channels -ansi-log false --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
+```
+
+#### With AdapterRemoval
+
+```bash
+#### MARKDUPLICATES with AR on all reads
+## Expect: deduplication directory with bam,bai,flagstat for each library (6 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --outdir ./results/AR_markduplicates -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' -resume
+
+#### MARKDUPLICATES with AR on merged reads
+## Expect: deduplication directory with bam,bai,flagstat for each library (6 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --outdir ./results/AR_markduplicates_merged -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
+
+#### MARKDUPLICATES with AR on merged reads from PE run only.
+## Use as input a version of the TSV in the test profile that only includes the PE data row.
+## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_markduplicates_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'markduplicates' --preprocessing_excludeunmerged -resume
+
+```
+
+### DEDUP
+
+#### With FastP (implicit)
+
+```bash
+#### DEDUP all reads from FastP
+## Expect: Run fails with error "Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."
+nextflow run main.nf -profile docker,test --outdir ./results/dedup -dump-channels -ansi-log false --deduplication_tool 'dedup' -resume
+
+#### DEDUP only on merged from FastP
+## Expect: Run fails with error "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs."
+nextflow run main.nf -profile docker,test --outdir ./results/dedup_merged -dump-channels -ansi-log false --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
+
+#### DEDUP only on merged from PE runs from  FastP
+## Use as input a version of the TSV in the test profile that only includes the PE data row.
+## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/dedup_merged_PE_only -dump-channels -ansi-log false --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
+
+```
+
+#### With AdapterRemoval
+
+```bash
+#### DEDUP on all reads from Adapter Removal
+## Expect: Run fails with error "Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."
+nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool dedup -resume
+
+#### DEDUP only on merged from AdapterRemoval
+## Expect: Run fails with error "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs."
+nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup_merged -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
+
+#### DEDUP only on merged from PE runs from  AdapterRemoval
+## Use as input a version of the TSV in the test profile that only includes the PE data row.
+## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
+nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_dedup_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
