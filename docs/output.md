@@ -135,13 +135,13 @@ The resulting FASTQ files will only be present in your results directory if you 
 
 - `bam_filtering/`
 
-  - `*length.filtered.bam`: BAM file containing mapped and unmapped reads with length filtered reads.
+  - `*length.filtered.bam`: BAM file containing length-filtered mapped and unmapped reads.
   - `*.filtered.bam`: BAM file containing mapped quality filtered reads (and optionally length filtering and unmapped reads, if specified by the user with the corresponding parameters).
   - `*.{bai,csi}`: Corresponding index files of any generated BAM files.
   - `*.unmapped_other_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only unmapped reads, if specified for generation, without length filtering.
     - If you do read merging or have single-end data you will only get one file containing (`*_other*`) containg all reads (the others will be empty).
     - If you skip merging for _paired-end data_ you'll get reads separately (`_1`, `_2`, `_singleton`), with `other` being empty.
-  - `*mapped_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only mapped reads, if specified for generation, without length or quality filtering. If you do read merging you will only get one file containing (`*_other*`) containg all reads. If you skip merging you'll get them separately (`_1, _2 etc.`).
+  - `*mapped_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only mapped reads, if specified for generation, without length or quality filtering. If you do read merging you will only get one file containing (`*_other*`) containg all reads. If you skip merging you'll get them separately (`_1`, `_2` etc.).
   - `*filtered.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
 
 </details>
