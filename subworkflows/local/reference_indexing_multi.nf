@@ -15,9 +15,8 @@ workflow REFERENCE_INDEXING_SINGLE {
     samplesheet // file: /path/to/name.{fasta,fa,fna,fas,fasta.gz,fa.gz,fna.gz,fas.gz}
 
     main:
-
-    // def fasta_ext = grab_ungzipped_extension(fasta)
-    // def clean_name = fasta.name.toString() - fasta_ext
+    ch_versions = Channel.empty()
+    // TODO FINISH!
 
     if ( samplesheet.extension == 'tsv' ){
         ch_splitsamplesheet_for_branch = samplesheet
