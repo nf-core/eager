@@ -213,15 +213,15 @@ workflow EAGER {
     // 
     // MODULE: PreSeq
     //
-    if ( !params.deduplication_skip_preseq && params.preseq_mode == 'c_curve') {
+    if ( !params.deduplication_skip_preseq && params.deduplication_preseq_mode == 'c_curve') {
         PRESEQ_CCURVE(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_CCURVE.out.versions )
     }
 
-    if ( !params.deduplication_skip_preseq && params.preseq_mode == 'lc_extrap') {
+    if ( !params.deduplication_skip_preseq && params.deduplication_preseq_mode == 'lc_extrap') {
         PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map{[it[0],it[1]]})
-        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.c_curve.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
 
