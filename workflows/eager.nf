@@ -62,6 +62,7 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/main'
+include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -163,10 +164,16 @@ workflow EAGER {
     // 
     // MODULE: PreSeq
     //
-    if ( !params.deduplication_skip_preseq ) {
+    if ( !params.deduplication_skip_preseq & params.preseq_mode == 'c_curve') {
         PRESEQ_CCURVE(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_CCURVE.out.versions )
+    }
+
+    if ( !params.deduplication_skip_preseq & params.preseq_mode == 'lc_extrap') {
+        PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map{[it[0],it[1]]})
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.c_curve.collect{it[1]}.ifEmpty([]))
+        ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
 
     //
