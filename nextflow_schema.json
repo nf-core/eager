@@ -318,7 +318,7 @@
                     "type": "boolean",
                     "description": "Specify to skip read-pair merging.",
                     "fa_icon": "fas fa-forward",
-                    "help_text": "Turns off the paired-end read merging, and will result in paired-end mapping modes being used during reference of reads again alignment.\n\nThis can be useful in cases where you have long ancient DNA reads, modern DNA,  or when you want to utilise mate-pair 'spatial' information..\n\n\u26a0\ufe0f If you run this and also with --preprocessing_minlength set to a value (as is by default!), you may end up removing single reads from either the pair1 or pair2 file. These reads will be NOT be mapped when aligning with either bwa or bowtie, as both can only accept one (forward) or two (forward and reverse) FASTQs as input in paired-end mode.\n\n> Modifies AdapterRemoval parameter: `--collapse`\n> Modifies fastp parameter: `--merge`"
+                    "help_text": "Turns off the paired-end read merging, and will result in paired-end mapping modes being used during reference of reads again alignment.\n\nThis can be useful in cases where you have long ancient DNA reads, modern DNA,  or when you want to utilise mate-pair 'spatial' information..\n\n⚠️ If you run this and also with --preprocessing_minlength set to a value (as is by default!), you may end up removing single reads from either the pair1 or pair2 file. These reads will be NOT be mapped when aligning with either bwa or bowtie, as both can only accept one (forward) or two (forward and reverse) FASTQs as input in paired-end mode.\n\n> ⚠️ If you run metagenomic screening as well as skipping merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies AdapterRemoval parameter: `--collapse`\n> Modifies fastp parameter: `--merge`"
                 },
                 "preprocessing_excludeunmerged": {
                     "type": "boolean",
@@ -364,7 +364,7 @@
                     "type": "integer",
                     "default": 0,
                     "description": "Specify number of bases to hard-trim from 5 prime or front of reads. Exact behaviour varies per tool, see documentation.",
-                    "help_text": "Specify number of bases to hard-trim from 5 prime or front of reads. Exact behaviour varies per tool, see documentation. By default set to `0` to not perform any hard trimming. By default set to `0` to not perform any hard trimming.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n\u26a0\ufe0f when this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: this 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter).  Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior mapping (to allow more specific mappering), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 5p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore this is more suitable for hard-removal of damage prior mapping (however the Bowtie2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim5p`\n> Modifies fastp parameters: `--trim_front1` and/or `--trim_front2`\n",
+                    "help_text": "Specify number of bases to hard-trim from 5 prime or front of reads. Exact behaviour varies per tool, see documentation. By default set to `0` to not perform any hard trimming.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n⚠️ when this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: this 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter).  Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior mapping (to allow more specific mapping), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 5p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore this is more suitable for hard-removal of damage prior mapping (however the Bowtie2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim5p`\n> Modifies fastp parameters: `--trim_front1` and/or `--trim_front2`\n",
                     "fa_icon": "fas fa-cut"
                 },
                 "preprocessing_trim3p": {
@@ -372,7 +372,7 @@
                     "default": 0,
                     "description": "Specify number of bases to hard-trim from 3 prime or tail of reads. Exact behaviour varies per tool, see documentation.",
                     "fa_icon": "fas fa-cut",
-                    "help_text": "Specify number of bases to hard-trim from 3 prime or tail of reads. Exact behaviour varies per tool, see documentation.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n\u26a0\ufe0f when this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: this 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter).  Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior mapping (to allow more specific mappering), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 3p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore this is more suitable for hard-removal of damage prior mapping (however the Bowtie2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim3p`\n> Modifies fastp parameters: `--tail_front1` and/or `--trim_tail2`\n"
+                    "help_text": "Specify number of bases to hard-trim from 3 prime or tail of reads. Exact behaviour varies per tool, see documentation. By default set to `0` to not perform any hard trimming.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n⚠️ when this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: this 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter).  Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior mapping (to allow more specific mapping), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 3p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore this is more suitable for hard-removal of damage prior mapping (however the Bowtie2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim3p`\n> Modifies fastp parameters: `--trim_tail1` and/or `--trim_tail2`\n"
                 },
                 "preprocessing_savepreprocessedreads": {
                     "type": "boolean",
@@ -480,6 +480,89 @@
             },
             "fa_icon": "fas fa-layer-group"
         },
+        "bam_filtering": {
+            "title": "BAM Filtering",
+            "type": "object",
+            "description": "Options related to length, quality, and map status filtering of reads.",
+            "default": "",
+            "properties": {
+                "run_bamfiltering": {
+                    "type": "boolean",
+                    "description": "Turn on filtering of reads in BAM files after mapping. By default, only mapped reads retained.",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "Turns on the filtering subworkflow for mapped BAM files coming out of the read alignment step. Filtering includes removal of unmapped reads, length filtering, and mapping quality filtering.\n\nWhen turning on bam filtering, by default only the mapped/unmapped filter is activated, thus only mapped reads are retained for downstream analyses. See `--bamfiltering_retainunmappedgenomicbam` to retain unmapped reads, if filtering only for length and/or quality is preferred.\n\nNote this subworkflow can also be activated if `--run_metagenomic_screening` is supplied."
+                },
+                "bamfiltering_minreadlength": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify the minimum read length mapped reads should have for downstream genomic analysis.",
+                    "help_text": "You can use this to remove mapped reads that fall below a certain length after mapping.\n\nThis can be useful to get more realistic 'endogenous DNA' or 'on target read' percentages.\n\nIf used _instead of_ minimum length read filtering at AdapterRemoval, you can get more more realistic endogenous DNA estimates when most of your reads are very short (e.g. in single-stranded libraries or samples with highly degraded DNA). In these cases, the default minimum length filter at earlier adapter clipping/read merging will remove a very large amount of your reads in your library (including valid reads), thus making an artificially small denominator for a typical endogenous DNA calculation. \n\nTherefore by retaining all of your reads until _after_ mapping (i.e., turning off the  adapter clipping/read merging filter), you can generate more 'real' endogenous DNA estimates immediately after mapping (with a better denominator). Then after estimating this, filter using this parameter to retain only 'useful' reads (i.e., those long enough to provide higher confidence of their mapped position) for downstream analyses.\n\nBy specifying `0`, no length filtering is performed.\n\nNote that by default the output BAM files of this step are _not_ stored in the results directory (as it is assumed that deduplicated BAM files are preferred). See `--bamfiltering_savefilteredbams` if you wish to save these.\n\n> Modifies tool parameter(s):\n> - filter_bam_fragment_length.py: `-l`",
+                    "fa_icon": "fas fa-ruler-horizontal"
+                },
+                "bamfiltering_mappingquality": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify the minimum mapping quality reads should have for downstream genomic analysis.",
+                    "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis.\n\nBy default all reads are retained and is therefore set to 0 to ensure no quality filtering is performed.\n\nNote that by default the output BAM files of this step are _not_ stored in the results directory (as it is assumed that deduplicated BAM files are preferred). See `--bamfiltering_savefilteredbams` if you wish to save these.\n\n> Modifies tool parameter(s):\n> - samtools view `-q`",
+                    "fa_icon": "fas fa-thermometer-full"
+                },
+                "bamfilter_genomicbamfilterflag": {
+                    "type": "integer",
+                    "default": 4,
+                    "fa_icon": "fas fa-flag",
+                    "description": "Specify the SAM format flag of reads to remove during BAM filtering for downstream genomic steps. Generally not recommended to change.",
+                    "help_text": "You can use this to customise the exact SAM format flag of reads you wish to _remove_ from your BAM file to for downstream _genomic_ analyses.\n\nYou can explore more using a tool from the Broad institute [here](https://broadinstitute.github.io/picard/explain-flags.html)\n\n> ⚠️ Modify at your own risk, alternative flags are not necessarily supported in downstream steps!\n\n> Modifies tool parameter(s):\n>     - SAMtools: `-F`"
+                },
+                "bamfiltering_retainunmappedgenomicbam": {
+                    "type": "boolean",
+                    "description": "Specify to retain unmapped reads in the BAM file used for downstream genomic analyses.",
+                    "help_text": "You can use this parameter to retain unmapped reads (optionally also length filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomicscreening_input` is set to `all`.\n\n> ⚠️ This will likely slow down run time of downstream pipeline steps!\n\n> Modifies tool parameter(s):\n> - samtools view: `-f 4` / `-F 4`",
+                    "fa_icon": "fas fa-piggy-bank"
+                },
+                "bamfiltering_generateunmappedfastq": {
+                    "type": "boolean",
+                    "description": "Generate FASTQ files containing only unmapped reads from the aligner generated BAM files.",
+                    "help_text": "This turns on the generation and saving of FASTQs of only the unmapped reads from the mapping step in the results directory, using `samtools fastq`.\n\nThis could be useful if you wish to do other analysis of the unmapped reads independently of the pipeline.\n\nNote: the reads in these FASTQ files have _not_ undergone length of quality filtering\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4`",
+                    "fa_icon": "fas fa-file-alt"
+                },
+                "bamfiltering_generatemappedfastq": {
+                    "type": "boolean",
+                    "description": "Generate FASTQ files containing only mapped reads from the aligner generated BAM files .",
+                    "help_text": "This turns on the generation and saving of FASTQs of only the mapped reads from the mapping step in the results directory, using `samtools fastq`.\n\nThis could be useful if you wish to do other analysis of the mapped reads independently of the pipeline, such as remapping with different parameters (whereby only including mapped reads will speed up computation time during the re-mapping due to reduced input data).\n\nNote the reads in these FASTQ files have _not_ undergone length of quality filtering\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-F 4`",
+                    "fa_icon": "far fa-file-alt"
+                },
+                "bamfiltering_savefilteredbams": {
+                    "type": "boolean",
+                    "description": "Save in the results directory the intermediate filtered genomic BAM files that are sent for  downstream genomic analyses.",
+                    "help_text": "This saves intermediate length and/or quality filtered genomic BAM files in the results directory.",
+                    "fa_icon": "far fa-save"
+                }
+            },
+            "fa_icon": "fas fa-filter"
+        },
+        "metagenomics": {
+            "title": "Metagenomics",
+            "type": "object",
+            "description": "Options to related to metagenomic screening.",
+            "default": "",
+            "properties": {
+                "run_metagenomicscreening": {
+                    "type": "boolean",
+                    "description": "Turn on metagenomic screening of mapped, unmapped, or all reads.",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "Turns on the metagenomic screening subworkflow of the pipeline, where reads are screened against large databases. Typically used for pathogen screening or microbial community analysis.\n\nIf supplied, this will also turn on the BAM filtering subworkflow of the pipeline."
+                },
+                "metagenomicscreening_input": {
+                    "type": "string",
+                    "default": "unmapped",
+                    "description": "Specify which type of reads to go into metagenomic screening.",
+                    "enum": ["unmapped", "mapped", "all"],
+                    "fa_icon": "fas fa-hand-pointer",
+                    "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> ⚠️ If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
+                }
+            },
+            "fa_icon": "fas fa-search"
+        },
         "deduplication": {
             "title": "Deduplication",
             "type": "object",
@@ -537,6 +620,12 @@
         },
         {
             "$ref": "#/definitions/mapping"
+        },
+        {
+            "$ref": "#/definitions/bam_filtering"
+        },
+        {
+            "$ref": "#/definitions/metagenomics"
         },
         {
             "$ref": "#/definitions/deduplication"

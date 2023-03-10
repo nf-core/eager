@@ -124,9 +124,35 @@ The resulting FASTQ files will only be present in your results directory if you 
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
   - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
 
-  </details>bam,bai,csi
+  </details>
 
   [BWA](https://bio-bwa.sourceforge.net/bwa.shtml) is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome. It consists of three algorithms: BWA-backtrack (a.k.a `bwa aln`), BWA-SW and BWA-MEM. The first algorithm is designed for Illumina sequence reads up to 100bp, while the rest two for longer sequences ranged from 70bp to 1Mbp. BWA-MEM and BWA-SW share similar features such as long-read support and split alignment, but BWA-MEM, which is the latest, is generally recommended for high-quality queries as it is faster and more accurate. BWA-MEM also has better performance than BWA-backtrack for 70-100bp Illumina reads.
+
+### BAM Filtering
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `bam_filtering/`
+
+  - `*length.filtered.bam`: BAM file containing length-filtered mapped and unmapped reads.
+  - `*.filtered.bam`: BAM file containing mapped quality filtered reads (and optionally length filtering and unmapped reads, if specified by the user with the corresponding parameters).
+  - `*.{bai,csi}`: Corresponding index files of any generated BAM files.
+  - `*.unmapped_other_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only unmapped reads, if specified for generation, without length filtering.
+    - If you do read merging or have single-end data you will only get one file containing (`*_other*`) containg all reads (the others will be empty).
+    - If you skip merging for _paired-end data_ you'll get reads separately (`_1`, `_2`, `_singleton`), with `other` being empty.
+  - `*mapped_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only mapped reads, if specified for generation, without length or quality filtering. If you do read merging you will only get one file containing (`*_other*`) containg all reads. If you skip merging you'll get them separately (`_1`, `_2` etc.).
+  - `*filtered.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
+
+</details>
+
+nf-core/eager can perform a range of different length, quality, and/or mapped-unmmapped filtering of BAM files, and generate converted FASTQ files for manual analysis outside the pipeline.
+
+If bam filtering is turned on, by default only mapped reads are retained for downstream genomic analysis. Additionally, please note that removal of PCR duplicates in nf-core/eager will additionally filter for mapped reads only.
+
+Please be aware, that intermediate length and mapping quality filtered genomic BAM files are _not_ saved in the results directory automatically, with the assumption that downstream deduplicated BAM files are preferred for further analyses - see the [parameters](https://nf-co.re/eager/parameters) page for more information if you wish to save these.
+
+You may also recieve the files above if metagenomic screening is turned on.
 
 ### Deduplication
 
@@ -139,7 +165,9 @@ The resulting FASTQ files will only be present in your results directory if you 
   - `*.dedupped.bam.{bai,csi}`: Index file corresponding to the BAM file.
   - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
 
-  </details>bam,bai,csi
+</details>bam,bai,csi
+
+Deduplication is carried by two possible tools, as described below. However the expected output files are should be the same.
 
 #### picard MarkDuplicates
 
