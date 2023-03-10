@@ -48,7 +48,7 @@ workflow INPUT_CHECK {
 
     emit:
     fastqs    // channel: [ val(meta), [ reads ] ]
-    bams      // channel  [ val(mea), bam ]
+    bams      // channel  [ val(meta), bam ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
