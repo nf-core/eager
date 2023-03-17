@@ -184,7 +184,7 @@ Deduplication is carried by two possible tools, as described below. However the 
 
 - `mapping/`
 
-  - `*.c_curve.txt`: A file for every BAM file that had enough deduplication statistics to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced. You can use this file for plotting e.g. in R to find your sequencing target depth.
+  - `*.c_curve.txt`: A two column text file with the first column representing sequencing depth and the second an estimate of unique reads .
 
   </details>
 
