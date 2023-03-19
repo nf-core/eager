@@ -34,8 +34,8 @@ workflow REFERENCE_INDEXING_MULTI {
                                                         def fai             = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
                                                         def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
                                                         def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
-                                                        def circular_target = row["circular_target"]
-                                                        def mitochondrion   = row["mitochondrion"]
+                                                        def circular_target = row["circular_target"] // TODO Additional tests?
+                                                        def mitochondrion   = row["mitochondrion"] // TODO Additional tests?
                                                         [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
                                                 }
         // TODO check same output as CSV (csv main testing)
@@ -56,12 +56,20 @@ workflow REFERENCE_INDEXING_MULTI {
                                                 }
     }
 
+    // GENERAL DESCRIPTION FOR NEXT SECTIONS
+    // This will be the same scheme for all other generation steps, i.e.
+    // for those that need to be processed send them to a  multiMap (others skip via branch) 
+    // take only those files needed for the generation step in one sub-channel, and all other
+    // channel elements go into 'remainder'. After generation, join these back, and then mix back the
+    // ones that don't skip
+
     //
     // DECOMPRESSION
     //
 
     // Detect if fasta is gzipped or not
     ch_fasta_for_gunzip = ch_splitreferencesheet_for_branch
+                            .dump(tag: "pre-gunzip")
                             .branch {
                                 meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
                                     forgunzip: fasta.extension == "gz"
@@ -110,11 +118,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // Rejoin output channel with main reference indicies channel elements
     // TODO this FAIDX was producing a nested ID for some reason, should work out why:  [['id':['id':'mammoth']], so we can drop the first map
     ch_faidxed_formix =  SAMTOOLS_FAIDX.out.fai
-                            .map {
-                                meta, fai ->
-                                [ meta['id'], fai ]
-                            }
-                            .join( ch_faidx_input.remainder)
+                            .join( ch_faidx_input.remainder )
                             .map {
                                 meta, fai, fasta, dict, mapper_index, circular_target, mitochondrion ->
 
@@ -122,7 +126,6 @@ workflow REFERENCE_INDEXING_MULTI {
                             }
 
     // Mix back newly faidx'd references with the pre-indexed ones
-    ch_faidxed_formix
     ch_fasta_for_dictindexing = ch_fasta_for_faidx.skip.mix(ch_faidxed_formix)
 
     //
@@ -138,6 +141,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_dict_input = ch_fasta_for_dict
         .fordict
+        .dump(tag: "pre-dict")
         .multiMap {
             meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
                 dict:      [ meta, fasta ]
@@ -156,27 +160,45 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_dict_formapperindexing = ch_fasta_for_dict.skip.mix(ch_dicted_formix)
 
+    //
+    // INDEXING: Mapping indicies
+    //
 
-    // // Generate mapper indicies if not supplied, and if supplied generate meta
-    // if ( params.mapping_tool == "bwaaln" ){
+    // Generate mapper indicies if not supplied, and if supplied generate meta
+    if ( params.mapping_tool == "bwaaln" ){
 
-    //     if ( !fasta_mapperindexdir ) {
-    //         ch_fasta_mapperindexdir = BWA_INDEX ( ch_ungz_ref ).index
-    //     } else {
-    //         ch_fasta_mapperindexdir = Channel.fromPath(fasta_mapperindexdir).map{[[id: clean_name], it ]}
-    //     }
+        ch_fasta_for_bwaindex = ch_dict_formapperindexing
+            .branch {
+                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
+                    forindex: mapper_index == ""
+                    skip: true
+            }
 
-    // } else if ( params.mapping_tool == "bowtie2" ) {
+        ch_mapindex_input = ch_fasta_for_bwaindex
+            .forindex
+            .dump(tag: "pre-index")
+            .multiMap {
+                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
+                    index:      [ meta, mapper_index ]
+                    remainder:  [ meta, fasta, fai, circular_target, mitochondrion ]
+            }
 
-    //     if ( !fasta_mapperindexdir ) {
-    //         ch_fasta_mapperindexdir = BOWTIE2_BUILD ( ch_ungz_ref ).index
-    //     } else {
-    //         ch_fasta_mapperindexdir = Channel.fromPath(fasta_mapperindexdir).map{[[id: clean_name], it ]}
-    //     }
+        BWA_INDEX ( ch_mapindex_input.index )
 
-    // }
+        ch_indexed_formix = BWA_INDEX.out.index
+                                .join( ch_mapindex_input.remainder )
+                                .map {
+                                    meta, mapper_index, fasta, fai, dict, circular_target, mitochondrion ->
 
+                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
+                                }
 
+        ch_indexmapper_for_reference = ch_fasta_for_bwaindex.skip.mix(ch_indexed_formix)
+
+    } else if ( params.mapping_tool == "bowtie2" ) {
+
+        println("Not yet implemented")
+    }
     // TODO: document that the "base name" of all indicies must be the same, i.e. correspond to the FASTA
 
     // Join all together into a single map. Include failOnMismatch as a check if
@@ -184,7 +206,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // ch_reference_for_mapping = ch_ungz_ref.join(ch_fasta_fai, failOnMismatch: true).join(ch_fasta_dict, failOnMismatch: true).join(ch_fasta_mapperindexdir, failOnMismatch: true)
 
     emit:
-    reference = Channel.empty() //ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex ]
+    reference = ch_indexmapper_for_reference.dump(tag: "final") //ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, <etc.> ]
     versions = ch_versions
 }
 
