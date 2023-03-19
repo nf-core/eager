@@ -19,6 +19,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     // TODO geneal: try with fai/dict files also in referneces.csv
     // TODO versions!
+    // TODO FINISH!
 
     // Parse CSV and detect files to load
     if ( samplesheet.extension == "tsv" ){

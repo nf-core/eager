@@ -31,7 +31,7 @@ workflow REFERENCE_INDEXING_SINGLE {
         ch_gz_ref = Channel.fromPath(fasta).map{[[], it]}
         GUNZIP ( ch_gz_ref )
         ch_ungz_ref = GUNZIP.out.gunzip.map{[[id: clean_name], it[1] ]}
-        ch_versions = ch_versions.mix( GUNZIP.out.versions )
+        ch_versions = ch_versions.mix( GUNZIP.out.versions.first())
     } else {
         ch_ungz_ref = Channel.fromPath(fasta).map{[[id: clean_name], it ]}
     }
@@ -39,7 +39,7 @@ workflow REFERENCE_INDEXING_SINGLE {
     // Generate FAI if not supplied, and if supplied generate meta ID
     if ( !fasta_fai ) {
         ch_fasta_fai = SAMTOOLS_FAIDX ( ch_ungz_ref ).fai.map{[ [id: clean_name - '.fai'], it[1] ] }
-        ch_versions = ch_versions.mix( SAMTOOLS_FAIDX.out.versions )
+        ch_versions = ch_versions.mix( SAMTOOLS_FAIDX.out.versions.first())
     } else {
         ch_fasta_fai = Channel.fromPath(fasta_fai).map{[[id: clean_name], it ]}
     }
@@ -47,7 +47,7 @@ workflow REFERENCE_INDEXING_SINGLE {
     // Generate DICT if not supplied, and if supplied generate meta
     if ( !fasta_dict ) {
         ch_fasta_dict = PICARD_CREATESEQUENCEDICTIONARY ( ch_ungz_ref ).reference_dict.map{[ [id: clean_name - '.fai'], it[1] ] }
-        ch_versions = ch_versions.mix( PICARD_CREATESEQUENCEDICTIONARY.out.versions )
+        ch_versions = ch_versions.mix( PICARD_CREATESEQUENCEDICTIONARY.out.versions.first())
     } else {
         ch_fasta_dict = Channel.fromPath(ch_fasta_dict).map{[[id: clean_name], it ]}
     }
@@ -57,7 +57,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
         if ( !fasta_mapperindexdir ) {
             ch_fasta_mapperindexdir = BWA_INDEX ( ch_ungz_ref ).index
-            ch_versions = ch_versions.mix( BWA_INDEX.out.versions )
+            ch_versions = ch_versions.mix( BWA_INDEX.out.versions.first())
         } else {
             ch_fasta_mapperindexdir = Channel.fromPath(fasta_mapperindexdir).map{[[id: clean_name], it ]}
         }
@@ -66,7 +66,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
         if ( !fasta_mapperindexdir ) {
             ch_fasta_mapperindexdir = BOWTIE2_BUILD ( ch_ungz_ref ).index
-            ch_versions = ch_versions.mix( BOWTIE2_BUILD.out.versions )
+            ch_versions = ch_versions.mix( BOWTIE2_BUILD.out.versions.first())
         } else {
             ch_fasta_mapperindexdir = Channel.fromPath(fasta_mapperindexdir).map{[[id: clean_name], it ]}
         }

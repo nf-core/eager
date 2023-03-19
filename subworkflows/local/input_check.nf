@@ -29,9 +29,26 @@ workflow INPUT_CHECK {
     fastqs = reads.fastq.map { create_fastq_channel(it) }
     bams = reads.bam.map { create_bam_channel(it) }
 
+    // Validate NO SE data allowed when using dedup
+    fastqs.map {
+        meta, reads ->
+            seq_type = meta.subMap('single_end')
+        seq_type
+    }
+    .toList()
+    .map {
+        ids ->
+            def has_se=ids.single_end.contains(true)
+
+            if ( params.deduplication_tool == 'dedup' &&  has_se ) {
+                exit 1, "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs."
+            }
+        [ids, has_se]
+    }
+
     emit:
     fastqs    // channel: [ val(meta), [ reads ] ]
-    bams      // channel  [ val(mea), bam ]
+    bams      // channel  [ val(meta), bam ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
@@ -39,7 +56,7 @@ workflow INPUT_CHECK {
 def create_fastq_channel(LinkedHashMap row) {
     // create meta map
     def meta = [:]
-    // TODO create spanning main metadata
+
     meta.id                 = [ row.sample_id, row.library_id, "L" + row.lane ].join("_").trim()
 
     meta.sample_id          = row.sample_id
@@ -67,7 +84,7 @@ def create_fastq_channel(LinkedHashMap row) {
 
 def create_bam_channel(LinkedHashMap row) {
     def meta = [:]
-    // TODO create spanning main metadata
+
     meta.id                 = [ row.sample_id, row.library_id ].join("_").trim()
 
     meta.sample_id          = row.sample_id

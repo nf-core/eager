@@ -17,6 +17,15 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
+// Check failing parameter combinations
+if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+
+// TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
+if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
+
+// Report possible warnings
+if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
@@ -37,8 +46,14 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+
+// TODO rename to active: index_reference, filter_bam etc.
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'
 include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
+include { MAP                } from '../subworkflows/local/map'
+include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,6 +67,7 @@ include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,6 +80,8 @@ def multiqc_report = []
 
 workflow EAGER {
 
+    log.info "Schaffa, Schaffa, Genome Baua!"
+
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
@@ -71,10 +89,20 @@ workflow EAGER {
     // Input file checks
     //
 
+    // Reference
     fasta                = file(params.fasta, checkIfExists: true)
     fasta_fai            = params.fasta_fai ? file(params.fasta_fai, checkIfExists: true) : []
     fasta_dict           = params.fasta_dict ? file(params.fasta_dict, checkIfExists: true) : []
     fasta_mapperindexdir = params.fasta_mapperindexdir ? file(params.fasta_mapperindexdir, checkIfExists: true) : []
+
+    // Preprocessing
+    adapterlist          = params.preprocessing_skipadaptertrim ? [] : params.preprocessing_adapterlist ? file(params.preprocessing_adapterlist, checkIfExists: true) : []
+
+
+    if ( params.preprocessing_adapterlist && !params.preprocessing_skipadaptertrim ) {
+        if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
+        if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
+    }
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -82,7 +110,7 @@ workflow EAGER {
     INPUT_CHECK (
         ch_input
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
 
     //
     // SUBWORKFLOW: Indexing of reference files
@@ -97,15 +125,98 @@ workflow EAGER {
     FASTQC (
         INPUT_CHECK.out.fastqs
     )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
+
+    //
+    // SUBWORKFLOW: Read preprocessing (clipping, merging, fastq trimming etc. )
+    //
+
+    if ( !params.skip_preprocessing ) {
+        PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist )
+        ch_reads_for_mapping = PREPROCESSING.out.reads
+        ch_versions          = ch_versions.mix( PREPROCESSING.out.versions )
+        ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
+    } else {
+        ch_reads_for_mapping = INPUT_CHECK.out.fastqs
+    }
+
+    //
+    // SUBWORKFLOW: Reference mapping
+    //
+
+    MAP ( ch_reads_for_mapping, REFERENCE_INDEXING.out.reference.map{meta, fasta, fai, dict, index -> [meta, index]} )
+    ch_versions       = ch_versions.mix( MAP.out.versions )
+    ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
+
+    //
+    //  MODULE: indexing of user supplied input BAMs
+    //
+
+    SAMTOOLS_INDEX ( INPUT_CHECK.out.bams )
+    ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+
+    if ( params.fasta_largeref )
+        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.csi )
+    else {
+        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.bai )
+    }
+
+    //
+    // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
+    //
+
+    if ( params.run_bamfiltering || params.run_metagenomicscreening ) {
+
+        ch_mapped_for_bamfilter = MAP.out.bam
+                                    .join(MAP.out.bai)
+                                    .mix(ch_bams_from_input)
+
+        FILTER_BAM ( ch_mapped_for_bamfilter )
+        ch_bamfiltered_for_deduplication = FILTER_BAM.out.genomics
+        ch_bamfiltered_for_metagenomics  = FILTER_BAM.out.metagenomics
+        ch_versions                      = ch_versions.mix( FILTER_BAM.out.versions )
+        ch_multiqc_files                 = ch_multiqc_files.mix( FILTER_BAM.out.mqc.collect{it[1]}.ifEmpty([]) )
+
+    } else {
+        ch_bamfiltered_for_deduplication = MAP.out.bam
+                                                .join(MAP.out.bai)
+                                                .mix(ch_bams_from_input)
+    }
+
+    ch_reads_for_deduplication = ch_bamfiltered_for_deduplication
+
+    //
+    // SUBWORKFLOW: genomic BAM deduplication
+    //
+
+    ch_fasta_for_deduplication = REFERENCE_INDEXING.out.reference
+        .multiMap{
+            meta, fasta, fai, dict, index ->
+            fasta:      [ meta, fasta ]
+            fasta_fai:  [ meta, fai ]
+        }
+
+    if ( !params.skip_deduplication ) {
+        DEDUPLICATE( ch_reads_for_deduplication, ch_fasta_for_deduplication.fasta, ch_fasta_for_deduplication.fasta_fai )
+        ch_versions          = ch_versions.mix( DEDUPLICATE.out.versions )
+
+        ch_dedupped_bams     = DEDUPLICATE.out.bam.join( DEDUPLICATE.out.bai )
+        ch_dedupped_flagstat = DEDUPLICATE.out.flagstat
+
+    } else {
+        ch_dedupped_bams     = ch_reads_for_deduplication
+        ch_dedupped_flagstat = Channel.empty()
+    }
+
+
+    //
+    // MODULE: MultiQC
+    //
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
 
-    //
-    // MODULE: MultiQC
-    //
     workflow_summary    = WorkflowEager.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
 
@@ -119,12 +230,11 @@ workflow EAGER {
 
     MULTIQC (
         ch_multiqc_files.collect(),
-        ch_multiqc_config.collect().ifEmpty([]),
-        ch_multiqc_custom_config.collect().ifEmpty([]),
-        ch_multiqc_logo.collect().ifEmpty([])
+        ch_multiqc_config.toList(),
+        ch_multiqc_custom_config.toList(),
+        ch_multiqc_logo.toList()
     )
     multiqc_report = MULTIQC.out.report.toList()
-    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 }
 
 /*
@@ -139,7 +249,7 @@ workflow.onComplete {
     }
     NfcoreTemplate.summary(workflow, params, log)
     if (params.hook_url) {
-        NfcoreTemplate.adaptivecard(workflow, params, summary_params, projectDir, log)
+        NfcoreTemplate.IM_notification(workflow, params, summary_params, projectDir, log)
     }
 }
 
