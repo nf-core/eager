@@ -17,9 +17,9 @@ workflow REFERENCE_INDEXING_MULTI {
     main:
     ch_versions = Channel.empty()
 
-    // TODO geneal: try with fai/dict files also in referneces.csv
+    // TODO geneal: try with different combinations of missing files (also in referneces.csv)
+    // TODO all the manual tests
     // TODO versions!
-    // TODO FINISH!
 
 
     // Parse CSV and detect files to load
@@ -58,7 +58,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     // GENERAL DESCRIPTION FOR NEXT SECTIONS
     // This will be the same scheme for all other generation steps, i.e.
-    // for those that need to be processed send them to a  multiMap (others skip via branch) 
+    // for those that need to be processed send them to a  multiMap (others skip via branch)
     // take only those files needed for the generation step in one sub-channel, and all other
     // channel elements go into 'remainder'. After generation, join these back, and then mix back the
     // ones that don't skip
@@ -88,7 +88,7 @@ workflow REFERENCE_INDEXING_MULTI {
     GUNZIP ( ch_gunzip_input.gunzip )
 
     // Mix back gunzipped fasta with remaining files, and then mix back with pre-gunzipped references
-    ch_gunzippedfasta_formix = GUNZIP.out.gunzip.join( ch_gunzip_input.remainder )
+    ch_gunzippedfasta_formix = GUNZIP.out.gunzip.join( ch_gunzip_input.remainder, failOnMismatch: true )
     ch_fasta_for_faiindexing = ch_fasta_for_gunzip.skip.mix(ch_gunzippedfasta_formix)
 
     //
@@ -117,7 +117,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // Rejoin output channel with main reference indicies channel elements
     // TODO this FAIDX was producing a nested ID for some reason, should work out why:  [['id':['id':'mammoth']], so we can drop the first map
     ch_faidxed_formix =  SAMTOOLS_FAIDX.out.fai
-                            .join( ch_faidx_input.remainder )
+                            .join( ch_faidx_input.remainder, failOnMismatch: true )
                             .map {
                                 meta, fai, fasta, dict, mapper_index, circular_target, mitochondrion ->
 
@@ -149,7 +149,7 @@ workflow REFERENCE_INDEXING_MULTI {
     PICARD_CREATESEQUENCEDICTIONARY ( ch_dict_input.dict )
 
     ch_dicted_formix =  PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
-                            .join( ch_dict_input.remainder )
+                            .join( ch_dict_input.remainder, failOnMismatch: true )
                             .map {
                                 meta, dict, fasta, fai, mapper_index, circular_target, mitochondrion ->
 
@@ -180,17 +180,16 @@ workflow REFERENCE_INDEXING_MULTI {
                     remainder:  [ meta, fasta, fai, dict, circular_target, mitochondrion ]
             }
 
-        BWA_INDEX ( ch_mapindex_input.index.dump(tag: "looksOK?") )
+        BWA_INDEX ( ch_mapindex_input.index )
 
         ch_indexed_formix = BWA_INDEX.out.index
-                                .join( ch_mapindex_input.remainder )
-                                .dump(tag: "post_join")
+                                .join( ch_mapindex_input.remainder, failOnMismatch: true )
                                 .map {
                                     meta, mapper_index, fasta, fai, dict, circular_target, mitochondrion ->
 
                                     [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
                                 }
-                                .dump(tag: "post_remap")
+
         ch_indexmapper_for_reference = ch_fasta_for_bwaindex.skip.mix(ch_indexed_formix)
 
     } else if ( params.mapping_tool == "bowtie2" ) {
@@ -198,10 +197,7 @@ workflow REFERENCE_INDEXING_MULTI {
         println("Not yet implemented")
     }
     // TODO: document that the "base name" of all indicies must be the same, i.e. correspond to the FASTA
-
-    // Join all together into a single map. Include failOnMismatch as a check if
-    // a user supplies indicies with different "base" names.
-    // ch_reference_for_mapping = ch_ungz_ref.join(ch_fasta_fai, failOnMismatch: true).join(ch_fasta_dict, failOnMismatch: true).join(ch_fasta_mapperindexdir, failOnMismatch: true)
+    // TODO Usage documentation (schema done!)
 
     emit:
     reference = ch_indexmapper_for_reference //ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, <etc.> ]

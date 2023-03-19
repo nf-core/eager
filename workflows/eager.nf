@@ -145,10 +145,11 @@ workflow EAGER {
     //
     ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
             .map{
+                // TODO make sure works with single-reference
                 meta, fasta, fai, dict, index, circular_target, mitochondrion -> 
                 [ meta, index ]
             }
-    MAP ( ch_reads_for_mapping, ch_reference_for_mapping.dump(tag: "hello") )
+    MAP ( ch_reads_for_mapping, ch_reference_for_mapping )
 
     ch_versions       = ch_versions.mix( MAP.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )

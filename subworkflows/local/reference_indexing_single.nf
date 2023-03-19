@@ -78,7 +78,14 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     // Join all together into a single map. Include failOnMismatch as a check if
     // a user supplies indicies with different 'base' names.
-    ch_reference_for_mapping = ch_ungz_ref.join(ch_fasta_fai, failOnMismatch: true).join(ch_fasta_dict, failOnMismatch: true).join(ch_fasta_mapperindexdir, failOnMismatch: true)
+    ch_reference_for_mapping = ch_ungz_ref
+                                .join(ch_fasta_fai, failOnMismatch: true)
+                                .join(ch_fasta_dict, failOnMismatch: true)
+                                .join(ch_fasta_mapperindexdir, failOnMismatch: true)
+                                .map{
+                                    meta, fasta, fai, dict, mapper_index ->
+                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.fasta_mitochondrion_id ]
+                                }
 
     emit:
     reference = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex ]
