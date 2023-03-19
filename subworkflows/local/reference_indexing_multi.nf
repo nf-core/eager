@@ -69,7 +69,6 @@ workflow REFERENCE_INDEXING_MULTI {
 
     // Detect if fasta is gzipped or not
     ch_fasta_for_gunzip = ch_splitreferencesheet_for_branch
-                            .dump(tag: "pre-gunzip")
                             .branch {
                                 meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
                                     forgunzip: fasta.extension == "gz"
@@ -141,7 +140,6 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_dict_input = ch_fasta_for_dict
         .fordict
-        .dump(tag: "pre-dict")
         .multiMap {
             meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
                 dict:      [ meta, fasta ]
@@ -176,23 +174,23 @@ workflow REFERENCE_INDEXING_MULTI {
 
         ch_mapindex_input = ch_fasta_for_bwaindex
             .forindex
-            .dump(tag: "pre-index")
             .multiMap {
                 meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
-                    index:      [ meta, mapper_index ]
-                    remainder:  [ meta, fasta, fai, circular_target, mitochondrion ]
+                    index:      [ meta, fasta ]
+                    remainder:  [ meta, fasta, fai, dict, circular_target, mitochondrion ]
             }
 
-        BWA_INDEX ( ch_mapindex_input.index )
+        BWA_INDEX ( ch_mapindex_input.index.dump(tag: "looksOK?") )
 
         ch_indexed_formix = BWA_INDEX.out.index
                                 .join( ch_mapindex_input.remainder )
+                                .dump(tag: "post_join")
                                 .map {
                                     meta, mapper_index, fasta, fai, dict, circular_target, mitochondrion ->
 
                                     [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
                                 }
-
+                                .dump(tag: "post_remap")
         ch_indexmapper_for_reference = ch_fasta_for_bwaindex.skip.mix(ch_indexed_formix)
 
     } else if ( params.mapping_tool == "bowtie2" ) {
@@ -206,7 +204,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // ch_reference_for_mapping = ch_ungz_ref.join(ch_fasta_fai, failOnMismatch: true).join(ch_fasta_dict, failOnMismatch: true).join(ch_fasta_mapperindexdir, failOnMismatch: true)
 
     emit:
-    reference = ch_indexmapper_for_reference.dump(tag: "final") //ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, <etc.> ]
+    reference = ch_indexmapper_for_reference //ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, <etc.> ]
     versions = ch_versions
 }
 

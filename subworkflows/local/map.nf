@@ -28,7 +28,7 @@ workflow MAP {
                             }
 
     if ( params.mapping_tool == 'bwaaln' ) {
-        FASTQ_ALIGN_BWAALN ( ch_input_for_mapping.reads, ch_input_for_mapping.index )
+        FASTQ_ALIGN_BWAALN ( ch_input_for_mapping.reads.dump(tag: "reads"), ch_input_for_mapping.index )
 
         ch_versions   = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
         ch_mapped_lane_bam = FASTQ_ALIGN_BWAALN.out.bam
