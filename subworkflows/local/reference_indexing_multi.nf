@@ -12,7 +12,7 @@ include { PICARD_CREATESEQUENCEDICTIONARY } from "../../modules/nf-core/picard/c
 workflow REFERENCE_INDEXING_MULTI {
 
     take:
-    samplesheet // file: /path/to/name.{csv,tsv}
+    referencesheet // file: /path/to/name.{csv,tsv}
 
     main:
     ch_versions = Channel.empty()
@@ -21,27 +21,39 @@ workflow REFERENCE_INDEXING_MULTI {
     // TODO versions!
     // TODO FINISH!
 
+
     // Parse CSV and detect files to load
-    if ( samplesheet.extension == "tsv" ){
-        ch_splitsamplesheet_for_branch = samplesheet
-                                            .splitCsv ( header:true, sep:"\t" )
-        // TODO copy over from csv
+    if ( referencesheet.extension == "tsv" ){
+        ch_splitreferencesheet_for_branch = Channel.fromPath(referencesheet)
+                                                .splitCsv ( header:true, sep:"\t" )
+                                                .map {
+                                                    row ->
+                                                        def meta            = [:]
+                                                        meta.id             = row["reference_name"]
+                                                        def fasta           = file(row["fasta"], checkIfExists: true) // mandatory parameter!
+                                                        def fai             = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
+                                                        def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
+                                                        def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
+                                                        def circular_target = row["circular_target"]
+                                                        def mitochondrion   = row["mitochondrion"]
+                                                        [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
+                                                }
+        // TODO check same output as CSV (csv main testing)
     } else {
-        ch_splitsamplesheet_for_branch = Channel.fromPath(samplesheet)
-                                            .splitCsv ( header:true )
-                                            .dump(tag: "splitcsv")
-                                            .map {
-                                                row ->
-                                                    def meta            = [:]
-                                                    meta.id             = row["reference_name"]
-                                                    def fasta           = file(row["fasta"], checkIfExists: true) // mandatory parameter!
-                                                    def fai             = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
-                                                    def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
-                                                    def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
-                                                    def circular_target = row["circular_target"]
-                                                    def mitochondrion   = row["mitochondrion"]
-                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
-                                            }
+        ch_splitreferencesheet_for_branch = Channel.fromPath(referencesheet)
+                                                .splitCsv ( header:true )
+                                                .map {
+                                                    row ->
+                                                        def meta            = [:]
+                                                        meta.id             = row["reference_name"]
+                                                        def fasta           = file(row["fasta"], checkIfExists: true) // mandatory parameter!
+                                                        def fai             = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
+                                                        def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
+                                                        def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
+                                                        def circular_target = row["circular_target"]
+                                                        def mitochondrion   = row["mitochondrion"]
+                                                        [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
+                                                }
     }
 
     //
@@ -49,8 +61,7 @@ workflow REFERENCE_INDEXING_MULTI {
     //
 
     // Detect if fasta is gzipped or not
-    ch_fasta_for_gunzip = ch_splitsamplesheet_for_branch
-                            .dump(tag: "ch_splitsamplesheet_for_branch")
+    ch_fasta_for_gunzip = ch_splitreferencesheet_for_branch
                             .branch {
                                 meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
                                     forgunzip: fasta.extension == "gz"
@@ -70,8 +81,8 @@ workflow REFERENCE_INDEXING_MULTI {
     GUNZIP ( ch_gunzip_input.gunzip )
 
     // Mix back gunzipped fasta with remaining files, and then mix back with pre-gunzipped references
-    ch_gunzippedfasta_formix = GUNZIP.out.gunzip.join( ch_gunzip_input.remainder ).dump(tag: "ch_gunzippedfasta_formix")
-    ch_fasta_for_faiindexing = ch_fasta_for_gunzip.skip.mix(ch_gunzippedfasta_formix).dump(tag: "prepped")
+    ch_gunzippedfasta_formix = GUNZIP.out.gunzip.join( ch_gunzip_input.remainder )
+    ch_fasta_for_faiindexing = ch_fasta_for_gunzip.skip.mix(ch_gunzippedfasta_formix)
 
     //
     // INDEXING: fai
@@ -103,26 +114,22 @@ workflow REFERENCE_INDEXING_MULTI {
                                 meta, fai ->
                                 [ meta['id'], fai ]
                             }
-                            .dump(tag: "ch_faidx_input_remainder")
                             .join( ch_faidx_input.remainder)
-                            .dump(tag: "ch_faidx_input_remainder_join")
                             .map {
                                 meta, fai, fasta, dict, mapper_index, circular_target, mitochondrion ->
 
                                 [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
                             }
-                            .dump(tag: "ch_faidx_input_remainder_map")
 
     // Mix back newly faidx'd references with the pre-indexed ones
-    ch_faidxed_formix.dump(tag: "ch_faidxed_formix")
-    ch_fasta_for_dictindexing = ch_fasta_for_faidx.skip.mix(ch_faidxed_formix).dump(tag: "ch_fasta_for_faidx_skip_mix")
+    ch_faidxed_formix
+    ch_fasta_for_dictindexing = ch_fasta_for_faidx.skip.mix(ch_faidxed_formix)
 
     //
     // INDEXING: dict
     //
 
     ch_fasta_for_dict = ch_fasta_for_dictindexing
-        .dump(tag: "ch_fasta_for_dictindexing")
         .branch {
             meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
                 fordict: dict == ""
@@ -131,7 +138,6 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_dict_input = ch_fasta_for_dict
         .fordict
-        .dump(tag: "ch_fasta_for_dict_fordict")
         .multiMap {
             meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
                 dict:      [ meta, fasta ]
@@ -141,17 +147,14 @@ workflow REFERENCE_INDEXING_MULTI {
     PICARD_CREATESEQUENCEDICTIONARY ( ch_dict_input.dict )
 
     ch_dicted_formix =  PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
-                            .dump(tag: "picard_createsequencedictionary_out_reference_dict")
-                            .join( ch_dict_input.remainder.dump(tag: "ch_dict_input_remainder") )
-                            .dump(tag: "ch_dict_input_remainder_join")
+                            .join( ch_dict_input.remainder )
                             .map {
                                 meta, dict, fasta, fai, mapper_index, circular_target, mitochondrion ->
 
                                 [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
                             }
-                            .dump(tag: "ch_dict_input_remainder_map")
 
-    ch_dict_formapperindexing = ch_fasta_for_dict.skip.dump(tag: "ch_fasta_for_dict_skip").mix(ch_dicted_formix).dump(tag: "ch_fasta_for_dict_skip_mix")
+    ch_dict_formapperindexing = ch_fasta_for_dict.skip.mix(ch_dicted_formix)
 
 
     // // Generate mapper indicies if not supplied, and if supplied generate meta
@@ -196,7 +199,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
 //     def array = []
 //     if (!file(row.bam).exists()) {
-//         exit 1, "[nf-core/eager] error: Please check input samplesheet. BAM file does not exist!\nFile: ${row.bam}"
+//         exit 1, "[nf-core/eager] error: Please check input referencesheet. BAM file does not exist!\nFile: ${row.bam}"
 //     } else {
 //         array = [ meta, file(row.bam) ]
 //     }
