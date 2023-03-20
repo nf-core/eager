@@ -17,7 +17,6 @@ workflow MAP {
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
-    // TODO fix IDs
     ch_input_for_mapping = reads
                             .combine(index)
                             .multiMap {

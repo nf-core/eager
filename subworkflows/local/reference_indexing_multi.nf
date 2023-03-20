@@ -17,11 +17,6 @@ workflow REFERENCE_INDEXING_MULTI {
     main:
     ch_versions = Channel.empty()
 
-    // TODO geneal: try with different combinations of missing files (also in referneces.csv)
-    // TODO all the manual tests
-    // TODO versions!
-
-
     // Parse CSV and detect files to load
     if ( referencesheet.extension == "tsv" ){
         ch_splitreferencesheet_for_branch = Channel.fromPath(referencesheet)
@@ -34,11 +29,10 @@ workflow REFERENCE_INDEXING_MULTI {
                                                         def fai             = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
                                                         def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
                                                         def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
-                                                        def circular_target = row["circular_target"] // TODO Additional tests?
-                                                        def mitochondrion   = row["mitochondrion"] // TODO Additional tests?
+                                                        def circular_target = row["circular_target"]
+                                                        def mitochondrion   = row["mitochondrion"]
                                                         [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
                                                 }
-        // TODO check same output as CSV (csv main testing)
     } else {
         ch_splitreferencesheet_for_branch = Channel.fromPath(referencesheet)
                                                 .splitCsv ( header:true )
@@ -117,7 +111,6 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_version = ch_versions.mix( SAMTOOLS_FAIDX.out.versions )
 
     // Rejoin output channel with main reference indicies channel elements
-    // TODO this FAIDX was producing a nested ID for some reason, should work out why:  [['id':['id':'mammoth']], so we can drop the first map
     ch_faidxed_formix =  SAMTOOLS_FAIDX.out.fai
                             .join( ch_faidx_input.remainder, failOnMismatch: true )
                             .map {
@@ -206,8 +199,13 @@ workflow REFERENCE_INDEXING_MULTI {
         ch_indexmapper_for_reference = ch_fasta_for_mapperindex.skip.mix(ch_indexed_formix)
 
     }
-    // TODO: Usage documentation (schema done!)
-    // TODO: document BAM files will have 'null' in the console log (FAQ)
+    // TODO: Output documentation (schema done!)
+    // TODO:BowTie2 mapping_tool is failing for some reason I don't understand
+    // TODO: missing output.md for bowtie2 files
+    // TODO: all manual tests -> single vs table, csv vs tsv (cycle through missing combinations of flags)
+    // TODO: check same output as CSV (csv main testing)
+    // TODO: for all sections check if saving based on --save_reference (also for single FASTA)
+    // tODO: when all direct reference and indicies are already supplied
 
     emit:
     reference = ch_indexmapper_for_reference //ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, circular_target, mitochondrion ]

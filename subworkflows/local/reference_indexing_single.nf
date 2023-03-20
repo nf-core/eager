@@ -24,8 +24,6 @@ workflow REFERENCE_INDEXING_SINGLE {
     def fasta_ext = grab_ungzipped_extension(fasta)
     def clean_name = fasta.name.toString() - fasta_ext
 
-    // TODO for all sections check if saving based on --save_reference
-
     // Detect if fasta is gzipped or not, unzip if necessary, and generate meta ID by sanitizing file
     if ( fasta.extension == 'gz' ) {
         ch_gz_ref = Channel.fromPath(fasta).map{[[], it]}
