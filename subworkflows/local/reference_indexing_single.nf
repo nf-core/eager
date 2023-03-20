@@ -73,10 +73,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     }
 
-
-    // TODO: document that the 'base name' of all indicies must be the same, i.e. correspond to the FASTA
-
-    // Join all together into a single map. Include failOnMismatch as a check if
+    // Join all together into a single map. failOnMismatch allows check if
     // a user supplies indicies with different 'base' names.
     ch_reference_for_mapping = ch_ungz_ref
                                 .join(ch_fasta_fai, failOnMismatch: true)

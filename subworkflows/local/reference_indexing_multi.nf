@@ -86,6 +86,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
 
     GUNZIP ( ch_gunzip_input.gunzip )
+    ch_version = ch_versions.mix( GUNZIP.out.versions )
 
     // Mix back gunzipped fasta with remaining files, and then mix back with pre-gunzipped references
     ch_gunzippedfasta_formix = GUNZIP.out.gunzip.join( ch_gunzip_input.remainder, failOnMismatch: true )
@@ -113,6 +114,7 @@ workflow REFERENCE_INDEXING_MULTI {
         }
 
     SAMTOOLS_FAIDX ( ch_faidx_input.faidx )
+    ch_version = ch_versions.mix( SAMTOOLS_FAIDX.out.versions )
 
     // Rejoin output channel with main reference indicies channel elements
     // TODO this FAIDX was producing a nested ID for some reason, should work out why:  [['id':['id':'mammoth']], so we can drop the first map
@@ -147,6 +149,7 @@ workflow REFERENCE_INDEXING_MULTI {
         }
 
     PICARD_CREATESEQUENCEDICTIONARY ( ch_dict_input.dict )
+    ch_version = ch_versions.mix( PICARD_CREATESEQUENCEDICTIONARY.out.versions )
 
     ch_dicted_formix =  PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
                             .join( ch_dict_input.remainder, failOnMismatch: true )
@@ -165,14 +168,14 @@ workflow REFERENCE_INDEXING_MULTI {
     // Generate mapper indicies if not supplied, and if supplied generate meta
     if ( params.mapping_tool == "bwaaln" ){
 
-        ch_fasta_for_bwaindex = ch_dict_formapperindexing
+        ch_fasta_for_mapperindex = ch_dict_formapperindexing
             .branch {
                 meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
                     forindex: mapper_index == ""
                     skip: true
             }
 
-        ch_mapindex_input = ch_fasta_for_bwaindex
+        ch_mapindex_input = ch_fasta_for_mapperindex
             .forindex
             .multiMap {
                 meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
@@ -180,9 +183,19 @@ workflow REFERENCE_INDEXING_MULTI {
                     remainder:  [ meta, fasta, fai, dict, circular_target, mitochondrion ]
             }
 
-        BWA_INDEX ( ch_mapindex_input.index )
+        if ( params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" ) {
+            BWA_INDEX ( ch_mapindex_input.index )
+            ch_version = ch_versions.mix( BWA_INDEX.out.versions )
+            ch_indexed_forremap = BWA_INDEX.out.index
+        } else if ( params.mapping_tool == "bowtie2" ) {
+            BOWTIE2_BUILD ( ch_mapindex_input.index )
+            ch_version = ch_versions.mix( BOWTIE2_BUILD.out.versions )
+            ch_indexed_forremap = BOWTIE2_BUILD.out.index
+        } else if ( params.mapping_tool == "circularmapper" ) {
+            println("Not yet implemented")
+        }
 
-        ch_indexed_formix = BWA_INDEX.out.index
+        ch_indexed_formix = ch_indexed_forremap
                                 .join( ch_mapindex_input.remainder, failOnMismatch: true )
                                 .map {
                                     meta, mapper_index, fasta, fai, dict, circular_target, mitochondrion ->
@@ -190,34 +203,13 @@ workflow REFERENCE_INDEXING_MULTI {
                                     [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
                                 }
 
-        ch_indexmapper_for_reference = ch_fasta_for_bwaindex.skip.mix(ch_indexed_formix)
+        ch_indexmapper_for_reference = ch_fasta_for_mapperindex.skip.mix(ch_indexed_formix)
 
-    } else if ( params.mapping_tool == "bowtie2" ) {
-
-        println("Not yet implemented")
     }
-    // TODO: document that the "base name" of all indicies must be the same, i.e. correspond to the FASTA
-    // TODO Usage documentation (schema done!)
+    // TODO: Usage documentation (schema done!)
+    // TODO: document BAM files will have 'null' in the console log (FAQ)
 
     emit:
-    reference = ch_indexmapper_for_reference //ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, <etc.> ]
+    reference = ch_indexmapper_for_reference //ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, circular_target, mitochondrion ]
     versions = ch_versions
 }
-
-// def create_index_channel(LinkedHashMap row) {
-//     def meta = [:]
-//     // TODO create spanning main metadata
-//     meta.reference_id = row.reference_name
-//     meta.file_type    =
-
-//     // MOVE FILE TYPE TO META AND TRANSPOSE TO SINGLE FILES?
-
-
-//     def array = []
-//     if (!file(row.bam).exists()) {
-//         exit 1, "[nf-core/eager] error: Please check input referencesheet. BAM file does not exist!\nFile: ${row.bam}"
-//     } else {
-//         array = [ meta, file(row.bam) ]
-//     }
-//     return array
-// }
