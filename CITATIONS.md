@@ -24,9 +24,17 @@
 
   > Schubert, M., Lindgreen, S., & Orlando, L. (2016). AdapterRemoval v2: rapid adapter trimming, identification, and read merging. BMC Research Notes, 9, 88. doi: [10.1186/s13104-016-1900-2](https://doi.org/10.1186/s13104-016-1900-2)
 
+- [Picard Tools](https://broadinstitute.github.io/picard/)
+
+  > Broad Institute (2019). Picard Toolkit. GitHub Repository: https://broadinstitute.github.io/picard/
+
 - [bwa](https://doi.org/10.1093/bioinformatics/btp324)
 
   > Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics , 25(14), 1754–1760. doi: [10.1093/bioinformatics/btp324](https://doi.org/10.1093/bioinformatics/btp324)
+
+- [Bowtie2](https://doi.org/10.1038/nmeth.1923)
+
+  > Langmead, B. & Salzberg, S. L. (2012). Fast gapped-read alignment with Bowtie 2. Nature methods, 9(4), p. 357–359. doi: [10.1038/nmeth.1923](https://doi.org/10.1038/nmeth.1923)
 
 - [SAMtools](https://doi.org/10.1093/bioinformatics/btp324)
 
