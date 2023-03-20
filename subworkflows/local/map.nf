@@ -34,15 +34,19 @@ workflow MAP {
         ch_mapped_lane_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
+    } else if ( params.mapping_tool == 'bowtie2' ) {
+        println("Bowtie2 Mapping Not Yet Implemented")
+        ch_mapped_lane_bam = Channel.empty()
     }
 
-    ch_input_for_lane_merge = ch_mapped_lane_bam.map{
-        meta, bam ->
-        new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry'] }
+    ch_input_for_lane_merge = ch_mapped_lane_bam
+                                .map {
+                                    meta, bam ->
+                                    new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry'] }
 
-        [ new_meta, bam ]
-    }
-    .groupTuple()
+                                    [ new_meta, bam ]
+                                }
+                                .groupTuple()
 
     SAMTOOLS_MERGE ( ch_input_for_lane_merge, [], [] )
     ch_versions.mix( SAMTOOLS_MERGE.out.versions )

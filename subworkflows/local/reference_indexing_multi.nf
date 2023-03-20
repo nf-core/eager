@@ -2,7 +2,7 @@
 // Index input reference as required
 //
 
-include { GUNZIP                          } from "../../modules/nf-core/gunzip/main"
+include { GUNZIP as GUNZIP_FASTA          } from "../../modules/nf-core/gunzip/main"
 include { BWA_INDEX                       } from "../../modules/nf-core/bwa/index/main"
 include { BOWTIE2_BUILD                   } from "../../modules/nf-core/bowtie2/build/main"
 include { SAMTOOLS_FAIDX                  } from "../../modules/nf-core/samtools/faidx/main"
@@ -79,11 +79,11 @@ workflow REFERENCE_INDEXING_MULTI {
         }
 
 
-    GUNZIP ( ch_gunzip_input.gunzip )
-    ch_version = ch_versions.mix( GUNZIP.out.versions )
+    GUNZIP_FASTA ( ch_gunzip_input.gunzip )
+    ch_version = ch_versions.mix( GUNZIP_FASTA.out.versions )
 
     // Mix back gunzipped fasta with remaining files, and then mix back with pre-gunzipped references
-    ch_gunzippedfasta_formix = GUNZIP.out.gunzip.join( ch_gunzip_input.remainder, failOnMismatch: true )
+    ch_gunzippedfasta_formix = GUNZIP_FASTA.out.gunzip.join( ch_gunzip_input.remainder, failOnMismatch: true )
     ch_fasta_for_faiindexing = ch_fasta_for_gunzip.skip.mix(ch_gunzippedfasta_formix)
 
     //
@@ -159,55 +159,50 @@ workflow REFERENCE_INDEXING_MULTI {
     //
 
     // Generate mapper indicies if not supplied, and if supplied generate meta
-    if ( params.mapping_tool == "bwaaln" ){
 
-        ch_fasta_for_mapperindex = ch_dict_formapperindexing
-            .branch {
-                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
-                    forindex: mapper_index == ""
-                    skip: true
-            }
-
-        ch_mapindex_input = ch_fasta_for_mapperindex
-            .forindex
-            .multiMap {
-                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
-                    index:      [ meta, fasta ]
-                    remainder:  [ meta, fasta, fai, dict, circular_target, mitochondrion ]
-            }
-
-        if ( params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" ) {
-            BWA_INDEX ( ch_mapindex_input.index )
-            ch_version = ch_versions.mix( BWA_INDEX.out.versions )
-            ch_indexed_forremap = BWA_INDEX.out.index
-        } else if ( params.mapping_tool == "bowtie2" ) {
-            BOWTIE2_BUILD ( ch_mapindex_input.index )
-            ch_version = ch_versions.mix( BOWTIE2_BUILD.out.versions )
-            ch_indexed_forremap = BOWTIE2_BUILD.out.index
-        } else if ( params.mapping_tool == "circularmapper" ) {
-            println("Not yet implemented")
+    ch_fasta_for_mapperindex = ch_dict_formapperindexing
+        .branch {
+            meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
+                forindex: mapper_index == ""
+                skip: true
         }
 
-        ch_indexed_formix = ch_indexed_forremap
-                                .join( ch_mapindex_input.remainder, failOnMismatch: true )
-                                .map {
-                                    meta, mapper_index, fasta, fai, dict, circular_target, mitochondrion ->
+    ch_mapindex_input = ch_fasta_for_mapperindex
+        .forindex
+        .multiMap {
+            meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
+                index:      [ meta, fasta ]
+                remainder:  [ meta, fasta, fai, dict, circular_target, mitochondrion ]
+        }
 
-                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
-                                }
-
-        ch_indexmapper_for_reference = ch_fasta_for_mapperindex.skip.mix(ch_indexed_formix)
-
+    if ( params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" ) {
+        BWA_INDEX ( ch_mapindex_input.index )
+        ch_version = ch_versions.mix( BWA_INDEX.out.versions )
+        ch_indexed_forremap = BWA_INDEX.out.index
+    } else if ( params.mapping_tool == "bowtie2" ) {
+        BOWTIE2_BUILD ( ch_mapindex_input.index )
+        ch_version = ch_versions.mix( BOWTIE2_BUILD.out.versions )
+        ch_indexed_forremap = BOWTIE2_BUILD.out.index
+    } else if ( params.mapping_tool == "circularmapper" ) {
+        println("CircularMapper Indexing Not Yet Implemented")
     }
-    // TODO: Output documentation (schema done!)
-    // TODO:BowTie2 mapping_tool is failing for some reason I don't understand
-    // TODO: missing output.md for bowtie2 files
+
+    ch_indexed_formix = ch_indexed_forremap
+                            .join( ch_mapindex_input.remainder, failOnMismatch: true )
+                            .map {
+                                meta, mapper_index, fasta, fai, dict, circular_target, mitochondrion ->
+
+                                [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
+                            }
+
+    ch_indexmapper_for_reference = ch_fasta_for_mapperindex.skip.mix(ch_indexed_formix)
+
+
     // TODO: all manual tests -> single vs table, csv vs tsv (cycle through missing combinations of flags)
     // TODO: check same output as CSV (csv main testing)
-    // TODO: for all sections check if saving based on --save_reference (also for single FASTA)
-    // tODO: when all direct reference and indicies are already supplied
+    // TODO: logic when all direct reference and indicies are already supplied (in main reference_indeinx.nf file)
 
     emit:
-    reference = ch_indexmapper_for_reference //ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, circular_target, mitochondrion ]
+    reference = ch_indexmapper_for_reference // [ meta, fasta, fai, dict, mapindex, circular_target, mitochondrion ]
     versions = ch_versions
 }
