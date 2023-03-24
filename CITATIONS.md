@@ -16,6 +16,10 @@
 
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
 
+- [Falco](https://doi.org/10.12688%2Ff1000research.21142.2)
+
+  > de Sena Brandine, G., Smith, A.D. (2019) Falco: high-speed FastQC emulation for quality control of sequencing data. F1000Res., 8, 1874. doi: [10.12688%2Ff1000research.21142.2](https://doi.org/10.12688%2Ff1000research.21142.2)
+
 - [fastp](https://doi.org/10.1093/bioinformatics/bty560)
 
   > Chen, S., Zhou, Y., Chen, Y., & Gu, J. (2018). fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics , 34(17), i884–i890. doi: [10.1093/bioinformatics/bty560](https://doi.org/10.1093/bioinformatics/bty560)
