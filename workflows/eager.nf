@@ -54,6 +54,7 @@ include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
 include { MAP                } from '../subworkflows/local/map'
 include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
+include { ENDORSPY           } from '../subworkflows/local/endorspy'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,7 +69,6 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -208,6 +208,10 @@ workflow EAGER {
         ch_dedupped_flagstat = Channel.empty()
     }
 
+    //
+    // SUBWORKFLOW: calculating percent on target and clonality
+    //
+    ENDORSPY ( MAP.out.flagstat, DEDUPLICATE.out.flagstat.ifEmpty([ [], [] ]), FILTER_BAM.out.flagstat.ifEmpty([ [], [] ])
 
     //
     // MODULE: MultiQC
