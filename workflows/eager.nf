@@ -68,6 +68,7 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
+include { FALCO                       } from '../modules/nf-core/falco/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,12 +121,18 @@ workflow EAGER {
     ch_versions = ch_versions.mix( REFERENCE_INDEXING.out.versions )
 
     //
-    // MODULE: Run FastQC
+    // MODULE: Run FastQC or Falco
     //
-    FASTQC (
-        INPUT_CHECK.out.fastqs
-    )
-    ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
+
+    if ( params.sequencing_qc_tool == "falco" ) {
+        FALCO ( INPUT_CHECK.out.fastqs )
+        ch_versions = ch_versions.mix( FALCO.out.versions.first() )
+        ch_multiqc_files = ch_multiqc_files.mix( FALCO.out.txt.collect{it[1]}.ifEmpty([]) )
+    } else {
+        FASTQC ( INPUT_CHECK.out.fastqs )
+        ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
+        ch_multiqc_files = ch_multiqc_files.mix( FASTQC.out.zip.collect{it[1]}.ifEmpty([]) )
+    }
 
     //
     // SUBWORKFLOW: Read preprocessing (clipping, merging, fastq trimming etc. )
@@ -232,7 +239,6 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),
