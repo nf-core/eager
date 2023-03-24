@@ -311,6 +311,14 @@
             "description": "Removal of adapters, paired-end merging, poly-G removal etc.",
             "default": "",
             "properties": {
+                "sequencing_qc_tool": {
+                    "type": "string",
+                    "default": "fastqc",
+                    "description": "Specify which tool to use for sequencing quality control.",
+                    "help_text": "Specify which tool to use for sequencing quality control.\n\nFalco is designed as a drop-in replacement for FastQC but written in C++ for faster computation. We recommend using falco with very large datasets (due to reduced memory constraints).",
+                    "enum": ["fastqc", "falco"],
+                    "fa_icon": "fas fa-hammer"
+                },
                 "skip_preprocessing": {
                     "type": "boolean",
                     "description": "Specify to skip all preprocessing steps (adapter removal, paired-end merging, poly-g trimming etc).",
