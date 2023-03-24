@@ -484,6 +484,18 @@
                     "default": 2,
                     "description": "Specify the -o parameter for BWA aln i.e. the number of gaps allowed.",
                     "help_text": "Configures the number of gaps used in bwa aln. Default is set to bwa default.\n\n> Modifies BWA aln parameter: `-o`"
+                },
+                "mapping_bwamem_k": {
+                    "type": "integer",
+                    "default": 19,
+                    "description": "Specify the -k parameter for BWA mem i.e. the  minimum seed length",
+                    "help_text": "Configures the minimum seed length unsed in BWA-MEM. Default is set to BWA default.\n\n> Modifies BWA-MEM parameter: `-k`"
+                },
+                "mapping_bwamem_r": {
+                    "type": "number",
+                    "default": 1.5,
+                    "description": "Specify the -k parameter for BWA mem i.e. the  minimum seed length",
+                    "help_text": "Configures the re-seeding used in BWA-MEM. Default is set to BWA default.\n\n> Modifies BWA-MEM parameter: `-r`"
                 }
             },
             "fa_icon": "fas fa-layer-group"

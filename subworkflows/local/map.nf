@@ -3,6 +3,7 @@
 //
 
 include { FASTQ_ALIGN_BWAALN                             } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { FASTQ_ALIGN_BWA                                } from '../../subworkflows/nf-core/fastq_align_bwa/main'
 include { SAMTOOLS_MERGE                                 } from '../../modules/nf-core/samtools/merge/main'
 include { SAMTOOLS_SORT                                  } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX                                 } from '../../modules/nf-core/samtools/index/main'
@@ -33,6 +34,13 @@ workflow MAP {
         ch_versions   = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
         ch_mapped_lane_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
+
+    } else if ( params.mapping_tool == 'bwamem' ) {
+        FASTQ_ALIGN_BWA ( ch_input_for_mapping.reads, ch_input_for_mapping.index, false, [] )
+
+        ch_versions   = ch_versions.mix ( FASTQ_ALIGN_BWA.out.versions.first() )
+        ch_mapped_lane_bam = FASTQ_ALIGN_BWA.out.bam
+        ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWA.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
     }
 
