@@ -616,8 +616,8 @@
                 "mapstats_preseq_stepsize": {
                     "type": "integer",
                     "default": 1000,
-                    "description": "Specify the step size of Preseq.",
-                    "help_text": "Can be used to configure the step size of Preseq's c_curve and lc_extrap method. Can be useful when only few and thus shallow sequencing results are used for extrapolation.\n\n\n> Modifies tool parameter(s)\n>   - preseq: `-s`",
+                    "description": "Specify the step size (i.e., sampling regularity) of Preseq.",
+                    "help_text": "Can be used to configure the step size of Preseq's c_curve and lc_extrap method. Can be useful when few reads and allow Preseq to be used for extrapolation of shallow sequencing results.\n\n\n> Modifies tool parameter(s)\n>   - preseq: `-s`",
                     "fa_icon": "fas fa-shoe-prints"
                 },
                 "mapstats_preseq_terms": {
