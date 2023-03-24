@@ -80,6 +80,9 @@ Tool Specific combinations
     - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
     - PE_only + preprocessing_excludeunmerged ✅
 
+### Multi-reference tests
+
+// TODO
 ### AdapterRemoval
 
 ```bash
