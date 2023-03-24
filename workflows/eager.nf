@@ -210,10 +210,10 @@ workflow EAGER {
         ch_dedupped_bams = DEDUPLICATE.out.bam
             .join( DEDUPLICATE.out.bai )
         ch_dedupped_flagstat = DEDUPLICATE.out.flagstat
-        ch_versions = ch_versions.mix( DEDUPLICATE.out.versions )
+        ch_versions                   = ch_versions.mix( DEDUPLICATE.out.versions )
 
     } else {
-        ch_dedupped_bams = ch_reads_for_deduplication
+        ch_dedupped_bams     = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
     }
 
