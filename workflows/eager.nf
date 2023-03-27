@@ -69,6 +69,7 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
+include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,6 +216,14 @@ workflow EAGER {
         ch_dedupped_flagstat = Channel.empty()
     }
 
+    //
+    // MODULE: MTNUCRATIO
+    //
+    if ( params.run_mtnucratio ) {
+        MTNUCRATIO(ch_dedupped_bams.map{[it[0],it[1]]}, params.mtnucratio_header)
+        ch_multiqc_files = ch_multiqc_files.mix(MTNUCRATIO.out.mtnucratio.collect{it[1]}.ifEmpty([]))
+        ch_versions = ch_versions.mix( MTNUCRATIO.out.versions )
+    }
 
     //
     // MODULE: MultiQC
