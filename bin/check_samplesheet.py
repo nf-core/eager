@@ -182,12 +182,12 @@ def check_samplesheet(file_in, file_out):
                     "Pairment for BAM input can only be 'single'.", "Line", line_num, error_counter
                 )
 
-            if isNAstr(bam) and isNAstr(bam_reference_id):
+            if (not  isNAstr(bam) and isNAstr(bam_reference_id) ) or ( isNAstr(bam) and not isNAstr(bam_reference_id) ):
                 error_counter = print_error(
-                    "A BAM reference id must be provided for each BAM input file.", "Line", line_num, error_counter
+                    "A BAM and BAM reference id must always be provided together.", "Line", line_num, error_counter
                 )
 
-            if not isNAstr("r1") and not isNAstr(bam_reference_id):
+            if not isNAstr(r1) and not isNAstr(bam_reference_id):
                 error_counter = print_error(
                     "FASTQ input cannot have a BAM reference id.", "Line", line_num, error_counter
                 )
