@@ -54,6 +54,7 @@ include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
 include { MAP                } from '../subworkflows/local/map'
 include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
+include { MANIPULATE_DAMAGE  } from '../subworkflows/local/manipulate_damage'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -208,6 +209,11 @@ workflow EAGER {
         ch_dedupped_flagstat = Channel.empty()
     }
 
+    //
+    // SUBWORKFLOW: aDNA Damage Manipulation
+    //
+
+    MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta )
 
     //
     // MODULE: MultiQC
