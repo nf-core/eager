@@ -10,10 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": [
-                "input",
-                "outdir"
-            ],
+            "required": ["input", "outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -219,14 +216,7 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": [
-                        "symlink",
-                        "rellink",
-                        "link",
-                        "copy",
-                        "copyNoFollow",
-                        "move"
-                    ],
+                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
                 },
                 "email_on_fail": {
@@ -315,10 +305,7 @@
                     "default": "fastqc",
                     "description": "Specify which tool to use for sequencing quality control.",
                     "help_text": "Specify which tool to use for sequencing quality control.\n\nFalco is designed as a drop-in replacement for FastQC but written in C++ for faster computation. We recommend using falco with very large datasets (due to reduced memory constraints).",
-                    "enum": [
-                        "fastqc",
-                        "falco"
-                    ],
+                    "enum": ["fastqc", "falco"],
                     "fa_icon": "fas fa-hammer"
                 },
                 "skip_preprocessing": {
@@ -331,10 +318,7 @@
                     "type": "string",
                     "default": "fastp",
                     "description": "Specify which preprocessing tool to use.",
-                    "enum": [
-                        "fastp",
-                        "adapterremoval"
-                    ],
+                    "enum": ["fastp", "adapterremoval"],
                     "help_text": "Specify which preprocessing tool to use.\n\nAdapterRemoval is commonly used in palaeogenomics, however fastp has similar performance and has many additional functionality (including inbuilt complexity trimming) that can be often useful.",
                     "fa_icon": "fas fa-hammer"
                 },
@@ -468,12 +452,7 @@
                 "mapping_tool": {
                     "type": "string",
                     "default": "bowtie2",
-                    "enum": [
-                        "bwaaln",
-                        "bwamem",
-                        "bowtie2",
-                        "circularmapper"
-                    ],
+                    "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper"],
                     "description": "Specify which mapper to use.",
                     "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)"
                 },
@@ -585,11 +564,7 @@
                     "type": "string",
                     "default": "unmapped",
                     "description": "Specify which type of reads to go into metagenomic screening.",
-                    "enum": [
-                        "unmapped",
-                        "mapped",
-                        "all"
-                    ],
+                    "enum": ["unmapped", "mapped", "all"],
                     "fa_icon": "fas fa-hand-pointer",
                     "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> ⚠️ If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
                 },
@@ -607,10 +582,7 @@
                     "type": "string",
                     "default": "bbduk",
                     "description": "Specify which tool to use for trimming, filtering, or reformatting of fastq reads that go into metagenomics screening.",
-                    "enum": [
-                        "bbduk",
-                        "prinseq"
-                    ],
+                    "enum": ["bbduk", "prinseq"],
                     "fa_icon": "fas fa-hand-pointer",
                     "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or refromatting of the reads.\n\nThis intermediate file is not saved in the results directory, unless marked with `metagenomics_complexity_generatefastq`."
                 },
@@ -659,10 +631,7 @@
                     "default": "markduplicates",
                     "description": "Specify which tool to use for deduplication.",
                     "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> ⚠️ DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
-                    "enum": [
-                        "markduplicates",
-                        "dedup"
-                    ]
+                    "enum": ["markduplicates", "dedup"]
                 }
             },
             "fa_icon": "fas fa-clone"
