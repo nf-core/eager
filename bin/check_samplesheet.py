@@ -195,14 +195,14 @@ def check_samplesheet(file_in, file_out):
             ## Prepare meta
             lane_info = []  ## [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam, bam_reference_id]
 
-            if sample_id and pairment == "single" and not isNAstr(r1) and isNAstr(r2) and isNAstr(bam):  ## SE: R1 only
+            if sample_id and pairment == "single" and not isNAstr(r1) and isNAstr(r2) and isNAstr(bam) and isNAstr(bam_reference_id):  ## SE: R1 only
                 lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam, bam_reference_id]
             elif (
-                sample_id and pairment == "paired" and not isNAstr(r1) and not isNAstr(r2) and isNAstr(bam)
+                sample_id and pairment == "paired" and not isNAstr(r1) and not isNAstr(r2) and isNAstr(bam) and isNAstr(bam_reference_id)
             ):  ## PE: R1 and R2 only
                 lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam, bam_reference_id]
             elif (
-                sample_id and pairment == "single" and isNAstr(r1) and isNAstr(r2) and not isNAstr(bam)
+                sample_id and pairment == "single" and isNAstr(r1) and isNAstr(r2) and not isNAstr(bam) and not isNAstr(bam_reference_id)
             ):  ## bam input(SE): BAM only
                 lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam, bam_reference_id]
             ## Print errors only when pairment is valid but input files don't match pairment
