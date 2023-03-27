@@ -2,10 +2,10 @@
 // Calculate different percent on target as well as complexity from samtools flagstats files
 //
 
-include { ENDORSPY_COMPLETE              } from '../../modules/nf-core/endorspy'
-include { ENDORSPY_QUALITY_FILTER        } from '../../modules/nf-core/endorspy'
-include { ENDORSPY_RAW                   } from '../../modules/nf-core/endorspy'
-include { ENDORSPY_NOQF_DEDUP                   } from '../../modules/nf-core/endorspy'
+include { ENDORSPY as ENDORSPY_COMPLETE              } from '../../modules/nf-core/endorspy/main'
+include { ENDORSPY as ENDORSPY_QUALITY_FILTER        } from '../../modules/nf-core/endorspy/main'
+include { ENDORSPY as ENDORSPY_RAW                   } from '../../modules/nf-core/endorspy/main'
+include { ENDORSPY as ENDORSPY_NOQF_DEDUP            } from '../../modules/nf-core/endorspy/main'
 
 workflow ENDORSPY {
     take:

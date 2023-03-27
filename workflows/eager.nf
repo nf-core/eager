@@ -218,8 +218,13 @@ workflow EAGER {
 
     //
     // SUBWORKFLOW: calculating percent on target and clonality
-    //
-    ENDORSPY ( MAP.out.flagstat, DEDUPLICATE.out.flagstat.ifEmpty([ [], [] ]), FILTER_BAM.out.flagstat.ifEmpty([ [], [] ])
+    // ENDORSPY (raw, filtered, deduplicated)
+    ch_for_endorspy_filterbam = params.run_bamfiltering ? FILTER_BAM.out.flagstat : Channel.empty()
+    ch_for_endorspy_dedupped  = !params.skip_deduplication ? DEDUPLICATE.out.flagstat : Channel.empty()
+
+    //  TODO: what if not mapping executed due to bam input, figure it out later
+
+    ENDORSPY ( MAP.out.flagstat, ch_for_endorspy_filterbam.ifEmpty([ [], [] ]), ch_for_endorspy_dedupped.ifEmpty([ [], [] ]) )
 
     //
     // MODULE: MultiQC
