@@ -70,6 +70,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
 include { BBMAP_BBDUK                 } from '../modules/nf-core/bbmap/bbduk/main'
+include { PRINSEQPLUSPLUS             } from '../modules/nf-core/prinseqplusplus/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -221,8 +222,12 @@ workflow EAGER {
     //
 
     if( params.run_metagenomicscreening ) {
+        ch_bamfiltered_for_metagenomics.map{ meta, fastq ->
+            [meta+['single_end':true], fastq]
+        }
+        .set{ch_bamfiltered_for_metagenomics}
 
-        // Is a complexity filter wanted? -> Put that into a subworkflow
+        // Is a complexity filter wanted?
         if ( params.run_metagenomics_complexity ) {
             // pick the complexity tool
             if (params.metagenomics_complexity_tool == 'bbduk') {
@@ -230,12 +235,15 @@ workflow EAGER {
                 ch_versions = ch_versions.mix( BBMAP_BBDUK.out.versions.first() )
                 ch_reads_for_metagenomics = BBMAP_BBDUK.out.reads
             }
-        }
-        else {
+            else if ( params.metagenomics_complexity_tool == 'prinseq' ) {
+                PRINSEQPLUSPLUS ( ch_bamfiltered_for_metagenomics )
+                ch_versions = ch_versions.mix( PRINSEQPLUSPLUS.out.versions )
+                ch_reads_for_metagenomics = PRINSEQPLUSPLUS.out.good_reads
+            }
+        } else {
             ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
         }
     }
-
 
     //
     // MODULE: MultiQC

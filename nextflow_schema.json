@@ -606,12 +606,14 @@
                 "metagenomics_complexity_tool": {
                     "type": "string",
                     "default": "bbduk",
-                    "fa_icon": "fas fa-hammer",
-                    "description": "Specify the tool to use for the metagenomics complexity filter",
+                    "fa_icon": "fas fa-hand-pointer",
+                    "description": "Specify which tool to use for trimming, filtering, or reformatting of fastq reads that go into metagenomics screening.",
                     "enum": [
                         "bbduk",
-                        "princeseq"
-                    ]
+                        "prinseq"
+                    ],
+                    "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or refromatting of the reads.\n\nThis intermediate file is not saved in the results directory."
+
                 },
                 "metagenomics_bbduk_entropy": {
                     "type": "number",
