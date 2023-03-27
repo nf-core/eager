@@ -71,7 +71,7 @@ Additional functionality contained by the pipeline currently includes:
 
 #### Metagenomic Screening
 
-- Low-sequenced complexity filtering (`BBduk`)
+- Low-sequenced complexity filtering (`BBduk` or `Princeseq`)
 - Taxonomic binner with alignment (`MALT`)
 - Taxonomic binner without alignment (`Kraken2`)
 - aDNA characteristic screening of taxonomically binned data from MALT (`MaltExtract`)
@@ -149,6 +149,7 @@ We thank the following people for their extensive assistance in the development 
 - [Mahesh Binzer-Panchal](https://github.com/mahesh-panchal)
 - [Marcel Keller](https://github.com/marcel-keller)
 - [Megan Michel](https://github.com/meganemichel)
+- [Merlin Szymanski](https://github.com/merszym)
 - [Pierre Lindenbaum](https://github.com/lindenb)
 - [Pontus Skoglund](https://github.com/pontussk)
 - [Raphael Eisenhofer](https://github.com/EisenRa)
