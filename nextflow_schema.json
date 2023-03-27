@@ -567,6 +567,14 @@
                     "enum": ["unmapped", "mapped", "all"],
                     "fa_icon": "fas fa-hand-pointer",
                     "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> ⚠️ If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
+                },
+                "metagenomics_complexity_tool": {
+                    "type": "string",
+                    "default": "bbduk",
+                    "description": "Specify which tool to use for trimming, filtering, or reformatting of fastq reads that go into metagenomics screening.",
+                    "enum": ["bbduk", "prinseq"],
+                    "fa_icon": "fas fa-hand-pointer",
+                    "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or refromatting of the reads.\n\nThis intermediate file is not saved in the results directory."
                 }
             },
             "fa_icon": "fas fa-search"

@@ -69,6 +69,7 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
+include { PRINSEQPLUSPLUS             } from '../modules/nf-core/prinseqplusplus/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -213,6 +214,17 @@ workflow EAGER {
     } else {
         ch_dedupped_bams     = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
+    }
+
+    //
+    // MODULE: prinseqplusplus
+    //
+
+    if ( params.run_metagenomicscreening && params.metagenomics_complexity_tool == 'prinseq' ) {
+        PRINSEQPLUSPLUS ( ch_bamfiltered_for_metagenomics )
+        ch_versions = ch_versions.mix( PRINSEQPLUSPLUS.out.versions )
+
+        ch_reads_for_metagenomics = PRINSEQPLUSPLUS.out.good_reads
     }
 
 
