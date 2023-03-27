@@ -136,6 +136,7 @@ We thank the following people for their extensive assistance in the development 
 - [Fabian Lehmann](https://github.com/Lehmann-Fabian)
 - [He Yu](https://github.com/paulayu)
 - [Hester van Schalkwyk](https://github.com/hesterjvs)
+- [Ian Light-Máka](https://github.com/ilight1542)
 - [Ido Bar](https://github.com/IdoBar)
 - [Irina Velsko](https://github.com/ivelsko)
 - [Işın Altınkaya](https://github.com/isinaltinkaya)
