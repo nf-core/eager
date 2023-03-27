@@ -193,3 +193,16 @@ Deduplication is carried by two possible tools, as described below. However the 
 #### DeDup
 
 [DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
+
+### MTtoNucRatio
+
+<details markdown="1">
+<summary>Output files</summary>
+
+`nuclear_contamination/`
+
+- `*.{.mtnucratio}`: number of reads on mitochondrium and on on nuclear chromosomes. Givs the mt/nuc Ratio.
+
+</details>
+
+[MTtoNucRatio](https://github.com/apeltzer/MTNucRatioCalculator) is a tool that reports the number of reads aligned to a mitochondrial entry in your reference FASTA to all other entries. This will typically be high but will vary depending on tissue type.
