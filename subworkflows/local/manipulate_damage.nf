@@ -7,7 +7,8 @@ include { PMDTOOLS_FILTER                                     } from '../../modu
 include { BAMUTIL_TRIMBAM                                     } from '../../modules/nf-core/bamutil/trimbam/main'
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_MANIPULATED } from '../../modules/nf-core/samtools/index/main'
 
-
+// TODO: Add required channels and channel manipulations for reference-dependednt bed masking before pmdtools.
+// TODO Do NOT bypass fullUDG for pmdtools filtering.
 workflow MANIPULATE_DAMAGE {
     take:
     ch_bam_bai  // [ [ meta ], bam , bai ]
@@ -26,13 +27,21 @@ workflow MANIPULATE_DAMAGE {
         [ meta2, meta, fasta ]
     }
 
-    ch_input_for_damage_manipulation = ch_bam_bai.map {
+    // No rescaling, filtering or trimming for UDG full libraries.
+    ch_manipulation_decision = ch_bam_bai.map {
         meta, bam, bai ->
             meta2 = [:]
             meta2.reference = meta.reference
         [ meta2, meta, bam, bai ]
     }
-    .combine(ch_refs, by: 0 )
+    .branch {
+        meta, bam, bai ->
+        skip:    meta.damage_treatment == 'full'
+        no_skip: meta.damage_treatment != 'full'
+    }
+
+    ch_input_for_damage_manipulation = ch_manipulation_decision.no_skip
+        .combine(ch_refs, by: 0 )
 
     if ( params.run_mapdamage_rescaling ) {
         ch_mapdamage_input = ch_input_for_damage_manipulation.multiMap {
@@ -48,7 +57,7 @@ workflow MANIPULATE_DAMAGE {
     }
 
     if ( params.run_pmd_filtering ) {
-        // TODO Add local module to produce Masked reference from given references and bed file (with meta specifying the reference it matches)?
+        // TODO Add module to produce Masked reference from given references and bed file (with meta specifying the reference it matches)?
         // if ( params.pmdtools_reference_mask) {
         //     MASK_REFERENCE_BY_BED()
         // }
@@ -79,9 +88,8 @@ workflow MANIPULATE_DAMAGE {
 
         ch_trimbam_input = ch_to_trim.map {
             meta, bam ->
-            // TODO this is a mess and throws syntax error
-                trim_left  = meta.strandedness == 'single' ? ( meta.damage_treatment == 'none' ? ( params.bamutils_clip_single_stranded_none_udg_left  : meta.damage_treatment == 'half' ? bamutils_clip_single_stranded_half_udg_left  : 0  ) ) : ( meta.damage_treatment == 'none' ? ( params.bamutils_clip_double_stranded_none_udg_left  : meta.damage_treatment == 'half' ? bamutils_clip_double_stranded_half_udg_left  : 0 ) )
-                trim_right = meta.strandedness == 'single' ? ( meta.damage_treatment == 'none' ? ( params.bamutils_clip_single_stranded_none_udg_right : meta.damage_treatment == 'half' ? bamutils_clip_single_stranded_half_udg_right : 0  ) ) : ( meta.damage_treatment == 'none' ? ( params.bamutils_clip_double_stranded_none_udg_right : meta.damage_treatment == 'half' ? bamutils_clip_double_stranded_half_udg_right : 0 ) )
+                trim_left  = meta.strandedness == 'single' ? ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_single_stranded_none_udg_left  : params.damage_manipulation_bamutils_clip_single_stranded_half_udg_left  ) : ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_double_stranded_none_udg_left  : params.damage_manipulation_bamutils_clip_double_stranded_half_udg_left  )
+                trim_right = meta.strandedness == 'single' ? ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_single_stranded_none_udg_right : params.damage_manipulation_bamutils_clip_single_stranded_half_udg_right ) : ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_double_stranded_none_udg_right : params.damage_manipulation_bamutils_clip_double_stranded_half_udg_right )
             [ meta, bam, trim_left, trim_right ]
         }
 
@@ -92,14 +100,21 @@ workflow MANIPULATE_DAMAGE {
     }
 
     ch_damage_manipulated_bam = params.run_mapdamage_rescaling ? ch_rescaled_bams : ( params.run_trim_bam ? ch_trimmed_bams : ch_damage_filtered_bams )
+    split_skipped             = ch_manipulation_decision.skip.multiMap {
+        meta, bam, bai ->
+        bam: [ meta, bam ]
+        bai: [ meta, bai ]
+    }
+    ch_bam_output             = ch_damage_manipulated_bam.mix( split_skipped.bam )
 
     // INDEX DAMAGE MANIPULATED BAM
     SAMTOOLS_INDEX_DAMAGE_MANIPULATED( ch_damage_manipulated_bam )
-    ch_versions = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.versions.first() )
-    ch_damage_manipulated_index =  params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.csi : SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.bai
+    ch_versions                 = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.versions.first() )
+    ch_damage_manipulated_index = params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.csi : SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.bai
+    ch_bai_output               = ch_damage_manipulated_index.mix( split_skipped.bai )
 
     emit:
-    bam      = ch_damage_manipulated_bam    // [ meta, bam ]
-    bai      = ch_damage_manipulated_index  // [ meta, bai ]
+    bam      = ch_bam_output    // [ meta, bam ]
+    bai      = ch_bai_output    // [ meta, bai ]
     versions = ch_versions
 }
