@@ -215,6 +215,12 @@ workflow EAGER {
         ch_dedupped_flagstat = Channel.empty()
     }
 
+    //
+    // Subworkflow: BAM for metagenomics
+    //
+
+
+
 
     //
     // MODULE: MultiQC
