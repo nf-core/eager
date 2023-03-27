@@ -69,6 +69,7 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
+include { BBMAP_BBDUK                 } from '../modules/nf-core/bbmap/bbduk/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -216,10 +217,24 @@ workflow EAGER {
     }
 
     //
-    // Subworkflow: BAM for metagenomics
+    // Subworkflow: Metagenomics screening
     //
 
+    if( params.run_metagenomicscreening ) {
 
+        // Is a complexity filter wanted? -> Put that into a subworkflow
+        if ( params.run_metagenomics_complexity ) {
+            // pick the complexity tool
+            if (params.metagenomics_complexity_tool == 'bbduk') {
+                BBMAP_BBDUK( ch_bamfiltered_for_metagenomics, [] )
+                ch_versions = ch_versions.mix( BBMAP_BBDUK.out.versions.first() )
+                ch_reads_for_metagenomics = BBMAP_BBDUK.out.reads
+            }
+        }
+        else {
+            ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
+        }
+    }
 
 
     //
