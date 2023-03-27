@@ -48,7 +48,6 @@
 
   > Bushnell B, Rood J, Singer E (2017) BBMerge – Accurate paired shotgun read merging via overlap. PLOS ONE 12(10): e0185056. [https://doi.org/10.1371/journal.pone.0185056](https://doi.org/10.1371/journal.pone.0185056)
 
-
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
