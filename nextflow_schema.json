@@ -10,7 +10,10 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": [
+                "input",
+                "outdir"
+            ],
             "properties": {
                 "input": {
                     "type": "string",
@@ -216,7 +219,14 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ],
                     "hidden": true
                 },
                 "email_on_fail": {
@@ -305,7 +315,10 @@
                     "default": "fastqc",
                     "description": "Specify which tool to use for sequencing quality control.",
                     "help_text": "Specify which tool to use for sequencing quality control.\n\nFalco is designed as a drop-in replacement for FastQC but written in C++ for faster computation. We recommend using falco with very large datasets (due to reduced memory constraints).",
-                    "enum": ["fastqc", "falco"],
+                    "enum": [
+                        "fastqc",
+                        "falco"
+                    ],
                     "fa_icon": "fas fa-hammer"
                 },
                 "skip_preprocessing": {
@@ -318,7 +331,10 @@
                     "type": "string",
                     "default": "fastp",
                     "description": "Specify which preprocessing tool to use.",
-                    "enum": ["fastp", "adapterremoval"],
+                    "enum": [
+                        "fastp",
+                        "adapterremoval"
+                    ],
                     "help_text": "Specify which preprocessing tool to use.\n\nAdapterRemoval is commonly used in palaeogenomics, however fastp has similar performance and has many additional functionality (including inbuilt complexity trimming) that can be often useful.",
                     "fa_icon": "fas fa-hammer"
                 },
@@ -452,7 +468,12 @@
                 "mapping_tool": {
                     "type": "string",
                     "default": "bowtie2",
-                    "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper"],
+                    "enum": [
+                        "bwaaln",
+                        "bwamem",
+                        "bowtie2",
+                        "circularmapper"
+                    ],
                     "description": "Specify which mapper to use.",
                     "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)"
                 },
@@ -564,41 +585,54 @@
                     "type": "string",
                     "default": "unmapped",
                     "description": "Specify which type of reads to go into metagenomic screening.",
-                    "enum": ["unmapped", "mapped", "all"],
+                    "enum": [
+                        "unmapped",
+                        "mapped",
+                        "all"
+                    ],
                     "fa_icon": "fas fa-hand-pointer",
                     "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> ⚠️ If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
                 },
-                "run_metagenomics_complexity": {
+                "run_metagenomics_complexityfiltering": {
                     "type": "boolean",
                     "fa_icon": "fas fa-power-off",
-                    "description": "Run a complexity filter on the metagenomics input files before classification. Specifiy the tool to use with the `metagenomics_complexity_tool` parameter, save with `metagenomics_complexity_generatefastq`"
+                    "help_text": "Turns on a subworkflow of the pipeline that filters the fastq-files for complexity before the metagenomics profiling\nUse the metagenomics_complexity_tool parameter to select a method",
+                    "description": "Run a complexity filter on the metagenomics input files before classification. Specifiy the tool to use with the `metagenomics_complexity_tool` parameter, save with `metagenomics_complexity_savefastq`"
                 },
-                "metagenomics_complexity_generatefastq": {
+                "metagenomics_complexity_savefastq": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
-                    "description": "Generate FASTQ files containing the complexity filtered reads (before metagenomic classification)."
+                    "description": "Save FASTQ files containing the complexity filtered reads (before metagenomic classification).",
+                    "help_text": "Save the complexity-filtered fastq-files to disk"
                 },
                 "metagenomics_complexity_tool": {
                     "type": "string",
                     "default": "bbduk",
                     "description": "Specify which tool to use for trimming, filtering, or reformatting of fastq reads that go into metagenomics screening.",
-                    "enum": ["bbduk", "prinseq"],
+                    "enum": [
+                        "bbduk",
+                        "prinseq"
+                    ],
                     "fa_icon": "fas fa-hand-pointer",
-                    "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or reformatting of the reads.\n\nThis intermediate file is not saved in the results directory, unless marked with `--metagenomics_complexity_generatefastq`."
+                    "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or reformatting of the reads.\n\nThis intermediate file is not saved in the results directory, unless marked with `--metagenomics_complexity_savefastq`."
                 },
-                "metagenomics_prinseq_entropy": {
+                "metagenomics_complexity_entropy": {
                     "type": "number",
+                    "fa_icon": "fas fa-sort-numeric-up",
+                    "description": "Specify the entropy threshold that under which a sequencing read will be complexity filtered out. This should be between 0-1.",
                     "default": 0.3,
-                    "fa_icon": "fas fa-random",
-                    "description": "Specify the minimum sequence entropy level for complexity filtering",
-                    "help_text": "Specify the minimum 'entropy' value for complexity filtering for BBDuk or PRINSEQ++.\n\nNote that this value will only be used for PRINSEQ++ if `--shortread_complexityfilter_prinseqplusplus_mode` is set to `entropy`.\n\nEntropy here corresponds to the amount of sequence variation exists within the read. Higher values correspond to more variety, and thus will likely result in more specific matching to a taxon's reference genome. The trade off here is fewer reads (or abundance information) available for having a confident identification.\n\n\n> Modifies tool parameter(s):\n> - BBDuk: `entropy=`\n> - PRINSEQ++:  `-lc_entropy`\n\n"
+                    "help_text": "Specify the minimum 'entropy' value for complexity filtering for the BBDuk or PRINSEQ++ tools.\n\nThis value will only be used for PRINSEQ++ if `--metagenomics_prinseq_mode` is set to `entropy`.\n\nEntropy here corresponds to the amount of sequence variation exists within the read. Higher values correspond to more variety, and thus will likely result in more specific matching to a taxon's reference genome. The trade off here is fewer reads (or abundance information) available for having a confident identification.\n\n> Modifies tool parameter(s):\n> - BBDuk: `entropy=`\n> - PRINSEQ++:  `-lc_entropy`\n\n"
                 },
                 "metagenomics_prinseq_mode": {
                     "type": "string",
                     "default": "entropy",
-                    "enum": ["entropy", "dust"],
+                    "enum": [
+                        "entropy",
+                        "dust"
+                    ],
                     "fa_icon": "fas fa-check-square",
-                    "description": "Specify the complexity filter mode for PRINSEQ++"
+                    "description": "Specify the complexity filter mode for PRINSEQ++",
+                    "help_text": "Specify the complexity filter mode for PRINSEQ++ \n\nUse the selected mode together with the correct flag:\n'dust' requires the `--metagenomics_prinseq_dustscore` parameter set\n'entropy' requires the `--metagenomics_complexity_entropy` parameter set\n\n> Sets one of the tool parameter(s):\n> - PRINSEQ++:  `-lc_entropy`\n> - PRINSEQ++:  `-lc_dust`"
                 },
                 "metagenomics_prinseq_dustscore": {
                     "type": "number",
@@ -606,12 +640,6 @@
                     "fa_icon": "fas fa-head-side-mask",
                     "description": "Specify the minimum dust score for PRINTSEQ++ complexity filtering",
                     "help_text": "Specify the minimum dust score below which low-complexity reads will be removed. A DUST score is based on how often different tri-nucleotides occur along a read.\n\n> Modifies tool parameter(s):\n> - PRINSEQ++: `--lc_dust`"
-                },
-                "metagenomics_bbduk_entropy": {
-                    "type": "number",
-                    "fa_icon": "fas fa-sort-numeric-up",
-                    "description": "Specify the entropy threshold that under which a sequencing read will be complexity filtered out. This should be between 0-1.",
-                    "default": 0.3
                 }
             },
             "fa_icon": "fas fa-search"
@@ -631,7 +659,10 @@
                     "default": "markduplicates",
                     "description": "Specify which tool to use for deduplication.",
                     "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> ⚠️ DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
-                    "enum": ["markduplicates", "dedup"]
+                    "enum": [
+                        "markduplicates",
+                        "dedup"
+                    ]
                 }
             },
             "fa_icon": "fas fa-clone"

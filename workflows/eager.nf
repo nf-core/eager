@@ -19,6 +19,18 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 
 // Check failing parameter combinations
 if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
+    // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
+    if (params.metagenomics_prinseq_dustscore == 0.5) {
+            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
+    }
+}
+if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
+    // dust score was set but entropy method picked. If no entropy-score provided, assume it was an error and fail
+    if (params.metagenomics_complexity_entropy == 0.3) {
+            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
+    }
+}
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
@@ -48,12 +60,13 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { INPUT_CHECK        } from '../subworkflows/local/input_check'
-include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
-include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
-include { MAP                } from '../subworkflows/local/map'
-include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
-include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
+include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
+include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
+include { MAP                           } from '../subworkflows/local/map'
+include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
+include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,8 +82,6 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
-include { BBMAP_BBDUK                 } from '../modules/nf-core/bbmap/bbduk/main'
-include { PRINSEQPLUSPLUS             } from '../modules/nf-core/prinseqplusplus/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -218,7 +229,7 @@ workflow EAGER {
     }
 
     //
-    // Subworkflow: Metagenomics screening
+    // Section: Metagenomics screening
     //
 
     if( params.run_metagenomicscreening ) {
@@ -227,19 +238,10 @@ workflow EAGER {
                 [meta+['single_end':true], fastq]
             }
 
-        // Is a complexity filter wanted?
-        if ( params.run_metagenomics_complexity ) {
-            // pick the complexity tool
-            if (params.metagenomics_complexity_tool == 'bbduk') {
-                BBMAP_BBDUK( ch_bamfiltered_for_metagenomics, [] )
-                ch_versions = ch_versions.mix( BBMAP_BBDUK.out.versions.first() )
-                ch_reads_for_metagenomics = BBMAP_BBDUK.out.reads
-            }
-            else if ( params.metagenomics_complexity_tool == 'prinseq' ) {
-                PRINSEQPLUSPLUS ( ch_bamfiltered_for_metagenomics )
-                ch_versions = ch_versions.mix( PRINSEQPLUSPLUS.out.versions )
-                ch_reads_for_metagenomics = PRINSEQPLUSPLUS.out.good_reads
-            }
+        // Check if a complexity filter is wanted?
+        if ( params.run_metagenomics_complexityfiltering ) {
+            METAGENOMICS_COMPLEXITYFILTER( ch_bamfiltered_for_metagenomics )
+            ch_reads_for_metagenomics = METAGENOMICS_COMPLEXITYFILTER.out.fastq
         } else {
             ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
         }
