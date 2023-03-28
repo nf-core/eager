@@ -611,7 +611,7 @@
                         "all"
                     ],
                     "fa_icon": "fas fa-hand-pointer",
-                    "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> ⚠️ If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
+                    "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> \u26a0\ufe0f If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
                 },
                 "run_metagenomics_complexityfiltering": {
                     "type": "boolean",
@@ -680,7 +680,10 @@
                     "default": "markduplicates",
                     "description": "Specify which tool to use for deduplication.",
                     "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> \u26a0\ufe0f DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
-                    "enum": ["markduplicates", "dedup"],
+                    "enum": [
+                        "markduplicates",
+                        "dedup"
+                    ],
                     "fa_icon": "fas fa-layer-group"
                 }
             },
