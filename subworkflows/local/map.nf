@@ -2,12 +2,12 @@
 // Prepare reference indexing for downstream
 //
 
-include { FASTQ_ALIGN_BWAALN                             } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
-include { BWA_MEM                                        } from '../../modules/nf-core/bwa/mem/main'
-include { SAMTOOLS_MERGE                                 } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT                                  } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGE                                 } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED  } from '../../modules/nf-core/samtools/flagstat/main'
+include { FASTQ_ALIGN_BWAALN                                                           } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { BWA_MEM                                                                      } from '../../modules/nf-core/bwa/mem/main'
+include { SAMTOOLS_MERGE                                                               } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT                                                                } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGE } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED                                } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow MAP {
     take:
