@@ -665,7 +665,7 @@
                     "type": "number",
                     "default": 0.95,
                     "fa_icon": "fas fa-check-circle",
-                    "help_text": "Specify the allowed level of confidence intervals used for `lc_extrap` mode.\n\n> Modifies preseq lc_extrap parameter: `-c`",
+                    "help_text": "Specify the allowed level of confidence intervals used for lc_extrap mode.\n\n> Modifies preseq lc_extrap parameter: `-c`",
                     "description": "Specify confidence interval level (lc_extrap mode only)"
                 },
                 "mapstats_preseq_defects_mode": {
