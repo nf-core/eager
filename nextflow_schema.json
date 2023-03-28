@@ -634,7 +634,7 @@
                     "help_text": "Turn on the module to estimate the ratio of mitochondrial to nuclear reads.",
                     "fa_icon": "fas fa-balance-scale-left"
                 },
-                "mtnucratio_header": {
+                "mitochondrion_header": {
                     "type": "string",
                     "default": "MT",
                     "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space).",
