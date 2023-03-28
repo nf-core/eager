@@ -31,8 +31,7 @@ jobs:
           - "--preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt'"
           - "--skip_preprocessing"
           - "--input 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/samplesheet_PE_only.tsv' --deduplication_tool dedup --preprocessing_excludeunmerged"
-          - "--run_mapdamage_rescaling"
-          - "--run_pmd_filtering --run_trim_bam"
+          - "--run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v3
