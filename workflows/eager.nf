@@ -247,10 +247,12 @@ workflow EAGER {
         } else {
             ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
         }
+    }
 
     //
     // MODULE: PreSeq
     //
+
     if ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'c_curve') {
         PRESEQ_CCURVE(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))

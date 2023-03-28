@@ -171,6 +171,33 @@ Please be aware, that intermediate length and mapping quality filtered genomic B
 
 You may also recieve the files above if metagenomic screening is turned on.
 
+### Metagenomics Screening
+
+#### Bbduk
+
+<details markdown="1">
+<summary>Output files</summary>
+
+Note: To save output files, set the `--metagenomics_complexity_savefastq` flag
+
+- `metagenomic_complexity_filter/`
+
+  - `*_complexity.fastq.gz`: FASTQ file containing the complexity filtered reads
+  </details>
+
+#### PRINSEQ++
+
+<details markdown="1">
+<summary>Output files</summary>
+
+Note: To save output files, set the `--metagenomics_complexity_savefastq` flag
+
+- `metagenomic_complexity_filter/`
+
+  - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
+  - `*_complexity.log`: LOG file containing filter stats
+  </details>
+
 ### Deduplication
 
 <details markdown="1">
