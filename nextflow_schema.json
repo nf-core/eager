@@ -642,6 +642,69 @@
                     "fa_icon": "fas fa-heading"
                 }
             }
+        "mapping_statistics": {
+            "title": "Mapping statistics",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "mapstats_skip_preseq": {
+                    "type": "boolean",
+                    "help_text": "Turns off the computation of library complexity estimation.",
+                    "description": "Turns off the computation of library complexity estimation.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "mapstats_preseq_mode": {
+                    "type": "string",
+                    "default": "c_curve",
+                    "help_text": "Specify which mode of preseq to run.\n\nFrom the [PreSeq documentation](http://smithlabresearch.org/wp-content/uploads/manual.pdf):\n\nc curve is used to compute the expected complexity curve of a mapped read file with a hypergeometric formula\n\nlc extrap is used to generate the expected yield for theoretical larger experiments and bounds on the number of distinct reads in the library and the associated confidence intervals, which is computed by bootstrapping the observed duplicate counts histogram.",
+                    "description": "Specify which mode of preseq to run.",
+                    "fa_icon": "fas fa-toggle-on",
+                    "enum": ["c_curve", "lc_extrap"]
+                },
+                "mapstats_preseq_stepsize": {
+                    "type": "integer",
+                    "default": 1000,
+                    "description": "Specify the step size (i.e., sampling regularity) of Preseq.",
+                    "help_text": "Can be used to configure the step size of Preseq's c_curve and lc_extrap method. Can be useful when few reads and allow Preseq to be used for extrapolation of shallow sequencing results.\n\n\n> Modifies tool parameter(s)\n>   - preseq: `-s`",
+                    "fa_icon": "fas fa-shoe-prints"
+                },
+                "mapstats_preseq_terms": {
+                    "type": "integer",
+                    "default": 100,
+                    "fa_icon": "fas fa-sort-numeric-up-alt",
+                    "help_text": "Specify the maximum number of terms that lc_extrap mode will use.\n \n> Modifies preseq lc_extrap parameter: `-x`",
+                    "description": "Specify the maximum number of terms that lc_extrap mode will use."
+                },
+                "mapstats_preseq_maxextrap": {
+                    "type": "integer",
+                    "default": 10000000000,
+                    "fa_icon": "fas fa-ban",
+                    "help_text": "Specify the maximum extrapolation that lc_extrap mode will perform.\n\n> Modifies preseq lc_extrap parameter: `-e`",
+                    "description": "Specify the maximum extrapolation (lc_extrap mode only)"
+                },
+                "mapstats_preseq_bootstrap": {
+                    "type": "integer",
+                    "default": 100,
+                    "fa_icon": "fab fa-bootstrap",
+                    "help_text": "Specify the number of bootstraps lc_extrap mode will perform to calculate confidence intervals.\n\n> Modifies preseq lc_extrap parameter: `-n`",
+                    "description": "Specify number of bootstraps to perform (lc_extrap mode only)"
+                },
+                "mapstats_preseq_cval": {
+                    "type": "number",
+                    "default": 0.95,
+                    "fa_icon": "fas fa-check-circle",
+                    "help_text": "Specify the allowed level of confidence intervals used for lc_extrap mode.\n\n> Modifies preseq lc_extrap parameter: `-c`",
+                    "description": "Specify confidence interval level (lc_extrap mode only)"
+                },
+                "mapstats_preseq_defects_mode": {
+                    "type": "boolean",
+                    "description": "Turns on defects mode to extrapolate without testing for defects (lc_extrap mode only).",
+                    "help_text": "Activates defects mode of `lc_extrap`, which does the extrapolation without testing for defects.\n\n> Modifies preseq lc_extrap parameter: `-D`",
+                    "fa_icon": "fab fa-creative-commons-sampling-plus"
+                }
+            },
+            "fa_icon": "fas fa-search"
         }
     },
     "allOf": [
@@ -677,6 +740,7 @@
         },
         {
             "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
+            "$ref": "#/definitions/mapping_statistics"
         }
     ]
 }
