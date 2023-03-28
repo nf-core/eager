@@ -32,6 +32,10 @@
 
   > Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics , 25(14), 1754–1760. doi: [10.1093/bioinformatics/btp324](https://doi.org/10.1093/bioinformatics/btp324)
 
+- [BWA-MEM](https://doi.org/10.48550/arXiv.1303.3997)
+
+  > Li, H. (2013). Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. arXiv , arXiv:1303.3997. doi: [10.48550/arXiv.1303.3997](https://doi.org/10.48550/arXiv.1303.3997)
+
 - [SAMtools](https://doi.org/10.1093/bioinformatics/btp324)
 
   > Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., & 1000 Genome Project Data Processing Subgroup. (2009). The Sequence Alignment/Map format and SAMtools. Bioinformatics , 25(16), 2078–2079. doi: [10.1093/bioinformatics/btp352](https://doi.org/10.1093/bioinformatics/btp324)
