@@ -598,7 +598,7 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
                     "description": "Save FASTQ files containing the complexity filtered reads (before metagenomic classification).",
-                    "help_text": "Save the complexity-filtered fastq-files to disk"
+                    "help_text": "Save the complexity-filtered fastq-files to the results directory"
                 },
                 "metagenomics_complexity_tool": {
                     "type": "string",
