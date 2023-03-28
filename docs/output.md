@@ -205,7 +205,7 @@ Deduplication is carried by two possible tools, as described below. However the 
 
   </details>
 
-  [Preseq](https://github.com/smithlabcode/preseq) Preseq is a collection of tools that allow assessment of the complexity of the library, where complexity means the number of unique molecules in your library (i.e. not molecules with the exact same length and sequence). There are two algorithms from the tools we use: c_curve and lc_extrap. The former gives you the expected number of unique reads if you were to repeated sequencing but with fewer reads than your first sequencing run. The latter tries to extrapolate the decay in the number of unique reads you would get with re-sequencing but with more reads than your initial sequencing run.
+[Preseq](https://github.com/smithlabcode/preseq) Preseq is a collection of tools that allow assessment of the complexity of the library, where complexity means the number of unique molecules in your library (i.e. not molecules with the exact same length and sequence). There are two algorithms from the tools we use: `c_curve` and `lc_extrap`. The former gives you the expected number of unique reads if you were to repeated sequencing but with fewer reads than your first sequencing run. The latter tries to extrapolate the decay in the number of unique reads you would get with re-sequencing but with more reads than your initial sequencing run.
 
 The resulting histogram file will contain estimated deduplication statistics at different theoretical sequencing depths, and can be used to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced.
 
