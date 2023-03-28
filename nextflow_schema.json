@@ -584,14 +584,14 @@
                     "description": "Specify which tool to use for trimming, filtering, or reformatting of fastq reads that go into metagenomics screening.",
                     "enum": ["bbduk", "prinseq"],
                     "fa_icon": "fas fa-hand-pointer",
-                    "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or refromatting of the reads.\n\nThis intermediate file is not saved in the results directory, unless marked with `metagenomics_complexity_generatefastq`."
+                    "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or reformatting of the reads.\n\nThis intermediate file is not saved in the results directory, unless marked with `--metagenomics_complexity_generatefastq`."
                 },
                 "metagenomics_prinseq_entropy": {
                     "type": "number",
                     "default": 0.3,
                     "fa_icon": "fas fa-random",
                     "description": "Specify the minimum sequence entropy level for complexity filtering",
-                    "help_text": "Specify the minimum 'entropy' value for complexity filtering for BBDuk or PRINSEQ++.\n\nNote that this value will only be used for PRINSEQ++ if `--shortread_complexityfilter_prinseqplusplus_mode` is set to `entropy`.\n\nEntropy here corresponds to the amount of sequence variation exists within the read. Higher values correspond to more variety, and thus will likely reslut in more specific matching to a taxon's reference genome. The trade off here is fewer reads (or abundance information) available for having a confident identification.\n\n\n> Modifies tool parameter(s):\n> - BBDuk: `entropy=`\n> - PRINSEQ++:  `-lc_entropy`\n\n"
+                    "help_text": "Specify the minimum 'entropy' value for complexity filtering for BBDuk or PRINSEQ++.\n\nNote that this value will only be used for PRINSEQ++ if `--shortread_complexityfilter_prinseqplusplus_mode` is set to `entropy`.\n\nEntropy here corresponds to the amount of sequence variation exists within the read. Higher values correspond to more variety, and thus will likely result in more specific matching to a taxon's reference genome. The trade off here is fewer reads (or abundance information) available for having a confident identification.\n\n\n> Modifies tool parameter(s):\n> - BBDuk: `entropy=`\n> - PRINSEQ++:  `-lc_entropy`\n\n"
                 },
                 "metagenomics_prinseq_mode": {
                     "type": "string",

@@ -222,10 +222,10 @@ workflow EAGER {
     //
 
     if( params.run_metagenomicscreening ) {
-        ch_bamfiltered_for_metagenomics.map{ meta, fastq ->
-            [meta+['single_end':true], fastq]
-        }
-        .set{ch_bamfiltered_for_metagenomics}
+        ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics
+            .map{ meta, fastq ->
+                [meta+['single_end':true], fastq]
+            }
 
         // Is a complexity filter wanted?
         if ( params.run_metagenomics_complexity ) {
