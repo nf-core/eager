@@ -224,9 +224,7 @@ workflow EAGER {
         PRESEQ_CCURVE(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_CCURVE.out.versions )
-    }
-
-    if ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'lc_extrap') {
+    } else ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'lc_extrap') {
         PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
