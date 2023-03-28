@@ -73,6 +73,7 @@ include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap
 include { FALCO                       } from '../modules/nf-core/falco/main'
 include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
 
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -222,10 +223,12 @@ workflow EAGER {
     // MODULE: MTNUCRATIO
     //
     if ( params.run_mtnucratio ) {
-        MTNUCRATIO(ch_dedupped_bams.map{[it[0],it[1]]}, params.mtnucratio_header)
+        MTNUCRATIO(ch_dedupped_bams.map{[it[0],it[1]]}, params.mitochondrion_header)
         ch_multiqc_files = ch_multiqc_files.mix(MTNUCRATIO.out.mtnucratio.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( MTNUCRATIO.out.versions )
-        
+    }
+
+    //
     // MODULE: PreSeq
     //
     if ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'c_curve') {
@@ -236,7 +239,6 @@ workflow EAGER {
         PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
-
     }
 
     //
@@ -256,6 +258,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),
