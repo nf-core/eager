@@ -40,13 +40,18 @@ workflow MANIPULATE_DAMAGE {
     .combine(ch_refs, by: 0 ) // [ [combine_meta], [meta], bam, bai, [ref_meta], fasta ]
 
     if ( params.run_mapdamage_rescaling ) {
-        ch_mapdamage_input.branch{
+        ch_mapdamage_prep = ch_input_for_damage_manipulation.branch{
             ignore_me, meta, bam, bai, ref_meta, fasta ->
             skip:    meta.damage_treatment == 'full'
             no_skip: true
         }
 
-        ch_mapdamage_input.no_skip = ch_input_for_damage_manipulation.multiMap {
+        ch_skip_rescale = ch_mapdamage_prep.skip.map {
+            ignore_me, meta, bam, bai, ref_meta, fasta ->
+            [ meta, bam, bai ]
+        }
+
+        ch_mapdamage_input = ch_mapdamage_prep.no_skip.multiMap {
             ignore_me, meta, bam, bai, ref_meta, fasta ->
                 bam: [ meta, bam ]
                 fasta: fasta
