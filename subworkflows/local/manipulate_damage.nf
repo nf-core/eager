@@ -8,7 +8,6 @@ include { BAMUTIL_TRIMBAM                                     } from '../../modu
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_MANIPULATED } from '../../modules/nf-core/samtools/index/main'
 
 // TODO: Add required channels and channel manipulations for reference-dependednt bed masking before pmdtools.
-// TODO Do NOT bypass fullUDG for pmdtools filtering.
 workflow MANIPULATE_DAMAGE {
     take:
     ch_bam_bai  // [ [ meta ], bam , bai ]
@@ -27,24 +26,22 @@ workflow MANIPULATE_DAMAGE {
         [ meta2, meta, fasta ]
     }
 
-    // No rescaling, filtering or trimming for UDG full libraries.
-    ch_manipulation_decision = ch_bam_bai.map {
+    ch_input_for_damage_manipulation = ch_bam_bai.map {
         meta, bam, bai ->
             meta2 = [:]
             meta2.reference = meta.reference
         [ meta2, meta, bam, bai ]
     }
-    .branch {
-        meta, bam, bai ->
-        skip:    meta.damage_treatment == 'full'
-        no_skip: meta.damage_treatment != 'full'
-    }
-
-    ch_input_for_damage_manipulation = ch_manipulation_decision.no_skip
-        .combine(ch_refs, by: 0 )
+    .combine(ch_refs, by: 0 ) // [ [combine_meta], [meta], bam, bai, [ref_meta], fasta ]
 
     if ( params.run_mapdamage_rescaling ) {
-        ch_mapdamage_input = ch_input_for_damage_manipulation.multiMap {
+        ch_mapdamage_input.branch{
+            ignore_me, meta, bam, bai, ref_meta, fasta ->
+            skip:    meta.damage_treatment == 'full'
+            no_skip: true
+        }
+
+        ch_mapdamage_input.no_skip = ch_input_for_damage_manipulation.multiMap {
             ignore_me, meta, bam, bai, ref_meta, fasta ->
                 bam: [ meta, bam ]
                 fasta: fasta
@@ -53,7 +50,13 @@ workflow MANIPULATE_DAMAGE {
         MAPDAMAGE2( ch_mapdamage_input.bam, ch_mapdamage_input.fasta )
         ch_versions = ch_versions.mix( MAPDAMAGE2.out.versions.first() )
 
-        ch_rescaled_bams = MAPDAMAGE2.out.rescaled
+        ch_skip_rescale = ch_mapdamage_input.skip.multiMap {
+            ignore_me, meta, bam, bai, ref_meta, fasta ->
+            bam: [ meta, bam ]
+            bai: [ meta, bai ]
+        }
+
+        ch_rescaled_bams = MAPDAMAGE2.out.rescaled.mix(ch_skip_rescale)
     }
 
     if ( params.run_pmd_filtering ) {
@@ -62,7 +65,6 @@ workflow MANIPULATE_DAMAGE {
         //     MASK_REFERENCE_BY_BED()
         // }
 
-        // TODO no PMD fitlering for full_UDG libraries
         ch_pmdtools_input = ch_input_for_damage_manipulation.multiMap {
             ignore_me, meta, bam, bai, ref_meta, fasta ->
                 bam: [ meta, bam, bai ]
@@ -70,7 +72,7 @@ workflow MANIPULATE_DAMAGE {
         }
 
 
-        PMDTOOLS_FILTER(ch_pmdtools_input.bam, params.pmdtools_threshold, ch_pmdtools_input.fasta)
+        PMDTOOLS_FILTER(ch_pmdtools_input.bam, params.damage_manipulation_pmdtools_threshold, ch_pmdtools_input.fasta)
         ch_versions = ch_versions.mix( PMDTOOLS_FILTER.out.versions.first() )
 
         ch_damage_filtered_bams = PMDTOOLS_FILTER.out.bam
@@ -88,8 +90,8 @@ workflow MANIPULATE_DAMAGE {
 
         ch_trimbam_input = ch_to_trim.map {
             meta, bam ->
-                trim_left  = meta.strandedness == 'single' ? ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_single_stranded_none_udg_left  : params.damage_manipulation_bamutils_clip_single_stranded_half_udg_left  ) : ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_double_stranded_none_udg_left  : params.damage_manipulation_bamutils_clip_double_stranded_half_udg_left  )
-                trim_right = meta.strandedness == 'single' ? ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_single_stranded_none_udg_right : params.damage_manipulation_bamutils_clip_single_stranded_half_udg_right ) : ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_double_stranded_none_udg_right : params.damage_manipulation_bamutils_clip_double_stranded_half_udg_right )
+                trim_left  = meta.strandedness == 'single' ? ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_single_stranded_none_udg_left  : ( meta.damage_treatment == 'half' ? params.damage_manipulation_bamutils_clip_single_stranded_half_udg_left  : 0 )) : ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_double_stranded_none_udg_left  : ( meta.damage_treatment == 'half' ? params.damage_manipulation_bamutils_clip_double_stranded_half_udg_left  : 0 ))
+                trim_right = meta.strandedness == 'single' ? ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_single_stranded_none_udg_right : ( meta.damage_treatment == 'half' ? params.damage_manipulation_bamutils_clip_single_stranded_half_udg_right : 0 )) : ( meta.damage_treatment == 'none' ? params.damage_manipulation_bamutils_clip_double_stranded_none_udg_right : ( meta.damage_treatment == 'half' ? params.damage_manipulation_bamutils_clip_double_stranded_half_udg_right : 0 ))
             [ meta, bam, trim_left, trim_right ]
         }
 
@@ -99,22 +101,16 @@ workflow MANIPULATE_DAMAGE {
         ch_trimmed_bams = BAMUTIL_TRIMBAM.out.bam
     }
 
+    // TODO What to output from the SWF? Allow users to pmdFilter/trim AND rescale, or only one of the two paths?
     ch_damage_manipulated_bam = params.run_mapdamage_rescaling ? ch_rescaled_bams : ( params.run_trim_bam ? ch_trimmed_bams : ch_damage_filtered_bams )
-    split_skipped             = ch_manipulation_decision.skip.multiMap {
-        meta, bam, bai ->
-        bam: [ meta, bam ]
-        bai: [ meta, bai ]
-    }
-    ch_bam_output             = ch_damage_manipulated_bam.mix( split_skipped.bam )
 
     // INDEX DAMAGE MANIPULATED BAM
     SAMTOOLS_INDEX_DAMAGE_MANIPULATED( ch_damage_manipulated_bam )
-    ch_versions                 = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.versions.first() )
-    ch_damage_manipulated_index = params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.csi : SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.bai
-    ch_bai_output               = ch_damage_manipulated_index.mix( split_skipped.bai )
+    ch_versions = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.versions.first() )
+    ch_damage_manipulated_index =  params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.csi : SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.bai
 
     emit:
-    bam      = ch_bam_output    // [ meta, bam ]
-    bai      = ch_bai_output    // [ meta, bai ]
+    bam      = ch_damage_manipulated_bam    // [ meta, bam ]
+    bai      = ch_damage_manipulated_index  // [ meta, bai ]
     versions = ch_versions
 }
