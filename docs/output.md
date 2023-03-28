@@ -178,25 +178,34 @@ You may also recieve the files above if metagenomic screening is turned on.
 <details markdown="1">
 <summary>Output files</summary>
 
-Note: To save output files, set the `--metagenomics_complexity_savefastq` flag
-
 - `metagenomic_complexity_filter/`
 
   - `*_complexity.fastq.gz`: FASTQ file containing the complexity filtered reads
+  - `*.log`: LOG file containing filter stats
   </details>
+
+The entropy filter of [BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) is used to remove reads from the fastq-files for metagenomics screening that don't pass the `--metagenomics_complexity_entropy` threshold. When ommiting the flag, a default value of 0.3 is applied. To cite the docs:
+> A homopolymer such as AAAAAAAAAAAAAA would have entropy of zero; completely random sequence would have entropy approaching 1.
+
+**Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
+
 
 #### PRINSEQ++
 
 <details markdown="1">
 <summary>Output files</summary>
 
-Note: To save output files, set the `--metagenomics_complexity_savefastq` flag
-
 - `metagenomic_complexity_filter/`
 
   - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
   - `*_complexity.log`: LOG file containing filter stats
   </details>
+
+  [PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus#readme) is an alternative to BBDuk for filtering the fastq files before metagenomics classification. From PRINSEQ++ we implemented filtering by the `dust` algorithm or by `entropy`, as explained above in the BBDuk section.
+
+  The saved files are the _good_ files, passing the `dust` or `entropy` filter treshold specified. The logs contain information about the amount of reads filtered.
+
+  **Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
 
 ### Deduplication
 
