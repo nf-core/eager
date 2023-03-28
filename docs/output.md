@@ -193,4 +193,3 @@ Deduplication is carried by two possible tools, as described below. However the 
 #### DeDup
 
 [DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
-

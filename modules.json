@@ -128,10 +128,7 @@
                     "samtools/index": {
                         "branch": "master",
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
-                        "installed_by": [
-                            "bam_split_by_region",
-                            "fastq_align_bwaaln"
-                        ]
+                        "installed_by": ["bam_split_by_region", "fastq_align_bwaaln"]
                     },
                     "samtools/merge": {
                         "branch": "master",
