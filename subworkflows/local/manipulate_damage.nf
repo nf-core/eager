@@ -2,20 +2,25 @@
 // Calculate PMD scores, trim, or rescale DNA damage from mapped reads.
 //
 
-include { MAPDAMAGE2                                          } from '../../modules/nf-core/mapdamage2/main'
-include { PMDTOOLS_FILTER                                     } from '../../modules/nf-core/pmdtools/filter/main'
-include { BAMUTIL_TRIMBAM                                     } from '../../modules/nf-core/bamutil/trimbam/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_MANIPULATED } from '../../modules/nf-core/samtools/index/main'
+include { MAPDAMAGE2                                       } from '../../modules/nf-core/mapdamage2/main'
+include { PMDTOOLS_FILTER                                  } from '../../modules/nf-core/pmdtools/filter/main'
+include { BAMUTIL_TRIMBAM                                  } from '../../modules/nf-core/bamutil/trimbam/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_RESCALED } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_FILTERED } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_TRIMMED  } from '../../modules/nf-core/samtools/index/main'
 
-// TODO: Add required channels and channel manipulations for reference-dependednt bed masking before pmdtools.
+// TODO: Add required channels and channel manipulations for reference-dependent bed masking before pmdtools.
 workflow MANIPULATE_DAMAGE {
     take:
     ch_bam_bai  // [ [ meta ], bam , bai ]
     ch_fasta    // [ [ meta ], fasta ]
 
     main:
-    ch_versions       = Channel.empty()
-    ch_multiqc_files  = Channel.empty()
+    ch_versions          = Channel.empty()
+    ch_multiqc_files     = Channel.empty()
+    ch_rescaled_bams     = Channel.empty()
+    ch_pmd_filtered_bams = Channel.empty()
+    ch_trimmed_bams      = Channel.empty()
 
     // Ensure correct reference is associated with each bam_bai pair
     ch_refs = ch_fasta.map {
@@ -48,15 +53,14 @@ workflow MANIPULATE_DAMAGE {
         }
 
         MAPDAMAGE2( ch_mapdamage_input.bam, ch_mapdamage_input.fasta )
-        ch_versions = ch_versions.mix( MAPDAMAGE2.out.versions.first() )
+        ch_versions       = ch_versions.mix( MAPDAMAGE2.out.versions.first() )
 
-        ch_skip_rescale = ch_mapdamage_input.skip.multiMap {
-            ignore_me, meta, bam, bai, ref_meta, fasta ->
-            bam: [ meta, bam ]
-            bai: [ meta, bai ]
-        }
+        SAMTOOLS_INDEX_DAMAGE_RESCALED( MAPDAMAGE2.out.rescaled )
+        ch_versions       = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_RESCALED.out.versions.first() )
+        ch_rescaled_index = params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_RESCALED.out.csi : SAMTOOLS_INDEX_DAMAGE_RESCALED.out.bai
 
-        ch_rescaled_bams = MAPDAMAGE2.out.rescaled.mix(ch_skip_rescale)
+        ch_rescaled_bams  = MAPDAMAGE2.out.rescaled.join(ch_rescaled_index)
+            .mix(ch_skip_rescale)
     }
 
     if ( params.run_pmd_filtering ) {
@@ -73,14 +77,21 @@ workflow MANIPULATE_DAMAGE {
 
 
         PMDTOOLS_FILTER(ch_pmdtools_input.bam, params.damage_manipulation_pmdtools_threshold, ch_pmdtools_input.fasta)
-        ch_versions = ch_versions.mix( PMDTOOLS_FILTER.out.versions.first() )
+        ch_versions       = ch_versions.mix( PMDTOOLS_FILTER.out.versions.first() )
 
-        ch_damage_filtered_bams = PMDTOOLS_FILTER.out.bam
+        SAMTOOLS_INDEX_DAMAGE_FILTERED( PMDTOOLS_FILTER.out.bam )
+        ch_versions       = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_FILTERED.out.versions.first() )
+        ch_filtered_index = params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_FILTERED.out.csi : SAMTOOLS_INDEX_DAMAGE_FILTERED.out.bai
+
+        ch_pmd_filtered_bams = PMDTOOLS_FILTER.out.bam.join( ch_filtered_index )
     }
 
     if ( params.run_trim_bam ) {
         if ( params.run_pmd_filtering ) {
-            ch_to_trim = ch_damage_filtered_bams
+            ch_to_trim = ch_pmd_filtered_bams.map{
+                meta, bam, bai ->
+                [ meta, bam ]
+            }
         } else {
             ch_to_trim = ch_bam_bai.map {
                 meta, bam, bai ->
@@ -96,21 +107,18 @@ workflow MANIPULATE_DAMAGE {
         }
 
         BAMUTIL_TRIMBAM( ch_trimbam_input )
-        ch_versions = ch_versions.mix( BAMUTIL_TRIMBAM.out.versions.first() )
+        ch_versions      = ch_versions.mix( BAMUTIL_TRIMBAM.out.versions.first() )
 
-        ch_trimmed_bams = BAMUTIL_TRIMBAM.out.bam
+        SAMTOOLS_INDEX_DAMAGE_TRIMMED( BAMUTIL_TRIMBAM.out.bam )
+        ch_versions      = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_TRIMMED.out.versions.first() )
+        ch_trimmed_index = params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_TRIMMED.out.csi : SAMTOOLS_INDEX_DAMAGE_TRIMMED.out.bai
+
+        ch_trimmed_bams  = BAMUTIL_TRIMBAM.out.bam.join( ch_trimmed_index )
     }
 
-    // TODO What to output from the SWF? Allow users to pmdFilter/trim AND rescale, or only one of the two paths?
-    ch_damage_manipulated_bam = params.run_mapdamage_rescaling ? ch_rescaled_bams : ( params.run_trim_bam ? ch_trimmed_bams : ch_damage_filtered_bams )
-
-    // INDEX DAMAGE MANIPULATED BAM
-    SAMTOOLS_INDEX_DAMAGE_MANIPULATED( ch_damage_manipulated_bam )
-    ch_versions = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.versions.first() )
-    ch_damage_manipulated_index =  params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.csi : SAMTOOLS_INDEX_DAMAGE_MANIPULATED.out.bai
-
     emit:
-    bam      = ch_damage_manipulated_bam    // [ meta, bam ]
-    bai      = ch_damage_manipulated_index  // [ meta, bai ]
+    rescaled = ch_rescaled_bams     // [ meta, bam, bai ]
+    filtered = ch_pmd_filtered_bams // [ meta, bam, bai ]
+    trimmed  = ch_trimmed_bams      // [ meta, bam, bai ]
     versions = ch_versions
 }
