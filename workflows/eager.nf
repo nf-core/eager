@@ -69,6 +69,9 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
+include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/main'
+include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
+include { FALCO                       } from '../modules/nf-core/falco/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -121,12 +124,18 @@ workflow EAGER {
     ch_versions = ch_versions.mix( REFERENCE_INDEXING.out.versions )
 
     //
-    // MODULE: Run FastQC
+    // MODULE: Run FastQC or Falco
     //
-    FASTQC (
-        INPUT_CHECK.out.fastqs
-    )
-    ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
+
+    if ( params.sequencing_qc_tool == "falco" ) {
+        FALCO ( INPUT_CHECK.out.fastqs )
+        ch_versions = ch_versions.mix( FALCO.out.versions.first() )
+        ch_multiqc_files = ch_multiqc_files.mix( FALCO.out.txt.collect{it[1]}.ifEmpty([]) )
+    } else {
+        FASTQC ( INPUT_CHECK.out.fastqs )
+        ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
+        ch_multiqc_files = ch_multiqc_files.mix( FASTQC.out.zip.collect{it[1]}.ifEmpty([]) )
+    }
 
     //
     // SUBWORKFLOW: Read preprocessing (clipping, merging, fastq trimming etc. )
@@ -199,14 +208,27 @@ workflow EAGER {
 
     if ( !params.skip_deduplication ) {
         DEDUPLICATE( ch_reads_for_deduplication, ch_fasta_for_deduplication.fasta, ch_fasta_for_deduplication.fasta_fai )
-        ch_versions          = ch_versions.mix( DEDUPLICATE.out.versions )
-
-        ch_dedupped_bams     = DEDUPLICATE.out.bam.join( DEDUPLICATE.out.bai )
+        ch_dedupped_bams = DEDUPLICATE.out.bam
+            .join( DEDUPLICATE.out.bai )
         ch_dedupped_flagstat = DEDUPLICATE.out.flagstat
+        ch_versions                   = ch_versions.mix( DEDUPLICATE.out.versions )
 
     } else {
         ch_dedupped_bams     = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
+    }
+
+    //
+    // MODULE: PreSeq
+    //
+    if ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'c_curve') {
+        PRESEQ_CCURVE(ch_reads_for_deduplication.map{[it[0],it[1]]})
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))
+        ch_versions = ch_versions.mix( PRESEQ_CCURVE.out.versions )
+    } else ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'lc_extrap') {
+        PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map{[it[0],it[1]]})
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
+        ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
 
     //
@@ -215,7 +237,6 @@ workflow EAGER {
 
     MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta )
     ch_versions = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
-
 
     //
     // MODULE: MultiQC
@@ -234,7 +255,6 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),

@@ -16,6 +16,10 @@
 
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
 
+- [Falco](https://doi.org/10.12688%2Ff1000research.21142.2)
+
+  > de Sena Brandine, G., Smith, A.D. (2019) Falco: high-speed FastQC emulation for quality control of sequencing data. F1000Res., 8, 1874. doi: [10.12688%2Ff1000research.21142.2](https://doi.org/10.12688%2Ff1000research.21142.2)
+
 - [fastp](https://doi.org/10.1093/bioinformatics/bty560)
 
   > Chen, S., Zhou, Y., Chen, Y., & Gu, J. (2018). fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics , 34(17), i884–i890. doi: [10.1093/bioinformatics/bty560](https://doi.org/10.1093/bioinformatics/bty560)
@@ -28,6 +32,10 @@
 
   > Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics , 25(14), 1754–1760. doi: [10.1093/bioinformatics/btp324](https://doi.org/10.1093/bioinformatics/btp324)
 
+- [BWA-MEM](https://doi.org/10.48550/arXiv.1303.3997)
+
+  > Li, H. (2013). Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. arXiv , arXiv:1303.3997. doi: [10.48550/arXiv.1303.3997](https://doi.org/10.48550/arXiv.1303.3997)
+
 - [SAMtools](https://doi.org/10.1093/bioinformatics/btp324)
 
   > Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., & 1000 Genome Project Data Processing Subgroup. (2009). The Sequence Alignment/Map format and SAMtools. Bioinformatics , 25(16), 2078–2079. doi: [10.1093/bioinformatics/btp352](https://doi.org/10.1093/bioinformatics/btp324)
@@ -35,6 +43,10 @@
 - [DeDup](https://doi.org/10.1186/s13059-016-0918-z)
 
   > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
+
+- [PreSeq](https://doi.org/10.1038/nmeth.2375)
+
+  > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
 
 - [mapDamage2](https://doi.org/10.1093/bioinformatics/btt193)
 

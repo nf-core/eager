@@ -25,10 +25,10 @@ On release, automated continuous integration tests run the pipeline on a full-si
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
 - (Optionally) create reference genome indices for mapping (`bwa`, `samtools`, and `picard`)
-- Sequencing quality control (`FastQC`)
+- Sequencing quality control (`FastQC`, `Falco`)
 - Sequencing adapter removal, paired-end data merging (`AdapterRemoval`)
 - Read mapping to reference using (`bwa aln`, `bwa mem`, `CircularMapper`, or `bowtie2`)
-- Post-mapping processing, statistics and conversion to bam (`samtools`)
+- Post-mapping processing, statistics and conversion to bam (`samtools`, and `preseq`)
 - Ancient DNA C-to-T damage pattern visualisation (`DamageProfiler`)
 - PCR duplicate removal (`DeDup` or `MarkDuplicates`)
 - Post-mapping statistics and BAM quality control (`Qualimap`)

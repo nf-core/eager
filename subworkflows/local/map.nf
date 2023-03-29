@@ -2,11 +2,12 @@
 // Prepare reference indexing for downstream
 //
 
-include { FASTQ_ALIGN_BWAALN                             } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
-include { SAMTOOLS_MERGE                                 } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT                                  } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX                                 } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED  } from '../../modules/nf-core/samtools/flagstat/main'
+include { FASTQ_ALIGN_BWAALN                                                           } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { BWA_MEM                                                                      } from '../../modules/nf-core/bwa/mem/main'
+include { SAMTOOLS_MERGE                                                               } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT                                                                } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGE } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED                                } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow MAP {
     take:
@@ -34,6 +35,15 @@ workflow MAP {
         ch_mapped_lane_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
+    } else if ( params.mapping_tool == 'bwamem' ) {
+        BWA_MEM ( ch_input_for_mapping.reads, ch_input_for_mapping.index, true )
+        ch_versions   = ch_versions.mix ( BWA_MEM.out.versions.first() )
+        ch_mapped_lane_bam = BWA_MEM.out.bam
+
+        SAMTOOLS_INDEX_MEM ( ch_mapped_lane_bam )
+        ch_versions = ch_versions.mix(SAMTOOLS_INDEX_MEM.out.versions.first())
+        ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_MEM.out.csi : SAMTOOLS_INDEX_MEM.out.bai
+
     }
 
     ch_input_for_lane_merge = ch_mapped_lane_bam.map{
@@ -51,11 +61,11 @@ workflow MAP {
     ch_mapped_bam = SAMTOOLS_SORT.out.bam
     ch_versions.mix( SAMTOOLS_SORT.out.versions )
 
-    SAMTOOLS_INDEX( ch_mapped_bam )
-    ch_mapped_bai =  params.fasta_largeref ? SAMTOOLS_INDEX.out.csi : SAMTOOLS_INDEX.out.bai
-    ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+    SAMTOOLS_INDEX_MERGE( ch_mapped_bam )
+    ch_mapped_bai =  params.fasta_largeref ? SAMTOOLS_INDEX_MERGE.out.csi : SAMTOOLS_INDEX_MERGE.out.bai
+    ch_versions.mix( SAMTOOLS_INDEX_MERGE.out.versions )
 
-    ch_input_for_flagstat = SAMTOOLS_SORT.out.bam.join( SAMTOOLS_INDEX.out.bai, failOnMismatch: true )
+    ch_input_for_flagstat = SAMTOOLS_SORT.out.bam.join( SAMTOOLS_INDEX_MERGE.out.bai, failOnMismatch: true )
 
     SAMTOOLS_FLAGSTAT_MAPPED ( ch_input_for_flagstat )
     ch_versions.mix( SAMTOOLS_FLAGSTAT_MAPPED.out.versions.first() )
