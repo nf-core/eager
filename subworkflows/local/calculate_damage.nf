@@ -2,7 +2,7 @@
 // Calculate damage profile
 //
 
-include { DAMAGEPROFILER } from '../modules/nf-core/damageprofiler/main'
+include { DAMAGEPROFILER } from '../../modules/nf-core/damageprofiler/main'
 
 workflow CALCULATE_DAMAGE {
     take:
@@ -13,14 +13,6 @@ workflow CALCULATE_DAMAGE {
     main:
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
-
-    ch_input_for_damageprofiler = bam
-                                  .mix(fasta
-                                       ,fasta_fai)
-                                  .groupTuple()
-                                .map {
-            meta, fasta, fasta_fai ->
-            [ meta, bam, fasta_fai ]
 
     //From deduplicate.nf
     ch_refs = fasta.join(fasta_fai)
