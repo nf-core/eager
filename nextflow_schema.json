@@ -618,7 +618,7 @@
             "type": "object",
             "description": "Options for the calculation of ratio of reads to one chromosome/FASTA entry against all others.",
             "default": "",
-            "help_text": "> If using TSV input, Mitochondrial to Nuclear Ratio calculation is calculated per deduplicated library (after lane merging)",
+            "help_text": "If using TSV input, Mitochondrial to Nuclear Ratio calculation is calculated per deduplicated library (after lane merging)",
             "fa_icon": "fas fa-balance-scale-left",
             "properties": {
                 "run_mtnucratio": {

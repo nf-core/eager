@@ -229,7 +229,7 @@ workflow EAGER {
             [ meta, bam ]
         }
 
-        MTNUCRATIO(mtnucratio_input, params.mitochondrion_header)
+        MTNUCRATIO( mtnucratio_input, params.mitochondrion_header )
         ch_multiqc_files = ch_multiqc_files.mix(MTNUCRATIO.out.mtnucratio.collect{it[1]}.ifEmpty([]))
         ch_versions      = ch_versions.mix( MTNUCRATIO.out.versions )
     }
