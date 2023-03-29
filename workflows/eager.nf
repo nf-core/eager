@@ -214,6 +214,8 @@ workflow EAGER {
     //
 
     MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta )
+    ch_versions = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
+
 
     //
     // MODULE: MultiQC
