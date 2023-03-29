@@ -754,6 +754,7 @@
                 }
             },
             "fa_icon": "fas fa-sliders-h"
+        },
         "mapping_statistics": {
             "title": "Mapping statistics",
             "type": "object",
@@ -852,12 +853,12 @@
         },
         {
             "$ref": "#/definitions/mapping_statistics"
-        }
+        },
         {
             "$ref": "#/definitions/damage_manipulation"
         },
         {
             "$ref": "#/definitions/genotyping"
-        },
+        }
     ]
 }
