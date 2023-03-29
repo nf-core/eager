@@ -630,6 +630,14 @@
                     "description": "Specify PMDScore threshold for PMDTools.",
                     "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user.\n\n> Modifies PMDTools parameter: `--threshold`"
                 },
+                "damage_manipulation_pmdtools_reference_mask": {
+                    "type": "string",
+                    "fa_icon": "fas fa-mask",
+                    "help_text": "Activates masking of the reference fasta prior to running pmdtools. Positions that are in the provided bedfile will be replaced by Ns in the reference genome. \nThis can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a transition SNP to be counted as damage. Masking of the reference is done using `bedtools maskfasta`.",
+                    "description": "Specify a bedfile to be used to mask the reference fasta prior to running pmdtools.",
+                    "pattern": "^\\S+\\.bed$",
+                    "format": "file-path"
+                },
                 "run_trim_bam": {
                     "type": "boolean",
                     "fa_icon": "fas fa-eraser",
