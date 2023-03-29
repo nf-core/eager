@@ -544,7 +544,7 @@
                 "bamfiltering_retainunmappedgenomicbam": {
                     "type": "boolean",
                     "description": "Specify to retain unmapped reads in the BAM file used for downstream genomic analyses.",
-                    "help_text": "You can use this parameter to retain unmapped reads (optionally also length filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomicscreening_input` is set to `all`.\n\n> \u26a0\ufe0f This will likely slow down run time of downstream pipeline steps!\n\n> Modifies tool parameter(s):\n> - samtools view: `-f 4` / `-F 4`",
+                    "help_text": "You can use this parameter to retain unmapped reads (optionally also length filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomics_screening_input` is set to `all`.\n\n> \u26a0\ufe0f This will likely slow down run time of downstream pipeline steps!\n\n> Modifies tool parameter(s):\n> - samtools view: `-f 4` / `-F 4`",
                     "fa_icon": "fas fa-piggy-bank"
                 },
                 "bamfiltering_generateunmappedfastq": {
@@ -574,19 +574,42 @@
             "description": "Options to related to metagenomic screening.",
             "default": "",
             "properties": {
-                "run_metagenomicscreening": {
+                "run_metagenomics_screening": {
                     "type": "boolean",
                     "description": "Turn on metagenomic screening of mapped, unmapped, or all reads.",
                     "fa_icon": "fas fa-power-off",
                     "help_text": "Turns on the metagenomic screening subworkflow of the pipeline, where reads are screened against large databases. Typically used for pathogen screening or microbial community analysis.\n\nIf supplied, this will also turn on the BAM filtering subworkflow of the pipeline."
                 },
-                "metagenomicscreening_input": {
+                "metagenomics_screening_input": {
                     "type": "string",
                     "default": "unmapped",
                     "description": "Specify which type of reads to go into metagenomic screening.",
                     "enum": ["unmapped", "mapped", "all"],
                     "fa_icon": "fas fa-hand-pointer",
                     "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> \u26a0\ufe0f If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
+                },
+                "metagenomics_profiling_tool": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Specify which tool to use for metagenomic profiling and screening.",
+                    "enum": ["malt", "metaphlan2", "kraken2", "krakenuniq"],
+                    "fa_icon": "fas fa-hand-pointer",
+                    "help_text": "Select which tool to run metagenomics profiling on designated metagenomics_screening_input. These tools behave vastly differently due to performing read profiling using different methods and yield vastly different reuslts."
+                },
+                "metagenomics_profiling_database": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "default": "",
+                    "description": "Specify a databse directory to run metagenomics profiling on. In the case of kraken2, this can be a tar.gz of the directory.",
+                    "fa_icon": "fas fa-hand-pointer",
+                    "help_text": "Select which tool to run metagenomics profiling database to use with the designated metagenomics_profiling_tool on the selected metagenomics_screening_input. These databases are NOT cross-compatible and need to be pre-built/downloaded for use in nf-core/eager. Database construction is often a balancing act between breadth of sequence diversity and size."
+                },
+                "metagenomics_profiling_malt_group_size": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Define group sizes for running multiple fastq files into malt.",
+                    "fa_icon": "fas fa-hand-pointer",
+                    "help_text": "Very large fastq files or many fastq files run through malt at the same time can lead to excessively long runtimes. This parameter allows for parallelization of malt runs. Please note, malt is resource heavy and setting this value above the default will spawn N/metagenomics_profiling_malt_group_size jobs where N is the number of samples. Please only use this if it is necessary to avoid runtime limits on your HPC cluster."
                 }
             },
             "fa_icon": "fas fa-search"
