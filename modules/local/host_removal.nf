@@ -20,21 +20,8 @@ process HOST_REMOVAL {
     task.ext.when == null || task.ext.when
 
     script:
-    def meta_out = [:]
-    meta_out.id                 = meta_fastqs.id
-
-    meta_out.sample_id          = meta_fastqs.sample_id
-    meta_out.library_id         = meta_fastqs.library_id
-    meta_out.lane               = meta_fastqs.lane
-    meta_out.colour_chemistry   = meta_fastqs.colour_chemistry
-    meta_out.single_end         = meta_fastqs.single_end
-    meta_out.strandedness       = meta_fastqs.strandedness
-    meta_out.damage_treatment   = meta_fastqs.damage_treatment
-    meta_out.reference          = meta.reference
-
-
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta_out.id}_${meta_out.reference}"
+    def prefix = task.ext.prefix ?: "${meta.id}_${meta.reference}"
     def VERSION_PYSAM = '0.16.0'
     def VERSION_XOPEN = '1.1.0'
     def fastqs_input = [fastqs].flatten().sort().size() > 1 ? "${fastqs[0]} -rev ${fastqs[1]}" : "${fastqs[0]}"
