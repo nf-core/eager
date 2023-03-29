@@ -17,7 +17,12 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
-// Check failing parameter combinations
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Check failing parameter combinations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
 if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
 if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
     // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
@@ -35,7 +40,15 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
 
-// Report possible warnings
+// TODO add any other metagenomics screening parameters checks for eg complexity filtering, post-processing
+if ( params.run_metagenomics_screening && ! params.metagenomics_profiling_database ) { exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening") }
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Report possible warnings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
 if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
 
 /*
@@ -67,6 +80,7 @@ include { MAP                           } from '../subworkflows/local/map'
 include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
+include { METAGENOMICS_PROFILING        } from '../subworkflows/local/metagenomics_profiling'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -189,7 +203,7 @@ workflow EAGER {
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
     //
 
-    if ( params.run_bamfiltering || params.run_metagenomicscreening ) {
+    if ( params.run_bamfiltering || params.run_metagenomics_screening ) {
 
         ch_mapped_for_bamfilter = MAP.out.bam
                                     .join(MAP.out.bai)
@@ -282,6 +296,13 @@ workflow EAGER {
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
+    // SUBWORKFLOW: metagenomics screening
+    //
+    //TODO: finish and figure out how exactly to call with proper database (check via a helper function?)
+    if ( params.run_metagenomics_screening ) {
+        METAGENOMICS_PROFILING ( ch_bamfiltered_for_metagenomics, params.metagenomics_profiling_database ) // TODO: implement full metagenomics screening main subworkflow
+    }
+    // that then calls complexityfilter, profiling, postprocessing
 
     //
     // MODULE: MultiQC

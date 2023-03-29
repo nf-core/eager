@@ -18,7 +18,7 @@
 
 - [Falco](https://doi.org/10.12688%2Ff1000research.21142.2)
 
-  > de Sena Brandine, G., Smith, A.D. (2019) Falco: high-speed FastQC emulation for quality control of sequencing data. F1000Res., 8, 1874. doi: [10.12688%2Ff1000research.21142.2](https://doi.org/10.12688%2Ff1000research.21142.2)
+  > de Sena Brandine, G., Smith, A.D. (2019). Falco: high-speed FastQC emulation for quality control of sequencing data. F1000Res., 8, 1874. doi: [10.12688%2Ff1000research.21142.2](https://doi.org/10.12688%2Ff1000research.21142.2)
 
 - [fastp](https://doi.org/10.1093/bioinformatics/bty560)
 
@@ -55,6 +55,22 @@
 - [PreSeq](https://doi.org/10.1038/nmeth.2375)
 
   > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
+
+- [MALT](https://www.nature.com/articles/s41559-017-0446-6)
+
+  > Vågene, Å.J., Herbig, A., Campana, M.G., Nelly, M., García, R., Warinner, C., Sabin, S., Spyrou, M.A., Valtueña, A.A., Huson, D., Tuross, N., Bos, K.I. & Krause, J. (2018). Salmonella enterica genomes from victims of a major sixteenth-century epidemic in Mexico. Nat Ecol Evol 2, 520–528. doi: [10.1038/s41559-017-0446-6](https://doi.org/10.1038/s41559-017-0446-6)
+
+- [Kraken2](https://doi.org/10.1186/s13059-019-1891-0)
+
+  > Wood, Derrick E., Jennifer Lu, and Ben Langmead. 2019. Improved Metagenomic Analysis with Kraken 2. Genome Biology 20 (1): 257. doi: 10.1186/s13059-019-1891-0.
+
+- [KrakenUniq](https://doi.org/10.1186/s13059-018-1568-0)
+
+  > Breitwieser, Florian P., Daniel N. Baker, and Steven L. Salzberg. 2018. KrakenUniq: confident and fast metagenomics classification using unique k-mer counts. Genome Biology 19 (1): 198. doi: 10.1186/s13059-018-1568-0
+
+- [MetaPhlAn3](https://doi.org/10.7554/eLife.65088)
+
+  > Beghini, Francesco, Lauren J McIver, Aitor Blanco-Míguez, Leonard Dubois, Francesco Asnicar, Sagun Maharjan, Ana Mailyan, et al. 2021. “Integrating Taxonomic, Functional, and Strain-Level Profiling of Diverse Microbial Communities with BioBakery 3.” Edited by Peter Turnbaugh, Eduardo Franco, and C Titus Brown. ELife 10 (May): e65088. doi: 10.7554/eLife.65088
 
 ## Software packaging/containerisation tools
 
