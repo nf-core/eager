@@ -31,6 +31,7 @@ jobs:
           - "--preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco"
           - "--mapping_tool bwamem"
           - "--skip_preprocessing"
+          - "--run_mtnucratio --mitochondrion_header 'NC_007596.2'"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v3
