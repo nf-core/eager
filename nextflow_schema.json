@@ -582,6 +582,140 @@
                 }
             },
             "fa_icon": "fas fa-clone"
+        },
+        "damage_manipulation": {
+            "title": "Damage Manipulation",
+            "type": "object",
+            "description": "Options for filtering for, trimming or rescaling characteristic ancient DNA damage patterns",
+            "default": "",
+            "fa_icon": "fas fa-chart-line",
+            "properties": {
+                "run_mapdamage_rescaling": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-map",
+                    "description": "Turn on damage rescaling of BAM files using mapDamage2 to probabilistically remove damage.",
+                    "help_text": "Turns on mapDamage2's BAM rescaling functionality. This probablistically replaces Ts back to Cs depending on the likelihood this reference-mismatch was originally caused by damage. If the library is specified to be single stranded, this will automatically use the --single-stranded mode.\n\n**This functionality does not have any MultiQC output.**\nwarning: rescaled libraries will not be merged with non-scaled libraries of the same sample for downstream genotyping, as the model may be different for each library. If you wish to merge these, please do this manually and re-run nf-core/eager using the merged BAMs as input.\n\n> Modifies the `--rescale parameter of mapDamage2`"
+                },
+                "damage_manipulation_rescale_seqlength": {
+                    "type": "integer",
+                    "default": 12,
+                    "description": "Length of read sequence to use from each side for rescaling. Can be overridden by `--rescalelength*p`.",
+                    "help_text": "Specify the length from the end of the read that mapDamage should rescale at both ends.\n\n> Modifies the `--seq-length` parameter of mapDamage2.",
+                    "fa_icon": "fas fa-ruler-horizontal"
+                },
+                "damage_manipulation_rescale_length_5p": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Length of read for mapDamage2 to rescale from 5p end. Only used if not 0 otherwise `--rescale_seqlength` used.",
+                    "help_text": "Specify the length from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-5p` parameter of mapDamage2.",
+                    "fa_icon": "fas fa-balance-scale-right"
+                },
+                "damage_manipulation_rescale_length_3p": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Length of read for mapDamage2 to rescale from 3p end. Only used if not 0 otherwise `--rescale_seqlength` used.",
+                    "help_text": "Specify the length from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-3p` parameter of mapDamage2.",
+                    "fa_icon": "fas fa-balance-scale-left"
+                },
+                "run_pmd_filtering": {
+                    "type": "boolean",
+                    "description": "Turn on PMDtools filtering.",
+                    "help_text": "Specifies to run PMDTools for damage based read filtering in sequencing libraries. Turned off by default.",
+                    "fa_icon": "fas fa-power-off"
+                },
+                "damage_manipulation_pmdtools_threshold": {
+                    "type": "integer",
+                    "default": 3,
+                    "fa_icon": "far fa-chart-bar",
+                    "description": "Specify PMDScore threshold for PMDTools.",
+                    "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user.\n\n> Modifies PMDTools parameter: `--threshold`"
+                },
+                "run_trim_bam": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-eraser",
+                    "description": "Turn on BAM trimming. Will only affect non-UDG or half-UDG libraries.",
+                    "help_text": "Turns on the BAM trimming method. Trims off [n] bases from reads in the deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only affect libraries with 'damage_treatment' of  'none' or 'half'. Complete UDG treatment ('full') should have removed all damage, so trimming of 0bp is performed. The amount of bases that will be trimmed off from each side of the molecule can be set separately for libraries with depending on their 'strandedness' and 'damage_treatment'.\n\n> Note: additional artefacts such as bar-codes or adapters that could potentially also be trimmed, should be removed prior to mapping and  not in this step."
+                },
+                "damage_manipulation_bamutils_clip_double_stranded_none_udg_left": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler-combined",
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for double-stranded non-UDG libraries.",
+                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`"
+                },
+                "damage_manipulation_bamutils_clip_double_stranded_none_udg_right": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler",
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for double-stranded non-UDG libraries.",
+                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
+                },
+                "damage_manipulation_bamutils_clip_double_stranded_half_udg_left": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler-combined",
+                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for double-stranded half-UDG libraries."
+                },
+                "damage_manipulation_bamutils_clip_double_stranded_half_udg_right": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler",
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for double-stranded half-UDG libraries.",
+                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
+                },
+                "damage_manipulation_bamutils_clip_single_stranded_none_udg_left": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler-combined",
+                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for single-stranded non-UDG libraries."
+                },
+                "damage_manipulation_bamutils_clip_single_stranded_none_udg_right": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler",
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for single-stranded non-UDG libraries.",
+                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
+                },
+                "damage_manipulation_bamutils_clip_single_stranded_half_udg_left": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler-combined",
+                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
+                    "description": "Specify the number of bases to clip off reads from 'left' end of read for single-stranded half-UDG libraries."
+                },
+                "damage_manipulation_bamutils_clip_single_stranded_half_udg_right": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-ruler",
+                    "description": "Specify the number of bases to clip off reads from 'right' end of read for single-stranded half-UDG libraries.",
+                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
+                },
+                "damage_manipulation_bamutils_softclip": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-paint-roller",
+                    "description": "Turn on using softclipping instead of hard masking.",
+                    "help_text": "By default, nf-core/eager uses hard clipping, which sets clipped bases to 'N' with quality '!' in the BAM output. Turn this on to use soft-clipping instead, which masks reads at the read ends using the CIGAR string instead.\n\n> Modifies bam trimBam parameter: `-c`"
+                }
+            }
+        },
+        "genotyping": {
+            "title": "Genotyping",
+            "type": "object",
+            "description": "Options for variant calling",
+            "default": "",
+            "properties": {
+                "genotyping_source": {
+                    "type": "string",
+                    "default": "raw",
+                    "description": "Specify which input BAM to use for genotyping.",
+                    "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' for mapped only, filtered, or DeDup BAMs (with priority right to left); 'pmd' (for pmdtools output); 'trimmed' (for base-clipped BAMs. Base-clipped-PMD-filtered BAMs if both filtering and trimming are requested); 'rescaled' (for mapDamage2 rescaling output). Default is: 'raw'.",
+                    "fa_icon": "fas fa-faucet",
+                    "enum": ["raw", "pmd", "trimmed", "rescaled"]
+                }
+            },
+            "fa_icon": "fas fa-sliders-h"
         }
     },
     "allOf": [
@@ -614,6 +748,12 @@
         },
         {
             "$ref": "#/definitions/deduplication"
+        },
+        {
+            "$ref": "#/definitions/damage_manipulation"
+        },
+        {
+            "$ref": "#/definitions/genotyping"
         }
     ]
 }
