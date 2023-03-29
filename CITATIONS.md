@@ -40,7 +40,7 @@
 
   > Langmead, B., Salzberg, S. (2012). Fast gapped-read alignment with Bowtie 2. Nat Methods 9, 357–359. doi: [10.1038/nmeth.1923](https://doi.org/10.1038/nmeth.1923)
 
-  > Langmead, B., Wilks, C., Antonescu, V., Charles, R. (2018).Scaling read aligners to hundreds of threads on general-purpose processors. Bioinformatics, 35(3), doi: [10.1093/bioinformatics/bty648](https://doi.org/10.1093/bioinformatics/bty648)
+  > Langmead, B., Wilks, C., Antonescu, V., Charles, R. (2018). Scaling read aligners to hundreds of threads on general-purpose processors. Bioinformatics, 35(3), doi: [10.1093/bioinformatics/bty648](https://doi.org/10.1093/bioinformatics/bty648)
 
 - [SAMtools](https://doi.org/10.1093/bioinformatics/btp324)
 

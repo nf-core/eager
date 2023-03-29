@@ -32,26 +32,26 @@ workflow MAP {
     if ( params.mapping_tool == 'bwaaln' ) {
         FASTQ_ALIGN_BWAALN ( ch_input_for_mapping.reads, ch_input_for_mapping.index )
 
-        ch_versions   = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
+        ch_versions        = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
         ch_mapped_lane_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
     } else if ( params.mapping_tool == 'bwamem' ) {
         BWA_MEM ( ch_input_for_mapping.reads, ch_input_for_mapping.index, true )
-        ch_versions   = ch_versions.mix ( BWA_MEM.out.versions.first() )
+        ch_versions        = ch_versions.mix ( BWA_MEM.out.versions.first() )
         ch_mapped_lane_bam = BWA_MEM.out.bam
 
         SAMTOOLS_INDEX_MEM ( ch_mapped_lane_bam )
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX_MEM.out.versions.first())
+        ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_MEM.out.versions.first())
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_MEM.out.csi : SAMTOOLS_INDEX_MEM.out.bai
 
     } else if ( params.mapping_tool == 'bowtie2' ) {
         BOWTIE2_ALIGN ( ch_input_for_mapping.reads, ch_input_for_mapping.index, false, true )
-        ch_versions   = ch_versions.mix ( BOWTIE2_ALIGN.out.versions.first() )
+        ch_versions        = ch_versions.mix ( BOWTIE2_ALIGN.out.versions.first() )
         ch_mapped_lane_bam = BOWTIE2_ALIGN.out.bam
 
         SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
+        ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
 
     }

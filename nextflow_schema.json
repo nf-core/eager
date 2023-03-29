@@ -508,16 +508,16 @@
                 "mapping_bowtie2_alignmode": {
                     "type": "string",
                     "default": "local",
-                    "description": "Specify the bowtie2 alignment mode. Options: 'local', 'end-to-end'.",
-                    "help_text": "The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. \nDefault: 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full)\n\n> Modifies Bowtie2 presets: `--local`, `--end-to-end`",
+                    "description": "Specify the bowtie2 alignment mode.",
+                    "help_text": "The type of read alignment to use. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. \nDefault: 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full)\n\n> Modifies Bowtie2 presets: `--local`, `--end-to-end`",
                     "fa_icon": "fas fa-arrows-alt-h",
                     "enum": ["local", "end-to-end"]
                 },
                 "mapping_bowtie2_sensitivity": {
                     "type": "string",
                     "default": "sensitive",
-                    "description": "Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'very-fast', 'fast', 'sensitive', 'very-sensitive'.",
-                    "help_text": "The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both --mapping_bowtie2_alignmode options. See the Bowtie2 manual for actual settings. \nDefault: 'sensitive' (following [Poullet and Orlando (2020)](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full), when running damaged-data without UDG treatment)\n\nModifies the Bowtie2 parameters: `--fast`, `--very-fast`, `--sensitive`, `--very-sensitive`, `--fast-local`, `--very-fast-local`, `--sensitive-local`, `--very-sensitive-local`",
+                    "description": "Specify the level of sensitivity for the bowtie2 alignment mode.",
+                    "help_text": "The Bowtie2 'preset' to use. These strings apply to both --mapping_bowtie2_alignmode options. See the Bowtie2 manual for actual settings. \nDefault: 'sensitive' (following [Poullet and Orlando (2020)](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full), when running damaged-data without UDG treatment)\n\nModifies the Bowtie2 parameters: `--fast`, `--very-fast`, `--sensitive`, `--very-sensitive`, `--fast-local`, `--very-fast-local`, `--sensitive-local`, `--very-sensitive-local`",
                     "fa_icon": "fas fa-microscope",
                     "enum": ["fast", "very-fast", "sensitive", "very-sensitive"]
                 },
