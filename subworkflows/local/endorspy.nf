@@ -18,18 +18,19 @@ workflow ENDORSPY {
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
-    if ( params.run_bamfiltering & !params.skip_deduplication ) {
-        ch_for_endorspy_complete = flagstats_raw.join (flagstats_filtered)
-                                                .join (flagstats_duplicated)
+    if ( params.run_bamfiltering && !params.skip_deduplication ) {
+        ch_for_endorspy_complete = flagstats_raw
+                                                                 .join (flagstats_filtered)
+                                                                 .join (flagstats_duplicated)
         ENDORSPY_COMPLETE ( ch_for_endorspy_complete )
-    } else if ( params.run_bamfiltering & params.skip_deduplication ) {
+    } else if ( params.run_bamfiltering && params.skip_deduplication ) {
         ch_for_endorspy_quality_filtered = flagstats_raw.join (flagstats_filtered)
-                                                        . map{
+                                                        .map {
                                                             meta, flags_raw, flags_filtered ->
                                                             [ meta, flags_raw, flags_filtered, [] ]
-                                                            }
+                                                        }
         ENDORSPY_QUALITY_FILTER ( ch_for_endorspy_quality_filtered)
-    } else if ( !params.run_bamfiltering & !params.skip_deduplication) {
+    } else if ( !params.run_bamfiltering && !params.skip_deduplication) {
         ch_for_endorspy_noqf_dedup = flagstats_raw.join (flagstats_duplicated)
                                                         . map{
                                                             meta, flags_raw, flags_dedup ->

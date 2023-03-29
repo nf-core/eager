@@ -219,6 +219,8 @@ workflow EAGER {
     //
     // SUBWORKFLOW: calculating percent on target and clonality
     // ENDORSPY (raw, filtered, deduplicated)
+    //
+    
     ch_for_endorspy_filterbam = params.run_bamfiltering ? FILTER_BAM.out.flagstat : Channel.empty()
     ch_for_endorspy_dedupped  = !params.skip_deduplication ? DEDUPLICATE.out.flagstat : Channel.empty()
 
