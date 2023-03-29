@@ -145,6 +145,21 @@ The resulting FASTQ files will only be present in your results directory if you 
 
   [BWA](https://bio-bwa.sourceforge.net/bwa.shtml) is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome. BWA-backtrack (a.k.a `bwa aln`) is designed for Illumina sequence reads up to 100bp, while BWA-MEM (`bwa mem`) is optimised for longer sequences ranged from 70bp to 1Mbp and split alignment.
 
+#### BOWTIE 2
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `mapping/`
+
+  - `*.bam`: Reads aligned against a reference genome in BAM format with no additional filtering.
+  - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
+  - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
+
+  </details>
+
+  [Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long (e.g. mammalian) genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small and supports gapped, local, and paired-end alignment modes.
+
 ### BAM Filtering
 
 <details markdown="1">

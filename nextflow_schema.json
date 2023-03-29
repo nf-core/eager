@@ -504,6 +504,55 @@
                     "description": "Specify the -k parameter for BWA mem i.e. the  minimum seed length",
                     "help_text": "Configures the re-seeding used in BWA-MEM. Default is set to BWA default.\n\n> Modifies BWA-MEM parameter: `-r`",
                     "fa_icon": "fas fa-angle-double-left"
+                },
+                "mapping_bowtie2_alignmode": {
+                    "type": "string",
+                    "default": "local",
+                    "description": "Specify the bowtie2 alignment mode. Options: 'local', 'end-to-end'.",
+                    "help_text": "The type of read alignment to use. Options are 'local' or 'end-to-end'. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. \nDefault: 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full)",
+                    "fa_icon": "fas fa-arrows-alt-h"
+                },
+                "mapping_bowtie2_sensitivity": {
+                    "type": "string",
+                    "default": "sensitive",
+                    "description": "Specify the level of sensitivity for the bowtie2 alignment mode. Options: 'no-preset', 'very-fast', 'fast', 'sensitive', 'very-sensitive'.",
+                    "help_text": "The Bowtie2 'preset' to use. Options: 'no-preset' 'very-fast', 'fast', 'sensitive', or 'very-sensitive'. These strings apply to both --bt2_alignmode options. See the Bowtie2 manual for actual settings. \nDefault: 'sensitive' (following [Poullet and Orlando (2020)](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full), when running damaged-data without UDG treatment)",
+                    "fa_icon": "fas fa-microscope"
+                },
+                "mapping_bowtie2_n": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity.",
+                    "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with --mapping_bowtie2_sensitivity. Can either be 0 or 1. Default: 0 \n\n>Modifies Bowtie2 parameter: -N",
+                    "fa_icon": "fas fa-sort-numeric-down"
+                },
+                "mapping_bowtie2_l": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity.",
+                    "help_text": "The length of the seed sub-string to use during seeding. This will override any values set with --mapping_bowtie2_sensitivity. Default: 20\n\n> Modiefies Bowtie2 parameters: -L",
+                    "fa_icon": "fas fa-ruler-horizontal"
+                },
+                "mapping_bowtie2_trim5": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify number of bases to trim off from 5' (left) end of read before alignment.",
+                    "help_text": "Number of bases to trim at the 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0\n\n> Modifies Bowtie2 parameters: -bt2_trim5",
+                    "fa_icon": "fas fa-cut"
+                },
+                "mapping_bowtie2_trim3": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify number of bases to trim off from 3' (right) end of read before alignment.",
+                    "help_text": "Number of bases to trim at the 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present Default: 0.\n\n> Modifies Bowtie2 parameters: -bt2_trim3",
+                    "fa_icon": "fas fa-cut"
+                },
+                "mapping_bowtie2_maxins": {
+                    "type": "integer",
+                    "default": 500,
+                    "description": "Specify the maximum fragment length for Bowtie2 paired-end mapping mode only.",
+                    "help_text": "The maximum fragment for valid paired-end alignments. Only for paired-end mapping (i.e. unmerged), and therefore typically only useful for modern data.\nDefault: 500\n\nModifies Bowtie2 parameters: --maxins",
+                    "fa_icon": "fas fa-exchange-alt"
                 }
             },
             "fa_icon": "fas fa-layer-group"
