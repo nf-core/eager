@@ -54,8 +54,6 @@ include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
 include { MAP                } from '../subworkflows/local/map'
 include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
-include { ENDORSPY           } from '../subworkflows/local/endorspy'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -70,6 +68,7 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
+include { HOST_REMOVAL                } from '../modules/local/host_removal'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -217,9 +216,34 @@ workflow EAGER {
     }
 
     //
-    // SUBWORKFLOW: calculating percent on target and clonality
+    // SUBWORKFLOW: remove reads mapping to the host from the raw fastq
     //
-    ENDORSPY ( MAP.out.flagstat, DEDUPLICATE.out.flagstat.ifEmpty([ [], [] ]), FILTER_BAM.out.flagstat.ifEmpty([ [], [] ])
+    if ( params.run_hostremoval ) {
+
+        ch_bam_for_hostremoval= MAP.out.bam.join(MAP.out.bai)
+                                            .map{
+                                                meta, bam, bai ->
+                                                new_meta = meta.clone().findAll{ it.key !in [ 'single_end', 'reference' ] }
+                                                [ new_meta, meta, bam, bai ]
+                                                }.dump(tag: "bammod")
+        ch_fastqs_for_hostremoval= INPUT_CHECK.out.fastqs.map{
+                                                        meta, fastqs ->
+                                                        new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
+                                                        [ new_meta, meta, fastqs ]
+                                                    }.dump(tag: "fastqsmod")
+
+        ch_for_hostremoval = ch_bam_for_hostremoval.join(ch_fastqs_for_hostremoval)
+                                                    .map{
+                                                        meta_join, meta_bam, bam, bai, meta_fastq, fastqs ->
+                                                        [ meta_bam, bam, bai, meta_fastq, fastqs]
+                                                    }
+                                                    .dump(tag: "hostremoval")
+
+        HOST_REMOVAL ( ch_for_hostremoval )
+        HOST_REMOVAL.out.fastqs.dump(tag: "hostremoval_out")
+
+        ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
+    }
 
     //
     // MODULE: MultiQC
