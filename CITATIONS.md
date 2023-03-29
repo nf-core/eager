@@ -36,6 +36,18 @@
 
   > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
 
+- [mapDamage2](https://doi.org/10.1093/bioinformatics/btt193)
+
+  > Jónsson H, Ginolhac A, Schubert M, Johnson P, Orlando L. mapDamage2.0: fast approximate Bayesian estimates of ancient DNA damage parameters. Bioinformatics 2013. 23rd April 2013. doi: [10.1093/bioinformatics/btt193](https://doi.org/10.1093/bioinformatics/btt193)
+
+- [PMDtools](https://doi.org/10.1073/pnas.1318934111)
+
+  > Skoglund P., Northoff B.H.,Shunkov M.V., Derevianko A., Pääbo S., Krause J., Jakobsson M. (2014) Separating ancient DNA from modern contamination in a Siberian Neandertal, Proceedings of the National Academy of Sciences USA doi: [10.1073/pnas.1318934111](https://doi.org/10.1073/pnas.1318934111)
+
+- [BamUtils](https://doi.org/10.1101/gr.176552.114)
+
+  > Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. doi: [10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114)
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)

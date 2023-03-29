@@ -165,7 +165,7 @@ You may also recieve the files above if metagenomic screening is turned on.
   - `*.dedupped.bam.{bai,csi}`: Index file corresponding to the BAM file.
   - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
 
-</details>bam,bai,csi
+</details>
 
 Deduplication is carried by two possible tools, as described below. However the expected output files are should be the same.
 
@@ -176,3 +176,50 @@ Deduplication is carried by two possible tools, as described below. However the 
 #### DeDup
 
 [DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
+
+### Damage Manipulation
+
+There are three different option for manipulation of ancient DNA damage.
+#### Damage Rescaling
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `damage_manipulation/`
+
+  - `*_rescaled.bam`: Reads with their base qualities rescaled according to the bayesian aDNA damage model, in BAM format.
+  - `*_rescaled.bam.{bai,csi}`: Index file corresponding to the BAM file.
+
+</details>
+
+[mapDamage2](https://ginolhac.github.io/mapDamage/) can apply a probabilistic bayesian model to rescale quality scores of likely-damaged positions in the reads. A new BAM file is constructed by downscaling quality values for misincorporations likely due to ancient DNA damage according to their initial qualities, position in reads, and damage patterns. These BAM files have damage probabilistically removed via a bayesian model.
+
+#### Post-Mortem-Damage (PMD) Filtering
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `damage_manipulation/`
+
+  - `*_pmdfiltered.bam`: Reads aligned to a reference genome that pass the post-mortem-damage threshold, in BAM format.
+  - `*_pmdfiltered.bam.{bai,csi}`: Index file corresponding to the BAM file.
+
+</details>
+
+[pmdtools](https://github.com/pontussk/PMDtools) implements a likelihood framework incorporating postmortem damage (PMD), base quality scores and biological polymorphism to identify degraded DNA sequences that are unlikely to originate from modern contamination. Using the model, each sequence is assigned a PMD score, for which positive values indicate support for the sequence being genuinely ancient.
+
+### Base Trimming
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `damage_manipulation/`
+
+  - `*{_pmdfiltered,}_trimmed.bam`: Reads whose ends have been trimmed to mitigate the effectts of aDNA damage, in BAM format.
+  - `*{_pmdfiltered,}_trimmed.bam.{bai,csi}`: Index file corresponding to the BAM file.
+
+</details>
+
+[bamUtil trimBam](https://genome.sph.umich.edu/wiki/BamUtil) trims the end of reads in a SAM/BAM file, changing read ends to ‘N’ and quality to ‘!’, or by soft clipping (if command-line option, --clip is specified). By default reverse strands are reversed and then the left & right are trimmed. This means that --left actually trims from the right of the read in the SAM/BAM for reverse reads.
+
+Within nf-core/eager, when BAM trimming is activated alongside PMD filtering, trimming is performed on the PMD-filtered reads only.
