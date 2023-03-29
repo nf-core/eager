@@ -454,36 +454,56 @@
                     "default": "bowtie2",
                     "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper"],
                     "description": "Specify which mapper to use.",
-                    "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)"
+                    "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)",
+                    "fa_icon": "fas fa-layer-group"
                 },
                 "fasta_largeref": {
                     "type": "boolean",
                     "description": "Specify to generate more recent '.csi' BAM indices. If your reference genome is larger than 3.5GB, this is recommended due to more efficient data handling with the '.csi' format over the older '.bai'.",
-                    "help_text": "This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `.csi` indices instead of `.bai` indices to compensate for the size of the reference genome (with samtools: `-c`). This parameter is not required for smaller references (including the human hg19 or grch37/grch38 references), but >4GB genomes have been shown to need `.csi` indices."
+                    "help_text": "This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `.csi` indices instead of `.bai` indices to compensate for the size of the reference genome (with samtools: `-c`). This parameter is not required for smaller references (including the human hg19 or grch37/grch38 references), but >4GB genomes have been shown to need `.csi` indices.",
+                    "fa_icon": "fas fa-address-book"
                 },
                 "mapping_bwaaln_n": {
                     "type": "number",
                     "default": 0.01,
                     "description": "Specify the -n parameter for BWA aln, i.e. amount of allowed mismatches in the alignment.",
-                    "help_text": "Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. Default is set following recommendations from [Oliva et al. 2021](https://doi.org/10.1093/bib/bbab076) who tested when aligning to human reference genomes. \n\nIf you're uncertain what to set check out this [Shiny App](https://apeltzer.shinyapps.io/bwa-mismatches/) for more information on how to set this parameter efficiently.\n\n> Modifies bwa aln parameter: `-n`"
+                    "help_text": "Configures the `bwa aln -n` parameter, defining how many mismatches are allowed in a read. Default is set following recommendations from [Oliva et al. 2021](https://doi.org/10.1093/bib/bbab076) who tested when aligning to human reference genomes. \n\nIf you're uncertain what to set check out this [Shiny App](https://apeltzer.shinyapps.io/bwa-mismatches/) for more information on how to set this parameter efficiently.\n\n> Modifies bwa aln parameter: `-n`",
+                    "fa_icon": "fas fa-sort-numeric-down"
                 },
                 "mapping_bwaaln_k": {
                     "type": "integer",
                     "default": 2,
                     "description": "Specify the -k parameter for BWA aln, i.e. maximum edit distance allowed in a seed.",
-                    "help_text": "Configures the bwa aln `-k` parameter for the maximu edit distance during the seeding phase of the mapping algorithm.\n\n> Modifies BWA aln parameter: `-k`"
+                    "help_text": "Configures the bwa aln `-k` parameter for the maximum edit distance during the seeding phase of the mapping algorithm.\n\n> Modifies BWA aln parameter: `-k`",
+                    "fa_icon": "fas fa-people-arrows"
                 },
                 "mapping_bwaaln_l": {
                     "type": "integer",
                     "default": 1024,
                     "description": "Specify the -l parameter for BWA aln i.e. the length of seeds to be used.",
-                    "help_text": "Configures the length of the seed used in bwa aln `-l`. Default is set to be 'turned off' at the recommendation of [Oliva et al. 2021](https://doi.org/10.1093/bib/bbab076) who tested when aligning to human reference genomes. Seeding is 'turned off' by specifying an arbitrarily long number to force the entire read to act as the seed. \n\nNote: Despite being recommended, turning off seeding can result in long runtimes!\n\n> Modifies BWA aln parameter: `-l`"
+                    "help_text": "Configures the length of the seed used in bwa aln `-l`. Default is set to be 'turned off' at the recommendation of [Oliva et al. 2021](https://doi.org/10.1093/bib/bbab076) who tested when aligning to human reference genomes. Seeding is 'turned off' by specifying an arbitrarily long number to force the entire read to act as the seed. \n\nNote: Despite being recommended, turning off seeding can result in long runtimes!\n\n> Modifies BWA aln parameter: `-l`",
+                    "fa_icon": "fas fa-ruler-horizontal"
                 },
                 "mapping_bwaaln_o": {
                     "type": "integer",
                     "default": 2,
                     "description": "Specify the -o parameter for BWA aln i.e. the number of gaps allowed.",
-                    "help_text": "Configures the number of gaps used in bwa aln. Default is set to bwa default.\n\n> Modifies BWA aln parameter: `-o`"
+                    "help_text": "Configures the number of gaps used in bwa aln. Default is set to bwa default.\n\n> Modifies BWA aln parameter: `-o`",
+                    "fa_icon": "fas fa-people-arrows"
+                },
+                "mapping_bwamem_k": {
+                    "type": "integer",
+                    "default": 19,
+                    "description": "Specify the -k parameter for BWA mem i.e. the  minimum seed length",
+                    "help_text": "Configures the minimum seed length used in BWA-MEM. Default is set to BWA default.\n\n> Modifies BWA-MEM parameter: `-k`",
+                    "fa_icon": "fas fa-seedling"
+                },
+                "mapping_bwamem_r": {
+                    "type": "number",
+                    "default": 1.5,
+                    "description": "Specify the -k parameter for BWA mem i.e. the  minimum seed length",
+                    "help_text": "Configures the re-seeding used in BWA-MEM. Default is set to BWA default.\n\n> Modifies BWA-MEM parameter: `-r`",
+                    "fa_icon": "fas fa-angle-double-left"
                 }
             },
             "fa_icon": "fas fa-layer-group"
@@ -579,18 +599,84 @@
             "properties": {
                 "skip_deduplication": {
                     "type": "boolean",
-                    "description": "Specify to skip the removal of PCR duplicates."
+                    "description": "Specify to skip the removal of PCR duplicates.",
+                    "fa_icon": "fas fa-forward"
                 },
                 "deduplication_tool": {
                     "type": "string",
                     "default": "markduplicates",
                     "description": "Specify which tool to use for deduplication.",
                     "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> \u26a0\ufe0f DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
-                    "enum": ["markduplicates", "dedup"]
+                    "enum": ["markduplicates", "dedup"],
+                    "fa_icon": "fas fa-layer-group"
                 }
             },
             "fa_icon": "fas fa-clone"
         },
+        "mapping_statistics": {
+            "title": "Mapping statistics",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "mapstats_skip_preseq": {
+                    "type": "boolean",
+                    "help_text": "Turns off the computation of library complexity estimation.",
+                    "description": "Turns off the computation of library complexity estimation.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "mapstats_preseq_mode": {
+                    "type": "string",
+                    "default": "c_curve",
+                    "help_text": "Specify which mode of preseq to run.\n\nFrom the [PreSeq documentation](http://smithlabresearch.org/wp-content/uploads/manual.pdf):\n\nc curve is used to compute the expected complexity curve of a mapped read file with a hypergeometric formula\n\nlc extrap is used to generate the expected yield for theoretical larger experiments and bounds on the number of distinct reads in the library and the associated confidence intervals, which is computed by bootstrapping the observed duplicate counts histogram.",
+                    "description": "Specify which mode of preseq to run.",
+                    "fa_icon": "fas fa-toggle-on",
+                    "enum": ["c_curve", "lc_extrap"]
+                },
+                "mapstats_preseq_stepsize": {
+                    "type": "integer",
+                    "default": 1000,
+                    "description": "Specify the step size (i.e., sampling regularity) of Preseq.",
+                    "help_text": "Can be used to configure the step size of Preseq's c_curve and lc_extrap method. Can be useful when few reads and allow Preseq to be used for extrapolation of shallow sequencing results.\n\n\n> Modifies tool parameter(s)\n>   - preseq: `-s`",
+                    "fa_icon": "fas fa-shoe-prints"
+                },
+                "mapstats_preseq_terms": {
+                    "type": "integer",
+                    "default": 100,
+                    "fa_icon": "fas fa-sort-numeric-up-alt",
+                    "help_text": "Specify the maximum number of terms that lc_extrap mode will use.\n \n> Modifies preseq lc_extrap parameter: `-x`",
+                    "description": "Specify the maximum number of terms that lc_extrap mode will use."
+                },
+                "mapstats_preseq_maxextrap": {
+                    "type": "integer",
+                    "default": 10000000000,
+                    "fa_icon": "fas fa-ban",
+                    "help_text": "Specify the maximum extrapolation that lc_extrap mode will perform.\n\n> Modifies preseq lc_extrap parameter: `-e`",
+                    "description": "Specify the maximum extrapolation (lc_extrap mode only)"
+                },
+                "mapstats_preseq_bootstrap": {
+                    "type": "integer",
+                    "default": 100,
+                    "fa_icon": "fab fa-bootstrap",
+                    "help_text": "Specify the number of bootstraps lc_extrap mode will perform to calculate confidence intervals.\n\n> Modifies preseq lc_extrap parameter: `-n`",
+                    "description": "Specify number of bootstraps to perform (lc_extrap mode only)"
+                },
+                "mapstats_preseq_cval": {
+                    "type": "number",
+                    "default": 0.95,
+                    "fa_icon": "fas fa-check-circle",
+                    "help_text": "Specify the allowed level of confidence intervals used for lc_extrap mode.\n\n> Modifies preseq lc_extrap parameter: `-c`",
+                    "description": "Specify confidence interval level (lc_extrap mode only)"
+                },
+                "mapstats_preseq_defects_mode": {
+                    "type": "boolean",
+                    "description": "Turns on defects mode to extrapolate without testing for defects (lc_extrap mode only).",
+                    "help_text": "Activates defects mode of `lc_extrap`, which does the extrapolation without testing for defects.\n\n> Modifies preseq lc_extrap parameter: `-D`",
+                    "fa_icon": "fab fa-creative-commons-sampling-plus"
+                }
+            },
+            "fa_icon": "fas fa-search"
+        },            
         "host_removal": {
             "title": "Host Removal",
             "type": "object",
@@ -645,7 +731,10 @@
             "$ref": "#/definitions/deduplication"
         },
         {
+            "$ref": "#/definitions/mapping_statistics"
+        },
+        {
             "$ref": "#/definitions/host_removal"
-        }
+        }        
     ]
 }

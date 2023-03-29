@@ -67,6 +67,8 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
+include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/main'
+include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
 include { HOST_REMOVAL                } from '../modules/local/host_removal'
 
@@ -205,10 +207,10 @@ workflow EAGER {
 
     if ( !params.skip_deduplication ) {
         DEDUPLICATE( ch_reads_for_deduplication, ch_fasta_for_deduplication.fasta, ch_fasta_for_deduplication.fasta_fai )
-        ch_versions          = ch_versions.mix( DEDUPLICATE.out.versions )
-
-        ch_dedupped_bams     = DEDUPLICATE.out.bam.join( DEDUPLICATE.out.bai )
+        ch_dedupped_bams = DEDUPLICATE.out.bam
+            .join( DEDUPLICATE.out.bai )
         ch_dedupped_flagstat = DEDUPLICATE.out.flagstat
+        ch_versions                   = ch_versions.mix( DEDUPLICATE.out.versions )
 
     } else {
         ch_dedupped_bams     = ch_reads_for_deduplication
@@ -243,6 +245,17 @@ workflow EAGER {
         HOST_REMOVAL.out.fastqs.dump(tag: "hostremoval_out")
 
         ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
+
+    // MODULE: PreSeq
+    //
+    if ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'c_curve') {
+        PRESEQ_CCURVE(ch_reads_for_deduplication.map{[it[0],it[1]]})
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))
+        ch_versions = ch_versions.mix( PRESEQ_CCURVE.out.versions )
+    } else ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'lc_extrap') {
+        PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map{[it[0],it[1]]})
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
+        ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
 
     //
