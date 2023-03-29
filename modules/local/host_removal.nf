@@ -13,7 +13,7 @@ process HOST_REMOVAL {
     tuple val(meta), path(bam), path(bai), val(meta_fastqs), path(fastqs)
 
     output:
-    tuple val(meta_out), path("*.fq.gz"), emit: fastqs
+    tuple val(meta), path("*.fq.gz"), emit: fastqs
     path "versions.yml"                 , emit: versions
 
     when:
