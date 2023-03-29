@@ -101,7 +101,7 @@ Falco results in the `raw/` directory contain the results of running Falco on th
   - `*_collapsed.fastq.gz`: FASTQ file containing merged reads of paired-end libraries that have not had trimming performed.
   - `*_collapsed.truncated.fastq.gz`: FASTQ file containing merged reads that have had additional quality trimming performed.
   - `*_discarded.fastq.gz`: FASTQ file containing merged reads that did not pass other quality thresholds (e.g. minimum length).
-  - `*.truncated.fastq.gz`: FASTQ file(s) containing umerged reads that have undergone additional quality trimming. Only present for paired-end libraries.
+  - `*.truncated.fastq.gz`: FASTQ file(s) containing unmerged reads that have undergone additional quality trimming. Only present for paired-end libraries.
   - `multiqc_plots/`: directory containing static images from the report in various formats.
 
 </details>
@@ -171,20 +171,20 @@ The resulting FASTQ files will only be present in your results directory if you 
   - `*.filtered.bam`: BAM file containing mapped quality filtered reads (and optionally length filtering and unmapped reads, if specified by the user with the corresponding parameters).
   - `*.{bai,csi}`: Corresponding index files of any generated BAM files.
   - `*.unmapped_other_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only unmapped reads, if specified for generation, without length filtering.
-    - If you do read merging or have single-end data you will only get one file containing (`*_other*`) containg all reads (the others will be empty).
+    - If you do read merging or have single-end data you will only get one file containing (`*_other*`) containing all reads (the others will be empty).
     - If you skip merging for _paired-end data_ you'll get reads separately (`_1`, `_2`, `_singleton`), with `other` being empty.
-  - `*mapped_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only mapped reads, if specified for generation, without length or quality filtering. If you do read merging you will only get one file containing (`*_other*`) containg all reads. If you skip merging you'll get them separately (`_1`, `_2` etc.).
+  - `*mapped_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only mapped reads, if specified for generation, without length or quality filtering. If you do read merging you will only get one file containing (`*_other*`) containing all reads. If you skip merging you'll get them separately (`_1`, `_2` etc.).
   - `*filtered.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
 
 </details>
 
-nf-core/eager can perform a range of different length, quality, and/or mapped-unmmapped filtering of BAM files, and generate converted FASTQ files for manual analysis outside the pipeline.
+nf-core/eager can perform a range of different length, quality, and/or mapped-unmapped filtering of BAM files, and generate converted FASTQ files for manual analysis outside the pipeline.
 
 If bam filtering is turned on, by default only mapped reads are retained for downstream genomic analysis. Additionally, please note that removal of PCR duplicates in nf-core/eager will additionally filter for mapped reads only.
 
 Please be aware, that intermediate length and mapping quality filtered genomic BAM files are _not_ saved in the results directory automatically, with the assumption that downstream deduplicated BAM files are preferred for further analyses - see the [parameters](https://nf-co.re/eager/parameters) page for more information if you wish to save these.
 
-You may also recieve the files above if metagenomic screening is turned on.
+You may also receive the files above if metagenomic screening is turned on.
 
 ### Deduplication
 
