@@ -230,11 +230,10 @@ workflow EAGER {
     ch_for_endorspy = MAP.out.flagstat
                                     .join(ch_for_endorspy_filterbam.ifEmpty([ [], [] ]))
                                     .join(ch_for_endorspy_dedupped.ifEmpty([ [], [] ]))
+                                    
     ENDORSPY ( ch_for_endorspy )
-
     ch_versions   = ch_versions.mix( ENDORSPY.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( ENDORSPY.out.json )
-
 
     // MODULE: PreSeq
     //
@@ -247,7 +246,6 @@ workflow EAGER {
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
-
 
     //
     // MODULE: MultiQC
