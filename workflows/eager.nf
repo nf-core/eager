@@ -29,7 +29,7 @@ if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mapping
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
 
 // TODO add any other metagenomics screening parameters checks for eg complexity filtering, post-processing
-if ( params.run_metagenomics_screening && ! params.metagenomics_profiling_database ) { exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening") }
+if ( params.run_metagenomics_screening && ! params.metagenomics_profiling_database ) { exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database") }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
