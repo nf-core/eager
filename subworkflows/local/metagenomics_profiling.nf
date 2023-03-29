@@ -87,11 +87,8 @@ workflow METAGENOMICS_PROFILING {
                 }
         }
 
-        ch_input_for_malt.reads.dump()
-        ch_input_for_malt.database.dump()
-
         // MALT: We groupTuple to have all samples in one channel for MALT as database
-        // loading takes a long time, so we only want to run it once per database, unless otherwise specified
+        // loading takes a long time, so we only want to run it once per database, unless otherwise specified (eg grouping samples)
 
         MALT_RUN ( ch_input_for_malt.reads, ch_input_for_malt.database )
 
@@ -108,25 +105,14 @@ workflow METAGENOMICS_PROFILING {
                                         [ meta_new, rma ]
                                 }
 
-        ch_multiqc_files       = ch_multiqc_files.mix( MALT_RUN.out.log )
         ch_versions            = ch_versions.mix( MALT_RUN.out.versions.first() )
         ch_raw_classifications = ch_raw_classifications.mix( ch_maltrun_for_megan )
+        ch_multiqc_files       = ch_multiqc_files.mix( MALT_RUN.out.log )
     }
 
     if ( params.metagenomics_profiling_tool == 'metaphlan3' ) {
 
-        ch_input_for_metaphlan3 = ch_input_for_profiling.metaphlan3
-                            .filter{
-                                if (it[0].is_fasta) log.warn "[nf-core/taxprofiler] MetaPhlAn3 currently does not accept FASTA files as input. Skipping MetaPhlAn3 for sample ${it[0].id}."
-                                !it[0].is_fasta
-                            }
-                            .multiMap {
-                                it ->
-                                    reads: [it[0] + it[2], it[1]]
-                                    db: it[3]
-                            }
-
-        METAPHLAN3_METAPHLAN3 ( ch_input_for_metaphlan3.reads, database )
+        METAPHLAN3_METAPHLAN3 ( reads , database )
         ch_versions        = ch_versions.mix( METAPHLAN3_METAPHLAN3.out.versions.first() )
         ch_raw_profiles    = ch_raw_profiles.mix( METAPHLAN3_METAPHLAN3.out.profile )
 
@@ -150,20 +136,11 @@ workflow METAGENOMICS_PROFILING {
         ch_versions            = ch_versions.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions.first() )
         ch_raw_classifications = ch_raw_classifications.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.classified_assignment )
         ch_raw_profiles        = ch_raw_profiles.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
+        ch_multiqc_files       = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
 
     }
 
     if ( params.metagenomics_profiling_tool == 'kraken2' ) {
-        ch_input_for_kraken2 = ch_input_for_profiling.kraken2
-                                .map {
-                                    meta, reads, db_meta, db ->
-                                    [ meta, reads, db_meta, db ]
-                                }
-                                .multiMap {
-                                    it ->
-                                        reads: [ it[0] + it[2], it[1] ]
-                                        db: it[3]
-                                }
 
         KRAKEN2_KRAKEN2 ( ch_input_for_kraken2.reads, database, params.metagenomics_kraken2_save_reads, params.metagenomics_kraken2_save_readclassification )
         ch_multiqc_files       = ch_multiqc_files.mix( KRAKEN2_KRAKEN2.out.report )
@@ -179,8 +156,8 @@ workflow METAGENOMICS_PROFILING {
     }
 
     emit:
+    versions          = ch_versions          // channel: [ versions.yml ]
     classifications   = ch_raw_classifications
     profiles          = ch_raw_profiles    // channel: [ val(meta), [ reads ] ] - should be text files or biom
-    versions          = ch_versions          // channel: [ versions.yml ]
     mqc               = ch_multiqc_files
 }
