@@ -54,7 +54,7 @@ include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
 include { MAP                } from '../subworkflows/local/map'
 include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
-include { ENDORSPY           } from '../subworkflows/local/endorspy'
+//include { ENDORSPY           } from '../subworkflows/local/endorspy'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,6 +70,7 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
+include { ENDORSPY                    } from '../modules/nf-core/endorspy/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -220,13 +221,18 @@ workflow EAGER {
     // SUBWORKFLOW: calculating percent on target and clonality
     // ENDORSPY (raw, filtered, deduplicated)
     //
-    
+
     ch_for_endorspy_filterbam = params.run_bamfiltering ? FILTER_BAM.out.flagstat : Channel.empty()
     ch_for_endorspy_dedupped  = !params.skip_deduplication ? DEDUPLICATE.out.flagstat : Channel.empty()
 
     //  TODO: what if not mapping executed due to bam input, figure it out later
+    ch_for_endorspy = MAP.out.flagstat
+                                    .join(ch_for_endorspy_filterbam.ifEmpty([ [], [] ]))
+                                    .join(ch_for_endorspy_dedupped.ifEmpty([ [], [] ]))
+    ENDORSPY ( ch_for_endorspy )
 
-    ENDORSPY ( MAP.out.flagstat, ch_for_endorspy_filterbam.ifEmpty([ [], [] ]), ch_for_endorspy_dedupped.ifEmpty([ [], [] ]) )
+    ch_versions   = ch_versions.mix( ENDORSPY.out.versions )
+    ch_multiqc_files  = ch_multiqc_files.mix( ENDORSPY.out.json )
 
     //
     // MODULE: MultiQC
