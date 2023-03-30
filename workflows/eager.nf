@@ -114,6 +114,7 @@ workflow EAGER {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
+
     INPUT_CHECK (
         ch_input
     )
@@ -224,6 +225,7 @@ workflow EAGER {
     //
     // MODULE: PreSeq
     //
+
     if ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'c_curve') {
         PRESEQ_CCURVE(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))
