@@ -32,7 +32,7 @@ jobs:
           - "--mapping_tool bwamem"
           - "--skip_preprocessing"
           - "--input 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/samplesheet_PE_only.tsv' --deduplication_tool dedup --preprocessing_excludeunmerged"
-          - "--run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam"
+          - "--run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam --run_mtnucratio --mitochondrion_header 'NC_007596.2'"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v3

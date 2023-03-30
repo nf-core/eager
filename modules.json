@@ -85,6 +85,11 @@
                         "git_sha": "0591cad3d725d5c21337f72e638507abf709f75e",
                         "installed_by": ["modules"]
                     },
+                    "mtnucratio": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "installed_by": ["modules"]
+                    },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "ee80d14721e76e2e079103b8dcd5d57129e584ba",
