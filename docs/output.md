@@ -145,6 +145,23 @@ The resulting FASTQ files will only be present in your results directory if you 
 
   [BWA](https://bio-bwa.sourceforge.net/bwa.shtml) is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome. BWA-backtrack (a.k.a `bwa aln`) is designed for Illumina sequence reads up to 100bp, while BWA-MEM (`bwa mem`) is optimised for longer sequences ranged from 70bp to 1Mbp and split alignment.
 
+### Host Removal
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `host_removal/`
+
+  - `*.fq.gz`: Fastq files containing only reads that did not map
+  to the reference genome.
+
+</details>
+
+nf-core/eager host removal step removes any reads from the original input fastq files that mapped to the provided reference. This step is performed by an a costume python script [extract_map_reads.py](https://github.com/nf-core/eager/blob/master/bin/extract_map_reads.py).
+
+The resulting fastq files can be used for publication purposes where
+the host DNA should not be made available for ethical reasons (for example when you do not have permission to analyse the host DNA but analysis on the metagenomic content were agreed) or for due to identifiability reasons (for example, for individualsthat died in recent times and could be identified based on their DNA alone).
+
 ### BAM Filtering
 
 <details markdown="1">

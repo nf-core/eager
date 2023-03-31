@@ -245,6 +245,7 @@ workflow EAGER {
         HOST_REMOVAL.out.fastqs.dump(tag: "hostremoval_out")
 
         ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
+    }
 
     // MODULE: PreSeq
     //

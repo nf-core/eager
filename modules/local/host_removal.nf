@@ -14,7 +14,7 @@ process HOST_REMOVAL {
 
     output:
     tuple val(meta), path("*.fq.gz"), emit: fastqs
-    path "versions.yml"                 , emit: versions
+    path "versions.yml"             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,14 +26,11 @@ process HOST_REMOVAL {
     def VERSION_XOPEN = '1.1.0'
     def fastqs_input = [fastqs].flatten().sort().size() > 1 ? "${fastqs[0]} -rev ${fastqs[1]}" : "${fastqs[0]}"
     def outputR2 = [fastqs].flatten().sort().size() > 1 ? "-or ${prefix}_hostremoved.r2.fq.gz" : ''
-    def merged = meta_fastqs.single_end == true ? "" : "-merged"
-
 
     """
     extract_map_reads.py \\
         $args \\
         $outputR2 \\
-        $merged \\
         -of ${prefix}_hostremoved.r1.fq.gz \\
         -t $task.cpus \\
         $bam \\
