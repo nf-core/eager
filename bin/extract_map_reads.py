@@ -27,24 +27,16 @@ def _get_args():
         action="store_true",
         help="specify if bam file was created from merged fastq files",
     )
-    parser.add_argument(
-        "-rev", dest="rev", default=None, help="path to reverse fastq file"
-    )
-    parser.add_argument(
-        "-of", dest="out_fwd", default=None, help="path to forward output fastq file"
-    )
-    parser.add_argument(
-        "-or", dest="out_rev", default=None, help="path to forward output fastq file"
-    )
+    parser.add_argument("-rev", dest="rev", default=None, help="path to reverse fastq file")
+    parser.add_argument("-of", dest="out_fwd", default=None, help="path to forward output fastq file")
+    parser.add_argument("-or", dest="out_rev", default=None, help="path to forward output fastq file")
     parser.add_argument(
         "-m",
         dest="mode",
         default="remove",
         help="Read removal mode: remove reads (remove) or replace sequence by N (replace). Default = remove",
     )
-    parser.add_argument(
-        "-t", dest="threads", default=4, help="Number of parallel threads"
-    )
+    parser.add_argument("-t", dest="threads", default=4, help="Number of parallel threads")
 
     args = parser.parse_args()
 
@@ -126,6 +118,7 @@ def read_write_fq(fq_in, fq_out, mapped_reads, mode, write_mode, proc):
                 except Exception as e:
                     logging.error(f"Problem with {str(read)}")
                     logging.error(e)
+
 
 def check_remove_mode(mode):
     if mode.lower() not in ["replace", "remove"]:
