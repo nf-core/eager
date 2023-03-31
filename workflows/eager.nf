@@ -19,6 +19,18 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 
 // Check failing parameter combinations
 if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
+    // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
+    if (params.metagenomics_prinseq_dustscore == 0.5) {
+            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
+    }
+}
+if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
+    // dust score was set but entropy method picked. If no entropy-score provided, assume it was an error and fail
+    if (params.metagenomics_complexity_entropy == 0.3) {
+            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
+    }
+}
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
@@ -54,7 +66,7 @@ include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
 include { MAP                } from '../subworkflows/local/map'
 include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
-//include { ENDORSPY           } from '../subworkflows/local/endorspy'
+include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,6 +84,7 @@ include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/
 include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/main'
 include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
+include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
 include { ENDORSPY                    } from '../modules/nf-core/endorspy/main'
 
 /*
@@ -220,6 +233,43 @@ workflow EAGER {
     }
 
     //
+    // Section: Metagenomics screening
+    //
+
+    if( params.run_metagenomicscreening ) {
+        ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics
+            .map{ meta, fastq ->
+                [meta+['single_end':true], fastq]
+            }
+
+        // Check if a complexity filter is wanted?
+        if ( params.run_metagenomics_complexityfiltering ) {
+            METAGENOMICS_COMPLEXITYFILTER( ch_bamfiltered_for_metagenomics )
+            ch_reads_for_metagenomics = METAGENOMICS_COMPLEXITYFILTER.out.fastq
+            ch_versions = ch_versions.mix(METAGENOMICS_COMPLEXITYFILTER.out.versions.first())
+            ch_multiqc_files = ch_multiqc_files.mix(METAGENOMICS_COMPLEXITYFILTER.out.fastq.collect{it[1]}.ifEmpty([]))
+        } else {
+            ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
+        }
+    }
+
+    //
+    // MODULE: MTNUCRATIO
+    //
+
+    if ( params.run_mtnucratio ) {
+        mtnucratio_input = ch_dedupped_bams
+        .map {
+            meta, bam, bai ->
+            [ meta, bam ]
+        }
+
+        MTNUCRATIO( mtnucratio_input, params.mitochondrion_header )
+        ch_multiqc_files = ch_multiqc_files.mix(MTNUCRATIO.out.mtnucratio.collect{it[1]}.ifEmpty([]))
+        ch_versions      = ch_versions.mix( MTNUCRATIO.out.versions )
+    }
+
+    //
     // MODULE: ENDORSPY (raw, filtered, deduplicated)
     //
 
@@ -232,11 +282,13 @@ workflow EAGER {
                                     .join(ch_for_endorspy_dedupped.ifEmpty([ [], [] ]))
                                     
     ENDORSPY ( ch_for_endorspy )
-    ch_versions   = ch_versions.mix( ENDORSPY.out.versions )
+    ch_versions       = ch_versions.mix( ENDORSPY.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( ENDORSPY.out.json )
 
+    //
     // MODULE: PreSeq
     //
+
     if ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'c_curve') {
         PRESEQ_CCURVE(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))
@@ -264,6 +316,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),

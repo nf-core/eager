@@ -587,6 +587,48 @@
                     "enum": ["unmapped", "mapped", "all"],
                     "fa_icon": "fas fa-hand-pointer",
                     "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> \u26a0\ufe0f If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
+                },
+                "run_metagenomics_complexityfiltering": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "Turns on a subworkflow of the pipeline that filters the fastq-files for complexity before the metagenomics profiling\nUse the metagenomics_complexity_tool parameter to select a method",
+                    "description": "Run a complexity filter on the metagenomics input files before classification. Specifiy the tool to use with the `metagenomics_complexity_tool` parameter, save with `metagenomics_complexity_savefastq`"
+                },
+                "metagenomics_complexity_savefastq": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save FASTQ files containing the complexity filtered reads (before metagenomic classification).",
+                    "help_text": "Save the complexity-filtered fastq-files to the results directory"
+                },
+                "metagenomics_complexity_tool": {
+                    "type": "string",
+                    "default": "bbduk",
+                    "description": "Specify which tool to use for trimming, filtering, or reformatting of fastq reads that go into metagenomics screening.",
+                    "enum": ["bbduk", "prinseq"],
+                    "fa_icon": "fas fa-hand-pointer",
+                    "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or reformatting of the reads.\n\nThis intermediate file is not saved in the results directory, unless marked with `--metagenomics_complexity_savefastq`."
+                },
+                "metagenomics_complexity_entropy": {
+                    "type": "number",
+                    "fa_icon": "fas fa-sort-numeric-up",
+                    "description": "Specify the entropy threshold that under which a sequencing read will be complexity filtered out. This should be between 0-1.",
+                    "default": 0.3,
+                    "help_text": "Specify the minimum 'entropy' value for complexity filtering for the BBDuk or PRINSEQ++ tools.\n\nThis value will only be used for PRINSEQ++ if `--metagenomics_prinseq_mode` is set to `entropy`.\n\nEntropy here corresponds to the amount of sequence variation exists within the read. Higher values correspond to more variety, and thus will likely result in more specific matching to a taxon's reference genome. The trade off here is fewer reads (or abundance information) available for having a confident identification.\n\n> Modifies tool parameter(s):\n> - BBDuk: `entropy=`\n> - PRINSEQ++:  `-lc_entropy`\n\n"
+                },
+                "metagenomics_prinseq_mode": {
+                    "type": "string",
+                    "default": "entropy",
+                    "enum": ["entropy", "dust"],
+                    "fa_icon": "fas fa-check-square",
+                    "description": "Specify the complexity filter mode for PRINSEQ++",
+                    "help_text": "Specify the complexity filter mode for PRINSEQ++ \n\nUse the selected mode together with the correct flag:\n'dust' requires the `--metagenomics_prinseq_dustscore` parameter set\n'entropy' requires the `--metagenomics_complexity_entropy` parameter set\n\n> Sets one of the tool parameter(s):\n> - PRINSEQ++:  `-lc_entropy`\n> - PRINSEQ++:  `-lc_dust`"
+                },
+                "metagenomics_prinseq_dustscore": {
+                    "type": "number",
+                    "default": 0.5,
+                    "fa_icon": "fas fa-head-side-mask",
+                    "description": "Specify the minimum dust score for PRINTSEQ++ complexity filtering",
+                    "help_text": "Specify the minimum dust score below which low-complexity reads will be removed. A DUST score is based on how often different tri-nucleotides occur along a read.\n\n> Modifies tool parameter(s):\n> - PRINSEQ++: `--lc_dust`"
                 }
             },
             "fa_icon": "fas fa-search"
@@ -612,6 +654,29 @@
                 }
             },
             "fa_icon": "fas fa-clone"
+        },
+        "mitochondrial_to_nuclear_ratio": {
+            "title": "Mitochondrial to Nuclear Ratio",
+            "type": "object",
+            "description": "Options for the calculation of ratio of reads to one chromosome/FASTA entry against all others.",
+            "default": "",
+            "help_text": "If using TSV input, Mitochondrial to Nuclear Ratio calculation is calculated per deduplicated library (after lane merging)",
+            "fa_icon": "fas fa-balance-scale-left",
+            "properties": {
+                "run_mtnucratio": {
+                    "type": "boolean",
+                    "description": "Turn on mitochondrial to nuclear ratio calculation.",
+                    "help_text": "Turn on the module to estimate the ratio of mitochondrial to nuclear reads.",
+                    "fa_icon": "fas fa-balance-scale-left"
+                },
+                "mitochondrion_header": {
+                    "type": "string",
+                    "default": "MT",
+                    "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space).",
+                    "help_text": "Specify the FASTA entry in the reference file specified as --fasta, which acts as the mitochondrial 'chromosome' to base the ratio calculation on. The tool only accepts the first section of the header before the first space. The default chromosome name is based on hs37d5/GrCH37 human reference genome.",
+                    "fa_icon": "fas fa-heading"
+                }
+            }
         },
         "mapping_statistics": {
             "title": "Mapping statistics",
@@ -708,6 +773,9 @@
         },
         {
             "$ref": "#/definitions/deduplication"
+        },
+        {
+            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
         },
         {
             "$ref": "#/definitions/mapping_statistics"
