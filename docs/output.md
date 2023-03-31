@@ -153,7 +153,7 @@ The resulting FASTQ files will only be present in your results directory if you 
 - `host_removal/`
 
   - `*.fq.gz`: Fastq files containing only reads that did not map
-  to the reference genome.
+    to the reference genome.
 
 </details>
 
