@@ -73,14 +73,13 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
-include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
-include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
-include { MAP                           } from '../subworkflows/local/map'
-include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
-include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
-include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
-include { METAGENOMICS_PROFILING        } from '../subworkflows/local/metagenomics_profiling'
+include { INPUT_CHECK             } from '../subworkflows/local/input_check'
+include { REFERENCE_INDEXING      } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING           } from '../subworkflows/local/preprocessing'
+include { MAP                     } from '../subworkflows/local/map'
+include { FILTER_BAM              } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE             } from '../subworkflows/local/deduplicate'
+include { METAGENOMICS            } from '../subworkflows/local/deduplicate'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -247,30 +246,15 @@ workflow EAGER {
     }
 
     //
-    // Section: Metagenomics screening
+    // Section: Metagenomics
     //
 
     //TODO: finish and figure out how exactly to call with proper database (check via a helper function?)
     if ( params.run_metagenomics_screening ) {
-        METAGENOMICS_PROFILING ( ch_bamfiltered_for_metagenomics, params.metagenomics_profiling_database ) // TODO: implement full metagenomics screening main subworkflow
-    }
-    // that then calls complexityfilter, profiling, postprocessing
+        METAGENOMICS ( ch_bamfiltered_for_metagenomics )
+        ch_versions      = ch_versions.mix( METAGENOMICS.out.versions.first() )
+        ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS.out.ch_multiqc_files )
 
-    if( params.run_metagenomics_screening ) {
-        ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics
-            .map{ meta, fastq ->
-                [meta+['single_end':true], fastq]
-            }
-
-        // Check if a complexity filter is wanted?
-        if ( params.run_metagenomics_complexityfiltering ) {
-            METAGENOMICS_COMPLEXITYFILTER( ch_bamfiltered_for_metagenomics )
-            ch_reads_for_metagenomics = METAGENOMICS_COMPLEXITYFILTER.out.fastq
-            ch_versions = ch_versions.mix(METAGENOMICS_COMPLEXITYFILTER.out.versions.first())
-            ch_multiqc_files = ch_multiqc_files.mix(METAGENOMICS_COMPLEXITYFILTER.out.fastq.collect{it[1]}.ifEmpty([]))
-        } else {
-            ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
-        }
     }
 
     //
