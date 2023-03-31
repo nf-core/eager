@@ -19,6 +19,18 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 
 // Check failing parameter combinations
 if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
+    // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
+    if (params.metagenomics_prinseq_dustscore == 0.5) {
+            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
+    }
+}
+if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
+    // dust score was set but entropy method picked. If no entropy-score provided, assume it was an error and fail
+    if (params.metagenomics_complexity_entropy == 0.3) {
+            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
+    }
+}
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
@@ -48,12 +60,14 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { INPUT_CHECK        } from '../subworkflows/local/input_check'
-include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
-include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
-include { MAP                } from '../subworkflows/local/map'
-include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
-include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
+include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
+include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
+include { MAP                           } from '../subworkflows/local/map'
+include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
+include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -219,7 +233,7 @@ workflow EAGER {
     }
 
     //
-    // SUBWORKFLOW: remove reads mapping to the host from the raw fastq
+    // MODULE: remove reads mapping to the host from the raw fastq
     //
     if ( params.run_hostremoval ) {
 
@@ -247,10 +261,32 @@ workflow EAGER {
 
         ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
     }
+    
+    //
+    // Section: Metagenomics screening
+    //
+
+    if( params.run_metagenomicscreening ) {
+        ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics
+            .map{ meta, fastq ->
+                [meta+['single_end':true], fastq]
+            }
+
+        // Check if a complexity filter is wanted?
+        if ( params.run_metagenomics_complexityfiltering ) {
+            METAGENOMICS_COMPLEXITYFILTER( ch_bamfiltered_for_metagenomics )
+            ch_reads_for_metagenomics = METAGENOMICS_COMPLEXITYFILTER.out.fastq
+            ch_versions = ch_versions.mix(METAGENOMICS_COMPLEXITYFILTER.out.versions.first())
+            ch_multiqc_files = ch_multiqc_files.mix(METAGENOMICS_COMPLEXITYFILTER.out.fastq.collect{it[1]}.ifEmpty([]))
+        } else {
+            ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
+        }
+    }
 
     //
     // MODULE: MTNUCRATIO
     //
+
     if ( params.run_mtnucratio ) {
         mtnucratio_input = ch_dedupped_bams
         .map {
@@ -266,6 +302,7 @@ workflow EAGER {
     //
     // MODULE: PreSeq
     //
+
     if ( !params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'c_curve') {
         PRESEQ_CCURVE(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect{it[1]}.ifEmpty([]))
