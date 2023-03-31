@@ -9,7 +9,7 @@ include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_RESCALED } from '../../modules
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_FILTERED } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_TRIMMED  } from '../../modules/nf-core/samtools/index/main'
 
-// TODO: Add required channels and channel manipulations for reference-dependent bed masking before pmdtools.
+// TODO: Add required channels and channel manipulations for reference-dependent bed masking before pmdtools. Requires multi-ref support before implementation.
 workflow MANIPULATE_DAMAGE {
     take:
     ch_bam_bai  // [ [ meta ], bam , bai ]
@@ -40,7 +40,7 @@ workflow MANIPULATE_DAMAGE {
     .combine(ch_refs, by: 0 ) // [ [combine_meta], [meta], bam, bai, [ref_meta], fasta ]
 
     if ( params.run_mapdamage_rescaling ) {
-        ch_mapdamage_prep = ch_input_for_damage_manipulation.branch{
+        ch_mapdamage_prep = ch_input_for_damage_manipulation.branch {
             ignore_me, meta, bam, bai, ref_meta, fasta ->
             skip:    meta.damage_treatment == 'full'
             no_skip: true
@@ -81,7 +81,7 @@ workflow MANIPULATE_DAMAGE {
         }
 
 
-        PMDTOOLS_FILTER(ch_pmdtools_input.bam, params.damage_manipulation_pmdtools_threshold, ch_pmdtools_input.fasta)
+        PMDTOOLS_FILTER( ch_pmdtools_input.bam, params.damage_manipulation_pmdtools_threshold, ch_pmdtools_input.fasta )
         ch_versions       = ch_versions.mix( PMDTOOLS_FILTER.out.versions.first() )
 
         SAMTOOLS_INDEX_DAMAGE_FILTERED( PMDTOOLS_FILTER.out.bam )
