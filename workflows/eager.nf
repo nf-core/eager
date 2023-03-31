@@ -84,6 +84,8 @@ include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/
 include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/main'
 include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
+include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -244,9 +246,26 @@ workflow EAGER {
         if ( params.run_metagenomics_complexityfiltering ) {
             METAGENOMICS_COMPLEXITYFILTER( ch_bamfiltered_for_metagenomics )
             ch_reads_for_metagenomics = METAGENOMICS_COMPLEXITYFILTER.out.fastq
+            ch_versions = ch_versions.mix(METAGENOMICS_COMPLEXITYFILTER.out.versions.first())
+            ch_multiqc_files = ch_multiqc_files.mix(METAGENOMICS_COMPLEXITYFILTER.out.fastq.collect{it[1]}.ifEmpty([]))
         } else {
             ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
         }
+
+    //
+    // MODULE: MTNUCRATIO
+    //
+
+    if ( params.run_mtnucratio ) {
+        mtnucratio_input = ch_dedupped_bams
+        .map {
+            meta, bam, bai ->
+            [ meta, bam ]
+        }
+
+        MTNUCRATIO( mtnucratio_input, params.mitochondrion_header )
+        ch_multiqc_files = ch_multiqc_files.mix(MTNUCRATIO.out.mtnucratio.collect{it[1]}.ifEmpty([]))
+        ch_versions      = ch_versions.mix( MTNUCRATIO.out.versions )
     }
 
     //
@@ -280,6 +299,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),

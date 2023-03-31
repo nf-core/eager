@@ -655,6 +655,29 @@
             },
             "fa_icon": "fas fa-clone"
         },
+        "mitochondrial_to_nuclear_ratio": {
+            "title": "Mitochondrial to Nuclear Ratio",
+            "type": "object",
+            "description": "Options for the calculation of ratio of reads to one chromosome/FASTA entry against all others.",
+            "default": "",
+            "help_text": "If using TSV input, Mitochondrial to Nuclear Ratio calculation is calculated per deduplicated library (after lane merging)",
+            "fa_icon": "fas fa-balance-scale-left",
+            "properties": {
+                "run_mtnucratio": {
+                    "type": "boolean",
+                    "description": "Turn on mitochondrial to nuclear ratio calculation.",
+                    "help_text": "Turn on the module to estimate the ratio of mitochondrial to nuclear reads.",
+                    "fa_icon": "fas fa-balance-scale-left"
+                },
+                "mitochondrion_header": {
+                    "type": "string",
+                    "default": "MT",
+                    "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space).",
+                    "help_text": "Specify the FASTA entry in the reference file specified as --fasta, which acts as the mitochondrial 'chromosome' to base the ratio calculation on. The tool only accepts the first section of the header before the first space. The default chromosome name is based on hs37d5/GrCH37 human reference genome.",
+                    "fa_icon": "fas fa-heading"
+                }
+            }
+        },
         "mapping_statistics": {
             "title": "Mapping statistics",
             "type": "object",
@@ -750,6 +773,9 @@
         },
         {
             "$ref": "#/definitions/deduplication"
+        },
+        {
+            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
         },
         {
             "$ref": "#/definitions/mapping_statistics"
