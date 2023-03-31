@@ -185,12 +185,12 @@ You may also recieve the files above if metagenomic screening is turned on.
   </details>
 
 The entropy filter of [BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) is used to remove reads from the fastq-files for metagenomics screening that don't pass the `--metagenomics_complexity_entropy` threshold. When ommiting the flag, a default value of 0.3 is applied. To cite the docs:
+
 > A homopolymer such as AAAAAAAAAAAAAA would have entropy of zero; completely random sequence would have entropy approaching 1.
 
 Using complexity-filtered fastq-files as input for metagenomic classifiers can reduce the number of false positive classifications, resulting in more precise taxonomic assignments of the sample through removal of reads that can align equally well to multiple reference genomes. Save the complexity-filtered fastq-files to the output directory to perform additional downstream analyses, such as testing multiple metagenomic profilers (see the [nf-core/taxprofiler](https://github.com/nf-core/taxprofiler) pipeline).
 
 **Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
-
 
 #### PRINSEQ++
 
