@@ -251,6 +251,7 @@ workflow EAGER {
         } else {
             ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
         }
+    }
 
     //
     // MODULE: MTNUCRATIO
