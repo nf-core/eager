@@ -242,22 +242,20 @@ workflow EAGER {
                                                 meta, bam, bai ->
                                                 new_meta = meta.clone().findAll{ it.key !in [ 'single_end', 'reference' ] }
                                                 [ new_meta, meta, bam, bai ]
-                                                }.dump(tag: "bammod")
+                                                }
         ch_fastqs_for_hostremoval= INPUT_CHECK.out.fastqs.map{
                                                         meta, fastqs ->
                                                         new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
                                                         [ new_meta, meta, fastqs ]
-                                                    }.dump(tag: "fastqsmod")
+                                                    }
 
         ch_for_hostremoval = ch_bam_for_hostremoval.join(ch_fastqs_for_hostremoval)
                                                     .map{
                                                         meta_join, meta_bam, bam, bai, meta_fastq, fastqs ->
                                                         [ meta_bam, bam, bai, meta_fastq, fastqs]
                                                     }
-                                                    .dump(tag: "hostremoval")
 
         HOST_REMOVAL ( ch_for_hostremoval )
-        HOST_REMOVAL.out.fastqs.dump(tag: "hostremoval_out")
 
         ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
     }
