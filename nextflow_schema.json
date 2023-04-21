@@ -593,7 +593,7 @@
                     "description": "Specify which tool to use for metagenomic profiling and screening.",
                     "enum": ["malt", "metaphlan2", "kraken2", "krakenuniq"],
                     "fa_icon": "fas fa-toolbox",
-                    "help_text": "Select which tool to run metagenomics profiling on designated metagenomics_screening_input. These tools behave vastly differently due to performing read profiling using different methods and yield vastly different reuslts."
+                    "help_text": "Select which tool to run metagenomics profiling on designated metagenomics_screening_input. Which tool to use will depend on your specific context, as each tool uses a different method and database. See literature of the tools for recommendations"
                 },
                 "metagenomics_profiling_database": {
                     "type": "string",
