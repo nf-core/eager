@@ -32,6 +32,7 @@ jobs:
           - "--mapping_tool bwamem"
           - "--mapping_tool bowtie2"
           - "--skip_preprocessing"
+          - "--run_mtnucratio --mitochondrion_header 'NC_007596.2'"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v3

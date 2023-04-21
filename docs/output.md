@@ -186,6 +186,46 @@ Please be aware, that intermediate length and mapping quality filtered genomic B
 
 You may also receive the files above if metagenomic screening is turned on.
 
+### Metagenomics Screening
+
+#### Bbduk
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `metagenomic_complexity_filter/`
+
+  - `*_complexity.fastq.gz`: FASTQ file containing the complexity filtered reads
+  - `*.log`: LOG file containing filter stats
+  </details>
+
+The entropy filter of [BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) is used to remove reads from the fastq-files for metagenomics screening that don't pass the `--metagenomics_complexity_entropy` threshold. When ommiting the flag, a default value of 0.3 is applied. To cite the docs:
+
+> A homopolymer such as AAAAAAAAAAAAAA would have entropy of zero; completely random sequence would have entropy approaching 1.
+
+Using complexity-filtered fastq-files as input for metagenomic classifiers can reduce the number of false positive classifications, resulting in more precise taxonomic assignments of the sample through removal of reads that can align equally well to multiple reference genomes. Save the complexity-filtered fastq-files to the output directory to perform additional downstream analyses, such as testing multiple metagenomic profilers (see the [nf-core/taxprofiler](https://github.com/nf-core/taxprofiler) pipeline).
+
+**Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
+
+#### PRINSEQ++
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `metagenomic_complexity_filter/`
+
+  - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
+  - `*_complexity.log`: LOG file containing filter stats
+  </details>
+
+  [PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus#readme) is an alternative to BBDuk for filtering the fastq files before metagenomics classification. From PRINSEQ++ we implemented filtering by the `dust` algorithm or by `entropy`, as explained above in the BBDuk section.
+
+  Using complexity-filtered fastq-files as input for metagenomic classifiers can reduce the number of false positive classifications, resulting in more precise taxonomic assignments of the sample. Save the complexity-filtered fastq-files to the output directory to perform additional downstream analyses, such as testing multiple metagenomic profilers (see the [nf-core/taxprofiler](https://github.com/nf-core/taxprofiler) pipeline).
+
+  The saved files are the _good_ files, passing the `dust` or `entropy` filter treshold specified. The logs contain information about the amount of reads filtered.
+
+  **Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
+
 ### Deduplication
 
 <details markdown="1">
@@ -208,3 +248,20 @@ Deduplication is carried by two possible tools, as described below. However the 
 #### DeDup
 
 [DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
+
+#### Preseq
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `mapping/`
+
+  - `*.{c_curve,lc_extrap}.txt`: A two column text file with the first column representing sequencing depth and the second an estimate of unique reads.
+
+  </details>
+
+[Preseq](https://github.com/smithlabcode/preseq) Preseq is a collection of tools that allow assessment of the complexity of the library, where complexity means the number of unique molecules in your library (i.e. not molecules with the exact same length and sequence). There are two algorithms from the tools we use: `c_curve` and `lc_extrap`. The former gives you the expected number of unique reads if you were to repeated sequencing but with fewer reads than your first sequencing run. The latter tries to extrapolate the decay in the number of unique reads you would get with re-sequencing but with more reads than your initial sequencing run.
+
+The resulting histogram file will contain estimated deduplication statistics at different theoretical sequencing depths, and can be used to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced.
+
+These curves will be displayed in the pipeline run's MultiQC report, however you can also use this file for plotting yourself for further exploration e.g. in R to find your sequencing target depth.

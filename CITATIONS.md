@@ -50,6 +50,18 @@
 
   > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
 
+- [prinseqplusplus](https://doi.org/10.7287/peerj.preprints.27553v1)
+
+  > Cantu VA, Sadural J, Edwards R. 2019. PRINSEQ++, a multi-threaded tool for fast and efficient quality control and preprocessing of sequencing datasets. PeerJ Preprints 7:e27553v1. doi: [10.7287/peerj.preprints.27553v1](https://doi.org/10.7287/peerj.preprints.27553v1)
+
+- [bbduk](https://doi.org/10.1371/journal.pone.0185056)
+
+  > Bushnell B, Rood J, Singer E (2017) BBMerge – Accurate paired shotgun read merging via overlap. PLOS ONE 12(10): e0185056. [https://doi.org/10.1371/journal.pone.0185056](https://doi.org/10.1371/journal.pone.0185056)
+
+- [PreSeq](https://doi.org/10.1038/nmeth.2375)
+
+  > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
