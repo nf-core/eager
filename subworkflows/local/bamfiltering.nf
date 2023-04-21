@@ -120,6 +120,7 @@ workflow FILTER_BAM {
     } else if ( params.run_metagenomics_screening && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' )) {
         ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_MAPPED.out.other
     } else if ( !params.run_metagenomics_screening ) {
+    } else if ( !params.run_metagenomics_screening ) {
         ch_fastq_for_metagenomics = Channel.empty()
     }
 
