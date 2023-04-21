@@ -85,7 +85,7 @@ include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/m
 include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
 include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
-
+include { AUTHENTICT_DEAM2CONT        } from '../modules/nf-core/authentict/deam2cont/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -230,6 +230,14 @@ workflow EAGER {
     } else {
         ch_dedupped_bams     = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
+    }
+
+    //
+    // SUBWORKFLOW: contamination estimate
+    // TODO: filter out double stranded, workout how to supply the position file
+
+    if ( params.run_contamination_authentict) {
+        AUTHENTICT_DEAM2CONT( ch_dedupped_bams, [[],[]], [[],[]] )
     }
 
     //
