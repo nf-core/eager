@@ -36,6 +36,12 @@
 
   > Li, H. (2013). Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. arXiv , arXiv:1303.3997. doi: [10.48550/arXiv.1303.3997](https://doi.org/10.48550/arXiv.1303.3997)
 
+- [Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)
+
+  > Langmead, B., Salzberg, S. (2012). Fast gapped-read alignment with Bowtie 2. Nat Methods 9, 357–359. doi: [10.1038/nmeth.1923](https://doi.org/10.1038/nmeth.1923)
+
+  > Langmead, B., Wilks, C., Antonescu, V., Charles, R. (2018). Scaling read aligners to hundreds of threads on general-purpose processors. Bioinformatics, 35(3), doi: [10.1093/bioinformatics/bty648](https://doi.org/10.1093/bioinformatics/bty648)
+
 - [SAMtools](https://doi.org/10.1093/bioinformatics/btp324)
 
   > Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., & 1000 Genome Project Data Processing Subgroup. (2009). The Sequence Alignment/Map format and SAMtools. Bioinformatics , 25(16), 2078–2079. doi: [10.1093/bioinformatics/btp352](https://doi.org/10.1093/bioinformatics/btp324)
