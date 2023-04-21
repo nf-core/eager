@@ -598,7 +598,7 @@
                 "metagenomics_profiling_database": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "Specify a databse directory to run metagenomics profiling on. In the case of kraken2, this can be a tar.gz of the directory.",
+                    "description": "Specify the path to a databse directory to run metagenomics profiling on. In the case of kraken2, this can be a tar.gz of the directory.",
                     "fa_icon": "fas fa-database",
                     "help_text": "Specify your metagenomics profiling database to use with the designated metagenomics_profiling_tool on the selected metagenomics_screening_input. These databases are NOT cross-compatible and need to be pre-built/downloaded for use in nf-core/eager. Database construction is often a balancing act between breadth of sequence diversity and size."
                 },
