@@ -8,6 +8,7 @@ include { BAMUTIL_TRIMBAM                                  } from '../../modules
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_RESCALED } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_FILTERED } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_TRIMMED  } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_FILTERED  } from '../../modules/nf-core/samtools/flagstat/main'
 
 // TODO: Add required channels and channel manipulations for reference-dependent bed masking before pmdtools. Requires multi-ref support before implementation.
 workflow MANIPULATE_DAMAGE {
@@ -16,11 +17,12 @@ workflow MANIPULATE_DAMAGE {
     ch_fasta    // [ [ meta ], fasta ]
 
     main:
-    ch_versions          = Channel.empty()
-    ch_multiqc_files     = Channel.empty()
-    ch_rescaled_bams     = Channel.empty()
-    ch_pmd_filtered_bams = Channel.empty()
-    ch_trimmed_bams      = Channel.empty()
+    ch_versions              = Channel.empty()
+    ch_multiqc_files         = Channel.empty()
+    ch_rescaled_bams         = Channel.empty()
+    ch_pmd_filtered_bams     = Channel.empty()
+    ch_trimmed_bams          = Channel.empty()
+    ch_pmd_filtered_flagstat = Channel.empty() // Only run flagstat on pmd filtered bam, since rescaling and trimming does not change the number of reads
 
     // Ensure correct reference is associated with each bam_bai pair
     ch_refs = ch_fasta.map {
@@ -80,7 +82,6 @@ workflow MANIPULATE_DAMAGE {
                 fasta: fasta
         }
 
-
         PMDTOOLS_FILTER( ch_pmdtools_input.bam, params.damage_manipulation_pmdtools_threshold, ch_pmdtools_input.fasta )
         ch_versions       = ch_versions.mix( PMDTOOLS_FILTER.out.versions.first() )
 
@@ -89,6 +90,9 @@ workflow MANIPULATE_DAMAGE {
         ch_filtered_index = params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_FILTERED.out.csi : SAMTOOLS_INDEX_DAMAGE_FILTERED.out.bai
 
         ch_pmd_filtered_bams = PMDTOOLS_FILTER.out.bam.join( ch_filtered_index )
+
+        SAMTOOLS_FLAGSTAT_FILTERED( ch_pmd_filtered_bams )
+        ch_pmd_filtered_flagstat = SAMTOOLS_FLAGSTAT_FILTERED.out.flagstat
     }
 
     if ( params.run_trim_bam ) {
@@ -122,8 +126,9 @@ workflow MANIPULATE_DAMAGE {
     }
 
     emit:
-    rescaled = ch_rescaled_bams     // [ meta, bam, bai ]
-    filtered = ch_pmd_filtered_bams // [ meta, bam, bai ]
-    trimmed  = ch_trimmed_bams      // [ meta, bam, bai ]
+    rescaled = ch_rescaled_bams         // [ meta, bam, bai ]
+    filtered = ch_pmd_filtered_bams     // [ meta, bam, bai ]
+    trimmed  = ch_trimmed_bams          // [ meta, bam, bai ]
+    flagstat = ch_pmd_filtered_flagstat // [ meta, flagstat ]
     versions = ch_versions
 }
