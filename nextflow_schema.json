@@ -748,7 +748,7 @@
                     "type": "string",
                     "default": "raw",
                     "description": "Specify which input BAM to use for genotyping.",
-                    "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' for mapped only, filtered, or DeDup BAMs (with priority right to left); 'pmd' (for pmdtools output); 'trimmed' (for base-clipped BAMs. Base-clipped-PMD-filtered BAMs if both filtering and trimming are requested); 'rescaled' (for mapDamage2 rescaling output). Default is: 'raw'.",
+                    "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' (to use the reads used as input for damage manipulation); 'pmd' (for pmdtools output); 'trimmed' (for base-clipped BAMs. Base-clipped-PMD-filtered BAMs if both filtering and trimming are requested); 'rescaled' (for mapDamage2 rescaling output). Default is: 'raw'.\nWarning: Depending on the parameters you provided, 'raw' can refer to all mapped reads, filtered reads (if bam filtering has been performed), or the deduplicated reads (if deduplication was performed).",
                     "fa_icon": "fas fa-faucet",
                     "enum": ["raw", "pmd", "trimmed", "rescaled"]
                 }

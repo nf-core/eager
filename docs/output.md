@@ -228,6 +228,7 @@ There are three different option for manipulation of ancient DNA damage.
 </details>
 
 [mapDamage2](https://ginolhac.github.io/mapDamage/) can apply a probabilistic bayesian model to rescale quality scores of likely-damaged positions in the reads. A new BAM file is constructed by downscaling quality values for misincorporations likely due to ancient DNA damage according to their initial qualities, position in reads, and damage patterns. These BAM files have damage probabilistically removed via a bayesian model.
+Rescaling a BAM file in this way can help reduce/remove the effects of DNA damage from downstream analysis.
 
 #### Post-Mortem-Damage (PMD) Filtering
 
@@ -242,6 +243,7 @@ There are three different option for manipulation of ancient DNA damage.
 </details>
 
 [pmdtools](https://github.com/pontussk/PMDtools) implements a likelihood framework incorporating postmortem damage (PMD), base quality scores and biological polymorphism to identify degraded DNA sequences that are unlikely to originate from modern contamination. Using the model, each sequence is assigned a PMD score, for which positive values indicate support for the sequence being genuinely ancient.
+By filtering a BAM file for damaged reads in this way, it is possible to ameliorate the effects of present-day contamination, and isolate sequences of ancient origin to be used downstream.
 
 ### Base Trimming
 
