@@ -36,6 +36,12 @@
 
   > Li, H. (2013). Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. arXiv , arXiv:1303.3997. doi: [10.48550/arXiv.1303.3997](https://doi.org/10.48550/arXiv.1303.3997)
 
+- [Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)
+
+  > Langmead, B., Salzberg, S. (2012). Fast gapped-read alignment with Bowtie 2. Nat Methods 9, 357–359. doi: [10.1038/nmeth.1923](https://doi.org/10.1038/nmeth.1923)
+
+  > Langmead, B., Wilks, C., Antonescu, V., Charles, R. (2018). Scaling read aligners to hundreds of threads on general-purpose processors. Bioinformatics, 35(3), doi: [10.1093/bioinformatics/bty648](https://doi.org/10.1093/bioinformatics/bty648)
+
 - [SAMtools](https://doi.org/10.1093/bioinformatics/btp324)
 
   > Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., & 1000 Genome Project Data Processing Subgroup. (2009). The Sequence Alignment/Map format and SAMtools. Bioinformatics , 25(16), 2078–2079. doi: [10.1093/bioinformatics/btp352](https://doi.org/10.1093/bioinformatics/btp324)
@@ -43,6 +49,14 @@
 - [DeDup](https://doi.org/10.1186/s13059-016-0918-z)
 
   > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
+
+- [prinseqplusplus](https://doi.org/10.7287/peerj.preprints.27553v1)
+
+  > Cantu VA, Sadural J, Edwards R. 2019. PRINSEQ++, a multi-threaded tool for fast and efficient quality control and preprocessing of sequencing datasets. PeerJ Preprints 7:e27553v1. doi: [10.7287/peerj.preprints.27553v1](https://doi.org/10.7287/peerj.preprints.27553v1)
+
+- [bbduk](https://doi.org/10.1371/journal.pone.0185056)
+
+  > Bushnell B, Rood J, Singer E (2017) BBMerge – Accurate paired shotgun read merging via overlap. PLOS ONE 12(10): e0185056. [https://doi.org/10.1371/journal.pone.0185056](https://doi.org/10.1371/journal.pone.0185056)
 
 - [PreSeq](https://doi.org/10.1038/nmeth.2375)
 
