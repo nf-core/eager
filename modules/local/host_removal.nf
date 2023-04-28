@@ -2,7 +2,6 @@ process HOST_REMOVAL {
     tag "$meta.id"
     label 'process_medium'
 
-    //TODO:check if correct conda and containers used
     conda "bioconda::xopen=1.1.0 bioconda::pysam=0.16.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-adbddd275b72bafc166f5c77e6b1a8c3d200cfe7:2c601eb41a331051f5d90b147919a69ac4e17e19-0' :
