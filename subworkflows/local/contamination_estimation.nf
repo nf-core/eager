@@ -15,7 +15,7 @@ workflow CONTAMINATION_ESTIMATION {
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
-    BAM_DOCOUNTS_CONTAMINATION_ANGSD ( ch_dedup_bam, ch_dedup_bai, ch_hapmap_file )
+    BAM_DOCOUNTS_CONTAMINATION_ANGSD ( dedup_bam, dedup_bai, hapmap_file )
     ch_versions     = ch_versions.mix ( BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.versions.first() )
     ch_angsd_contam = BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.txt
 
