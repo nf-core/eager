@@ -193,6 +193,29 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 
 ```
 
+## Host Removal
+
+All possible parameters
+
+```
+preprocessing_skippairmerging = true
+skip_preprocessing            = true
+```
+
+Tests
+
+```bash
+##Check pair end merged and single end processed correctly
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval -w results_hostremoval/work --run_hostremoval
+
+##Check pair end non-merged and single end processed correctly
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPEmerging -w results_hostremoval_skipPEmerging/work --run_hostremoval --preprocessing_skippairmerging
+
+##Check it still runs when preprocessing is not done and files are proper
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPreprocessing -w results_hostremoval_skipPreprocessing/work --run_hostremoval --skip_preprocessing
+
+```
+
 ## BAM filtering
 
 All possible parameters
