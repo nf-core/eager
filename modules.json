@@ -80,6 +80,31 @@
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
+                    "kraken2/kraken2": {
+                        "branch": "master",
+                        "git_sha": "7c695e0147df1157413e06246d9b0094617d3e6b",
+                        "installed_by": ["modules"]
+                    },
+                    "krakenuniq/preloadedkrakenuniq": {
+                        "branch": "master",
+                        "git_sha": "a6eb17f65b3ee5761c25c075a6166c9f76733cee",
+                        "installed_by": ["modules"]
+                    },
+                    "malt/run": {
+                        "branch": "master",
+                        "git_sha": "75027bf77472b1f4fd2cdd7e46f83119dfb0f2c6",
+                        "installed_by": ["modules"]
+                    },
+                    "maltextract": {
+                        "branch": "master",
+                        "git_sha": "0f8a77ff00e65eaeebc509b8156eaa983192474b",
+                        "installed_by": ["modules"]
+                    },
+                    "metaphlan3/metaphlan3": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "installed_by": ["modules"]
+                    },
                     "mtnucratio": {
                         "branch": "master",
                         "git_sha": "7c695e0147df1157413e06246d9b0094617d3e6b",
@@ -125,11 +150,6 @@
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
-                    "prinseqplusplus": {
-                        "branch": "master",
-                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
-                        "installed_by": ["modules"]
-                    },
                     "preseq/ccurve": {
                         "branch": "master",
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
@@ -138,6 +158,11 @@
                     "preseq/lcextrap": {
                         "branch": "master",
                         "git_sha": "0f8a77ff00e65eaeebc509b8156eaa983192474b",
+                        "installed_by": ["modules"]
+                    },
+                    "prinseqplusplus": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
                     "samtools/faidx": {

@@ -41,7 +41,7 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
 
 // TODO add any other metagenomics screening parameters checks for eg complexity filtering, post-processing
-if ( params.run_metagenomics_screening && ! params.metagenomics_profiling_database ) { exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database") }
+if ( params.run_metagenomics && ! params.metagenomics_profiling_database ) { exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database") }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -202,7 +202,7 @@ workflow EAGER {
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
     //
 
-    if ( params.run_bamfiltering || params.run_metagenomics_screening ) {
+    if ( params.run_bamfiltering || params.run_metagenomics ) {
 
         ch_mapped_for_bamfilter = MAP.out.bam
                                     .join(MAP.out.bai)
@@ -286,6 +286,13 @@ workflow EAGER {
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
+    // SUBWORKFLOW: metagenomics screening
+    //
+    //TODO: finish and figure out how exactly to call with proper database (check via a helper function?)
+    if ( params.run_metagenomics ) {
+        METAGENOMICS_PROFILING ( ch_bamfiltered_for_metagenomics, params.metagenomics_profiling_database ) // TODO: implement full metagenomics screening main subworkflow
+    }
+    // that then calls complexityfilter, profiling, postprocessing
 
     //
     // MODULE: MultiQC

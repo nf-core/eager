@@ -35,7 +35,7 @@ workflow METAGENOMICS_PROFILING {
 
     if ( params.metagenomics_profiling_tool == 'malt' ) {
 
-        if ( params.metagenomics_profiling_malt_group_size > 0 ) {
+        if ( params.metagenomics_malt_group_size > 0 ) {
             ch_input_for_malt =  reads
                 .map {
                     meta, reads ->
@@ -53,7 +53,7 @@ workflow METAGENOMICS_PROFILING {
                         [ temp_meta, reads, database ]
 
                 }
-                .groupTuple(by: [0,2], size: params.metagenomics_profiling_malt_group_size, remainder: true)
+                .groupTuple(by: [0,2], size: params.metagenomics_malt_group_size, remainder: true)
                 .multiMap {
                     meta, reads, database ->
                         reads: [ meta, reads ]
@@ -131,7 +131,8 @@ workflow METAGENOMICS_PROFILING {
                                             db: db
                                 }
         // Hardcode to _always_ produce the report file (which is our basic output, and goes into)
-        KRAKENUNIQ_PRELOADEDKRAKENUNIQ ( reads , database , params.metagenomics_profiling_krakenuniq_ram_chunk_size, params.metagenomics_profiling_krakenuniq_save_reads, true, params.metagenomics_profiling_krakenuniq_save_read_classifications )
+        KRAKENUNIQ_PRELOADEDKRAKENUNIQ ( ch_input_for_krakenuniq.reads, ch_input_for_krakenuniq.db, params.metagenomics_krakenuniq_ram_chunk_size, params.metagenomics_krakenuniq_save_reads, true, params.metagenomics_krakenuniq_save_readclassifications )
+        ch_multiqc_files       = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
         ch_versions            = ch_versions.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions.first() )
         ch_raw_classifications = ch_raw_classifications.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.classified_assignment )
         ch_raw_profiles        = ch_raw_profiles.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
@@ -141,7 +142,7 @@ workflow METAGENOMICS_PROFILING {
 
     if ( params.metagenomics_profiling_tool == 'kraken2' ) {
 
-        KRAKEN2_KRAKEN2 ( reads, database, params.metagenomics_profiling_kraken2_save_reads, params.metagenomics_profiling_kraken2_save_readclassification )
+        KRAKEN2_KRAKEN2 ( ch_input_for_kraken2.reads, database, params.metagenomics_kraken2_save_reads, params.metagenomics_kraken2_save_readclassification )
         ch_multiqc_files       = ch_multiqc_files.mix( KRAKEN2_KRAKEN2.out.report )
         ch_versions            = ch_versions.mix( KRAKEN2_KRAKEN2.out.versions.first() )
         ch_raw_classifications = ch_raw_classifications.mix( KRAKEN2_KRAKEN2.out.classified_reads_assignment )
