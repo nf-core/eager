@@ -2,7 +2,7 @@
 // Contamination estimation
 //
 
-include { BAM_DOCOUNTS_CONTAMINATION_ANGSD } from '../subworkflows/nf-core/bam_docounts_contamination_angsd/main'
+include { BAM_DOCOUNTS_CONTAMINATION_ANGSD } from '../../subworkflows/nf-core/bam_docounts_contamination_angsd/main'
 
 workflow CONTAMINATION_ESTIMATION {
 

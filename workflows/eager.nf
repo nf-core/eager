@@ -293,11 +293,20 @@ workflow EAGER {
     //
 
     if ( params.run_contamination) {
-        contamination_input  = ch_dedupped_bams
+        contamination_input_bam  = ch_dedupped_bams
+        .map {
+            meta, bam, bai ->
+            [ meta, bam ]
+        }
+        contamination_input_bai = ch_dedupped_bams
+        .map {
+            meta, bam, bai ->
+            [ meta, bai ]
+        }
         contamination_hapmap = hapmap_file
-        CONTAMINATION_ESTIMATION(contamination_input.bam, contamination_input.bai, contamination_hapmap)
+        CONTAMINATION_ESTIMATION(contamination_input_bam, contamination_input_bai, contamination_hapmap)
         ch_versions      = ch_versions.mix( CONTAMINATION_ESTIMATION.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix( CONTAMINATION_ESTIMATION.out.fastq.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix( CONTAMINATION_ESTIMATION.out.angsd_contam.collect{it[1]}.ifEmpty([]))
 
     }
 
