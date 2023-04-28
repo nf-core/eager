@@ -37,7 +37,7 @@ workflow METAGENOMICS {
     ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS_PROFILING.out.mqc.collect{it[1]}.ifEmpty([]) )
 
     emit:
-    ch_versions      = ch_versions
+    versions      = ch_versions
     ch_multiqc_files = ch_multiqc_files
 
 

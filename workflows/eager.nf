@@ -79,7 +79,7 @@ include { PREPROCESSING           } from '../subworkflows/local/preprocessing'
 include { MAP                     } from '../subworkflows/local/map'
 include { FILTER_BAM              } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE             } from '../subworkflows/local/deduplicate'
-include { METAGENOMICS            } from '../subworkflows/local/deduplicate'
+include { METAGENOMICS            } from '../subworkflows/local/metagenomics'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

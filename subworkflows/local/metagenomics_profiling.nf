@@ -11,9 +11,8 @@ include { METAPHLAN3_METAPHLAN3                         } from '../../modules/nf
 
 workflow METAGENOMICS_PROFILING {
 
-    take:
-    reads // channel: [ [ meta ] , [ reads ] ]
-    database // channel: [ [ meta ] , path ]
+    take: reads // channel: [ [ meta ] , [ reads ] ]
+    take: database // channel: [ [ meta ] , path ]
 
     main:
 
@@ -119,17 +118,18 @@ workflow METAGENOMICS_PROFILING {
     }
 
     if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
-        ch_input_for_krakenuniq =  ch_input_for_profiling.krakenuniq
-                                    .map {
-                                        meta, reads, db_meta, db ->
-                                            [[id: db_meta.db_name, single_end: meta.single_end], reads, db_meta, db]
-                                    }
-                                    .groupTuple(by: [0,2,3])
-                                    .multiMap {
-                                        single_meta, reads, db_meta, db ->
-                                            reads: [ single_meta + db_meta, reads.flatten() ]
-                                            db: db
-                                }
+        reads.view()
+        /*reads =  reads
+                    .map {
+                        meta, reads ->
+                            [[id: db_meta.db_name, single_end: meta.single_end], reads, db_meta, db]
+                    }
+                    .groupTuple(by: [0,2,3])
+                    .multiMap {
+                        single_meta, reads, db_meta, db ->
+                            reads: [ single_meta + db_meta, reads.flatten() ]
+                            db: db
+                }
         // Hardcode to _always_ produce the report file (which is our basic output, and goes into)
         KRAKENUNIQ_PRELOADEDKRAKENUNIQ ( ch_input_for_krakenuniq.reads, ch_input_for_krakenuniq.db, params.metagenomics_krakenuniq_ram_chunk_size, params.metagenomics_kraken_save_reads, true, params.metagenomics_kraken_save_readclassifications )
         ch_multiqc_files       = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
@@ -137,7 +137,7 @@ workflow METAGENOMICS_PROFILING {
         ch_raw_classifications = ch_raw_classifications.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.classified_assignment )
         ch_raw_profiles        = ch_raw_profiles.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
         ch_multiqc_files       = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
-
+        */
     }
 
     if ( params.metagenomics_profiling_tool == 'kraken2' ) {
