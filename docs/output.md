@@ -230,6 +230,8 @@ There are three different option for manipulation of ancient DNA damage.
 [mapDamage2](https://ginolhac.github.io/mapDamage/) can apply a probabilistic bayesian model to rescale quality scores of likely-damaged positions in the reads. A new BAM file is constructed by downscaling quality values for misincorporations likely due to ancient DNA damage according to their initial qualities, position in reads, and damage patterns. These BAM files have damage probabilistically removed via a bayesian model.
 Rescaling a BAM file in this way can help reduce/remove the effects of DNA damage from downstream analysis.
 
+Be advised that this process introduces reference bias in the resulting rescaled BAMs, because only mismatches to the reference get corrected, while true mismatches that become reference alleles due to damage are not rescaled.
+
 #### Post-Mortem-Damage (PMD) Filtering
 
 <details markdown="1">
