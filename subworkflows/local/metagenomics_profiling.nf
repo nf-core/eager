@@ -21,8 +21,7 @@ workflow METAGENOMICS_PROFILING {
     ch_raw_classifications       = Channel.empty()
     ch_raw_profiles              = Channel.empty()
     ch_multiqc_files             = Channel.empty()
-    // TODO: malt, metaphylan, kraken2, krakenuniq
-    // TODO: maltextract, krakenparse
+    ch_postprocessing_input      = Channel.empty()
 
     /*
         PREPARE PROFILER INPUT CHANNELS & RUN PROFILING
@@ -87,8 +86,9 @@ workflow METAGENOMICS_PROFILING {
                 }
         }
 
-        // MALT: We groupTuple to have all samples in one channel for MALT as database
-        // loading takes a long time, so we only want to run it once per database, unless otherwise specified (eg grouping samples)
+        // MALT: We can groupTuple to have all samples in one channel for MALT as database
+        // since loading takes a long time, we only want to run it once per database
+        // unless otherwise specified (eg grouping samples)
 
         MALT_RUN ( ch_input_for_malt.reads, ch_input_for_malt.database )
 
@@ -105,12 +105,13 @@ workflow METAGENOMICS_PROFILING {
                                         [ meta_new, rma ]
                                 }
 
-        ch_versions            = ch_versions.mix( MALT_RUN.out.versions.first() )
-        ch_raw_classifications = ch_raw_classifications.mix( ch_maltrun_for_megan )
-        ch_multiqc_files       = ch_multiqc_files.mix( MALT_RUN.out.log )
+        ch_versions                 = ch_versions.mix( MALT_RUN.out.versions.first() )
+        ch_raw_classifications      = ch_raw_classifications.mix( ch_maltrun_for_megan )
+        ch_multiqc_files            = ch_multiqc_files.mix( MALT_RUN.out.log )
+        ch_postprocessing_input = ch_postprocessing_input.mix( ch_maltrun_for_megan )
     }
 
-    if ( params.metagenomics_profiling_tool == 'metaphlan3' ) {
+    else if ( params.metagenomics_profiling_tool == 'metaphlan3' ) {
 
         METAPHLAN3_METAPHLAN3 ( reads , database )
         ch_versions        = ch_versions.mix( METAPHLAN3_METAPHLAN3.out.versions.first() )
@@ -118,7 +119,7 @@ workflow METAGENOMICS_PROFILING {
 
     }
 
-    if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
+    else if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
         ch_input_for_krakenuniq =  ch_input_for_profiling.krakenuniq
                                     .map {
                                         meta, reads, db_meta, db ->
@@ -132,32 +133,29 @@ workflow METAGENOMICS_PROFILING {
                                 }
         // Hardcode to _always_ produce the report file (which is our basic output, and goes into)
         KRAKENUNIQ_PRELOADEDKRAKENUNIQ ( ch_input_for_krakenuniq.reads, ch_input_for_krakenuniq.db, params.metagenomics_krakenuniq_ram_chunk_size, params.metagenomics_krakenuniq_save_reads, true, params.metagenomics_krakenuniq_save_readclassifications )
-        ch_multiqc_files       = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
-        ch_versions            = ch_versions.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions.first() )
-        ch_raw_classifications = ch_raw_classifications.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.classified_assignment )
-        ch_raw_profiles        = ch_raw_profiles.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
-        ch_multiqc_files       = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
-
+        ch_multiqc_files            = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
+        ch_versions                 = ch_versions.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions.first() )
+        ch_raw_classifications      = ch_raw_classifications.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.classified_assignment )
+        ch_raw_profiles             = ch_raw_profiles.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
+        ch_multiqc_files            = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
+        ch_postprocessing_input = ch_postprocessing_input.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
     }
 
-    if ( params.metagenomics_profiling_tool == 'kraken2' ) {
+    else if ( params.metagenomics_profiling_tool == 'kraken2' ) {
 
         KRAKEN2_KRAKEN2 ( ch_input_for_kraken2.reads, database, params.metagenomics_kraken2_save_reads, params.metagenomics_kraken2_save_readclassification )
-        ch_multiqc_files       = ch_multiqc_files.mix( KRAKEN2_KRAKEN2.out.report )
-        ch_versions            = ch_versions.mix( KRAKEN2_KRAKEN2.out.versions.first() )
-        ch_raw_classifications = ch_raw_classifications.mix( KRAKEN2_KRAKEN2.out.classified_reads_assignment )
-        ch_raw_profiles        = ch_raw_profiles.mix(
-            KRAKEN2_KRAKEN2.out.report
-                // Set the tool to be strictly 'kraken2' instead of potentially 'bracken' for downstream use.
-                // Will remain distinct from 'pure' Kraken2 results due to distinct database names in file names.
-                .map { meta, report -> [meta + [tool: 'kraken2'], report]}
-        )
+        ch_multiqc_files            = ch_multiqc_files.mix( KRAKEN2_KRAKEN2.out.report )
+        ch_versions                 = ch_versions.mix( KRAKEN2_KRAKEN2.out.versions.first() )
+        ch_raw_classifications      = ch_raw_classifications.mix( KRAKEN2_KRAKEN2.out.classified_reads_assignment )
+        ch_raw_profiles             = ch_raw_profiles.mix( KRAKEN2_KRAKEN2.out.report )
+        ch_postprocessing_input     = ch_postprocessing_input.mix( KRAKEN2_KRAKEN2.out.report )
 
     }
 
     emit:
-    versions          = ch_versions          // channel: [ versions.yml ]
-    classifications   = ch_raw_classifications
-    profiles          = ch_raw_profiles    // channel: [ val(meta), [ reads ] ] - should be text files or biom
-    mqc               = ch_multiqc_files
+    versions                 = ch_versions          // channel: [ versions.yml ]
+    classifications          = ch_raw_classifications
+    profiles                 = ch_raw_profiles    // channel: [ val(meta), [ reads ] ] - should be text files or biom
+    postprocessing_input     = ch_postprocessing_input
+    mqc                      = ch_multiqc_files
 }
