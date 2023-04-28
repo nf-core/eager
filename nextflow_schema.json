@@ -111,7 +111,7 @@
                     "help_text": "\n\nThe entry (chromosome, contig, etc.) in your FASTA reference that you'd like to be treated as circular.\n\nApplies only when providing a single FASTA file via `--fasta` (NOT multi-reference input - see reference TSV/CSV input).\n\n> Modifies tool parameter(s):\n> - circulargenerator `-s`\n",
                     "fa_icon": "fas fa-bullseye"
                 },
-                "fasta_mitochondrion_id": {
+                "fasta_mitochondrion_header": {
                     "type": "string",
                     "fa_icon": "fas fa-tag",
                     "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space).",

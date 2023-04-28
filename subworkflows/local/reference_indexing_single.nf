@@ -79,7 +79,7 @@ workflow REFERENCE_INDEXING_SINGLE {
                                 .join(ch_fasta_mapperindexdir, failOnMismatch: true)
                                 .map{
                                     meta, fasta, fai, dict, mapper_index ->
-                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.fasta_mitochondrion_id ]
+                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.fasta_mitochondrion_header ]
                                 }
 
     emit:

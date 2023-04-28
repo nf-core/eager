@@ -30,7 +30,7 @@ workflow REFERENCE_INDEXING_MULTI {
                                                         def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
                                                         def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
                                                         def circular_target = row["circular_target"]
-                                                        def mitochondrion   = row["mitochondrion"]
+                                                        def mitochondrion   = row["mitochondrion_header"]
                                                         [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
                                                 }
     } else {
