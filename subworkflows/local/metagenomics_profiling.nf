@@ -138,7 +138,7 @@ workflow METAGENOMICS_PROFILING {
         ch_raw_classifications      = ch_raw_classifications.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.classified_assignment )
         ch_raw_profiles             = ch_raw_profiles.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
         ch_multiqc_files            = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
-        ch_postprocessing_input = ch_postprocessing_input.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
+        ch_postprocessing_input     = ch_postprocessing_input.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
     }
 
     else if ( params.metagenomics_profiling_tool == 'kraken2' ) {
