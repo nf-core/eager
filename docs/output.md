@@ -145,6 +145,25 @@ The resulting FASTQ files will only be present in your results directory if you 
 
   [BWA](https://bio-bwa.sourceforge.net/bwa.shtml) is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome. BWA-backtrack (a.k.a `bwa aln`) is designed for Illumina sequence reads up to 100bp, while BWA-MEM (`bwa mem`) is optimised for longer sequences ranged from 70bp to 1Mbp and split alignment.
 
+### Mapping statistics
+
+#### EndorSpy
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `endorspy`
+
+  - `*.json`: json file per sample containing all the calculated percent on target, clonality and percent duplicates
+
+</details>
+[endorS.py](https://github.com/aidaanva/endorS.py) calculates percent on target (aka Endogenous DNA) from samtools flagstat files and print to screen.
+The percent on target reported will be different depending on the combination of samtools flagstat provided.
+This program also calculates clonality (aka 'cluster factor') and percent duplicates when the flagstat file after duplicate removal is provided
+
+ADD DESCRIPTION OF ENDOGENOUS + CLONALITY + % DUP and How they are calculated
+
+
 ### BAM Filtering
 
 <details markdown="1">
