@@ -43,6 +43,10 @@ if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmer
 // TODO add any other metagenomics screening parameters checks for eg complexity filtering, post-processing
 if ( params.run_metagenomics && ! params.metagenomics_profiling_database ) { exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database") }
 
+if ( params.metagenomics_postprocessing_tool == 'maltextract' && ! params.metagenomics_profiling_tool != 'malt' ) { exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'maltextract' can only be run with --metagenomics_profiling_tool 'malt'") }
+
+if ( params.metagenomics_postprocessing_tool == 'krakenparse' && ( ! params.metagenomics_profiling_tool != 'kraken2' || ! params.metagenomics_profiling_tool != 'krakenuniq' ) ) { exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'krakenparse' can only be run with --metagenomics_profiling_tool 'kraken2' or 'krakenuniq'") }
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Report possible warnings
