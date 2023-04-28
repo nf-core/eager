@@ -28,7 +28,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
 - Sequencing quality control (`FastQC`, `Falco`)
 - Sequencing adapter removal, paired-end data merging (`AdapterRemoval`)
 - Read mapping to reference using (`bwa aln`, `bwa mem`, `CircularMapper`, or `bowtie2`)
-- Post-mapping processing, statistics and conversion to bam (`samtools`)
+- Post-mapping processing, statistics and conversion to bam (`samtools`, and `preseq`)
 - Ancient DNA C-to-T damage pattern visualisation (`DamageProfiler`)
 - PCR duplicate removal (`DeDup` or `MarkDuplicates`)
 - Post-mapping statistics and BAM quality control (`Qualimap`)
@@ -71,7 +71,7 @@ Additional functionality contained by the pipeline currently includes:
 
 #### Metagenomic Screening
 
-- Low-sequenced complexity filtering (`BBduk`)
+- Low-sequenced complexity filtering (`BBduk` or `PRINSEQ++`)
 - Taxonomic binner with alignment (`MALT`)
 - Taxonomic binner without alignment (`Kraken2`)
 - aDNA characteristic screening of taxonomically binned data from MALT (`MaltExtract`)
@@ -136,6 +136,7 @@ We thank the following people for their extensive assistance in the development 
 - [Fabian Lehmann](https://github.com/Lehmann-Fabian)
 - [He Yu](https://github.com/paulayu)
 - [Hester van Schalkwyk](https://github.com/hesterjvs)
+- [Ian Light-Máka](https://github.com/ilight1542)
 - [Ido Bar](https://github.com/IdoBar)
 - [Irina Velsko](https://github.com/ivelsko)
 - [Işın Altınkaya](https://github.com/isinaltinkaya)
@@ -148,6 +149,7 @@ We thank the following people for their extensive assistance in the development 
 - [Mahesh Binzer-Panchal](https://github.com/mahesh-panchal)
 - [Marcel Keller](https://github.com/marcel-keller)
 - [Megan Michel](https://github.com/meganemichel)
+- [Merlin Szymanski](https://github.com/merszym)
 - [Pierre Lindenbaum](https://github.com/lindenb)
 - [Pontus Skoglund](https://github.com/pontussk)
 - [Raphael Eisenhofer](https://github.com/EisenRa)
