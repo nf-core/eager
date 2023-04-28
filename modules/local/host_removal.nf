@@ -23,12 +23,12 @@ process HOST_REMOVAL {
     def VERSION_PYSAM = '0.16.0'
     def VERSION_XOPEN = '1.1.0'
     def fastqs_input = [fastqs].flatten().sort().size() > 1 ? "${fastqs[0]} -rev ${fastqs[1]}" : "${fastqs[0]}"
-    def outputR2 = [fastqs].flatten().sort().size() > 1 ? "-or ${prefix}_hostremoved.r2.fq.gz" : ''
+    def output_r2 = [fastqs].flatten().sort().size() > 1 ? "-or ${prefix}_hostremoved.r2.fq.gz" : ''
 
     """
     extract_map_reads.py \\
         $args \\
-        $outputR2 \\
+        $output_r2 \\
         -of ${prefix}_hostremoved.r1.fq.gz \\
         -t $task.cpus \\
         $bam \\
