@@ -245,7 +245,7 @@ workflow EAGER {
     if ( !params.skip_damage_calculation ) {
         CALCULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_damagecalculation.fasta, ch_fasta_for_damagecalculation.fasta_fai )
         ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.lc_extrap.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
 
     } 
 
