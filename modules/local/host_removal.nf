@@ -36,7 +36,6 @@ process HOST_REMOVAL {
         $bam \\
         $fastqs_input
 
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
