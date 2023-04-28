@@ -10,6 +10,16 @@
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
+                    "angsd/contamination": {
+                        "branch": "master",
+                        "git_sha": "df739eaa4ca41885ce8f590d0727d6e397d95cec",
+                        "installed_by": ["bam_docounts_contamination_angsd"]
+                    },
+                    "angsd/docounts": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "installed_by": ["bam_docounts_contamination_angsd"]
+                    },
                     "bbmap/bbduk": {
                         "branch": "master",
                         "git_sha": "0f8a77ff00e65eaeebc509b8156eaa983192474b",
@@ -105,11 +115,6 @@
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
-                    "prinseqplusplus": {
-                        "branch": "master",
-                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
-                        "installed_by": ["modules"]
-                    },
                     "preseq/ccurve": {
                         "branch": "master",
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
@@ -118,6 +123,11 @@
                     "preseq/lcextrap": {
                         "branch": "master",
                         "git_sha": "0f8a77ff00e65eaeebc509b8156eaa983192474b",
+                        "installed_by": ["modules"]
+                    },
+                    "prinseqplusplus": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
                     "samtools/faidx": {
@@ -164,6 +174,11 @@
             },
             "subworkflows": {
                 "nf-core": {
+                    "bam_docounts_contamination_angsd": {
+                        "branch": "master",
+                        "git_sha": "a9784afdd5dcda23b84e64db75dc591065d64653",
+                        "installed_by": ["subworkflows"]
+                    },
                     "bam_split_by_region": {
                         "branch": "master",
                         "git_sha": "cb519b4da8bc644f5dd4820d83d7f7416d519d26",

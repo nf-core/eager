@@ -67,7 +67,7 @@ include { MAP                           } from '../subworkflows/local/map'
 include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
-
+include { CONTAMINATION_ESTIMATION      } from '../subworkflows/local/contamination_estimation'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -121,6 +121,9 @@ workflow EAGER {
         if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
+
+    // Contamination estimation
+    hapmap_file = file(params.hapmap, checkIfExists:true) // does this need an if else condition for skipping?
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -281,6 +284,19 @@ workflow EAGER {
         PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
+    }
+
+    //
+    // SUBWORKFLOW: CONTAMINATION ESTIMATION
+    //
+
+    if ( params.run_contamination) {
+        contamination_input  = ch_dedupped_bams
+        contamination_hapmap = hapmap_file
+        CONTAMINATION_ESTIMATION(contamination_input.bam, contamination_input.bai, contamination_hapmap)
+        ch_versions      = ch_versions.mix( CONTAMINATION_ESTIMATION.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( CONTAMINATION_ESTIMATION.out.fastq.collect{it[1]}.ifEmpty([]))
+
     }
 
     //
