@@ -250,7 +250,7 @@ workflow EAGER {
     //
 
     //TODO: finish and figure out how exactly to call with proper database (check via a helper function?)
-    if ( params.run_metagenomics_screening ) {
+    if ( params.run_metagenomics ) {
         METAGENOMICS ( ch_bamfiltered_for_metagenomics )
         ch_versions      = ch_versions.mix( METAGENOMICS.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS.out.ch_multiqc_files )
