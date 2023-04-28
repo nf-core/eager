@@ -65,10 +65,6 @@
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
-                    "endorspy": {
-                        "branch": "master",
-                        "git_sha": "d0cd7a67ee53e32c668cfaaba4de20c308654833"
-                    },
                     "falco": {
                         "branch": "master",
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
