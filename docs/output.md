@@ -157,10 +157,12 @@ The resulting FASTQ files will only be present in your results directory if you 
 
 </details>
 
-nf-core/eager host removal step removes any reads from the original input fastq files that mapped to the provided reference. This step is performed by an a costume python script [extract_map_reads.py](https://github.com/nf-core/eager/blob/master/bin/extract_map_reads.py).
+nf-core/eager host removal step removes any reads from the original input fastq files that mapped to the provided reference. This step is performed by a custom python script [extract_map_reads.py](https://github.com/nf-core/eager/blob/master/bin/extract_map_reads.py).
 
-The resulting fastq files can be used for publication purposes where
-the host DNA should not be made available for ethical reasons (for example when you do not have permission to analyse the host DNA but analysis on the metagenomic content were agreed) or for due to identifiability reasons (for example, for individualsthat died in recent times and could be identified based on their DNA alone).
+The resulting FASTQ files can be used for publication purposes where
+the host DNA should not be made available for ethical reasons (for example when you do not have permission to analyse the host DNA but only analysis on the metagenomic content were agreed) or for due to identifiability reasons (for example, for individuals that died in recent times and could be identified based on their DNA alone).
+
+Alternatively you could use it for manual metagenomic screen outside of nf-core/eager (e.g. when your preferred taxonomic classifier isn't supported by nf-core/eager).
 
 ### BAM Filtering
 
