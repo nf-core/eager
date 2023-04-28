@@ -19,10 +19,6 @@ workflow CONTAMINATION_ESTIMATION {
     ch_versions     = ch_versions.mix ( BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.versions.first() )
     ch_angsd_contam = BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.txt
 
-// where does the config statement need to go?
-// includeConfig 'subworkflows/nf-core/bam_docounts_contamination_angsd/nextflow.config'
-// need to add param for running contamination_estimation and hapmap file
-
     emit:
     angsd_contam      = ch_angsd_contam
     versions          = ch_versions

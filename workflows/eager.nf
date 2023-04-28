@@ -123,7 +123,9 @@ workflow EAGER {
     }
 
     // Contamination estimation
-    hapmap_file = file(params.hapmap, checkIfExists:true) // does this need an if else condition for skipping?
+    if ( params.run_contamination ) {
+        hapmap_file = file(params.angsd_hapmap, checkIfExists:true)
+    }
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -287,7 +289,7 @@ workflow EAGER {
     }
 
     //
-    // SUBWORKFLOW: CONTAMINATION ESTIMATION
+    // SUBWORKFLOW: Contamination estimation
     //
 
     if ( params.run_contamination) {

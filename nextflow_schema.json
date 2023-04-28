@@ -706,6 +706,49 @@
             },
             "fa_icon": "fas fa-clone"
         },
+        "contamination_estimation_for_human_dna": {
+            "title": "Contamination estimation for Human DNA",
+            "type": "object",
+            "description": "Options for the estimation of contamination of human DNA",
+            "default": "",
+            "fa_icon": "fas fa-radiation-alt",
+            "properties": {
+                "run_contamination": {
+                    "type": "boolean",
+                    "description": "Turn on nuclear contamination estimation for human reference genomes.",
+                    "help_text": "Specify to run the optional processes for (human) nuclear DNA contamination estimation.",
+                    "fa_icon": "fas fa-power-off"
+                },
+                "angsd_chrom_name": {
+                    "type": "string",
+                    "default": "X",
+                    "description": "The name of the X chromosome in your bam/FASTA header. 'X' for hs37d5, 'chrX' for HG19.",
+                    "help_text": "The name of the human chromosome X in your bam. 'X' for hs37d5, 'chrX' for HG19.",
+                    "fa_icon": "fas fa-address-card"
+                },
+                "angsd_mapq": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "Specify the minimum mapping quality reads should have for contamination estimation with angsd.",
+                    "help_text": "> Modifies angsd parameter: `-minMapQ`",
+                    "fa_icon": "fas fa-thumbs-up"
+                },
+                "angsd_minq": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "Specify the minimum bam quality reads should have for contamination estimation with angsd.",
+                    "help_text": "> Modifies angsd parameter: `-minQ`",
+                    "fa_icon": "fas fa-thumbs-up"
+                },
+                "angsd_hapmap": {
+                    "type": "string",
+                    "default": "${projectDir}/assets/HapMapChrX.gz",
+                    "fa_icon": "fas fa-map",
+                    "description": "Path to HapMap file of X-chromosome.",
+                    "help_text": "The haplotype map, or \"HapMap\", records the location of haplotype blocks and their tag SNPs."
+                }
+            }
+        },
         "mitochondrial_to_nuclear_ratio": {
             "title": "Mitochondrial to Nuclear Ratio",
             "type": "object",
@@ -824,6 +867,9 @@
         },
         {
             "$ref": "#/definitions/deduplication"
+        },
+        {
+            "$ref": "#/definitions/contamination_estimation_for_human_dna"
         },
         {
             "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
