@@ -759,7 +759,8 @@
                     "default": "remove",
                     "description": "Host removal mode. Remove mapped reads completely from FASTQ (remove) or just mask mapped reads sequence by N (replace).",
                     "help_text": "Read removal mode. Remove mapped reads completely ('remove') or just replace mapped reads sequence by N ('replace')\n\n> Modifies extract_map_reads.py parameter: -m",
-                    "fa_icon": "fas fa-plane-slash"
+                    "fa_icon": "fas fa-plane-slash",
+                    "enum": ["remove", "replace"]
                 }
             },
             "fa_icon": "fas fa-user-slash"
