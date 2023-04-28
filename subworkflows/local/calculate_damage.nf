@@ -46,10 +46,11 @@ workflow CALCULATE_DAMAGE {
     DAMAGEPROFILER(
                 ch_damageprofiler_input.bam,
                 ch_damageprofiler_input.fasta,
-                ch_damageprofiler_input.fasta_fai
+                ch_damageprofiler_input.fasta_fai,
+                []
             )
             ch_versions       = ch_versions.mix( DAMAGEPROFILER.out.versions.first() )
-            ch_multiqc_files  = ch_multiqc_files.mix( DAMAGEPROFILER.out.settings )
+            ch_multiqc_files  = ch_multiqc_files.mix( DAMAGEPROFILER.out.results )
 
     emit:
     versions = ch_versions          // channel: [ versions.yml ]
