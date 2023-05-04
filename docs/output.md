@@ -213,7 +213,7 @@ These curves will be displayed in the pipeline run's MultiQC report, however you
 
 ### Damage Manipulation
 
-There are three different option for manipulation of ancient DNA damage.
+There are three different options for manipulation of ancient DNA damage.
 
 #### Damage Rescaling
 
