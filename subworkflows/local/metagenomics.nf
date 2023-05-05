@@ -30,15 +30,15 @@ workflow METAGENOMICS {
     // Run the profiling subworkflow
     //
 
-    database = params.metagenomics_profiling_database
+    database = Channel.fromPath(params.metagenomics_profiling_database)
 
     METAGENOMICS_PROFILING( ch_reads_for_metagenomics, database )
+
     ch_versions      = ch_versions.mix( METAGENOMICS_PROFILING.out.versions.first() )
     ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS_PROFILING.out.mqc.collect{it[1]}.ifEmpty([]) )
 
     emit:
     versions      = ch_versions
     ch_multiqc_files = ch_multiqc_files
-
 
 }

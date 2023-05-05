@@ -11,23 +11,21 @@ include { METAPHLAN3_METAPHLAN3                         } from '../../modules/nf
 
 workflow METAGENOMICS_PROFILING {
 
-    take: reads // channel: [ [ meta ] , [ reads ] ]
-    take: database // channel: [ [ meta ] , path ]
+    take:
+    reads
+    database
 
     main:
-
-    ch_versions                  = Channel.empty()
-    ch_raw_classifications       = Channel.empty()
-    ch_raw_profiles              = Channel.empty()
-    ch_multiqc_files             = Channel.empty()
-    // TODO: malt, metaphylan, kraken2, krakenuniq
-    // TODO: maltextract, krakenparse
+    ch_versions            = Channel.empty()
+    ch_raw_classifications = Channel.empty()
+    ch_raw_profiles        = Channel.empty()
+    ch_multiqc_files       = Channel.empty()
 
     /*
         PREPARE PROFILER INPUT CHANNELS & RUN PROFILING
     */
 
-    // Each tool as a slightly different input structure and generally separate
+    // Each tool has a slightly different input structure and generally separate
     // input channels for reads vs database. We restructure the channel tuple
     // for each tool and make liberal use of multiMap to keep reads/database
     // channel element order in sync with each other
@@ -118,26 +116,26 @@ workflow METAGENOMICS_PROFILING {
     }
 
     if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
-        reads.view()
-        /*reads =  reads
-                    .map {
-                        meta, reads ->
-                            [[id: db_meta.db_name, single_end: meta.single_end], reads, db_meta, db]
-                    }
-                    .groupTuple(by: [0,2,3])
-                    .multiMap {
-                        single_meta, reads, db_meta, db ->
-                            reads: [ single_meta + db_meta, reads.flatten() ]
-                            db: db
-                }
-        // Hardcode to _always_ produce the report file (which is our basic output, and goes into)
-        KRAKENUNIQ_PRELOADEDKRAKENUNIQ ( ch_input_for_krakenuniq.reads, ch_input_for_krakenuniq.db, params.metagenomics_krakenuniq_ram_chunk_size, params.metagenomics_kraken_save_reads, true, params.metagenomics_kraken_save_readclassifications )
+        // run kraken uniq per sample, to preserve the meta-data
+
+        reads = reads.combine(database)
+        krakenuniq_reads = reads.map{meta, reads, database -> [meta, reads]}
+        krakenuniq_db = reads.map{meta, reads, database -> [database]}
+
+        KRAKENUNIQ_PRELOADEDKRAKENUNIQ (
+            krakenuniq_reads,
+            krakenuniq_db,
+            params.metagenomics_krakenuniq_ram_chunk_size,
+            params.metagenomics_kraken_save_reads,
+            true,
+            params.metagenomics_kraken_save_read_classifications
+        )
+
         ch_multiqc_files       = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
         ch_versions            = ch_versions.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions.first() )
         ch_raw_classifications = ch_raw_classifications.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.classified_assignment )
         ch_raw_profiles        = ch_raw_profiles.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
         ch_multiqc_files       = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
-        */
     }
 
     if ( params.metagenomics_profiling_tool == 'kraken2' ) {

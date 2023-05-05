@@ -389,3 +389,25 @@ nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup_merged -du
 ## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
 nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_dedup_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
+
+## Metagenomics
+
+### Complexityfilter
+
+### Profiling
+
+#### Krakenuniq
+
+```bash
+### With saved reads
+# Use only the -profile test dataset, provide a custom kraken database
+# Expected: directory with 2 fastq-files and 1 textfile for each sample, containing classified, unclassified reads and the raw krakenuniq profile
+nextflow run main.nf -profile test,singularity --outdir out --run_metagenomics --metagenomics_profiling_tool krakenuniq --metagenomics_profiling_database ../runtest/refseq_rel215/kraken/Mito_db_kmer22/ --metagenomics_kraken_save_reads
+```
+
+```bash
+### Without saved reads
+# Use only the -profile test dataset, provide a custom kraken database
+# Expected: directory with 1 textfile for each sample: the raw krakenuniq profile
+nextflow run main.nf -profile test,singularity --outdir out --run_metagenomics --metagenomics_profiling_tool krakenuniq --metagenomics_profiling_database ../runtest/refseq_rel215/kraken/Mito_db_kmer22/
+```

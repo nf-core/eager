@@ -286,13 +286,6 @@ workflow EAGER {
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
-    // SUBWORKFLOW: metagenomics screening
-    //
-    //TODO: finish and figure out how exactly to call with proper database (check via a helper function?)
-    if ( params.run_metagenomics ) {
-        METAGENOMICS_PROFILING ( ch_bamfiltered_for_metagenomics, params.metagenomics_profiling_database ) // TODO: implement full metagenomics screening main subworkflow
-    }
-    // that then calls complexityfilter, profiling, postprocessing
 
     //
     // MODULE: MultiQC
