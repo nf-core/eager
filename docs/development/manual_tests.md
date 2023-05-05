@@ -392,8 +392,9 @@ nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/onl
 ### CALCULATE DAMAGE
 
 #### With DamageProfiler
+
 ```bash
 ## DamageProfiler with default parameters
-## Expect:damageprofiler directory with txt, pdf, svg for each library (19 files total per library). 
+## Expect:damageprofiler directory with txt, pdf, svg for each library (19 files total per library).
 nextflow run main.nf -profile test,conda --outdir ./results -resume
 ```
