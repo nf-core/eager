@@ -67,7 +67,7 @@ include { MAP                           } from '../subworkflows/local/map'
 include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
-include { CONTAMINATION_ESTIMATION      } from '../subworkflows/local/contamination_estimation'
+include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -123,8 +123,11 @@ workflow EAGER {
     }
 
     // Contamination estimation
-    if ( params.run_contamination ) {
+    if ( params.run_contamination_angsd ) {
         hapmap_file = file(params.angsd_hapmap, checkIfExists:true)
+        ch_hapmap = Channel.of( [ hapmap_file ] )
+    } else {
+        ch_hapmap = Channel.empty()
     }
 
     //
@@ -134,6 +137,7 @@ workflow EAGER {
         ch_input
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
+    // INPUT_CHECK.out.bams.dump() no reference [DUMP] [['id':'JK2067_JK2067', 'sample_id':'JK2067', 'library_id':'JK2067', 'strandedness':'double', 'damage_treatment':'full'], /nf-core/test-datasets/raw/eager/testdata/Human/bam/JK2067_downsampled_s0.1.bam]
 
     //
     // SUBWORKFLOW: Indexing of reference files
@@ -292,22 +296,18 @@ workflow EAGER {
     // SUBWORKFLOW: Contamination estimation
     //
 
-    if ( params.run_contamination) {
-        contamination_input_bam  = ch_dedupped_bams
+    if ( params.run_contamination_angsd ) {
+        contamination_input = ch_dedupped_bams
+        hapmap_input        = ch_hapmap
+        .combine( REFERENCE_INDEXING.out.reference )
         .map {
-            meta, bam, bai ->
-            [ meta, bam ]
-        }
-        contamination_input_bai = ch_dedupped_bams
-        .map {
-            meta, bam, bai ->
-            [ meta, bai ]
-        }
-        contamination_hapmap = hapmap_file
-        CONTAMINATION_ESTIMATION(contamination_input_bam, contamination_input_bai, contamination_hapmap)
-        ch_versions      = ch_versions.mix( CONTAMINATION_ESTIMATION.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix( CONTAMINATION_ESTIMATION.out.angsd_contam.collect{it[1]}.ifEmpty([]))
+            hapmap, meta, fasta, fai, dict, index ->
+            [ meta, hapmap ]
+        } //works fine until here [DUMP] [['id':'hs37d5_chr21'], /Users/carlhoff/Documents/git/eager/assets/HapMapChrX.gz]
 
+        //ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
+        //ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
+        //ch_multiqc_files = ch_multiqc_files.mix(ESTIMATE_CONTAMINATION.out.angsd_contam.collect{it[1]}.ifEmpty([]))
     }
 
     //

@@ -713,11 +713,11 @@
             "default": "",
             "fa_icon": "fas fa-radiation-alt",
             "properties": {
-                "run_contamination": {
+                "run_contamination_angsd": {
                     "type": "boolean",
-                    "description": "Turn on nuclear contamination estimation for human reference genomes.",
-                    "help_text": "Specify to run the optional processes for (human) nuclear DNA contamination estimation.",
-                    "fa_icon": "fas fa-power-off"
+                    "fa_icon": "fas fa-power-off",
+                    "description": "Turn on nuclear contamination estimation for human genomes with ANGSD.",
+                    "help_text": "Specify to run the optional processes for (human) nuclear DNA contamination estimation with ANGSD."
                 },
                 "angsd_chrom_name": {
                     "type": "string",
