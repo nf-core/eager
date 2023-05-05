@@ -294,7 +294,7 @@ workflow EAGER {
     //
     //TODO: finish and figure out how exactly to call with proper database (check via a helper function?)
     if ( params.run_metagenomics ) {
-        METAGENOMICS_PROFILING ( ch_bamfiltered_for_metagenomics, params.metagenomics_profiling_database ) // TODO: implement full metagenomics screening main subworkflow
+        METAGENOMICS ( ch_bamfiltered_for_metagenomics ) // TODO: implement full metagenomics screening main subworkflow
     }
     // that then calls complexityfilter, profiling, postprocessing
 
