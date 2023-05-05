@@ -272,7 +272,7 @@ These curves will be displayed in the pipeline run's MultiQC report, however you
 <details markdown="1">
 <summary>Output files</summary>
 
-- `damageprofiler/`: this contains sample specific directories containing raw statistics and damage plots from DamageProfiler.
+- `damage_estimation/damageprofiler/`: this contains sample specific directories containing raw statistics and damage plots from DamageProfiler.
   - `*.pdf`: can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
 
   </details>
