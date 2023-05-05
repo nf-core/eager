@@ -60,7 +60,6 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-
 include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
 include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
 include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
