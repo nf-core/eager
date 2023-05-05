@@ -5,6 +5,7 @@
 // TODO nf-core: A subworkflow SHOULD import at least two modules
 
 include { MALTEXTRACT } from '../../../modules/nf-core/maltextract/main'
+include { KRAKENPARSE } from '../../../modules/local/krakenparse'
 
 workflow METAGENOMICS_POSTPROCESSING {
 
@@ -17,24 +18,24 @@ workflow METAGENOMICS_POSTPROCESSING {
     ch_versions      = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    // TODO nf-core: substitute modules here for the modules of your subworkflow
-
     if ( params.metagenomics_postprocessing_tool == 'maltextract') {
         MALTEXTRACT ( ch_postprocessing_input, params.taxon_list, params.ncbi_dir )
         ch_versions = ch_versions.mix( MALTEXTRACT.out.versions.first() )
         ch_results  = ch_results.mix( MALTEXTRACT.out.results )
     }
     else if ( params.metagenomics_postprocessing_tool == 'krakenparse' ) {
-        // TODO: @merlin fininsh implementation/merge with your implementation
         KRAKENPARSE ( ch_postprocessing_input )
         ch_versions = ch_versions.mix( KRAKENPARSE.out.versions.first() )
         ch_results  = ch_results.mix( KRAKENPARSE.out.results )
     }
-
+// TODO check how to actually emit krakenparse output channels into one directory
+// TODO check if necessary to have merge_kraken_parsed
+// TODO add paths for multiqc files (maltextract and maybe kraken parse)
     emit:
     // TODO nf-core: edit emitted channels
     versions          = ch_versions
     results_directory = ch_results
+    mqc               = ch_multiqc_files
 
 }
 

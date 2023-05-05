@@ -41,10 +41,12 @@ workflow METAGENOMICS {
     //
     // Run the post profiling subworkflow
     //
-    if ( params.metagenomics_postprocessing_tool == 'maltextract' || params.metagenomics_postprocessing_tool == 'krakenparse' ) { }
-    METAGENOMICS_POSTPROCESSING ( METAGENOMICS_PROFILING.out.postprocessing_input )
-    ch_versions      = ch_versions.mix( METAGENOMICS_POSTPROCESSING.out.versions.first() )
-    ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS_POSTPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
+
+    if ( params.metagenomics_postprocessing_tool ) {
+        METAGENOMICS_POSTPROCESSING ( METAGENOMICS_PROFILING.out.postprocessing_input )
+        ch_versions      = ch_versions.mix( METAGENOMICS_POSTPROCESSING.out.versions.first() )
+        ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS_POSTPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
+    }
 
     emit:
     versions      = ch_versions
