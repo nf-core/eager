@@ -67,6 +67,7 @@ include { MAP                           } from '../subworkflows/local/map'
 include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
+include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -282,6 +283,24 @@ workflow EAGER {
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
+
+     //
+    // SUBWORKFLOW: Calculate Damage
+    //
+
+    ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
+        .multiMap{
+            meta, fasta, fai, dict, index ->
+            fasta:      [ meta, fasta ]
+            fasta_fai:  [ meta, fai ]
+        }
+
+    if ( !params.skip_damage_calculation ) {
+        CALCULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_damagecalculation.fasta, ch_fasta_for_damagecalculation.fasta_fai )
+        ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
+
+    } 
 
     //
     // MODULE: MultiQC
