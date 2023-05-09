@@ -802,8 +802,7 @@
             "help_text": "More documentation can be seen in the follow links for:\n\n[DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)\n\nIf using TSV input, DamageProfiler is performed per library, i.e. after lane merging. BAM Trimming is only performed on non-UDG and half-UDG treated data.",
             "properties": {
                 "skip_damage_calculation": {
-                    "type": "string",
-                    "default": "false",
+                    "type": "boolean",
                     "fa_icon": "fas fa-forward",
                     "help_text": "Turns off the DamageProfiler module to compute DNA damage profiles."
                 },
