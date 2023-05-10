@@ -107,8 +107,23 @@ nextflow run ../main.nf -profile singularity,test --outdir ./results --input sam
 ## Expect: Expect FAIL at mapping step for Mammoth two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
 nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test06.csv -ansi-log false -dump-channels --save_reference --mapping_tool bowtie2
 
-## BACK TO BWA, SUPPLY ALL for MAMMOTH
-## ALSO SUPPLY FILES FOR HUMAN REF
+## Test: (7) Mammoth has all pre-supplied ✅
+## Expect: Expect one fai (x1 SAMTOOLS_FAIDX processes), one dict (x1 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test07.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (8) No indexing necessary, all already supplied ✅
+## Expect: Expect no files to be generated/processes executed, nor results present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test08.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (9) All but Human FAI provided ❓️ - fails at step not involving FAI?
+## Expect: Expect one fai (x1 SAMTOOLS_FAIDX processes), and nothing else results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test09.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (10) All but Human dict provided ✅
+## Expect: Expect one dict (x1 PICARD_CREATESEQUENCEDICTIONARY processes), and nothing else results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test10.csv -ansi-log false -dump-channels --save_reference
+
+## BORKED PATHS
 ```
 
 ### AdapterRemoval
