@@ -197,11 +197,6 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_indexmapper_for_reference = ch_fasta_for_mapperindex.skip.mix(ch_indexed_formix)
 
-
-    // TODO: all manual tests -> single vs table, csv vs tsv (cycle through missing combinations of flags)
-    // TODO: check same output as CSV (csv main testing)
-    // TODO: logic when all direct reference and indicies are already supplied (in main reference_indeinx.nf file)
-
     emit:
     reference = ch_indexmapper_for_reference // [ meta, fasta, fai, dict, mapindex, circular_target, mitochondrion ]
     versions = ch_versions

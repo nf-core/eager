@@ -21,7 +21,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     ch_versions = Channel.empty()
 
-    def fasta_ext = grab_ungzipped_extension(fasta)
+    def fasta_ext = grabUngzippedExtension(fasta)
     def clean_name = fasta.name.toString() - fasta_ext
 
     // Detect if fasta is gzipped or not, unzip if necessary, and generate meta ID by sanitizing file
@@ -88,7 +88,8 @@ workflow REFERENCE_INDEXING_SINGLE {
 
 }
 
-def grab_ungzipped_extension (Path infile) {
+// TODO Move to lib?
+def grabUngzippedExtension (Path infile) {
 
     def split_name = infile.toString().tokenize('.')
     def output = split_name.reverse().first() == 'gz' ? split_name.reverse()[1,0].join('.') : split_name.reverse()[0]

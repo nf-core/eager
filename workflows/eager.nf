@@ -169,7 +169,6 @@ workflow EAGER {
     //
     ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
             .map{
-                // TODO make sure works with single-reference
                 meta, fasta, fai, dict, index, circular_target, mitochondrion ->
                 [ meta, index ]
             }
