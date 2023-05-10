@@ -123,7 +123,9 @@ nextflow run ../main.nf -profile singularity,test --outdir ./results --input sam
 ## Expect: Expect one dict (x1 PICARD_CREATESEQUENCEDICTIONARY processes), and nothing else results/reference folder
 nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test10.csv -ansi-log false -dump-channels --save_reference
 
-## BORKED PATHS
+## Test: (11) Broken path correctly fails pipeline ✅
+## Expect: Expect fail
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test11.csv -ansi-log false -dump-channels --save_reference
 ```
 
 ### AdapterRemoval
