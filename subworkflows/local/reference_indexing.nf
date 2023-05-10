@@ -14,32 +14,17 @@ workflow REFERENCE_INDEXING {
 
     main:
     ch_versions = Channel.empty()
-    // TODO add WARN: if fasta.ext == csv && fai/dict/mapperindexdir supplied, then latter will be ignored with preference for info in csv!
 
+    // Warn user if they've given a reference sheet that already includes fai/dict/mapper index etc.
+    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' && (fasta_fai || fasta_dict || fasta_mapperindexdir))  ) warning("A TSV or CSV has been supplied to `--fasta` as well as e.g. `--fasta_fai`. --fasta CSV/TSV takes priority and --fasta_* parameters will be ignored.")
 
-    if ( fasta_fai && fasta_dict && fasta_mapperindexdir ) {
-        def fasta_ext = grabUngzippedExtension(fasta)
-        def clean_name = fasta.name.toString() - fasta_ext
-
-        ch_fasta = Channel.fromPath(fasta).map{[[id: clean_name], it ]}
-        ch_fasta_fai = Channel.fromPath(fasta_fai).map{[[id: clean_name], it ]}
-        ch_fasta_dict = Channel.fromPath(fasta_dict).map{[[id: clean_name], it ]}
-        ch_fasta_mapperindexdir = Channel.fromPath(fasta_mapperindexdir).map{[[id: clean_name], it ]}
-
-        ch_reference_for_mapping = ch_fasta
-                                    .join(ch_fasta_fai, failOnMismatch: true)
-                                    .join(ch_fasta_dict, failOnMismatch: true)
-                                    .join(ch_fasta_mapperindexdir, failOnMismatch: true)
-                                    .map{
-                                        meta, fasta, fai, dict, mapper_index ->
-                                        [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.fasta_mitochondrion_header ]
-                                    }
-
-    } else if ( fasta.extension == 'csv' | fasta.extension == 'tsv' ) {
+    if ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) {
+        // If input (multi-)reference sheet supplied
         REFERENCE_INDEXING_MULTI ( fasta )
         ch_reference_for_mapping = REFERENCE_INDEXING_MULTI.out.reference
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_MULTI.out.versions )
     } else {
+        // If input FASTA and/or indicies supplied
         ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir ).reference
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }

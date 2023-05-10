@@ -47,7 +47,7 @@ workflow REFERENCE_INDEXING_SINGLE {
         ch_fasta_dict = PICARD_CREATESEQUENCEDICTIONARY ( ch_ungz_ref ).reference_dict.map{[ [id: clean_name - '.fai'], it[1] ] }
         ch_versions = ch_versions.mix( PICARD_CREATESEQUENCEDICTIONARY.out.versions.first())
     } else {
-        ch_fasta_dict = Channel.fromPath(ch_fasta_dict).map{[[id: clean_name], it ]}
+        ch_fasta_dict = Channel.fromPath(fasta_dict).map{[[id: clean_name], it ]}
     }
 
     // Generate mapper indicies if not supplied, and if supplied generate meta
