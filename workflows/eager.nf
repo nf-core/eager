@@ -305,9 +305,9 @@ workflow EAGER {
             [ meta, hapmap ]
         } //works fine until here [DUMP] [['id':'hs37d5_chr21'], /Users/carlhoff/Documents/git/eager/assets/HapMapChrX.gz]
 
-        //ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
-        //ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
-        //ch_multiqc_files = ch_multiqc_files.mix(ESTIMATE_CONTAMINATION.out.angsd_contam.collect{it[1]}.ifEmpty([]))
+        ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
+        ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix(ESTIMATE_CONTAMINATION.out.angsd_contam.collect{it[1]}.ifEmpty([]))
     }
 
     //

@@ -30,15 +30,16 @@ workflow ESTIMATE_CONTAMINATION {
             // Create additional map containing only meta.reference for combining samples and hapmap
             meta, bam, bai ->
                 meta2 = [:]
-                meta2.reference = meta.reference
+                //meta2.reference = meta.reference
+                meta2.reference = 'hs37d5_chr21'
             [ meta2, meta, bam, bai ]
-        }.dump() // no reference in meta [DUMP] [['reference':null], ['id':'JK2067_JK2067', 'sample_id':'JK2067', 'library_id':'JK2067', 'strandedness':'double', 'damage_treatment':'full'], /Users/carlhoff/Documents/git/eager/test/work/c3/43a2c63895c0f069d6a6ffd489ef68/JK2067_JK2067_JK2067_filtered.bam, /Users/carlhoff/Documents/git/eager/test/work/71/f02947a9b4a7a4f1eb62e7927decdd/JK2067_JK2067_JK2067_filtered.bam.bai]
+        }.dump() //[DUMP] [['reference':'hs37d5_chr21'], ['id':'JK2067_JK2067', 'sample_id':'JK2067', 'library_id':'JK2067', 'strandedness':'double', 'damage_treatment':'full'], /Users/carlhoff/Documents/git/eager/test/work/24/7ce6e5910196fa07e9b314891c1532/JK2067_JK2067_JK2067_filtered.bam, /Users/carlhoff/Documents/git/eager/test/work/b9/e1f1beb5109c7ab68e8948218325c1/JK2067_JK2067_JK2067_filtered.bam.bai]
         .combine(
             by: 0,
             angsd_input_hapmap
-        )
+        )// [DUMP] [['reference':'hs37d5_chr21'], ['id':'JK2067_JK2067', 'sample_id':'JK2067', 'library_id':'JK2067', 'strandedness':'double', 'damage_treatment':'full'], /Users/carlhoff/Documents/git/eager/test/work/24/7ce6e5910196fa07e9b314891c1532/JK2067_JK2067_JK2067_filtered.bam, /Users/carlhoff/Documents/git/eager/test/work/b9/e1f1beb5109c7ab68e8948218325c1/JK2067_JK2067_JK2067_filtered.bam.bai, ['id':'hs37d5_chr21'], /nf-core/test-datasets/blob/9a51c46c2ee9e46c906a3b136275a06155f3cdbc/data/delete_me/angsd/HapMapChrX.gz]
         .multiMap {
-            meta, bam, bai, hapmap ->
+            ignore_me, meta, bam, bai, meta2, hapmap ->
             bam:    [ meta, bam ]
             bai:    [ meta, bai ]
             hapmap: [ meta, hapmap ]
@@ -48,6 +49,7 @@ workflow ESTIMATE_CONTAMINATION {
 
         ch_versions     = ch_versions.mix( BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.versions.first() )
         ch_angsd_contam = BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.txt
+        // TODO: include print_nuclear_contam as module for multiqc
     }
 
     emit:

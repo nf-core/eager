@@ -17,7 +17,7 @@
                     },
                     "angsd/docounts": {
                         "branch": "master",
-                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "git_sha": "bd9e43646a9435d2f62ce4a777ae88ef10ec922d",
                         "installed_by": ["bam_docounts_contamination_angsd"]
                     },
                     "bbmap/bbduk": {

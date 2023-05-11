@@ -742,7 +742,7 @@
                 },
                 "angsd_hapmap": {
                     "type": "string",
-                    "default": "${projectDir}/assets/HapMapChrX.gz",
+                    "default": "${baseDir}/assets/HapMapChrX.gz",
                     "fa_icon": "fas fa-map",
                     "description": "Path to HapMap file of X-chromosome.",
                     "help_text": "The haplotype map, or \"HapMap\", records the location of haplotype blocks and their tag SNPs."
