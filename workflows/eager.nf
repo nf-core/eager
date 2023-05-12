@@ -131,7 +131,6 @@ workflow EAGER {
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
 
-
     //
     // SUBWORKFLOW: Indexing of reference files
     //
