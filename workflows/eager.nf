@@ -250,17 +250,17 @@ workflow EAGER {
                                                         [ new_meta, meta, fastqs ]
                                                     }
 
-        ch_for_hostremoval = ch_bam_for_hostremoval.join(ch_fastqs_for_hostremoval)
+        ch_input_for_hostremoval = ch_bam_for_hostremoval.join(ch_fastqs_for_hostremoval)
                                                     .map{
                                                         meta_join, meta_bam, bam, bai, meta_fastq, fastqs ->
                                                         [ meta_bam, bam, bai, meta_fastq, fastqs]
                                                     }
 
-        HOST_REMOVAL ( ch_for_hostremoval )
+        HOST_REMOVAL ( ch_input_for_hostremoval )
 
         ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
     }
-    
+
     //
     // Section: Metagenomics screening
     //
