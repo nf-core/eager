@@ -12,7 +12,7 @@
                     },
                     "angsd/contamination": {
                         "branch": "master",
-                        "git_sha": "df739eaa4ca41885ce8f590d0727d6e397d95cec",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["bam_docounts_contamination_angsd"]
                     },
                     "angsd/docounts": {
