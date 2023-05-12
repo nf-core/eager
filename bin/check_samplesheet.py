@@ -74,7 +74,7 @@ def check_samplesheet(file_in, file_out):
     Sample3	Sample3_Lib1	9	4	single	single	none	NA	NA	Sample3_Lib1.bam	Reference
 
     For an example see:
-    https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/mammoth_design_fastq_bam_dsl2.tsv
+    https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/samplesheet.tsv
     """
 
     error_counter = 0
