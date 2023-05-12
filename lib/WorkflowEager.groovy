@@ -76,4 +76,13 @@ class WorkflowEager {
         }
     }
 
+    public static string (Path infile) {
+
+        def split_name = infile.toString().tokenize('.')
+        def output = split_name.reverse().first() == 'gz' ? split_name.reverse()[1,0].join('.') : split_name.reverse()[0]
+
+        return '.' + output
+
+    }
+
 }

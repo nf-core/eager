@@ -89,6 +89,8 @@ workflow REFERENCE_INDEXING_SINGLE {
 }
 
 // TODO Move to lib?
+
+/*
 def grabUngzippedExtension (Path infile) {
 
     def split_name = infile.toString().tokenize('.')
@@ -97,3 +99,4 @@ def grabUngzippedExtension (Path infile) {
     return '.' + output
 
 }
+*/
