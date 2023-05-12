@@ -14,6 +14,9 @@ process PRINT_CONTAMINATION_ANGSD {
     tuple val(meta), file("nuclear_contamination.txt"), emit: contam_angsd_txt
     tuple val(meta), file("nuclear_contamination_mqc.json"), emit: contam_angsd_multiqc
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     prefix   = task.ext.prefix ?: "${meta.id}"
 

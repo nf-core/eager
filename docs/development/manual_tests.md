@@ -398,6 +398,7 @@ nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/onl
 ## Expect:damageprofiler directory with txt, pdf, svg for each library (19 files total per library).
 nextflow run main.nf -profile test,conda --outdir ./results -resume
 ```
+
 ### ESTIMATE CONTAMINATION
 
 #### With ANGSD
@@ -410,3 +411,4 @@ nextflow run main.nf -profile test,humanbam --outdir ./results  --run_contaminat
 ## ANGSD contamination estimation with quality filters reduced
 ## Expect: contamination_estimation/angsd directory with txt for each library.
 nextflow run main.nf -profile test,humanbam --outdir ./results --run_contamination_angsd --angsd_minq 0 --angsd_mapq 0 -resume
+```
