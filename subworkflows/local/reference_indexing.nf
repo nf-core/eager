@@ -16,7 +16,7 @@ workflow REFERENCE_INDEXING {
     ch_versions = Channel.empty()
 
     // Warn user if they've given a reference sheet that already includes fai/dict/mapper index etc.
-    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' && (fasta_fai || fasta_dict || fasta_mapperindexdir))  ) log.warn("A TSV or CSV has been supplied to `--fasta` as well as e.g. `--fasta_fai`. --fasta CSV/TSV takes priority and --fasta_* parameters will be ignored.")
+    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && (fasta_fai || fasta_dict || fasta_mapperindexdir)) log.warn("A TSV or CSV has been supplied to `--fasta` as well as e.g. `--fasta_fai`. --fasta CSV/TSV takes priority and --fasta_* parameters will be ignored.")
 
     if ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) {
         // If input (multi-)reference sheet supplied
@@ -28,7 +28,6 @@ workflow REFERENCE_INDEXING {
         ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir ).reference
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }
-
     emit:
     reference = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex ]
     versions  = ch_versions
