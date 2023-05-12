@@ -177,7 +177,9 @@ The resulting FASTQ files will only be present in your results directory if you 
 The percent on target reported will be different depending on the combination of samtools flagstat provided.
 This program also calculates clonality (aka 'cluster factor') and percent duplicates when the flagstat file after duplicate removal is provided
 
-ADD DESCRIPTION OF ENDOGENOUS + CLONALITY + % DUP and How they are calculated
+//TO DO: ADD DESCRIPTION OF ENDOGENOUS + CLONALITY + % DUP and How they are calculated
+
+//TO DO: DISCLAIMER: No endogenous calculation done with bam input provided --> we do not know if this bams have been already filtered in any way, so the total number of reads obtained from such bam may not be the original total number of reads leading to wrong endogenous calculation.
 
 ### BAM Filtering
 

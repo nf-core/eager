@@ -273,17 +273,21 @@ workflow EAGER {
     // MODULE: ENDORSPY (raw, filtered, deduplicated)
     //
 
+    //  TODO: what if not mapping executed due to bam input, figure it out later
+
+    ch_for_endorspy_rawbam    = MAP.out.flagstat //CHECK IF INPUT BAM, need to add a flagstat for the input bam (DANGEROUS if the provided bam file does not contain all reads --> wrong endogenous calculations!), else MAP.out.flagstats
     ch_for_endorspy_filterbam = params.run_bamfiltering ? FILTER_BAM.out.flagstat : Channel.empty()
     ch_for_endorspy_dedupped  = !params.skip_deduplication ? DEDUPLICATE.out.flagstat : Channel.empty()
 
-    //  TODO: what if not mapping executed due to bam input, figure it out later
-    ch_for_endorspy = MAP.out.flagstat
+    ch_for_endorspy = ch_for_endorspy_rawbam
                                     .join(ch_for_endorspy_filterbam.ifEmpty([ [], [] ]))
                                     .join(ch_for_endorspy_dedupped.ifEmpty([ [], [] ]))
-                                    
+
     ENDORSPY ( ch_for_endorspy )
+    ENDORSPY.out.json.dump()
+
     ch_versions       = ch_versions.mix( ENDORSPY.out.versions )
-    ch_multiqc_files  = ch_multiqc_files.mix( ENDORSPY.out.json )
+    ch_multiqc_files  = ch_multiqc_files.mix( ENDORSPY.out.json.collect{it[1]}.ifEmpty([]) )
 
     //
     // MODULE: PreSeq
