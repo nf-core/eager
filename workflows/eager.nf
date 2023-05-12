@@ -139,7 +139,6 @@ workflow EAGER {
         ch_input
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-    // INPUT_CHECK.out.bams.dump() no reference [DUMP] [['id':'JK2067_JK2067', 'sample_id':'JK2067', 'library_id':'JK2067', 'strandedness':'double', 'damage_treatment':'full'], /nf-core/test-datasets/raw/eager/testdata/Human/bam/JK2067_downsampled_s0.1.bam]
 
     //
     // SUBWORKFLOW: Indexing of reference files
@@ -323,11 +322,11 @@ workflow EAGER {
         .map {
             hapmap, meta, fasta, fai, dict, index ->
             [ meta, hapmap ]
-        } //works fine until here [DUMP] [['id':'hs37d5_chr21'], /Users/carlhoff/Documents/git/eager/assets/HapMapChrX.gz]
+        }
 
         ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
         ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix(ESTIMATE_CONTAMINATION.out.angsd_contam.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ESTIMATE_CONTAMINATION.out.contam_mqc.collect{it[1]}.ifEmpty([]))
     }
 
     //

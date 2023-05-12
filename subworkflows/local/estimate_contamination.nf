@@ -3,6 +3,7 @@
 //
 
 include { BAM_DOCOUNTS_CONTAMINATION_ANGSD } from '../../subworkflows/nf-core/bam_docounts_contamination_angsd/main'
+include { PRINT_CONTAMINATION_ANGSD        } from '../../modules/local/print_contamination_angsd'
 
 workflow ESTIMATE_CONTAMINATION {
 
@@ -18,26 +19,24 @@ workflow ESTIMATE_CONTAMINATION {
     if ( params.run_contamination_angsd ) {
         angsd_input_hapmap = hapmap_input
         .map {
-            // Create additional map containing only meta.reference for combining samples and hapmap
+            // Create additional map containing only meta.id for combining samples and hapmap
             meta, hapmap ->
                 meta2 = [:]
                 meta2.reference = meta.id
             [ meta2, meta, hapmap ]
-        }// works fine [DUMP] [['reference':'hs37d5_chr21'], ['id':'hs37d5_chr21'], /nf-core/test-datasets/blob/9a51c46c2ee9e46c906a3b136275a06155f3cdbc/data/delete_me/angsd/HapMapChrX.gz]
-
+        }
         angsd_input = contamination_input
         .map {
             // Create additional map containing only meta.reference for combining samples and hapmap
             meta, bam, bai ->
                 meta2 = [:]
-                //meta2.reference = meta.reference
-                meta2.reference = 'hs37d5_chr21'
+                meta2.reference = meta.reference
             [ meta2, meta, bam, bai ]
-        }.dump() //[DUMP] [['reference':'hs37d5_chr21'], ['id':'JK2067_JK2067', 'sample_id':'JK2067', 'library_id':'JK2067', 'strandedness':'double', 'damage_treatment':'full'], /Users/carlhoff/Documents/git/eager/test/work/24/7ce6e5910196fa07e9b314891c1532/JK2067_JK2067_JK2067_filtered.bam, /Users/carlhoff/Documents/git/eager/test/work/b9/e1f1beb5109c7ab68e8948218325c1/JK2067_JK2067_JK2067_filtered.bam.bai]
+        }
         .combine(
             by: 0,
             angsd_input_hapmap
-        )// [DUMP] [['reference':'hs37d5_chr21'], ['id':'JK2067_JK2067', 'sample_id':'JK2067', 'library_id':'JK2067', 'strandedness':'double', 'damage_treatment':'full'], /Users/carlhoff/Documents/git/eager/test/work/24/7ce6e5910196fa07e9b314891c1532/JK2067_JK2067_JK2067_filtered.bam, /Users/carlhoff/Documents/git/eager/test/work/b9/e1f1beb5109c7ab68e8948218325c1/JK2067_JK2067_JK2067_filtered.bam.bai, ['id':'hs37d5_chr21'], /nf-core/test-datasets/blob/9a51c46c2ee9e46c906a3b136275a06155f3cdbc/data/delete_me/angsd/HapMapChrX.gz]
+        )
         .multiMap {
             ignore_me, meta, bam, bai, meta2, hapmap ->
             bam:    [ meta, bam ]
@@ -47,14 +46,19 @@ workflow ESTIMATE_CONTAMINATION {
 
         BAM_DOCOUNTS_CONTAMINATION_ANGSD( angsd_input.bam, angsd_input.bai, angsd_input.hapmap )
 
-        ch_versions     = ch_versions.mix( BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.versions.first() )
+        ch_versions     = ch_versions.mix( BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.versions )
         ch_angsd_contam = BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.txt
-        // TODO: include print_nuclear_contam as module for multiqc
+
+        ch_angsd_output = ch_angsd_contam.collect()
+
+        PRINT_CONTAMINATION_ANGSD( ch_angsd_output)
+        ch_contam_angsd_print = PRINT_CONTAMINATION_ANGSD.out.contam_angsd_txt
+        ch_contam_mqc         = PRINT_CONTAMINATION_ANGSD.out.contam_angsd_multiqc
     }
 
     emit:
-    angsd_contam      = ch_angsd_contam
-    versions          = ch_versions
-    mqc               = ch_multiqc_files
+    contam_angsd_print = ch_contam_angsd_print
+    contam_mqc         = ch_contam_mqc
+    versions           = ch_versions
 
 }
