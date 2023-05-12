@@ -236,27 +236,27 @@ workflow EAGER {
     //
     // MODULE: remove reads mapping to the host from the raw fastq
     //
-    if ( params.run_hostremoval ) {
+    if ( params.run_host_removal ) {
 
-        ch_bam_for_hostremoval= MAP.out.bam.join(MAP.out.bai)
+        ch_bam_for_host_removal= MAP.out.bam.join(MAP.out.bai)
                                             .map{
                                                 meta, bam, bai ->
                                                 new_meta = meta.clone().findAll{ it.key !in [ 'single_end', 'reference' ] }
                                                 [ new_meta, meta, bam, bai ]
                                                 }
-        ch_fastqs_for_hostremoval= INPUT_CHECK.out.fastqs.map{
+        ch_fastqs_for_host_removal= INPUT_CHECK.out.fastqs.map{
                                                         meta, fastqs ->
                                                         new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
                                                         [ new_meta, meta, fastqs ]
                                                     }
 
-        ch_input_for_hostremoval = ch_bam_for_hostremoval.join(ch_fastqs_for_hostremoval)
+        ch_input_for_host_removal = ch_bam_for_host_removal.join(ch_fastqs_for_host_removal)
                                                     .map{
                                                         meta_join, meta_bam, bam, bai, meta_fastq, fastqs ->
                                                         [ meta_bam, bam, bai, meta_fastq, fastqs]
                                                     }
 
-        HOST_REMOVAL ( ch_input_for_hostremoval )
+        HOST_REMOVAL ( ch_input_for_host_removal )
 
         ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
     }
