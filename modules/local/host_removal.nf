@@ -8,7 +8,7 @@ process HOST_REMOVAL {
         'quay.io/biocontainers/mulled-v2-adbddd275b72bafc166f5c77e6b1a8c3d200cfe7:2c601eb41a331051f5d90b147919a69ac4e17e19-0' }"
 
     input:
-    tuple val(meta), path(bam), path(bai), val(meta_fastqs), path(fastqs) // [ meta_bam, bam, meta_fastqs, fastqs ]
+    tuple val(meta), path(bam), path(bai), val(meta_fastqs), path(fastqs) // [ meta_bam, bam, bai,  meta_fastqs, fastqs ]
 
     output:
     tuple val(meta), path("*.fq.gz"), emit: fastqs
