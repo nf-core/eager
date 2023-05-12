@@ -208,11 +208,18 @@ Tests
 ##Check pair end merged and single end processed correctly
 nextflow run ../main.nf -profile docker,test --outdir results_hostremoval -w results_hostremoval/work --run_host_removal
 
+##Check pair end merged and single end processed correctly and host reads in but masked with Ns
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_replace -w results_hostremoval_replace/work --run_host_removal --host_removal_mode replace
+
+#Checked that the read is masked with: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
 ##Check pair end non-merged and single end processed correctly
 nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPEmerging -w results_hostremoval_skipPEmerging/work --run_host_removal --preprocessing_skippairmerging
 
 ##Check it still runs when preprocessing is not done and files are proper
 nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPreprocessing -w results_hostremoval_skipPreprocessing/work --run_host_removal --skip_preprocessing
+
+##Check it runs with multiple lanes and gives correct output per lane
 
 ```
 
