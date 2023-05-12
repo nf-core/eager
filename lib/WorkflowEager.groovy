@@ -13,7 +13,6 @@ class WorkflowEager {
     public static void initialise(params, log) {
         genomeExistsError(params, log)
 
-
         if (!params.fasta) {
             Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
         }
@@ -32,16 +31,16 @@ class WorkflowEager {
                 for (param in group_params.keySet()) {
                     summary_section += "        <dt>$param</dt><dd><samp>${group_params.get(param) ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>\n"
                 }
-                summary_section += "    </dl>\n"
+                summary_section += '    </dl>\n'
             }
         }
 
-        String yaml_file_text  = "id: '${workflow.manifest.name.replace('/','-')}-summary'\n"
+        String yaml_file_text  = "id: '${workflow.manifest.name.replace('/', '-')}-summary'\n"
         yaml_file_text        += "description: ' - this information is collected when the pipeline is started.'\n"
         yaml_file_text        += "section_name: '${workflow.manifest.name} Workflow Summary'\n"
         yaml_file_text        += "section_href: 'https://github.com/${workflow.manifest.name}'\n"
         yaml_file_text        += "plot_type: 'html'\n"
-        yaml_file_text        += "data: |\n"
+        yaml_file_text        += 'data: |\n'
         yaml_file_text        += "${summary_section}"
         return yaml_file_text
     }
@@ -50,10 +49,10 @@ class WorkflowEager {
         // Convert  to a named map so can be used as with familar NXF ${workflow} variable syntax in the MultiQC YML file
         def meta = [:]
         meta.workflow = run_workflow.toMap()
-        meta["manifest_map"] = run_workflow.manifest.toMap()
+        meta['manifest_map'] = run_workflow.manifest.toMap()
 
-        meta["doi_text"] = meta.manifest_map.doi ? "(doi: <a href=\'https://doi.org/${meta.manifest_map.doi}\'>${meta.manifest_map.doi}</a>)" : ""
-        meta["nodoi_text"] = meta.manifest_map.doi ? "": "<li>If available, make sure to update the text to include the Zenodo DOI of version of the pipeline used. </li>"
+        meta['doi_text'] = meta.manifest_map.doi ? "(doi: <a href=\'https://doi.org/${meta.manifest_map.doi}\'>${meta.manifest_map.doi}</a>)" : ''
+        meta['nodoi_text'] = meta.manifest_map.doi ? '' : '<li>If available, make sure to update the text to include the Zenodo DOI of version of the pipeline used. </li>'
 
         def methods_text = mqc_methods_yaml.text
 
@@ -76,4 +75,5 @@ class WorkflowEager {
             Nextflow.error(error_string)
         }
     }
+
 }
