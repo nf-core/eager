@@ -173,6 +173,7 @@ workflow EAGER {
                 meta, fasta, fai, dict, index, circular_target, mitochondrion ->
                 [ meta, index ]
             }
+
     MAP ( ch_reads_for_mapping, ch_reference_for_mapping )
 
     ch_versions       = ch_versions.mix( MAP.out.versions )
@@ -295,7 +296,7 @@ workflow EAGER {
 
     ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index ->
+            meta, fasta, fai, dict, index, circular_target, mitochondrion ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
