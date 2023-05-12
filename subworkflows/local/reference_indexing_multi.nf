@@ -19,36 +19,27 @@ workflow REFERENCE_INDEXING_MULTI {
 
     // Parse CSV and detect files to load
     if ( referencesheet.extension == "tsv" ){
-        ch_splitreferencesheet_for_branch = Channel.fromPath(referencesheet)
+        ch_splitreferencesheet_for_map = Channel.fromPath(referencesheet)
                                                 .splitCsv ( header:true, sep:"\t" )
-                                                .map {
-                                                    row ->
-                                                        def meta            = [:]
-                                                        meta.id             = row["reference_name"]
-                                                        def fasta           = file(row["fasta"], checkIfExists: true) // mandatory parameter!
-                                                        def fai             = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
-                                                        def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
-                                                        def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
-                                                        def circular_target = row["circular_target"]
-                                                        def mitochondrion   = row["mitochondrion_header"]
-                                                        [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
-                                                }
     } else {
-        ch_splitreferencesheet_for_branch = Channel.fromPath(referencesheet)
+        ch_splitreferencesheet_for_map = Channel.fromPath(referencesheet)
                                                 .splitCsv ( header:true )
-                                                .map {
-                                                    row ->
-                                                        def meta            = [:]
-                                                        meta.id             = row["reference_name"]
-                                                        def fasta           = file(row["fasta"], checkIfExists: true) // mandatory parameter!
-                                                        def fai             = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
-                                                        def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
-                                                        def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
-                                                        def circular_target = row["circular_target"]
-                                                        def mitochondrion   = row["mitochondrion"]
-                                                        [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
-                                                }
     }
+
+    ch_splitreferencesheet_for_branch = ch_splitreferencesheet_for_map =
+                                            .map {
+                                                row ->
+                                                    def meta            = [:]
+                                                    meta.id             = row["reference_name"]
+                                                    def fasta           = file(row["fasta"], checkIfExists: true) // mandatory parameter!
+                                                    def fai             = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
+                                                    def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
+                                                    def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
+                                                    def circular_target = row["circular_target"]
+                                                    def mitochondrion   = row["mitochondrion_header"]
+                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ]
+                                            }
+
 
     // GENERAL DESCRIPTION FOR NEXT SECTIONS
     // This will be the same scheme for all other generation steps, i.e.
