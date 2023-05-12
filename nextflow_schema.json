@@ -504,6 +504,57 @@
                     "description": "Specify the -k parameter for BWA mem i.e. the  minimum seed length",
                     "help_text": "Configures the re-seeding used in BWA-MEM. Default is set to BWA default.\n\n> Modifies BWA-MEM parameter: `-r`",
                     "fa_icon": "fas fa-angle-double-left"
+                },
+                "mapping_bowtie2_alignmode": {
+                    "type": "string",
+                    "default": "local",
+                    "description": "Specify the bowtie2 alignment mode.",
+                    "help_text": "The type of read alignment to use. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. \nDefault: 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full)\n\n> Modifies Bowtie2 presets: `--local`, `--end-to-end`",
+                    "fa_icon": "fas fa-arrows-alt-h",
+                    "enum": ["local", "end-to-end"]
+                },
+                "mapping_bowtie2_sensitivity": {
+                    "type": "string",
+                    "default": "sensitive",
+                    "description": "Specify the level of sensitivity for the bowtie2 alignment mode.",
+                    "help_text": "The Bowtie2 'preset' to use. These strings apply to both --mapping_bowtie2_alignmode options. See the Bowtie2 manual for actual settings. \nDefault: 'sensitive' (following [Poullet and Orlando (2020)](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full), when running damaged-data without UDG treatment)\n\nModifies the Bowtie2 parameters: `--fast`, `--very-fast`, `--sensitive`, `--very-sensitive`, `--fast-local`, `--very-fast-local`, `--sensitive-local`, `--very-sensitive-local`",
+                    "fa_icon": "fas fa-microscope",
+                    "enum": ["fast", "very-fast", "sensitive", "very-sensitive"]
+                },
+                "mapping_bowtie2_n": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify the -N parameter for bowtie2 (mismatches in seed). This will override defaults from alignmode/sensitivity.",
+                    "help_text": "The number of mismatches allowed in the seed during seed-and-extend procedure of Bowtie2. This will override any values set with --mapping_bowtie2_sensitivity. Can either be 0 or 1.\n\n>Modifies Bowtie2 parameter: `-N`",
+                    "fa_icon": "fas fa-sort-numeric-down"
+                },
+                "mapping_bowtie2_l": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "Specify the -L parameter for bowtie2 (length of seed substrings). This will override defaults from alignmode/sensitivity.",
+                    "help_text": "The length of the seed sub-string to use during seeding. This will override any values set with --mapping_bowtie2_sensitivity.\n\n> Modifies Bowtie2 parameter: `-L`",
+                    "fa_icon": "fas fa-ruler-horizontal"
+                },
+                "mapping_bowtie2_trim5": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify number of bases to trim off from 5' (left) end of read before alignment.",
+                    "help_text": "Number of bases to trim at the 5' (left) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present.\n\n> Modifies Bowtie2 parameter: `--trim5`",
+                    "fa_icon": "fas fa-cut"
+                },
+                "mapping_bowtie2_trim3": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify number of bases to trim off from 3' (right) end of read before alignment.",
+                    "help_text": "Number of bases to trim at the 3' (right) end of read prior alignment. Maybe useful when left-over sequencing artefacts of in-line barcodes present.\n\n> Modifies Bowtie2 parameter: `--trim3`",
+                    "fa_icon": "fas fa-cut"
+                },
+                "mapping_bowtie2_maxins": {
+                    "type": "integer",
+                    "default": 500,
+                    "description": "Specify the maximum fragment length for Bowtie2 paired-end mapping mode only.",
+                    "help_text": "The maximum fragment for valid paired-end alignments. Only for paired-end mapping (i.e. unmerged), and therefore typically only useful for modern data.\n\n> Modifies Bowtie2 parameter: `--maxins`",
+                    "fa_icon": "fas fa-exchange-alt"
                 }
             },
             "fa_icon": "fas fa-layer-group"
@@ -587,6 +638,48 @@
                     "enum": ["unmapped", "mapped", "all"],
                     "fa_icon": "fas fa-hand-pointer",
                     "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> \u26a0\ufe0f If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
+                },
+                "run_metagenomics_complexityfiltering": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "Turns on a subworkflow of the pipeline that filters the fastq-files for complexity before the metagenomics profiling\nUse the metagenomics_complexity_tool parameter to select a method",
+                    "description": "Run a complexity filter on the metagenomics input files before classification. Specifiy the tool to use with the `metagenomics_complexity_tool` parameter, save with `metagenomics_complexity_savefastq`"
+                },
+                "metagenomics_complexity_savefastq": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save FASTQ files containing the complexity filtered reads (before metagenomic classification).",
+                    "help_text": "Save the complexity-filtered fastq-files to the results directory"
+                },
+                "metagenomics_complexity_tool": {
+                    "type": "string",
+                    "default": "bbduk",
+                    "description": "Specify which tool to use for trimming, filtering, or reformatting of fastq reads that go into metagenomics screening.",
+                    "enum": ["bbduk", "prinseq"],
+                    "fa_icon": "fas fa-hand-pointer",
+                    "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or reformatting of the reads.\n\nThis intermediate file is not saved in the results directory, unless marked with `--metagenomics_complexity_savefastq`."
+                },
+                "metagenomics_complexity_entropy": {
+                    "type": "number",
+                    "fa_icon": "fas fa-sort-numeric-up",
+                    "description": "Specify the entropy threshold that under which a sequencing read will be complexity filtered out. This should be between 0-1.",
+                    "default": 0.3,
+                    "help_text": "Specify the minimum 'entropy' value for complexity filtering for the BBDuk or PRINSEQ++ tools.\n\nThis value will only be used for PRINSEQ++ if `--metagenomics_prinseq_mode` is set to `entropy`.\n\nEntropy here corresponds to the amount of sequence variation exists within the read. Higher values correspond to more variety, and thus will likely result in more specific matching to a taxon's reference genome. The trade off here is fewer reads (or abundance information) available for having a confident identification.\n\n> Modifies tool parameter(s):\n> - BBDuk: `entropy=`\n> - PRINSEQ++:  `-lc_entropy`\n\n"
+                },
+                "metagenomics_prinseq_mode": {
+                    "type": "string",
+                    "default": "entropy",
+                    "enum": ["entropy", "dust"],
+                    "fa_icon": "fas fa-check-square",
+                    "description": "Specify the complexity filter mode for PRINSEQ++",
+                    "help_text": "Specify the complexity filter mode for PRINSEQ++ \n\nUse the selected mode together with the correct flag:\n'dust' requires the `--metagenomics_prinseq_dustscore` parameter set\n'entropy' requires the `--metagenomics_complexity_entropy` parameter set\n\n> Sets one of the tool parameter(s):\n> - PRINSEQ++:  `-lc_entropy`\n> - PRINSEQ++:  `-lc_dust`"
+                },
+                "metagenomics_prinseq_dustscore": {
+                    "type": "number",
+                    "default": 0.5,
+                    "fa_icon": "fas fa-head-side-mask",
+                    "description": "Specify the minimum dust score for PRINTSEQ++ complexity filtering",
+                    "help_text": "Specify the minimum dust score below which low-complexity reads will be removed. A DUST score is based on how often different tri-nucleotides occur along a read.\n\n> Modifies tool parameter(s):\n> - PRINSEQ++: `--lc_dust`"
                 }
             },
             "fa_icon": "fas fa-search"
@@ -841,6 +934,42 @@
                 }
             },
             "fa_icon": "fas fa-search"
+        },
+        "adna_damage_analysis": {
+            "title": "(aDNA) Damage Analysis",
+            "type": "object",
+            "description": "Options for calculating and filtering for characteristic ancient DNA damage patterns.",
+            "default": "",
+            "fa_icon": "fas fa-chart-line",
+            "help_text": "More documentation can be seen in the follow links for:\n\n[DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)\n\nIf using TSV input, DamageProfiler is performed per library, i.e. after lane merging. BAM Trimming is only performed on non-UDG and half-UDG treated data.",
+            "properties": {
+                "skip_damage_calculation": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "help_text": "Turns off the DamageProfiler module to compute DNA damage profiles."
+                },
+                "damageprofiler_length": {
+                    "type": "integer",
+                    "default": 100,
+                    "fa_icon": "fas fa-sort-amount-up",
+                    "description": "Specifies the length filter for DamageProfiler. By default set to 100.",
+                    "help_text": "> Modifies DamageProfile parameter: -l "
+                },
+                "damageprofiler_threshold": {
+                    "type": "integer",
+                    "default": 15,
+                    "description": "Specify number of bases of each read to consider for DamageProfiler calculations.",
+                    "fa_icon": "fas fa-ruler-horizontal",
+                    "help_text": "Specifies the length of the read start and end to be considered for profile generation in DamageProfiler. By default set to 15 bases.\n\n> Modifies DamageProfile parameter: -t\n"
+                },
+                "damageprofiler_yaxis": {
+                    "type": "number",
+                    "default": 0.3,
+                    "fa_icon": "fas fa-ruler-vertical",
+                    "description": "Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'.",
+                    "help_text": "Specifies what the maximum misincorporation frequency should be displayed as, in the DamageProfiler damage plot. This is set to 0.30 (i.e. 30%) by default as this matches the popular [mapDamage2.0 program](https://ginolhac.github.io/mapDamage/). However, the default behavior of the DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any possible damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behavior can be turned on by specifying the number to 0. Default: 0.30.\n\n> Modifies DamageProfile parameter: -yaxis_dp_max"
+                }
+            }
         }
     },
     "allOf": [
@@ -885,6 +1014,9 @@
         },
         {
             "$ref": "#/definitions/genotyping"
+        },
+        {
+            "$ref": "#/definitions/adna_damage_analysis"
         }
     ]
 }

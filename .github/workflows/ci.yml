@@ -30,6 +30,7 @@ jobs:
           - "--preprocessing_tool fastp --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/fastp/adapters.fasta'"
           - "--preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco"
           - "--mapping_tool bwamem"
+          - "--mapping_tool bowtie2"
           - "--skip_preprocessing"
           - "--input 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/samplesheet_PE_only.tsv' --deduplication_tool dedup --preprocessing_excludeunmerged"
           - "--run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam --run_mtnucratio --mitochondrion_header 'NC_007596.2'"
@@ -47,4 +48,4 @@ jobs:
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results ${{ matrix.PARAMS }}

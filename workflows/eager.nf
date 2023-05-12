@@ -22,6 +22,18 @@ if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mapping
 if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
 if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
 if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
+if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
+    // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
+    if (params.metagenomics_prinseq_dustscore == 0.5) {
+            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
+    }
+}
+if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
+    // dust score was set but entropy method picked. If no entropy-score provided, assume it was an error and fail
+    if (params.metagenomics_complexity_entropy == 0.3) {
+            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
+    }
+}
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
@@ -51,13 +63,15 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { INPUT_CHECK        } from '../subworkflows/local/input_check'
-include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
-include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
-include { MAP                } from '../subworkflows/local/map'
-include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
-include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
-include { MANIPULATE_DAMAGE  } from '../subworkflows/local/manipulate_damage'
+include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
+include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
+include { MAP                           } from '../subworkflows/local/map'
+include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
+include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate_damage'
+include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
+include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -225,8 +239,30 @@ workflow EAGER {
     }
 
     //
+    // Section: Metagenomics screening
+    //
+
+    if( params.run_metagenomicscreening ) {
+        ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics
+            .map{ meta, fastq ->
+                [meta+['single_end':true], fastq]
+            }
+
+        // Check if a complexity filter is wanted?
+        if ( params.run_metagenomics_complexityfiltering ) {
+            METAGENOMICS_COMPLEXITYFILTER( ch_bamfiltered_for_metagenomics )
+            ch_reads_for_metagenomics = METAGENOMICS_COMPLEXITYFILTER.out.fastq
+            ch_versions = ch_versions.mix(METAGENOMICS_COMPLEXITYFILTER.out.versions.first())
+            ch_multiqc_files = ch_multiqc_files.mix(METAGENOMICS_COMPLEXITYFILTER.out.fastq.collect{it[1]}.ifEmpty([]))
+        } else {
+            ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
+        }
+    }
+
+    //
     // MODULE: MTNUCRATIO
     //
+
     if ( params.run_mtnucratio ) {
         mtnucratio_input = ch_dedupped_bams
         .map {
@@ -251,6 +287,24 @@ workflow EAGER {
         PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map{[it[0],it[1]]})
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect{it[1]}.ifEmpty([]))
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
+    }
+
+     //
+    // SUBWORKFLOW: Calculate Damage
+    //
+
+    ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
+        .multiMap{
+            meta, fasta, fai, dict, index ->
+            fasta:      [ meta, fasta ]
+            fasta_fai:  [ meta, fai ]
+        }
+
+    if ( !params.skip_damage_calculation ) {
+        CALCULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_damagecalculation.fasta, ch_fasta_for_damagecalculation.fasta_fai )
+        ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
+
     }
 
     //
@@ -282,7 +336,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([])) // Replaced with custom mixing
 
     MULTIQC (
         ch_multiqc_files.collect(),

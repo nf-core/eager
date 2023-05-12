@@ -101,7 +101,7 @@ Falco results in the `raw/` directory contain the results of running Falco on th
   - `*_collapsed.fastq.gz`: FASTQ file containing merged reads of paired-end libraries that have not had trimming performed.
   - `*_collapsed.truncated.fastq.gz`: FASTQ file containing merged reads that have had additional quality trimming performed.
   - `*_discarded.fastq.gz`: FASTQ file containing merged reads that did not pass other quality thresholds (e.g. minimum length).
-  - `*.truncated.fastq.gz`: FASTQ file(s) containing umerged reads that have undergone additional quality trimming. Only present for paired-end libraries.
+  - `*.truncated.fastq.gz`: FASTQ file(s) containing unmerged reads that have undergone additional quality trimming. Only present for paired-end libraries.
   - `multiqc_plots/`: directory containing static images from the report in various formats.
 
 </details>
@@ -137,13 +137,28 @@ The resulting FASTQ files will only be present in your results directory if you 
 
 - `mapping/`
 
-  - `*.bam`: Reads aligned against a reference genome in BAM format with no additional filtering.
+  - `*.bam`: Sorted reads aligned against a reference genome in BAM format with no additional filtering.
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
   - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
 
   </details>
 
   [BWA](https://bio-bwa.sourceforge.net/bwa.shtml) is a software package for mapping low-divergent sequences against a large reference genome, such as the human genome. BWA-backtrack (a.k.a `bwa aln`) is designed for Illumina sequence reads up to 100bp, while BWA-MEM (`bwa mem`) is optimised for longer sequences ranged from 70bp to 1Mbp and split alignment.
+
+#### Bowtie 2
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `mapping/`
+
+  - `*.bam`: Sorted reads aligned against a reference genome in BAM format with no additional filtering.
+  - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
+  - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
+
+  </details>
+
+  [Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long (e.g. mammalian) genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small and supports gapped, local, and paired-end alignment modes.
 
 ### BAM Filtering
 
@@ -156,20 +171,60 @@ The resulting FASTQ files will only be present in your results directory if you 
   - `*.filtered.bam`: BAM file containing mapped quality filtered reads (and optionally length filtering and unmapped reads, if specified by the user with the corresponding parameters).
   - `*.{bai,csi}`: Corresponding index files of any generated BAM files.
   - `*.unmapped_other_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only unmapped reads, if specified for generation, without length filtering.
-    - If you do read merging or have single-end data you will only get one file containing (`*_other*`) containg all reads (the others will be empty).
+    - If you do read merging or have single-end data you will only get one file containing (`*_other*`) containing all reads (the others will be empty).
     - If you skip merging for _paired-end data_ you'll get reads separately (`_1`, `_2`, `_singleton`), with `other` being empty.
-  - `*mapped_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only mapped reads, if specified for generation, without length or quality filtering. If you do read merging you will only get one file containing (`*_other*`) containg all reads. If you skip merging you'll get them separately (`_1`, `_2` etc.).
+  - `*mapped_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only mapped reads, if specified for generation, without length or quality filtering. If you do read merging you will only get one file containing (`*_other*`) containing all reads. If you skip merging you'll get them separately (`_1`, `_2` etc.).
   - `*filtered.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
 
 </details>
 
-nf-core/eager can perform a range of different length, quality, and/or mapped-unmmapped filtering of BAM files, and generate converted FASTQ files for manual analysis outside the pipeline.
+nf-core/eager can perform a range of different length, quality, and/or mapped-unmapped filtering of BAM files, and generate converted FASTQ files for manual analysis outside the pipeline.
 
 If bam filtering is turned on, by default only mapped reads are retained for downstream genomic analysis. Additionally, please note that removal of PCR duplicates in nf-core/eager will additionally filter for mapped reads only.
 
 Please be aware, that intermediate length and mapping quality filtered genomic BAM files are _not_ saved in the results directory automatically, with the assumption that downstream deduplicated BAM files are preferred for further analyses - see the [parameters](https://nf-co.re/eager/parameters) page for more information if you wish to save these.
 
-You may also recieve the files above if metagenomic screening is turned on.
+You may also receive the files above if metagenomic screening is turned on.
+
+### Metagenomics Screening
+
+#### Bbduk
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `metagenomic_complexity_filter/`
+
+  - `*_complexity.fastq.gz`: FASTQ file containing the complexity filtered reads
+  - `*.log`: LOG file containing filter stats
+  </details>
+
+The entropy filter of [BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) is used to remove reads from the fastq-files for metagenomics screening that don't pass the `--metagenomics_complexity_entropy` threshold. When ommiting the flag, a default value of 0.3 is applied. To cite the docs:
+
+> A homopolymer such as AAAAAAAAAAAAAA would have entropy of zero; completely random sequence would have entropy approaching 1.
+
+Using complexity-filtered fastq-files as input for metagenomic classifiers can reduce the number of false positive classifications, resulting in more precise taxonomic assignments of the sample through removal of reads that can align equally well to multiple reference genomes. Save the complexity-filtered fastq-files to the output directory to perform additional downstream analyses, such as testing multiple metagenomic profilers (see the [nf-core/taxprofiler](https://github.com/nf-core/taxprofiler) pipeline).
+
+**Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
+
+#### PRINSEQ++
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `metagenomic_complexity_filter/`
+
+  - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
+  - `*_complexity.log`: LOG file containing filter stats
+  </details>
+
+  [PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus#readme) is an alternative to BBDuk for filtering the fastq files before metagenomics classification. From PRINSEQ++ we implemented filtering by the `dust` algorithm or by `entropy`, as explained above in the BBDuk section.
+
+  Using complexity-filtered fastq-files as input for metagenomic classifiers can reduce the number of false positive classifications, resulting in more precise taxonomic assignments of the sample. Save the complexity-filtered fastq-files to the output directory to perform additional downstream analyses, such as testing multiple metagenomic profilers (see the [nf-core/taxprofiler](https://github.com/nf-core/taxprofiler) pipeline).
+
+  The saved files are the _good_ files, passing the `dust` or `entropy` filter treshold specified. The logs contain information about the amount of reads filtered.
+
+  **Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
 
 ### Deduplication
 
@@ -262,3 +317,16 @@ By filtering a BAM file for damaged reads in this way, it is possible to amelior
 [bamUtil trimBam](https://genome.sph.umich.edu/wiki/BamUtil) trims the end of reads in a SAM/BAM file, changing read ends to ‘N’ and quality to ‘!’, or by soft clipping (if command-line option, --clip is specified). By default reverse strands are reversed and then the left & right are trimmed. This means that --left actually trims from the right of the read in the SAM/BAM for reverse reads.
 
 Within nf-core/eager, when BAM trimming is activated alongside PMD-filtering, trimming is performed on the PMD-filtered reads only.
+
+### Damage Estimation
+
+#### DamageProfiler
+
+- `damage_estimation/damageprofiler/`: this contains sample specific directories containing raw statistics and damage plots from DamageProfiler.
+
+  - `*.pdf`: can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
+
+    </details>
+
+[DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
+is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
