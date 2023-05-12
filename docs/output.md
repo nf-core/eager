@@ -266,6 +266,20 @@ The resulting histogram file will contain estimated deduplication statistics at 
 
 These curves will be displayed in the pipeline run's MultiQC report, however you can also use this file for plotting yourself for further exploration e.g. in R to find your sequencing target depth.
 
+#### DamageProfiler
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `damage_estimation/damageprofiler/`: this contains sample specific directories containing raw statistics and damage plots from DamageProfiler.
+
+  - `*.pdf`: can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
+
+    </details>
+
+[DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
+is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
+
 ### Contamination estimation for Human DNA
 
 #### ANGSD nuclear contamination
@@ -273,9 +287,10 @@ These curves will be displayed in the pipeline run's MultiQC report, however you
 <details markdown="1">
 <summary>Output files</summary>
 
-- `contamination/nuclear_contamination/`
+- `contamination_estimation/angsd/`
 
-  - `*.X.contamination.out`: Text file containing the results of nuclear contamination estimation with ANGSD.
+  - `*.txt`: Text file containing the results of nuclear contamination estimation with ANGSD.
+
   </details>
 
 [ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. Among other functions, ANGSD can estimate contamination for chromosomes for which one copy exists, i.e. X-chromosome for humans with karyotype XY. To do this, we first generate a binary count file for the X-chromosome (`angsd`) and then perform a Fisher's exact test for finding a p-value and jackknife to get an estimate of contamination (`contamination`).

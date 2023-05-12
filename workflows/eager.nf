@@ -68,6 +68,8 @@ include { FILTER_BAM                    } from '../subworkflows/local/bamfilteri
 include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
 include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
+include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -292,6 +294,24 @@ workflow EAGER {
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
 
+     //
+    // SUBWORKFLOW: Calculate Damage
+    //
+
+    ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
+        .multiMap{
+            meta, fasta, fai, dict, index ->
+            fasta:      [ meta, fasta ]
+            fasta_fai:  [ meta, fai ]
+        }
+
+    if ( !params.skip_damage_calculation ) {
+        CALCULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_damagecalculation.fasta, ch_fasta_for_damagecalculation.fasta_fai )
+        ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
+
+    }
+
     //
     // SUBWORKFLOW: Contamination estimation
     //
@@ -327,7 +347,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([])) // Replaced with custom mixing
 
     MULTIQC (
         ch_multiqc_files.collect(),

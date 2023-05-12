@@ -388,3 +388,13 @@ nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup_merged -du
 ## Expect: deduplication directory with a single bam,bai,flagstat for the library (3 files total). Flagstat for each library should include fewer mapped reads than the mapped bam version. Check that duplicate at NC_007596.2:187-187 is removed.
 nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_dedup_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
+
+### CALCULATE DAMAGE
+
+#### With DamageProfiler
+
+```bash
+## DamageProfiler with default parameters
+## Expect:damageprofiler directory with txt, pdf, svg for each library (19 files total per library).
+nextflow run main.nf -profile test,conda --outdir ./results -resume
+```
