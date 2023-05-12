@@ -51,6 +51,7 @@ def make_dir(path):
             if exception.errno != errno.EEXIST:
                 raise exception
 
+
 def print_error(error, context="Line", context_str="", error_counter=0):
     if isinstance(context_str, str):
         context_str = "'{}'".format(context_str.strip())
@@ -62,6 +63,7 @@ def print_error(error, context="Line", context_str="", error_counter=0):
     print(error_str)
     error_counter += 1
     return error_counter
+
 
 def check_samplesheet(file_in, file_out):
     """
