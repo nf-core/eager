@@ -892,6 +892,9 @@
         },
         {
             "$ref": "#/definitions/mapping_statistics"
+        },
+        {
+            "$ref": "#/definitions/host_removal"
         }
     ]
 }
