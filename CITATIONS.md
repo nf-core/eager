@@ -66,6 +66,9 @@
 
   > Fellows Yates JA, Lamnidis TC, Borry M, Valtueña Andrades A, Fagernäs Z, Clayton S, Garcia MU, Neukamm J, Peltzer A. 2021. Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager. PeerJ 9:e10947. doi: [10.7717/peerj.10947](https://doi.org/10.7717/peerj.10947)
 
+- [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
+  > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190). Download: https://github.com/Integrative-Transcriptomics/DamageProfiler
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)

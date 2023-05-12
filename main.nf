@@ -4,7 +4,6 @@
     nf-core/eager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/eager
-
     Website: https://nf-co.re/eager
     Slack  : https://nfcore.slack.com/channels/eager
 ----------------------------------------------------------------------------------------

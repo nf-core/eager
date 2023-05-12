@@ -389,6 +389,16 @@ nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup_merged -du
 nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_dedup_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
 
+### CALCULATE DAMAGE
+
+#### With DamageProfiler
+
+```bash
+## DamageProfiler with default parameters
+## Expect:damageprofiler directory with txt, pdf, svg for each library (19 files total per library).
+nextflow run main.nf -profile test,conda --outdir ./results -resume
+```
+
 ## Mapping statistics
 
 ### ENDOSPY
