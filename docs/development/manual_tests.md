@@ -208,6 +208,8 @@ Tests
 ##Check pair end merged and single end processed correctly
 nextflow run ../main.nf -profile docker,test --outdir results_hostremoval -w results_hostremoval/work --run_host_removal
 
+#Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
 ##Check pair end merged and single end processed correctly and host reads in but masked with Ns
 nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_replace -w results_hostremoval_replace/work --run_host_removal --host_removal_mode replace
 
@@ -216,10 +218,21 @@ nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_replac
 ##Check pair end non-merged and single end processed correctly
 nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPEmerging -w results_hostremoval_skipPEmerging/work --run_host_removal --preprocessing_skippairmerging
 
+#Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
+
 ##Check it still runs when preprocessing is not done and files are proper
 nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPreprocessing -w results_hostremoval_skipPreprocessing/work --run_host_removal --skip_preprocessing
 
+#Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
 ##Check it runs with multiple lanes and gives correct output per lane
+
+nextflow run ../main.nf -profile docker,test --input mammoth_design_fastq_multilane_multilib.tsv --outdir results_hostremoval_multilane_multilib -w results_hostremoval_multilane_multilib/work --run_host_removal
+
+#Checked that we obtain all the fastq for all the lanes in the input TSV
+#Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+#Checked that the number of reads is not the same as in the original input by counting the number of reads.
 
 ```
 
