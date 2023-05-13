@@ -26,7 +26,7 @@ workflow REFERENCE_INDEXING_MULTI {
                                                 .splitCsv ( header:true )
     }
 
-    ch_splitreferencesheet_for_branch = ch_splitreferencesheet_for_map =
+    ch_splitreferencesheet_for_branch = ch_splitreferencesheet_for_map
                                             .map {
                                                 row ->
                                                     def meta            = [:]
