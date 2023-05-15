@@ -25,7 +25,8 @@ workflow REFERENCE_INDEXING {
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_MULTI.out.versions )
     } else {
         // If input FASTA and/or indicies supplied
-        ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir ).reference
+        REFERENCE_INDEXING_SINGLE ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir )
+        ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE.out.reference
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }
     emit:

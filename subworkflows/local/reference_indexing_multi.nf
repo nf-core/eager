@@ -2,11 +2,11 @@
 // Index input reference as required
 //
 
-include { GUNZIP as GUNZIP_FASTA          } from "../../modules/nf-core/gunzip/main"
-include { BWA_INDEX                       } from "../../modules/nf-core/bwa/index/main"
-include { BOWTIE2_BUILD                   } from "../../modules/nf-core/bowtie2/build/main"
-include { SAMTOOLS_FAIDX                  } from "../../modules/nf-core/samtools/faidx/main"
-include { PICARD_CREATESEQUENCEDICTIONARY } from "../../modules/nf-core/picard/createsequencedictionary/main"
+include { GUNZIP as GUNZIP_FASTA          } from '../../modules/nf-core/gunzip/main'
+include { BWA_INDEX                       } from '../../modules/nf-core/bwa/index/main'
+include { BOWTIE2_BUILD                   } from '../../modules/nf-core/bowtie2/build/main'
+include { SAMTOOLS_FAIDX                  } from '../../modules/nf-core/samtools/faidx/main'
+include { PICARD_CREATESEQUENCEDICTIONARY } from '../../modules/nf-core/picard/createsequencedictionary/main'
 // TODO missing: circulargeneraotr?
 
 workflow REFERENCE_INDEXING_MULTI {
@@ -61,8 +61,7 @@ workflow REFERENCE_INDEXING_MULTI {
                             }
 
     // Pull out name/file to match cardinality for GUNZIP module
-    ch_gunzip_input = ch_fasta_for_gunzip
-        .forgunzip
+    ch_gunzip_input = ch_fasta_for_gunzip.forgunzip
         .multiMap {
             meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion ->
                 gunzip:    [ meta, fasta ]
