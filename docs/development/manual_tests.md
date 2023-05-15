@@ -115,7 +115,7 @@ nextflow run ../main.nf -profile singularity,test --outdir ./results --input sam
 ## Expect: Expect no files to be generated/processes executed, nor results present in per reference results/reference folder
 nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test08.csv -ansi-log false -dump-channels --save_reference
 
-## Test: (9) All but Human FAI provided ❓️ - fails at step not involving FAI?
+## Test: (9) All but Human FAI provided  ✅
 ## Expect: Expect one fai (x1 SAMTOOLS_FAIDX processes), and nothing else results/reference folder
 nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test09.csv -ansi-log false -dump-channels --save_reference
 
