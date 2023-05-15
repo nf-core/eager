@@ -103,7 +103,7 @@ nextflow run ../main.nf -profile singularity,test --outdir ./results --input sam
 ## Expect: Expect two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (x1 BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
 nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test05.csv -ansi-log false -dump-channels --save_reference --mapping_tool bowtie2
 
-## Test: (6) Mapper index mismatch with `--mapping_tool` ✅
+## Test: (6) Mapper index mismatch with `--mapping_tool` (bwa index to bowtie2-align) ✅
 ## Expect: Expect FAIL at mapping step for Mammoth two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
 nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test06.csv -ansi-log false -dump-channels --save_reference --mapping_tool bowtie2
 
