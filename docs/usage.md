@@ -251,13 +251,3 @@ We recommend adding the following line to your environment to limit this (typica
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
-
-## FAQ
-
-### Why do some of my job names say null in them
-
-When supplying BAM files as input to the pipeline, they are not automatically associated with a reference file for some of the steps that do not require a FASTA file.
-
-As they aren't associated with a reference file these BAM files will not have the metadata about the reference until they are run in a step of the pipeline that requires a reference.
-
-Therefore in most cases you do not need to worry about this.
