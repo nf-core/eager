@@ -16,7 +16,7 @@ workflow ESTIMATE_CONTAMINATION {
     ch_multiqc_files  = Channel.empty()
 
 // fix unexpected input/syntax error
-    if ( params.run_contamination_angsd ) {
+    if ( params.run_contamination_estimation_angsd ) {
         angsd_input_hapmap = hapmap_input
         .map {
             // Create additional map containing only meta.id for combining samples and hapmap
@@ -51,14 +51,14 @@ workflow ESTIMATE_CONTAMINATION {
 
         ch_angsd_output = ch_angsd_contam.collect()
 
-        PRINT_CONTAMINATION_ANGSD( ch_angsd_output)
-        ch_contam_angsd_print = PRINT_CONTAMINATION_ANGSD.out.contam_angsd_txt
-        ch_contam_mqc         = PRINT_CONTAMINATION_ANGSD.out.contam_angsd_multiqc
+        PRINT_CONTAMINATION_ANGSD( ch_angsd_output )
+        ch_contam_angsd_print = PRINT_CONTAMINATION_ANGSD.out.txt
+        ch_multiqc_files      = ch_multiqc_files.mix( PRINT_CONTAMINATION_ANGSD.out.json )
+        ch_versions           = ch_versions.mix( PRINT_CONTAMINATION_ANGSD.out.versions )
     }
 
     emit:
     contam_angsd_print = ch_contam_angsd_print
-    contam_mqc         = ch_contam_mqc
+    mqc                = ch_multiqc_files
     versions           = ch_versions
-
 }

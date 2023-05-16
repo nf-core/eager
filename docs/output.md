@@ -280,7 +280,7 @@ These curves will be displayed in the pipeline run's MultiQC report, however you
 [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
 is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
 
-### Contamination estimation for Human DNA
+### Contamination estimation for Nuclear DNA
 
 #### ANGSD nuclear contamination
 
@@ -289,8 +289,9 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
 
 - `contamination_estimation/angsd/`
 
-  - `*.txt`: Text file containing the results of nuclear contamination estimation with ANGSD.
+  - `*.txt`: Text file containing the results of nuclear contamination estimation with ANGSD for each library.
+  - `nuclear_contamination.txt`: Text file containing a summary table of contamination estimates for all libraries.
 
   </details>
 
-[ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. Among other functions, ANGSD can estimate contamination for chromosomes for which one copy exists, i.e. X-chromosome for humans with karyotype XY. To do this, we first generate a binary count file for the X-chromosome (`angsd`) and then perform a Fisher's exact test for finding a p-value and jackknife to get an estimate of contamination (`contamination`).
+[ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. Among other functions, ANGSD can estimate contamination for chromosomes for which one copy exists, i.e. X-chromosome for humans with karyotype XY. To do this, we first generate a binary count file for the X-chromosome (`angsd`) and then perform a Fisher's exact test for finding a p-value and jackknife to get an estimate of contamination (`contamination`). Contamination is estimated with Method of Moments (MOM) and Maximum Likelihood (ML) for both Method1 and Method2. Method1 compares the total number of minor and major reads at SNP sites with the number of minor and major reads at adjacent sites, assuming independent errors between reads and sites, while Method2 only samples one read at each site to remove the previous assumption. The results of all methods for each library, as well as respective standard errors are summarised in `nuclear_contamination.txt`.

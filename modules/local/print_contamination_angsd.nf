@@ -11,16 +11,22 @@ process PRINT_CONTAMINATION_ANGSD {
     tuple val(meta), path(angsd_output)
 
     output:
-    tuple val(meta), file("nuclear_contamination.txt"), emit: contam_angsd_txt
-    tuple val(meta), file("nuclear_contamination_mqc.json"), emit: contam_angsd_multiqc
+    tuple val(meta), file("nuclear_contamination.txt"),      emit: txt
+    tuple val(meta), file("nuclear_contamination_mqc.json"), emit: json
+    path "versions.yml",                                     emit: versions
 
     when:
-    params.run_contamination_angsd
+    params.run_contamination_estimation_angsd
 
     script:
     prefix   = task.ext.prefix ?: "${meta.id}"
 
     """
     print_x_contamination.py ${angsd_output.join(' ')}
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 }

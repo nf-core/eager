@@ -125,12 +125,7 @@ workflow EAGER {
     }
 
     // Contamination estimation
-    if ( params.run_contamination_angsd ) {
-        hapmap_file = file(params.angsd_hapmap, checkIfExists:true)
-        ch_hapmap = Channel.of( [ hapmap_file ] )
-    } else {
-        ch_hapmap = Channel.empty()
-    }
+    hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -315,18 +310,19 @@ workflow EAGER {
     // SUBWORKFLOW: Contamination estimation
     //
 
-    if ( params.run_contamination_angsd ) {
+    if ( params.run_contamination_estimation_angsd ) {
         contamination_input = ch_dedupped_bams
-        hapmap_input        = ch_hapmap
-        .combine( REFERENCE_INDEXING.out.reference )
+        ch_hapmap = Channel.of( [ hapmap_file ] )
+        hapmap_input = REFERENCE_INDEXING.out.reference
+        .combine( ch_hapmap )
         .map {
-            hapmap, meta, fasta, fai, dict, index ->
+            meta, fasta, fai, dict, index, hapmap ->
             [ meta, hapmap ]
         }
 
         ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
         ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix(ESTIMATE_CONTAMINATION.out.contam_mqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]))
     }
 
     //

@@ -405,10 +405,10 @@ nextflow run main.nf -profile test,conda --outdir ./results -resume
 
 ```bash
 ## ANGSD contamination estimation with default parameters
-## Expect: contamination_estimation/angsd directory with txt for each library.
+## Expect: contamination_estimation/angsd directory with txt for each library and 'nuclear_contamination.txt' summary table.
 nextflow run main.nf -profile test,humanbam --outdir ./results  --run_contamination_angsd -resume
 
 ## ANGSD contamination estimation with quality filters reduced
-## Expect: contamination_estimation/angsd directory with txt for each library.
+## Expect: contamination_estimation/angsd directory with txt for each library and 'nuclear_contamination.txt' summary table.
 nextflow run main.nf -profile test,humanbam --outdir ./results --run_contamination_angsd --angsd_minq 0 --angsd_mapq 0 -resume
 ```
