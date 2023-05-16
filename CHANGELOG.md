@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### `Dependencies`
 
 - `pygments`: 2.9 -> 2.14
+- `multiqc`: 1.13 -> 1.14
 
 ### `Deprecated`
 
