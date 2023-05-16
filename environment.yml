@@ -1,6 +1,6 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-name: nf-core-eager-2.4.6
+name: nf-core-eager-2.4.7
 channels:
   - conda-forge
   - bioconda
@@ -9,7 +9,7 @@ dependencies:
   - conda-forge::python=3.9.4
   - conda-forge::markdown=3.3.4
   - conda-forge::pymdown-extensions=8.2
-  - conda-forge::pygments=2.9.0
+  - conda-forge::pygments=2.14.0
   - bioconda::rename=1.601
   - conda-forge::openjdk=8.0.144 # Don't upgrade - required for GATK
   - bioconda::fastqc=0.11.9
@@ -26,7 +26,7 @@ dependencies:
   - bioconda::qualimap=2.2.2d
   - bioconda::vcf2genome=0.91
   - bioconda::damageprofiler=0.4.9 # Don't upgrade - later versions don't allow java 8
-  - bioconda::multiqc=1.13
+  - bioconda::multiqc=1.14
   - bioconda::pmdtools=0.60
   - bioconda::bedtools=2.30.0
   - conda-forge::libiconv=1.16
