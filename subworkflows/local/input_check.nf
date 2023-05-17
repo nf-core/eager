@@ -91,6 +91,7 @@ def create_bam_channel(LinkedHashMap row) {
     meta.library_id         = row.library_id
     meta.strandedness       = row.strandedness
     meta.damage_treatment   = row.damage_treatment
+    meta.reference          = row.bam_reference_id
 
     def array = []
     if (!file(row.bam).exists()) {
