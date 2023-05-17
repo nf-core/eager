@@ -723,13 +723,13 @@
                     "type": "integer",
                     "default": 12,
                     "description": "Length of read sequence to use from each side for rescaling. Can be overridden by `--rescalelength*p`.",
-                    "help_text": "Specify the length from the end of the read that mapDamage should rescale at both ends.\n\n> Modifies the `--seq-length` parameter of mapDamage2.",
+                    "help_text": "Specify the length in bp  from the end of the read that mapDamage should rescale at both ends.\n\n> Modifies the `--seq-length` parameter of mapDamage2.",
                     "fa_icon": "fas fa-ruler-horizontal"
                 },
                 "damage_manipulation_rescale_length_5p": {
                     "type": "integer",
                     "default": 0,
-                    "description": "Length of read for mapDamage2 to rescale from 5p end. Only used if not 0 otherwise `--rescale_seqlength` used.",
+                    "description": "Length of read for mapDamage2 to rescale from 5p end. Only used if not 0, otherwise `--rescale_seqlength` used.",
                     "help_text": "Specify the length from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-5p` parameter of mapDamage2.",
                     "fa_icon": "fas fa-balance-scale-right"
                 },
@@ -756,7 +756,7 @@
                 "damage_manipulation_pmdtools_reference_mask": {
                     "type": "string",
                     "fa_icon": "fas fa-mask",
-                    "help_text": "Activates masking of the reference fasta prior to running pmdtools. Positions that are in the provided bedfile will be replaced by Ns in the reference genome. \nThis can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a transition SNP to be counted as damage. Masking of the reference is done using `bedtools maskfasta`.",
+                    "help_text": "Supplying a bedfile to this parameter activates masking of the reference fasta at the contained sites prior to running PMDtools. Positions that are in the provided bedfile will be replaced by Ns in the reference genome. \nThis can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a transition SNP to be counted as damage. Masking of the reference is done using `bedtools maskfasta`.",
                     "description": "Specify a bedfile to be used to mask the reference fasta prior to running pmdtools.",
                     "pattern": "^\\S+\\.bed$",
                     "format": "file-path"
@@ -765,7 +765,7 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-eraser",
                     "description": "Turn on BAM trimming. Will only affect non-UDG or half-UDG libraries.",
-                    "help_text": "Turns on the BAM trimming method. Trims off [n] bases from reads in the deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only affect libraries with 'damage_treatment' of  'none' or 'half'. Complete UDG treatment ('full') should have removed all damage, during library construction so trimming of 0 bp is performed. The amount of bases that will be trimmed off from each side of the molecule can be set separately for libraries with depending on their 'strandedness' and 'damage_treatment'.\n\n> Note: additional artefacts such as bar-codes or adapters that could potentially also be trimmed, should be removed prior to mapping and not in this step."
+                    "help_text": "Turns on the BAM trimming method. Trims off [n] bases from reads in the deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only affect libraries with 'damage_treatment' of  'none' or 'half'. Complete UDG treatment ('full') should have removed all damage, during library construction so trimming of 0 bp is performed. The amount of bases that will be trimmed off from each side of the molecule can be set separately for libraries with depending on their 'strandedness' and 'damage_treatment'.\n\n> Note: additional artefacts such as bar-codes or adapters should be removed prior to mapping and not in this step."
                 },
                 "damage_manipulation_bamutils_clip_double_stranded_none_udg_left": {
                     "type": "integer",

@@ -73,6 +73,7 @@
 - [BamUtils](https://doi.org/10.1101/gr.176552.114)
 
   > Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. doi: [10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114)
+
 - [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
   > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190). Download: https://github.com/Integrative-Transcriptomics/DamageProfiler
 

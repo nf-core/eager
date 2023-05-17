@@ -299,8 +299,8 @@ Be advised that this process introduces reference bias in the resulting rescaled
 
 </details>
 
-[pmdtools](https://github.com/pontussk/PMDtools) implements a likelihood framework incorporating postmortem damage (PMD), base quality scores and biological polymorphism to identify degraded DNA sequences that are unlikely to originate from modern contamination. Using the model, each sequence is assigned a PMD score, for which positive values indicate support for the sequence being genuinely ancient.
-By filtering a BAM file for damaged reads in this way, it is possible to ameliorate the effects of present-day contamination, and isolate sequences of ancient origin to be used downstream.
+[pmdtools](https://github.com/pontussk/PMDtools) implements a likelihood framework incorporating a postmortem damage (PMD) score, base quality scores and biological polymorphism to identify degraded DNA sequences that are unlikely to originate from modern contamination. Using the model, each sequence is assigned a PMD score, for which positive values indicate support for the sequence being genuinely ancient.
+By filtering a BAM file for damaged reads in this way, it is possible to ameliorate the effects of present-day contamination, and isolate sequences of likely ancient origin to be used downstream.
 
 ### Base Trimming
 
