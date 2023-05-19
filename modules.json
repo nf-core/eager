@@ -10,6 +10,16 @@
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     },
+                    "angsd/contamination": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["bam_docounts_contamination_angsd"]
+                    },
+                    "angsd/docounts": {
+                        "branch": "master",
+                        "git_sha": "bd9e43646a9435d2f62ce4a777ae88ef10ec922d",
+                        "installed_by": ["bam_docounts_contamination_angsd"]
+                    },
                     "bbmap/bbduk": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
@@ -169,6 +179,11 @@
             },
             "subworkflows": {
                 "nf-core": {
+                    "bam_docounts_contamination_angsd": {
+                        "branch": "master",
+                        "git_sha": "a9784afdd5dcda23b84e64db75dc591065d64653",
+                        "installed_by": ["subworkflows"]
+                    },
                     "bam_split_by_region": {
                         "branch": "master",
                         "git_sha": "a9784afdd5dcda23b84e64db75dc591065d64653",
