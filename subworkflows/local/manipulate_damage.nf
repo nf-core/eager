@@ -66,8 +66,9 @@ workflow MANIPULATE_DAMAGE {
         ch_versions       = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_RESCALED.out.versions.first() )
         ch_rescaled_index = params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_RESCALED.out.csi : SAMTOOLS_INDEX_DAMAGE_RESCALED.out.bai
 
+        // TODO When adding library-level data merging pre-genotyping, make sure that rescaled bams are not merged in any way as the underlying damage model could differ between libraries
         ch_rescaled_bams  = MAPDAMAGE2.out.rescaled.join(ch_rescaled_index)
-            .mix(ch_skip_rescale)
+            .mix(ch_skip_rescale) // Should these be mixed actually, or excluded? Might not make sense to take rescaled and non-rescaled bams togetehr for anything downstream.
     }
 
     if ( params.run_pmd_filtering ) {
