@@ -71,7 +71,7 @@ def check_samplesheet(file_in, file_out):
     sample_id	library_id	lane	colour_chemistry	pairment	strandedness	damage_treatment	r1	r2	bam	bam_reference_id
     Sample1	Sample1_Lib1	1	4	paired	double	full	Sample1_Lib1_L008_R1_001.fq.gz	Sample1_Lib1_L008_R2_001.fq.gz	NA	NA
     Sample2	Sample2_Lib1	2	2	single	double	full	Sample2_Lib1_L008_R1_001.fq.gz	NA	NA	NA
-    Sample3	Sample3_Lib1	9	4	single	single	none	NA	NA	Sample3_Lib1.bam	Reference
+    Sample3	Sample3_Lib1	9	4	single	single	none	NA	NA	Sample3_Lib1.bam	Mammoth_MT
 
     For an example see:
     https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/mammoth_design_fastq_bam_dsl2.tsv
