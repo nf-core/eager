@@ -322,6 +322,9 @@ Within nf-core/eager, when BAM trimming is activated alongside PMD-filtering, tr
 
 #### DamageProfiler
 
+<details markdown="1">
+<summary>Output files</summary>
+
 - `damage_estimation/damageprofiler/`: this contains sample specific directories containing raw statistics and damage plots from DamageProfiler.
 
   - `*.pdf`: can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
