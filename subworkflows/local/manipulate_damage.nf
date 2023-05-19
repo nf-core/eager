@@ -2,13 +2,13 @@
 // Calculate PMD scores, trim, or rescale DNA damage from mapped reads.
 //
 
-include { MAPDAMAGE2                                       } from '../../modules/nf-core/mapdamage2/main'
-include { PMDTOOLS_FILTER                                  } from '../../modules/nf-core/pmdtools/filter/main'
-include { BAMUTIL_TRIMBAM                                  } from '../../modules/nf-core/bamutil/trimbam/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_RESCALED } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_FILTERED } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_DAMAGE_TRIMMED  } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_FILTERED  } from '../../modules/nf-core/samtools/flagstat/main'
+include { MAPDAMAGE2                                              } from '../../modules/nf-core/mapdamage2/main'
+include { PMDTOOLS_FILTER                                         } from '../../modules/nf-core/pmdtools/filter/main'
+include { BAMUTIL_TRIMBAM                                         } from '../../modules/nf-core/bamutil/trimbam/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DAMAGE_RESCALED     } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DAMAGE_FILTERED     } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DAMAGE_TRIMMED      } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED  } from '../../modules/nf-core/samtools/flagstat/main'
 
 // TODO: Add required channels and channel manipulations for reference-dependent bed masking before pmdtools. Requires multi-ref support before implementation.
 workflow MANIPULATE_DAMAGE {
@@ -92,8 +92,8 @@ workflow MANIPULATE_DAMAGE {
 
         ch_pmd_filtered_bams = PMDTOOLS_FILTER.out.bam.join( ch_filtered_index )
 
-        SAMTOOLS_FLAGSTAT_FILTERED( ch_pmd_filtered_bams )
-        ch_pmd_filtered_flagstat = SAMTOOLS_FLAGSTAT_FILTERED.out.flagstat
+        SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED( ch_pmd_filtered_bams )
+        ch_pmd_filtered_flagstat = SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED.out.flagstat
     }
 
     if ( params.run_trim_bam ) {
