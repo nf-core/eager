@@ -287,6 +287,10 @@ Rescaling a BAM file in this way can help reduce/remove the effects of DNA damag
 
 Be advised that this process introduces reference bias in the resulting rescaled BAMs, because only mismatches to the reference get corrected, while true mismatches that become reference alleles due to damage are not rescaled.
 
+**This functionality does not produce any MultiQC output.**
+
+> ⚠️ Warning: rescaled libraries will not be merged with non-scaled libraries of the same sample for downstream genotyping, as the underlying damage model may be different for each library. If you wish to merge these, please do this manually and re-run nf-core/eager using the merged BAMs as input.
+
 #### Post-Mortem-Damage (PMD) Filtering
 
 <details markdown="1">
