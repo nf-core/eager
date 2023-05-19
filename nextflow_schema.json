@@ -723,35 +723,35 @@
                     "type": "integer",
                     "default": 12,
                     "description": "Length of read sequence to use from each side for rescaling. Can be overridden by `--rescalelength*p`.",
-                    "help_text": "Specify the length in bp  from the end of the read that mapDamage should rescale at both ends.\n\n> Modifies the `--seq-length` parameter of mapDamage2.",
+                    "help_text": "Specify the length in bp from the end of the read that mapDamage should rescale at both ends.\n\n> Modifies the `--seq-length` parameter of mapDamage2.",
                     "fa_icon": "fas fa-ruler-horizontal"
                 },
                 "damage_manipulation_rescale_length_5p": {
                     "type": "integer",
                     "default": 0,
                     "description": "Length of read for mapDamage2 to rescale from 5p end. Only used if not 0, otherwise `--rescale_seqlength` used.",
-                    "help_text": "Specify the length from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-5p` parameter of mapDamage2.",
+                    "help_text": "Specify the length in bp from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-5p` parameter of mapDamage2.",
                     "fa_icon": "fas fa-balance-scale-right"
                 },
                 "damage_manipulation_rescale_length_3p": {
                     "type": "integer",
                     "default": 0,
                     "description": "Length of read for mapDamage2 to rescale from 3p end. Only used if not 0 otherwise `--rescale_seqlength` used.",
-                    "help_text": "Specify the length from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-3p` parameter of mapDamage2.",
+                    "help_text": "Specify the length in bp from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-3p` parameter of mapDamage2.",
                     "fa_icon": "fas fa-balance-scale-left"
                 },
                 "run_pmd_filtering": {
                     "type": "boolean",
                     "description": "Turn on PMDtools filtering.",
-                    "help_text": "Specifies to run PMDTools for damage based read filtering in sequencing libraries. Turned off by default.",
+                    "help_text": "Specifies to run PMDtools for damage based read filtering in sequencing libraries. Turned off by default.",
                     "fa_icon": "fas fa-power-off"
                 },
                 "damage_manipulation_pmdtools_threshold": {
                     "type": "integer",
                     "default": 3,
                     "fa_icon": "far fa-chart-bar",
-                    "description": "Specify PMDScore threshold for PMDTools.",
-                    "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user.\n\n> Modifies PMDTools parameter: `--threshold`"
+                    "description": "Specify PMDScore threshold for PMDtools.",
+                    "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user.\n\n> Modifies PMDtools parameter: `--threshold`"
                 },
                 "damage_manipulation_pmdtools_reference_mask": {
                     "type": "string",
@@ -765,7 +765,7 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-eraser",
                     "description": "Turn on BAM trimming. Will only affect non-UDG or half-UDG libraries.",
-                    "help_text": "Turns on the BAM trimming method. Trims off [n] bases from reads in the deduplicated BAM file. Damage assessment in PMDTools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only affect libraries with 'damage_treatment' of  'none' or 'half'. Complete UDG treatment ('full') should have removed all damage, during library construction so trimming of 0 bp is performed. The amount of bases that will be trimmed off from each side of the molecule can be set separately for libraries with depending on their 'strandedness' and 'damage_treatment'.\n\n> Note: additional artefacts such as bar-codes or adapters should be removed prior to mapping and not in this step."
+                    "help_text": "Turns on the BAM trimming method. Trims off [n] bases from reads in the deduplicated BAM file. Damage assessment in PMDtools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only affect libraries with 'damage_treatment' of  'none' or 'half'. Complete UDG treatment ('full') should have removed all damage, during library construction so trimming of 0 bp is performed. The amount of bases that will be trimmed off from each side of the molecule can be set separately for libraries with depending on their 'strandedness' and 'damage_treatment'.\n\n> Note: additional artefacts such as bar-codes or adapters should be removed prior to mapping and not in this step."
                 },
                 "damage_manipulation_bamutils_clip_double_stranded_none_udg_left": {
                     "type": "integer",
