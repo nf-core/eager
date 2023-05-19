@@ -314,15 +314,15 @@ workflow EAGER {
         contamination_input = ch_dedupped_bams
         ch_hapmap = Channel.of( [ hapmap_file ] )
         hapmap_input = REFERENCE_INDEXING.out.reference
-        .combine( ch_hapmap )
-        .map {
-            meta, fasta, fai, dict, index, hapmap ->
-            [ meta, hapmap ]
-        }
+            .combine( ch_hapmap )
+            .map {
+                meta, fasta, fai, dict, index, hapmap ->
+                [ meta, hapmap ]
+            }
 
         ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
         ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix(ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix( ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //

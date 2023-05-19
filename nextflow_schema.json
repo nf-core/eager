@@ -849,18 +849,18 @@
                     "help_text": "The name of the chromosome as specified in your FASTA/bam header.\ne.g. 'X' for hs37d5, 'chrX' for HG19",
                     "fa_icon": "fas fa-address-card"
                 },
-                "contamination_estimation_angsd_range_pos1": {
+                "contamination_estimation_angsd_range_from": {
                     "type": "integer",
                     "default": 5000000,
                     "description": "The first position on the chromosome to be used for contamination estimation with ANGSD.",
-                    "help_text": "The beginning of the genetic range that should be utilised for nuclear contamination estimation. ",
+                    "help_text": "The beginning of the genetic range that should be utilised for nuclear contamination estimation.",
                     "fa_icon": "fas fa-map-marker-alt"
                 },
-                "contamination_estimation_angsd_range_pos2": {
+                "contamination_estimation_angsd_range_to": {
                     "type": "integer",
                     "default": 154900000,
+                    "help_text": "The end of the genetic range that should be utilised for nuclear contamination estimation.",
                     "description": "The last position on the chromosome to be used for contamination estimation with ANGSD.",
-                    "help_text": "The end of the genetic range that should be utilised for nuclear contamination estimation. ",
                     "fa_icon": "fas fa-map-marker-alt"
                 },
                 "contamination_estimation_angsd_mapq": {
