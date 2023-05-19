@@ -80,6 +80,22 @@ Tool Specific combinations
     - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
     - PE_only + preprocessing_excludeunmerged ✅
 
+- Damage Manipulation
+  - MapDamage2
+    - mapdamage2 rescaling with default parameters
+    - mapdamage2 rescaling with changed parameters
+
+  - PMD filtering
+    - with default parameters
+    - with stricter threshold
+
+  - BAM filtering
+    - with default parameters
+    - different length by udg treatment
+
+- All together
+    -
+
 ### AdapterRemoval
 
 ```bash
@@ -397,4 +413,78 @@ nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/onl
 ## DamageProfiler with default parameters
 ## Expect:damageprofiler directory with txt, pdf, svg for each library (19 files total per library).
 nextflow run main.nf -profile test,conda --outdir ./results -resume
+```
+
+### MANIPULATE DAMAGE
+
+## Rescaling
+
+```bash
+## Rescaling with default parameters
+## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG)
+nextflow run . -profile test,docker --run_mapdamage_rescaling -resume --outdir ./results
+
+## Rescaling with changed rescale lengths
+## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG). Commands checked to ensure parameter gets propagated (Yes, together with default --seq-length of 12.)
+nextflow run . -profile test,docker --run_mapdamage_rescaling --damage_manipulation_rescale_length_5p 3 --damage_manipulation_rescale_length_3p 3 -resume --outdir ./results
+```
+
+## PMD Filtering
+
+```bash
+## PMD filtering with default parameters
+## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total).
+nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results
+## number of reads in each file after filtering:
+# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  70
+# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      180
+# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      55
+
+
+## PMD filtering with changed parameters
+## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total). Commands checked to ensure parameter gets propagated.
+nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results --damage_manipulation_pmdtools_threshold 4
+## number of reads in each file after filtering:
+# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  64
+# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      137
+# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      30
+```
+
+## BAM trimming
+
+```bash
+## BAM trimming with default parameters (0bp trim)
+## Expect: damage_manipulation directory with a bam and bai per library. No trimming actually done. (6 files total. full UDG still goes through module but trimming is 0bp)
+nextflow run . -profile test,docker --run_trim_bam -resume --outdir ./results
+
+## BAM trimming with changed parameters
+## Expect: damage_manipulation directory with a bam and bai per library. Trimming is done. 0 bp for full UDG, 1-2bp for half, 5-7 for none. (6 files total)
+## Giving different on each side to make sure arguments are passed correctly.
+nextflow run . -profile test,docker \
+  -resume \
+  --outdir ./results \
+  --run_trim_bam \
+  --damage_manipulation_bamutils_clip_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_clip_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_clip_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_clip_double_stranded_half_udg_right 2
+```
+
+## All together
+
+```bash
+## All together with default parameters + non-0 trimming.
+## Expect: damage_manipulation directory with _pmdfiltered, and _pmdfiltered_trimmed bams and bai per library, plus pmd_filtered flagstat files. (9 files total).
+##   Also _rescaled bam/bai for libraries that are not full-UDG. (9 + 2 = 11 files total)
+## Number of reads in each file after trimming should match filtered flagstat.
+nextflow run . -profile test,docker \
+  -resume \
+  --outdir ./results \
+  --run_mapdamage_rescaling \
+  --run_pmd_filtering \
+  --run_trim_bam \
+  --damage_manipulation_bamutils_clip_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_clip_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_clip_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_clip_double_stranded_half_udg_right 2
 ```
