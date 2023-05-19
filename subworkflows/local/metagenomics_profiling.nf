@@ -144,14 +144,15 @@ workflow METAGENOMICS_PROFILING {
     }
 
     else if ( params.metagenomics_profiling_tool == 'kraken2' ) {
+        // run kraken2 over all samples
 
         KRAKEN2_KRAKEN2 ( ch_input_for_kraken2.reads, database, params.metagenomics_kraken_save_reads, params.metagenomics_kraken_save_read_classifications )
+
         ch_multiqc_files            = ch_multiqc_files.mix( KRAKEN2_KRAKEN2.out.report )
         ch_versions                 = ch_versions.mix( KRAKEN2_KRAKEN2.out.versions.first() )
         ch_raw_classifications      = ch_raw_classifications.mix( KRAKEN2_KRAKEN2.out.classified_reads_assignment )
         ch_raw_profiles             = ch_raw_profiles.mix( KRAKEN2_KRAKEN2.out.report )
         ch_postprocessing_input     = ch_postprocessing_input.mix( KRAKEN2_KRAKEN2.out.report )
-
     }
 
     emit:
@@ -160,4 +161,5 @@ workflow METAGENOMICS_PROFILING {
     profiles                 = ch_raw_profiles    // channel: [ val(meta), [ reads ] ] - should be text files or biom
     postprocessing_input     = ch_postprocessing_input
     mqc                      = ch_multiqc_files
+
 }
