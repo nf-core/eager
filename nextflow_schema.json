@@ -743,7 +743,7 @@
                 "run_pmd_filtering": {
                     "type": "boolean",
                     "description": "Turn on PMDtools filtering.",
-                    "help_text": "Specifies to run PMDtools for damage based read filtering in sequencing libraries. Turned off by default.",
+                    "help_text": "Specifies to run PMDtools for damage based read filtering in sequencing libraries.",
                     "fa_icon": "fas fa-power-off"
                 },
                 "damage_manipulation_pmdtools_threshold": {
@@ -751,7 +751,7 @@
                     "default": 3,
                     "fa_icon": "far fa-chart-bar",
                     "description": "Specify PMDScore threshold for PMDtools.",
-                    "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis. By default set to `3` if not set specifically by the user.\n\n> Modifies PMDtools parameter: `--threshold`"
+                    "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis.\n\n> Modifies PMDtools parameter: `--threshold`"
                 },
                 "damage_manipulation_pmdtools_reference_mask": {
                     "type": "string",
@@ -765,27 +765,27 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-eraser",
                     "description": "Turn on BAM trimming. Will only affect non-UDG or half-UDG libraries.",
-                    "help_text": "Turns on the BAM trimming method. Trims off [n] bases from reads in the deduplicated BAM file. Damage assessment in PMDtools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only affect libraries with 'damage_treatment' of  'none' or 'half'. Complete UDG treatment ('full') should have removed all damage, during library construction so trimming of 0 bp is performed. The amount of bases that will be trimmed off from each side of the molecule can be set separately for libraries with depending on their 'strandedness' and 'damage_treatment'.\n\n> Note: additional artefacts such as bar-codes or adapters should be removed prior to mapping and not in this step."
+                    "help_text": "Turns on the BAM trimming method. Trims off [n] bases from reads in the deduplicated BAM file. Damage assessment in PMDtools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only affect libraries with 'damage_treatment' of  'none' or 'half'. Complete UDG treatment ('full') should have removed all damage, during library construction so trimming of 0 bp is performed. The amount of bases that will be trimmed off from each side of the molecule should be set separately for libraries with depending on their 'strandedness' and 'damage_treatment'.\n\n> Note: additional artefacts such as bar-codes or adapters should be removed prior to mapping and not in this step."
                 },
                 "damage_manipulation_bamutils_clip_double_stranded_none_udg_left": {
                     "type": "integer",
                     "default": 0,
                     "fa_icon": "fas fa-ruler-combined",
                     "description": "Specify the number of bases to clip off reads from 'left' end of read for double-stranded non-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`"
+                    "help_text": "The number of bases to trim on the left side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`"
                 },
                 "damage_manipulation_bamutils_clip_double_stranded_none_udg_right": {
                     "type": "integer",
                     "default": 0,
                     "fa_icon": "fas fa-ruler",
                     "description": "Specify the number of bases to clip off reads from 'right' end of read for double-stranded non-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
+                    "help_text": "The number of bases to trim on the right side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
                 },
                 "damage_manipulation_bamutils_clip_double_stranded_half_udg_left": {
                     "type": "integer",
                     "default": 0,
                     "fa_icon": "fas fa-ruler-combined",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
+                    "help_text": "The number of bases to trim on the left side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
                     "description": "Specify the number of bases to clip off reads from 'left' end of read for double-stranded half-UDG libraries."
                 },
                 "damage_manipulation_bamutils_clip_double_stranded_half_udg_right": {
@@ -793,13 +793,13 @@
                     "default": 0,
                     "fa_icon": "fas fa-ruler",
                     "description": "Specify the number of bases to clip off reads from 'right' end of read for double-stranded half-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
+                    "help_text": "The number of bases to trim on the right side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
                 },
                 "damage_manipulation_bamutils_clip_single_stranded_none_udg_left": {
                     "type": "integer",
                     "default": 0,
                     "fa_icon": "fas fa-ruler-combined",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
+                    "help_text": "The number of bases to trim on the left side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
                     "description": "Specify the number of bases to clip off reads from 'left' end of read for single-stranded non-UDG libraries."
                 },
                 "damage_manipulation_bamutils_clip_single_stranded_none_udg_right": {
@@ -807,13 +807,13 @@
                     "default": 0,
                     "fa_icon": "fas fa-ruler",
                     "description": "Specify the number of bases to clip off reads from 'right' end of read for single-stranded non-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
+                    "help_text": "The number of bases to trim on the right side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
                 },
                 "damage_manipulation_bamutils_clip_single_stranded_half_udg_left": {
                     "type": "integer",
                     "default": 0,
                     "fa_icon": "fas fa-ruler-combined",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
+                    "help_text": "The number of bases to trim on the left side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
                     "description": "Specify the number of bases to clip off reads from 'left' end of read for single-stranded half-UDG libraries."
                 },
                 "damage_manipulation_bamutils_clip_single_stranded_half_udg_right": {
@@ -821,7 +821,7 @@
                     "default": 0,
                     "fa_icon": "fas fa-ruler",
                     "description": "Specify the number of bases to clip off reads from 'right' end of read for single-stranded half-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
+                    "help_text": "The number of bases to trim on the right side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
                 },
                 "damage_manipulation_bamutils_softclip": {
                     "type": "boolean",
