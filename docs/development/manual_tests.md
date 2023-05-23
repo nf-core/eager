@@ -71,6 +71,7 @@ Tool Specific combinations
     - PE_only + preprocessing_excludeunmerged ✅
 
 - Dedup
+
   - With FastP
     - SE&PE data ✅ (expected failure)
     - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
@@ -81,11 +82,14 @@ Tool Specific combinations
     - PE_only + preprocessing_excludeunmerged ✅
 
 - Damage Manipulation
+
   - MapDamage2
+
     - mapdamage2 rescaling with default parameters
     - mapdamage2 rescaling with changed parameters
 
   - PMD filtering
+
     - with default parameters
     - with stricter threshold
 
@@ -94,7 +98,7 @@ Tool Specific combinations
     - different length by udg treatment
 
 - All together
-    -
+  -
 
 ### AdapterRemoval
 

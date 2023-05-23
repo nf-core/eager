@@ -20,6 +20,11 @@
                         "git_sha": "bd9e43646a9435d2f62ce4a777ae88ef10ec922d",
                         "installed_by": ["bam_docounts_contamination_angsd"]
                     },
+                    "bamutil/trimbam": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "installed_by": ["modules"]
+                    },
                     "bbmap/bbduk": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
@@ -28,11 +33,6 @@
                     "bowtie2/align": {
                         "branch": "master",
                         "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
-                        "installed_by": ["modules"]
-                    },
-                    "bamutil/trimbam": {
-                        "branch": "master",
-                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
                     "bowtie2/build": {
