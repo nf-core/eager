@@ -482,10 +482,10 @@ nextflow run . -profile test,docker \
   -resume \
   --outdir ./results \
   --run_trim_bam \
-  --damage_manipulation_bamutils_clip_double_stranded_none_udg_left 5 \
-  --damage_manipulation_bamutils_clip_double_stranded_none_udg_right 7 \
-  --damage_manipulation_bamutils_clip_double_stranded_half_udg_left 1 \
-  --damage_manipulation_bamutils_clip_double_stranded_half_udg_right 2
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
 ```
 
 ## All together
@@ -501,8 +501,8 @@ nextflow run . -profile test,docker \
   --run_mapdamage_rescaling \
   --run_pmd_filtering \
   --run_trim_bam \
-  --damage_manipulation_bamutils_clip_double_stranded_none_udg_left 5 \
-  --damage_manipulation_bamutils_clip_double_stranded_none_udg_right 7 \
-  --damage_manipulation_bamutils_clip_double_stranded_half_udg_left 1 \
-  --damage_manipulation_bamutils_clip_double_stranded_half_udg_right 2
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
 ```
