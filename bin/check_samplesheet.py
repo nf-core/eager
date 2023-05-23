@@ -74,7 +74,7 @@ def check_samplesheet(file_in, file_out):
     Sample3	Sample3_Lib1	9	4	single	single	none	NA	NA	Sample3_Lib1.bam	Mammoth_MT
 
     For an example see:
-    https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/mammoth_design_fastq_bam_dsl2.tsv
+    https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/samplesheet.tsv
     """
 
     error_counter = 0
@@ -194,7 +194,10 @@ def check_samplesheet(file_in, file_out):
 
             if (not isNAstr(bam) and isNAstr(bam_reference_id)) or (isNAstr(bam) and not isNAstr(bam_reference_id)):
                 error_counter = print_error(
-                    "A BAM and BAM reference id (corresponding to what is supplied to `--fasta`, without the file type suffix) must always be provided together.", "Line", line_num, error_counter
+                    "A BAM and BAM reference id (corresponding to what is supplied to `--fasta`, without the file type suffix) must always be provided together.",
+                    "Line",
+                    line_num,
+                    error_counter,
                 )
 
             if not isNAstr(r1) and not isNAstr(bam_reference_id):
