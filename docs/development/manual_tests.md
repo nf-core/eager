@@ -98,7 +98,6 @@ Tool Specific combinations
     - different length by udg treatment
 
 - All together
-  -
 
 ### AdapterRemoval
 
@@ -217,7 +216,7 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 
 All possible parameters
 
-```
+```bash
     // BAM Filtering
     run_bamfiltering                      = false
     bamfiltering_minreadlength            = 0
@@ -439,11 +438,12 @@ nextflow run main.nf -profile test,humanbam --outdir ./results --run_contaminati
 
 ```bash
 ## Rescaling with default parameters
-## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG)
+## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG), and 2 results_* directories with 6 Stats_out_MCMC_* files each.
 nextflow run . -profile test,docker --run_mapdamage_rescaling -resume --outdir ./results
 
 ## Rescaling with changed rescale lengths
-## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG). Commands checked to ensure parameter gets propagated (Yes, together with default --seq-length of 12.)
+## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG), and 2 results_* directories with 6 Stats_out_MCMC_* files each.
+##   Commands checked to ensure parameter gets propagated (Yes, together with default --seq-length of 12.)
 nextflow run . -profile test,docker --run_mapdamage_rescaling --damage_manipulation_rescale_length_5p 3 --damage_manipulation_rescale_length_3p 3 -resume --outdir ./results
 ```
 
@@ -492,8 +492,8 @@ nextflow run . -profile test,docker \
 
 ```bash
 ## All together with default parameters + non-0 trimming.
-## Expect: damage_manipulation directory with _pmdfiltered, and _pmdfiltered_trimmed bams and bai per library, plus pmd_filtered flagstat files. (9 files total).
-##   Also _rescaled bam/bai for libraries that are not full-UDG. (9 + 2 = 11 files total)
+## Expect: damage_manipulation directory with _pmdfiltered, and _pmdfiltered_trimmed bams and bai per library, plus pmd_filtered flagstat files. (5 * 3 = 15 files total).
+##   Also _rescaled bam/bai for libraries that are not full-UDG. (15 + 4 = 19 files total), and 2 results_* directories with 6 Stats_out_MCMC_* files each.
 ## Number of reads in each file after trimming should match filtered flagstat.
 nextflow run . -profile test,docker \
   -resume \
