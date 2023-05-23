@@ -279,6 +279,7 @@ There are three different options for manipulation of ancient DNA damage.
 
   - `*_rescaled.bam`: Reads with their base qualities rescaled according to the bayesian aDNA damage model, in BAM format.
   - `*_rescaled.bam.{bai,csi}`: Index file corresponding to the BAM file.
+  - `results_*/Stats_out_MCMC_*{.pdf,.csv}`: CSV and PDF files containing information about the damage model used in rescaling.
 
 </details>
 
