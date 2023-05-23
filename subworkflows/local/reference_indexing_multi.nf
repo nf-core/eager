@@ -88,7 +88,7 @@ workflow REFERENCE_INDEXING_MULTI {
                 skip: true
         }
 
-    // Split channel to ensure cardindality matching
+    // Split channel to ensure cardinality matching
     ch_faidx_input = ch_fasta_for_faidx
         .forfaidx
         .multiMap {
