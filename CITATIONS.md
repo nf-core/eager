@@ -54,6 +54,12 @@
 
   > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
 
+- [ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD)
+
+  > Korneliussen, T. S., Albrechtsen, A., Nielsen, R. (2014) ANGSD: Analysis of Next Generation Sequencing Data. BMC Bioinformatics, 15, 356. doi: [10.1186/s12859-014-0356-4](https://doi.org/10.1186/s12859-014-0356-4)
+
+  > Rasmussen, M., et. al. (2011) An Aboriginal Australian genome reveals separate human dispersals into Asia. Science, 334(6052), 94-98. doi: [10.1126/science.1211177](https://doi.org/10.1126/science.1211177)
+
 - [prinseqplusplus](https://doi.org/10.7287/peerj.preprints.27553v1)
 
   > Cantu VA, Sadural J, Edwards R. 2019. PRINSEQ++, a multi-threaded tool for fast and efficient quality control and preprocessing of sequencing datasets. PeerJ Preprints 7:e27553v1. doi: [10.7287/peerj.preprints.27553v1](https://doi.org/10.7287/peerj.preprints.27553v1)
