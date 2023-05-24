@@ -68,20 +68,20 @@ def print_error(error, context="Line", context_str="", error_counter=0):
 def check_samplesheet(file_in, file_out):
     """
     This function checks that the samplesheet follows the following structure:
-    sample_id	library_id	lane	colour_chemistry	pairment	strandedness	damage_treatment	r1	r2	bam
-    Sample1	Sample1_Lib1	1	4	paired	double	full	Sample1_Lib1_L008_R1_001.fq.gz	Sample1_Lib1_L008_R2_001.fq.gz	NA
-    Sample2	Sample2_Lib1	2	2	single	double	full	Sample2_Lib1_L008_R1_001.fq.gz	NA	NA
-    Sample3	Sample3_Lib1	9	4	single	single	none	NA	NA	Sample3_Lib1.bam
+    sample_id	library_id	lane	colour_chemistry	pairment	strandedness	damage_treatment	r1	r2	bam	bam_reference_id
+    Sample1	Sample1_Lib1	1	4	paired	double	full	Sample1_Lib1_L008_R1_001.fq.gz	Sample1_Lib1_L008_R2_001.fq.gz	NA	NA
+    Sample2	Sample2_Lib1	2	2	single	double	full	Sample2_Lib1_L008_R1_001.fq.gz	NA	NA	NA
+    Sample3	Sample3_Lib1	9	4	single	single	none	NA	NA	Sample3_Lib1.bam	Reference
 
     For an example see:
-    https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/mammoth_design_fastq_bam_dsl2.tsv
+    https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/samplesheet.tsv
     """
 
     error_counter = 0
     sample_mapping_dict = {}
     with open(file_in, "r") as fin:
         ## Check header
-        MIN_COLS = 10
+        MIN_COLS = 11
         HEADER = [
             "sample_id",
             "library_id",
@@ -93,6 +93,7 @@ def check_samplesheet(file_in, file_out):
             "r1",
             "r2",
             "bam",
+            "bam_reference_id",
         ]
         header = [x.strip('"') for x in fin.readline().strip().split("\t")]
         if header[: len(HEADER)] != HEADER:
@@ -116,9 +117,19 @@ def check_samplesheet(file_in, file_out):
                 )
 
             ## Check sample name entries
-            sample_id, library_id, lane, colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam = lspl[
-                : len(HEADER)
-            ]
+            (
+                sample_id,
+                library_id,
+                lane,
+                colour_chemistry,
+                pairment,
+                strandedness,
+                damage_treatment,
+                r1,
+                r2,
+                bam,
+                bam_reference_id,
+            ) = lspl[: len(HEADER)]
 
             sample_id = sample_id.replace(" ", "_")
             if not sample_id:
@@ -181,19 +192,51 @@ def check_samplesheet(file_in, file_out):
                     "Pairment for BAM input can only be 'single'.", "Line", line_num, error_counter
                 )
 
-            ## Prepare meta
-            lane_info = []  ## [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+            if (not isNAstr(bam) and isNAstr(bam_reference_id)) or (isNAstr(bam) and not isNAstr(bam_reference_id)):
+                error_counter = print_error(
+                    "A BAM and BAM reference id (corresponding to what is supplied to `--fasta`, without the file type suffix) must always be provided together.",
+                    "Line",
+                    line_num,
+                    error_counter,
+                )
 
-            if sample_id and pairment == "single" and not isNAstr(r1) and isNAstr(r2) and isNAstr(bam):  ## SE: R1 only
-                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+            if not isNAstr(r1) and not isNAstr(bam_reference_id):
+                error_counter = print_error(
+                    "FASTQ input cannot have a BAM reference id.", "Line", line_num, error_counter
+                )
+
+            ## Prepare meta
+            lane_info = (
+                []
+            )  ## [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam, bam_reference_id]
+
+            if (
+                sample_id
+                and pairment == "single"
+                and not isNAstr(r1)
+                and isNAstr(r2)
+                and isNAstr(bam)
+                and isNAstr(bam_reference_id)
+            ):  ## SE: R1 only
+                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam, bam_reference_id]
             elif (
-                sample_id and pairment == "paired" and not isNAstr(r1) and not isNAstr(r2) and isNAstr(bam)
+                sample_id
+                and pairment == "paired"
+                and not isNAstr(r1)
+                and not isNAstr(r2)
+                and isNAstr(bam)
+                and isNAstr(bam_reference_id)
             ):  ## PE: R1 and R2 only
-                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam, bam_reference_id]
             elif (
-                sample_id and pairment == "single" and isNAstr(r1) and isNAstr(r2) and not isNAstr(bam)
+                sample_id
+                and pairment == "single"
+                and isNAstr(r1)
+                and isNAstr(r2)
+                and not isNAstr(bam)
+                and not isNAstr(bam_reference_id)
             ):  ## bam input(SE): BAM only
-                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam]
+                lane_info = [colour_chemistry, pairment, strandedness, damage_treatment, r1, r2, bam, bam_reference_id]
             ## Print errors only when pairment is valid but input files don't match pairment
             elif pairment in ["single", "paired"]:
                 error_counter = print_error(
@@ -265,6 +308,7 @@ def check_samplesheet(file_in, file_out):
                         "r1",
                         "r2",
                         "bam",
+                        "bam_reference_id",
                     ]
                 )
                 + "\n"
