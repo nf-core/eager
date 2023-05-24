@@ -851,6 +851,63 @@
                 }
             },
             "fa_icon": "fas fa-user-slash"
+        },
+        "contamination_estimation": {
+            "title": "Contamination estimation",
+            "type": "object",
+            "description": "Options for the estimation of contamination",
+            "default": "",
+            "fa_icon": "fas fa-radiation-alt",
+            "properties": {
+                "run_contamination_estimation_angsd": {
+                    "type": "boolean",
+                    "description": "Turn on nuclear contamination estimation for genomes with ANGSD.",
+                    "help_text": "Specify to run the optional processes for nuclear DNA contamination estimation with ANGSD.",
+                    "fa_icon": "fas fa-power-off"
+                },
+                "contamination_estimation_angsd_chrom_name": {
+                    "type": "string",
+                    "default": "X",
+                    "description": "The name of the chromosome to be used for contamination estimation.",
+                    "help_text": "The name of the chromosome as specified in your FASTA/bam header.\ne.g. 'X' for hs37d5, 'chrX' for HG19",
+                    "fa_icon": "fas fa-address-card"
+                },
+                "contamination_estimation_angsd_range_from": {
+                    "type": "integer",
+                    "default": 5000000,
+                    "description": "The first position on the chromosome to be used for contamination estimation with ANGSD.",
+                    "help_text": "The beginning of the genetic range that should be utilised for nuclear contamination estimation.",
+                    "fa_icon": "fas fa-map-marker-alt"
+                },
+                "contamination_estimation_angsd_range_to": {
+                    "type": "integer",
+                    "default": 154900000,
+                    "help_text": "The end of the genetic range that should be utilised for nuclear contamination estimation.",
+                    "description": "The last position on the chromosome to be used for contamination estimation with ANGSD.",
+                    "fa_icon": "fas fa-map-marker-alt"
+                },
+                "contamination_estimation_angsd_mapq": {
+                    "type": "integer",
+                    "default": 30,
+                    "help_text": "> Modifies angsd parameter: `-minMapQ`",
+                    "description": "Specify the minimum mapping quality reads should have for contamination estimation with ANGSD.",
+                    "fa_icon": "fas fa-thermometer-full"
+                },
+                "contamination_estimation_angsd_minq": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "Specify the minimum base quality reads should have for contamination estimation with ANGSD.",
+                    "help_text": "> Modifies angsd parameter: `-minQ`",
+                    "fa_icon": "fas fa-ruler-vertical"
+                },
+                "contamination_estimation_angsd_hapmap": {
+                    "type": "string",
+                    "default": "${baseDir}/assets/angsd_resources/HapMapChrX.gz",
+                    "description": "Path to HapMap file of chromosome for contamination estimation..",
+                    "help_text": "The haplotype map, or \"HapMap\", records the location of haplotype blocks and their tag SNPs.",
+                    "fa_icon": "fas fa-map"
+                }
+            }
         }
     },
     "allOf": [
@@ -892,6 +949,12 @@
         },
         {
             "$ref": "#/definitions/mapping_statistics"
+        },
+        {
+            "$ref": "#/definitions/adna_damage_analysis"
+        },
+        {
+            "$ref": "#/definitions/contamination_estimation"
         },
         {
             "$ref": "#/definitions/host_removal"

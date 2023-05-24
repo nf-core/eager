@@ -67,6 +67,7 @@ include { MAP                           } from '../subworkflows/local/map'
 include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
+include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
 
 /*
@@ -122,6 +123,9 @@ workflow EAGER {
         if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
+
+    // Contamination estimation
+    hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -334,6 +338,25 @@ workflow EAGER {
         ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
 
+    }
+
+    //
+    // SUBWORKFLOW: Contamination estimation
+    //
+
+    if ( params.run_contamination_estimation_angsd ) {
+        contamination_input = ch_dedupped_bams
+        ch_hapmap = Channel.of( [ hapmap_file ] )
+        hapmap_input = REFERENCE_INDEXING.out.reference
+            .combine( ch_hapmap )
+            .map {
+                meta, fasta, fai, dict, index, hapmap ->
+                [ meta, hapmap ]
+            }
+
+        ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
+        ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //
