@@ -114,7 +114,7 @@
                 "fasta_mitochondrion_header": {
                     "type": "string",
                     "fa_icon": "fas fa-tag",
-                    "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome (up to the first space).",
+                    "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome, up to the first space (optional MTNucRatio only).",
                     "help_text": "Specify the FASTA entry in the reference file specified as `--fasta` that acts as the mitochondrial 'chromosome' to base a mitochondrial-to-nuclear ratio calculation on. \n\nThe tool only accepts the first section of the header before the first space. For example, mitochondrion chromosome name is `MT` for the hs37d5/GrCH37 human reference genome.\n"
                 }
             }
