@@ -322,7 +322,7 @@ workflow EAGER {
         hapmap_input = REFERENCE_INDEXING.out.reference
             .combine( ch_hapmap )
             .map {
-                meta, fasta, fai, dict, index, hapmap ->
+                meta, fasta, fai, dict, index, circular_target, mitochondrion, hapmap ->
                 [ meta, hapmap ]
             }
 
