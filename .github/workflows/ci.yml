@@ -32,7 +32,7 @@ jobs:
           - "-profile test,docker --mapping_tool bwamem"
           - "-profile test,docker --mapping_tool bowtie2"
           - "-profile test,docker --skip_preprocessing"
-          - "-profile test_humanbam,docker --run_mtnucratio --mitochondrion_header 'NC_007596.2' --run_contamination_estimation_angsd"
+          - "-profile test_humanbam,docker --run_mtnucratio --run_contamination_estimation_angsd"
           - "-profile test_multiref,docker"
     steps:
       - name: Check out pipeline code
