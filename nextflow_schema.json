@@ -837,14 +837,14 @@
             "properties": {
                 "run_host_removal": {
                     "type": "boolean",
-                    "description": "Turn on per-lane creation pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)",
-                    "help_text": "Create pre-Adapter Removal FASTQ files without reads that mapped to reference (e.g. for public upload of privacy-sensitive non-host data)",
+                    "description": "Turn on per-lane creation of pre-adapter-removal and/or read-pair-merging FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)",
+                    "help_text": "Recreates pre-adapter-removal and/or read-pair-merging FASTQ files but without reads that mapped to reference (e.g. for public upload of privacy-sensitive non-host data)",
                     "fa_icon": "fas fa-power-off"
                 },
                 "host_removal_mode": {
                     "type": "string",
                     "default": "remove",
-                    "description": "Host-mapped read removal mode. Remove mapped reads completely from FASTQ (remove) or just mask the sequence of mapped reads with N (replace).",
+                    "description": "Host-mapped read removal mode. Remove mapped reads completely from FASTQ (remove) or just mask the host sequence of mapped reads with N (replace).",
                     "help_text": "Modifies extract_map_reads.py parameter: -m",
                     "fa_icon": "fas fa-plane-slash",
                     "enum": ["remove", "replace"]
