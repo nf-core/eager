@@ -143,7 +143,7 @@ The resulting FASTQ files will only be present in your results directory if you 
   - `*.fastp.fastq.gz`: Final FASTQ file of single-end data that have undergone quality trimming. These are the final reads used downstream for single-end data.
   - `*_{1,2}.fastp.fastq.gz`: Final FASTQ file(s) containing paired-end reads that have had undergone additional quality trimming but _not_ merging. These are the final reads used downstream for paired-end data when merging is skipped. Only present for paired-end libraries.
 
-  </details>
+</details>
 
 [fastp](https://github.com/OpenGene/fastp) is an all-in-one FASTQ preprocessor (QC/adapters/trimming/filtering/splitting/merging etc.)
 
@@ -177,7 +177,7 @@ The resulting FASTQ files will only be present in your results directory if you 
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
   - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
 
-  </details>
+</details>
 
   [Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long (e.g. mammalian) genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small and supports gapped, local, and paired-end alignment modes.
 
@@ -236,7 +236,8 @@ You may also receive the files above if metagenomic screening is turned on.
 
   - `*_complexity.fastq.gz`: FASTQ file containing the complexity filtered reads
   - `*.log`: LOG file containing filter stats
-  </details>
+
+</details>
 
 The entropy filter of [BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) is used to remove reads from the fastq-files for metagenomics screening that don't pass the `--metagenomics_complexity_entropy` threshold. When ommiting the flag, a default value of 0.3 is applied. To cite the docs:
 
@@ -255,7 +256,8 @@ Using complexity-filtered fastq-files as input for metagenomic classifiers can r
 
   - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
   - `*_complexity.log`: LOG file containing filter stats
-  </details>
+
+</details>
 
   [PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus#readme) is an alternative to BBDuk for filtering the fastq files before metagenomics classification. From PRINSEQ++ we implemented filtering by the `dust` algorithm or by `entropy`, as explained above in the BBDuk section.
 
@@ -297,7 +299,7 @@ Deduplication is carried by two possible tools, as described below. However the 
 
   - `*.{c_curve,lc_extrap}.txt`: A two column text file with the first column representing sequencing depth and the second an estimate of unique reads.
 
-  </details>
+</details>
 
 [Preseq](https://github.com/smithlabcode/preseq) Preseq is a collection of tools that allow assessment of the complexity of the library, where complexity means the number of unique molecules in your library (i.e. not molecules with the exact same length and sequence). There are two algorithms from the tools we use: `c_curve` and `lc_extrap`. The former gives you the expected number of unique reads if you were to repeated sequencing but with fewer reads than your first sequencing run. The latter tries to extrapolate the decay in the number of unique reads you would get with re-sequencing but with more reads than your initial sequencing run.
 
@@ -373,7 +375,7 @@ Within nf-core/eager, when BAM trimming is activated alongside PMD-filtering, tr
 
   - `*.pdf`: can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
 
-    </details>
+</details>
 
 [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
 is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
@@ -391,6 +393,6 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
   - `nuclear_contamination.txt`: Text file containing a summary table of contamination estimates for all libraries.
   - `nuclear_contamination_mqc.json`: JSON file containing a summary table of contamination estimates for all libraries.
 
-  </details>
+</details>
 
 [ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. Among other functions, ANGSD can estimate contamination for chromosomes for which one copy exists, i.e. X-chromosome for humans with karyotype XY. To do this, we first generate a binary count file for the X-chromosome (`angsd`) and then perform a Fisher's exact test for finding a p-value and jackknife to get an estimate of contamination (`contamination`). Contamination is estimated with Method of Moments (MOM) and Maximum Likelihood (ML) for both Method1 and Method2. Method1 compares the total number of minor and major reads at SNP sites with the number of minor and major reads at adjacent sites, assuming independent errors between reads and sites, while Method2 only samples one read at each site to remove the previous assumption. The results of all methods for each library, as well as respective standard errors are summarised in `nuclear_contamination.txt` and `nuclear_contamination_mqc.json`.
