@@ -80,6 +80,54 @@ Tool Specific combinations
     - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
     - PE_only + preprocessing_excludeunmerged ✅
 
+### Multi-reference tests
+
+```bash
+## Test: (1) Two references, only FASTAs ✅
+## Expect: Expect all of fai file (x2 SAMTOOLS_FAIDX processes), dict file (x2 PICARD_CREATESEQUENCEDICTIONARY), bwa index directory (x2 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test01.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (2) Two reference FASTAs, one also has fai ✅
+## Expect: Expect one fai file (x1 SAMTOOLS_FAIDX processes), 2 dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 2 bwa  index directory (x2 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test02.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (3) Two reference FASTAs, one also has dict ✅
+## Expect: Expect two fai file (x2 SAMTOOLS_FAIDX processes), 1 dict file (x1 PICARD_CREATESEQUENCEDICTIONARY), 2 bwa index directory (x2 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test03.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (4) Two reference FASTAs, one also has bwa_index ref ✅
+## Expect: Expect two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bwa  index directory (x1 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test04.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (5) Two reference FASTAs, one also has bowtie2_index ref ✅
+## Expect: Expect two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (x1 BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test05.csv -ansi-log false -dump-channels --save_reference --mapping_tool bowtie2
+
+## Test: (6) Mapper index mismatch with `--mapping_tool` (bwa index to bowtie2-align) ✅
+## Expect: Expect FAIL at mapping step for Mammoth two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test06.csv -ansi-log false -dump-channels --save_reference --mapping_tool bowtie2
+
+## Test: (7) Mammoth has all pre-supplied ✅
+## Expect: Expect one fai (x1 SAMTOOLS_FAIDX processes), one dict (x1 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test07.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (8) No indexing necessary, all already supplied ✅
+## Expect: Expect no files to be generated/processes executed, nor results present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test08.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (9) All but Human FAI provided  ✅
+## Expect: Expect one fai (x1 SAMTOOLS_FAIDX processes), and nothing else results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test09.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (10) All but Human dict provided ✅
+## Expect: Expect one dict (x1 PICARD_CREATESEQUENCEDICTIONARY processes), and nothing else results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test10.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (11) Broken path correctly fails pipeline ✅
+## Expect: Expect fail
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test11.csv -ansi-log false -dump-channels --save_reference
+```
+
 ### AdapterRemoval
 
 ```bash

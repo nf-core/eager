@@ -172,8 +172,14 @@ workflow EAGER {
     //
     // SUBWORKFLOW: Reference mapping
     //
+    ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
+            .map{
+                meta, fasta, fai, dict, index, circular_target, mitochondrion ->
+                [ meta, index ]
+            }
 
-    MAP ( ch_reads_for_mapping, REFERENCE_INDEXING.out.reference.map{meta, fasta, fai, dict, index -> [meta, index]} )
+    MAP ( ch_reads_for_mapping, ch_reference_for_mapping )
+
     ch_versions       = ch_versions.mix( MAP.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
 
@@ -220,7 +226,7 @@ workflow EAGER {
 
     ch_fasta_for_deduplication = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index ->
+            meta, fasta, fai, dict, index, circular_target, mitochondrion ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -328,7 +334,7 @@ workflow EAGER {
 
     ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index ->
+            meta, fasta, fai, dict, index, circular_target, mitochondrion ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -350,7 +356,7 @@ workflow EAGER {
         hapmap_input = REFERENCE_INDEXING.out.reference
             .combine( ch_hapmap )
             .map {
-                meta, fasta, fai, dict, index, hapmap ->
+                meta, fasta, fai, dict, index, circular_target, mitochondrion, hapmap ->
                 [ meta, hapmap ]
             }
 
