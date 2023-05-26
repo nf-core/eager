@@ -18,7 +18,6 @@ workflow MANIPULATE_DAMAGE {
 
     main:
     ch_versions              = Channel.empty()
-    ch_multiqc_files         = Channel.empty()
     ch_rescaled_bams         = Channel.empty()
     ch_pmd_filtered_bams     = Channel.empty()
     ch_trimmed_bams          = Channel.empty()
