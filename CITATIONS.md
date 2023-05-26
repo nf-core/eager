@@ -72,6 +72,18 @@
 
   > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
 
+- [mapDamage2](https://doi.org/10.1093/bioinformatics/btt193)
+
+  > Jónsson H, Ginolhac A, Schubert M, Johnson P, Orlando L. mapDamage2.0: fast approximate Bayesian estimates of ancient DNA damage parameters. Bioinformatics 2013. 23rd April 2013. doi: [10.1093/bioinformatics/btt193](https://doi.org/10.1093/bioinformatics/btt193)
+
+- [PMDtools](https://doi.org/10.1073/pnas.1318934111)
+
+  > Skoglund P., Northoff B.H.,Shunkov M.V., Derevianko A., Pääbo S., Krause J., Jakobsson M. (2014) Separating ancient DNA from modern contamination in a Siberian Neandertal, Proceedings of the National Academy of Sciences USA doi: [10.1073/pnas.1318934111](https://doi.org/10.1073/pnas.1318934111)
+
+- [BamUtils](https://doi.org/10.1101/gr.176552.114)
+
+  > Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. doi: [10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114)
+
 - [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
   > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190). Download: https://github.com/Integrative-Transcriptomics/DamageProfiler
 
