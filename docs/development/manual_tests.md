@@ -241,6 +241,54 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 
 ```
 
+## Host Removal
+
+All possible parameters
+
+```
+preprocessing_skippairmerging = true
+skip_preprocessing            = true
+```
+
+Tests
+
+```bash
+##Check pair end merged and single end processed correctly
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs without host reads
+## Checked that host_removal folder exists, first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval -w results_hostremoval/work --run_host_removal
+
+##Check pair end merged and single end processed correctly and host reads in but masked with Ns
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs with host reads but replaced with Ns
+##Checked that the read is masked with: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_replace -w results_hostremoval_replace/work --run_host_removal --host_removal_mode replace
+
+
+
+##Check pair end non-merged and single end processed correctly
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs without host reads
+## Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPEmerging -w results_hostremoval_skipPEmerging/work --run_host_removal --preprocessing_skippairmerging
+
+##Check it still runs when preprocessing is not done and files are proper
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs without host reads and no preprocessing folder present.
+## Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPreprocessing -w results_hostremoval_skipPreprocessing/work --run_host_removal --skip_preprocessing
+
+##Check it runs with multiple lanes and gives correct output per lane
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs without host reads
+## Checked that we obtain all the fastq for all the lanes in the input TSV
+## Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+## Checked that the number of reads is not the same as in the original input by counting the number of reads.
+
+
+nextflow run ../main.nf -profile docker,test --input mammoth_design_fastq_multilane_multilib.tsv --outdir results_hostremoval_multilane_multilib -w results_hostremoval_multilane_multilib/work --run_host_removal
+
+```
+
 ## BAM filtering
 
 All possible parameters

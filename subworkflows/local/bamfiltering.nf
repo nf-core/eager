@@ -21,6 +21,7 @@ workflow FILTER_BAM {
     main:
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
+    ch_flagstats_file = Channel.empty()
 
     //
     // GENOMICS BAM GENERATION
@@ -60,6 +61,7 @@ workflow FILTER_BAM {
         SAMTOOLS_FLAGSTAT_FILTERED ( ch_bam_for_genomics )
         ch_versions      = ch_versions.mix( SAMTOOLS_FLAGSTAT_FILTERED.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_FILTERED.out.flagstat )
+        ch_flagstats_file = ch_flagstats_file.mix( SAMTOOLS_FLAGSTAT_FILTERED.out.flagstat )
     }
 
     //
@@ -127,6 +129,7 @@ workflow FILTER_BAM {
     genomics         = ch_bam_for_genomics
     metagenomics     = ch_fastq_for_metagenomics
     versions         = ch_versions
+    flagstat         = ch_flagstats_file    // [ [ meta ], stats ]
     mqc              = ch_multiqc_files
 
 }

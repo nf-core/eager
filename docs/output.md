@@ -181,6 +181,24 @@ The resulting FASTQ files will only be present in your results directory if you 
 
   [Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long (e.g. mammalian) genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small and supports gapped, local, and paired-end alignment modes.
 
+### Host Removal
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `host_removal/`
+
+  - `*.fq.gz`: FASTQ files containing only reads that did not map
+    to the reference genome.
+
+</details>
+
+The nf-core/eager host removal step removes any reads from the original input FASTQ files that mapped to the provided reference. This step is performed by a custom python script [extract_map_reads.py](https://github.com/nf-core/eager/blob/master/bin/extract_map_reads.py).
+
+The resulting FASTQ files can be used for data sharing purposes where the host DNA should not be made publically available for ethical reasons (for example when you do not have permission to analyse the host DNA but only analysis on the metagenomic content were agreed) or for due to identifiability reasons (for example, for individuals that died in recent times and could be identified based on their DNA alone).
+
+Alternatively you could use the resulting files for manual metagenomic screen outside of nf-core/eager (e.g. when your preferred taxonomic classifier isn't supported by nf-core/eager).
+
 ### BAM Filtering
 
 <details markdown="1">
