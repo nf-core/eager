@@ -358,7 +358,7 @@ By filtering a BAM file for damaged reads in this way, it is possible to amelior
 
 </details>
 
-[bamUtil trimBam](https://genome.sph.umich.edu/wiki/BamUtil) trims the end of reads in a SAM/BAM file, changing read ends to ‘N’ and quality to ‘!’, or by soft clipping (if command-line option, --clip is specified). By default reverse strands are reversed and then the left & right are trimmed. This means that --left actually trims from the right of the read in the SAM/BAM for reverse reads.
+[bamUtil trimBam](https://genome.sph.umich.edu/wiki/BamUtil) trims the end of reads in a SAM/BAM file, changing read ends to `N` and quality to `!`, or by soft clipping (if command-line option, `--clip` is specified). By default reverse strands are reversed and then the left & right are trimmed. This means that `--left` actually trims from the right of the read in the SAM/BAM for reverse reads.
 
 Within nf-core/eager, when BAM trimming is activated alongside PMD-filtering, trimming is performed on the PMD-filtered reads only.
 

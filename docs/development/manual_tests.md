@@ -93,7 +93,7 @@ Tool Specific combinations
     - with default parameters
     - with stricter threshold
 
-  - BAM filtering
+  - BAM trimming
     - with default parameters
     - different length by udg treatment
 
