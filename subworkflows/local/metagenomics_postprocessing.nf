@@ -31,7 +31,7 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     }
 
-    else if ( params.metagenomics_profiling_tool == 'kraken2' || params.metagenomics_profiling_tool == 'krakenuniq' ) {
+    else if ( params.metagenomics_postprocessing_tool == 'krakenmerge' ) {
 
         KRAKENPARSE ( ch_postprocessing_input )
 
