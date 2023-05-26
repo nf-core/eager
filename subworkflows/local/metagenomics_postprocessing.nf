@@ -21,9 +21,9 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     if ( params.metagenomics_postprocessing_tool == 'maltextract') {
 
-        MALTEXTRACT ( ch_postprocessing_input, params.taxon_list, params.ncbi_dir )
+        MALTEXTRACT ( ch_postprocessing_input, params.metagenomics_maltextract_taxon_list, params.metagenomics_maltextract_ncbi_dir )
 
-        AMPS ( MALTEXTRACT.out.results, params.taxon_list, params.metagenomics_malt_filter )
+        AMPS ( MALTEXTRACT.out.results, params.taxon_list, params.metagenomics_malt_filter, params.metagenomics_maltextract_filter )
 
         ch_versions      = ch_versions.mix( MALTEXTRACT.out.versions.first(), AMPS.out.versions.first() )
         ch_results       = ch_results.mix( AMPS.out.results.summary_pdf, AMPS.out.tsv, AMPS.out.summary_pdf )
