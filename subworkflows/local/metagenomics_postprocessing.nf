@@ -4,10 +4,10 @@
 //               https://nf-co.re/join
 // TODO nf-core: A subworkflow SHOULD import at least two modules
 
-include { MALTEXTRACT } from '../../../modules/nf-core/maltextract/main'
-include { AMPS        } from '../../../modules/nf-core/amps/main'
-include { KRAKENPARSE } from '../../../modules/local/krakenparse'
-include { KRAKENMERGE } from '../../../modules/local/krakenmerge'
+include { MALTEXTRACT } from '../../modules/nf-core/maltextract/main'
+include { AMPS        } from '../../modules/nf-core/amps/main'
+include { KRAKENPARSE } from '../../modules/local/krakenparse'
+include { KRAKENMERGE } from '../../modules/local/krakenmerge'
 
 workflow METAGENOMICS_POSTPROCESSING {
 
