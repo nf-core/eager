@@ -82,7 +82,7 @@
                     },
                     "endorspy": {
                         "branch": "master",
-                        "git_sha": "96380e84df89689e730b2aaafc3b3af2c1693abd",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     },
                     "falco": {
