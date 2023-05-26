@@ -99,6 +99,54 @@ Tool Specific combinations
 
 - All together
 
+### Multi-reference tests
+
+```bash
+## Test: (1) Two references, only FASTAs ✅
+## Expect: Expect all of fai file (x2 SAMTOOLS_FAIDX processes), dict file (x2 PICARD_CREATESEQUENCEDICTIONARY), bwa index directory (x2 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test01.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (2) Two reference FASTAs, one also has fai ✅
+## Expect: Expect one fai file (x1 SAMTOOLS_FAIDX processes), 2 dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 2 bwa  index directory (x2 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test02.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (3) Two reference FASTAs, one also has dict ✅
+## Expect: Expect two fai file (x2 SAMTOOLS_FAIDX processes), 1 dict file (x1 PICARD_CREATESEQUENCEDICTIONARY), 2 bwa index directory (x2 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test03.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (4) Two reference FASTAs, one also has bwa_index ref ✅
+## Expect: Expect two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bwa  index directory (x1 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test04.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (5) Two reference FASTAs, one also has bowtie2_index ref ✅
+## Expect: Expect two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (x1 BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test05.csv -ansi-log false -dump-channels --save_reference --mapping_tool bowtie2
+
+## Test: (6) Mapper index mismatch with `--mapping_tool` (bwa index to bowtie2-align) ✅
+## Expect: Expect FAIL at mapping step for Mammoth two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test06.csv -ansi-log false -dump-channels --save_reference --mapping_tool bowtie2
+
+## Test: (7) Mammoth has all pre-supplied ✅
+## Expect: Expect one fai (x1 SAMTOOLS_FAIDX processes), one dict (x1 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test07.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (8) No indexing necessary, all already supplied ✅
+## Expect: Expect no files to be generated/processes executed, nor results present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test08.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (9) All but Human FAI provided  ✅
+## Expect: Expect one fai (x1 SAMTOOLS_FAIDX processes), and nothing else results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test09.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (10) All but Human dict provided ✅
+## Expect: Expect one dict (x1 PICARD_CREATESEQUENCEDICTIONARY processes), and nothing else results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test10.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (11) Broken path correctly fails pipeline ✅
+## Expect: Expect fail
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test11.csv -ansi-log false -dump-channels --save_reference
+```
+
 ### AdapterRemoval
 
 ```bash
@@ -209,6 +257,54 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 
 ## BWA ALN (with merging): Both SAMSE and SAMPE executed
 nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -dump-channels -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --preprocessing_skippairmerging
+
+```
+
+## Host Removal
+
+All possible parameters
+
+```
+preprocessing_skippairmerging = true
+skip_preprocessing            = true
+```
+
+Tests
+
+```bash
+##Check pair end merged and single end processed correctly
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs without host reads
+## Checked that host_removal folder exists, first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval -w results_hostremoval/work --run_host_removal
+
+##Check pair end merged and single end processed correctly and host reads in but masked with Ns
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs with host reads but replaced with Ns
+##Checked that the read is masked with: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_replace -w results_hostremoval_replace/work --run_host_removal --host_removal_mode replace
+
+
+
+##Check pair end non-merged and single end processed correctly
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs without host reads
+## Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPEmerging -w results_hostremoval_skipPEmerging/work --run_host_removal --preprocessing_skippairmerging
+
+##Check it still runs when preprocessing is not done and files are proper
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs without host reads and no preprocessing folder present.
+## Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+
+nextflow run ../main.nf -profile docker,test --outdir results_hostremoval_skipPreprocessing -w results_hostremoval_skipPreprocessing/work --run_host_removal --skip_preprocessing
+
+##Check it runs with multiple lanes and gives correct output per lane
+## Expect: host_removal is runned and we have a folder containing filtered gzip fastqs without host reads
+## Checked that we obtain all the fastq for all the lanes in the input TSV
+## Checked that first mapped read is not in the fastq as: samtools view -F 4 *.bam | head -n 1, and grep for the read name in the fastq
+## Checked that the number of reads is not the same as in the original input by counting the number of reads.
+
+
+nextflow run ../main.nf -profile docker,test --input mammoth_design_fastq_multilane_multilib.tsv --outdir results_hostremoval_multilane_multilib -w results_hostremoval_multilane_multilib/work --run_host_removal
 
 ```
 
