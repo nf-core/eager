@@ -144,9 +144,18 @@ workflow METAGENOMICS_PROFILING {
     }
 
     else if ( params.metagenomics_profiling_tool == 'kraken2' ) {
-        // run kraken2 over all samples
+        // run kraken2 per sample
 
-        KRAKEN2_KRAKEN2 ( ch_input_for_kraken2.reads, database, params.metagenomics_kraken_save_reads, params.metagenomics_kraken_save_read_classifications )
+        reads = reads.combine(database)
+        kraken2_reads = reads.map{meta, reads, database -> [meta, reads]}
+        kraken2_db = reads.map{meta, reads, database -> [database]}
+
+        KRAKEN2_KRAKEN2 (
+            kraken2_reads,
+            kraken2_db,
+            params.metagenomics_kraken_save_reads,
+            params.metagenomics_kraken_save_read_classifications
+        )
 
         ch_multiqc_files            = ch_multiqc_files.mix( KRAKEN2_KRAKEN2.out.report )
         ch_versions                 = ch_versions.mix( KRAKEN2_KRAKEN2.out.versions.first() )

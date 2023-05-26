@@ -59,7 +59,7 @@ process KRAKENPARSE {
         -c ${params.metagenomics_min_support_reads} \\
         -or $read_out \\
         -ok $kmer_out \\
-        $ch_postprocessing_input
+        $report
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

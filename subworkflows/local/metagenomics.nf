@@ -42,11 +42,15 @@ workflow METAGENOMICS {
     // Run the post profiling subworkflow (optionally run for malt, mandatory for kraken2/krakenuniq)
     //
 
+
     if ( params.metagenomics_postprocessing_tool || params.metagenomics_profiling_tool == 'kraken2' || params.metagenomics_profiling_tool == 'krakenuniq' ) {
+
         METAGENOMICS_POSTPROCESSING ( METAGENOMICS_PROFILING.out.postprocessing_input )
+
         ch_versions      = ch_versions.mix( METAGENOMICS_POSTPROCESSING.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS_POSTPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
+
 
     emit:
     versions      = ch_versions
