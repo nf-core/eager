@@ -1,7 +1,3 @@
-// TODO nf-core: If in doubt look at other nf-core/modules to see how we are doing things! :)
-//               https://github.com/nf-core/modules/tree/master/modules/nf-core/
-//               You can also ask for help via your pull request or on the #modules channel on the nf-core Slack workspace:
-//               https://nf-co.re/join
 // TODO nf-core: A module file SHOULD only define input and output files as command-line parameters.
 //               All other parameters MUST be provided using the "task.ext" directive, see here:
 //               https://www.nextflow.io/docs/latest/process.html#ext
@@ -12,8 +8,6 @@
 //               unless there is a run-time, storage advantage in implementing in this way
 //               e.g. it's ok to have a single module for bwa to output BAM instead of SAM:
 //                 bwa mem | samtools view -B -T ref.fasta
-// TODO nf-core: Optional inputs are not currently supported by Nextflow. However, using an empty
-//               list (`[]`) instead of a file can be used to work around this issue.
 
 process KRAKENPARSE {
     tag "$meta.id"
@@ -37,8 +31,8 @@ process KRAKENPARSE {
     tuple val(meta), path(report)
 
     output:
-    tuple val(meta), path(read_out), emit: read_kraken_parsed
-    tuple val(meta), path(kmer_out), emit: kmer_kraken_parsed
+    tuple val(meta), path("*read_kraken_parsed.csv"), emit: read_kraken_parsed
+    tuple val(meta), path("*kmer_kraken_parsed.csv"), emit: kmer_kraken_parsed
     path "versions.yml"            , emit: versions
 
     when:

@@ -42,7 +42,7 @@ workflow METAGENOMICS_POSTPROCESSING {
             meta, kmer_out -> [ kmer_out ]
         }
 
-        KRAKENMERGE ( ch_list_of_kraken_parse_reads , ch_list_of_kraken_parse_kmer )
+        KRAKENMERGE ( ch_list_of_kraken_parse_reads.collect() , ch_list_of_kraken_parse_kmer.collect() )
 
         ch_versions      = ch_versions.mix( KRAKENPARSE.out.versions.first(), KRAKENMERGE.out.versions.first() )
         ch_results       = ch_results.mix( KRAKENMERGE.out.read_count_table, KRAKENMERGE.out.kmer_duplication_table )

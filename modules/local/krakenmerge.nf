@@ -22,10 +22,10 @@ process KRAKENMERGE {
     //               Software MUST be pinned to channel (i.e. "bioconda"), version (i.e. "1.10").
     //               For Conda, the build (i.e. "h9402c20_2") must be EXCLUDED to support installation on different operating systems.
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
-    conda "conda-forge::python=3.8.3"
+    conda "conda-forge::pandas=1.5.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/python:3.8.3' :
-        'quay.io/biocontainers/python:3.8.3' }"
+        'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
+        'quay.io/biocontainers/pandas:1.5.2' }"
     input:
     // TODO nf-core: Where applicable all sample-specific information e.g. "id", "single_end", "read_group"
     //               MUST be provided as an input via a Groovy Map called "meta".
@@ -33,7 +33,7 @@ process KRAKENMERGE {
     //               https://github.com/nf-core/modules/blob/master/modules/nf-core/bwa/index/main.nf
 
     // TODO check if this works
-    path karken_parse_reads
+    path kraken_parse_reads
     path kraken_parse_kmers
 
     output:
@@ -58,8 +58,6 @@ process KRAKENMERGE {
     merge_kraken_res.py \\
         -or $read_out \\
         -ok $kmer_out \\
-        -inr $karken_parse_reads \\
-        -ink $kraken_parse_kmers
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
