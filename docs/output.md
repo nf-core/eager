@@ -179,7 +179,7 @@ The resulting FASTQ files will only be present in your results directory if you 
 
 </details>
 
-  [Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long (e.g. mammalian) genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small and supports gapped, local, and paired-end alignment modes.
+[Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long (e.g. mammalian) genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small and supports gapped, local, and paired-end alignment modes.
 
 ### Host Removal
 
@@ -259,13 +259,13 @@ Using complexity-filtered fastq-files as input for metagenomic classifiers can r
 
 </details>
 
-  [PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus#readme) is an alternative to BBDuk for filtering the fastq files before metagenomics classification. From PRINSEQ++ we implemented filtering by the `dust` algorithm or by `entropy`, as explained above in the BBDuk section.
+[PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus#readme) is an alternative to BBDuk for filtering the fastq files before metagenomics classification. From PRINSEQ++ we implemented filtering by the `dust` algorithm or by `entropy`, as explained above in the BBDuk section.
 
-  Using complexity-filtered fastq-files as input for metagenomic classifiers can reduce the number of false positive classifications, resulting in more precise taxonomic assignments of the sample. Save the complexity-filtered fastq-files to the output directory to perform additional downstream analyses, such as testing multiple metagenomic profilers (see the [nf-core/taxprofiler](https://github.com/nf-core/taxprofiler) pipeline).
+Using complexity-filtered fastq-files as input for metagenomic classifiers can reduce the number of false positive classifications, resulting in more precise taxonomic assignments of the sample. Save the complexity-filtered fastq-files to the output directory to perform additional downstream analyses, such as testing multiple metagenomic profilers (see the [nf-core/taxprofiler](https://github.com/nf-core/taxprofiler) pipeline).
 
-  The saved files are the _good_ files, passing the `dust` or `entropy` filter treshold specified. The logs contain information about the amount of reads filtered.
+The saved files are the _good_ files, passing the `dust` or `entropy` filter treshold specified. The logs contain information about the amount of reads filtered.
 
-  **Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
+**Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
 
 ### Deduplication
 
