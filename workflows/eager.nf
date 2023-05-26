@@ -87,7 +87,7 @@ include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/m
 include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
 include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
-
+include { HOST_REMOVAL                } from '../modules/local/host_removal'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -235,6 +235,40 @@ workflow EAGER {
     } else {
         ch_dedupped_bams     = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
+    }
+
+    //
+    // MODULE: remove reads mapping to the host from the raw fastq
+    //
+    if ( params.run_host_removal ) {
+        // Preparing bam channel for host removal to be combined with the input fastq channel
+        // The bam channel consist of [meta, bam, bai] and in the meta we have in addition 'single_end' always set as TRUE and 'reference' set
+        // To be able to join it with fastq channel, we need to remove them from the meta (done in map) and stored in new_meta
+        ch_bam_for_host_removal= MAP.out.bam.join(MAP.out.bai)
+                                            .map{
+                                                meta, bam, bai ->
+                                                new_meta = meta.clone().findAll{ it.key !in [ 'single_end', 'reference' ] }
+                                                [ new_meta, meta, bam, bai ]
+                                                }
+        // Preparing fastq channel for host removal to be combined with the bam channel
+        // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
+        // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
+        ch_fastqs_for_host_removal= INPUT_CHECK.out.fastqs.map{
+                                                        meta, fastqs ->
+                                                        new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
+                                                        [ new_meta, meta, fastqs ]
+                                                    }
+        // We join the bam and fastq channel with now matching metas (new_meta) referred as meta_join
+        // and remove the meta_join from the final channel, keeping the original metas for the bam and the fastqs
+        ch_input_for_host_removal = ch_bam_for_host_removal.join(ch_fastqs_for_host_removal)
+                                                    .map{
+                                                        meta_join, meta_bam, bam, bai, meta_fastq, fastqs ->
+                                                        [ meta_bam, bam, bai, meta_fastq, fastqs]
+                                                    }
+
+        HOST_REMOVAL ( ch_input_for_host_removal )
+
+        ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
     }
 
     //
