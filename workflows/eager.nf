@@ -60,13 +60,14 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { INPUT_CHECK        } from '../subworkflows/local/input_check'
-include { REFERENCE_INDEXING } from '../subworkflows/local/reference_indexing'
-include { PREPROCESSING      } from '../subworkflows/local/preprocessing'
-include { MAP                } from '../subworkflows/local/map'
-include { FILTER_BAM         } from '../subworkflows/local/bamfiltering.nf'
-include { DEDUPLICATE        } from '../subworkflows/local/deduplicate'
+include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
+include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
+include { MAP                           } from '../subworkflows/local/map'
+include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
+include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
 
 /*
@@ -86,7 +87,7 @@ include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/m
 include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
 include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
-include { ENDORSPY                    } from '../modules/nf-core/endorspy/main'
+include { HOST_REMOVAL                } from '../modules/local/host_removal'include { ENDORSPY                    } from '../modules/nf-core/endorspy/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,6 +123,9 @@ workflow EAGER {
         if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
+
+    // Contamination estimation
+    hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -234,6 +238,40 @@ workflow EAGER {
     }
 
     //
+    // MODULE: remove reads mapping to the host from the raw fastq
+    //
+    if ( params.run_host_removal ) {
+        // Preparing bam channel for host removal to be combined with the input fastq channel
+        // The bam channel consist of [meta, bam, bai] and in the meta we have in addition 'single_end' always set as TRUE and 'reference' set
+        // To be able to join it with fastq channel, we need to remove them from the meta (done in map) and stored in new_meta
+        ch_bam_for_host_removal= MAP.out.bam.join(MAP.out.bai)
+                                            .map{
+                                                meta, bam, bai ->
+                                                new_meta = meta.clone().findAll{ it.key !in [ 'single_end', 'reference' ] }
+                                                [ new_meta, meta, bam, bai ]
+                                                }
+        // Preparing fastq channel for host removal to be combined with the bam channel
+        // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
+        // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
+        ch_fastqs_for_host_removal= INPUT_CHECK.out.fastqs.map{
+                                                        meta, fastqs ->
+                                                        new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
+                                                        [ new_meta, meta, fastqs ]
+                                                    }
+        // We join the bam and fastq channel with now matching metas (new_meta) referred as meta_join
+        // and remove the meta_join from the final channel, keeping the original metas for the bam and the fastqs
+        ch_input_for_host_removal = ch_bam_for_host_removal.join(ch_fastqs_for_host_removal)
+                                                    .map{
+                                                        meta_join, meta_bam, bam, bai, meta_fastq, fastqs ->
+                                                        [ meta_bam, bam, bai, meta_fastq, fastqs]
+                                                    }
+
+        HOST_REMOVAL ( ch_input_for_host_removal )
+
+        ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
+    }
+
+    //
     // Section: Metagenomics screening
     //
 
@@ -320,6 +358,25 @@ workflow EAGER {
         ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
 
+    }
+
+    //
+    // SUBWORKFLOW: Contamination estimation
+    //
+
+    if ( params.run_contamination_estimation_angsd ) {
+        contamination_input = ch_dedupped_bams
+        ch_hapmap = Channel.of( [ hapmap_file ] )
+        hapmap_input = REFERENCE_INDEXING.out.reference
+            .combine( ch_hapmap )
+            .map {
+                meta, fasta, fai, dict, index, hapmap ->
+                [ meta, hapmap ]
+            }
+
+        ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
+        ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //

@@ -160,6 +160,24 @@ The resulting FASTQ files will only be present in your results directory if you 
 
   [Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long (e.g. mammalian) genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small and supports gapped, local, and paired-end alignment modes.
 
+### Host Removal
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `host_removal/`
+
+  - `*.fq.gz`: FASTQ files containing only reads that did not map
+    to the reference genome.
+
+</details>
+
+The nf-core/eager host removal step removes any reads from the original input FASTQ files that mapped to the provided reference. This step is performed by a custom python script [extract_map_reads.py](https://github.com/nf-core/eager/blob/master/bin/extract_map_reads.py).
+
+The resulting FASTQ files can be used for data sharing purposes where the host DNA should not be made publically available for ethical reasons (for example when you do not have permission to analyse the host DNA but only analysis on the metagenomic content were agreed) or for due to identifiability reasons (for example, for individuals that died in recent times and could be identified based on their DNA alone).
+
+Alternatively you could use the resulting files for manual metagenomic screen outside of nf-core/eager (e.g. when your preferred taxonomic classifier isn't supported by nf-core/eager).
+
 
 ### Mapping statistics
 
@@ -300,3 +318,20 @@ These curves will be displayed in the pipeline run's MultiQC report, however you
 
 [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
 is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
+
+### Contamination estimation for Nuclear DNA
+
+#### ANGSD nuclear contamination
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `contamination_estimation/angsd/`
+
+  - `*.txt`: Text file containing the results of nuclear contamination estimation with ANGSD for each library.
+  - `nuclear_contamination.txt`: Text file containing a summary table of contamination estimates for all libraries.
+  - `nuclear_contamination_mqc.json`: JSON file containing a summary table of contamination estimates for all libraries.
+
+  </details>
+
+[ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. Among other functions, ANGSD can estimate contamination for chromosomes for which one copy exists, i.e. X-chromosome for humans with karyotype XY. To do this, we first generate a binary count file for the X-chromosome (`angsd`) and then perform a Fisher's exact test for finding a p-value and jackknife to get an estimate of contamination (`contamination`). Contamination is estimated with Method of Moments (MOM) and Maximum Likelihood (ML) for both Method1 and Method2. Method1 compares the total number of minor and major reads at SNP sites with the number of minor and major reads at adjacent sites, assuming independent errors between reads and sites, while Method2 only samples one read at each site to remove the previous assumption. The results of all methods for each library, as well as respective standard errors are summarised in `nuclear_contamination.txt` and `nuclear_contamination_mqc.json`.
