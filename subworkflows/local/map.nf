@@ -2,12 +2,13 @@
 // Prepare reference indexing for downstream
 //
 
-include { FASTQ_ALIGN_BWAALN                                                           } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
-include { BWA_MEM                                                                      } from '../../modules/nf-core/bwa/mem/main'
-include { SAMTOOLS_MERGE                                                               } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT                                                                } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGE } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED                                } from '../../modules/nf-core/samtools/flagstat/main'
+include { FASTQ_ALIGN_BWAALN                                                                                                 } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { BWA_MEM                                                                                                            } from '../../modules/nf-core/bwa/mem/main'
+include { BOWTIE2_ALIGN                                                                                                      } from '../../modules/nf-core/bowtie2/align/main'
+include { SAMTOOLS_MERGE                                                                                                     } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT                                                                                                      } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGE } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED                                                                      } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow MAP {
     take:
@@ -31,28 +32,37 @@ workflow MAP {
     if ( params.mapping_tool == 'bwaaln' ) {
         FASTQ_ALIGN_BWAALN ( ch_input_for_mapping.reads, ch_input_for_mapping.index )
 
-        ch_versions   = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
+        ch_versions        = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
         ch_mapped_lane_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
     } else if ( params.mapping_tool == 'bwamem' ) {
         BWA_MEM ( ch_input_for_mapping.reads, ch_input_for_mapping.index, true )
-        ch_versions   = ch_versions.mix ( BWA_MEM.out.versions.first() )
+        ch_versions        = ch_versions.mix ( BWA_MEM.out.versions.first() )
         ch_mapped_lane_bam = BWA_MEM.out.bam
 
         SAMTOOLS_INDEX_MEM ( ch_mapped_lane_bam )
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX_MEM.out.versions.first())
+        ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_MEM.out.versions.first())
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_MEM.out.csi : SAMTOOLS_INDEX_MEM.out.bai
 
+    } else if ( params.mapping_tool == 'bowtie2' ) {
+        BOWTIE2_ALIGN ( ch_input_for_mapping.reads, ch_input_for_mapping.index, false, true )
+        ch_versions        = ch_versions.mix ( BOWTIE2_ALIGN.out.versions.first() )
+        ch_mapped_lane_bam = BOWTIE2_ALIGN.out.bam
+
+        SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
+        ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
+        ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
     }
 
-    ch_input_for_lane_merge = ch_mapped_lane_bam.map{
-        meta, bam ->
-        new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry'] }
+    ch_input_for_lane_merge = ch_mapped_lane_bam
+                                .map {
+                                    meta, bam ->
+                                    new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry'] }
 
-        [ new_meta, bam ]
-    }
-    .groupTuple()
+                                    [ new_meta, bam ]
+                                }
+                                .groupTuple()
 
     SAMTOOLS_MERGE ( ch_input_for_lane_merge, [], [] )
     ch_versions.mix( SAMTOOLS_MERGE.out.versions )

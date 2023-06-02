@@ -19,6 +19,9 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 
 // Check failing parameter combinations
 if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
+if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
+if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
 if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
     // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
     if (params.metagenomics_prinseq_dustscore == 0.5) {
@@ -66,7 +69,10 @@ include { PREPROCESSING                 } from '../subworkflows/local/preprocess
 include { MAP                           } from '../subworkflows/local/map'
 include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
+include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate_damage'
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
+include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
+include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,7 +91,7 @@ include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/m
 include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
 include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
-include { AUTHENTICT_DEAM2CONT        } from '../modules/nf-core/authentict/deam2cont/main'
+include { HOST_REMOVAL                } from '../modules/local/host_removal'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,9 +128,13 @@ workflow EAGER {
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
 
+    // Contamination estimation
+    hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
+
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
+
     INPUT_CHECK (
         ch_input
     )
@@ -167,8 +177,14 @@ workflow EAGER {
     //
     // SUBWORKFLOW: Reference mapping
     //
+    ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
+            .map{
+                meta, fasta, fai, dict, index, circular_target, mitochondrion ->
+                [ meta, index ]
+            }
 
-    MAP ( ch_reads_for_mapping, REFERENCE_INDEXING.out.reference.map{meta, fasta, fai, dict, index -> [meta, index]} )
+    MAP ( ch_reads_for_mapping, ch_reference_for_mapping )
+
     ch_versions       = ch_versions.mix( MAP.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
 
@@ -215,7 +231,7 @@ workflow EAGER {
 
     ch_fasta_for_deduplication = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index ->
+            meta, fasta, fai, dict, index, circular_target, mitochondrion ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -233,11 +249,37 @@ workflow EAGER {
     }
 
     //
-    // SUBWORKFLOW: contamination estimate
-    // TODO: filter out double stranded, workout how to supply the position file
+    // MODULE: remove reads mapping to the host from the raw fastq
+    //
+    if ( params.run_host_removal ) {
+        // Preparing bam channel for host removal to be combined with the input fastq channel
+        // The bam channel consist of [meta, bam, bai] and in the meta we have in addition 'single_end' always set as TRUE and 'reference' set
+        // To be able to join it with fastq channel, we need to remove them from the meta (done in map) and stored in new_meta
+        ch_bam_for_host_removal= MAP.out.bam.join(MAP.out.bai)
+                                            .map{
+                                                meta, bam, bai ->
+                                                new_meta = meta.clone().findAll{ it.key !in [ 'single_end', 'reference' ] }
+                                                [ new_meta, meta, bam, bai ]
+                                                }
+        // Preparing fastq channel for host removal to be combined with the bam channel
+        // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
+        // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
+        ch_fastqs_for_host_removal= INPUT_CHECK.out.fastqs.map{
+                                                        meta, fastqs ->
+                                                        new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
+                                                        [ new_meta, meta, fastqs ]
+                                                    }
+        // We join the bam and fastq channel with now matching metas (new_meta) referred as meta_join
+        // and remove the meta_join from the final channel, keeping the original metas for the bam and the fastqs
+        ch_input_for_host_removal = ch_bam_for_host_removal.join(ch_fastqs_for_host_removal)
+                                                    .map{
+                                                        meta_join, meta_bam, bam, bai, meta_fastq, fastqs ->
+                                                        [ meta_bam, bam, bai, meta_fastq, fastqs]
+                                                    }
 
-    if ( params.run_contamination_authentict) {
-        AUTHENTICT_DEAM2CONT( ch_dedupped_bams, [[],[]], [[],[]] )
+        HOST_REMOVAL ( ch_input_for_host_removal )
+
+        ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
     }
 
     //
@@ -291,6 +333,56 @@ workflow EAGER {
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
 
+     //
+    // SUBWORKFLOW: Calculate Damage
+    //
+
+    ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
+        .multiMap{
+            meta, fasta, fai, dict, index, circular_target, mitochondrion ->
+            fasta:      [ meta, fasta ]
+            fasta_fai:  [ meta, fai ]
+        }
+
+    if ( !params.skip_damage_calculation ) {
+        CALCULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_damagecalculation.fasta, ch_fasta_for_damagecalculation.fasta_fai )
+        ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
+
+    }
+
+    //
+    // SUBWORKFLOW: Contamination estimation
+    //
+
+    if ( params.run_contamination_estimation_angsd ) {
+        contamination_input = ch_dedupped_bams
+        ch_hapmap = Channel.of( [ hapmap_file ] )
+        hapmap_input = REFERENCE_INDEXING.out.reference
+            .combine( ch_hapmap )
+            .map {
+                meta, fasta, fai, dict, index, circular_target, mitochondrion, hapmap ->
+                [ meta, hapmap ]
+            }
+
+        ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
+        ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]) )
+    }
+
+    //
+    // SUBWORKFLOW: aDNA Damage Manipulation
+    //
+
+    if ( params.run_mapdamage_rescaling || params.run_pmd_filtering || params.run_trim_bam ) {
+        MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta )
+        ch_multiqc_files       = ch_multiqc_files.mix( MANIPULATE_DAMAGE.out.flagstat.collect{it[1]}.ifEmpty([]) )
+        ch_versions            = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
+        ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
+    } else {
+        ch_bams_for_genotyping = ch_dedupped_bams
+    }
+
     //
     // MODULE: MultiQC
     //
@@ -308,7 +400,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([])) // Replaced with custom mixing
 
     MULTIQC (
         ch_multiqc_files.collect(),

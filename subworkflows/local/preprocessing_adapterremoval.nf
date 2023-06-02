@@ -4,7 +4,7 @@
 
 include { ADAPTERREMOVAL as ADAPTERREMOVAL_SINGLE       } from '../../modules/nf-core/adapterremoval/main'
 include { ADAPTERREMOVAL as ADAPTERREMOVAL_PAIRED       } from '../../modules/nf-core/adapterremoval/main'
-include { CAT_FASTQ                                     } from '../../modules/nf-core/cat/fastq/main'
+include { CAT_FASTQ as CAT_FASTQ_ADAPTERREMOVAL         } from '../../modules/nf-core/cat/fastq/main'
 
 workflow PREPROCESSING_ADAPTERREMOVAL {
 
@@ -56,9 +56,9 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
             .map { meta, fastq -> [meta, fastq.flatten()] }
 
 
-        CAT_FASTQ(ch_concat_fastq)
+        CAT_FASTQ_ADAPTERREMOVAL(ch_concat_fastq)
 
-        ch_adapterremoval_reads_prepped = CAT_FASTQ.out.reads
+        ch_adapterremoval_reads_prepped = CAT_FASTQ_ADAPTERREMOVAL.out.reads
             .mix(ADAPTERREMOVAL_SINGLE.out.singles_truncated)
 
     // Merge and exclude singletons
@@ -78,9 +78,9 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
             .map { meta, fastq -> [meta, fastq.flatten()] }
 
 
-        CAT_FASTQ(ch_concat_fastq)
+        CAT_FASTQ_ADAPTERREMOVAL(ch_concat_fastq)
 
-        ch_adapterremoval_reads_prepped = CAT_FASTQ.out.reads
+        ch_adapterremoval_reads_prepped = CAT_FASTQ_ADAPTERREMOVAL.out.reads
             .mix(ADAPTERREMOVAL_SINGLE.out.singles_truncated)
 
     // Don't merge (no singletons will exist)

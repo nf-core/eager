@@ -2,6 +2,7 @@
 // This file holds several functions specific to the workflow/eager.nf in the nf-core/eager pipeline
 //
 
+import nextflow.Nextflow
 import groovy.text.SimpleTemplateEngine
 
 class WorkflowEager {
@@ -13,8 +14,7 @@ class WorkflowEager {
         genomeExistsError(params, log)
 
         if (!params.fasta) {
-            log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
-            System.exit(1)
+            Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
         }
     }
 
@@ -60,18 +60,29 @@ class WorkflowEager {
         def description_html = engine.createTemplate(methods_text).make(meta)
 
         return description_html
-    }//
+    }
+
+    //
     // Exit pipeline if incorrect --genome key provided
     //
     private static void genomeExistsError(params, log) {
         if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-            log.error '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n' +
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                '  Currently, the available genome keys are:\n' +
-                "  ${params.genomes.keySet().join(', ')}\n" +
-                '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-            System.exit(1)
+                "  Currently, the available genome keys are:\n" +
+                "  ${params.genomes.keySet().join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.error(error_string)
         }
+    }
+
+    def public static String grabUngzippedExtension(infile) {
+
+        def split_name = infile.toString().tokenize('.')
+        def output = split_name.reverse().first() == 'gz' ? split_name.reverse()[1,0].join('.') : split_name.reverse()[0]
+
+        return '.' + output
+
     }
 
 }
