@@ -63,6 +63,7 @@ workflow ESTIMATE_CONTAMINATION {
     }
 
     if ( params.run_contamination_estimation_authentict ) {
+        // TODO: only run on single-stranded and non-UDG data
         if ( position_input ) {
             authnetict_input_position = position_input
                 .map {
