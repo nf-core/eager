@@ -279,3 +279,20 @@ These curves will be displayed in the pipeline run's MultiQC report, however you
 
 [DamageProfiler](https://github.com/Integrative-Transcriptomics/DamageProfiler)
 is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
+
+#### QualiMap
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `qualimap/`: this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
+
+[QualiMap](http://qualimap.bioinfo.cipf.es/)
+is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
+
+> NB: Neither fold coverage nor percent coverage on there own is sufficient to assess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or un-removed-adapter-containing reference genomes can artificially inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
+
+**Note that many of the statistics from this module are displayed in the General Stats table, as they represent single values that are not plottable.**
+
+You will receive output for each sample. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
+warning: If your library has no reads mapping to the reference, this will result in an empty BAM file. Qualimap will therefore not produce any output even if a BAM exists!
