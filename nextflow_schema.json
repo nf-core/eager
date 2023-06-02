@@ -1059,6 +1059,11 @@
                     "description": "Path to HapMap file of chromosome for contamination estimation..",
                     "help_text": "The haplotype map, or \"HapMap\", records the location of haplotype blocks and their tag SNPs.",
                     "fa_icon": "fas fa-map"
+                },
+                "run_contamination_estimation_authentict": {
+                    "type": "boolean",
+                    "description": "Turn on nuclear contamination estimation from DNA damage in single-stranded non-UDG treated libraries",
+                    "help_text": "Specify to run the optional processes for nuclear DNA contamination estimation with AuthentiCT for single-stranded non-UDG treated libraries."
                 }
             }
         }
@@ -1086,9 +1091,6 @@
             "$ref": "#/definitions/mapping"
         },
         {
-            "$ref": "#/definitions/adna_damage_analysis"
-        },
-        {
             "$ref": "#/definitions/bam_filtering"
         },
         {
@@ -1098,25 +1100,25 @@
             "$ref": "#/definitions/deduplication"
         },
         {
-            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
-        },
-        {
-            "$ref": "#/definitions/mapping_statistics"
-        },
-        {
             "$ref": "#/definitions/damage_manipulation"
         },
         {
             "$ref": "#/definitions/genotyping"
         },
         {
+            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
+        },
+        {
+            "$ref": "#/definitions/mapping_statistics"
+        },
+        {
             "$ref": "#/definitions/adna_damage_analysis"
         },
         {
-            "$ref": "#/definitions/contamination_estimation"
+            "$ref": "#/definitions/host_removal"
         },
         {
-            "$ref": "#/definitions/host_removal"
+            "$ref": "#/definitions/contamination_estimation"
         }
     ]
 }

@@ -364,8 +364,8 @@ workflow EAGER {
                 meta, fasta, fai, dict, index, circular_target, mitochondrion, hapmap ->
                 [ meta, hapmap ]
             }
-
-        ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
+        // TODO: Add AuthentiCT position file as third input when implemented
+        ESTIMATE_CONTAMINATION( contamination_input, hapmap_input, [] )
         ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
