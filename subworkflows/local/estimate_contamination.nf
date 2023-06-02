@@ -14,8 +14,11 @@ workflow ESTIMATE_CONTAMINATION {
     position_input      // channel: [ val(meta), [ position_file ] ]
 
     main:
-    ch_versions       = Channel.empty()
-    ch_multiqc_files  = Channel.empty()
+    ch_versions           = Channel.empty()
+    ch_multiqc_files      = Channel.empty()
+    ch_contam_angsd_print = Channel.empty()
+    ch_contam_authentict  = Channel.empty()
+
 
 // fix unexpected input/syntax error
     if ( params.run_contamination_estimation_angsd ) {
