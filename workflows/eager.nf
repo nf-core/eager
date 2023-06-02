@@ -355,7 +355,7 @@ workflow EAGER {
     // SUBWORKFLOW: Contamination estimation
     //
 
-    if ( params.run_contamination_estimation_angsd ) {
+    if ( params.run_contamination_estimation_angsd || params.run_contamination_estimation_authentict ) {
         contamination_input = ch_dedupped_bams
         ch_hapmap = Channel.of( [ hapmap_file ] )
         hapmap_input = REFERENCE_INDEXING.out.reference
