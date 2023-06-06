@@ -125,7 +125,11 @@ workflow EAGER {
     }
 
     // QualiMap
-    snpcapture_bed       = params.snpcapture_bed ? file(params.snpcapture_bed, checkIfExists: true) : []
+   if ( params.snpcapture_bed ) {
+    ch_snpcapture_bed = Channel.fromPath(params.snpcapture_bed, checkIfExists: true).collect()
+    } else {
+    ch_snpcapture_bed = Channel.empty()
+    }
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -309,17 +313,18 @@ workflow EAGER {
     //
     // MODULE: QUALIMAP_BAMQC
     //
+
     if ( !params.skip_qualimap ) {
 
-    qualimap_input = ch_dedupped_bams
+        qualimap_input = ch_dedupped_bams
         .map {
             meta, bam, bai ->
             [ meta, bam ]
         }
 
-        QUALIMAP_BAMQC(qualimap_input, snpcapture_bed)
-        ch_multiqc_files = ch_multiqc_files.mix(( QUALIMAP_BAMQC.out.qualimap.collect{it[1]}.ifEmpty([]) ))
+        QUALIMAP_BAMQC(qualimap_input, ch_snpcapture_bed)
         ch_versions = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix(QUALIMAP_BAMQC.out.mqc.collect{it[1]}.ifEmpty([]))
     
     }
 
