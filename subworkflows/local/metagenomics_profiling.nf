@@ -4,10 +4,10 @@
 
 // Much taken from nf-core/taxprofile subworkflows/local/profiling.nf
 
-include { MALT_RUN                                      } from '../../modules/nf-core/malt/run/main'
-include { KRAKEN2_KRAKEN2                               } from '../../modules/nf-core/kraken2/kraken2/main'
-include { KRAKENUNIQ_PRELOADEDKRAKENUNIQ                } from '../../modules/nf-core/krakenuniq/preloadedkrakenuniq/main'
-include { METAPHLAN3_METAPHLAN3                         } from '../../modules/nf-core/metaphlan3/metaphlan3/main'
+include { MALT_RUN                       } from '../../modules/nf-core/malt/run/main'
+include { KRAKEN2_KRAKEN2                } from '../../modules/nf-core/kraken2/kraken2/main'
+include { KRAKENUNIQ_PRELOADEDKRAKENUNIQ } from '../../modules/nf-core/krakenuniq/preloadedkrakenuniq/main'
+include { METAPHLAN_METAPHLAN            } from '../../modules/nf-core/metaphlan/metaphlan/main'
 
 workflow METAGENOMICS_PROFILING {
 
@@ -111,11 +111,11 @@ workflow METAGENOMICS_PROFILING {
         ch_postprocessing_input = ch_postprocessing_input.mix( ch_maltrun_for_megan )
     }
 
-    else if ( params.metagenomics_profiling_tool == 'metaphlan3' ) {
+    else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
 
-        METAPHLAN3_METAPHLAN3 ( reads , database )
-        ch_versions        = ch_versions.mix( METAPHLAN3_METAPHLAN3.out.versions.first() )
-        ch_raw_profiles    = ch_raw_profiles.mix( METAPHLAN3_METAPHLAN3.out.profile )
+        METAPHLAN_METAPHLAN ( reads , database )
+        ch_versions        = ch_versions.mix( METAPHLAN_METAPHLAN.out.versions.first() )
+        ch_raw_profiles    = ch_raw_profiles.mix( METAPHLAN_METAPHLAN.out.profile )
 
     }
 

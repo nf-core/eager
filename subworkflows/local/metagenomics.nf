@@ -43,7 +43,7 @@ workflow METAGENOMICS {
     //
 
 
-    if ( params.metagenomics_postprocessing_tool || params.metagenomics_profiling_tool == 'kraken2' || params.metagenomics_profiling_tool == 'krakenuniq' ) {
+    if ( params.metagenomics_postprocessing_tool == 'krakenmerge' || params.metagenomics_profiling_tool == 'kraken2' || params.metagenomics_profiling_tool == 'krakenuniq' ) {
 
         METAGENOMICS_POSTPROCESSING ( METAGENOMICS_PROFILING.out.postprocessing_input )
 

@@ -68,9 +68,9 @@
 
   > Breitwieser, Florian P., Daniel N. Baker, and Steven L. Salzberg. 2018. KrakenUniq: confident and fast metagenomics classification using unique k-mer counts. Genome Biology 19 (1): 198. doi: 10.1186/s13059-018-1568-0
 
-- [MetaPhlAn3](https://doi.org/10.7554/eLife.65088)
+- [MetaPhlAn](https://doi.org/10.1038/s41587-023-01688-w)
 
-  > Beghini, Francesco, Lauren J McIver, Aitor Blanco-Míguez, Leonard Dubois, Francesco Asnicar, Sagun Maharjan, Ana Mailyan, et al. 2021. “Integrating Taxonomic, Functional, and Strain-Level Profiling of Diverse Microbial Communities with BioBakery 3.” Edited by Peter Turnbaugh, Eduardo Franco, and C Titus Brown. ELife 10 (May): e65088. doi: 10.7554/eLife.65088
+  > Blanco-Míguez, A., Beghini, F., Cumbo, F. et al. Extending and improving metagenomic taxonomic profiling with uncharacterized species using MetaPhlAn 4. Nat Biotechnol (2023). doi: [10.1038/s41587-023-01688-w](https://doi.org/10.1038/s41587-023-01688-w)
 
 ## Software packaging/containerisation tools
 

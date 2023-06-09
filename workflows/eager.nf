@@ -45,7 +45,7 @@ if ( params.run_metagenomics && ! params.metagenomics_profiling_database ) { exi
 
 if ( params.metagenomics_postprocessing_tool == 'maltextract' && ! params.metagenomics_profiling_tool != 'malt' ) { exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'maltextract' can only be run with --metagenomics_profiling_tool 'malt'") }
 
-if ( params.metagenomics_postprocessing_tool == 'krakenparse' && ( ! params.metagenomics_profiling_tool != 'kraken2' || ! params.metagenomics_profiling_tool != 'krakenuniq' ) ) { exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'krakenparse' can only be run with --metagenomics_profiling_tool 'kraken2' or 'krakenuniq'") }
+if ( params.metagenomics_postprocessing_tool == 'krakenmerge' && ( ! params.metagenomics_profiling_tool != 'kraken2' || ! params.metagenomics_profiling_tool != 'krakenuniq' ) ) { exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'krakenmerge' can only be run with --metagenomics_profiling_tool 'kraken2' or 'krakenuniq'") }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,6 +54,8 @@ if ( params.metagenomics_postprocessing_tool == 'krakenparse' && ( ! params.meta
 */
 
 if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
+
+if ( params.metagenomics_postprocessing_tool == 'krakenmerge' && params.metagenomics_min_support_reads == 1 ) log.warn("[nf-core/eager] Warning: The default value for krakenmerge minimum reads for outputing a node has not been changed from the default. This default is set for MALT and maltextract. Consider updating to the default value for krakenmerge (50 reads) by setting --metagenomics_min_support_reads 50")
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -253,7 +255,6 @@ workflow EAGER {
     // Section: Metagenomics
     //
 
-    //TODO: finish and figure out how exactly to call with proper database (check via a helper function?)
     if ( params.run_metagenomics ) {
         METAGENOMICS ( ch_bamfiltered_for_metagenomics )
         ch_versions      = ch_versions.mix( METAGENOMICS.out.versions.first() )

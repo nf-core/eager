@@ -633,7 +633,7 @@
                 "metagenomics_profiling_tool": {
                     "type": "string",
                     "description": "Specify which tool to use for metagenomic profiling and screening.",
-                    "enum": ["malt", "metaphlan2", "kraken2", "krakenuniq"],
+                    "enum": ["malt", "metaphlan", "kraken2", "krakenuniq"],
                     "fa_icon": "fas fa-toolbox",
                     "help_text": "Select which tool to run metagenomics profiling on designated metagenomics_screening_input. These tools behave vastly differently due to performing read profiling using different methods and yield vastly different reuslts."
                 },
@@ -719,7 +719,7 @@
                     "default": 1,
                     "description": "Specify a minimum number of reads a taxon of sample total is required to have to be retained in malt or kraken. Not compatible with --malt_min_support_mode 'percent'.",
                     "fa_icon": "fas fa-sort-numeric-up-alt",
-                    "help_text": "For usage in malt: Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'. \n For usage in kraken2 or krakenuniq: Specify the number of hits on a clade to retain it in the final report when using kraken_parse. \nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. Default: 1.\n\n> Modifies MALT or kraken_parse.py parameter: `-sup` and `-c` respectively\n"
+                    "help_text": "For usage in malt or kraken: Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'. \n For usage in kraken2 or krakenuniq: Specify the number of hits on a clade to retain it in the final report when using kraken_parse. Default: 1. \nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. \n\n> Modifies MALT or kraken_parse.py parameter: `-sup` and `-c` respectively\n"
                 },
                 "metagenomics_malt_max_queries": {
                     "type": "integer",
