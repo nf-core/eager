@@ -53,16 +53,16 @@ workflow MAP {
         SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
         ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
-
     }
 
-    ch_input_for_lane_merge = ch_mapped_lane_bam.map{
-        meta, bam ->
-        new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry'] }
+    ch_input_for_lane_merge = ch_mapped_lane_bam
+                                .map {
+                                    meta, bam ->
+                                    new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry'] }
 
-        [ new_meta, bam ]
-    }
-    .groupTuple()
+                                    [ new_meta, bam ]
+                                }
+                                .groupTuple()
 
     SAMTOOLS_MERGE ( ch_input_for_lane_merge, [], [] )
     ch_versions.mix( SAMTOOLS_MERGE.out.versions )
