@@ -324,7 +324,7 @@ workflow EAGER {
 
         QUALIMAP_BAMQC(qualimap_input, ch_snpcapture_bed)
         ch_versions = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix(QUALIMAP_BAMQC.out.mqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(QUALIMAP_BAMQC.out.results.collect{it[1]}.ifEmpty([]))
     
     }
 
