@@ -2,14 +2,14 @@
 //  Carry out per-chromosome deduplication
 //
 
-include { BUILD_INTERVALS        } from '../../modules/local/build_intervals'
-include { BAM_SPLIT_BY_REGION    } from '../../subworkflows/nf-core/bam_split_by_region/main'
-include { PICARD_MARKDUPLICATES  } from '../../modules/nf-core/picard/markduplicates/main'
-include { DEDUP                  } from '../../modules/nf-core/dedup/main'
-include { SAMTOOLS_MERGE         } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT          } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX         } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT      } from '../../modules/nf-core/samtools/flagstat/main'
+include { BUILD_INTERVALS                                 } from '../../modules/local/build_intervals'
+include { BAM_SPLIT_BY_REGION                             } from '../../subworkflows/nf-core/bam_split_by_region/main'
+include { PICARD_MARKDUPLICATES                           } from '../../modules/nf-core/picard/markduplicates/main'
+include { DEDUP                                           } from '../../modules/nf-core/dedup/main'
+include { SAMTOOLS_MERGE    as SAMTOOLS_MERGE_DEDUPPED    } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT     as SAMTOOLS_SORT_DEDUPPED     } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DEDUPPED    } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_DEDUPPED } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow DEDUPLICATE {
     take:
@@ -135,32 +135,32 @@ workflow DEDUPLICATE {
         }
 
     // Merge the bams for each region into one bam
-    SAMTOOLS_MERGE(
+    SAMTOOLS_MERGE_DEDUPPED(
         ch_input_for_samtools_merge.bam,
         ch_input_for_samtools_merge.fasta,
         ch_input_for_samtools_merge.fasta_fai
     )
-    ch_versions   = ch_versions.mix( SAMTOOLS_MERGE.out.versions )
+    ch_versions   = ch_versions.mix( SAMTOOLS_MERGE_DEDUPPED.out.versions )
 
 
     // Sort the merged bam and index
-    SAMTOOLS_SORT ( SAMTOOLS_MERGE.out.bam )
-    ch_versions   = ch_versions.mix( SAMTOOLS_SORT.out.versions )
-    ch_dedup_bam  = SAMTOOLS_SORT.out.bam
+    SAMTOOLS_SORT_DEDUPPED ( SAMTOOLS_MERGE_DEDUPPED.out.bam )
+    ch_versions   = ch_versions.mix( SAMTOOLS_SORT_DEDUPPED.out.versions )
+    ch_dedup_bam  = SAMTOOLS_SORT_DEDUPPED.out.bam
 
-    SAMTOOLS_INDEX ( ch_dedup_bam )
-    ch_versions   = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
-    ch_dedup_bai  =  params.fasta_largeref ? SAMTOOLS_INDEX.out.csi : SAMTOOLS_INDEX.out.bai
+    SAMTOOLS_INDEX_DEDUPPED ( ch_dedup_bam )
+    ch_versions   = ch_versions.mix( SAMTOOLS_INDEX_DEDUPPED.out.versions )
+    ch_dedup_bai  =  params.fasta_largeref ? SAMTOOLS_INDEX_DEDUPPED.out.csi : SAMTOOLS_INDEX_DEDUPPED.out.bai
 
     // Finally run flagstat on the dedupped bam
     ch_input_for_samtools_flagstat = ch_dedup_bam.join( ch_dedup_bai )
 
-    SAMTOOLS_FLAGSTAT(
+    SAMTOOLS_FLAGSTAT_DEDUPPED(
         ch_input_for_samtools_flagstat
     )
-    ch_versions       = ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions )
-    ch_multiqc_files  = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT.out.flagstat )
-    ch_dedup_flagstat = SAMTOOLS_FLAGSTAT.out.flagstat
+    ch_versions       = ch_versions.mix( SAMTOOLS_FLAGSTAT_DEDUPPED.out.versions )
+    ch_multiqc_files  = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_DEDUPPED.out.flagstat )
+    ch_dedup_flagstat = SAMTOOLS_FLAGSTAT_DEDUPPED.out.flagstat
 
     emit:
     bam         = ch_dedup_bam
