@@ -1135,6 +1135,8 @@
         },
         {
             "$ref": "#/definitions/statistics"
+        },
+        {
             "$ref": "#/definitions/contamination_estimation"
         },
         {
