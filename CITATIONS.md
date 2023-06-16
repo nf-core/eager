@@ -28,6 +28,10 @@
 
   > Schubert, M., Lindgreen, S., & Orlando, L. (2016). AdapterRemoval v2: rapid adapter trimming, identification, and read merging. BMC Research Notes, 9, 88. doi: [10.1186/s13104-016-1900-2](https://doi.org/10.1186/s13104-016-1900-2)
 
+- [Picard Tools](https://broadinstitute.github.io/picard/)
+
+  > Broad Institute (2019). Picard Toolkit. GitHub Repository: https://broadinstitute.github.io/picard/
+
 - [bwa](https://doi.org/10.1093/bioinformatics/btp324)
 
   > Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics , 25(14), 1754–1760. doi: [10.1093/bioinformatics/btp324](https://doi.org/10.1093/bioinformatics/btp324)
@@ -71,6 +75,18 @@
 - [endorS.py](https://doi.org/10.7717/peerj.10947)
 
   > Fellows Yates JA, Lamnidis TC, Borry M, Valtueña Andrades A, Fagernäs Z, Clayton S, Garcia MU, Neukamm J, Peltzer A. 2021. Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager. PeerJ 9:e10947. doi: [10.7717/peerj.10947](https://doi.org/10.7717/peerj.10947)
+
+- [mapDamage2](https://doi.org/10.1093/bioinformatics/btt193)
+
+  > Jónsson H, Ginolhac A, Schubert M, Johnson P, Orlando L. mapDamage2.0: fast approximate Bayesian estimates of ancient DNA damage parameters. Bioinformatics 2013. 23rd April 2013. doi: [10.1093/bioinformatics/btt193](https://doi.org/10.1093/bioinformatics/btt193)
+
+- [PMDtools](https://doi.org/10.1073/pnas.1318934111)
+
+  > Skoglund P., Northoff B.H.,Shunkov M.V., Derevianko A., Pääbo S., Krause J., Jakobsson M. (2014) Separating ancient DNA from modern contamination in a Siberian Neandertal, Proceedings of the National Academy of Sciences USA doi: [10.1073/pnas.1318934111](https://doi.org/10.1073/pnas.1318934111)
+
+- [BamUtils](https://doi.org/10.1101/gr.176552.114)
+
+  > Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. doi: [10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114)
 
 - [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
   > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190). Download: https://github.com/Integrative-Transcriptomics/DamageProfiler

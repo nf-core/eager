@@ -71,7 +71,7 @@ def check_samplesheet(file_in, file_out):
     sample_id	library_id	lane	colour_chemistry	pairment	strandedness	damage_treatment	r1	r2	bam	bam_reference_id
     Sample1	Sample1_Lib1	1	4	paired	double	full	Sample1_Lib1_L008_R1_001.fq.gz	Sample1_Lib1_L008_R2_001.fq.gz	NA	NA
     Sample2	Sample2_Lib1	2	2	single	double	full	Sample2_Lib1_L008_R1_001.fq.gz	NA	NA	NA
-    Sample3	Sample3_Lib1	9	4	single	single	none	NA	NA	Sample3_Lib1.bam	Reference
+    Sample3	Sample3_Lib1	9	4	single	single	none	NA	NA	Sample3_Lib1.bam	Mammoth_MT
 
     For an example see:
     https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/samplesheet.tsv
@@ -194,7 +194,7 @@ def check_samplesheet(file_in, file_out):
 
             if (not isNAstr(bam) and isNAstr(bam_reference_id)) or (isNAstr(bam) and not isNAstr(bam_reference_id)):
                 error_counter = print_error(
-                    "A BAM and BAM reference id (corresponding to what is supplied to `--fasta`, without the file type suffix) must always be provided together.",
+                    "A BAM and BAM reference id (corresponding to what is supplied to `--fasta`) must always be provided together.",
                     "Line",
                     line_num,
                     error_counter,

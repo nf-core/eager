@@ -71,6 +71,7 @@ Tool Specific combinations
     - PE_only + preprocessing_excludeunmerged ✅
 
 - Dedup
+
   - With FastP
     - SE&PE data ✅ (expected failure)
     - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
@@ -79,6 +80,72 @@ Tool Specific combinations
     - SE&PE data ✅ (expected failure)
     - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
     - PE_only + preprocessing_excludeunmerged ✅
+
+- Damage Manipulation
+
+  - MapDamage2
+
+    - mapdamage2 rescaling with default parameters
+    - mapdamage2 rescaling with changed parameters
+
+  - PMD filtering
+
+    - with default parameters
+    - with stricter threshold
+
+  - BAM trimming
+    - with default parameters
+    - different length by udg treatment
+
+- All together
+
+### Multi-reference tests
+
+```bash
+## Test: (1) Two references, only FASTAs ✅
+## Expect: Expect all of fai file (x2 SAMTOOLS_FAIDX processes), dict file (x2 PICARD_CREATESEQUENCEDICTIONARY), bwa index directory (x2 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test01.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (2) Two reference FASTAs, one also has fai ✅
+## Expect: Expect one fai file (x1 SAMTOOLS_FAIDX processes), 2 dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 2 bwa  index directory (x2 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test02.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (3) Two reference FASTAs, one also has dict ✅
+## Expect: Expect two fai file (x2 SAMTOOLS_FAIDX processes), 1 dict file (x1 PICARD_CREATESEQUENCEDICTIONARY), 2 bwa index directory (x2 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test03.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (4) Two reference FASTAs, one also has bwa_index ref ✅
+## Expect: Expect two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bwa  index directory (x1 BWA_INDEX) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test04.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (5) Two reference FASTAs, one also has bowtie2_index ref ✅
+## Expect: Expect two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (x1 BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test05.csv -ansi-log false -dump-channels --save_reference --mapping_tool bowtie2
+
+## Test: (6) Mapper index mismatch with `--mapping_tool` (bwa index to bowtie2-align) ✅
+## Expect: Expect FAIL at mapping step for Mammoth two fai (x2 SAMTOOLS_FAIDX processes), two dict (x2 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test06.csv -ansi-log false -dump-channels --save_reference --mapping_tool bowtie2
+
+## Test: (7) Mammoth has all pre-supplied ✅
+## Expect: Expect one fai (x1 SAMTOOLS_FAIDX processes), one dict (x1 PICARD_CREATESEQUENCEDICTIONARY), 1 bowtie2  index directory (BOWTIE2_BUILD) etc. to be generated and present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test07.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (8) No indexing necessary, all already supplied ✅
+## Expect: Expect no files to be generated/processes executed, nor results present in per reference results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test08.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (9) All but Human FAI provided  ✅
+## Expect: Expect one fai (x1 SAMTOOLS_FAIDX processes), and nothing else results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test09.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (10) All but Human dict provided ✅
+## Expect: Expect one dict (x1 PICARD_CREATESEQUENCEDICTIONARY processes), and nothing else results/reference folder
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test10.csv -ansi-log false -dump-channels --save_reference
+
+## Test: (11) Broken path correctly fails pipeline ✅
+## Expect: Expect fail
+nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test11.csv -ansi-log false -dump-channels --save_reference
+```
 
 ### AdapterRemoval
 
@@ -245,7 +312,7 @@ nextflow run ../main.nf -profile docker,test --input mammoth_design_fastq_multil
 
 All possible parameters
 
-```
+```bash
     // BAM Filtering
     run_bamfiltering                      = false
     bamfiltering_minreadlength            = 0
@@ -437,30 +504,6 @@ nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup_merged -du
 nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_dedup_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
 
-### CALCULATE DAMAGE
-
-#### With DamageProfiler
-
-```bash
-## DamageProfiler with default parameters
-## Expect:damageprofiler directory with txt, pdf, svg for each library (19 files total per library).
-nextflow run main.nf -profile test,conda --outdir ./results -resume
-```
-
-### ESTIMATE CONTAMINATION
-
-#### With ANGSD
-
-```bash
-## ANGSD contamination estimation with default parameters
-## Expect: contamination_estimation/angsd directory with txt for each library and 'nuclear_contamination.txt' summary table.
-nextflow run main.nf -profile test,humanbam --outdir ./results  --run_contamination_angsd -resume
-
-## ANGSD contamination estimation with quality filters reduced
-## Expect: contamination_estimation/angsd directory with txt for each library and 'nuclear_contamination.txt' summary table.
-nextflow run main.nf -profile test,humanbam --outdir ./results --run_contamination_angsd --angsd_minq 0 --angsd_mapq 0 -resume
-```
-
 ## Mapping statistics
 
 ### ENDOSPY
@@ -498,5 +541,104 @@ nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_filte
 ##Checked: there is 3 jsons with Percent on target (%), Percent on target postdedup (%), Clonality and Percent Duplicates (%)
 
 nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_nofiltering_dedup -w results_endorspy_map_nofiltering_dedup/work --run_bamfiltering false
+```
 
+
+### CALCULATE DAMAGE
+
+#### With DamageProfiler
+
+```bash
+## DamageProfiler with default parameters
+## Expect:damageprofiler directory with txt, pdf, svg for each library (19 files total per library).
+nextflow run main.nf -profile test,conda --outdir ./results -resume
+```
+
+### ESTIMATE CONTAMINATION
+
+#### With ANGSD
+
+```bash
+## ANGSD contamination estimation with default parameters
+## Expect: contamination_estimation/angsd directory with txt for each library and 'nuclear_contamination.txt' summary table.
+nextflow run main.nf -profile test,humanbam --outdir ./results  --run_contamination_angsd -resume
+
+## ANGSD contamination estimation with quality filters reduced
+## Expect: contamination_estimation/angsd directory with txt for each library and 'nuclear_contamination.txt' summary table.
+nextflow run main.nf -profile test,humanbam --outdir ./results --run_contamination_angsd --angsd_minq 0 --angsd_mapq 0 -resume
+```
+
+### MANIPULATE DAMAGE
+
+## Rescaling
+
+```bash
+## Rescaling with default parameters
+## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG), and 2 results_* directories with 6 Stats_out_MCMC_* files each.
+nextflow run . -profile test,docker --run_mapdamage_rescaling -resume --outdir ./results
+
+## Rescaling with changed rescale lengths
+## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG), and 2 results_* directories with 6 Stats_out_MCMC_* files each.
+##   Commands checked to ensure parameter gets propagated (Yes, together with default --seq-length of 12.)
+nextflow run . -profile test,docker --run_mapdamage_rescaling --damage_manipulation_rescale_length_5p 3 --damage_manipulation_rescale_length_3p 3 -resume --outdir ./results
+```
+
+## PMD Filtering
+
+```bash
+## PMD filtering with default parameters
+## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total).
+nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results
+## number of reads in each file after filtering:
+# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  70
+# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      180
+# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      55
+
+
+## PMD filtering with changed parameters
+## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total). Commands checked to ensure parameter gets propagated.
+nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results --damage_manipulation_pmdtools_threshold 4
+## number of reads in each file after filtering:
+# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  64
+# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      137
+# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      30
+```
+
+## BAM trimming
+
+```bash
+## BAM trimming with default parameters (0bp trim)
+## Expect: damage_manipulation directory with a bam and bai per library. No trimming actually done. (6 files total. full UDG still goes through module but trimming is 0bp)
+nextflow run . -profile test,docker --run_trim_bam -resume --outdir ./results
+
+## BAM trimming with changed parameters
+## Expect: damage_manipulation directory with a bam and bai per library. Trimming is done. 0 bp for full UDG, 1-2bp for half, 5-7 for none. (6 files total)
+## Giving different on each side to make sure arguments are passed correctly.
+nextflow run . -profile test,docker \
+  -resume \
+  --outdir ./results \
+  --run_trim_bam \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
+```
+
+## All together
+
+```bash
+## All together with default parameters + non-0 trimming.
+## Expect: damage_manipulation directory with _pmdfiltered, and _pmdfiltered_trimmed bams and bai per library, plus pmd_filtered flagstat files. (5 * 3 = 15 files total).
+##   Also _rescaled bam/bai for libraries that are not full-UDG. (15 + 4 = 19 files total), and 2 results_* directories with 6 Stats_out_MCMC_* files each.
+## Number of reads in each file after trimming should match filtered flagstat.
+nextflow run . -profile test,docker \
+  -resume \
+  --outdir ./results \
+  --run_mapdamage_rescaling \
+  --run_pmd_filtering \
+  --run_trim_bam \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
 ```
