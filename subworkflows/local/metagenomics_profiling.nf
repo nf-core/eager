@@ -89,7 +89,7 @@ workflow METAGENOMICS_PROFILING {
         ch_versions                 = ch_versions.mix( MALT_RUN.out.versions.first() )
         ch_raw_classifications      = ch_raw_classifications.mix( ch_maltrun_for_megan )
         ch_multiqc_files            = ch_multiqc_files.mix( MALT_RUN.out.log )
-        ch_postprocessing_input = ch_postprocessing_input.mix( ch_maltrun_for_megan )
+        ch_postprocessing_input     = ch_postprocessing_input.mix( ch_maltrun_for_megan )
     }
 
     else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
