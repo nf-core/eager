@@ -54,6 +54,8 @@ def parse_kraken(infile, countlim):
         kmer_dict = {}
         csvreader = csv.reader(f, delimiter="\t")
         for line in csvreader:
+            if line[0].startswith("#") or line[0] == "%":
+                continue
             reads = int(line[1])
             if reads >= countlim:
                 taxid = line[6]
