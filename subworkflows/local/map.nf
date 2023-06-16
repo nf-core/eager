@@ -6,8 +6,8 @@ include { FASTQ_ALIGN_BWAALN                                                    
 include { BWA_MEM                                                                                                             } from '../../modules/nf-core/bwa/mem/main'
 include { BOWTIE2_ALIGN                                                                                                       } from '../../modules/nf-core/bowtie2/align/main'
 include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES                                                                              } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED                                                                              } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED_LANES                                                                        } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED                                                                       } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow MAP {
@@ -67,15 +67,15 @@ workflow MAP {
     SAMTOOLS_MERGE_LANES ( ch_input_for_lane_merge, [], [] )
     ch_versions.mix( SAMTOOLS_MERGE_LANES.out.versions )
 
-    SAMTOOLS_SORT_MERGED ( SAMTOOLS_MERGE_LANES.out.bam )
-    ch_mapped_bam = SAMTOOLS_SORT_MERGED.out.bam
-    ch_versions.mix( SAMTOOLS_SORT_MERGED.out.versions )
+    SAMTOOLS_SORT_MERGED_LANES ( SAMTOOLS_MERGE_LANES.out.bam )
+    ch_mapped_bam = SAMTOOLS_SORT_MERGED_LANES.out.bam
+    ch_versions.mix( SAMTOOLS_SORT_MERGED_LANES.out.versions )
 
-    SAMTOOLS_INDEX_MERGED( ch_mapped_bam )
-    ch_mapped_bai =  params.fasta_largeref ? SAMTOOLS_INDEX_MERGED.out.csi : SAMTOOLS_INDEX_MERGED.out.bai
-    ch_versions.mix( SAMTOOLS_INDEX_MERGED.out.versions )
+    SAMTOOLS_INDEX_MERGED_LANES( ch_mapped_bam )
+    ch_mapped_bai =  params.fasta_largeref ? SAMTOOLS_INDEX_MERGED_LANES.out.csi : SAMTOOLS_INDEX_MERGED_LANES.out.bai
+    ch_versions.mix( SAMTOOLS_INDEX_MERGED_LANES.out.versions )
 
-    ch_input_for_flagstat = SAMTOOLS_SORT_MERGED.out.bam.join( SAMTOOLS_INDEX_MERGED.out.bai, failOnMismatch: true )
+    ch_input_for_flagstat = SAMTOOLS_SORT_MERGED_LANES.out.bam.join( SAMTOOLS_INDEX_MERGED_LANES.out.bai, failOnMismatch: true )
 
     SAMTOOLS_FLAGSTAT_MAPPED ( ch_input_for_flagstat )
     ch_versions.mix( SAMTOOLS_FLAGSTAT_MAPPED.out.versions.first() )
