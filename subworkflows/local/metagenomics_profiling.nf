@@ -34,76 +34,57 @@ workflow METAGENOMICS_PROFILING {
 
     if ( params.metagenomics_profiling_tool == 'malt' ) {
 
+        // Reset entire input meta for MALT to just database name,
+        // as we don't run run on a per-sample basis due to huge databases
+        // so all samples are in one run and so sample-specific metadata
+        // unnecessary. Set as database name to prevent `null` job ID and prefix.
+
         if ( params.metagenomics_malt_group_size > 0 ) {
-            ch_input_for_malt =  reads
-                .map {
-                    meta, reads ->
-
-                        // Reset entire input meta for MALT to just database name,
-                        // as we don't run run on a per-sample basis due to huge datbaases
-                        // so all samples are in one run and so sample-specific metadata
-                        // unnecessary. Set as database name to prevent `null` job ID and prefix.
-
-                        def temp_meta = [ id: database ]
-
-                        // Combine reduced sample metadata with updated database parameters metadata,
-                        // make sure id is db_name for publishing purposes.
-
-                        [ temp_meta, reads, database ]
-
+            ch_input_for_malt_tmp =  reads
+                .map { meta, reads -> reads }
+                .collate( params.metagenomics_malt_group_size ) //collate into bins of defined lengths
+                .map{
+                    reads ->
+                    // add new meta with db-name as id
+                    [[id: file(params.metagenomics_profiling_database).getBaseName() ], reads]
                 }
-                .groupTuple(by: [0,2], size: params.metagenomics_malt_group_size, remainder: true)
-                .multiMap {
+                .combine(database) //combine with database
+                .multiMap{
+                    // and split apart again
                     meta, reads, database ->
-                        reads: [ meta, reads ]
+                        reads: [meta, reads]
                         database: database
                 }
+            ch_input_for_malt = ch_input_for_malt_tmp.reads
+            database = ch_input_for_malt_tmp.database
         }
 
         else {
             ch_input_for_malt =  reads
-                .map {
-                    meta, reads ->
-
-                        // Reset entire input meta for MALT to just database name,
-                        // as we don't run run on a per-sample basis due to huge datbaases
-                        // so all samples are in one run and so sample-specific metadata
-                        // unnecessary. Set as database name to prevent `null` job ID and prefix.
-
-                        def temp_meta = [ id: database ]
-
-                        // Combine reduced sample metadata with updated database parameters metadata,
-                        // make sure id is db_name for publishing purposes.
-
-                        [ temp_meta, reads, database ]
-
-                }
-                .groupTuple(by: [0,2])
-                .multiMap {
-                    meta, reads, database ->
-                        reads: [ meta, reads ]
-                        database: database
+                .map { meta, reads -> reads }
+                .collect()
+                .map{
+                    // make sure id is db_name for publishing purposes.
+                    reads ->
+                    [[id: file(params.metagenomics_profiling_database).getBaseName() ], reads]
                 }
         }
 
-        // MALT: We can groupTuple to have all samples in one channel for MALT as database
-        // since loading takes a long time, we only want to run it once per database
-        // unless otherwise specified (eg grouping samples)
-
-        MALT_RUN ( ch_input_for_malt.reads, ch_input_for_malt.database )
+        // Run MALT
+        MALT_RUN ( ch_input_for_malt, database )
 
         ch_maltrun_for_megan = MALT_RUN.out.rma6
-                                .transpose()
-                                .map{
-                                    meta, rma ->
-                                            // re-extract meta from file names, use filename without rma to
-                                            // ensure we keep paired-end information in downstream filenames
-                                            // when no pair-merging
-                                            def meta_new = meta.clone()
-                                            meta_new['db_name'] = meta.id
-                                            meta_new['id'] = rma.baseName
-                                        [ meta_new, rma ]
-                                }
+            .transpose()
+            .map {
+                meta, rma ->
+                    // re-extract meta from file names, use filename without rma to
+                    // ensure we keep paired-end information in downstream filenames
+                    // when no pair-merging
+                    def meta_new = meta.clone()
+                    meta_new['db_name'] = meta.id
+                    meta_new['id'] = rma.baseName
+                [ meta_new, rma ]
+            }
 
         ch_versions                 = ch_versions.mix( MALT_RUN.out.versions.first() )
         ch_raw_classifications      = ch_raw_classifications.mix( ch_maltrun_for_megan )
@@ -123,8 +104,8 @@ workflow METAGENOMICS_PROFILING {
         // run kraken uniq per sample, to preserve the meta-data
 
         reads = reads.combine(database)
-        krakenuniq_reads = reads.map{meta, reads, database -> [meta, reads]}
-        krakenuniq_db = reads.map{meta, reads, database -> [database]}
+        krakenuniq_reads = reads.map{ meta, reads, database -> [meta, reads] }
+        krakenuniq_db = reads.map{ meta, reads, database -> [database] }
 
         KRAKENUNIQ_PRELOADEDKRAKENUNIQ (
             krakenuniq_reads,
