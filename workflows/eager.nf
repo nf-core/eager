@@ -198,7 +198,6 @@ workflow EAGER {
     //
     ch_bam_bai_input = INPUT_CHECK.out.bams
                             .join(SAMTOOLS_INDEX.out.bai)
-                            .dump(tag: "SamtoolsIndexInputBam")
 
     SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
     ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
@@ -327,7 +326,6 @@ workflow EAGER {
 
     ch_flagstat_for_endorspy_raw    = MAP.out.flagstat
                                             .mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat )
-                                            .dump(tag: "Endorspy_raw") //CHECK IF INPUT BAM: DANGEROUS if the provided bam file does not contain all reads --> wrong endogenous calculations!), else MAP.out.flagstats
 
     if ( params.run_bamfiltering & !params.skip_deduplication ) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw.join (FILTER_BAM.out.flagstat)
@@ -352,7 +350,7 @@ workflow EAGER {
     }
 
     ENDORSPY ( ch_for_endorspy )
-    ENDORSPY.out.json.dump(tag: "Endorspy_json")
+    ENDORSPY.out.json
 
     ch_versions       = ch_versions.mix( ENDORSPY.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( ENDORSPY.out.json.collect{it[1]}.ifEmpty([]) )
