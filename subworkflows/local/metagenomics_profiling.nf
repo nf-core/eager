@@ -95,8 +95,9 @@ workflow METAGENOMICS_PROFILING {
     else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
 
         METAPHLAN_METAPHLAN ( reads , database )
-        ch_versions        = ch_versions.mix( METAPHLAN_METAPHLAN.out.versions.first() )
-        ch_raw_profiles    = ch_raw_profiles.mix( METAPHLAN_METAPHLAN.out.profile )
+        ch_versions             = ch_versions.mix( METAPHLAN_METAPHLAN.out.versions.first() )
+        ch_raw_profiles         = ch_raw_profiles.mix( METAPHLAN_METAPHLAN.out.profile )
+        ch_postprocessing_input = ch_postprocessing_input.mix( METAPHLAN_METAPHLAN.out.profile )
 
     }
 
@@ -146,10 +147,10 @@ workflow METAGENOMICS_PROFILING {
     }
 
     emit:
-    versions                 = ch_versions          // channel: [ versions.yml ]
-    classifications          = ch_raw_classifications
-    profiles                 = ch_raw_profiles    // channel: [ val(meta), [ reads ] ] - should be text files or biom
-    postprocessing_input     = ch_postprocessing_input
-    mqc                      = ch_multiqc_files
+    versions             = ch_versions          // channel: [ versions.yml ]
+    classifications      = ch_raw_classifications
+    profiles             = ch_raw_profiles    // channel: [ val(meta), [ reads ] ] - should be text files or biom
+    postprocessing_input = ch_postprocessing_input // channel: [ val(meta), [ inputs_for_postprocessing_tools ] ] // see info at metagenomics_postprocessing
+    mqc                  = ch_multiqc_files
 
 }

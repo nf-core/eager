@@ -7,7 +7,8 @@ include { METAPHLAN_MERGEMETAPHLANTABLES } from '../modules/nf-core/metaphlan/me
 workflow METAGENOMICS_POSTPROCESSING {
 
     take:
-    ch_postprocessing_input // different between kraken and malt
+    ch_postprocessing_input // different between each profiling --> postprocessing tool,
+                            // defined in metagenomics profiling subworkflow
 
     main:
     ch_versions      = Channel.empty()
@@ -26,7 +27,7 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     }
 
-    elif ( params.metagenomics_postprocessing_tool == 'krakenmerge' ) {
+    elif ( params.metagenomics_postprocessing_tool == 'krakenmerge' || ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
 
         KRAKENPARSE ( ch_postprocessing_input )
 
@@ -46,7 +47,7 @@ workflow METAGENOMICS_POSTPROCESSING {
     }
 
     elif ( params.metagenomics_postprocessing_tool == 'mergemetaphlantables' ) {
-        METAPHLAN_MERGEMETAPHLANTABLES ( ch_postprocessing_input )
+        METAPHLAN_MERGEMETAPHLANTABLES ( ch_postprocessing_input , params.metagenomics_profiling_database )
 
         ch_versions      = ch_versions.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.versions.first() )
         ch_results       = ch_results.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.txt )
