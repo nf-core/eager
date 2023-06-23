@@ -387,6 +387,8 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
 
 - `qualimap/`: this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
 
+</details>
+
 [QualiMap](http://qualimap.bioinfo.cipf.es/)
 is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
 
@@ -404,8 +406,3 @@ warning: If your library has no reads mapping to the reference, this will result
 </details>
 
 [ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. Among other functions, ANGSD can estimate contamination for chromosomes for which one copy exists, i.e. X-chromosome for humans with karyotype XY. To do this, we first generate a binary count file for the X-chromosome (`angsd`) and then perform a Fisher's exact test for finding a p-value and jackknife to get an estimate of contamination (`contamination`). Contamination is estimated with Method of Moments (MOM) and Maximum Likelihood (ML) for both Method1 and Method2. Method1 compares the total number of minor and major reads at SNP sites with the number of minor and major reads at adjacent sites, assuming independent errors between reads and sites, while Method2 only samples one read at each site to remove the previous assumption. The results of all methods for each library, as well as respective standard errors are summarised in `nuclear_contamination.txt` and `nuclear_contamination_mqc.json`.
-
-- `contamination_estimation/angsd/`
-- `*.txt`: Text file containing the results of nuclear contamination estimation with ANGSD for each library.
-- `nuclear_contamination.txt`: Text file containing a summary table of contamination estimates for all libraries.
-- `nuclear_contamination_mqc.json`: JSON file containing a summary table of contamination estimates for all libraries.

@@ -979,7 +979,7 @@
                     "default": 15,
                     "description": "Specify number of bases of each read to consider for DamageProfiler calculations.",
                     "fa_icon": "fas fa-ruler-horizontal",
-                    "help_text": "Specifies what the maximum misincorporation frequency should be displayed as, in the DamageProfiler damage plot. This is set to 0.30 (i.e. 30%) by default as this matches the popular [mapDamage2.0 program](https://ginolhac.github.io/mapDamage/). However, the default behavior of the DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any possible damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behavior can be turned on by specifying the number to 0.\n\n> Modifies DamageProfile parameter: -yaxis_dp_max"
+                    "help_text": "Specifies the length of the read start and end to be considered for profile generation in DamageProfiler. By default set to 15 bases.\n\n> Modifies DamageProfile parameter: -t"
                 }
             }
         },
