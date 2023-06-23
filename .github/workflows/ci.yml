@@ -29,11 +29,11 @@ jobs:
         PARAMS:
           - "-profile test,docker --preprocessing_tool fastp --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/fastp/adapters.fasta'"
           - "-profile test,docker --preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco"
-          - "-profile test,docker --mapping_tool bwamem"
+          - "-profile test,docker --mapping_tool bwamem --run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam"
           - "-profile test,docker --mapping_tool bowtie2"
           - "-profile test,docker --skip_preprocessing"
           - "-profile test_humanbam,docker --run_mtnucratio --run_contamination_estimation_angsd"
-          - "-profile test_multiref,docker"
+          - "-profile test_multiref,docker" ## TODO add damage manipulation here instead once it goes multiref
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v3
