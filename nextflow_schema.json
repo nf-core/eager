@@ -848,16 +848,75 @@
             "description": "Options for variant calling",
             "default": "",
             "properties": {
+                "run_genotyping": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-power-off",
+                    "description": "Turn on genotyping of BAM files.",
+                    "help_text": "Turns on genotyping. `--genotyping_source` and `--genotyping_tool` must also be provided together with this option."
+                },
                 "genotyping_source": {
                     "type": "string",
-                    "default": "raw",
                     "description": "Specify which input BAM to use for genotyping.",
                     "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' (to use the reads used as input for damage manipulation); 'pmd' (for pmdtools output); 'trimmed' (for base-clipped BAMs. Base-clipped-PMD-filtered BAMs if both filtering and trimming are requested); 'rescaled' (for mapDamage2 rescaling output).\nWarning: Depending on the parameters you provided, 'raw' can refer to all mapped reads, filtered reads (if bam filtering has been performed), or the deduplicated reads (if deduplication was performed).",
                     "fa_icon": "fas fa-faucet",
                     "enum": ["raw", "pmd", "trimmed", "rescaled"]
+                },
+                "genotyping_tool": {
+                    "type": "string",
+                    "fa_icon": "fas fa-tools",
+                    "enum": ["ug", "hc", "freebayes", "pileupcaller", "angsd"],
+                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does de novo assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute.",
+                    "description": "Specify which genotyper to use between: GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller."
+                },
+                "genotyping_pileupcaller_min_base_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "The base mapping quality to be used for genotyping with pileupcaller.",
+                    "help_text": "The minimum mapping quality to be used for genotyping with pileupCaller. Affects the `samtools mpileup` output that is used by `pileupCaller`. \n\n> Affects `-Q` parameter of `samtools mpileup`.",
+                    "fa_icon": "fas fa-filter"
+                },
+                "genotyping_pileupcaller_min_map_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "fa_icon": "fas fa-filter",
+                    "description": "The minimum mapping quality to be used for genotyping with pileupcaller.",
+                    "help_text": "The minimum mapping quality to be used for genotyping with pileupCaller. Affects the `samtools mpileup` output that is used by `pileupCaller`. \n\n> Affects `-q` parameter of `samtools mpileup`."
+                },
+                "genotyping_pileupcaller_bedfile": {
+                    "type": "string",
+                    "default": "None",
+                    "fa_icon": "fas fa-bed",
+                    "help_text": "Specify a SNP panel in the form of a bed file of sites at which to generate a pileup for pileupCaller.",
+                    "format": "file-path",
+                    "description": "Specify the path to SNP panel in bed format for pileupCaller."
+                },
+                "genotyping_pileupcaller_snpfile": {
+                    "type": "string",
+                    "default": "None",
+                    "help_text": "Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/blob/master/CONVERTF/README) format, pileupCaller will call these sites.",
+                    "fa_icon": "fas fa-sliders-h",
+                    "format": "file-path",
+                    "description": "Specify the path to SNP panel in EIGENSTRAT format for pileupCaller."
+                },
+                "genotyping_pileupcaller_method": {
+                    "type": "string",
+                    "default": "randomHaploid",
+                    "fa_icon": "fas fa-toolbox",
+                    "description": "Specify the calling method to use.",
+                    "help_text": "Specify the calling method to use.\n\n> Modifies pileupCaller parameter: `--randomHaploid` `--randomDiploid` `--majorityCall`",
+                    "enum": ["randomHaploid", "randomDiploid", "majorityCall"]
+                },
+                "genotyping_pileupcaller_transitions_mode": {
+                    "type": "string",
+                    "default": "AllSites",
+                    "description": "Specify the calling mode for transitions.",
+                    "help_text": "Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. \n\n> Modifies pileupCaller parameter: --skipTransitions --transitionsMissing",
+                    "enum": ["AllSites", "TransitionsMissing", "SkipTransitions"],
+                    "fa_icon": "fas fa-toggle-on"
                 }
             },
-            "fa_icon": "fas fa-sliders-h"
+            "fa_icon": "fas fa-sliders-h",
+            "help_text": "There are options for different genotypers (or genotype likelihood calculators) to be used. We suggest you read the documentation of each tool to find the ones that suit your needs.\n\nDocumentation for each tool:\n\n- GATK UnifiedGenotyper\n- GATK HaplotypeCaller\n- FreeBayes\n- ANGSD\n- sequenceTools pileupCaller\n\nGenotyping is performed per sample (i.e. after all types of libraries are merged), except for pileupCaller which gathers all double-stranded and single-stranded (same-type merged) libraries respectively.\nSome genotypers require additional files to be specified in the reference sheet, or using command line parameters. When using a reference sheet, only references with the required filed specified in the respective columns will be used for genotyping. "
         },
         "mitochondrial_to_nuclear_ratio": {
             "title": "Mitochondrial to Nuclear Ratio",
@@ -1086,9 +1145,6 @@
             "$ref": "#/definitions/mapping"
         },
         {
-            "$ref": "#/definitions/adna_damage_analysis"
-        },
-        {
             "$ref": "#/definitions/bam_filtering"
         },
         {
@@ -1098,25 +1154,25 @@
             "$ref": "#/definitions/deduplication"
         },
         {
-            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
-        },
-        {
-            "$ref": "#/definitions/mapping_statistics"
-        },
-        {
             "$ref": "#/definitions/damage_manipulation"
         },
         {
             "$ref": "#/definitions/genotyping"
         },
         {
+            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
+        },
+        {
+            "$ref": "#/definitions/mapping_statistics"
+        },
+        {
             "$ref": "#/definitions/adna_damage_analysis"
         },
         {
-            "$ref": "#/definitions/contamination_estimation"
+            "$ref": "#/definitions/host_removal"
         },
         {
-            "$ref": "#/definitions/host_removal"
+            "$ref": "#/definitions/contamination_estimation"
         }
     ]
 }
