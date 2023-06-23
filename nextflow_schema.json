@@ -824,7 +824,7 @@
                     "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--meganSummary`"
                 },
                 "metagenomics_maltextract_percentidentity": {
-                    "type": "integer",
+                    "type": "number",
                     "default": 85,
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85`.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--minPI`"
