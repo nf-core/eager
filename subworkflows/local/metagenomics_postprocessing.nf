@@ -1,13 +1,8 @@
-// TODO nf-core: If in doubt look at other nf-core/subworkflows to see how we are doing things! :)
-//               https://github.com/nf-core/modules/tree/master/subworkflows
-//               You can also ask for help via your pull request or on the #subworkflows channel on the nf-core Slack workspace:
-//               https://nf-co.re/join
-// TODO nf-core: A subworkflow SHOULD import at least two modules
-
-include { MALTEXTRACT } from '../../modules/nf-core/maltextract/main'
-include { AMPS        } from '../../modules/nf-core/amps/main'
-include { KRAKENPARSE } from '../../modules/local/krakenparse'
-include { KRAKENMERGE } from '../../modules/local/krakenmerge'
+include { MALTEXTRACT                    } from '../../modules/nf-core/maltextract/main'
+include { AMPS                           } from '../../modules/nf-core/amps/main'
+include { KRAKENPARSE                    } from '../../modules/local/krakenparse'
+include { KRAKENMERGE                    } from '../../modules/local/krakenmerge'
+include { METAPHLAN_MERGEMETAPHLANTABLES } from '../modules/nf-core/metaphlan/mergemetaphlantables/main'
 
 workflow METAGENOMICS_POSTPROCESSING {
 
@@ -19,7 +14,7 @@ workflow METAGENOMICS_POSTPROCESSING {
     ch_results       = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    if ( params.metagenomics_postprocessing_tool == 'maltextract') {
+    if ( params.metagenomics_postprocessing_tool == 'maltextract' ) {
 
         MALTEXTRACT ( ch_postprocessing_input, params.metagenomics_maltextract_taxon_list, params.metagenomics_maltextract_ncbi_dir )
 
@@ -31,7 +26,7 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     }
 
-    else {
+    elif ( params.metagenomics_postprocessing_tool == 'krakenmerge' ) {
 
         KRAKENPARSE ( ch_postprocessing_input )
 
@@ -48,6 +43,13 @@ workflow METAGENOMICS_POSTPROCESSING {
         ch_results       = ch_results.mix( KRAKENMERGE.out.read_count_table, KRAKENMERGE.out.kmer_duplication_table )
         ch_multiqc_files = ch_multiqc_files.mix( KRAKENMERGE.out.read_count_table, KRAKENMERGE.out.kmer_duplication_table )
 
+    }
+
+    elif ( params.metagenomics_postprocessing_tool == 'mergemetaphlantables' ) {
+        METAPHLAN_MERGEMETAPHLANTABLES ( ch_postprocessing_input )
+
+        ch_versions      = ch_versions.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.versions.first() )
+        ch_results       = ch_results.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.txt )
     }
 
     emit:
