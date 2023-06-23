@@ -2,7 +2,7 @@ include { MALTEXTRACT                    } from '../../modules/nf-core/maltextra
 include { AMPS                           } from '../../modules/nf-core/amps/main'
 include { KRAKENPARSE                    } from '../../modules/local/krakenparse'
 include { KRAKENMERGE                    } from '../../modules/local/krakenmerge'
-include { METAPHLAN_MERGEMETAPHLANTABLES } from '../modules/nf-core/metaphlan/mergemetaphlantables/main'
+include { METAPHLAN_MERGEMETAPHLANTABLES } from '../../modules/nf-core/metaphlan/mergemetaphlantables/main'
 
 workflow METAGENOMICS_POSTPROCESSING {
 
@@ -17,9 +17,16 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     if ( params.metagenomics_postprocessing_tool == 'maltextract' ) {
 
-        MALTEXTRACT ( ch_postprocessing_input, params.metagenomics_maltextract_taxon_list, params.metagenomics_maltextract_ncbi_dir )
+        //maltextract doesnt accepts a meta param in the first input channel, so remove it
+        ch_maltextract_input = ch_postprocessing_input.map{it[1]}
 
-        AMPS ( MALTEXTRACT.out.results, params.metagenomics_maltextract_taxon_list, params.metagenomics_maltextract_filter )
+        tax_list = Channel.fromPath(params.metagenomics_maltextract_taxon_list)
+        ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbi_dir)
+        maltex_filter = Channel.fromPath(params.metagenomics_maltextract_filter)
+
+        MALTEXTRACT ( ch_maltextract_input, tax_list, ncbi_dir)
+
+        AMPS ( MALTEXTRACT.out.results, tax_list, maltex_filter )
 
         ch_versions      = ch_versions.mix( MALTEXTRACT.out.versions.first(), AMPS.out.versions.first() )
         ch_results       = ch_results.mix( AMPS.out.candidate_pdfs, AMPS.out.tsv, AMPS.out.summary_pdf )
@@ -27,7 +34,7 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     }
 
-    elif ( params.metagenomics_postprocessing_tool == 'krakenmerge' || ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
+    else if ( params.metagenomics_postprocessing_tool == 'krakenmerge' || ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
 
         KRAKENPARSE ( ch_postprocessing_input )
 
@@ -46,7 +53,7 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     }
 
-    elif ( params.metagenomics_postprocessing_tool == 'mergemetaphlantables' ) {
+    else if ( params.metagenomics_postprocessing_tool == 'mergemetaphlantables' ) {
         METAPHLAN_MERGEMETAPHLANTABLES ( ch_postprocessing_input , params.metagenomics_profiling_database )
 
         ch_versions      = ch_versions.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.versions.first() )
