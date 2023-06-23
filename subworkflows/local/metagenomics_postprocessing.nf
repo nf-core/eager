@@ -22,7 +22,6 @@ workflow METAGENOMICS_POSTPROCESSING {
         AMPS ( MALTEXTRACT.out.results, params.taxon_list, params.metagenomics_maltextract_filter )
 
         ch_versions      = ch_versions.mix( MALTEXTRACT.out.versions.first(), AMPS.out.versions.first() )
-        ch_results       = ch_results.mix( AMPS.out.results.summary_pdf, AMPS.out.tsv, AMPS.out.summary_pdf )
         ch_multiqc_files = ch_multiqc_files.mix( AMPS.out.results.json )
 
     }
@@ -41,7 +40,6 @@ workflow METAGENOMICS_POSTPROCESSING {
         KRAKENMERGE ( ch_list_of_kraken_parse_reads.collect() , ch_list_of_kraken_parse_kmer.collect() )
 
         ch_versions      = ch_versions.mix( KRAKENPARSE.out.versions.first(), KRAKENMERGE.out.versions.first() )
-        ch_results       = ch_results.mix( KRAKENMERGE.out.read_count_table, KRAKENMERGE.out.kmer_duplication_table )
         ch_multiqc_files = ch_multiqc_files.mix( KRAKENMERGE.out.read_count_table, KRAKENMERGE.out.kmer_duplication_table )
 
     }
@@ -50,12 +48,12 @@ workflow METAGENOMICS_POSTPROCESSING {
         METAPHLAN_MERGEMETAPHLANTABLES ( ch_postprocessing_input , params.metagenomics_profiling_database )
 
         ch_versions      = ch_versions.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.versions.first() )
-        ch_results       = ch_results.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.txt )
+        ch_multiqc_files = ch_multiqc_files.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.txt )
+
     }
 
     emit:
     versions = ch_versions
-    results  = ch_results
     mqc      = ch_multiqc_files
 
 }
