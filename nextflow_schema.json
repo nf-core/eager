@@ -790,35 +790,35 @@
                     "fa_icon": "fas fa-percent"
                 },
                 "metagenomics_maltextract_destackingoff": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Turn off destacking.",
                     "help_text": "Turn off destacking. If left on, a read that overlaps with another read will be\\nremoved (leaving a depth coverage of 1).\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--destackingOff`",
                     "fa_icon": "fab fa-stack-overflow"
                 },
                 "metagenomics_maltextract_downsamplingoff": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Turn off downsampling.",
                     "help_text": "Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--downSampOff`",
                     "fa_icon": "fas fa-angle-double-down"
                 },
                 "metagenomics_maltextract_duplicateremovaloff": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Turn off duplicate removal.",
                     "help_text": "\\nTurn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--dupRemOff`",
                     "fa_icon": "fas fa-copy"
                 },
                 "metagenomics_maltextract_matches": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Turn on exporting alignments of hits in BLAST format.",
                     "help_text": "\\nExport alignments of hits for each node in BLAST format. By default turned off.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--matches`",
                     "fa_icon": "fas fa-equals"
                 },
                 "metagenomics_maltextract_megansummary": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Turn on export of MEGAN summary files.",
                     "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--meganSummary`"
@@ -830,7 +830,7 @@
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85`.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--minPI`"
                 },
                 "metagenomics_maltextract_topalignment": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Turn on using top alignments per read after filtering.",
                     "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--useTopAlignment`",
