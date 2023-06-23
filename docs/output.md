@@ -199,7 +199,6 @@ The resulting FASTQ files can be used for data sharing purposes where the host D
 
 Alternatively you could use the resulting files for manual metagenomic screen outside of nf-core/eager (e.g. when your preferred taxonomic classifier isn't supported by nf-core/eager).
 
-
 ### Mapping statistics
 
 #### EndorSpy
@@ -222,20 +221,19 @@ We provide up to 3 different estimates of percent on target:
 
 Percent on target (%): percent of mapping reads mapping to a specific reference. This is calculated as follows: number of reads mapping to the specific reference (Mapped_Raw) in comparison to the total number of reads (Total_Reads)
 
-$$ Percent_on_target = { Mapped_Raw \over Total_Reads * 100 } $$
+$$ Percent_on_target = { Mapped_Raw \over Total_Reads \* 100 } $$
 
 Where $ Mapped_Raw $ is the number of reads mapping to the reference during the mapping step, and $ Total_Reads $ are the total number of reads that went into the mapping step.
 
 Percent on target modified (%): percent of mapping reads after filtering the raw bam based on quality, read length or any other filtering performed that mapped to a specific reference:
 
-$$ Percent_on_target_modified = { Mapped_Post_Filtering \over Total_Reads * 100 } $$
+$$ Percent_on_target_modified = { Mapped_Post_Filtering \over Total_Reads \* 100 } $$
 
 Where $ Mapped_Post_Filtering $ are the number of reads mapping to the reference after applying the filters.
 
 Percent on target postdedup (%): percent of deduplicated reads (either raw mapped reads or filtered mapped reads) that mapped to a specific reference:
 
-$$ Percent_on_target_postdedup = { Mapped_Post_Dedup \over Total_Reads * 100 } $$
-
+$$ Percent_on_target_postdedup = { Mapped_Post_Dedup \over Total_Reads \* 100 } $$
 
 Additionally, this script provides two different ways of estimating library complexity:
 
@@ -245,8 +243,7 @@ $$ Clonality = { Total_Reads_PreDedup \over mappedDedup } $$
 
 Percent Duplicates (%): percent of mapping reads that have at least 1 duplicate. It is calculated as follows:
 
-$$ Percent_Duplicates = {(Total_Reads_PreDedup - Mapped_Reads_Dedup) \over Total_Reads_PreDedup * 100} $$
-
+$$ Percent_Duplicates = {(Total_Reads_PreDedup - Mapped_Reads_Dedup) \over Total_Reads_PreDedup \* 100} $$
 
 The combination of statistics calculated would vary depending on the steps taken:
 Mapping/bam input + filtering + deduplication (all):

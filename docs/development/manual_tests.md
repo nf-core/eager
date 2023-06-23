@@ -543,7 +543,6 @@ nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_filte
 nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_nofiltering_dedup -w results_endorspy_map_nofiltering_dedup/work --run_bamfiltering false
 ```
 
-
 ### CALCULATE DAMAGE
 
 #### With DamageProfiler
