@@ -24,6 +24,14 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 */
 
 if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+
+// TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
+if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
+
+// Metagenomics failing parameter combinations
+// TODO add any other metagenomics screening parameters checks for eg complexity filtering, post-processing
+if ( params.run_metagenomics && ! params.metagenomics_profiling_database ) { exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database") }
+
 if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
     // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
     if (params.metagenomics_prinseq_dustscore == 0.5) {
@@ -36,12 +44,6 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
             exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
     }
 }
-
-// TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
-if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
-
-// TODO add any other metagenomics screening parameters checks for eg complexity filtering, post-processing
-if ( params.run_metagenomics && ! params.metagenomics_profiling_database ) { exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database") }
 
 if ( params.metagenomics_postprocessing_tool == 'maltextract' && params.metagenomics_profiling_tool != 'malt' ) { exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'maltextract' can only be run with --metagenomics_profiling_tool 'malt'") }
 

@@ -72,7 +72,7 @@ Additional functionality contained by the pipeline currently includes:
 #### Metagenomic Screening
 
 - Low-sequenced complexity filtering (`BBduk` or `PRINSEQ++`)
-- Taxonomic binner with alignment (`MALT`)
+- Taxonomic binner with alignment (`MALT` or `MetaPhlAn 4`)
 - Taxonomic binner without alignment (`Kraken2`)
 - aDNA characteristic screening of taxonomically binned data from MALT (`MaltExtract`)
 
