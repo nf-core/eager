@@ -1,8 +1,4 @@
-// TODO nf-core: If in doubt look at other nf-core/subworkflows to see how we are doing things! :)
-//               https://github.com/nf-core/modules/tree/master/subworkflows
-//               You can also ask for help via your pull request or on the #subworkflows channel on the nf-core Slack workspace:
-//               https://nf-co.re/join
-// TODO nf-core: A subworkflow SHOULD import at least two modules
+// TODO: publish the files in ch_results directly?
 
 include { MALTEXTRACT } from '../../modules/nf-core/maltextract/main'
 include { AMPS        } from '../../modules/nf-core/amps/main'
@@ -23,11 +19,11 @@ workflow METAGENOMICS_POSTPROCESSING {
 
         MALTEXTRACT ( ch_postprocessing_input, params.metagenomics_maltextract_taxon_list, params.metagenomics_maltextract_ncbi_dir )
 
-        AMPS ( MALTEXTRACT.out.results, params.taxon_list, params.metagenomics_maltextract_filter )
+        AMPS ( MALTEXTRACT.out.results, params.metagenomics_maltextract_taxon_list, params.metagenomics_maltextract_filter )
 
         ch_versions      = ch_versions.mix( MALTEXTRACT.out.versions.first(), AMPS.out.versions.first() )
-        ch_results       = ch_results.mix( AMPS.out.results.summary_pdf, AMPS.out.tsv, AMPS.out.summary_pdf )
-        ch_multiqc_files = ch_multiqc_files.mix( AMPS.out.results.json )
+        ch_results       = ch_results.mix( AMPS.out.candidate_pdfs, AMPS.out.tsv, AMPS.out.summary_pdf )
+        ch_multiqc_files = ch_multiqc_files.mix( AMPS.out.json )
 
     }
 
