@@ -105,6 +105,11 @@
                         "git_sha": "0f8a77ff00e65eaeebc509b8156eaa983192474b",
                         "installed_by": ["modules"]
                     },
+                    "metaphlan/mergemetaphlantables": {
+                        "branch": "master",
+                        "git_sha": "9aa59197c0fb35c29e315bcd10c0fc9e1afc70a8",
+                        "installed_by": ["modules"]
+                    },
                     "metaphlan/metaphlan": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
