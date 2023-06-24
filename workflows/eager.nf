@@ -34,6 +34,14 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
             exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
     }
 }
+if( params.run_bedtools_coverage ){
+    if( !params.anno_file ) {
+        exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
+    } else {
+        ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
+            .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --anno_file ${params.anno_file}."}
+    }
+}
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
@@ -83,6 +91,8 @@ include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_
 //
 // MODULE: Installed directly from nf-core/modules
 //
+include { BEDTOOLS_COVERAGE ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_MEAN } from '../modules/nf-core/bedtools/coverage/main' 
+include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_GENOME } from '../modules/nf-core/samtools/view/main' 
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
@@ -333,7 +343,27 @@ workflow EAGER {
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
 
-     //
+
+    //
+    // MODULE: Bedtools coverage 
+    //
+    
+    if ( params.run_bedtools_coverage ) {
+        ch_dedupped_bams.combine(ch_anno_for_bedtools).map{
+            meta, bam, bai, anno ->
+            [meta, anno, bam]
+        }.set { ch_dedupped_for_bedtools }
+
+        // Running samtools view to get header
+        SAMTOOLS_VIEW_GENOME(ch_dedupped_bams, [], [])
+        BEDTOOLS_COVERAGE(ch_dedupped_for_bedtools, SAMTOOLS_VIEW_GENOME.out.sam.map{[it[1]]})
+        BEDTOOLS_COVERAGE_MEAN(ch_dedupped_for_bedtools, SAMTOOLS_VIEW_GENOME.out.sam.map{[it[1]]})
+        ch_versions = ch_versions.mix( SAMTOOLS_VIEW_GENOME.out.versions )
+        ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE.out.versions )
+    }
+    
+
+    //
     // SUBWORKFLOW: Calculate Damage
     //
 
