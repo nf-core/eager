@@ -549,6 +549,7 @@ nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_nofil
 nextflow run ../main.nf -profile docker,test_multiref --outdir results_endorspy_all_multiref -w results_endorspy_all_multiref/work --run_bamfiltering
 
 ```
+
 ### CALCULATE DAMAGE
 
 #### With DamageProfiler
