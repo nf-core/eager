@@ -1139,6 +1139,9 @@
         },
         {
             "$ref": "#/definitions/host_removal"
+        },
+        {
+            "$ref": "#/definitions/feature_annotation_statistics"
         }
     ]
 }
