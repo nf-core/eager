@@ -385,7 +385,10 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `qualimap/`: this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
+- `qualimap/`
+
+  - `<sample_id>/`
+    - `*.html`:  in-depth report including percent coverage, depth coverage, GC content, etc. of mapped reads
 
 </details>
 
