@@ -359,27 +359,16 @@ workflow EAGER {
 
     }
 
-    //
-    // MODULE: QUALIMAP_BAMQC
-    //
-
-    if ( !params.skip_qualimap ) {
-
-        qualimap_input = ch_dedupped_bams
-        .map {
-            meta, bam, bai ->
-            [ meta, bam ]
-        }
 // MODULE: QUALIMAP_BAMQC
 //
 if ( !params.skip_qualimap & params.run_contamination_estimation_angsd ) {
         snpcapture_bed_input = ch_snpcapture_bed
             .map {
-                // Create additional map containing only meta.id for combining samples and hapmap
-                meta, hapmap ->
+                // Create additional map containing only meta.id for combining samples and snpcapture
+                meta, snpcapture ->
                     meta2 = [:]
                     meta2.reference = meta.id
-                [ meta2, meta, hapmap ]
+                [ meta2, meta, snpcapture ]
             }
         qualimap_input = ch_dedupped_bams
             .map {
