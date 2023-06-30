@@ -91,7 +91,7 @@ include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/m
 include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
 include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
-include { QUALIMAP_BAMQC              } from '../modules/nf-core/qualimap/bamqc/main' 
+include { QUALIMAP_BAMQC              } from '../modules/nf-core/qualimap/bamqc/main'
 include { HOST_REMOVAL                } from '../modules/local/host_removal'
 
 /*
@@ -135,7 +135,7 @@ workflow EAGER {
     } else {
     ch_snpcapture_bed = Channel.empty()
     }
-    
+
     // Contamination estimation
     hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
 
@@ -406,13 +406,7 @@ if ( !params.skip_qualimap & params.run_contamination_estimation_angsd ) {
         ch_multiqc_files = ch_multiqc_files.mix(QUALIMAP_BAMQC.out.results.collect{it[1]}.ifEmpty([]))
 
     }
- 
-        QUALIMAP_BAMQC( qualimap_input, ch_snpcapture_bed )
-        ch_versions = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix(QUALIMAP_BAMQC.out.results.collect{it[1]}.ifEmpty([]))
 
-    }
-    
     // SUBWORKFLOW: Contamination estimation
     //
 
