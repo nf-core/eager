@@ -1072,14 +1072,13 @@
                 "skip_qualimap": {
                     "type": "boolean",
                     "fa_icon": "fas fa-forward",
-                    "description": "Specify to skip QualiMap."
+                    "description": "Specify to skip QualiMap.",
                     "help_text": "Turns off QualiMap and thus does not compute coverage and other mapping metrics."
                 },
                 "snpcapture_bed": {
                     "type": "string",
                     "default": null,
-                    "description": "If library result of SNP capture, path to BED file containing SNPS positions on reference genome. SNP statistics are qualimap results directory only not MultiQC."
-                    "description:" "If library is the result of SNP capture, adds a path to a BED file containing SNP positions on reference genome."
+                    "description": "If library is the result of SNP capture, adds a path to a BED file containing SNP positions on reference genome.",
                     "help_text": "Can be used to set a path to a BED file (3/6 column format) of SNP positions of a reference genome, to calculate SNP captured libraries on-target efficiency. This should be used for array or in-solution SNP capture protocols such as 390K, 1240K, etc. If supplied, some on-target metrics are automatically generated for you by qualimap in the 'Globals inside' section of the 'genome_results.txt' file in the qualimap results directory. These statistics are currently NOT displayed in MultiQC!",
                     "fa_icon": "fas fa-magnet"
                 }

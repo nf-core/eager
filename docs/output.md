@@ -411,7 +411,7 @@ warning: If your library has no reads mapping to the reference, this will result
 
 - `contamination_estimation/angsd/`
 
-    - `*.txt`: Text file containing the results of nuclear contamination estimation with ANGSD for each library.
+  - `*.txt`: Text file containing the results of nuclear contamination estimation with ANGSD for each library.
   - `nuclear_contamination.txt`: Text file containing a summary table of contamination estimates for all libraries.
   - `nuclear_contamination_mqc.json`: JSON file containing a summary table of contamination estimates for all libraries.
 
