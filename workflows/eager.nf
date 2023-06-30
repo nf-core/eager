@@ -370,7 +370,43 @@ workflow EAGER {
             meta, bam, bai ->
             [ meta, bam ]
         }
+// MODULE: QUALIMAP_BAMQC
+//
+if ( !params.skip_qualimap & params.run_contamination_estimation_angsd ) {
+        snpcapture_bed_input = ch_snpcapture_bed
+            .map {
+                // Create additional map containing only meta.id for combining samples and hapmap
+                meta, hapmap ->
+                    meta2 = [:]
+                    meta2.reference = meta.id
+                [ meta2, meta, hapmap ]
+            }
+        qualimap_input = ch_dedupped_bams
+            .map {
+             // Create additional map containing only meta.reference for combining samples and snpcapture
+                meta, bam, bai ->
+                    meta2 = [:]
+                    meta2.reference = meta.reference
+                [ meta2, meta, bam, bai ]
+            }
+            .combine(
+                by: 0,
+                snpcapture_bed_input
+            )
+            .multiMap {
+                ignore_me, meta, bam, bai, meta2, snpcapture ->
+                bam:    [ meta, bam ]
+                bai:    [ meta, bai ]
+                snpcapture: [ meta, snpcapture ]
+            }
 
+
+        QUALIMAP_BAMQC( qualimap_input.bam, qualimap_input.snpcapture )
+        ch_versions = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix(QUALIMAP_BAMQC.out.results.collect{it[1]}.ifEmpty([]))
+
+    }
+ 
         QUALIMAP_BAMQC( qualimap_input, ch_snpcapture_bed )
         ch_versions = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix(QUALIMAP_BAMQC.out.results.collect{it[1]}.ifEmpty([]))
