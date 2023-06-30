@@ -75,6 +75,7 @@ include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
 include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
+include { GENOTYPE                      } from '../subworkflows/local/genotype'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -383,6 +384,17 @@ workflow EAGER {
         ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
     } else {
         ch_bams_for_genotyping = ch_dedupped_bams
+    }
+
+    //
+    // SUBWORKFLOW: Genotyping
+    //
+
+    if ( params.run_genotyping ) {
+        GENOTYPE( ch_genotyping_input, ch_fasta )
+
+        ch_versions      = ch_versions.mix( GENOTYPE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( GENOTYPE.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //
