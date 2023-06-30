@@ -1,5 +1,4 @@
 process PRINT_CONTAMINATION_ANGSD {
-    tag "nuclear_contamination.txt"
     label 'process_single'
 
     conda "conda-forge::python=3.8.3"

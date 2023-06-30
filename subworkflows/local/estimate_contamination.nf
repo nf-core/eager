@@ -47,10 +47,7 @@ workflow ESTIMATE_CONTAMINATION {
 
         ch_versions     = ch_versions.mix( BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.versions )
         ch_angsd_contam = BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.txt
-                            .map{
-                                meta, txt ->
-                                output: txt
-                            }
+                            .map{ it[1] } //remove meta
 
         ch_angsd_output = ch_angsd_contam.collect()
 
