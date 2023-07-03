@@ -24,7 +24,7 @@ workflow DEDUPLICATE {
     ch_refs = fasta.join(fasta_fai)
     .map {
         // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
-        WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false)
+        WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
     }
 
     // Create genomic regions file for splitting the bam before deduplication
@@ -35,14 +35,14 @@ workflow DEDUPLICATE {
     ch_intervals_for_join = BUILD_INTERVALS.out.bed
     .map {
         // Replace meta with new meta that contains the meta.id value in the meta.reference attribute only
-        WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , true)
+        WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , true )
     }
 
     // Ensure input bam matches the regions file
     ch_bam_for_split = ch_bam_bai
         .map {
-            // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
-            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false)
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
         }
         .combine(
             by: 0,
@@ -61,8 +61,8 @@ workflow DEDUPLICATE {
 
         ch_markduplicates_input = BAM_SPLIT_BY_REGION.out.bam_bai
             .map {
-                // Prepend a new meta that only includes the reference attribute of the original meta
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false)
+                // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by:0,
@@ -106,8 +106,8 @@ workflow DEDUPLICATE {
         }
         .groupTuple()
         .map {
-            // Prepend a new meta that only includes the reference attribute of the original meta
-            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false)
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
         }
         .combine(
             by:0,
