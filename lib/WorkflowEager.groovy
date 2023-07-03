@@ -85,4 +85,32 @@ class WorkflowEager {
 
     }
 
+    def public static ArrayList addNewMetaFromAttributes( ArrayList row, Object source_attributes, Object target_attributes) {
+        def meta = row[0]
+        def meta2 = [:]
+
+        // Read in target and source attributes and create a mapping between them
+        // Option A: both attributes are Strings
+        if ((source_attributes instanceof String) && (target_attributes instanceof String)) {
+                meta2[target_attributes] = meta[source_attributes]
+
+        } else if ((source_attributes instanceof List) && (target_attributes instanceof List)) {
+            if (source_attributes.size() == target_attributes.size()) {
+                for (int i = 0; i < source_attributes.size(); i++) {
+                    // Option B: Both are lists of same size
+                    meta2[target_attributes[i]] = meta[source_attributes[i]]
+                }
+            } else {
+                // Option C: Both lists, but uneven. Error.
+                throw new IllegalArgumentException("Error: The target_attributes and source_attributes lists do not have the same size.")
+            }
+        } else {
+            // Option D: Not both the same type or acceptable types. Error.
+            throw new IllegalArgumentException("Error: target_attributes and source_attributes must be of same type (both Strings or both Lists).")
+
+        }
+
+        def new_row = [ meta2 ] + row
+        new_row
+    }
 }
