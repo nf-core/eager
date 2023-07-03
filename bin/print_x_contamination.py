@@ -14,10 +14,10 @@ data = OrderedDict()
 def make_float(x):
     # print (x)
     output = [None for i in range(len(x))]
-    ## If value for an estimate/error is -nan, replace with "NA". JSON does not accept NaN as a valid field.
+    ## If value for an estimate/error is -nan, replace with "None". JSON does not accept NaN as a valid field.
     for i in range(len(x)):
         if x[i] == "-nan" or x[i] == "nan":
-            output[i] = "N/A"
+            output[i] = None
             continue
         try:
             output[i] = float(x[i])
@@ -45,11 +45,11 @@ print(
     file=output,
 )
 for fn in Input_files:
-    ## For each file, reset the values to "N/A" so they don't carry over from last file.
-    mom1, err_mom1 = "N/A", "N/A"
-    ml1, err_ml1 = "N/A", "N/A"
-    mom2, err_mom2 = "N/A", "N/A"
-    ml2, err_ml2 = "N/A", "N/A"
+    ## For each file, reset the values to "None" so they don't carry over from last file.
+    mom1, err_mom1 = None, None
+    ml1, err_ml1 = None, None
+    mom2, err_mom2 = None, None
+    ml2, err_ml2 = None, None
     nSNPs = "0"
     with open(fn, "r") as f:
         Estimates = {}
