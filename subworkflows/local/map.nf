@@ -2,10 +2,11 @@
 // Prepare reference indexing for downstream
 //
 
+include { SEQKIT_SPLIT2                                                                                                       } from '../../modules/nf-core/seqkit/split2/main'
 include { FASTQ_ALIGN_BWAALN                                                                                                  } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
 include { BWA_MEM                                                                                                             } from '../../modules/nf-core/bwa/mem/main'
 include { BOWTIE2_ALIGN                                                                                                       } from '../../modules/nf-core/bowtie2/align/main'
-include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES                                                                              } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES ; SAMTOOLS_MERGE as SAMTOOLS_MERGE_SHARDS                                    } from '../../modules/nf-core/samtools/merge/main'
 include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED_LANES                                                                        } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED                                                                       } from '../../modules/nf-core/samtools/flagstat/main'
@@ -28,6 +29,13 @@ workflow MAP {
                                     reads: [ new_meta, reads ]
                                     index: [ meta2, index]
                             }
+    ch_input_for_mapping.reads.view()
+    if ( params.shard_fastq ) {
+    // Takes meta and reads as input
+    // Takes args   = task.ext.args which can be used to specify chunk_size
+        SEQKIT_SPLIT2( ch_input_for_mapping.reads )
+        ch_versions        = ch_versions.mix ( SEQKIT_SPLIT2.out.versions.first() )
+    }
 
     if ( params.mapping_tool == 'bwaaln' ) {
         FASTQ_ALIGN_BWAALN ( ch_input_for_mapping.reads, ch_input_for_mapping.index )
