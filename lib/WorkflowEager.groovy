@@ -85,7 +85,7 @@ class WorkflowEager {
 
     }
 
-    def public static ArrayList addNewMetaFromAttributes( ArrayList row, Object source_attributes, Object target_attributes) {
+    def public static ArrayList addNewMetaFromAttributes( ArrayList row, Object source_attributes, Object target_attributes, boolean remove = false) {
         def meta = row[0]
         def meta2 = [:]
 
@@ -111,6 +111,12 @@ class WorkflowEager {
         }
 
         def new_row = [ meta2 ] + row
-        new_row
+
+        // If replace is true, then remove the old meta
+        if (remove && new_row.size() > 1) {
+            new_row.remove(1)
+        }
+
+        return new_row
     }
 }
