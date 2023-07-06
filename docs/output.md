@@ -389,7 +389,7 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
 
   - `<sample_id>/`
     - `*.html`: in-depth report including percent coverage, depth coverage, GC content, etc. of mapped reads
-    -  `genome_results.txt`
+    - `genome_results.txt`
   - `css/`: HTML CSS styling used for the report
   - `images_qualimapReport/`: PNG version of images from the HTML report.
   - `raw_data_qualimapReport/`: The raw data used to render the HTML report as TXT files.
