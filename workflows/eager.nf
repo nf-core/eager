@@ -367,7 +367,7 @@ if ( !params.skip_qualimap & params.run_contamination_estimation_angsd ) {
             .combine( ch_snpcapture_bed )
             .map {
                 meta, fasta, fai, dict, index, circular_target, mitochondrion, snp_capture ->
-                [ meta, hapmap ]
+                [ meta, snp_capture ]
             }
 
         snpcapture_bed_input = ch_snpcapture_bed_map
