@@ -386,6 +386,7 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
 <summary>Output files</summary>
 
 - `qualimap/`
+
   - `<sample_id>/`
     - `*.html`: in-depth report including percent coverage, depth coverage, GC content, etc. of mapped reads
     -  `genome_results.txt`
@@ -403,7 +404,8 @@ is a tool which provides statistics on the quality of the mapping of your reads 
 **Note that many of the statistics from this module are displayed in the General Stats table, as they represent single values that are not plottable.**
 
 You will receive output for each sample. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
-warning: If your library has no reads mapping to the reference, this will result in an empty BAM file. Qualimap will therefore not produce any output even if a BAM exists!
+
+> ⚠️ Warning: If your library has no reads mapping to the reference, this will result in an empty BAM file. Qualimap will therefore not produce any output even if a BAM exists!
 
 ### Contamination estimation for Nuclear DNA
 
