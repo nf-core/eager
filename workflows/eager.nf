@@ -362,7 +362,16 @@ workflow EAGER {
 // MODULE: QUALIMAP_BAMQC
 //
 if ( !params.skip_qualimap & params.run_contamination_estimation_angsd ) {
-        snpcapture_bed_input = ch_snpcapture_bed
+        //Adding map to snp_capture
+        ch_snpcapture_bed_map = Channel.of( [ ch_snpcapture_bed ] )
+        hapmap_input = REFERENCE_INDEXING.out.reference
+            .combine( ch_snpcapture_bed_map )
+            .map {
+                meta, fasta, fai, dict, index, circular_target, mitochondrion, snp_capture ->
+                [ meta, hapmap ]
+            }
+
+        snpcapture_bed_input =
             .map {
                 // Create additional map containing only meta.id for combining samples and snpcapture
                 meta, snpcapture ->
