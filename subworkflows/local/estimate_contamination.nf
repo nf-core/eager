@@ -15,7 +15,6 @@ workflow ESTIMATE_CONTAMINATION {
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
-// fix unexpected input/syntax error
     if ( params.run_contamination_estimation_angsd ) {
         angsd_input_hapmap = hapmap_input
             .map {
@@ -48,6 +47,7 @@ workflow ESTIMATE_CONTAMINATION {
 
         ch_versions     = ch_versions.mix( BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.versions )
         ch_angsd_contam = BAM_DOCOUNTS_CONTAMINATION_ANGSD.out.txt
+                            .map{ it[1] } //remove meta
 
         ch_angsd_output = ch_angsd_contam.collect()
 
