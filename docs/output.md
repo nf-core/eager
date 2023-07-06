@@ -386,7 +386,6 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
 <summary>Output files</summary>
 
 - `qualimap/`
-
   - `<sample_id>/`
     - `*.html`: in-depth report including percent coverage, depth coverage, GC content, etc. of mapped reads
 
