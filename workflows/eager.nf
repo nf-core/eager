@@ -126,9 +126,6 @@ workflow EAGER {
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
 
-    // Contamination estimation
-    hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
-
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
@@ -137,11 +134,11 @@ workflow EAGER {
         file(params.input)
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-    
+
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
-    
+
     //
     // SUBWORKFLOW: Indexing of reference files
     //
@@ -181,7 +178,7 @@ workflow EAGER {
     //
     ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
             .map{
-                meta, fasta, fai, dict, index, circular_target, mitochondrion ->
+                meta, fasta, fai, dict, index, circular_target ->
                 [ meta, index ]
             }
 
@@ -233,7 +230,7 @@ workflow EAGER {
 
     ch_fasta_for_deduplication = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index, circular_target, mitochondrion ->
+            meta, fasta, fai, dict, index, circular_target ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -310,13 +307,31 @@ workflow EAGER {
     //
 
     if ( params.run_mtnucratio ) {
+        ch_mito_header = REFERENCE_INDEXING.out.mitochondrion_header
+            .map{
+                meta, mito_header ->
+                meta2 = [:]
+                meta2.reference = meta.id
+                [ meta2, meta, mito_header ]
+            }
         mtnucratio_input = ch_dedupped_bams
-        .map {
-            meta, bam, bai ->
-            [ meta, bam ]
-        }
+            .map {
+                meta, bam, bai ->
+                meta2 = [:]
+                meta2.reference = meta.reference
+                [ meta2, meta, bam ]
+            }
+            .combine(
+                by: 0,
+                ch_mito_header
+            )
+            .multiMap{
+                ignore_meta, meta, bam, meta2, mito_header ->
+                bam:         [ meta, bam ]
+                mito_header: [ meta2, mito_header ]
+            }
 
-        MTNUCRATIO( mtnucratio_input, params.mitochondrion_header )
+        MTNUCRATIO( mtnucratio_input.bam, mtnucratio_input.mito_header.map{ it[1] } )
         ch_multiqc_files = ch_multiqc_files.mix(MTNUCRATIO.out.mtnucratio.collect{it[1]}.ifEmpty([]))
         ch_versions      = ch_versions.mix( MTNUCRATIO.out.versions )
     }
@@ -341,7 +356,7 @@ workflow EAGER {
 
     ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index, circular_target, mitochondrion ->
+            meta, fasta, fai, dict, index, circular_target ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -359,22 +374,15 @@ workflow EAGER {
 
     if ( params.run_contamination_estimation_angsd ) {
         contamination_input = ch_dedupped_bams
-        ch_hapmap = Channel.of( [ hapmap_file ] )
-        hapmap_input = REFERENCE_INDEXING.out.reference
-            .combine( ch_hapmap )
-            .map {
-                meta, fasta, fai, dict, index, circular_target, mitochondrion, hapmap ->
-                [ meta, hapmap ]
-            }
 
-        ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
+        ESTIMATE_CONTAMINATION( contamination_input, REFERENCE_INDEXING.out.hapmap )
         ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //
     // SUBWORKFLOW: aDNA Damage Manipulation
-    //
+    // TODO: Add pmd_mask and snp_capture input
 
     if ( params.run_mapdamage_rescaling || params.run_pmd_filtering || params.run_trim_bam ) {
         MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta )

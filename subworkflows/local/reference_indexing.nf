@@ -17,20 +17,59 @@ workflow REFERENCE_INDEXING {
 
     // Warn user if they've given a reference sheet that already includes fai/dict/mapper index etc.
     if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && (fasta_fai || fasta_dict || fasta_mapperindexdir)) log.warn("A TSV or CSV has been supplied to `--fasta` as well as e.g. `--fasta_fai`. --fasta CSV/TSV takes priority and --fasta_* parameters will be ignored.")
+    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && (params.mitochondrion_header || params.contamination_estimation_angsd_hapmap || params.damage_manipulation_pmdtools_reference_mask )) log.warn("A TSV or CSV has been supplied to `--fasta` as well as individual reference-specific input files, e.g. `--contamination_estimation_angsd_hapmap`. Input files specified in the --fasta CSV/TSV take priority and other input parameters will be ignored.")
 
     if ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) {
         // If input (multi-)reference sheet supplied
         REFERENCE_INDEXING_MULTI ( fasta )
         ch_reference_for_mapping = REFERENCE_INDEXING_MULTI.out.reference
+        ch_mitochondrion_header  = REFERENCE_INDEXING_MULTI.out.mitochondrion_header
+        ch_hapmap                = REFERENCE_INDEXING_MULTI.out.hapmap
+        ch_pmd_mask              = REFERENCE_INDEXING_MULTI.out.pmd_mask
+        ch_snp_capture_bed       = REFERENCE_INDEXING_MULTI.out.snp_capture_bed
+        ch_snp_eigenstrat        = REFERENCE_INDEXING_MULTI.out.snp_eigenstrat
+        ch_sexdeterrmine_bed     = REFERENCE_INDEXING_MULTI.out.sexdeterrmine_bed
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_MULTI.out.versions )
     } else {
         // If input FASTA and/or indicies supplied
         REFERENCE_INDEXING_SINGLE ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir )
+        ch_mitochondrion_header  = REFERENCE_INDEXING_SINGLE.out.mitochondrion_header
+        ch_hapmap                = REFERENCE_INDEXING_SINGLE.out.hapmap
+        ch_pmd_mask              = REFERENCE_INDEXING_SINGLE.out.pmd_mask
+        ch_snp_capture_bed       = REFERENCE_INDEXING_SINGLE.out.snp_capture_bed
+        ch_snp_eigenstrat        = REFERENCE_INDEXING_SINGLE.out.snp_eigenstrat
+        ch_sexdeterrmine_bed     = REFERENCE_INDEXING_SINGLE.out.sexdeterrmine_bed
         ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE.out.reference
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }
+
+    // Filter out input options that are not provided
+    ch_mitochondrion_header = ch_mitochondrion_header
+                    .filter{ it[1] != "" }
+
+    ch_hapmap = ch_hapmap
+                    .filter{ it[1] != "" }
+
+    ch_pmd_mask = ch_pmd_mask
+                    .filter{ it[1] != "" && it[2] != "" }
+
+    ch_snp_capture_bed = ch_snp_capture_bed
+                    .filter{ it[1] != "" }
+
+    ch_snp_eigenstrat = ch_snp_eigenstrat
+                    .filter{ it[1] != "" }
+
+    ch_sexdeterrmine_bed = ch_sexdeterrmine_bed
+                    .filter{ it[1] != "" }
+
     emit:
-    reference = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex ]
-    versions  = ch_versions
+    reference            = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, circular_target ]
+    mitochondrion_header = ch_mitochondrion_header  // [ meta, mitochondrion_header ]
+    hapmap               = ch_hapmap                // [ meta, hapmap ]
+    pmd_mask             = ch_pmd_mask              // [ meta, masked_fasta, capture_bed ]
+    snp_capture_bed      = ch_snp_capture_bed       // [ meta, capture_bed ]
+    snp_eigenstrat       = ch_snp_eigenstrat        // [ meta, snp_eigenstrat ]
+    sexdeterrmine_bed    = ch_sexdeterrmine_bed     // [ meta, sexdet_bed ]
+    versions             = ch_versions
 
 }

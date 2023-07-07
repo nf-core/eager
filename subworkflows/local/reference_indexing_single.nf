@@ -79,11 +79,35 @@ workflow REFERENCE_INDEXING_SINGLE {
                                 .join(ch_fasta_mapperindexdir, failOnMismatch: true)
                                 .map{
                                     meta, fasta, fai, dict, mapper_index ->
-                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.fasta_mitochondrion_header ]
+                                    //TODO: add params for snpcapturebed, snpeigenstrat and sexdetbed once implemented
+                                    def contamination_estimation_angsd_hapmap = params.contamination_estimation_angsd_hapmap != null ? file( params.contamination_estimation_angsd_hapmap, checkIfExists: true ) : ""
+                                    def pmd_mask                              = params.damage_manipulation_pmdtools_reference_mask != null ? file(params.damage_manipulation_pmdtools_reference_mask, checkIfExists: true ) : ""
+                                    def capture_bed                           = ""
+                                    def snp_eigenstrat                        = ""
+                                    def sexdet_bed                            = ""
+                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, snp_eigenstrat, sexdet_bed ]
+                                }
+
+    ch_ref_index_single = ch_reference_for_mapping
+                                .multiMap{
+                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, snp_eigenstrat, sexdet_bed ->
+                                    reference:         [ meta, fasta, fai, dict, mapper_index, circular_target ]
+                                    mito_header:       [ meta, mitochondrion_header ]
+                                    hapmap:            [ meta, contamination_estimation_angsd_hapmap ]
+                                    pmd_mask:          [ meta, pmd_mask, capture_bed ]
+                                    snp_bed:           [ meta, capture_bed ]
+                                    snp_eigenstrat:    [ meta, snp_eigenstrat ]
+                                    sexdeterrmine_bed: [ meta, sexdet_bed ]
                                 }
 
     emit:
-    reference = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex ]
-    versions  = ch_versions
+    reference            = ch_ref_index_single.reference          // [ meta, fasta, fai, dict, mapindex, circular_target ]
+    mitochondrion_header = ch_ref_index_single.mito_header        // [ meta, mito_header ]
+    hapmap               = ch_ref_index_single.hapmap             // [ meta, hapmap ]
+    pmd_mask             = ch_ref_index_single.pmd_mask           // [ meta, pmd_mask, capture_bed ]
+    snp_capture_bed      = ch_ref_index_single.snp_bed            // [ meta, capture_bed ]
+    snp_eigenstrat       = ch_ref_index_single.snp_eigenstrat     // [ meta, snp_eigenstrat ]
+    sexdeterrmine_bed    = ch_ref_index_single.sexdeterrmine_bed  // [ meta, sexdet_bed ]
+    versions             = ch_versions
 
 }
