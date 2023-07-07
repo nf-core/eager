@@ -365,7 +365,6 @@ workflow EAGER {
     }
 
     ENDORSPY ( ch_for_endorspy )
-    ENDORSPY.out.json
 
     ch_versions       = ch_versions.mix( ENDORSPY.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( ENDORSPY.out.json.collect{it[1]}.ifEmpty([]) )
