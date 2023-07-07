@@ -1,5 +1,4 @@
 process PRINT_CONTAMINATION_ANGSD {
-    tag "$meta.id"
     label 'process_single'
 
     conda "conda-forge::python=3.8.3"
@@ -8,18 +7,17 @@ process PRINT_CONTAMINATION_ANGSD {
         'biocontainers/python:3.8.3' }"
 
     input:
-    tuple val(meta), path(angsd_output)
+    path angsd_output
 
     output:
-    tuple val(meta), file("nuclear_contamination.txt"),      emit: txt
-    tuple val(meta), file("nuclear_contamination_mqc.json"), emit: json
-    path "versions.yml",                                     emit: versions
+    path "nuclear_contamination.txt"     , emit: txt
+    path "nuclear_contamination_mqc.json", emit: json
+    path "versions.yml"                  , emit: versions
 
     when:
     params.run_contamination_estimation_angsd
 
     script:
-    prefix   = task.ext.prefix ?: "${meta.id}"
 
     """
     print_x_contamination.py ${angsd_output.join(' ')}
