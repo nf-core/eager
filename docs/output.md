@@ -222,29 +222,29 @@ We provide up to 3 different estimates of percent on target:
 
 Percent on target (%): percent of mapping reads mapping to a specific reference. This is calculated as follows: number of reads mapping to the specific reference (Mapped_Raw) in comparison to the total number of reads (Total_Reads)
 
-$$ Percent\_on\_target = { Mapped\_Raw \over Total\_Reads \* 100 } $$
+$$ PercentOnTarget = { MappedRaw \over TotalReads \* 100 } $$
 
 Where $ Mapped_Raw $ is the number of reads mapping to the reference during the mapping step, and $ Total_Reads $ are the total number of reads that went into the mapping step.
 
 Percent on target modified (%): percent of mapping reads after filtering the raw bam based on quality, read length or any other filtering performed that mapped to a specific reference:
 
-$$ Percent\_on\_target\_modified = { Mapped\_Post\_Filtering \over Total\_Reads \* 100 } $$
+$$ PercentOnTargetModified = { MappedPostFiltering \over TotalReads \* 100 } $$
 
 Where $ Mapped_Post_Filtering $ are the number of reads mapping to the reference after applying the filters.
 
 Percent on target postdedup (%): percent of deduplicated reads (either raw mapped reads or filtered mapped reads) that mapped to a specific reference:
 
-$$ Percent\_on\_target\_postdedup = { Mapped\_Post\_Dedup \over Total\_Reads \* 100 } $$
+$$ PercentOnTargetPostdedup = { MappedPostDedup \over TotalReads \* 100 } $$
 
 Additionally, this script provides two different ways of estimating library complexity:
 
 Clonality (Cluster Factor in eager1): ratio of reads that have duplicated reads
 
-$$ Clonality = { Total\_Reads\_PreDedup \over mappedDedup } $$
+$$ Clonality = { TotalReadsPreDedup \over mappedDedup } $$
 
 Percent Duplicates (%): percent of mapping reads that have at least 1 duplicate. It is calculated as follows:
 
-$$ Percent\_Duplicates = {(Total\_Reads\_PreDedup - Mapped\_Reads\_Dedup) \over Total\_Reads\_PreDedup \* 100} $$
+$$ Percent_Duplicates = {(TotalReadsPreDedup - MappedReadsDedup) \over TotalReadsPreDedup \* 100} $$
 
 The combination of statistics calculated would vary depending on the steps taken:
 Mapping/bam input + filtering + deduplication (all):
