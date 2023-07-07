@@ -994,7 +994,7 @@
                     "fa_icon": "fas fa-chart-area",
                     "help_text": "Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.\n"
                 },
-                "anno_file": {
+                "mapstats_bedtools_featurefile": {
                     "type": "string",
                     "description": "Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.",
                     "fa_icon": "fas fa-file-signature",

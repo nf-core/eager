@@ -35,11 +35,11 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
     }
 }
 if( params.run_bedtools_coverage ){
-    if( !params.anno_file ) {
-        exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --anno_file. Please validate your parameters."
+    if( !params.mapstats_bedtools_featurefile ) {
+        exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters."
     } else {
-        ch_anno_for_bedtools = Channel.fromPath(params.anno_file, checkIfExists: true)
-            .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --anno_file ${params.anno_file}."}
+        ch_anno_for_bedtools = Channel.fromPath(params.mapstats_bedtools_featurefile, checkIfExists: true)
+            .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --mapstats_bedtools_featurefile ${params.mapstats_bedtools_featurefile}."}
     }
 }
 
@@ -91,8 +91,8 @@ include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { BEDTOOLS_COVERAGE ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_MEAN } from '../modules/nf-core/bedtools/coverage/main' 
-include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_GENOME } from '../modules/nf-core/samtools/view/main' 
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main' 
+include { SAMTOOLS_VIEW_GENOME        } from '../modules/local/samtools_view_genome.nf' 
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
@@ -349,17 +349,22 @@ workflow EAGER {
     //
     
     if ( params.run_bedtools_coverage ) {
-        ch_dedupped_bams.combine(ch_anno_for_bedtools).map{
+
+        ch_dedupped_for_bedtools = ch_dedupped_bams.combine(ch_anno_for_bedtools).map{
             meta, bam, bai, anno ->
-            [meta, anno, bam]
-        }.set { ch_dedupped_for_bedtools }
+            [meta, anno, bam]}
 
         // Running samtools view to get header
-        SAMTOOLS_VIEW_GENOME(ch_dedupped_bams, [], [])
-        BEDTOOLS_COVERAGE(ch_dedupped_for_bedtools, SAMTOOLS_VIEW_GENOME.out.sam.map{[it[1]]})
-        BEDTOOLS_COVERAGE_MEAN(ch_dedupped_for_bedtools, SAMTOOLS_VIEW_GENOME.out.sam.map{[it[1]]})
+        SAMTOOLS_VIEW_GENOME(ch_dedupped_bams)
+
+        ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
+        
+        BEDTOOLS_COVERAGE_BREADTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
+        BEDTOOLS_COVERAGE_DEPTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
+
         ch_versions = ch_versions.mix( SAMTOOLS_VIEW_GENOME.out.versions )
-        ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE.out.versions )
+        ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
+        ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
     }
     
 
