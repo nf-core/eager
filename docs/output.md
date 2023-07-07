@@ -307,6 +307,24 @@ The resulting histogram file will contain estimated deduplication statistics at 
 
 These curves will be displayed in the pipeline run's MultiQC report, however you can also use this file for plotting yourself for further exploration e.g. in R to find your sequencing target depth.
 
+### Mapping Statistics 
+
+#### Bedtools
+
+<details markdown="1">
+<summary>Output file</summary>
+
+- `mapstats/bedtools/` 
+
+  - `*.breadth.gz`: This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature.
+  - `*.depth.gz`: This file will have the the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
+
+</details>
+
+[bedtools](https://github.com/arq5x/bedtools2) utilities are a swiss-army knife of tools for a wide-range of genomics analysis tasks. Bedtools allows one to intersect, merge, count, complement, and shuffle genomic intervals from multiple files in widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF.
+The `bedtools coverage` tool computes both the depth and breadth of coverage of features in file B (alignment file) on the features in file A (provied by `--mapstats_bedtools_featurefile` when running the eager workflow). One advantage that bedtools coverage offers is that it not only counts the number of features that overlap an interval in file A, it also computes the fraction of bases in the interval in A that were overlapped by one or more features. Thus, bedtools coverage also computes the breadth of coverage observed for each interval in A.
+
+
 ### Damage Manipulation
 
 There are three different options for manipulation of ancient DNA damage.
