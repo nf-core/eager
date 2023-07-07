@@ -85,6 +85,25 @@ class WorkflowEager {
 
     }
 
+    /*
+    This function can be applied to the contents of a channel row-by-row with a .map operator.
+    It assumes that the first element of the channel row is a map of metadata. It will then create a new metadata map
+    that consists of the source_attributes of the original metadata map, but named after the corresponding target_attributes.
+    The new metadata map is then prepended to the channel row, becoming the new first element.
+    If the remove flag is set to true, then the original metadata map is removed from the channel row.
+
+    Example:
+    ch_my_channel=Channel.of( [ [id:'id', sample_id:'sample_id', single_end:true, reference:"hs37d5" ], "bam", "bai" ] )
+
+    ch_my_channel.map{ row -> addNewMetaFromAttributes(row, "id", "new_attribute", false) }
+    // This will create a new channel with the following rows:
+    [ [ new_attribute: 'id' ], [id:'id', sample_id:'sample_id', single_end:true, reference:"hs37d5" ], "bam", "bai" ]
+
+    ch_my_channel.map{ row -> addNewMetaFromAttributes(row, ["id", "single_end"], ["new_attribute", "endedness"] , true) }
+    // This will create a new channel with the following rows:
+    [ [ new_attribute: 'id' , endedness: true ], "bam", "bai" ]
+
+    */
     def public static ArrayList addNewMetaFromAttributes( ArrayList row, Object source_attributes, Object target_attributes, boolean remove = false) {
         def meta = row[0]
         def meta2 = [:]
