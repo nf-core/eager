@@ -339,25 +339,29 @@ workflow EAGER {
                                             .mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat )
 
     if ( params.run_bamfiltering & !params.skip_deduplication ) {
-        ch_for_endorspy = ch_flagstat_for_endorspy_raw.join (FILTER_BAM.out.flagstat)
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                .join (FILTER_BAM.out.flagstat)
                                                 .join (DEDUPLICATE.out.flagstat)
     } else if ( params.run_bamfiltering & params.skip_deduplication ) {
-        ch_for_endorspy = ch_flagstat_for_endorspy_raw.join (FILTER_BAM.out.flagstat)
-                                                        . map{
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                        .join (FILTER_BAM.out.flagstat)
+                                                        .map{
                                                             meta, flags_raw, flags_filtered ->
                                                             [ meta, flags_raw, flags_filtered, [] ]
                                                             }
     } else if ( !params.run_bamfiltering & !params.skip_deduplication) {
-        ch_for_endorspy = ch_flagstat_for_endorspy_raw.join (DEDUPLICATE.out.flagstat)
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                        .join (DEDUPLICATE.out.flagstat)
                                                         . map{
                                                             meta, flags_raw, flags_dedup ->
                                                             [ meta, flags_raw, [], flags_dedup ]
                                                             }
     } else {
-        ch_for_endorspy = ch_flagstat_for_endorspy_raw.map {
-                                                    meta, flags_raw ->
-                                                    [ meta, flags_raw, [], [] ]
-        }
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                        .map {
+                                                            meta, flags_raw ->
+                                                            [ meta, flags_raw, [], [] ]
+                                                        }
     }
 
     ENDORSPY ( ch_for_endorspy )

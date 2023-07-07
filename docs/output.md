@@ -211,8 +211,9 @@ Alternatively you could use the resulting files for manual metagenomic screen ou
   - `*.json`: json file per sample containing all the calculated percent on target, clonality and percent duplicates
 
 </details>
+
 [endorS.py](https://github.com/aidaanva/endorS.py) calculates percent on target (aka Endogenous DNA) from samtools flagstat files and prints to screen.
-The percent on target reported will be different depending on the combination of samtools flagstat provided.
+The 'Percent on target (%)' reported will be different depending on the combination of samtools flagstat inputs provided.
 This program also calculates clonality (aka 'cluster factor') and percent duplicates when the flagstat file after duplicate removal is provided.
 
 Definitions and calculations:
@@ -221,29 +222,29 @@ We provide up to 3 different estimates of percent on target:
 
 Percent on target (%): percent of mapping reads mapping to a specific reference. This is calculated as follows: number of reads mapping to the specific reference (Mapped_Raw) in comparison to the total number of reads (Total_Reads)
 
-$$ Percent_on_target = { Mapped_Raw \over Total_Reads \* 100 } $$
+$$ Percent\_on\_target = { Mapped\_Raw \over Total\_Reads \* 100 } $$
 
 Where $ Mapped_Raw $ is the number of reads mapping to the reference during the mapping step, and $ Total_Reads $ are the total number of reads that went into the mapping step.
 
 Percent on target modified (%): percent of mapping reads after filtering the raw bam based on quality, read length or any other filtering performed that mapped to a specific reference:
 
-$$ Percent_on_target_modified = { Mapped_Post_Filtering \over Total_Reads \* 100 } $$
+$$ Percent\_on\_target\_modified = { Mapped\_Post\_Filtering \over Total\_Reads \* 100 } $$
 
 Where $ Mapped_Post_Filtering $ are the number of reads mapping to the reference after applying the filters.
 
 Percent on target postdedup (%): percent of deduplicated reads (either raw mapped reads or filtered mapped reads) that mapped to a specific reference:
 
-$$ Percent_on_target_postdedup = { Mapped_Post_Dedup \over Total_Reads \* 100 } $$
+$$ Percent\_on\_target\_postdedup = { Mapped\_Post\_Dedup \over Total\_Reads \* 100 } $$
 
 Additionally, this script provides two different ways of estimating library complexity:
 
 Clonality (Cluster Factor in eager1): ratio of reads that have duplicated reads
 
-$$ Clonality = { Total_Reads_PreDedup \over mappedDedup } $$
+$$ Clonality = { Total\_Reads\_PreDedup \over mappedDedup } $$
 
 Percent Duplicates (%): percent of mapping reads that have at least 1 duplicate. It is calculated as follows:
 
-$$ Percent_Duplicates = {(Total_Reads_PreDedup - Mapped_Reads_Dedup) \over Total_Reads_PreDedup \* 100} $$
+$$ Percent\_Duplicates = {(Total\_Reads\_PreDedup - Mapped\_Reads\_Dedup) \over Total\_Reads\_PreDedup \* 100} $$
 
 The combination of statistics calculated would vary depending on the steps taken:
 Mapping/bam input + filtering + deduplication (all):
