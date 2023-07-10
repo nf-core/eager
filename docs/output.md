@@ -244,7 +244,7 @@ $$ Clonality = { TotalReadsPreDedup \over mappedDedup } $$
 
 Percent Duplicates (%): percent of mapping reads that have at least 1 duplicate. It is calculated as follows:
 
-$$ Percent_Duplicates = {(TotalReadsPreDedup - MappedReadsDedup) \over TotalReadsPreDedup \* 100} $$
+$$ PercentDuplicates = {(TotalReadsPreDedup - MappedReadsDedup) \over TotalReadsPreDedup \* 100} $$
 
 The combination of statistics calculated would vary depending on the steps taken:
 Mapping/bam input + filtering + deduplication (all):
