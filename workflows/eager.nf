@@ -81,15 +81,17 @@ include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
-include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/main'
-include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
-include { FALCO                       } from '../modules/nf-core/falco/main'
-include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
-include { HOST_REMOVAL                } from '../modules/local/host_removal'
+include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
+include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS                       } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { SAMTOOLS_INDEX                                    } from '../modules/nf-core/samtools/index/main'
+include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
+include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
+include { FALCO                                             } from '../modules/nf-core/falco/main'
+include { MTNUCRATIO                                        } from '../modules/nf-core/mtnucratio/main'
+include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
+include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -202,6 +204,16 @@ workflow EAGER {
     else {
         ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.bai )
     }
+
+
+    //
+    // MODULE: flagstats of user supplied input BAMs
+    //
+    ch_bam_bai_input = INPUT_CHECK.out.bams
+                            .join(SAMTOOLS_INDEX.out.bai)
+
+    SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
+    ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
 
     //
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
@@ -320,6 +332,44 @@ workflow EAGER {
         ch_multiqc_files = ch_multiqc_files.mix(MTNUCRATIO.out.mtnucratio.collect{it[1]}.ifEmpty([]))
         ch_versions      = ch_versions.mix( MTNUCRATIO.out.versions )
     }
+
+    //
+    // MODULE: ENDORSPY (raw, filtered, deduplicated)
+    //
+
+    ch_flagstat_for_endorspy_raw    = MAP.out.flagstat
+                                            .mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat )
+
+    if ( params.run_bamfiltering & !params.skip_deduplication ) {
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                .join (FILTER_BAM.out.flagstat)
+                                                .join (DEDUPLICATE.out.flagstat)
+    } else if ( params.run_bamfiltering & params.skip_deduplication ) {
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                        .join (FILTER_BAM.out.flagstat)
+                                                        .map{
+                                                            meta, flags_raw, flags_filtered ->
+                                                            [ meta, flags_raw, flags_filtered, [] ]
+                                                            }
+    } else if ( !params.run_bamfiltering & !params.skip_deduplication) {
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                        .join (DEDUPLICATE.out.flagstat)
+                                                        . map{
+                                                            meta, flags_raw, flags_dedup ->
+                                                            [ meta, flags_raw, [], flags_dedup ]
+                                                            }
+    } else {
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                        .map {
+                                                            meta, flags_raw ->
+                                                            [ meta, flags_raw, [], [] ]
+                                                        }
+    }
+
+    ENDORSPY ( ch_for_endorspy )
+
+    ch_versions       = ch_versions.mix( ENDORSPY.out.versions )
+    ch_multiqc_files  = ch_multiqc_files.mix( ENDORSPY.out.json.collect{it[1]}.ifEmpty([]) )
 
     //
     // MODULE: PreSeq

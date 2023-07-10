@@ -504,6 +504,52 @@ nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup_merged -du
 nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_dedup_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
 
+## Mapping statistics
+
+### ENDOSPY
+
+All possible paramters
+
+```
+// BAM Filtering
+params.run_bamfiltering
+//Deduplication
+params.skip_deduplication
+```
+
+Tests
+
+```{bash}
+##Check if mapping + filtering + deduplication is done, meaning params.run_bamfiltering is true and params.skip_deduplication is false
+##Expect: a json for each of the of the libraries with all the stats calculates (percent on target raw, percent on target modified, percent on target postdedup, clonality and percent duplicates)
+##Checked: there is 3 jsons with all the stats calculates
+
+nextflow run ../main.nf -profile docker,test --outdir results_endorspy_all -w results_endorspy_all/work --run_bamfiltering
+
+##Check if mapping only has been performed, meaning params.run_bamfiltering is false and params.skip_deduplication is true
+##Expect: a json for each of the of the libraries with only percent on target raw
+##Checked: there is 3 jsons with only Percent on target (%)
+
+nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_only -w results_endorspy_map_only/work --skip_deduplication --run_bamfiltering false
+
+##Check if mapping and run_bamfiltering done but no dedepup, meaning params.run_bamfiltering is true and params.skip_deduplication is true
+##Checked: there is 3 jsons with only Percent on target (%) and Percent on target modified (%) calculated
+
+nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_filtering_nodedup -w results_endorspy_map_filtering_nodedup/work --run_bamfiltering --skip_deduplication
+
+##Check if mapping and dedup done but no bam filtering, meaning params.run_bamfiltering is false and params.skip_deduplication is true
+##Checked: there is 3 jsons with Percent on target (%), Percent on target postdedup (%), Clonality and Percent Duplicates (%)
+
+nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_nofiltering_dedup -w results_endorspy_map_nofiltering_dedup/work --run_bamfiltering false
+
+##Check if mapping + filtering + deduplication is done (meaning params.run_bamfiltering is true and params.skip_deduplication is false) and multiple reference used
+##Expect: a json for each of the of the libraries with all the stats calculates (percent on target raw, percent on target modified, percent on target postdedup, clonality and percent duplicates) for each of the references
+##Checked: there is 6 jsons with all the stats calculates: one for each of the references (2) for each of the samples (3 samples in total). All the stats were calculated.
+
+nextflow run ../main.nf -profile docker,test_multiref --outdir results_endorspy_all_multiref -w results_endorspy_all_multiref/work --run_bamfiltering
+
+```
+
 ### CALCULATE DAMAGE
 
 #### With DamageProfiler
