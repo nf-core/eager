@@ -143,6 +143,7 @@ workflow EAGER {
 
 
     // Convert input BAMs back to FASTQ for mixing (if required)
+    // TODO: BAM input is missing single end info, thus being discarded on the branch of PREPROCESSING_FASTP line 17
     // TODO: fix output from th e SAMTOOLS_FASTQ as paired vs. single ends will come out differentlY! Will need to do a mixing of fastqs and other (I think)
     // TODO: check FASTQ outputs in correct format (consider paired / single / singletons?)
     // TODO: check metamap is equivalent
