@@ -64,7 +64,6 @@ workflow MAP {
                                     [ new_meta, bam ]
                                 }
                                 .groupTuple()
-                                .dump(tag: "test")
                                 .branch {
                                     meta, bam ->
                                         println(bam.size())
