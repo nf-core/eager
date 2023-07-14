@@ -1079,7 +1079,7 @@
                     "type": "string",
                     "default": null,
                     "description": "If library is the result of SNP capture, adds a path to a BED file containing SNP positions on reference genome.",
-                    "help_text": "Can be used to set a path to a BED file (3/6 column format) of SNP positions of a reference genome, to calculate SNP captured libraries on-target efficiency. This should be used for array or in-solution SNP capture protocols such as 390K, 1240K, etc. If supplied, some on-target metrics are automatically generated for you by qualimap in the 'Globals inside' section of the 'genome_results.txt' file in the qualimap results directory. These statistics are currently NOT displayed in MultiQC!",
+                    "help_text": "Can be used to set a path to a BED file (3/6 column format) of SNP positions of a reference genome, to calculate the on-target efficiency of SNP captured libraries. This should be used for array or in-solution SNP capture protocols such as 390K, 1240K, etc. If supplied, some on-target metrics are automatically generated for you by qualimap in the 'Globals inside' section of the 'genome_results.txt' file in the qualimap results directory. These statistics are currently NOT displayed in MultiQC!",
                     "fa_icon": "fas fa-magnet"
                 }
             },
