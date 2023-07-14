@@ -12,6 +12,8 @@
 
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
+  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]. Available online https://www.bioinformatics.babraham.ac.uk/projects/fastqc/.
+
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
@@ -72,6 +74,10 @@
 
   > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
 
+- [endorS.py](https://doi.org/10.7717/peerj.10947)
+
+  > Fellows Yates JA, Lamnidis TC, Borry M, Valtueña Andrades A, Fagernäs Z, Clayton S, Garcia MU, Neukamm J, Peltzer A. 2021. Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager. PeerJ 9:e10947. doi: [10.7717/peerj.10947](https://doi.org/10.7717/peerj.10947)
+
 - [mapDamage2](https://doi.org/10.1093/bioinformatics/btt193)
 
   > Jónsson H, Ginolhac A, Schubert M, Johnson P, Orlando L. mapDamage2.0: fast approximate Bayesian estimates of ancient DNA damage parameters. Bioinformatics 2013. 23rd April 2013. doi: [10.1093/bioinformatics/btt193](https://doi.org/10.1093/bioinformatics/btt193)
@@ -108,5 +114,8 @@
 
 - [Docker](https://dl.acm.org/doi/10.5555/2600239.2600241)
 
+  > Merkel, D. (2014). Docker: lightweight linux containers for consistent development and deployment. Linux Journal, 2014(239), 2. doi: 10.5555/2600239.2600241.
+
 - [Singularity](https://pubmed.ncbi.nlm.nih.gov/28494014/)
+
   > Kurtzer GM, Sochat V, Bauer MW. Singularity: Scientific containers for mobility of compute. PLoS One. 2017 May 11;12(5):e0177459. doi: 10.1371/journal.pone.0177459. eCollection 2017. PubMed PMID: 28494014; PubMed Central PMCID: PMC5426675.
