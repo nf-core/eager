@@ -2,12 +2,14 @@
 // Genotype the input data using the requested genotyper.
 //
 
-include { SAMTOOLS_MPILEUP as SAMTOOLS_MPILEUP_PILEUPCALLER } from '../modules/nf-core/samtools/mpileup/main'
-include { EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE     } from '../modules/nf-core/eigenstratdatabasetools/eigenstratsnpcoverage/main'
-include { SEQUENCETOOLS_PILEUPCALLER                        } from '../modules/nf-core/sequencetools/pileupcaller/main'
-include { GATK_UNIFIEDGENOTYPER                             } from '../modules/nf-core/gatk/unifiedgenotyper/main'
-include { GATK4_HAPLOTYPECALLER                             } from '../modules/nf-core/gatk4/haplotypecaller/main'
-include { FREEBAYES                                         } from '../modules/nf-core/freebayes/main'
+include { SAMTOOLS_MPILEUP as SAMTOOLS_MPILEUP_PILEUPCALLER } from '../../modules/nf-core/samtools/mpileup/main'
+include { EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE     } from '../../modules/nf-core/eigenstratdatabasetools/eigenstratsnpcoverage/main'
+include { SEQUENCETOOLS_PILEUPCALLER                        } from '../../modules/nf-core/sequencetools/pileupcaller/main'
+include { GATK_INDELREALIGNER                               } from '../../modules/nf-core/gatk/indelrealigner/main'
+include { GATK_REALIGNERTARGETCREATOR                       } from '../../modules/nf-core/gatk/realignertargetcreator/main'
+include { GATK_UNIFIEDGENOTYPER                             } from '../../modules/nf-core/gatk/unifiedgenotyper/main'
+include { GATK4_HAPLOTYPECALLER                             } from '../../modules/nf-core/gatk4/haplotypecaller/main'
+include { FREEBAYES                                         } from '../../modules/nf-core/freebayes/main'
 // TODO Add ANGSD GTL module. The current module does not pick up the .glf.gz output files.
 
 workflow GENOTYPE {
@@ -29,7 +31,7 @@ workflow GENOTYPE {
 
 
     if ( params.genotyping_tool == 'pileupcaller' ) {
-        SAMTOOLS_MPILEUP_PILEUPCALLER( ch_bam_bai, ch_fasta )
+        // SAMTOOLS_MPILEUP_PILEUPCALLER( ch_bam_bai, ch_fasta )
 
     /*
     // TODO - this is not working yet. Need snpcapture Bed and pileupcaller snp file to add here.
