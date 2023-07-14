@@ -90,6 +90,7 @@ include { PRESEQ_CCURVE                                     } from '../modules/n
 include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                                             } from '../modules/nf-core/falco/main'
 include { MTNUCRATIO                                        } from '../modules/nf-core/mtnucratio/main'
+include { QUALIMAP_BAMQC                                    } from '../modules/nf-core/qualimap/bamqc/main'
 include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
 include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
@@ -148,11 +149,11 @@ workflow EAGER {
         file(params.input)
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-    
+
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
-    
+
     //
     // SUBWORKFLOW: Indexing of reference files
     //
