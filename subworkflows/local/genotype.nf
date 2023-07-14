@@ -5,8 +5,8 @@
 include { SAMTOOLS_MPILEUP as SAMTOOLS_MPILEUP_PILEUPCALLER } from '../../modules/nf-core/samtools/mpileup/main'
 include { EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE     } from '../../modules/nf-core/eigenstratdatabasetools/eigenstratsnpcoverage/main'
 include { SEQUENCETOOLS_PILEUPCALLER                        } from '../../modules/nf-core/sequencetools/pileupcaller/main'
-include { GATK_INDELREALIGNER                               } from '../../modules/nf-core/gatk/indelrealigner/main'
 include { GATK_REALIGNERTARGETCREATOR                       } from '../../modules/nf-core/gatk/realignertargetcreator/main'
+include { GATK_INDELREALIGNER                               } from '../../modules/nf-core/gatk/indelrealigner/main'
 include { GATK_UNIFIEDGENOTYPER                             } from '../../modules/nf-core/gatk/unifiedgenotyper/main'
 include { GATK4_HAPLOTYPECALLER                             } from '../../modules/nf-core/gatk4/haplotypecaller/main'
 include { FREEBAYES                                         } from '../../modules/nf-core/freebayes/main'
@@ -40,7 +40,46 @@ workflow GENOTYPE {
     }
 
     if ( params.genotyping_tool == 'unifiedgenotyper' ) {
-        // TODO
+        // Use correct reference for each input bam/bai pair.
+        ch_bams_for_multimap = ch_bam_bai
+            .map {
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+
+        ch_fasta_for_multimap = ch_fasta
+            .map {
+            // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+            }
+
+        ch_input_for_targetcreator = ch_bams_for_multimap
+            .combine( ch_fasta_for_multimap , by:0 )
+            .multiMap {
+                ignore_me, meta, bam, bai, ref_meta, fasta ->
+                    bam: [ meta, bam ]
+                    fasta: fasta // no meta needed for fasta in GATK_* modules
+            }
+
+        GATK_REALIGNERTARGETCREATOR( ch_input_for_targetcreator.bam, ch_input_for_targetcreator.fasta )
+        ch_versions = ch_versions.mix( GATK_REALIGNERTARGETCREATOR.out.versions.first() )
+
+        ch_input_for_indelrealigner = ch_bam_bai
+            // TODO can I join to ch_bams_for_multimap instead?
+            .join( GATK_REALIGNERTARGETCREATOR.out.intervals )
+            .map {
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+            .combine( ch_fasta_for_multimap , by:0 )
+            .multiMap {
+                ignore_me, meta, bam, bai, ref_meta, fasta ->
+                    bam: [ meta, bam ]
+                    fasta: fasta // no meta needed for fasta in GATK_* modules
+            }
+            // TODO check that the channel manipulations work as intended and what gets given to INDELREALIGNER
+        GATK_INDELREALIGNER( ch_input_for_gatk_ug.bam, ch_input_for_gatk_ug.fasta, GATK_REALIGNERTARGETCREATOR.out.intervals )
+        // GATK_UNIFIEDGENOTYPER()
     }
 
     if ( params.genotyping_tool == 'haplotypecaller' ) {
