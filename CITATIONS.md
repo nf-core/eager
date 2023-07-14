@@ -62,6 +62,10 @@
 
   > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
 
+- [QualiMap](https://doi.org/10.1093/bioinformatics/btv566)
+
+  > QualiMap Okonechnikov, K., Conesa, A., & García-Alcalde, F. (2016). Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. Bioinformatics , 32(2), 292–294. Download: http://qualimap.bioinfo.cipf.es/
+
 - [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
   > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190). Download: https://github.com/Integrative-Transcriptomics/DamageProfiler
 

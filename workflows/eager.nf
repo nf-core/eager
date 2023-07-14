@@ -86,6 +86,7 @@ include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/m
 include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                       } from '../modules/nf-core/falco/main'
 include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
+include { QUALIMAP_BAMQC              } from '../modules/nf-core/qualimap/bamqc/main'
 
 
 /*
@@ -121,6 +122,13 @@ workflow EAGER {
     if ( params.preprocessing_adapterlist && !params.preprocessing_skipadaptertrim ) {
         if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
+    }
+
+    // QualiMap
+   if ( params.snpcapture_bed ) {
+    ch_snpcapture_bed = Channel.fromPath(params.snpcapture_bed, checkIfExists: true).collect()
+    } else {
+    ch_snpcapture_bed = []
     }
 
     //
@@ -231,6 +239,19 @@ workflow EAGER {
     } else {
         ch_dedupped_bams     = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
+    }
+
+    //
+    // MODULE QUALIMAP
+    //
+
+    if ( !params.skip_qualimap ) {
+       ch_qualimap_input = ch_dedupped_bams
+            .map {
+            meta, bam, bai ->
+                [ meta, bam ]
+            }
+        QUALIMAP_BAMQC(ch_qualimap_input, ch_snpcapture_bed)
     }
 
     //

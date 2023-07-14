@@ -789,6 +789,14 @@
                     "description": "Turns on defects mode to extrapolate without testing for defects (lc_extrap mode only).",
                     "help_text": "Activates defects mode of `lc_extrap`, which does the extrapolation without testing for defects.\n\n> Modifies preseq lc_extrap parameter: `-D`",
                     "fa_icon": "fab fa-creative-commons-sampling-plus"
+                },
+                "skip_qualimap": {
+                    "type": "boolean",
+                    "default": "false"
+                },
+                "snpcapture_bed": {
+                    "type": "string",
+                    "description": "Path to snp capture BED"
                 }
             },
             "fa_icon": "fas fa-search"
