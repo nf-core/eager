@@ -147,10 +147,23 @@ workflow EAGER {
     // TODO: fix output from th e SAMTOOLS_FASTQ as paired vs. single ends will come out differentlY! Will need to do a mixing of fastqs and other (I think)
     // TODO: check FASTQ outputs in correct format (consider paired / single / singletons?)
     // TODO: check metamap is equivalent
-    // TODO: document singletons will be ignored? Or always specify single-end?
+    // TODO: update test.md
     if ( params.convert_inputbam ) {
         SAMTOOLS_FASTQ_INPUTBAM ( INPUT_CHECK.out.bams, false )
-        ch_prepared_reads          = INPUT_CHECK.out.fastqs.mix( SAMTOOLS_FASTQ_INPUTBAM.out.fastq ).dump(tag: "converted_bams_and_fastqs")
+
+        // Due to behaviour of samtools fasta, single-end or merged BAMs are dumped into an 'other' category
+        // We need to select whether to take pairs or just the other for downstream,
+        ch_picked_convertedfastqs = SAMTOOLS_FASTQ_INPUTBAM.out.fastq
+                                        .join(SAMTOOLS_FASTQ_INPUTBAM.out.out)
+                                        .map {
+                                            meta, reads ->
+
+                                            def new_reads = meta.single_end ? [ reads[2] ] : [ reads[0], reads[1] ]
+
+                                            [meta, new_reads]
+                                        }
+
+        ch_prepared_reads          = INPUT_CHECK.out.fastqs.mix( ch_picked_convertedfastqs ).dump(tag: "converted_bams_and_fastqs")
         ch_input_bam_for_filtering = Channel.empty()
     } else {
         ch_prepared_reads          = INPUT_CHECK.out.fastqs.dump(tag: "input_fqs")
