@@ -36,11 +36,8 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
 }
 if( params.run_bedtools_coverage ){
     if( !params.mapstats_bedtools_featurefile ) {
-        exit 1, "[nf-core/eager] error: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters."
-    } else {
-        ch_anno_for_bedtools = Channel.fromPath(params.mapstats_bedtools_featurefile, checkIfExists: true)
-            .ifEmpty { exit 1, "[nf-core/eager] error: bedtools annotation file not found. Supplied parameter: --mapstats_bedtools_featurefile ${params.mapstats_bedtools_featurefile}."}
-    }
+        exit 1, "[nf-core/eager] ERROR: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters."
+    } 
 }
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
