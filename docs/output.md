@@ -266,6 +266,54 @@ The resulting histogram file will contain estimated deduplication statistics at 
 
 These curves will be displayed in the pipeline run's MultiQC report, however you can also use this file for plotting yourself for further exploration e.g. in R to find your sequencing target depth.
 
+### Mapping Statistics
+
+#### Bedtools
+
+<details markdown="1">
+<summary>Output file</summary>
+
+- `mapstats/bedtools/`
+
+  - `*.breadth.gz`: This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature.
+  - `*.depth.gz`: This file will have the the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
+
+</details>
+
+[bedtools](https://github.com/arq5x/bedtools2) utilities are a swiss-army knife of tools for a wide-range of genomics analysis tasks. Bedtools allows one to intersect, merge, count, complement, and shuffle genomic intervals from multiple files in widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF.
+
+The `bedtools coverage` tool computes both the depth and breadth of coverage of features in file B (alignment file) on the features in file A (provied by `--mapstats_bedtools_featurefile` when running the eager workflow). One advantage that bedtools coverage offers is that it not only counts the number of features that overlap an interval in file A, it also computes the fraction of bases in the interval in A that were overlapped by one or more features. Thus, bedtools coverage also computes the breadth of coverage observed for each interval in A.
+
+The output from this module can be useful for things such as checking for the presence/absence of virulence factors in ancient pathogen genomes, or getting statistics on SNP capture positions.
+
+### Damage Manipulation
+
+There are three different options for manipulation of ancient DNA damage.
+
+#### Damage Rescaling
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `damage_manipulation/`
+
+  - `*_rescaled.bam`: Reads with their base qualities rescaled according to the bayesian aDNA damage model, in BAM format.
+  - `*_rescaled.bam.{bai,csi}`: Index file corresponding to the BAM file.
+  - `results_*/Stats_out_MCMC_*{.pdf,.csv}`: CSV and PDF files containing information about the damage model used in rescaling.
+
+</details>
+
+[mapDamage2](https://ginolhac.github.io/mapDamage/) can apply a probabilistic bayesian model to rescale quality scores of likely-damaged positions in the reads. A new BAM file is constructed by downscaling quality values for misincorporations likely due to ancient DNA damage according to their initial qualities, position in reads, and damage patterns. These BAM files have damage probabilistically removed via a bayesian model.
+Rescaling a BAM file in this way can help reduce/remove the effects of DNA damage from downstream analysis.
+
+Be advised that this process introduces reference bias in the resulting rescaled BAMs, because only mismatches to the reference get corrected, while true mismatches that become reference alleles due to damage are not rescaled.
+
+**This functionality does not produce any MultiQC output.**
+
+> ⚠️ Warning: rescaled libraries will not be merged with non-scaled libraries of the same sample for downstream genotyping, as the underlying damage model may be different for each library. If you wish to merge these, please do this manually and re-run nf-core/eager using the merged BAMs as input.
+
+#### Post-Mortem-Damage (PMD) Filtering
+
 #### QualiMap
 
 <details markdown="1">

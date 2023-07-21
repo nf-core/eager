@@ -15,6 +15,11 @@
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     },
+                    "bedtools/coverage": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
                     "bowtie2/align": {
                         "branch": "master",
                         "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
