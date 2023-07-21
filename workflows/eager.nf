@@ -252,6 +252,7 @@ workflow EAGER {
                 [ meta, bam ]
             }
         QUALIMAP_BAMQC(ch_qualimap_input, ch_snpcapture_bed)
+        ch_versions = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
     }
 
     //
