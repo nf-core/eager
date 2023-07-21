@@ -26,19 +26,14 @@ workflow MANIPULATE_DAMAGE {
     // Ensure correct reference is associated with each bam_bai pair
     ch_refs = ch_fasta
         .map {
-            // Create additional map containing only meta.reference for combining samples and reference fastas
-            meta, fasta ->
-                meta2 = [:]
-                meta2.reference = meta.id
-            [ meta2, meta, fasta ]
+            // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+            WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
         }
 
     ch_input_for_damage_manipulation = ch_bam_bai
         .map {
-            meta, bam, bai ->
-                meta2 = [:]
-                meta2.reference = meta.reference
-            [ meta2, meta, bam, bai ]
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
         }
         .combine(ch_refs, by: 0 ) // [ [combine_meta], [meta], bam, bai, [ref_meta], fasta ]
 
