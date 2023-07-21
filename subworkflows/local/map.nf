@@ -66,7 +66,6 @@ workflow MAP {
                                 .groupTuple()
                                 .branch {
                                     meta, bam ->
-                                        println(bam.size())
                                         merge: bam.size() > 1
                                         skip: true
                                 }
