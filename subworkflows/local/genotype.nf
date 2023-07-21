@@ -104,8 +104,8 @@ workflow GENOTYPE {
             }
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
-                ignore_me, meta, bam, bai, intervals, ref_meta, fasta, fai, dict -> // TODO add dbSNP
-                    bam: [ meta, bam, bai, intervals ]
+                ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict -> // TODO add dbSNP
+                    bam: [ meta, bam, bai ]
                     fasta: [ ref_meta, fasta ]
                     fai:   [ ref_meta, fai ]
                     dict:  [ ref_meta, dict ]
