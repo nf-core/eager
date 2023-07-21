@@ -406,7 +406,6 @@ You will receive output for each sample. This means you will statistics of dedup
 
 > ⚠️ Warning: If your library has no reads mapping to the reference, this will result in an empty BAM file. Qualimap will therefore not produce any output even if a BAM exists!
 
-
 #### Bedtools
 
 <details markdown="1">
