@@ -122,6 +122,7 @@ workflow GENOTYPE {
             [[], []], // No dbsnp //TODO add dbsnp // ch_bams_for_ug.dbsnp
             [[], []]  // No comp
         )
+        ch_versions = ch_versions.mix( GATK_UNIFIEDGENOTYPER.out.versions.first() )
     }
 
     if ( params.genotyping_tool == 'hc' ) {
