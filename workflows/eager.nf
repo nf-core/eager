@@ -87,15 +87,6 @@ include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_
 // MODULE: Installed directly from nf-core/modules
 //
 
-include { FASTQC                      } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
-include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/main'
-include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
-include { FALCO                       } from '../modules/nf-core/falco/main'
-include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
-
 include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS                       } from '../modules/nf-core/custom/dumpsoftwareversions/main'
