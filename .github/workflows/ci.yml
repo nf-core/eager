@@ -24,15 +24,16 @@ jobs:
     strategy:
       matrix:
         NXF_VER:
-          - "22.10.1"
+          - "23.04.0"
           - "latest-everything"
         PARAMS:
-          - "--preprocessing_tool fastp --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/fastp/adapters.fasta'"
-          - "--preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco"
-          - "--mapping_tool bwamem"
-          - "--mapping_tool bowtie2"
-          - "--skip_preprocessing"
-          - "--run_mtnucratio --mitochondrion_header 'NC_007596.2'"
+          - "-profile test,docker --preprocessing_tool fastp --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/fastp/adapters.fasta'"
+          - "-profile test,docker --preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco"
+          - "-profile test,docker --mapping_tool bwamem --run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam"
+          - "-profile test,docker --mapping_tool bowtie2"
+          - "-profile test,docker --skip_preprocessing"
+          - "-profile test_humanbam,docker --run_mtnucratio --run_contamination_estimation_angsd"
+          - "-profile test_multiref,docker" ## TODO add damage manipulation here instead once it goes multiref
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v3
@@ -47,4 +48,4 @@ jobs:
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results ${{ matrix.PARAMS }}
+          nextflow run ${GITHUB_WORKSPACE} --outdir ./results ${{ matrix.PARAMS }}

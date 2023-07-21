@@ -12,6 +12,8 @@
 
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
+  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]. Available online https://www.bioinformatics.babraham.ac.uk/projects/fastqc/.
+
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
@@ -27,6 +29,10 @@
 - [AdapterRemoval](https://doi.org/10.1186/s13104-016-1900-2)
 
   > Schubert, M., Lindgreen, S., & Orlando, L. (2016). AdapterRemoval v2: rapid adapter trimming, identification, and read merging. BMC Research Notes, 9, 88. doi: [10.1186/s13104-016-1900-2](https://doi.org/10.1186/s13104-016-1900-2)
+
+- [Picard Tools](https://broadinstitute.github.io/picard/)
+
+  > Broad Institute (2019). Picard Toolkit. GitHub Repository: https://broadinstitute.github.io/picard/
 
 - [bwa](https://doi.org/10.1093/bioinformatics/btp324)
 
@@ -50,6 +56,12 @@
 
   > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
 
+- [ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD)
+
+  > Korneliussen, T. S., Albrechtsen, A., Nielsen, R. (2014) ANGSD: Analysis of Next Generation Sequencing Data. BMC Bioinformatics, 15, 356. doi: [10.1186/s12859-014-0356-4](https://doi.org/10.1186/s12859-014-0356-4)
+
+  > Rasmussen, M., et. al. (2011) An Aboriginal Australian genome reveals separate human dispersals into Asia. Science, 334(6052), 94-98. doi: [10.1126/science.1211177](https://doi.org/10.1126/science.1211177)
+
 - [prinseqplusplus](https://doi.org/10.7287/peerj.preprints.27553v1)
 
   > Cantu VA, Sadural J, Edwards R. 2019. PRINSEQ++, a multi-threaded tool for fast and efficient quality control and preprocessing of sequencing datasets. PeerJ Preprints 7:e27553v1. doi: [10.7287/peerj.preprints.27553v1](https://doi.org/10.7287/peerj.preprints.27553v1)
@@ -58,9 +70,29 @@
 
   > Bushnell B, Rood J, Singer E (2017) BBMerge – Accurate paired shotgun read merging via overlap. PLOS ONE 12(10): e0185056. [https://doi.org/10.1371/journal.pone.0185056](https://doi.org/10.1371/journal.pone.0185056)
 
+- [BEDTools](https://doi.org/10.1093/bioinformatics/btq033)
+
+  > Quinlan, A. R., & Hall, I. M. (2010). BEDTools: A flexible suite of utilities for comparing genomic features. Bioinformatics, 26(6), 841–842. [https://doi.org/10.1093/bioinformatics/btq033](https://doi.org/10.1093/bioinformatics/btq033)
+
 - [PreSeq](https://doi.org/10.1038/nmeth.2375)
 
   > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
+
+- [endorS.py](https://doi.org/10.7717/peerj.10947)
+
+  > Fellows Yates JA, Lamnidis TC, Borry M, Valtueña Andrades A, Fagernäs Z, Clayton S, Garcia MU, Neukamm J, Peltzer A. 2021. Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager. PeerJ 9:e10947. doi: [10.7717/peerj.10947](https://doi.org/10.7717/peerj.10947)
+
+- [mapDamage2](https://doi.org/10.1093/bioinformatics/btt193)
+
+  > Jónsson H, Ginolhac A, Schubert M, Johnson P, Orlando L. mapDamage2.0: fast approximate Bayesian estimates of ancient DNA damage parameters. Bioinformatics 2013. 23rd April 2013. doi: [10.1093/bioinformatics/btt193](https://doi.org/10.1093/bioinformatics/btt193)
+
+- [PMDtools](https://doi.org/10.1073/pnas.1318934111)
+
+  > Skoglund P., Northoff B.H.,Shunkov M.V., Derevianko A., Pääbo S., Krause J., Jakobsson M. (2014) Separating ancient DNA from modern contamination in a Siberian Neandertal, Proceedings of the National Academy of Sciences USA doi: [10.1073/pnas.1318934111](https://doi.org/10.1073/pnas.1318934111)
+
+- [BamUtils](https://doi.org/10.1101/gr.176552.114)
+
+  > Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. doi: [10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114)
 
 - [QualiMap](https://doi.org/10.1093/bioinformatics/btv566)
 
@@ -85,5 +117,8 @@
 
 - [Docker](https://dl.acm.org/doi/10.5555/2600239.2600241)
 
+  > Merkel, D. (2014). Docker: lightweight linux containers for consistent development and deployment. Linux Journal, 2014(239), 2. doi: 10.5555/2600239.2600241.
+
 - [Singularity](https://pubmed.ncbi.nlm.nih.gov/28494014/)
+
   > Kurtzer GM, Sochat V, Bauer MW. Singularity: Scientific containers for mobility of compute. PLoS One. 2017 May 11;12(5):e0177459. doi: 10.1371/journal.pone.0177459. eCollection 2017. PubMed PMID: 28494014; PubMed Central PMCID: PMC5426675.
