@@ -17,20 +17,14 @@ workflow CALCULATE_DAMAGE {
     //From deduplicate.nf
     ch_refs = fasta.join(fasta_fai)
         .map {
-            // Create additional map containing only meta.reference for combining samples and intervals
-            meta, fasta, fai ->
-                meta2 = [:]
-                meta2.reference = meta.id
-            [ meta2, meta, fasta, fai ]
+            // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+            WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
         }
     // Ensure input bam matches the regions file
     ch_damageprofiler_input = ch_bam_bai
         .map {
-            // Create additional map containing only meta.reference for combining with intervals for reference
-            meta, bam, bai ->
-                meta2 = [:]
-                meta2.reference = meta.reference
-            [ meta2, meta, bam, bai ]
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
         }
         .combine(
                 by:0,
