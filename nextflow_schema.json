@@ -992,7 +992,7 @@
                     "type": "boolean",
                     "description": "Turn on ability to calculate no. reads, depth and breadth coverage of features in reference.",
                     "fa_icon": "fas fa-chart-area",
-                    "help_text": "Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.\n"
+                    "help_text": "Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.\n\n> Modifies tool parameter(s):\n- bedtools coverage: `-mean`"
                 },
                 "mapstats_bedtools_featurefile": {
                     "type": "string",
