@@ -139,12 +139,12 @@ workflow GENOTYPE {
     }
 
     emit:
-    pileupcaller_genotypes          = ch_pileupcaller_genotypes          // [ [ meta ], geno, snp, ind ]
-    gatk_haplotypecaller_genotypes  = ch_gatk_haplotypecaller_genotypes  // [ [ meta ], vcf ] ]
-    gatk_unifiedgenotyper_genotypes = ch_gatk_unifiedgenotyper_genotypes // [ [ meta ], vcf ] ]
-    freebayes_genotypes             = ch_freebayes_genotypes             // [ [ meta ], vcf ] ]
-    angsd_genotypes                 = ch_angsd_genotypes                 // [ [ meta ], glf ] ]
-    versions                        = ch_versions
-    mqc                             = ch_multiqc_files
+    geno_pileupcaller = ch_pileupcaller_genotypes          // [ [ meta ], geno, snp, ind ]
+    geno_gatk_hc      = ch_gatk_haplotypecaller_genotypes  // [ [ meta ], vcf ] ]
+    geno_gatk_ug      = ch_gatk_unifiedgenotyper_genotypes // [ [ meta ], vcf ] ]
+    geno_freebayes    = ch_freebayes_genotypes             // [ [ meta ], vcf ] ]
+    geno_angsd        = ch_angsd_genotypes                 // [ [ meta ], glf ] ]
+    versions          = ch_versions
+    mqc               = ch_multiqc_files
 
 }
