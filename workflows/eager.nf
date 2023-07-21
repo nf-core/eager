@@ -98,8 +98,8 @@ include { MTNUCRATIO                                        } from '../modules/n
 include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
 include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
-include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main' 
-include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf' 
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
+include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
 include { QUALIMAP_BAMQC              } from '../modules/nf-core/qualimap/bamqc/main'
 
 
@@ -157,11 +157,11 @@ workflow EAGER {
         file(params.input)
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-    
+
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
-    
+
     //
     // SUBWORKFLOW: Indexing of reference files
     //
@@ -291,6 +291,7 @@ workflow EAGER {
                 [ meta, bam ]
             }
         QUALIMAP_BAMQC(ch_qualimap_input, ch_snpcapture_bed)
+        ch_versions = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
     }
 
     //
@@ -418,9 +419,9 @@ workflow EAGER {
 
 
     //
-    // MODULE: Bedtools coverage 
+    // MODULE: Bedtools coverage
     //
-    
+
     if ( params.run_bedtools_coverage ) {
 
         ch_anno_for_bedtools = Channel.fromPath(params.mapstats_bedtools_featurefile, checkIfExists: true).collect()
@@ -435,7 +436,7 @@ workflow EAGER {
         SAMTOOLS_VIEW_GENOME(ch_dedupped_bams)
 
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
-        
+
         BEDTOOLS_COVERAGE_BREADTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
         BEDTOOLS_COVERAGE_DEPTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
 
@@ -443,7 +444,7 @@ workflow EAGER {
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
     }
-    
+
 
     //
     // SUBWORKFLOW: Calculate Damage
