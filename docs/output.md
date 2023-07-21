@@ -325,6 +325,8 @@ These curves will be displayed in the pipeline run's MultiQC report, however you
 
 The `bedtools coverage` tool computes both the depth and breadth of coverage of features in file B (alignment file) on the features in file A (provied by `--mapstats_bedtools_featurefile` when running the eager workflow). One advantage that bedtools coverage offers is that it not only counts the number of features that overlap an interval in file A, it also computes the fraction of bases in the interval in A that were overlapped by one or more features. Thus, bedtools coverage also computes the breadth of coverage observed for each interval in A.
 
+The output from this module can be useful for things such as checking for the presence/absence of virulence factors in ancient pathogen genomes, or getting statistics on SNP capture positions.
+
 ### Damage Manipulation
 
 There are three different options for manipulation of ancient DNA damage.
