@@ -3,7 +3,7 @@
 //
 
 include { FILTER_BAM_FRAGMENT_LENGTH                      } from '../../modules/local/filter_bam_fragment_length'
-include { SAMTOOLS_VIEW                                   } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW  as SAMTOOLS_VIEW_BAM_FILTERING   } from '../../modules/nf-core/samtools/view/main'
 include { SAMTOOLS_INDEX as SAMTOOLS_LENGTH_FILTER_INDEX  } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_INDEX as SAMTOOLS_FILTER_INDEX         } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_FILTERED } from '../../modules/nf-core/samtools/flagstat/main'
@@ -21,6 +21,7 @@ workflow FILTER_BAM {
     main:
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
+    ch_flagstats_file = Channel.empty()
 
     //
     // GENOMICS BAM GENERATION
@@ -47,19 +48,20 @@ workflow FILTER_BAM {
     // Generate BAM file of quality filtered and mapped-only reads,
     // optionally retaining unmapped reads, defined in modules.config
 
-    SAMTOOLS_VIEW ( ch_bam_for_qualityfilter, [], [] ) // fasta isn't needed until we support CRAM
-    ch_versions = ch_versions.mix( SAMTOOLS_VIEW.out.versions.first() )
+    SAMTOOLS_VIEW_BAM_FILTERING ( ch_bam_for_qualityfilter, [], [] ) // fasta isn't needed until we support CRAM
+    ch_versions = ch_versions.mix( SAMTOOLS_VIEW_BAM_FILTERING.out.versions.first() )
 
-    SAMTOOLS_FILTER_INDEX ( SAMTOOLS_VIEW.out.bam )
+    SAMTOOLS_FILTER_INDEX ( SAMTOOLS_VIEW_BAM_FILTERING.out.bam )
     ch_versions = ch_versions.mix( SAMTOOLS_FILTER_INDEX.out.versions.first() )
 
-    ch_bam_for_genomics = SAMTOOLS_VIEW.out.bam.join( SAMTOOLS_FILTER_INDEX.out.bai )
+    ch_bam_for_genomics = SAMTOOLS_VIEW_BAM_FILTERING.out.bam.join( SAMTOOLS_FILTER_INDEX.out.bai )
 
     // Only run if we actually remove mapped reads
     if ( params.bamfiltering_mappingquality != 0 || params.bamfiltering_minreadlength != 0  ) {
         SAMTOOLS_FLAGSTAT_FILTERED ( ch_bam_for_genomics )
         ch_versions      = ch_versions.mix( SAMTOOLS_FLAGSTAT_FILTERED.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_FILTERED.out.flagstat )
+        ch_flagstats_file = ch_flagstats_file.mix( SAMTOOLS_FLAGSTAT_FILTERED.out.flagstat )
     }
 
     //
@@ -127,6 +129,7 @@ workflow FILTER_BAM {
     genomics         = ch_bam_for_genomics
     metagenomics     = ch_fastq_for_metagenomics
     versions         = ch_versions
+    flagstat         = ch_flagstats_file    // [ [ meta ], stats ]
     mqc              = ch_multiqc_files
 
 }
