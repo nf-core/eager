@@ -379,12 +379,6 @@ These curves will be displayed in the pipeline run's MultiQC report, however you
 
 #### QualiMap
 
-### Damage Manipulation
-
-There are three different options for manipulation of ancient DNA damage.
-
-#### Damage Rescaling
-
 <details markdown="1">
 <summary>Output files</summary>
 
@@ -409,7 +403,13 @@ is a tool which provides statistics on the quality of the mapping of your reads 
 You will receive output for each sample. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
 
 > ⚠️ Warning: If your library has no reads mapping to the reference, this will result in an empty BAM file. Qualimap will therefore not produce any output even if a BAM exists!
-=======
+
+### Damage Manipulation
+
+There are three different options for manipulation of ancient DNA damage.
+
+#### Damage Rescaling
+
 - `damage_manipulation/`
 
   - `*_rescaled.bam`: Reads with their base qualities rescaled according to the bayesian aDNA damage model, in BAM format.

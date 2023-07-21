@@ -73,10 +73,11 @@
 - [PreSeq](https://doi.org/10.1038/nmeth.2375)
 
   > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
+
 - [QualiMap](https://doi.org/10.1093/bioinformatics/btv566)
 
   > QualiMap Okonechnikov, K., Conesa, A., & García-Alcalde, F. (2016). Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. Bioinformatics , 32(2), 292–294. Download: http://qualimap.bioinfo.cipf.es/
-=======
+
 - [endorS.py](https://doi.org/10.7717/peerj.10947)
 
   > Fellows Yates JA, Lamnidis TC, Borry M, Valtueña Andrades A, Fagernäs Z, Clayton S, Garcia MU, Neukamm J, Peltzer A. 2021. Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager. PeerJ 9:e10947. doi: [10.7717/peerj.10947](https://doi.org/10.7717/peerj.10947)
