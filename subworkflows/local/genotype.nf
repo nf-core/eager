@@ -63,26 +63,14 @@ workflow GENOTYPE {
                     dict:  [ ref_meta, dict ]
             }
 
-        GATK_REALIGNERTARGETCREATOR( ch_input_for_targetcreator.bam, ch_input_for_targetcreator.fasta, ch_input_for_targetcreator.fai, ch_input_for_targetcreator.dict, [[], []] )
+        GATK_REALIGNERTARGETCREATOR(
+            ch_input_for_targetcreator.bam,
+            ch_input_for_targetcreator.fasta,
+            ch_input_for_targetcreator.fai,
+            ch_input_for_targetcreator.dict,
+            [[], []] // No known_vcf
+        )
         ch_versions = ch_versions.mix( GATK_REALIGNERTARGETCREATOR.out.versions.first() )
-
-
-        // ch_input_for_indelrealigner = ch_bam_bai
-        //     // TODO can I join to ch_bams_for_multimap instead? or will that break ordering?
-        //     .join( GATK_REALIGNERTARGETCREATOR.out.intervals )
-        //     .map {
-        //     // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-        //         WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
-        //     }
-        // ch_input_for_indelrealigner = ch_bams_for_multimap
-        //     .combine( ch_fasta_for_multimap , by:0 )
-        //     .multiMap {
-        //         ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, mapindex, circular_target, mitochondrion  ->
-        //             bam: [ meta, bam, bai ]
-        //             fasta: fasta // no meta needed for fasta in GATK_* modules // TODO add meta once modules get updated [ ref_meta, fasta ]
-        //             fai:   fai   // no meta needed for fai in GATK_* modules   // TODO add meta once modules get updated [ ref_meta, fai ]
-        //             dict:  dict  // no meta needed for dict in GATK_* modules  // TODO add meta once modules get updated [ ref_meta, dict ]
-        //     }
 
         // Join the bam/bai pairs to the intervals file, then redo multiMap to get the correct ordering for each bam/reference/intervals set.
         ch_input_for_indelrealigner = ch_bam_bai
@@ -100,13 +88,40 @@ workflow GENOTYPE {
                     dict:  [ ref_meta, dict ]
             }
 
-        GATK_INDELREALIGNER( ch_input_for_indelrealigner.bam, ch_input_for_indelrealigner.fasta, ch_input_for_indelrealigner.fai, ch_input_for_indelrealigner.dict, [[], []] )
+        GATK_INDELREALIGNER(
+            ch_input_for_indelrealigner.bam,
+            ch_input_for_indelrealigner.fasta,
+            ch_input_for_indelrealigner.fai,
+            ch_input_for_indelrealigner.dict,
+            [[], []] // No known_vcf
+        )
         ch_versions = ch_versions.mix( GATK_INDELREALIGNER.out.versions.first() ) // TODO is this actually needed, since all GATK modules have the same version?
 
-        // Use realigned bams as input for UG.
+        // Use realigned bams as input for UG. combine with reference info to get correct ordering.
         ch_bams_for_ug = GATK_INDELREALIGNER.out.bam
+            .map {
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+            .combine( ch_fasta_for_multimap , by:0 )
+            .multiMap {
+                ignore_me, meta, bam, bai, intervals, ref_meta, fasta, fai, dict -> // TODO add dbSNP
+                    bam: [ meta, bam, bai, intervals ]
+                    fasta: [ ref_meta, fasta ]
+                    fai:   [ ref_meta, fai ]
+                    dict:  [ ref_meta, dict ]
+                    // dbsnp: [ ref_meta, dbsnp ] // TODO add dbsnp
+            }
 
-        // GATK_UNIFIEDGENOTYPER()
+        GATK_UNIFIEDGENOTYPER(
+            ch_bams_for_ug.bam,
+            ch_bams_for_ug.fasta,
+            ch_bams_for_ug.fai,
+            ch_bams_for_ug.dict,
+            [[], []], // No intervals
+            [[], []], // No contamination
+            [[], []], // No dbsnp //TODO add dbsnp // ch_bams_for_ug.dbsnp
+            [[], []]  // No comp
+        )
     }
 
     if ( params.genotyping_tool == 'hc' ) {
