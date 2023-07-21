@@ -998,6 +998,28 @@
                 }
             }
         },
+        "feature_annotation_statistics": {
+            "title": "Feature Annotation Statistics",
+            "type": "object",
+            "description": "Options for getting reference annotation statistics (e.g. gene coverages)",
+            "default": "",
+            "properties": {
+                "run_bedtools_coverage": {
+                    "type": "boolean",
+                    "description": "Turn on ability to calculate no. reads, depth and breadth coverage of features in reference.",
+                    "fa_icon": "fas fa-chart-area",
+                    "help_text": "Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.\n\n> Modifies tool parameter(s):\n- bedtools coverage: `-mean`"
+                },
+                "mapstats_bedtools_featurefile": {
+                    "type": "string",
+                    "description": "Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.",
+                    "fa_icon": "fas fa-file-signature",
+                    "help_text": "Specify the path to a GFF/BED containing the feature coordinates (or any acceptable input for [`bedtools coverage`](https://bedtools.readthedocs.io/en/latest/content/tools/coverage.html)). Must be in quotes.\n"
+                }
+            },
+            "fa_icon": "fas fa-scroll",
+            "help_text": "If you're interested in looking at coverage stats for certain features on your\nreference such as genes, SNPs etc., you can use the following bedtools module\nfor this purpose.\n\nMore documentation on bedtools can be seen in the [bedtools\ndocumentation](https://bedtools.readthedocs.io/en/latest/)\n\nIf using TSV input, bedtools is run after library merging of same-named library\nBAMs that have the same type of UDG treatment.\n"
+        },
         "host_removal": {
             "title": "Host Removal",
             "type": "object",
@@ -1133,6 +1155,9 @@
         },
         {
             "$ref": "#/definitions/host_removal"
+        },
+        {
+            "$ref": "#/definitions/feature_annotation_statistics"
         }
     ]
 }
