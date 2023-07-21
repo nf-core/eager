@@ -11,4 +11,3 @@ testing*
 *.pyc
 bin/
 *.cff
-test/

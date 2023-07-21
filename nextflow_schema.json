@@ -15,9 +15,9 @@
                 "input": {
                     "type": "string",
                     "format": "file-path",
-                    "exists": true,
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.(c|t)sv$",
+                    "schema": "assets/schema_input.json",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/eager/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
@@ -51,11 +51,10 @@
                 "fasta": {
                     "type": "string",
                     "format": "file-path",
-                    "exists": true,
                     "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$|^\\S+\\.(c|t)sv$",
+                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
                     "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't supply a mapper index (e.g. for BWA), this will be generated for you automatically. Combine with `--save_reference` to save mapper index for future runs.",
+                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
                     "fa_icon": "far fa-file-code"
                 },
                 "fasta_fai": {
@@ -76,7 +75,8 @@
                     "type": "string",
                     "default": "None",
                     "description": "Path to directory containing index files of the FASTA for a given mapper.",
-                    "help_text": "For most people this will likely be the same directory that contains the file you provided to `--fasta`.\n\nIf you want to use pre-existing `bwa index` indices, the directory should contain files ending in '.amb' '.ann' '.bwt'. If you want to use pre-existing `bowtie2 build` indices, the directory should contain files ending in'.1.bt2', '.2.bt2', '.rev.1.bt2'. \n\nIn any case do not include the files themselves in the path. nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa index`/`bowtie2 build` file suffixes.  If not supplied, the indices will be generated for you.\n\n"
+                    "help_text": "For most people this will likely be the same directory that contains the file you provided to `--fasta`.\n\nIf you want to use pre-existing `bwa index` indices, the directory should contain files ending in '.amb' '.ann' '.bwt'. If you want to use pre-existing `bowtie2 build` indices, the directory should contain files ending in'.1.bt2', '.2.bt2', '.rev.1.bt2'. \n\nIn any case do not include the files themselves in the path.  nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa index`/`bowtie2 build` file suffixes.  If not supplied will be made for you.\n\n",
+                    "fa_icon": "fas fa-address-book"
                 },
                 "save_reference": {
                     "type": "boolean",
@@ -105,18 +105,6 @@
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
-                },
-                "fasta_circular_target": {
-                    "type": "string",
-                    "description": "Specify the FASTA header of the target chromosome to extend. Only applies when using `circularmapper`.",
-                    "help_text": "The entry (chromosome, contig, etc.) in your FASTA reference that you'd like to be treated as circular.\n\nApplies only when providing a single FASTA file via `--fasta` (NOT multi-reference input - see reference TSV/CSV input).\n\n> Modifies tool parameter(s):\n> - circulargenerator `-s`\n",
-                    "fa_icon": "fas fa-bullseye"
-                },
-                "fasta_mitochondrion_header": {
-                    "type": "string",
-                    "fa_icon": "fas fa-tag",
-                    "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome, up to the first space. Only applies when using `--run_mtnucratio`.",
-                    "help_text": "Specify the FASTA entry in the reference file specified as `--fasta` that acts as the mitochondrial 'chromosome' to base a mitochondrial-to-nuclear ratio calculation on. \n\nThe tool only accepts the first section of the header before the first space. For example, mitochondrion chromosome name is `MT` for the hs37d5/GrCH37 human reference genome.\n"
                 }
             }
         },
@@ -197,7 +185,7 @@
                     "description": "Maximum amount of time that can be requested for any single job.",
                     "default": "240.h",
                     "fa_icon": "far fa-clock",
-                    "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
+                    "pattern": "^(\\d+\\.?\\s*(s|m|h|day)\\s*)+$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
                 }
@@ -214,14 +202,12 @@
                     "type": "boolean",
                     "description": "Display help text.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "publish_dir_mode": {
@@ -245,7 +231,6 @@
                     "type": "boolean",
                     "description": "Send plain-text email instead of HTML.",
                     "fa_icon": "fas fa-remove-format",
-                    "default": false,
                     "hidden": true
                 },
                 "max_multiqc_email_size": {
@@ -260,7 +245,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "default": false,
                     "hidden": true
                 },
                 "hook_url": {
@@ -272,7 +256,6 @@
                 },
                 "multiqc_config": {
                     "type": "string",
-                    "format": "file-path",
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
                     "hidden": true
@@ -288,6 +271,13 @@
                     "description": "Custom MultiQC yaml file containing HTML including a methods description.",
                     "fa_icon": "fas fa-cog"
                 },
+                "tracedir": {
+                    "type": "string",
+                    "description": "Directory to keep pipeline Nextflow logs and reports.",
+                    "default": "${params.outdir}/pipeline_info",
+                    "fa_icon": "fas fa-cogs",
+                    "hidden": true
+                },
                 "validate_params": {
                     "type": "boolean",
                     "description": "Boolean whether to validate parameters against the schema at runtime",
@@ -295,29 +285,12 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "validationShowHiddenParams": {
+                "show_hidden_params": {
                     "type": "boolean",
                     "fa_icon": "far fa-eye-slash",
                     "description": "Show all params when using `--help`",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
-                },
-                "validationFailUnrecognisedParams": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters fails when an unrecognised parameter is found.",
-                    "default": false,
-                    "hidden": true,
-                    "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
-                },
-                "validationLenientMode": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters in lenient more.",
-                    "default": false,
-                    "hidden": true,
-                    "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
             }
         },
@@ -425,7 +398,7 @@
                     "type": "integer",
                     "default": 10,
                     "description": "Specify the complexity threshold that must be reached or exceeded to retain reads.",
-                    "help_text": "This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming.\n\n> Modifies fastp parameter: `--poly_g_min_len`",
+                    "help_text": "This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming. By default, this is set to a value of 10 unless the user has chosen something specifically using this option.\n\n> Modifies fastp parameter: `--poly_g_min_len`",
                     "fa_icon": "fas fa-ruler"
                 },
                 "preprocessing_adapterremoval_preserve5p": {
@@ -444,7 +417,7 @@
                     "type": "integer",
                     "default": 20,
                     "description": "Specify AdapterRemoval minimum base quality for trimming off bases.",
-                    "help_text": "Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off.\n\n> Modifies AdapterRemoval parameter: `--minquality`",
+                    "help_text": "Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off. Default is set to 20.\n\n> Modifies AdapterRemoval parameter: `--minquality`",
                     "fa_icon": "fas fa-ruler-vertical"
                 },
                 "preprocessing_adapterremoval_skipntrimming": {
@@ -481,7 +454,7 @@
                     "default": "bowtie2",
                     "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper"],
                     "description": "Specify which mapper to use.",
-                    "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming).\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)",
+                    "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). Default is 'bwaaln'\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)",
                     "fa_icon": "fas fa-layer-group"
                 },
                 "fasta_largeref": {
@@ -536,7 +509,7 @@
                     "type": "string",
                     "default": "local",
                     "description": "Specify the bowtie2 alignment mode.",
-                    "help_text": "The type of read alignment to use. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. \nDefault is set following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full)\n\n> Modifies Bowtie2 presets: `--local`, `--end-to-end`",
+                    "help_text": "The type of read alignment to use. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. \nDefault: 'local', following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full)\n\n> Modifies Bowtie2 presets: `--local`, `--end-to-end`",
                     "fa_icon": "fas fa-arrows-alt-h",
                     "enum": ["local", "end-to-end"]
                 },
@@ -544,7 +517,7 @@
                     "type": "string",
                     "default": "sensitive",
                     "description": "Specify the level of sensitivity for the bowtie2 alignment mode.",
-                    "help_text": "The Bowtie2 'preset' to use. These strings apply to both --mapping_bowtie2_alignmode options. See the Bowtie2 manual for actual settings. \nDefault is set following [Poullet and Orlando (2020)](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full), when running damaged-data without UDG treatment)\n\nModifies the Bowtie2 parameters: `--fast`, `--very-fast`, `--sensitive`, `--very-sensitive`, `--fast-local`, `--very-fast-local`, `--sensitive-local`, `--very-sensitive-local`",
+                    "help_text": "The Bowtie2 'preset' to use. These strings apply to both --mapping_bowtie2_alignmode options. See the Bowtie2 manual for actual settings. \nDefault: 'sensitive' (following [Poullet and Orlando (2020)](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full), when running damaged-data without UDG treatment)\n\nModifies the Bowtie2 parameters: `--fast`, `--very-fast`, `--sensitive`, `--very-sensitive`, `--fast-local`, `--very-fast-local`, `--sensitive-local`, `--very-sensitive-local`",
                     "fa_icon": "fas fa-microscope",
                     "enum": ["fast", "very-fast", "sensitive", "very-sensitive"]
                 },
@@ -726,154 +699,12 @@
                     "type": "string",
                     "default": "markduplicates",
                     "description": "Specify which tool to use for deduplication.",
-                    "help_text": "Sets the duplicate read removal tool. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> \u26a0\ufe0f DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
+                    "help_text": "Sets the duplicate read removal tool. By default uses `markduplicates` from Picard. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> \u26a0\ufe0f DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
                     "enum": ["markduplicates", "dedup"],
                     "fa_icon": "fas fa-layer-group"
                 }
             },
             "fa_icon": "fas fa-clone"
-        },
-        "damage_manipulation": {
-            "title": "Damage Manipulation",
-            "type": "object",
-            "description": "Options for filtering for, trimming or rescaling characteristic ancient DNA damage patterns",
-            "default": "",
-            "fa_icon": "fas fa-chart-line",
-            "properties": {
-                "run_mapdamage_rescaling": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-map",
-                    "description": "Turn on damage rescaling of BAM files using mapDamage2 to probabilistically remove damage.",
-                    "help_text": "Turns on mapDamage2's BAM rescaling functionality. This probabilistically replaces Ts back to Cs depending on the likelihood this reference-mismatch was originally caused by damage. If the library is specified to be single stranded, this will automatically use the --single-stranded mode.\nThis process will ameliorate the effects of aDNA damage, but also increase reference-bias. \n\n**This functionality does not have any MultiQC output.**\nwarning: rescaled libraries will not be merged with non-scaled libraries of the same sample for downstream genotyping, as the model may be different for each library. If you wish to merge these, please do this manually and re-run nf-core/eager using the merged BAMs as input.\n\n> Modifies the `--rescale` parameter of mapDamage2"
-                },
-                "damage_manipulation_rescale_seqlength": {
-                    "type": "integer",
-                    "default": 12,
-                    "description": "Length of read sequence to use from each side for rescaling. Can be overridden by `--rescalelength*p`.",
-                    "help_text": "Specify the length in bp from the end of the read that mapDamage should rescale at both ends.\n\n> Modifies the `--seq-length` parameter of mapDamage2.",
-                    "fa_icon": "fas fa-ruler-horizontal"
-                },
-                "damage_manipulation_rescale_length_5p": {
-                    "type": "integer",
-                    "default": 0,
-                    "description": "Length of read for mapDamage2 to rescale from 5p end. Only used if not 0, otherwise `--rescale_seqlength` used.",
-                    "help_text": "Specify the length in bp from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-5p` parameter of mapDamage2.",
-                    "fa_icon": "fas fa-balance-scale-right"
-                },
-                "damage_manipulation_rescale_length_3p": {
-                    "type": "integer",
-                    "default": 0,
-                    "description": "Length of read for mapDamage2 to rescale from 3p end. Only used if not 0 otherwise `--rescale_seqlength` used.",
-                    "help_text": "Specify the length in bp from the end of the read that mapDamage should rescale. Overrides `--rescale_seqlength`.\n\n> Modifies the `--rescale-length-3p` parameter of mapDamage2.",
-                    "fa_icon": "fas fa-balance-scale-left"
-                },
-                "run_pmd_filtering": {
-                    "type": "boolean",
-                    "description": "Turn on PMDtools filtering.",
-                    "help_text": "Specifies to run PMDtools for damage based read filtering in sequencing libraries.",
-                    "fa_icon": "fas fa-power-off"
-                },
-                "damage_manipulation_pmdtools_threshold": {
-                    "type": "integer",
-                    "default": 3,
-                    "fa_icon": "far fa-chart-bar",
-                    "description": "Specify PMDScore threshold for PMDtools.",
-                    "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis.\n\n> Modifies PMDtools parameter: `--threshold`"
-                },
-                "damage_manipulation_pmdtools_reference_mask": {
-                    "type": "string",
-                    "fa_icon": "fas fa-mask",
-                    "help_text": "Supplying a bedfile to this parameter activates masking of the reference fasta at the contained sites prior to running PMDtools. Positions that are in the provided bedfile will be replaced by Ns in the reference genome. \nThis can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a transition SNP to be counted as damage. Masking of the reference is done using `bedtools maskfasta`.",
-                    "description": "Specify a bedfile to be used to mask the reference fasta prior to running pmdtools.",
-                    "pattern": "^\\S+\\.bed$",
-                    "format": "file-path"
-                },
-                "run_trim_bam": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-eraser",
-                    "description": "Turn on BAM trimming. Will only affect non-UDG or half-UDG libraries.",
-                    "help_text": "Turns on the BAM trimming method. Trims off [n] bases from reads in the deduplicated BAM file. Damage assessment in PMDtools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only affect libraries with 'damage_treatment' of  'none' or 'half'. Complete UDG treatment ('full') should have removed all damage, during library construction so trimming of 0 bp is performed. The amount of bases that will be trimmed off from each side of the molecule should be set separately for libraries with depending on their 'strandedness' and 'damage_treatment'.\n\n> Note: additional artefacts such as bar-codes or adapters should be removed prior to mapping and not in this step."
-                },
-                "damage_manipulation_bamutils_trim_double_stranded_none_udg_left": {
-                    "type": "integer",
-                    "default": 0,
-                    "fa_icon": "fas fa-ruler-combined",
-                    "description": "Specify the number of bases to clip off reads from 'left' end of read for double-stranded non-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`"
-                },
-                "damage_manipulation_bamutils_trim_double_stranded_none_udg_right": {
-                    "type": "integer",
-                    "default": 0,
-                    "fa_icon": "fas fa-ruler",
-                    "description": "Specify the number of bases to clip off reads from 'right' end of read for double-stranded non-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
-                },
-                "damage_manipulation_bamutils_trim_double_stranded_half_udg_left": {
-                    "type": "integer",
-                    "default": 0,
-                    "fa_icon": "fas fa-ruler-combined",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
-                    "description": "Specify the number of bases to clip off reads from 'left' end of read for double-stranded half-UDG libraries."
-                },
-                "damage_manipulation_bamutils_trim_double_stranded_half_udg_right": {
-                    "type": "integer",
-                    "default": 0,
-                    "fa_icon": "fas fa-ruler",
-                    "description": "Specify the number of bases to clip off reads from 'right' end of read for double-stranded half-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
-                },
-                "damage_manipulation_bamutils_trim_single_stranded_none_udg_left": {
-                    "type": "integer",
-                    "default": 0,
-                    "fa_icon": "fas fa-ruler-combined",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
-                    "description": "Specify the number of bases to clip off reads from 'left' end of read for single-stranded non-UDG libraries."
-                },
-                "damage_manipulation_bamutils_trim_single_stranded_none_udg_right": {
-                    "type": "integer",
-                    "default": 0,
-                    "fa_icon": "fas fa-ruler",
-                    "description": "Specify the number of bases to clip off reads from 'right' end of read for single-stranded non-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
-                },
-                "damage_manipulation_bamutils_trim_single_stranded_half_udg_left": {
-                    "type": "integer",
-                    "default": 0,
-                    "fa_icon": "fas fa-ruler-combined",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
-                    "description": "Specify the number of bases to clip off reads from 'left' end of read for single-stranded half-UDG libraries."
-                },
-                "damage_manipulation_bamutils_trim_single_stranded_half_udg_right": {
-                    "type": "integer",
-                    "default": 0,
-                    "fa_icon": "fas fa-ruler",
-                    "description": "Specify the number of bases to clip off reads from 'right' end of read for single-stranded half-UDG libraries.",
-                    "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
-                },
-                "damage_manipulation_bamutils_softclip": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-paint-roller",
-                    "description": "Turn on using soft-trimming instead of hard masking.",
-                    "help_text": "By default, nf-core/eager uses hard trimming, which sets trimmed bases to 'N' with quality '!' in the BAM output. Turn this on to use soft-trimming instead, which masks reads at the read ends using the CIGAR string instead.\n\n> Modifies bam trimBam parameter: `-c`"
-                }
-            }
-        },
-        "genotyping": {
-            "title": "Genotyping",
-            "type": "object",
-            "description": "Options for variant calling",
-            "default": "",
-            "properties": {
-                "genotyping_source": {
-                    "type": "string",
-                    "default": "raw",
-                    "description": "Specify which input BAM to use for genotyping.",
-                    "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' (to use the reads used as input for damage manipulation); 'pmd' (for pmdtools output); 'trimmed' (for base-clipped BAMs. Base-clipped-PMD-filtered BAMs if both filtering and trimming are requested); 'rescaled' (for mapDamage2 rescaling output).\nWarning: Depending on the parameters you provided, 'raw' can refer to all mapped reads, filtered reads (if bam filtering has been performed), or the deduplicated reads (if deduplication was performed).",
-                    "fa_icon": "fas fa-faucet",
-                    "enum": ["raw", "pmd", "trimmed", "rescaled"]
-                }
-            },
-            "fa_icon": "fas fa-sliders-h"
         },
         "mitochondrial_to_nuclear_ratio": {
             "title": "Mitochondrial to Nuclear Ratio",
@@ -987,7 +818,7 @@
                     "type": "integer",
                     "default": 100,
                     "fa_icon": "fas fa-sort-amount-up",
-                    "description": "Specifies the length filter for DamageProfiler.",
+                    "description": "Specifies the length filter for DamageProfiler. By default set to 100.",
                     "help_text": "> Modifies DamageProfile parameter: -l "
                 },
                 "damageprofiler_threshold": {
@@ -995,94 +826,14 @@
                     "default": 15,
                     "description": "Specify number of bases of each read to consider for DamageProfiler calculations.",
                     "fa_icon": "fas fa-ruler-horizontal",
-                    "help_text": "Specifies the length of the read start and end to be considered for profile generation in DamageProfiler.\n\n> Modifies DamageProfile parameter: -t\n"
+                    "help_text": "Specifies the length of the read start and end to be considered for profile generation in DamageProfiler. By default set to 15 bases.\n\n> Modifies DamageProfile parameter: -t\n"
                 },
                 "damageprofiler_yaxis": {
                     "type": "number",
                     "default": 0.3,
                     "fa_icon": "fas fa-ruler-vertical",
                     "description": "Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'.",
-                    "help_text": "Specifies what the maximum misincorporation frequency should be displayed as, in the DamageProfiler damage plot. This is set to 0.30 (i.e. 30%) by default as this matches the popular [mapDamage2.0 program](https://ginolhac.github.io/mapDamage/). However, the default behavior of the DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any possible damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behavior can be turned on by specifying the number to 0.\n\n> Modifies DamageProfile parameter: -yaxis_dp_max"
-                }
-            }
-        },
-        "host_removal": {
-            "title": "Host Removal",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "run_host_removal": {
-                    "type": "boolean",
-                    "description": "Turn on per-lane creation of pre-adapter-removal and/or read-pair-merging FASTQ files without reads that mapped to reference (e.g. for public upload of privacy sensitive non-host data)",
-                    "help_text": "Recreates pre-adapter-removal and/or read-pair-merging FASTQ files but without reads that mapped to reference (e.g. for public upload of privacy-sensitive non-host data)",
-                    "fa_icon": "fas fa-power-off"
-                },
-                "host_removal_mode": {
-                    "type": "string",
-                    "default": "remove",
-                    "description": "Host-mapped read removal mode. Remove mapped reads completely from FASTQ (remove) or just mask the host sequence of mapped reads with N (replace).",
-                    "help_text": "Modifies extract_map_reads.py parameter: -m",
-                    "fa_icon": "fas fa-plane-slash",
-                    "enum": ["remove", "replace"]
-                }
-            },
-            "fa_icon": "fas fa-user-slash"
-        },
-        "contamination_estimation": {
-            "title": "Contamination estimation",
-            "type": "object",
-            "description": "Options for the estimation of contamination",
-            "default": "",
-            "fa_icon": "fas fa-radiation-alt",
-            "properties": {
-                "run_contamination_estimation_angsd": {
-                    "type": "boolean",
-                    "description": "Turn on nuclear contamination estimation for genomes with ANGSD.",
-                    "help_text": "Specify to run the optional processes for nuclear DNA contamination estimation with ANGSD.",
-                    "fa_icon": "fas fa-power-off"
-                },
-                "contamination_estimation_angsd_chrom_name": {
-                    "type": "string",
-                    "default": "X",
-                    "description": "The name of the chromosome to be used for contamination estimation.",
-                    "help_text": "The name of the chromosome as specified in your FASTA/bam header.\ne.g. 'X' for hs37d5, 'chrX' for HG19",
-                    "fa_icon": "fas fa-address-card"
-                },
-                "contamination_estimation_angsd_range_from": {
-                    "type": "integer",
-                    "default": 5000000,
-                    "description": "The first position on the chromosome to be used for contamination estimation with ANGSD.",
-                    "help_text": "The beginning of the genetic range that should be utilised for nuclear contamination estimation.",
-                    "fa_icon": "fas fa-map-marker-alt"
-                },
-                "contamination_estimation_angsd_range_to": {
-                    "type": "integer",
-                    "default": 154900000,
-                    "help_text": "The end of the genetic range that should be utilised for nuclear contamination estimation.",
-                    "description": "The last position on the chromosome to be used for contamination estimation with ANGSD.",
-                    "fa_icon": "fas fa-map-marker-alt"
-                },
-                "contamination_estimation_angsd_mapq": {
-                    "type": "integer",
-                    "default": 30,
-                    "help_text": "> Modifies angsd parameter: `-minMapQ`",
-                    "description": "Specify the minimum mapping quality reads should have for contamination estimation with ANGSD.",
-                    "fa_icon": "fas fa-thermometer-full"
-                },
-                "contamination_estimation_angsd_minq": {
-                    "type": "integer",
-                    "default": 30,
-                    "description": "Specify the minimum base quality reads should have for contamination estimation with ANGSD.",
-                    "help_text": "> Modifies angsd parameter: `-minQ`",
-                    "fa_icon": "fas fa-ruler-vertical"
-                },
-                "contamination_estimation_angsd_hapmap": {
-                    "type": "string",
-                    "default": "${baseDir}/assets/angsd_resources/HapMapChrX.gz",
-                    "description": "Path to HapMap file of chromosome for contamination estimation..",
-                    "help_text": "The haplotype map, or \"HapMap\", records the location of haplotype blocks and their tag SNPs.",
-                    "fa_icon": "fas fa-map"
+                    "help_text": "Specifies what the maximum misincorporation frequency should be displayed as, in the DamageProfiler damage plot. This is set to 0.30 (i.e. 30%) by default as this matches the popular [mapDamage2.0 program](https://ginolhac.github.io/mapDamage/). However, the default behavior of the DamageProfiler is to 'autoscale' the y-axis maximum to zoom in on any possible damage that may occur (e.g. if the damage is about 10%, the highest value on the y-axis would be set to 0.12). This 'autoscale' behavior can be turned on by specifying the number to 0. Default: 0.30.\n\n> Modifies DamageProfile parameter: -yaxis_dp_max"
                 }
             }
         }
@@ -1110,9 +861,6 @@
             "$ref": "#/definitions/mapping"
         },
         {
-            "$ref": "#/definitions/adna_damage_analysis"
-        },
-        {
             "$ref": "#/definitions/bam_filtering"
         },
         {
@@ -1128,19 +876,7 @@
             "$ref": "#/definitions/mapping_statistics"
         },
         {
-            "$ref": "#/definitions/damage_manipulation"
-        },
-        {
-            "$ref": "#/definitions/genotyping"
-        },
-        {
             "$ref": "#/definitions/adna_damage_analysis"
-        },
-        {
-            "$ref": "#/definitions/contamination_estimation"
-        },
-        {
-            "$ref": "#/definitions/host_removal"
         }
     ]
 }

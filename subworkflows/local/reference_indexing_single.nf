@@ -21,8 +21,10 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     ch_versions = Channel.empty()
 
-    def fasta_ext = WorkflowEager.grabUngzippedExtension(fasta)
+    def fasta_ext = grab_ungzipped_extension(fasta)
     def clean_name = fasta.name.toString() - fasta_ext
+
+    // TODO for all sections check if saving based on --save_reference
 
     // Detect if fasta is gzipped or not, unzip if necessary, and generate meta ID by sanitizing file
     if ( fasta.extension == 'gz' ) {
@@ -47,7 +49,7 @@ workflow REFERENCE_INDEXING_SINGLE {
         ch_fasta_dict = PICARD_CREATESEQUENCEDICTIONARY ( ch_ungz_ref ).reference_dict.map{[ [id: clean_name - '.fai'], it[1] ] }
         ch_versions = ch_versions.mix( PICARD_CREATESEQUENCEDICTIONARY.out.versions.first())
     } else {
-        ch_fasta_dict = Channel.fromPath(fasta_dict).map{[[id: clean_name], it ]}
+        ch_fasta_dict = Channel.fromPath(ch_fasta_dict).map{[[id: clean_name], it ]}
     }
 
     // Generate mapper indicies if not supplied, and if supplied generate meta
@@ -71,19 +73,24 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     }
 
-    // Join all together into a single map. failOnMismatch allows check if
+
+    // TODO: document that the 'base name' of all indicies must be the same, i.e. correspond to the FASTA
+
+    // Join all together into a single map. Include failOnMismatch as a check if
     // a user supplies indicies with different 'base' names.
-    ch_reference_for_mapping = ch_ungz_ref
-                                .join(ch_fasta_fai, failOnMismatch: true)
-                                .join(ch_fasta_dict, failOnMismatch: true)
-                                .join(ch_fasta_mapperindexdir, failOnMismatch: true)
-                                .map{
-                                    meta, fasta, fai, dict, mapper_index ->
-                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.fasta_mitochondrion_header ]
-                                }
+    ch_reference_for_mapping = ch_ungz_ref.join(ch_fasta_fai, failOnMismatch: true).join(ch_fasta_dict, failOnMismatch: true).join(ch_fasta_mapperindexdir, failOnMismatch: true)
 
     emit:
     reference = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex ]
     versions  = ch_versions
+
+}
+
+def grab_ungzipped_extension (Path infile) {
+
+    def split_name = infile.toString().tokenize('.')
+    def output = split_name.reverse().first() == 'gz' ? split_name.reverse()[1,0].join('.') : split_name.reverse()[0]
+
+    return '.' + output
 
 }
