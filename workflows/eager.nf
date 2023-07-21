@@ -142,11 +142,11 @@ workflow EAGER {
         file(params.input)
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-    
+
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
-    
+
     //
     // SUBWORKFLOW: Indexing of reference files
     //
@@ -438,12 +438,21 @@ workflow EAGER {
         ch_bams_for_genotyping = ch_dedupped_bams
     }
 
+    // TODO Merge library-level BAMs into sample-level BAMs for genotyping.
+
     //
     // SUBWORKFLOW: Genotyping
     //
 
     if ( params.run_genotyping ) {
-        GENOTYPE( ch_genotyping_input, ch_fasta )
+        ch_reference_for_genotyping = REFERENCE_INDEXING.out.reference
+            // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
+            .map{
+                meta, fasta, fai, dict, mapindex, circular_target, mitochondrion ->
+                [ meta, fasta, fai, dict ] // dbsnp ] // TODO add dbsnp to reference sheet.
+            }
+
+        GENOTYPE( ch_bams_for_genotyping, ch_reference_for_genotyping, [], [], [] )
 
         ch_versions      = ch_versions.mix( GENOTYPE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( GENOTYPE.out.mqc.collect{it[1]}.ifEmpty([]) )
