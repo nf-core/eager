@@ -350,9 +350,11 @@ workflow EAGER {
     
     if ( params.run_bedtools_coverage ) {
 
-        ch_dedupped_for_bedtools = ch_dedupped_bams.combine(ch_anno_for_bedtools).map{
-            meta, bam, bai, anno ->
-            [meta, anno, bam]}
+        ch_dedupped_for_bedtools = ch_dedupped_bams.combine(ch_anno_for_bedtools)
+        .map{
+              meta, bam, bai, anno ->
+                [meta, anno, bam]
+            }
 
         // Running samtools view to get header
         SAMTOOLS_VIEW_GENOME(ch_dedupped_bams)
