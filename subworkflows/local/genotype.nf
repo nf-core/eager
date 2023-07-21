@@ -123,6 +123,7 @@ workflow GENOTYPE {
             [[], []]  // No comp
         )
         ch_versions = ch_versions.mix( GATK_UNIFIEDGENOTYPER.out.versions.first() )
+        ch_gatk_unifiedgenotyper_genotypes = GATK_UNIFIEDGENOTYPER.out.vcf
     }
 
     if ( params.genotyping_tool == 'hc' ) {
