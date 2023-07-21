@@ -90,6 +90,7 @@ include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_
 include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS                       } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_INPUTBAM         } from '../modules/nf-core/samtools/fastq/main'
 include { SAMTOOLS_INDEX                                    } from '../modules/nf-core/samtools/index/main'
 include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
 include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
@@ -147,11 +148,40 @@ workflow EAGER {
         file(params.input)
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-    
+
+
+    // Convert input BAMs back to FASTQ for mixing (if required)
+    // TODO: BAM input is missing single end info, thus being discarded on the branch of PREPROCESSING_FASTP line 17
+    // TODO: fix output from th e SAMTOOLS_FASTQ as paired vs. single ends will come out differentlY! Will need to do a mixing of fastqs and other (I think)
+    // TODO: check FASTQ outputs in correct format (consider paired / single / singletons?)
+    // TODO: check metamap is equivalent
+    // TODO: update test.md
+    if ( params.convert_inputbam ) {
+        SAMTOOLS_FASTQ_INPUTBAM ( INPUT_CHECK.out.bams, false )
+
+        // Due to behaviour of samtools fasta, single-end or merged BAMs are dumped into an 'other' category
+        // We need to select whether to take pairs or just the other for downstream,
+        ch_picked_convertedfastqs = SAMTOOLS_FASTQ_INPUTBAM.out.fastq
+                                        .join(SAMTOOLS_FASTQ_INPUTBAM.out.out)
+                                        .map {
+                                            meta, reads ->
+
+                                            def new_reads = meta.single_end ? [ reads[2] ] : [ reads[0], reads[1] ]
+
+                                            [meta, new_reads]
+                                        }
+
+        ch_prepared_reads          = INPUT_CHECK.out.fastqs.mix( ch_picked_convertedfastqs ).dump(tag: "converted_bams_and_fastqs")
+        ch_input_bam_for_filtering = Channel.empty()
+    } else {
+        ch_prepared_reads          = INPUT_CHECK.out.fastqs.dump(tag: "input_fqs")
+        ch_input_bam_for_filtering = INPUT_CHECK.out.bams.dump(tag: "unconverted_bams")
+    }
+
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
-    
+
     //
     // SUBWORKFLOW: Indexing of reference files
     //
@@ -164,11 +194,11 @@ workflow EAGER {
     //
 
     if ( params.sequencing_qc_tool == "falco" ) {
-        FALCO ( INPUT_CHECK.out.fastqs )
+        FALCO ( ch_prepared_reads )
         ch_versions = ch_versions.mix( FALCO.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FALCO.out.txt.collect{it[1]}.ifEmpty([]) )
     } else {
-        FASTQC ( INPUT_CHECK.out.fastqs )
+        FASTQC ( ch_prepared_reads )
         ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FASTQC.out.zip.collect{it[1]}.ifEmpty([]) )
     }
@@ -178,12 +208,12 @@ workflow EAGER {
     //
 
     if ( !params.skip_preprocessing ) {
-        PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist )
+        PREPROCESSING ( ch_prepared_reads, adapterlist )
         ch_reads_for_mapping = PREPROCESSING.out.reads
         ch_versions          = ch_versions.mix( PREPROCESSING.out.versions )
         ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
-        ch_reads_for_mapping = INPUT_CHECK.out.fastqs
+        ch_reads_for_mapping = ch_prepared_reads
     }
 
     //
@@ -204,20 +234,20 @@ workflow EAGER {
     //  MODULE: indexing of user supplied input BAMs
     //
 
-    SAMTOOLS_INDEX ( INPUT_CHECK.out.bams )
+    SAMTOOLS_INDEX ( ch_input_bam_for_filtering )
     ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
 
     if ( params.fasta_largeref )
-        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.csi )
+        ch_bams_from_input = ch_input_bam_for_filtering.join( SAMTOOLS_INDEX.out.csi )
     else {
-        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.bai )
+        ch_bams_from_input = ch_input_bam_for_filtering.join( SAMTOOLS_INDEX.out.bai )
     }
 
 
     //
     // MODULE: flagstats of user supplied input BAMs
     //
-    ch_bam_bai_input = INPUT_CHECK.out.bams
+    ch_bam_bai_input = ch_input_bam_for_filtering
                             .join(SAMTOOLS_INDEX.out.bai)
 
     SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
@@ -286,11 +316,12 @@ workflow EAGER {
         // Preparing fastq channel for host removal to be combined with the bam channel
         // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
         // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
-        ch_fastqs_for_host_removal= INPUT_CHECK.out.fastqs.map{
-                                                        meta, fastqs ->
-                                                        new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
-                                                        [ new_meta, meta, fastqs ]
-                                                    }
+        ch_fastqs_for_host_removal= ch_prepared_reads
+                                        .map{
+                                            meta, fastqs ->
+                                            new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
+                                            [ new_meta, meta, fastqs ]
+                                        }
         // We join the bam and fastq channel with now matching metas (new_meta) referred as meta_join
         // and remove the meta_join from the final channel, keeping the original metas for the bam and the fastqs
         ch_input_for_host_removal = ch_bam_for_host_removal.join(ch_fastqs_for_host_removal)

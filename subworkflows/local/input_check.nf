@@ -89,6 +89,7 @@ def create_bam_channel(LinkedHashMap row) {
 
     meta.sample_id          = row.sample_id
     meta.library_id         = row.library_id
+    meta.single_end         = row.pairment == 'single'
     meta.strandedness       = row.strandedness
     meta.damage_treatment   = row.damage_treatment
     meta.reference          = row.bam_reference_id

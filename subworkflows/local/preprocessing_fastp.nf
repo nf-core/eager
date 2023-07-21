@@ -18,6 +18,8 @@ workflow PREPROCESSING_FASTP {
                             .branch{
                                 single: it[0]['single_end'] == true
                                 paired: it[0]['single_end'] == false
+                                other: true
+                                    return error("[nf-core/eager] ERROR: ${it[0].id} is missing an endedness meta field! Check input TSV.")
                             }
 
     FASTP_SINGLE ( ch_input_for_fastp.single, adapterlist, false, false )
