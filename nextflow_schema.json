@@ -214,14 +214,12 @@
                     "type": "boolean",
                     "description": "Display help text.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "publish_dir_mode": {
@@ -245,7 +243,6 @@
                     "type": "boolean",
                     "description": "Send plain-text email instead of HTML.",
                     "fa_icon": "fas fa-remove-format",
-                    "default": false,
                     "hidden": true
                 },
                 "max_multiqc_email_size": {
@@ -260,7 +257,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "default": false,
                     "hidden": true
                 },
                 "hook_url": {
@@ -299,7 +295,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-eye-slash",
                     "description": "Show all params when using `--help`",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
                 },
@@ -307,7 +302,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters fails when an unrecognised parameter is found.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
                 },
@@ -315,7 +309,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters in lenient more.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
@@ -884,6 +877,13 @@
                     "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does de novo assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute.",
                     "description": "Specify which genotyper to use between: GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller."
                 },
+                "run_bcftools_stats": {
+                    "type": "boolean",
+                    "default": true,
+                    "fa_icon": "far fa-chart-bar",
+                    "description": "Turn on bcftools stats generation for VCF based variant calling statistics",
+                    "help_text": "Runs `bcftools stats` against VCF files from GATK and FreeBayes genotypers.\n\nIt will automatically include the FASTA reference for INDEL-related statistics."
+                },
                 "genotyping_pileupcaller_min_base_quality": {
                     "type": "integer",
                     "default": 30,
@@ -926,9 +926,64 @@
                     "type": "string",
                     "default": "AllSites",
                     "description": "Specify the calling mode for transitions.",
-                    "help_text": "Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. \n\n> Modifies pileupCaller parameter: --skipTransitions --transitionsMissing",
+                    "help_text": "Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. \n\n> Modifies pileupCaller parameter: `--skipTransitions` `--transitionsMissing`",
                     "enum": ["AllSites", "TransitionsMissing", "SkipTransitions"],
                     "fa_icon": "fas fa-toggle-on"
+                },
+                "genotyping_gatk_call_conf": {
+                    "type": "integer",
+                    "default": 30,
+                    "fa_icon": "fas fa-balance-scale-right",
+                    "description": "Specify GATK phred-scaled confidence threshold.",
+                    "help_text": "If selected, specify a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call.\n\n> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `-stand_call_conf`"
+                },
+                "genotyping_gatk_ploidy": {
+                    "type": "integer",
+                    "default": 2,
+                    "fa_icon": "fas fa-pastafarianism",
+                    "description": "Specify GATK organism ploidy.",
+                    "help_text": "If selected, specify a GATK genotyper ploidy value of your reference organism. E.g. if you want to allow heterozygous calls from >= diploid organisms.\n\n> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: --sample-ploidy"
+                },
+                "genotyping_gatk_dbsnp": {
+                    "type": "string",
+                    "help_text": "(Optional) Specify VCF file for output VCF SNP annotation e.g. if you want to annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.",
+                    "fa_icon": "fas fa-pen-alt"
+                },
+                "genotyping_gatk_ug_downsample": {
+                    "type": "integer",
+                    "default": 250,
+                    "fa_icon": "fas fa-icicles",
+                    "description": "Maximum depth coverage allowed for genotyping before down-sampling is turned on.",
+                    "help_text": "Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to this many reads.\n\n> Modifies GATK UnifiedGenotyper parameter: `-dcov`"
+                },
+                "genotyping_gatk_ug_out_mode": {
+                    "type": "string",
+                    "default": "EMIT_VARIANTS_ONLY",
+                    "description": "Specify GATK output mode.",
+                    "enum": ["EMIT_VARIANTS_ONLY", "EMIT_ALL_CONFIDENT_SITES", "EMIT_ALL_SITES"],
+                    "help_text": "If the GATK UnifiedGenotyper is selected, what type of VCF to create, i.e. produce calls for every site or just confidence sites.\n\n> Modifies GATK UnifiedGenotyper parameter: `--output_mode`",
+                    "fa_icon": "fas fa-bullhorn"
+                },
+                "genotyping_gatk_ug_genotype_mode": {
+                    "type": "string",
+                    "default": "SNP",
+                    "description": "Specify UnifiedGenotyper likelihood model.",
+                    "enum": ["SNP", "INDEL", "BOTH", "GENERALPLOIDYSNP", "GENERALPLOIDYINDEL"],
+                    "fa_icon": "fas fa-project-diagram",
+                    "help_text": "If the GATK UnifiedGenotyper is selected, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc.\n\n> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`"
+                },
+                "genotyping_gatk_ug_keep_realign_bam": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-save",
+                    "description": "Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.",
+                    "help_text": "If provided when running GATK's UnifiedGenotyper, this will put into the output folder the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping.\n\nThese BAMs will be stored in the same folder as the corresponding VCF files."
+                },
+                "genotyping_gatk_ug_defaultbasequalities": {
+                    "type": "integer",
+                    "default": -1,
+                    "description": "Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.",
+                    "help_text": "When running GATK's UnifiedGenotyper, specify a value to set base quality scores, if reads are missing this information. Might be useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to `-1` which is to not set any default quality (turned off). \n\n> Modifies GATK UnifiedGenotyper parameter: `--defaultBaseQualities`",
+                    "fa_icon": "fas fa-redo-alt"
                 }
             },
             "fa_icon": "fas fa-sliders-h",
