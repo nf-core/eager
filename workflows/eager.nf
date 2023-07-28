@@ -292,7 +292,6 @@ workflow EAGER {
             }
         QUALIMAP_BAMQC(ch_qualimap_input, ch_snpcapture_bed)
         ch_versions      = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix( QUALIMAP_BAMQC.out.results.collect{it[1]}.ifEmpty([]) )
     }
 
     //
@@ -515,6 +514,10 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([])) // Replaced with custom mixing
+
+    if ( !params.skip_qualimap ) {
+        ch_multiqc_files = ch_multiqc_files.mix( QUALIMAP_BAMQC.out.results.collect{it[1]}.ifEmpty([]) )
+    }
 
     MULTIQC (
         ch_multiqc_files.collect(),
