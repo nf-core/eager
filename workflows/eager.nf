@@ -100,8 +100,7 @@ include { ENDORSPY                                          } from '../modules/n
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
 include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
-include { QUALIMAP_BAMQC              } from '../modules/nf-core/qualimap/bamqc/main'
-
+include { QUALIMAP_BAMQC                                    } from '../modules/nf-core/qualimap/bamqc/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,14 +139,13 @@ workflow EAGER {
 
     // QualiMap
     if ( params.snpcapture_bed ) {
-    ch_snpcapture_bed = Channel.fromPath(params.snpcapture_bed, checkIfExists: true).collect()
+      ch_snpcapture_bed = Channel.fromPath(params.snpcapture_bed, checkIfExists: true).collect()
     } else {
-    ch_snpcapture_bed = []
+      ch_snpcapture_bed = []
     }
 
     // Contamination estimation
     hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
-
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -157,7 +155,6 @@ workflow EAGER {
         file(params.input)
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
@@ -445,7 +442,6 @@ workflow EAGER {
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
     }
-
 
     //
     // SUBWORKFLOW: Calculate Damage
