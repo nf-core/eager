@@ -32,6 +32,22 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
             exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
     }
 }
+if ( params.run_metagenomics && ! params.metagenomics_profiling_database ) {
+    exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database")
+}
+
+if ( params.metagenomics_postprocessing_tool == 'maltextract' && params.metagenomics_profiling_tool != 'malt' ) {
+    exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'maltextract' can only be run with --metagenomics_profiling_tool 'malt'")
+}
+
+if ( params.metagenomics_postprocessing_tool == 'krakenmerge' || ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
+    exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'krakenmerge' can only be run with --metagenomics_profiling_tool 'kraken2' or 'krakenuniq'")
+}
+
+if ( params.metagenomics_postprocessing_tool == 'mergemetaphlantables' && ! params.metagenomics_profiling_tool == 'metaphlan' ) {
+    exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'mergemetaphlantables' can only be run with --metagenomics_profiling_tool 'metaphlan'")
+}
+
 if( params.run_bedtools_coverage ){
     if( !params.mapstats_bedtools_featurefile ) {
         exit 1, "[nf-core/eager] ERROR: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters."
@@ -43,6 +59,8 @@ if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmer
 
 // Report possible warnings
 if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
+
+if ( params.metagenomics_postprocessing_tool == 'krakenmerge' && params.metagenomics_min_support_reads == 1 ) log.warn("[nf-core/eager] Warning: The default value for krakenmerge minimum reads for outputing a node has not been changed from the default. This default is set for MALT and maltextract. Consider updating to the default value for krakenmerge (50 reads) by setting --metagenomics_min_support_reads 50")
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,16 +84,16 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
-include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
-include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
-include { MAP                           } from '../subworkflows/local/map'
-include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
-include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
-include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate_damage'
-include { METAGENOMICS } from '../subworkflows/local/metagenomics'
-include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
-include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
+include { INPUT_CHECK            } from '../subworkflows/local/input_check'
+include { REFERENCE_INDEXING     } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING          } from '../subworkflows/local/preprocessing'
+include { MAP                    } from '../subworkflows/local/map'
+include { FILTER_BAM             } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE            } from '../subworkflows/local/deduplicate'
+include { MANIPULATE_DAMAGE      } from '../subworkflows/local/manipulate_damage'
+include { METAGENOMICS           } from '../subworkflows/local/metagenomics'
+include { ESTIMATE_CONTAMINATION } from '../subworkflows/local/estimate_contamination'
+include { CALCULATE_DAMAGE       } from '../subworkflows/local/calculate_damage'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

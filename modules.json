@@ -10,6 +10,11 @@
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     },
+                    "amps": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
                     "angsd/contamination": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
@@ -23,11 +28,6 @@
                     "bamutil/trimbam": {
                         "branch": "master",
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
-                        "installed_by": ["modules"]
-                    },
-                    "amps": {
-                        "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     },
                     "bbmap/bbduk": {
@@ -140,6 +140,11 @@
                         "git_sha": "0f8a77ff00e65eaeebc509b8156eaa983192474b",
                         "installed_by": ["modules"]
                     },
+                    "mapdamage2": {
+                        "branch": "master",
+                        "git_sha": "0591cad3d725d5c21337f72e638507abf709f75e",
+                        "installed_by": ["modules"]
+                    },
                     "metaphlan/mergemetaphlantables": {
                         "branch": "master",
                         "git_sha": "9aa59197c0fb35c29e315bcd10c0fc9e1afc70a8",
@@ -147,7 +152,7 @@
                     },
                     "metaphlan/metaphlan": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "1038d3de36263159b4138324a646105941ac271a",
                         "installed_by": ["modules"]
                     },
                     "mtnucratio": {
@@ -186,11 +191,6 @@
                         "installed_by": ["modules"]
                     },
                     "prinseqplusplus": {
-                        "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
-                        "installed_by": ["modules"]
-                    },
-                    "samtools/faidx": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
