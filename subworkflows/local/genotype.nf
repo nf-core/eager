@@ -19,6 +19,7 @@ workflow GENOTYPE {
     ch_snpcapture_bed       // [ [ meta ], bed ]
     ch_pileupcaller_bedfile // [ [ meta ], bed ]
     ch_pileupcaller_snpfile // [ [ meta ], snp ]
+    ch_dbsnp                // [ dbsnp ]
 
     main:
     ch_versions                        = Channel.empty()
@@ -48,6 +49,7 @@ workflow GENOTYPE {
             }
 
         ch_fasta_for_multimap = ch_fasta_plus
+            .combine( ch_dbsnp ) // TODO This will need a 'by:0' once the dbsnp channel gets a meta.
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
@@ -56,7 +58,7 @@ workflow GENOTYPE {
         ch_input_for_targetcreator = ch_bams_for_multimap
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
-                ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict -> // TODO add dbSNP
+                ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, dbsnp ->
                     bam: [ meta, bam , bai ]
                     fasta: [ ref_meta, fasta ]
                     fai:   [ ref_meta, fai ]
@@ -81,7 +83,7 @@ workflow GENOTYPE {
             }
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
-                ignore_me, meta, bam, bai, intervals, ref_meta, fasta, fai, dict -> // TODO add dbSNP
+                ignore_me, meta, bam, bai, intervals, ref_meta, fasta, fai, dict, dbsnp ->
                     bam: [ meta, bam, bai, intervals ]
                     fasta: [ ref_meta, fasta ]
                     fai:   [ ref_meta, fai ]
@@ -104,12 +106,12 @@ workflow GENOTYPE {
             }
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
-                ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict -> // TODO add dbSNP
+                ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, dbsnp ->
                     bam: [ meta, bam, bai ]
                     fasta: [ ref_meta, fasta ]
                     fai:   [ ref_meta, fai ]
                     dict:  [ ref_meta, dict ]
-                    // dbsnp: [ ref_meta, dbsnp ] // TODO add dbsnp
+                    dbsnp: [ ref_meta, dbsnp ]
             }
 
         GATK_UNIFIEDGENOTYPER(
@@ -119,7 +121,7 @@ workflow GENOTYPE {
             ch_bams_for_ug.dict,
             [[], []], // No intervals
             [[], []], // No contamination
-            [[], []], // No dbsnp //TODO add dbsnp // ch_bams_for_ug.dbsnp
+            ch_bams_for_ug.dbsnp,
             [[], []]  // No comp
         )
         ch_versions = ch_versions.mix( GATK_UNIFIEDGENOTYPER.out.versions.first() )
