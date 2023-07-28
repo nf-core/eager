@@ -25,28 +25,28 @@ doi: 10.7717/peerj.10947
 date-released: 2022-08-02
 url: https://github.com/nf-core/eager
 prefered-citation:
-  type: article
-  authors:
-    - family-names: Fellows Yates
-      given-names: James A.
-    - family-names: Lamnidis
-      given-names: Thiseas C.
-    - family-names: Borry
-      given-names: Maxime
-    - family-names: Andrades Valtueña
-      given-names: Aida
-    - family-names: Fagernãs
-      given-names: Zandra
-    - family-names: Clayton
-      given-names: Stephen
-    - family-names: Garcia
-      given-names: Maxime U.
-    - family-names: Neukamm
-      given-names: Judith
-    - family-names: Peltzer
-      given-names: Alexander
-  doi: 10.7717/peerj.10947
-  start: e10947
-  title: "Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager"
-  year: 2021
-  url: https://dx.doi.org/10.1038/10.7717/peerj.10947
+    type: article
+    authors:
+        - family-names: Fellows Yates
+          given-names: James A.
+        - family-names: Lamnidis
+          given-names: Thiseas C.
+        - family-names: Borry
+          given-names: Maxime
+        - family-names: Andrades Valtueña
+          given-names: Aida
+        - family-names: Fagernãs
+          given-names: Zandra
+        - family-names: Clayton
+          given-names: Stephen
+        - family-names: Garcia
+          given-names: Maxime U.
+        - family-names: Neukamm
+          given-names: Judith
+        - family-names: Peltzer
+          given-names: Alexander
+    doi: 10.7717/peerj.10947
+    start: e10947
+    title: "Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager"
+    year: 2021
+    url: https://dx.doi.org/10.1038/10.7717/peerj.10947
