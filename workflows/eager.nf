@@ -142,10 +142,20 @@ workflow EAGER {
     ch_versions = ch_versions.mix( ch_input.versions )
     */
 
-    ch_input = Channel.fromSamplesheet("input").dump(tag: "OUTPUT").branch{
-        fastqs: true
-        bams: true
-        }
+    ch_samplesheet_for_split = Channel.fromSamplesheet("input")
+                .branch{
+                    meta, r1, r2, bam ->
+                        fastqs: r1
+                        bams: bam
+                }
+
+
+    ch_input_fastqs = ch_samplesheet_for_split.fastqs.map {
+                            meta, r1, r2, bam ->
+                                def reads = r2 != [] ? [r1, r2] : [r1]
+                            [meta, reads]
+                        }
+    ch_input_bams = ch_samplesheet_for_split.bams.map     { meta, r1, r2, bam -> [meta, [bam]] }
 
     //
     // SUBWORKFLOW: Indexing of reference files
@@ -159,11 +169,11 @@ workflow EAGER {
     //
 
     if ( params.sequencing_qc_tool == "falco" ) {
-        FALCO ( ch_input.fastqs )
+        FALCO ( ch_input_fastqs )
         ch_versions = ch_versions.mix( FALCO.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FALCO.out.txt.collect{it[1]}.ifEmpty([]) )
     } else {
-        FASTQC ( ch_input.fastqs )
+        FASTQC ( ch_input_fastqs )
         ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FASTQC.out.zip.collect{it[1]}.ifEmpty([]) )
     }
@@ -173,12 +183,12 @@ workflow EAGER {
     //
 
     if ( !params.skip_preprocessing ) {
-        PREPROCESSING ( ch_input.fastqs, adapterlist )
+        PREPROCESSING ( ch_input_fastqs, adapterlist )
         ch_reads_for_mapping = PREPROCESSING.out.reads
         ch_versions          = ch_versions.mix( PREPROCESSING.out.versions )
         ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
-        ch_reads_for_mapping = ch_input.fastqs
+        ch_reads_for_mapping = ch_input_fastqs
     }
 
     //
@@ -199,20 +209,20 @@ workflow EAGER {
     //  MODULE: indexing of user supplied input BAMs
     //
 
-    SAMTOOLS_INDEX ( ch_input.bams )
+    SAMTOOLS_INDEX ( ch_input_bams )
     ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
 
     if ( params.fasta_largeref )
-        ch_bams_from_input = ch_input.bams.join( SAMTOOLS_INDEX.out.csi )
+        ch_bams_from_input = ch_input_bams.join( SAMTOOLS_INDEX.out.csi )
     else {
-        ch_bams_from_input = ch_input.bams.join( SAMTOOLS_INDEX.out.bai )
+        ch_bams_from_input = ch_input_bams.join( SAMTOOLS_INDEX.out.bai )
     }
 
 
     //
     // MODULE: flagstats of user supplied input BAMs
     //
-    ch_bam_bai_input = ch_input.bams
+    ch_bam_bai_input = ch_input_bams
                             .join(SAMTOOLS_INDEX.out.bai)
 
     SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
@@ -281,7 +291,7 @@ workflow EAGER {
         // Preparing fastq channel for host removal to be combined with the bam channel
         // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
         // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
-        ch_fastqs_for_host_removal= ch_input.fastqs.map{
+        ch_fastqs_for_host_removal= ch_input_fastqs.map{
                                                         meta, fastqs ->
                                                         new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
                                                         [ new_meta, meta, fastqs ]
