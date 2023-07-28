@@ -98,8 +98,8 @@ include { MTNUCRATIO                                        } from '../modules/n
 include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
 include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
-include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main' 
-include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf' 
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
+include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -160,9 +160,10 @@ workflow EAGER {
 
     ch_input_fastqs = ch_samplesheet_for_split.fastqs.map {
                             meta, r1, r2, bam ->
-                                def reads = r2 != [] ? [r1, r2] : [r1]
+                                def reads = r2 != [] ? [r1, r2] : r1
                             [meta, reads]
                         }
+                        .dump(tag: "ch_input_fastqs")
     ch_input_bams = ch_samplesheet_for_split.bams.map     { meta, r1, r2, bam -> [meta, [bam]] }
 
     //
@@ -408,9 +409,9 @@ workflow EAGER {
 
 
     //
-    // MODULE: Bedtools coverage 
+    // MODULE: Bedtools coverage
     //
-    
+
     if ( params.run_bedtools_coverage ) {
 
         ch_anno_for_bedtools = Channel.fromPath(params.mapstats_bedtools_featurefile, checkIfExists: true).collect()
@@ -425,7 +426,7 @@ workflow EAGER {
         SAMTOOLS_VIEW_GENOME(ch_dedupped_bams)
 
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
-        
+
         BEDTOOLS_COVERAGE_BREADTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
         BEDTOOLS_COVERAGE_DEPTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
 
@@ -433,7 +434,7 @@ workflow EAGER {
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
     }
-    
+
 
     //
     // SUBWORKFLOW: Calculate Damage
