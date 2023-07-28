@@ -30,7 +30,6 @@ workflow GENOTYPE {
     ch_freebayes_genotypes             = Channel.empty()
     ch_angsd_genotypes                 = Channel.empty()
 
-
     if ( params.genotyping_tool == 'pileupcaller' ) {
         // SAMTOOLS_MPILEUP_PILEUPCALLER( ch_bam_bai, ch_fasta_plus )
 
@@ -49,11 +48,12 @@ workflow GENOTYPE {
             }
 
         ch_fasta_for_multimap = ch_fasta_plus
-            .combine( ch_dbsnp ) // TODO This will need a 'by:0' once the dbsnp channel gets a meta.
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
+            .combine( ch_dbsnp ) // TODO This will need tweaking ('by:0'?) once the dbsnp channel gets a meta.
+            .dump(tag:"dbsnp")
 
         ch_input_for_targetcreator = ch_bams_for_multimap
             .combine( ch_fasta_for_multimap , by:0 )

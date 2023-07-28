@@ -134,6 +134,12 @@ workflow EAGER {
     // Contamination estimation
     hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
 
+    // GATK dbSNP
+    if ( params.genotyping_gatk_dbsnp ) {
+        ch_dbsnp = Channel.fromPath(params.genotyping_gatk_dbsnp, checkIfExists: true)
+    } else {
+        ch_dbsnp = Channel.empty()
+    }
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
@@ -452,7 +458,7 @@ workflow EAGER {
                 [ meta, fasta, fai, dict ] // dbsnp ] // TODO add dbsnp to reference sheet.
             }
 
-        GENOTYPE( ch_bams_for_genotyping, ch_reference_for_genotyping, [], [], [] )
+        GENOTYPE( ch_bams_for_genotyping, ch_reference_for_genotyping, [], [], [], ch_dbsnp.ifEmpty([[]]) )
 
         ch_versions      = ch_versions.mix( GENOTYPE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( GENOTYPE.out.mqc.collect{it[1]}.ifEmpty([]) )
