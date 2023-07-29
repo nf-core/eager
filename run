@@ -1,0 +1,9 @@
+#!/bin/bash
+
+nextflow run com.nf \
+	--fasta_info "/crex/proj/snic2022-6-144/nobackup/CHENYU/check_dna_damage/competitive_mapping/21genus.fasta_ref" \
+	--reads "/crex/proj/snic2022-6-144/nobackup/TOM/EDNA/READS/BISON/Blank.fastq.gz" \
+	--fasta_index "/crex/proj/snic2022-6-144/nobackup/CHENYU/check_dna_damage/competitive_mapping/index/21genus" \
+	--threads 20 \
+	--label "21genus" \
+	-resume
