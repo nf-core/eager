@@ -232,11 +232,17 @@ process EXTRACT_BAM_OF_REF_ID {
 
 
 process AUTHENTICATION {
+
+	errorStrategy 'ignore'
+
+	memory '50 GB'
+
+
         publishDir "results/",
                 mode: "copy"
 
         input:
-		path(sorted_bam)
+		path(bam)
 		val(label)
         output:
                 path("*.png")
@@ -244,9 +250,14 @@ process AUTHENTICATION {
         script:
         """
 	#extract reference ID from the bam name
-	ref_id=\$(echo $sorted_bam | cut -d'-' -f 2)
+	ref_id=\$(echo $bam | cut -d'-' -f 2)
 
-	echo -e "\${ref_id}\t$sorted_bam" > bam_file
+	bam_name=\$(echo $bam | sed 's/.bam//')
+	sorted_bam=\${bam_name}_sorted.bam
+	samtools sort -o \$sorted_bam \${bam_name}.bam
+	samtools index \$sorted_bam
+
+	echo -e "\${ref_id}\t\${sorted_bam}" > bam_file
 	AMBER --bamfiles bam_file --out "${label}-\${ref_id}-damage"
         """
 }
