@@ -877,9 +877,8 @@
                     "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does de novo assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute.",
                     "description": "Specify which genotyper to use between: GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller."
                 },
-                "run_bcftools_stats": {
+                "skip_bcftools_stats": {
                     "type": "boolean",
-                    "default": true,
                     "fa_icon": "far fa-chart-bar",
                     "description": "Turn on bcftools stats generation for VCF based variant calling statistics",
                     "help_text": "Runs `bcftools stats` against VCF files from GATK and FreeBayes genotypers.\n\nIt will automatically include the FASTA reference for INDEL-related statistics."
