@@ -880,8 +880,8 @@
                 "skip_bcftools_stats": {
                     "type": "boolean",
                     "fa_icon": "far fa-chart-bar",
-                    "description": "Turn on bcftools stats generation for VCF based variant calling statistics",
-                    "help_text": "Runs `bcftools stats` against VCF files from GATK and FreeBayes genotypers.\n\nIt will automatically include the FASTA reference for INDEL-related statistics."
+                    "description": "Skip bcftools stats generation for VCF based variant calling statistics",
+                    "help_text": "Disables running of `bcftools stats` against VCF files from GATK and FreeBayes genotypers.\n\nIf ran, `bcftools stats`  will automatically include the FASTA reference for INDEL-related statistics."
                 },
                 "genotyping_pileupcaller_min_base_quality": {
                     "type": "integer",
@@ -946,7 +946,11 @@
                 "genotyping_gatk_dbsnp": {
                     "type": "string",
                     "help_text": "(Optional) Specify VCF file for output VCF SNP annotation e.g. if you want to annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.",
-                    "fa_icon": "fas fa-pen-alt"
+                    "fa_icon": "fas fa-pen-alt",
+                    "description": "Specify VCF file for SNP annotation of output VCF files. Optional. Gzip not accepted.",
+                    "pattern": "^\\S+\\.vcf$",
+                    "format": "file-path",
+                    "mimetype": "VCF"
                 },
                 "genotyping_gatk_ug_downsample": {
                     "type": "integer",
