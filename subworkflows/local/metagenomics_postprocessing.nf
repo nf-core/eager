@@ -34,7 +34,7 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     }
 
-    else if ( params.metagenomics_postprocessing_tool == 'krakenmerge' || ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
+    else if ( ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
 
         KRAKENPARSE ( ch_postprocessing_input )
 
@@ -44,6 +44,7 @@ workflow METAGENOMICS_POSTPROCESSING {
         ch_list_of_kraken_parse_kmer = KRAKENPARSE.out.kmer_kraken_parsed.map {
             meta, kmer_out -> [ kmer_out ]
         }
+
 
         KRAKENMERGE ( ch_list_of_kraken_parse_reads.collect() , ch_list_of_kraken_parse_kmer.collect() )
 

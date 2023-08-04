@@ -7,7 +7,6 @@ process KRAKENMERGE {
         'quay.io/biocontainers/pandas:1.5.2' }"
     input:
 
-    // TODO check if this works
     path kraken_parse_reads
     path kraken_parse_kmers
 

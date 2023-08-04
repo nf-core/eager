@@ -40,10 +40,6 @@ if ( params.metagenomics_postprocessing_tool == 'maltextract' && params.metageno
     exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'maltextract' can only be run with --metagenomics_profiling_tool 'malt'")
 }
 
-if ( params.metagenomics_postprocessing_tool == 'krakenmerge' || ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
-    exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'krakenmerge' can only be run with --metagenomics_profiling_tool 'kraken2' or 'krakenuniq'")
-}
-
 if ( params.metagenomics_postprocessing_tool == 'mergemetaphlantables' && ! params.metagenomics_profiling_tool == 'metaphlan' ) {
     exit 1, ("[nf-core/eager] ERROR: --metagenomics_postprocessing_tool 'mergemetaphlantables' can only be run with --metagenomics_profiling_tool 'metaphlan'")
 }

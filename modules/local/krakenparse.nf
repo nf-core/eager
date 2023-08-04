@@ -18,9 +18,9 @@ process KRAKENPARSE {
     task.ext.when == null || task.ext.when
 
     script:
-
-    def read_out = "${meta.id}.read_kraken_parsed.csv"
-    def kmer_out = "${meta.id}.kmer_kraken_parsed.csv"
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def read_out = "${prefix}.read_kraken_parsed.csv"
+    def kmer_out = "${prefix}.kmer_kraken_parsed.csv"
     """
     kraken_parse.py \\
         -c ${params.metagenomics_min_support_reads} \\
