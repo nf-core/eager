@@ -42,7 +42,6 @@ workflow METAGENOMICS {
     // Run the post profiling subworkflow (optionally run for malt, mandatory for kraken2/krakenuniq)
     //
 
-
     if ( params.metagenomics_postprocessing_tool || ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
 
         METAGENOMICS_POSTPROCESSING ( METAGENOMICS_PROFILING.out.postprocessing_input )

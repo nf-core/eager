@@ -54,7 +54,8 @@ workflow METAGENOMICS_POSTPROCESSING {
     }
 
     else if ( params.metagenomics_postprocessing_tool == 'mergemetaphlantables' ) {
-        METAPHLAN_MERGEMETAPHLANTABLES ( ch_postprocessing_input , params.metagenomics_profiling_database )
+
+        METAPHLAN_MERGEMETAPHLANTABLES ( ch_postprocessing_input.map{ [[id:"metaphlan_profiles_all_samples_merged"], it[1]] }.groupTuple() )
 
         ch_versions      = ch_versions.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.txt )

@@ -94,7 +94,16 @@ workflow METAGENOMICS_PROFILING {
 
     else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
 
-        METAPHLAN_METAPHLAN ( reads , database )
+        reads = reads
+            .map {
+                meta, reads ->
+                    [meta + [id: "${meta.id}_${meta.damage_treatment}"] , reads]
+            }
+            .combine(database)
+        metaphlan_reads = reads.map{ meta, reads, database -> [meta, reads] }
+        metaphlan_db = reads.map{ meta, reads, database -> [database] }
+
+        METAPHLAN_METAPHLAN ( metaphlan_reads , metaphlan_db )
         ch_versions             = ch_versions.mix( METAPHLAN_METAPHLAN.out.versions.first() )
         ch_raw_profiles         = ch_raw_profiles.mix( METAPHLAN_METAPHLAN.out.profile )
         ch_postprocessing_input = ch_postprocessing_input.mix( METAPHLAN_METAPHLAN.out.profile )
