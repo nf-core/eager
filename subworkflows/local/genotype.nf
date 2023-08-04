@@ -10,6 +10,7 @@ include { GATK_INDELREALIGNER                               } from '../../module
 include { GATK_UNIFIEDGENOTYPER                             } from '../../modules/nf-core/gatk/unifiedgenotyper/main'
 include { GATK4_HAPLOTYPECALLER                             } from '../../modules/nf-core/gatk4/haplotypecaller/main'
 include { FREEBAYES                                         } from '../../modules/nf-core/freebayes/main'
+include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
 // TODO Add ANGSD GTL module. The current module does not pick up the .glf.gz output files.
 
 workflow GENOTYPE {

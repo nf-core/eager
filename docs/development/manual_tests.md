@@ -648,3 +648,12 @@ nextflow run . -profile test,docker \
   --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
   --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
 ```
+# GENOTYPING
+
+## GATK UG
+
+```bash
+## Gatk on raw reads
+## Expect: One VCF per sample/reference combination.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' -ansi-log false
+```
