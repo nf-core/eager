@@ -94,12 +94,7 @@ workflow METAGENOMICS_PROFILING {
 
     else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
 
-        reads = reads
-            .map {
-                meta, reads ->
-                    [meta + [id: "${meta.id}_${meta.damage_treatment}"] , reads]
-            }
-            .combine(database)
+        reads = reads.combine(database)
         metaphlan_reads = reads.map{ meta, reads, database -> [meta, reads] }
         metaphlan_db = reads.map{ meta, reads, database -> [database] }
 

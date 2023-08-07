@@ -505,13 +505,50 @@ nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup_merged -du
 nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_dedup_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
 
-## Metagenomics
+### METAGENOMICS
 
-### Complexityfilter
+#### Complexityfilter
 
-### Profiling
+#### Profiling
 
-#### Krakenuniq
+##### metaphlan
+
+```bash
+## metaphlan with default parameters
+## Expect:
+
+nextflow run -resume ./main.nf -profile test,docker --outdir out \
+--run_metagenomics --metagenomics_profiling_tool metaphlan --metagenomics_profiling_database ./runtest/metaphlandb/
+
+# 20230728: Works
+```
+
+##### krakenuniq
+
+```bash
+nextflow run -resume ../eager3/main.nf -profile test,docker --outdir out \
+--run_metagenomics --metagenomics_profiling_tool krakenuniq --metagenomics_profiling_database ../runtest/refseq_rel215/kraken/Mito_db_kmer22/
+
+# 20230623: Works
+```
+
+##### kraken2
+
+```bash
+sudo nextflow run -resume ../eager3/main.nf -profile test,docker --outdir out \
+--run_metagenomics --metagenomics_profiling_tool kraken2 --metagenomics_profiling_database kraken2_db/
+# 20230623: Works
+```
+
+##### malt
+
+```bash
+sudo nextflow run -resume ../eager3/main.nf -profile test,docker --outdir out \
+--run_metagenomics --metagenomics_profiling_tool malt --metagenomics_profiling_database maltdb/maltdb/
+# 20230623: Works
+```
+
+##### Krakenuniq
 
 ```bash
 ### With saved reads
@@ -525,4 +562,26 @@ nextflow run main.nf -profile test,singularity --outdir out --run_metagenomics -
 # Use only the -profile test dataset, provide a custom kraken database
 # Expected: directory with 1 textfile for each sample: the raw krakenuniq profile
 nextflow run main.nf -profile test,singularity --outdir out --run_metagenomics --metagenomics_profiling_tool krakenuniq --metagenomics_profiling_database ../runtest/refseq_rel215/kraken/Mito_db_kmer22/
+```
+
+#### postprocessing
+
+##### maltextract
+
+```bash
+nextflow run -resume ../eager3/main.nf -profile test,docker --outdir out \
+--run_metagenomics --metagenomics_profiling_tool malt --metagenomics_profiling_database maltdb/maltdb/ \
+--metagenomics_postprocessing_tool maltextract \
+--metagenomics_maltextract_ncbi_dir maltextract_ncbi_dir/ \
+--metagenomics_maltextract_taxon_list maltdb/target.txt
+
+# 20230623: No errors, but postpocessing steps dont finish? I need to wait and see how long it takes
+```
+
+##### mergemetaphlantables
+
+```bash
+nextflow run -resume ./main.nf -profile test,docker --outdir out \
+--run_metagenomics --metagenomics_profiling_tool metaphlan --metagenomics_profiling_database ./runtest/metaphlandb/ --metagenomics_postprocessing_tool mergemetaphlantables
+# 20230804: works
 ```
