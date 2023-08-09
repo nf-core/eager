@@ -22,10 +22,11 @@ workflow METAGENOMICS_POSTPROCESSING {
 
         tax_list = Channel.fromPath(params.metagenomics_maltextract_taxon_list)
         ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbi_dir)
-        maltex_filter = Channel.fromPath(params.metagenomics_maltextract_filter)
 
         MALTEXTRACT ( ch_maltextract_input, tax_list, ncbi_dir)
 
+        maltex_filter = params.metagenomics_maltextract_filter
+        
         AMPS ( MALTEXTRACT.out.results, tax_list, maltex_filter )
 
         ch_versions      = ch_versions.mix( MALTEXTRACT.out.versions.first(), AMPS.out.versions.first() )

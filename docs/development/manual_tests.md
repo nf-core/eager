@@ -679,14 +679,17 @@ nextflow run main.nf -profile test,docker \
 ##### maltextract
 
 ```bash
-# 20230623: No errors, but postpocessing steps dont finish? I need to wait and see how long it takes
+### Create a SummaryTable from the Malt rma6 files
+# Expected: A directory 'metagenomics_screening/postprocessing/maltextract/results' see the docs for the content of this dir
 
-nextflow run -resume ../eager3/main.nf -profile test,docker --outdir out \
---run_metagenomics --metagenomics_profiling_tool malt --metagenomics_profiling_database maltdb/maltdb/ \
---metagenomics_postprocessing_tool maltextract \
---metagenomics_maltextract_ncbi_dir maltextract_ncbi_dir/ \
---metagenomics_maltextract_taxon_list maltdb/target.txt
-
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool malt \
+  --metagenomics_profiling_database CUSTOM_MALT_DB \
+  --metagenomics_postprocessing_tool maltextract \
+  --metagenomics_maltextract_ncbi_dir NCBI_DIR \
+  --metagenomics_maltextract_taxon_list TAXONLISTFILE
 ```
 
 ##### mergemetaphlantables
