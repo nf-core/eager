@@ -509,6 +509,64 @@ nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/onl
 
 #### Complexityfilter
 
+##### Test bbduk
+
+```bash
+#### Use bbduk to remove low complexity reads _without_ saving the intermediate files
+## Expect: NO additional directory created, but the files in the profiling directory contain the 'complexity' postfix
+nextflow run main.nf -profile test,docker \
+  --outdir ./out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --run_metagenomics_complexityfiltering \
+  --metagenomics_complexity_tool bbduk
+```
+
+```bash
+#### Use bbduk to remove low complexity reads _with_ saving intermediate files
+## Expect: Additional directory created 'metagenomics_screening/complexity_filter/bbduk' that contains the fastq files
+## with 'complexity' postfix and a bbduk.log file for each library
+nextflow run main.nf -profile test,docker \
+  --outdir ./out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --run_metagenomics_complexityfiltering \
+  --metagenomics_complexity_tool bbduk \
+  --metagenomics_complexity_savefastq
+```
+
+## Test prinseq
+
+```bash
+#### Use prinseq to remove low complexity reads _without_ saving the intermediate files
+## Expect: NO additional directory created, but the files in the profiling directory contain the 'complexity_good_out' postfix
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --run_metagenomics_complexityfiltering \
+  --metagenomics_complexity_tool prinseq
+```
+
+```bash
+#### Use prinseq to remove low complexity reads _with_ saving the intermediate files
+## Expect: Additional directory created 'metagenomics_screening/complexity_filter/prinseq' that contains the fastq files
+## with 'complexity_good_out' postfix and a 'complexity.log' file for each library
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --run_metagenomics_complexityfiltering \
+  --metagenomics_complexity_tool prinseq
+  --metagenomics_complexity_savefastq
+```
+
 #### Profiling
 
 ##### metaphlan
@@ -526,42 +584,94 @@ nextflow run -resume ./main.nf -profile test,docker --outdir out \
 ##### krakenuniq
 
 ```bash
-nextflow run -resume ../eager3/main.nf -profile test,docker --outdir out \
---run_metagenomics --metagenomics_profiling_tool krakenuniq --metagenomics_profiling_database ../runtest/refseq_rel215/kraken/Mito_db_kmer22/
+#### Use krakenuniq for metagenomics sequence classification, save only report (default)
+## Use a custom Database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/krakenuniq' that contains one 'krakenuniq.report' file for
+## each analyzed library
 
-# 20230623: Works
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB
+
+#### Use krakenuniq for metagenomics sequence classification, save fastq files
+## Use a custom Database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/krakenuniq' that contains:
+# - 'krakenuniq.report' file
+# - 'krakenuniq.classified.txt' file
+# - 'classified.fastq.gz' file
+# - 'unclassified.fastq.gz' file
+# for each analyzed library
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --metagenomics_kraken_save_reads \
+  --metagenomics_kraken_save_read_classifications
 ```
 
 ##### kraken2
 
 ```bash
-sudo nextflow run -resume ../eager3/main.nf -profile test,docker --outdir out \
---run_metagenomics --metagenomics_profiling_tool kraken2 --metagenomics_profiling_database kraken2_db/
-# 20230623: Works
+#### Use kraken2 for metagenomics sequence classification, save only report (default)
+## Use a custom database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/kraken2' that contains a 'kraken2.report' file
+## for each analyzed library
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool kraken2 \
+  --metagenomics_profiling_database CUSTOM_KRAKEN2_DB
+
+#### Use krakenuniq for metagenomics sequence classification, save also fastq files
+## Use a custom Database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/kraken2' that contains:
+# - 'kraken2.report' file
+# - 'kraken2.classifiedreads.txt' file
+# - 'classified.fastq.gz' file
+# - 'unclassified.fastq.gz' file
+# for each analyzed library
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool kraken2 \
+  --metagenomics_profiling_database CUSTOM_KRAKEN2_DB \
+  --metagenomics_kraken_save_reads \
+  --metagenomics_kraken_save_read_classifications
 ```
 
 ##### malt
 
 ```bash
-sudo nextflow run -resume ../eager3/main.nf -profile test,docker --outdir out \
---run_metagenomics --metagenomics_profiling_tool malt --metagenomics_profiling_database maltdb/maltdb/
-# 20230623: Works
-```
+#### Use MALT for metagenomics sequence classification, save only report (default)
+## Use a custom database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/malt' that contains a '.rma6' file for each analyzed library
+## and a single CUSTOM_MALT_DB-malt-run.log file
 
-##### Krakenuniq
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool malt \
+  --metagenomics_profiling_database CUSTOM_MALT_DB
 
-```bash
-### With saved reads
-# Use only the -profile test dataset, provide a custom kraken database
-# Expected: directory with 2 fastq-files and 1 textfile for each sample, containing classified, unclassified reads and the raw krakenuniq profile
-nextflow run main.nf -profile test,singularity --outdir out --run_metagenomics --metagenomics_profiling_tool krakenuniq --metagenomics_profiling_database ../runtest/refseq_rel215/kraken/Mito_db_kmer22/ --metagenomics_kraken_save_reads
-```
+#### Use MALT for metagenomics sequence classification, save reads
+## Use a custom database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/malt' that contains for each analyzed library:
+# - a '.rma6' file
+# - a '.blastn.sam' file
+# and a single CUSTOM_MALT_DB-malt-run.log file
 
-```bash
-### Without saved reads
-# Use only the -profile test dataset, provide a custom kraken database
-# Expected: directory with 1 textfile for each sample: the raw krakenuniq profile
-nextflow run main.nf -profile test,singularity --outdir out --run_metagenomics --metagenomics_profiling_tool krakenuniq --metagenomics_profiling_database ../runtest/refseq_rel215/kraken/Mito_db_kmer22/
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool malt \
+  --metagenomics_profiling_database CUSTOM_MALT_DB \
+  --metagenomics_malt_save_reads
 ```
 
 #### postprocessing
@@ -569,13 +679,14 @@ nextflow run main.nf -profile test,singularity --outdir out --run_metagenomics -
 ##### maltextract
 
 ```bash
+# 20230623: No errors, but postpocessing steps dont finish? I need to wait and see how long it takes
+
 nextflow run -resume ../eager3/main.nf -profile test,docker --outdir out \
 --run_metagenomics --metagenomics_profiling_tool malt --metagenomics_profiling_database maltdb/maltdb/ \
 --metagenomics_postprocessing_tool maltextract \
 --metagenomics_maltextract_ncbi_dir maltextract_ncbi_dir/ \
 --metagenomics_maltextract_taxon_list maltdb/target.txt
 
-# 20230623: No errors, but postpocessing steps dont finish? I need to wait and see how long it takes
 ```
 
 ##### mergemetaphlantables
