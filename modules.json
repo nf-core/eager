@@ -32,7 +32,7 @@
                     },
                     "bcftools/stats": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "e2693a7e2d773b92e0649b25880ee22fe82bb79d",
                         "installed_by": ["modules"]
                     },
                     "bedtools/coverage": {
