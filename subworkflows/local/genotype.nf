@@ -131,6 +131,7 @@ workflow GENOTYPE {
         ch_gatk_unifiedgenotyper_genotypes = GATK_UNIFIEDGENOTYPER.out.vcf
 
     if ( ! params.skip_bcftools_stats ) {
+        // TODO this section could be moved outside the UG specific section into its own if clause and take input from HC and FB as well.
         ch_bcftools_input= ch_gatk_unifiedgenotyper_genotypes
             .map {
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
