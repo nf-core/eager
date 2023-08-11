@@ -30,6 +30,7 @@ workflow GENOTYPE {
     ch_gatk_unifiedgenotyper_genotypes = Channel.empty()
     ch_freebayes_genotypes             = Channel.empty()
     ch_angsd_genotypes                 = Channel.empty()
+    ch_bcftools_stats                  = Channel.empty()
 
     if ( params.genotyping_tool == 'pileupcaller' ) {
         // SAMTOOLS_MPILEUP_PILEUPCALLER( ch_bam_bai, ch_fasta_plus )
@@ -48,6 +49,7 @@ workflow GENOTYPE {
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
 
+        // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
         ch_fasta_for_multimap = ch_fasta_plus
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
@@ -60,7 +62,7 @@ workflow GENOTYPE {
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
                 ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, dbsnp ->
-                    bam: [ meta, bam , bai ]
+                    bam:   [ meta, bam , bai ]
                     fasta: [ ref_meta, fasta ]
                     fai:   [ ref_meta, fai ]
                     dict:  [ ref_meta, dict ]
@@ -85,7 +87,7 @@ workflow GENOTYPE {
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
                 ignore_me, meta, bam, bai, intervals, ref_meta, fasta, fai, dict, dbsnp ->
-                    bam: [ meta, bam, bai, intervals ]
+                    bam:   [ meta, bam, bai, intervals ]
                     fasta: [ ref_meta, fasta ]
                     fai:   [ ref_meta, fai ]
                     dict:  [ ref_meta, dict ]
@@ -108,7 +110,7 @@ workflow GENOTYPE {
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
                 ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, dbsnp ->
-                    bam: [ meta, bam, bai ]
+                    bam:   [ meta, bam, bai ]
                     fasta: [ ref_meta, fasta ]
                     fai:   [ ref_meta, fai ]
                     dict:  [ ref_meta, dict ]
@@ -127,6 +129,29 @@ workflow GENOTYPE {
         )
         ch_versions = ch_versions.mix( GATK_UNIFIEDGENOTYPER.out.versions.first() )
         ch_gatk_unifiedgenotyper_genotypes = GATK_UNIFIEDGENOTYPER.out.vcf
+
+    if ( ! params.skip_bcftools_stats ) {
+        ch_bcftools_input= ch_gatk_unifiedgenotyper_genotypes
+            .map {
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+            .combine( ch_fasta_for_multimap , by:0 )
+            .multiMap {
+                ignore_me, meta, vcf, ref_meta, fasta, fai, dict, dbsnp ->
+                    vcf:   [ meta, vcf, [] ] // bcftools stats module expects a tbi file with the vcf.
+                    fasta: [ ref_meta, fasta ]
+            }
+
+        BCFTOOLS_STATS_GENOTYPING(
+            ch_bcftools_input.vcf,  // vcf
+            [ [], [] ],             // regions
+            [ [], [] ],             // targets
+            [ [], [] ],             // samples
+            [ [], [] ],             // exons
+            ch_bcftools_input.fasta // fasta
+        )
+        ch_versions = ch_versions.mix( BCFTOOLS_STATS_GENOTYPING.out.versions.first() )
+    }
     }
 
     if ( params.genotyping_tool == 'hc' ) {
