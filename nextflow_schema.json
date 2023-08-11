@@ -752,7 +752,7 @@
                     "default": "BlastN",
                     "description": "Specify which alignment mode to use for MALT. Options: 'Unknown', 'BlastN', 'BlastP', 'BlastX', 'Classifier'.",
                     "fa_icon": "fas fa-align-left",
-                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA\nand DNA, protein and protein, or DNA reads against protein references\nrespectively. Ensure your database matches the mode. Check the\n[MALT\nmanual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)\nfor more details. Default: `'BlastN'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-m`\n",
+                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA\nand DNA, protein and protein, or DNA reads against protein references\nrespectively. Ensure your database matches the mode. Check the\n[MALT\nmanual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)\nfor more details. Default: `'BlastN'`\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-m`\n",
                     "enum": ["BlastN", "BlastP", "BlastX"]
                 },
                 "metagenomics_malt_alignment_mode": {
@@ -760,7 +760,7 @@
                     "default": "SemiGlobal",
                     "description": "Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'.",
                     "fa_icon": "fas fa-align-center",
-                    "help_text": "Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-at`",
+                    "help_text": "Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-at`",
                     "enum": ["Local", "SemiGlobal"]
                 },
                 "metagenomics_malt_min_percent_identity": {
@@ -768,21 +768,21 @@
                     "default": 85,
                     "description": "Percent identity value threshold for MALT.",
                     "fa_icon": "fas fa-id-card",
-                    "help_text": "Specify the minimum percent identity (or similarity) a sequence must have to the reference for it to be retained. Default is `85`\n\nOnly used when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-id`"
+                    "help_text": "Specify the minimum percent identity (or similarity) a sequence must have to the reference for it to be retained. Default is `85`\n\nOnly used when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-id`"
                 },
                 "metagenomics_malt_top_percent": {
                     "type": "integer",
                     "default": 1,
                     "description": "Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual).",
                     "fa_icon": "fas fa-percent",
-                    "help_text": "Specify the top percent value of the LCA algorithm. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): \"For each\nread, only those matches are used for taxonomic placement whose bit disjointScore is within\n10% of the best disjointScore for that read.\". Default: `1`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-top`"
+                    "help_text": "Specify the top percent value of the LCA algorithm. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): \"For each\nread, only those matches are used for taxonomic placement whose bit disjointScore is within\n10% of the best disjointScore for that read.\". Default: `1`.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-top`"
                 },
                 "metagenomics_malt_min_support_mode": {
                     "type": "string",
                     "default": "percent",
                     "description": "Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'.",
                     "fa_icon": "fas fa-drumstick-bite",
-                    "help_text": "Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-sup -supp`",
+                    "help_text": "Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-sup -supp`",
                     "enum": ["percent", "reads"]
                 },
                 "metagenomics_malt_min_support_percent": {
@@ -790,7 +790,7 @@
                     "default": 0.01,
                     "description": "Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT.",
                     "fa_icon": "fas fa-percentage",
-                    "help_text": "Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-supp`"
+                    "help_text": "Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-supp`"
                 },
                 "metagenomics_min_support_reads": {
                     "type": "integer",
@@ -804,14 +804,14 @@
                     "default": 100,
                     "description": "Specify the maximum number of queries a read can have for MALT.",
                     "fa_icon": "fas fa-phone",
-                    "help_text": "Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: `100`\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-mq`"
+                    "help_text": "Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: `100`\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-mq`"
                 },
                 "metagenomics_malt_memory_mode": {
                     "type": "string",
                     "default": "load",
                     "description": "Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'.",
                     "fa_icon": "fas fa-memory",
-                    "help_text": "\nHow to load the database into memory. Options are `'load'`, `'page'` or `'map'`.\n'load' directly loads the entire database into memory prior seed look up, this\nis slow but compatible with all servers/file systems. `'page'` and `'map'`\nperform a sort of 'chunked' database loading, allowing seed look up prior entire\ndatabase loading. Note that Page and Map modes do not work properly not with\nmany remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MALT parameter: `--memoryMode`",
+                    "help_text": "\nHow to load the database into memory. Options are `'load'`, `'page'` or `'map'`.\n'load' directly loads the entire database into memory prior seed look up, this\nis slow but compatible with all servers/file systems. `'page'` and `'map'`\nperform a sort of 'chunked' database loading, allowing seed look up prior entire\ndatabase loading. Note that Page and Map modes do not work properly not with\nmany remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `--memoryMode`",
                     "enum": ["load", "page", "map"]
                 },
                 "metagenomics_malt_sam_output": {
@@ -842,21 +842,23 @@
                 },
                 "metagenomics_maltextract_taxon_list": {
                     "type": "string",
+                    "description": "Path to a text file with taxa of interest (one taxon per row, NCBI taxonomy name format)",
                     "default": null,
-                    "help_text": "\\nPath to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.",
+                    "help_text": "\\nPath to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.",
                     "fa_icon": "fas fa-align-left"
                 },
                 "metagenomics_maltextract_ncbi_dir": {
                     "type": "string",
+                    "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; available: https://github.com/rhuebler/HOPS/)",
                     "default": null,
-                    "help_text": "Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).\\n\\nOnly when `--metagenomic_tool malt` is also supplied.",
+                    "help_text": "Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).\\n\\nOnly needed when `--metagenomics_profiling_tool malt` is also supplied.",
                     "fa_icon": "fab fa-buffer"
                 },
                 "metagenomics_maltextract_filter": {
                     "type": "string",
                     "default": "def_anc",
                     "description": "Specify which MaltExtract filter to use. Options: 'def_anc', 'ancient', 'default', 'crawl', 'scan', 'srna', 'assignment'.",
-                    "help_text": "Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`, 'assignment'. Default: `'def_anc'`.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `-f`",
+                    "help_text": "Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`, 'assignment'. Default: `'def_anc'`.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `-f`",
                     "fa_icon": "fas fa-filter",
                     "enum": ["def_anc", "default", "ancient", "scan", "crawl", "srna"]
                 },
@@ -864,54 +866,54 @@
                     "type": "number",
                     "default": 0.01,
                     "description": "Specify percent of top alignments to use.",
-                    "help_text": "Specify frequency of top alignments for each read to be considered for each node.\\nDefault is 0.01, i.e. 1% of all reads (where 1 would correspond to 100%).\\n\\n> :warning: this parameter follows the same concept as `--malt_top_percent` but\\n> uses a different notation i.e. integer (MALT) versus float (MALTExtract)\\n\\nDefault: `0.01`.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `-a`",
+                    "help_text": "Specify frequency of top alignments for each read to be considered for each node.\\nDefault is 0.01, i.e. 1% of all reads (where 1 would correspond to 100%).\\n\\n> :warning: this parameter follows the same concept as `--malt_top_percent` but\\n> uses a different notation i.e. integer (MALT) versus float (MALTExtract)\\n\\nDefault: `0.01`.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `-a`",
                     "fa_icon": "fas fa-percent"
                 },
                 "metagenomics_maltextract_destackingoff": {
                     "type": "boolean",
                     "default": "false",
                     "description": "Turn off destacking.",
-                    "help_text": "Turn off destacking. If left on, a read that overlaps with another read will be\\nremoved (leaving a depth coverage of 1).\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--destackingOff`",
+                    "help_text": "Turn off destacking. If left on, a read that overlaps with another read will be\\nremoved (leaving a depth coverage of 1).\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--destackingOff`",
                     "fa_icon": "fab fa-stack-overflow"
                 },
                 "metagenomics_maltextract_downsamplingoff": {
                     "type": "boolean",
                     "default": "false",
                     "description": "Turn off downsampling.",
-                    "help_text": "Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--downSampOff`",
+                    "help_text": "Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--downSampOff`",
                     "fa_icon": "fas fa-angle-double-down"
                 },
                 "metagenomics_maltextract_duplicateremovaloff": {
                     "type": "boolean",
                     "default": "false",
                     "description": "Turn off duplicate removal.",
-                    "help_text": "\\nTurn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--dupRemOff`",
+                    "help_text": "\\nTurn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--dupRemOff`",
                     "fa_icon": "fas fa-copy"
                 },
                 "metagenomics_maltextract_matches": {
                     "type": "boolean",
                     "default": "false",
                     "description": "Turn on exporting alignments of hits in BLAST format.",
-                    "help_text": "\\nExport alignments of hits for each node in BLAST format. By default turned off.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--matches`",
+                    "help_text": "\\nExport alignments of hits for each node in BLAST format. By default turned off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--matches`",
                     "fa_icon": "fas fa-equals"
                 },
                 "metagenomics_maltextract_megansummary": {
                     "type": "boolean",
                     "default": "false",
                     "description": "Turn on export of MEGAN summary files.",
-                    "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--meganSummary`"
+                    "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--meganSummary`"
                 },
                 "metagenomics_maltextract_percentidentity": {
                     "type": "number",
                     "default": 85,
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
-                    "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85`.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--minPI`"
+                    "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85`.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--minPI`"
                 },
                 "metagenomics_maltextract_topalignment": {
                     "type": "boolean",
                     "default": "false",
                     "description": "Turn on using top alignments per read after filtering.",
-                    "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.\\n\\nOnly when `--metagenomic_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--useTopAlignment`",
+                    "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--useTopAlignment`",
                     "fa_icon": "fas fa-bahai"
                 }
             },
