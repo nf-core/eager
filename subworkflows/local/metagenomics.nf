@@ -9,10 +9,6 @@ workflow METAGENOMICS {
     // Define channels
     ch_multiqc_files                = Channel.empty()
     ch_versions                     = Channel.empty()
-    ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics
-        .map{ meta, fastq ->
-            [meta+['single_end':true], fastq]
-        }
 
     //
     // Run the complexity filter subworkflow
