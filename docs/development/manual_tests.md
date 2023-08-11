@@ -648,12 +648,40 @@ nextflow run . -profile test,docker \
   --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
   --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
 ```
+
 # GENOTYPING
 
 ## GATK UG
 
 ```bash
 ## Gatk on raw reads
-## Expect: One VCF per sample/reference combination.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' -ansi-log false
+## Expect: One VCF per sample/reference combination. Also 1 bcftools_stats file per bam.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## Gatk on trimmed reads
+## Expect: One VCF per sample/reference combination, based on the trimmed bams. Also 1 bcftools_stats file per bam.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed' -ansi-log false -dump-channels --run_trim_bam \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
+## Checked that the input bam for the UG jobs indeed had trimmed reads. (The full UDG sample has untrimmed bams.)
+```
+
+```bash
+```
+
+```bash
+## Gatk on pmd-filtered reads
+## Expect: One VCF per sample/reference combination, based on the pmd-filtered bams. Also 1 bcftools_stats file per bam.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'pmd' -ansi-log false -dump-channels --run_pmd_filtering
+## Checked that the bams had fewer reads compared to the raw bams.
+```
+
+```bash
+## Gatk on rescaled reads
+## Expect: One VCF per sample/reference combination, based on the rescaled bams. Also 1 bcftools_stats file per bam.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'rescaled' -ansi-log false -dump-channels --run_mapdamage_rescaling
 ```
