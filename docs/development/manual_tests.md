@@ -671,9 +671,6 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ```
 
 ```bash
-```
-
-```bash
 ## Gatk on pmd-filtered reads
 ## Expect: One VCF per sample/reference combination, based on the pmd-filtered bams. Also 1 bcftools_stats file per bam.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'pmd' -ansi-log false -dump-channels --run_pmd_filtering
