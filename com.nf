@@ -201,6 +201,12 @@ process SUM_MAPPED_READS_TO_FASTA {
 }
 
 process EXTRACT_BAM_OF_REF_ID {
+	// errorStrategy { task.exitStatus == '137' ? 'retry' : 'terminate' } 
+	//memory { 6.GB * task.attempt }
+
+	errorStrategy 'ignore'
+
+
         publishDir "results/",
                 mode: "copy"
 
