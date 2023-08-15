@@ -2245,8 +2245,8 @@ process bam_trim {
     // def right_clipping = udg == "half" ? "${params.bamutils_clip_half_udg_right}" : "${params.bamutils_clip_none_udg_right}"
     """
     bam trimBam $bam tmp.bam -L ${left_clipping} -R ${right_clipping} ${softclip}
-    samtools sort -@ ${task.cpus} tmp.bam -o ${libraryid}.trimmed.bam 
-    samtools index ${libraryid}.trimmed.bam ${size}
+    samtools sort -@ ${task.cpus} tmp.bam -o ${libraryid}_udg${udg}.trimmed.bam 
+    samtools index ${libraryid}_udg${udg}.trimmed.bam ${size}
     """
 }
 
