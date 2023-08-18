@@ -882,8 +882,8 @@
                 },
                 "mapdamage_downsample": {
                     "type": "integer",
-                    "default": 10000,
-                    "description": "Specify the maximum number of reads to consider for damage calculation.",
+                    "default": 0,
+                    "description": "Specify the maximum number of reads to consider for damage calculation. Defaults value is `0` (i.e. no downsampling is performed).",
                     "fa_icon": "fas fa-greater-than-equal",
                     "help_text": "The maximum number of reads used for damage calculation in mapDamage2. Can be used to significantly reduce the amount of time required for damage assessment. Note that a too low value can also obtain incorrect results.\n\n> Modifies mapDamage2 parameter: `-n`"
                 },
