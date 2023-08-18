@@ -47,12 +47,13 @@ workflow {
 
 	EXTRACT_BAM_OF_REF_ID(GET_CONTIGS_ID_AND_FASTA.out, SORT_AND_INDEX_BAM.out.map{it[0]}, params.label)
 
-	AUTHENTICATION( EXTRACT_BAM_OF_REF_ID.out, params.label )
+	//some dependency issue
+	//AUTHENTICATION( EXTRACT_BAM_OF_REF_ID.out, params.label )
 
 }
 
 process MAPPING {
-	publishDir "results/", 
+	publishDir params.mapping, 
 		mode: "copy"
 	 
 	input:
@@ -70,7 +71,7 @@ process MAPPING {
 }
 
 process GET_CONTIGS_ID_AND_FASTA {
-        publishDir "results/",
+        publishDir params.contigs,
                 mode: "copy"
 
         input:
@@ -110,7 +111,7 @@ process GET_CONTIGS_ID_AND_FASTA {
 
 process COMBINE_CONFIG_ID{
 
-	publishDir "results/",
+	publishDir params.contigs,
                 mode: "copy"
         
         input:  
@@ -130,7 +131,7 @@ process COMBINE_CONFIG_ID{
 }
 
 process SORT_AND_INDEX_BAM {
-        publishDir "results/",
+        publishDir params.mapping,
                 mode: "copy"
 
         input:
@@ -141,15 +142,17 @@ process SORT_AND_INDEX_BAM {
 
         script:
         """
-        bam_name=\$(echo $bam | sed 's/.bam//')
+        bam_name=\$(echo $bam | cut -f 1 -d".")
 
         samtools sort -o \${bam_name}_sorted.bam ${bam}
-        samtools index \${bam_name}_sorted.bam
+
+	#use csi index to remove the limitation of the size of bam.
+        samtools index -c \${bam_name}_sorted.bam
         """
 }
 
 process IDXSTAT {
-        publishDir "results/",
+        publishDir params.results,
                 mode: "copy"
 
         input:
@@ -165,7 +168,7 @@ process IDXSTAT {
 }
 
 process JOIN_MAP_WITH_SOURCE_INFO_OF_CONTIGS {
-        publishDir "results/",
+        publishDir params.results,
                 mode: "copy"
 
         input:
@@ -183,7 +186,7 @@ process JOIN_MAP_WITH_SOURCE_INFO_OF_CONTIGS {
 }
 
 process SUM_MAPPED_READS_TO_FASTA {
-        publishDir "results/",
+        publishDir params.results,
                 mode: "copy"
 
         input:
@@ -207,12 +210,12 @@ process EXTRACT_BAM_OF_REF_ID {
 	errorStrategy 'ignore'
 
 
-        publishDir "results/",
+        publishDir params.mapping,
                 mode: "copy"
 
         input:
 		path(contig_from)
-		tuple path(sorted_bam), path(sorted_bam_bai)
+		tuple path(sorted_bam), path(sorted_bam_index)
 		val(label)
 		
         output:
@@ -241,17 +244,16 @@ process AUTHENTICATION {
 
 	errorStrategy 'ignore'
 
-	memory '50 GB'
+	cpus 10
 
-
-        publishDir "results/",
+        publishDir params.plot,
                 mode: "copy"
 
         input:
 		path(bam)
 		val(label)
         output:
-                path("*.png")
+                path("*.pdf")
 
         script:
         """
@@ -261,9 +263,9 @@ process AUTHENTICATION {
 	bam_name=\$(echo $bam | sed 's/.bam//')
 	sorted_bam=\${bam_name}_sorted.bam
 	samtools sort -o \$sorted_bam \${bam_name}.bam
-	samtools index \$sorted_bam
+	samtools index -c \$sorted_bam
 
-	echo -e "\${ref_id}\t\${sorted_bam}" > bam_file
+	echo -e "\${ref_id}\\t\${sorted_bam}" > bam_file
 	AMBER --bamfiles bam_file --out "${label}-\${ref_id}-damage"
         """
 }
