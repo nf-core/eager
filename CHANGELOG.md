@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#1020](https://github.com/nf-core/eager/issues/1020) Added mapdamage2 as an alternative for damage calculation.
+
 ### `Fixed`
 
 - [#1017](https://github.com/nf-core/eager/issues/1017) Fixed file name collision in niche cases with multiple libraries of multiple UDG treatments.
