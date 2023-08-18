@@ -35,3 +35,23 @@ The script called `run`:
 `--label`: Label used for output.
 
 `-with-trace`: Reports time and memory usage.
+
+**Output**
+
+All output are stored in a directory `Results/`
+
+${label}_${reads_filename}.mapped_config_from
+
+`${label}_${reads_filename}_reads_sum.csv` output 3 columns: 
+- `species`: the name given to each fasta file in the input *.info file)	
+- `n_reads_Sum`: the number of reads mapped to this fasta file
+
+- `contigs_len_Sum`: the genome size summed from all contigs of the fasta file
+
+**Subdirectory of Results/**
+
+- `contigs`: contigs ID corresponding to the reference ID given in .info file.
+
+- `mapping`: bam and their index, also extracted bam file with only reads mapped to each fasta file, which has a `-ext.bam` as suffix.
+
+- `plot`: damage plots for authentication
