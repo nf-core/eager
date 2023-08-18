@@ -9,6 +9,9 @@
    conda env create -f container/env.yml
 
 # Running
+
+The script called `run`:
+
 ```sh
   nextflow run com.nf \
 	--fasta_info "61genus.info" \
