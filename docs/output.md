@@ -494,11 +494,11 @@ Plateauing can be caused by a number of reasons:
 * You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio
 * You have a low quality library made up of mappable sequencing artefacts that were able to pass filtering (e.g. adapters)
 
-### DamageProfiler
+### Damage Calculation
 
 #### Background
 
-DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
+DamageProfiler and mapDamage2 are tools which calculate a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
 
 Therefore, three main characteristics of ancient DNA are:
 
@@ -509,7 +509,7 @@ Therefore, three main characteristics of ancient DNA are:
 You will receive output for each deduplicated _library_. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes of the library in one value.
   
 #### Misincorporation Plots
-
+<!-- TODO Add mapDamage MultiQC module and then rewrite this part -->
 The MultiQC DamageProfiler module misincorporation plots shows the percent frequency (Y axis) of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The X axis represents base pairs from the end of the molecule from the given prime end, going into the middle of the molecule i.e. 1st base of molecule, 2nd base of molecule etc until the 14th base pair. The mismatches are when compared to the base of the reference genome at that position.
 
 When looking at the misincorporation plots, keep the following in mind:
@@ -525,7 +525,7 @@ When looking at the misincorporation plots, keep the following in mind:
   <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
 </p>
 
-> **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
+> **NB:** An important difference to note compared to the MapDamage2 tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
 
 #### Length Distribution
 
@@ -686,6 +686,7 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 * `preseq/`: this contains a `.preseq` file for every BAM file that had enough deduplication statistics to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced. You can use this file for plotting e.g. in `R` to find your sequencing target depth.
 * `qualimap/`: this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
 * `damageprofiler/`: this contains sample specific directories containing raw statistics and damage plots from DamageProfiler. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
+* `mapdamage/`: this contains sample specific directories containing raw statistics and damage plots from mapDamage2. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files. The `Runtime_log.txt` file contains runtime information.
 * `pmdtools/`: this contains raw output statistics of pmdtools (estimates of frequencies of substitutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`.
 * `trimmed_bam/`: this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_half_udg_left`, `--bamutils_clip_half_udg_right`, `--bamutils_clip_none_udg_left`, and `--bamutils_clip_none_udg_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read).
 * `damage_rescaling/`: this contains rescaled BAM files from mapDamage2. These BAM files have damage probabilistically removed via a bayesian model, and can be used for downstream genotyping.
