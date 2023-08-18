@@ -101,6 +101,7 @@ include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/n
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
 include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
 include { QUALIMAP_BAMQC                                    } from '../modules/nf-core/qualimap/bamqc/main'
+include { GUNZIP as GUNZIP_SNPBED                           } from '../modules/nf-core/gunzip/main.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -139,7 +140,17 @@ workflow EAGER {
 
     // QualiMap
     if ( params.snpcapture_bed ) {
-      ch_snpcapture_bed = Channel.fromPath(params.snpcapture_bed, checkIfExists: true).collect()
+      ch_snpcapture_bed_gunzip = Channel.fromPath(params.snpcapture_bed, checkIfExists: true).collect().map{
+        file ->
+            meta = file.simpleName
+        [meta,file]
+      }.branch{
+        meta, bed ->
+            forgunzip: bed[0].extension == "gz"
+            skip: true
+      }
+      ch_snpcapture_bed = GUNZIP_SNPBED(ch_snpcapture_bed_gunzip.forgunzip).gunzip.mix(ch_snpcapture_bed_gunzip).map{it[1]}
+
     } else {
       ch_snpcapture_bed = []
     }

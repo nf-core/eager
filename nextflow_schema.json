@@ -965,7 +965,7 @@
                 },
                 "snpcapture_bed": {
                     "type": "string",
-                    "description": "Path to snp capture BED"
+                    "description": "Path to snp capture in BED format."
                 }
             },
             "fa_icon": "fas fa-search"
