@@ -186,7 +186,7 @@ if("${params.fasta}".endsWith(".gz")){
         path zipped_fasta from file(params.fasta) // path doesn't like it if a string of an object is not prefaced with a root dir (/), so use file() to resolve string before parsing to `path` 
 
         output:
-        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler,ch_fasta_for_qualimap,ch_unmasked_fasta_for_masking,ch_unmasked_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling,ch_fasta_for_bcftools_stats
+        path "$unzip" into ch_fasta into ch_fasta_for_bwaindex,ch_fasta_for_bt2index,ch_fasta_for_faidx,ch_fasta_for_seqdict,ch_fasta_for_circulargenerator,ch_fasta_for_circularmapper,ch_fasta_for_damageprofiler, ch_fasta_for_mapdamage ,ch_fasta_for_qualimap,ch_unmasked_fasta_for_masking,ch_unmasked_fasta_for_pmdtools,ch_fasta_for_genotyping_ug,ch_fasta_for_genotyping_hc,ch_fasta_for_genotyping_freebayes,ch_fasta_for_genotyping_pileupcaller,ch_fasta_for_vcf2genome,ch_fasta_for_multivcfanalyzer,ch_fasta_for_genotyping_angsd,ch_fasta_for_damagerescaling,ch_fasta_for_bcftools_stats
 
         script:
         unzip = zipped_fasta.toString() - '.gz'
@@ -197,7 +197,7 @@ if("${params.fasta}".endsWith(".gz")){
     } else {
     fasta_for_indexing = Channel
     .fromPath("${params.fasta}", checkIfExists: true)
-    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_qualimap; ch_unmasked_fasta_for_masking; ch_unmasked_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer; ch_fasta_for_genotyping_angsd; ch_fasta_for_damagerescaling; ch_fasta_for_bcftools_stats }
+    .into{ ch_fasta_for_bwaindex; ch_fasta_for_bt2index; ch_fasta_for_faidx; ch_fasta_for_seqdict; ch_fasta_for_circulargenerator; ch_fasta_for_circularmapper; ch_fasta_for_damageprofiler; ch_fasta_for_mapdamage; ch_fasta_for_qualimap; ch_unmasked_fasta_for_masking; ch_unmasked_fasta_for_pmdtools; ch_fasta_for_genotyping_ug; ch_fasta__for_genotyping_hc; ch_fasta_for_genotyping_hc; ch_fasta_for_genotyping_freebayes; ch_fasta_for_genotyping_pileupcaller; ch_fasta_for_vcf2genome; ch_fasta_for_multivcfanalyzer; ch_fasta_for_genotyping_angsd; ch_fasta_for_damagerescaling; ch_fasta_for_bcftools_stats }
 }
 
 // Check that fasta index file path ends in '.fai'
@@ -1903,10 +1903,10 @@ process markduplicates{
 // form of library merging. 
 if ( params.skip_deduplication ) {
   ch_skiprmdup_for_libeval.mix(ch_dedup_for_libeval, ch_markdup_for_libeval)
-    .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
+    .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_mapdamage; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
 } else {
   ch_dedup_for_libeval.mix(ch_markdup_for_libeval)
-    .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
+    .into{ ch_rmdup_for_preseq; ch_rmdup_for_damageprofiler; ch_rmdup_for_mapdamage; ch_for_nuclear_contamination; ch_rmdup_formtnucratio }
 }
 
 // Merge independent libraries sequenced but with same treatment (often done to 
@@ -2077,7 +2077,7 @@ process bedtools {
 /* --    ANCIENT DNA EVALUATION AND BAM MODIFICATION     -- */
 //////////////////////////////////////////////////////////////
 
-// Calculate typical aDNA damage frequency distribution
+// Calculate typical aDNA damage frequency distribution with DamageProfiler
 
 process damageprofiler {
     label 'sc_small'
@@ -2086,7 +2086,7 @@ process damageprofiler {
     publishDir "${params.outdir}/damageprofiler", mode: params.publish_dir_mode
 
     when:
-    !params.skip_damage_calculation
+    !params.skip_damage_calculation && params.damage_estimation_tool == 'damageprofiler'
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_damageprofiler
@@ -2103,6 +2103,33 @@ process damageprofiler {
     base = "${bam.baseName}"
     """
     damageprofiler -Xmx${task.memory.toGiga()}g -i $bam -r $fasta -l ${params.damageprofiler_length} -t ${params.damageprofiler_threshold} -o . -yaxis_damageplot ${params.damageprofiler_yaxis}
+    """
+}
+
+// Calculate typical aDNA damage frequency distribution with mapDamage
+
+process mapdamage_estimation {
+    label 'sc_small'
+    tag "${libraryid}"
+
+    publishDir "${params.outdir}/mapdamage", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_damage_calculation && params.damage_estimation_tool == 'mapdamage'
+
+    input:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_mapdamage
+    file fasta from ch_fasta_for_mapdamage.collect()
+
+    output:
+    tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("results_*") into ch_output_from_mapdamage
+
+    script:
+    def base = "${bam.baseName}"
+    def singlestranded = strandedness == "single" ? '--single-stranded' : ''
+    def downsample = params.mapdamage_downsample != 0 ? "-n ${params.mapdamage_downsample} --downsample-seed=1" : '' // Include seed to make results consistent between runs
+    """
+    mapDamage -i ${bam} -r ${fasta} ${singlestranded} ${downsample} --ymax=${params.mapdamage_yaxis} --no-stats
     """
 }
 
