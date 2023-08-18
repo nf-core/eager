@@ -2086,7 +2086,7 @@ process damageprofiler {
     publishDir "${params.outdir}/damageprofiler", mode: params.publish_dir_mode
 
     when:
-    !params.skip_damage_calculation && params.damage_estimation_tool == 'damageprofiler'
+    !params.skip_damage_calculation && params.damage_calculation_tool == 'damageprofiler'
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_damageprofiler
@@ -2115,7 +2115,7 @@ process mapdamage_estimation {
     publishDir "${params.outdir}/mapdamage", mode: params.publish_dir_mode
 
     when:
-    !params.skip_damage_calculation && params.damage_estimation_tool == 'mapdamage'
+    !params.skip_damage_calculation && params.damage_calculation_tool == 'mapdamage'
 
     input:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path(bam), path(bai) from ch_rmdup_for_mapdamage

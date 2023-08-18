@@ -848,12 +848,12 @@
             "description": "Options for calculating and filtering for characteristic ancient DNA damage patterns.",
             "default": "",
             "properties": {
-                "damage_estimation_tool": {
+                "damage_calculation_tool": {
                     "type": "string",
                     "default": "damageprofiler",
-                    "description": "Specify the tool to use for damage estimation.",
+                    "description": "Specify the tool to use for damage calculation.",
                     "fa_icon": "fas fa-tools",
-                    "help_text": "Specify the tool to be used for damage estimation. Options: `damageprofiler`, `mapdamage`. By default, DamageProfiler is used.",
+                    "help_text": "Specify the tool to be used for damage calculation. Options: `damageprofiler`, `mapdamage`. By default, DamageProfiler is used.",
                     "enum": [
                         "damageprofiler",
                         "mapdamage"
@@ -883,9 +883,9 @@
                 "mapdamage_downsample": {
                     "type": "integer",
                     "default": 10000,
-                    "description": "Specify the maximum number of reads to consider for damage estimation.",
+                    "description": "Specify the maximum number of reads to consider for damage calculation.",
                     "fa_icon": "fas fa-greater-than-equal",
-                    "help_text": "The maximum number of reads used for damage estimation in mapDamage2. Can be used to significantly reduce the amount of time required for damage assessment. Note that a too low value can also obtain incorrect results.\n\n> Modifies mapDamage2 parameter: `-n`"
+                    "help_text": "The maximum number of reads used for damage calculation in mapDamage2. Can be used to significantly reduce the amount of time required for damage assessment. Note that a too low value can also obtain incorrect results.\n\n> Modifies mapDamage2 parameter: `-n`"
                 },
                 "mapdamage_yaxis": {
                     "type": "number",
