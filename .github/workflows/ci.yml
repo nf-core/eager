@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['20.07.1', '22.10.6']
+        nxf_ver: ["20.07.1", "22.10.6"]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -58,7 +58,7 @@ jobs:
         run: |
           git clone --single-branch --branch eager https://github.com/nf-core/test-datasets.git data
       - name: DELAY to try address some odd behaviour with what appears to be a conflict between parallel htslib jobs leading to CI hangs
-        run: | 
+        run: |
           if [[ $NXF_VER = '' ]]; then sleep 1200; fi
       - name: BASIC Run the basic pipeline with directly supplied single-end FASTQ
         run: |
@@ -74,7 +74,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --save_reference
       - name: REFERENCE Basic workflow, with supplied indices
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --bwa_index 'results/reference_genome/bwa_index/BWAIndex/' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai' 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --bwa_index 'results/reference_genome/bwa_index/BWAIndex/' --fasta_index 'https://github.com/nf-core/test-datasets/blob/eager/reference/Mammoth/Mammoth_MT_Krause.fasta.fai'
       - name: REFERENCE Run the basic pipeline with FastA reference with `fna` extension
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker
@@ -107,7 +107,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --clip_adapters_list 'https://github.com/nf-core/test-datasets/raw/eager/databases/adapters/adapter-list.txt'
       - name: ADAPTER LIST Run the basic pipeline using an adapter list, skipping adapter removal
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --clip_adapters_list 'https://github.com/nf-core/test-datasets/raw/eager/databases/adapters/adapter-list.txt' --skip_adapterremoval 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --clip_adapters_list 'https://github.com/nf-core/test-datasets/raw/eager/databases/adapters/adapter-list.txt' --skip_adapterremoval
       - name: POST_AR_FASTQ_TRIMMING Run the basic pipeline post-adapterremoval FASTQ trimming
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --run_post_ar_trimming
@@ -141,6 +141,9 @@ jobs:
       - name: BEDTOOLS Test bedtools feature annotation
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --run_bedtools_coverage --anno_file 'https://github.com/nf-core/test-datasets/raw/eager/reference/Mammoth/Mammoth_MT_Krause.gff3'
+      - name: MAPDAMAGE2 damage calculation
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --damage_calculation_tool 'mapdamage'
       - name: GENOTYPING_HC Test running GATK HaplotypeCaller
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_fna,docker --run_genotyping --genotyping_tool 'hc' --gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES' --gatk_hc_emitrefconf 'BP_RESOLUTION'
@@ -193,11 +196,11 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --run_bam_filtering  --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt/" --metagenomic_complexity_filter
       - name: MALTEXTRACT Download resource files
         run: |
-            mkdir -p databases/maltextract
-            for i in ncbi.tre ncbi.map; do wget https://github.com/rhuebler/HOPS/raw/0.33/Resources/"$i" -P databases/maltextract/; done
+          mkdir -p databases/maltextract
+          for i in ncbi.tre ncbi.map; do wget https://github.com/rhuebler/HOPS/raw/0.33/Resources/"$i" -P databases/maltextract/; done
       - name: MALTEXTRACT Basic with MALT plus MaltExtract
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --run_bam_filtering  --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles "/home/runner/work/eager/eager/databases/maltextract/" --maltextract_taxon_list 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt' 
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --run_bam_filtering  --bam_unmapped_type 'fastq' --run_metagenomic_screening --metagenomic_tool 'malt' --database "/home/runner/work/eager/eager/databases/malt" --run_maltextract --maltextract_ncbifiles "/home/runner/work/eager/eager/databases/maltextract/" --maltextract_taxon_list 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/maltextract/MaltExtract_list.txt'
       - name: METAGENOMIC Run the basic pipeline but with unmapped reads going into Kraken
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_tsv_kraken,docker --run_bam_filtering  --bam_unmapped_type 'fastq'
