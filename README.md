@@ -3,6 +3,7 @@
 1. Make sure you have the following dependencies installed:
    - Nextflow
    - Conda
+   - [AMBER]([url](https://github.com/tvandervalk/AMBER.git)) (optional for authentication) 
 
 2. Create a Conda environment using the provided YAML file:
    ```sh
@@ -24,7 +25,7 @@ The script called `run`:
 
 **Input**
 
-`--fasta_info`: Specify the path to the fasta information file with the first column as the path to the fasta file and the second column as their name.
+`--fasta_info`: Specify the path to the fasta information file with the first column as the path to the fasta file and the second column as their name (reference ID).
 
 `--reads`: Provide the reads to be mapped.
 
@@ -38,17 +39,19 @@ The script called `run`:
 
 **Output**
 
-All output are stored in a directory `Results/`
+All output are stored in a directory `results/`
 
-${label}_${reads_filename}.mapped_config_from
+`${label}_${reads_filename}.mapped_config_from` has 5 columns:
+contig ID, reference ID, Contig length, the number of mapped read-segments, the number of unmapped read-segments.
 
 `${label}_${reads_filename}_reads_sum.csv` output 3 columns: 
-- `species`: the name given to each fasta file in the input *.info file)	
+- `species`: reference ID
+
 - `n_reads_Sum`: the number of reads mapped to this fasta file
 
-- `contigs_len_Sum`: the genome size summed from all contigs of the fasta file
+- `contigs_len_Sum`: the total genome size summed from all contigs of the fasta file
 
-**Subdirectory of Results/**
+**Subdirectory of results/**
 
 - `contigs`: contigs ID corresponding to the reference ID given in .info file.
 
