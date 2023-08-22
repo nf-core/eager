@@ -2123,6 +2123,7 @@ process mapdamage_estimation {
 
     output:
     tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("results_*") into ch_output_from_mapdamage
+    path ("results_*") into ch_mapdamage_for_multiqc
 
     script:
     def base = "${bam.baseName}"
@@ -3257,6 +3258,7 @@ process multiqc {
     file ('flagstat_filtered/*') from ch_bam_filtered_flagstat_for_multiqc.collect().ifEmpty([])
     file ('preseq/*') from ch_preseq_for_multiqc.collect().ifEmpty([])
     file ('damageprofiler/dmgprof*/*') from ch_damageprofiler_results.collect().ifEmpty([])
+    path ('mapdamage/*') from ch_mapdamage_for_multiqc.collect().ifEmpty([]).dump(tag:'ch_mapdamage_for_multiqc')
     file ('qualimap/qualimap*/*') from ch_qualimap_results.collect().ifEmpty([])
     file ('markdup/*') from ch_markdup_results_for_multiqc.collect().ifEmpty([])
     file ('dedup*/*') from ch_dedup_results_for_multiqc.collect().ifEmpty([])
