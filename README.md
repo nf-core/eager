@@ -69,7 +69,7 @@ By default the pipeline currently performs the following:
 * Sequencing adapter removal, paired-end data merging (`AdapterRemoval`)
 * Read mapping to reference using (`bwa aln`, `bwa mem`, `CircularMapper`, or `bowtie2`)
 * Post-mapping processing, statistics and conversion to bam (`samtools`)
-* Ancient DNA C-to-T damage pattern visualisation (`DamageProfiler`)
+* Ancient DNA C-to-T damage pattern visualisation (`DamageProfiler` or `mapDamage`)
 * PCR duplicate removal (`DeDup` or `MarkDuplicates`)
 * Post-mapping statistics and BAM quality control (`Qualimap`)
 * Library Complexity Estimation (`preseq`)
@@ -246,7 +246,7 @@ In addition, references of tools and data used in this pipeline are as follows:
 * **Bowtie2**  Langmead, B. and Salzberg, S. L. 2012 Fast gapped-read alignment with Bowtie 2. Nature methods, 9(4), p. 357–359. doi: [10.1038/nmeth.1923](https:/dx.doi.org/10.1038/nmeth.1923).
 * **sequenceTools** Stephan Schiffels (Unpublished). Download: [https://github.com/stschiff/sequenceTools](https://github.com/stschiff/sequenceTools)
 * **EigenstratDatabaseTools** Thiseas C. Lamnidis (Unpublished). Download: [https://github.com/TCLamnidis/EigenStratDatabaseTools.git](https://github.com/TCLamnidis/EigenStratDatabaseTools.git)
-* **mapDamage2** Jónsson, H., et al 2013. mapDamage2.0: fast approximate Bayesian estimates of ancient DNA damage parameters. Bioinformatics , 29(13), 1682–1684. [https://doi.org/10.1093/bioinformatics/btt193](https://doi.org/10.1093/bioinformatics/btt193)
+* **mapDamage** Jónsson, H., et al 2013. mapDamage2.0: fast approximate Bayesian estimates of ancient DNA damage parameters. Bioinformatics , 29(13), 1682–1684. [https://doi.org/10.1093/bioinformatics/btt193](https://doi.org/10.1093/bioinformatics/btt193)
 * **BBduk** Brian Bushnell (Unpublished). Download: [https://sourceforge.net/projects/bbmap/](sourceforge.net/projects/bbmap/)
 
 ## Data References

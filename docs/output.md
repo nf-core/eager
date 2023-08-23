@@ -526,7 +526,7 @@ When looking at the misincorporation plots, keep the following in mind:
   <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
 </p>
 
-> **NB:** An important difference to note compared to the MapDamage2 tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
+> **NB:** An important difference to note compared to the mapDamage tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
 
 #### Length Distribution
 
