@@ -2108,7 +2108,7 @@ process damageprofiler {
 
 // Calculate typical aDNA damage frequency distribution with mapDamage
 
-process mapdamage_estimation {
+process mapdamage_calculation {
     label 'sc_small'
     tag "${libraryid}"
 

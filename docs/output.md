@@ -498,7 +498,7 @@ Plateauing can be caused by a number of reasons:
 
 #### Background
 
-DamageProfiler and mapDamage are tools which calculate a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
+DamageProfiler and mapDamage are tools that calculate a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
 
 Therefore, three main characteristics of ancient DNA are:
 
