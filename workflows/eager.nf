@@ -140,15 +140,18 @@ workflow EAGER {
 
     // QualiMap
     if ( params.snpcapture_bed ) {
-      ch_snpcapture_bed_gunzip = Channel.fromPath(params.snpcapture_bed, checkIfExists: true).collect().map{
-        file ->
-            meta = file.simpleName
-        [meta,file]
-      }.branch{
-        meta, bed ->
+      ch_snpcapture_bed_gunzip = Channel.fromPath( params.snpcapture_bed, checkIfExists: true )
+        .collect()
+        .map {
+          file ->
+              meta = file.simpleName
+          [meta,file]
+        }
+        .branch {
+          meta, bed ->
             forgunzip: bed[0].extension == "gz"
             skip: true
-      }
+        }
       ch_snpcapture_bed = GUNZIP_SNPBED(ch_snpcapture_bed_gunzip.forgunzip).gunzip.mix(ch_snpcapture_bed_gunzip.skip).map{it[1]}
 
     } else {
