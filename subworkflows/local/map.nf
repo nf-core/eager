@@ -20,7 +20,28 @@ workflow MAP {
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
-    ch_input_for_mapping = reads
+    if ( params.shard_fastq ) {
+
+        ch_input_for_sharding = reads
+
+        SEQKIT_SPLIT2( ch_input_for_sharding )
+        ch_versions        = ch_versions.mix ( SEQKIT_SPLIT2.out.versions.first() )
+
+        ch_input_for_mapping = SEQKIT_SPLIT2.out.reads
+            .transpose()
+            .combine(index)
+            .multiMap {
+                meta, reads, meta2, index ->
+                    new_meta = meta.clone()
+                    new_meta.shard_number = reads.getName().replaceAll(/.*(part_\d+).fastq.gz/, '$1')
+                    new_meta.reference = meta2.id
+                    reads: [ new_meta, reads ] 
+                    index: [ meta2, index ]
+            } 
+
+    } else {
+
+        ch_input_for_mapping = reads
                             .combine(index)
                             .multiMap {
                                 meta, reads, meta2, index ->
@@ -29,12 +50,7 @@ workflow MAP {
                                     reads: [ new_meta, reads ]
                                     index: [ meta2, index]
                             }
-    ch_input_for_mapping.reads.view()
-    if ( params.shard_fastq ) {
-    // Takes meta and reads as input
-    // Takes args   = task.ext.args which can be used to specify chunk_size
-        SEQKIT_SPLIT2( ch_input_for_mapping.reads )
-        ch_versions        = ch_versions.mix ( SEQKIT_SPLIT2.out.versions.first() )
+
     }
 
     if ( params.mapping_tool == 'bwaaln' ) {
@@ -66,8 +82,7 @@ workflow MAP {
     ch_input_for_lane_merge = ch_mapped_lane_bam
                                 .map {
                                     meta, bam ->
-                                    new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry'] }
-
+                                    new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry', 'shard_number'] }
                                     [ new_meta, bam ]
                                 }
                                 .groupTuple()
