@@ -149,7 +149,7 @@ workflow EAGER {
             forgunzip: bed[0].extension == "gz"
             skip: true
       }
-      ch_snpcapture_bed = GUNZIP_SNPBED(ch_snpcapture_bed_gunzip.forgunzip).gunzip.mix(ch_snpcapture_bed_gunzip).map{it[1]}
+      ch_snpcapture_bed = GUNZIP_SNPBED(ch_snpcapture_bed_gunzip.forgunzip).gunzip.mix(ch_snpcapture_bed_gunzip.skip).map{it[1]}
 
     } else {
       ch_snpcapture_bed = []
