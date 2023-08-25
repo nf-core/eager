@@ -476,18 +476,18 @@
             "description": "Options for aligning reads against reference genome(s)",
             "default": "",
             "properties": {
-                "shard_fastq": {
+                "run_fastq_sharding": {
                     "type": "boolean",
                     "description": "Turn on sharding to split reads into smaller chunks before mapping",
                     "fa_icon": "fas fa-power-off",
                     "help_text": "Sharding reads before mapping can help parallelise mapping for very large FASTQs.  "
                 },
-                "shard_size": {
+                "fastq_shard_size": {
                     "type": "integer",
                     "default": 1000000,
                     "description": "Specify the number of reads in each shard when splitting.",
                     "fa_icon": "fas fa-arrows-alt-v",
-                    "help_text": "Make sure to choose a value that makes sense for your dataset. Small values can create many files. Needs `--shard_fastq`"
+                    "help_text": "Make sure to choose a value that makes sense for your dataset. Small values can create many files. Needs `--run_fastq_sharding`"
                 },
                 "mapping_tool": {
                     "type": "string",

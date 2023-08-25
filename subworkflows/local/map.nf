@@ -20,7 +20,7 @@ workflow MAP {
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
-    if ( params.shard_fastq ) {
+    if ( params.run_fastq_sharding ) {
 
         ch_input_for_sharding = reads
 
