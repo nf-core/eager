@@ -22,35 +22,27 @@ workflow DEDUPLICATE {
     ch_multiqc_files  = Channel.empty()
 
     ch_refs = fasta.join(fasta_fai)
-        .map {
-            // Create additional map containing only meta.reference for combining samples and intervals
-            meta, fasta, fai ->
-                meta2 = [:]
-                meta2.reference = meta.id
-            [ meta2, meta, fasta, fai ]
-        }
+    .map {
+        // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+        WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+    }
 
     // Create genomic regions file for splitting the bam before deduplication
     BUILD_INTERVALS( fasta_fai )
     ch_versions      = ch_versions.mix( BUILD_INTERVALS.out.versions.first() )
 
     // Prep regions for combining
-    ch_intervals_for_join = BUILD_INTERVALS.out.bed.map {
-        // Rename reference meta.id to meta.reference to allow combining with bams of specific reference
-        meta, bed ->
-            meta2 = [:]
-            meta2.reference = meta.id
-        [ meta2, bed ]
+    ch_intervals_for_join = BUILD_INTERVALS.out.bed
+    .map {
+        // Replace meta with new meta that contains the meta.id value in the meta.reference attribute only
+        WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , true )
     }
 
     // Ensure input bam matches the regions file
     ch_bam_for_split = ch_bam_bai
         .map {
-            // Create additional map containing only meta.reference for combining with intervals for reference
-            meta, bam, bai ->
-                meta2 = [:]
-                meta2.reference = meta.reference
-            [ meta2, meta, bam, bai ]
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
         }
         .combine(
             by: 0,
@@ -69,11 +61,8 @@ workflow DEDUPLICATE {
 
         ch_markduplicates_input = BAM_SPLIT_BY_REGION.out.bam_bai
             .map {
-                // Create additional map containing only meta.reference for combining with intervals for reference
-                meta, bam, bai ->
-                    meta2 = [:]
-                    meta2.reference = meta.reference
-                [ meta2, meta, bam, bai ]
+                // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by:0,
@@ -117,10 +106,8 @@ workflow DEDUPLICATE {
         }
         .groupTuple()
         .map {
-            meta, bam ->
-                ref_meta = [:]
-                ref_meta.reference = meta.reference
-            [ ref_meta, meta, bam ]
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
         }
         .combine(
             by:0,
