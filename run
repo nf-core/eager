@@ -1,9 +1,8 @@
-#!/bin/bash
-
 nextflow run com.nf \
-	--fasta_info "/crex/proj/snic2022-6-144/nobackup/CHENYU/check_dna_damage/competitive_mapping/21genus.fasta_ref" \
-	--reads "/crex/proj/snic2022-6-144/nobackup/TOM/EDNA/READS/BISON/Blank.fastq.gz" \
-	--fasta_index "/crex/proj/snic2022-6-144/nobackup/CHENYU/check_dna_damage/competitive_mapping/index/21genus" \
-	--threads 20 \
-	--label "21genus" \
-	-resume
+	--fasta_info "fasta_info" \
+	--reads "https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz" \
+	--threads 128 \
+	--label "test" \
+	-profile conda \
+	-with-trace -resume
+	#--fasta_index "~/extract_authentication/index/61genus" \

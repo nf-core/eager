@@ -64,7 +64,7 @@ workflow {
 
 
 process INDEXING {
-        publishDir params.mapping,
+        publishDir params.index,
                 mode: "copy"
 
 	cpus params.threads
