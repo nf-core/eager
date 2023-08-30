@@ -4,9 +4,10 @@ nextflow.enable.dsl = 2
 // Workflow definition
 workflow {
 	// 1) input a file with fasta file their corresponding reference ID
-	fasta_info = Channel.fromPath(params.fasta_info).splitCsv( sep: "\t" ).map { row -> [file(row[0]), row[1]] }
-
-	//fasta_info.view()
+	fasta_info = Channel.fromPath(params.fasta_info).splitCsv( sep: " " ).map { row -> [file(row[0]), row[1]] }
+	
+	// get the list of fasta files
+	fastas = fasta_info.map{it[0]}.collect()//.view()
 
 	// 3) the reads to be mapped
 	// params.reads
@@ -16,13 +17,22 @@ workflow {
 
 	// 4) params.threads
 
-	// params.label
+	// params.label // used to name the bowtie2 index of concacenated fasta files
 
 	//workflow------------------
 
-	//INDEX() // memory-intensive so not included so far
+	// if there are bowtie2 indexes, then skip the indexing process
+	if ( params.fasta_index == null ) {
+		INDEXING( fastas, params.label, params.threads )
+		INDEXING.out.view()
+		INDEXING.out.set{ fasta_index }
+	} else {
+		fasta_index = Channel.value( params.fasta_index )
+	}
+	
+	fasta_index.view()	
 
-	MAPPING(params.fasta_index, params.reads)
+	MAPPING(fasta_index, params.reads, params.label)
 	//MAPPING.out.view()
 
 	GET_CONTIGS_ID_AND_FASTA(fasta_info)
@@ -52,20 +62,58 @@ workflow {
 
 }
 
+
+process INDEXING {
+        publishDir params.mapping,
+                mode: "copy"
+
+	cpus params.threads
+
+        input:
+		path(fastas)
+                val(label)
+		val(threads)
+
+        output:
+                path("*.bt2l")
+
+        script:
+	"""
+	#turn groovy list into a bash list
+	fastas_bash=\$(echo $fastas | sed 's/[][]//g')
+
+	#concacenate all the fasta file
+	for file in \$fastas_bash; do
+		if [[ -f "\$file" ]]; then
+        		if [[ "\${file##*.}" != "gz" ]]; then
+            			gzip -c "\$file" > "\${file}.gz"
+				cat "\${file}.gz" >> tmp
+        		fi
+    		fi
+	done
+
+	mv tmp ${label}.fa.gz
+
+	#build the mapping index from the concacenated fasta #direct the error to output
+	bowtie2-build --large-index --threads $threads ${label}.fa.gz $label #> /dev/null 2>&1
+        """
+}
+
 process MAPPING {
 	publishDir params.mapping, 
 		mode: "copy"
 	 
 	input:
-		val(index)
+		path(index)
 		path(reads)
+		val(label)
 
 	output:
 		path("*.bam")
 	
 	script:	  
 	"""
-	bowtie2 --very-sensitive -p ${params.threads} -x $index -U $reads | \
+	bowtie2 --very-sensitive -p ${params.threads} -x $label -U $reads | \
   samtools view -@ ${params.threads} -Sb -q 1 - > \$(basename $reads).bam
 	"""
 }
