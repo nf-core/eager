@@ -1,8 +1,8 @@
 # Configuration
 
 Make sure you have the following dependencies installed:
-   - Nextflow
-   - Conda
+   - Nextflow (tested on version 22.04.0.5697)
+   - Conda (tested on version 23.3.1)
 
 # Running
 
