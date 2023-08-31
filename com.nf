@@ -27,12 +27,12 @@ workflow {
 		INDEXING.out.view()
 		INDEXING.out.set{ fasta_index }
 	} else {
-		fasta_index = Channel.value( params.fasta_index )
+		fasta_index = Channel.fromPath( params.fasta_index )
 	}
 	
 	fasta_index.view()	
 
-	MAPPING(fasta_index, params.reads, params.label)
+	MAPPING(fasta_index.collect(), params.reads)
 	//MAPPING.out.view()
 
 	GET_CONTIGS_ID_AND_FASTA(fasta_info)
@@ -106,14 +106,16 @@ process MAPPING {
 	input:
 		path(index)
 		path(reads)
-		val(label)
 
 	output:
 		path("*.bam")
 	
 	script:	  
 	"""
-	bowtie2 --very-sensitive -p ${params.threads} -x $label -U $reads | \
+	#obtain the name of the index files
+	ind_name=\$(ls *.bt2* | sed -n 1p | cut -f 1 -d'.' )
+
+	bowtie2 --very-sensitive -p ${params.threads} -x \$ind_name -U $reads | \
   samtools view -@ ${params.threads} -Sb -q 1 - > \$(basename $reads).bam
 	"""
 }
@@ -251,39 +253,40 @@ process SUM_MAPPED_READS_TO_FASTA {
         """
 }
 
-process EXTRACT_BAM_OF_REF_ID {
-	// errorStrategy { task.exitStatus == '137' ? 'retry' : 'terminate' } 
-	//memory { 6.GB * task.attempt }
 
-	errorStrategy 'ignore'
+process EXTRACT_BAM_OF_REF_ID {
+        // errorStrategy { task.exitStatus == '137' ? 'retry' : 'terminate' }
+        //memory { 6.GB * task.attempt }
+
+        errorStrategy 'ignore'
 
 
         publishDir params.mapping,
                 mode: "copy"
 
         input:
-		path(contig_from)
-		tuple path(sorted_bam), path(sorted_bam_index)
-		val(label)
-		
+                path(contig_from)
+                tuple path(sorted_bam), path(sorted_bam_index)
+                val(label)
+
         output:
                 path("*-ext.bam")
 
         script:
         """
-	#extract all contig IDs
-	cut -f 1 $contig_from > contig_IDs
+        #extract all contig IDs
+        cut -f 1 $contig_from > contig_IDs
 
-	#get the reference ID
-	ref_id=\$(cut -f 2 $contig_from | head -1)
+        #get the reference ID
+        ref_id=\$(cut -f 2 $contig_from | head -1)
 
-	#output the header
-	samtools view -H $sorted_bam >> ${label}-\${ref_id}-ext.sam
+        #extract the header according to the contig IDs
+        ext_header_bam.sh $sorted_bam contig_IDs > ${label}-\${ref_id}-ext.sam
 
-	samtools view $sorted_bam | LC_ALL=C fgrep -f contig_IDs >> ${label}-\${ref_id}-ext.sam
+        samtools view $sorted_bam | LC_ALL=C fgrep -w -f contig_IDs >> ${label}-\${ref_id}-ext.sam
 
-	#sam to bam
-	samtools view -S -b ${label}-\${ref_id}-ext.sam > ${label}-\${ref_id}-ext.bam
+        #sam to bam
+        samtools view -S -b ${label}-\${ref_id}-ext.sam > ${label}-\${ref_id}-ext.bam
         """
 }
 

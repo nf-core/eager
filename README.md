@@ -1,26 +1,37 @@
 # Configuration
 
-1. Make sure you have the following dependencies installed:
+Make sure you have the following dependencies installed:
    - Nextflow
    - Conda
-   - [AMBER]([url](https://github.com/tvandervalk/AMBER.git)) (optional for authentication) 
-
-2. Create a Conda environment using the provided YAML file:
-   ```sh
-   conda env create -f container/env.yml
 
 # Running
 
 The script called `run`:
 
+(1) If you have not ran indexing, please input the fasta file list:
+
 ```sh
-  nextflow run com.nf \
-	--fasta_info "61genus.info" \
-	--reads "Steppe_bison.fastq.gz" \
-	--fasta_index "~/extract_authentication/index/61genus" \
-	--threads 10 \
-	--label "61genus" \
-	-with-trace
+#input fasta files only
+nextflow run com.nf \
+	--fasta_info "fasta_info" \
+	--reads "https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz" \
+	--threads 128 \
+	--label "test" \
+	-profile conda \
+	-with-trace # -resume
+```
+
+(2) If you have ran the indexing of concacenated fasta files, please input both fasta files list and bowtie2 index files
+
+```sh
+nextflow run com.nf \
+        --fasta_info "fasta_info" \
+        --reads "https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz" \
+        --threads 128 \
+        --label "test" \
+        -profile conda \
+        -with-trace \
+        --fasta_index "./results/index/test.*.bt2* #-resume
 ```
 
 **Input**
@@ -29,13 +40,15 @@ The script called `run`:
 
 `--reads`: Provide the reads to be mapped.
 
-`--fasta_index`: Set the directory containing the bowtie2 index of the concatenated fasta file of all fasta files.
+`--fasta_index`: Optional input. Input all the bowtie2 index files (.bt2l or .bt2) of the concatenated fasta file of all fasta files. With this input, the indexing process will be skipped.
 
-`--threads`: Number of threads to use (e.g., 10 in the example).
+`--threads`: Number of threads to use (for example the number of cores of your cluster). If your cluster has partition of memory, please base the number of threads/cores on the memory needed during the process of indexing, which is the most memory-intensive process.
 
-`--label`: Label used for output.
+`--label`: Label used for output or naming bowtie2 indexes.
 
-`-with-trace`: Reports time and memory usage.
+`-with-trace`: Reports time and memory usage of processes.
+
+`-profile conda`: This makes nextflow to take care of the environment. Otherwise, you can disable this and check out the `container/env.yml` file for which software you need to load in the module.
 
 **Output**
 
@@ -57,4 +70,4 @@ contig ID, reference ID, Contig length, the number of mapped read-segments, the 
 
 - `mapping`: bam and their index, also extracted bam file with only reads mapped to each fasta file, which has a `-ext.bam` as suffix.
 
-- `plot`: damage plots for authentication
+- `index`: bowtie2 index files

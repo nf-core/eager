@@ -4,4 +4,5 @@ nextflow run com.nf \
 	--threads 128 \
 	--label "test" \
 	-profile conda \
-	-with-trace #-resume
+	-with-trace \
+	--fasta_index "/project/home/p200123/CHENYU/dev_competitive_mapping_bowtie2/results/index/test*bt2*"
