@@ -1,8 +1,11 @@
 # Configuration
 
-Make sure you have the following dependencies installed:
+(1) Make sure you have the following dependencies installed:
    - Nextflow (tested on version 22.04.0.5697)
    - Conda (tested on version 23.3.1)
+(2) Change the `process.conda = '/path/to/container/env.yml'` in `nextflow.config` to the path of your current path to the file.
+
+(3) Make a directory called `results/`.
 
 # Running
 
