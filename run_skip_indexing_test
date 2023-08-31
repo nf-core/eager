@@ -1,9 +1,0 @@
-nextflow run com.nf \
-	--fasta_info "fasta_info" \
-	--reads "https://github.com/nf-core/test-datasets/raw/eager/testdata/Mammoth/fastq/JK2782_TGGCCGATCAACGA_L007_R1_001.fastq.gz.tengrand.fq.gz" \
-	--threads 128 \
-	--label "test" \
-	-profile conda \
-	-with-trace \
-	--fasta_index "/project/home/p200123/CHENYU/dev_competitive_mapping_bowtie2/results/index/test*bt2*" \ 	 	
-	-resume
