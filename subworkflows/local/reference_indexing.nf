@@ -4,6 +4,7 @@
 
 include { REFERENCE_INDEXING_SINGLE } from '../../subworkflows/local/reference_indexing_single.nf'
 include { REFERENCE_INDEXING_MULTI  } from '../../subworkflows/local/reference_indexing_multi.nf'
+include { GUNZIP as GUNZIP_SNPBED   } from '../../modules/nf-core/gunzip/main.nf'
 
 workflow REFERENCE_INDEXING {
     take:
@@ -17,7 +18,7 @@ workflow REFERENCE_INDEXING {
 
     // Warn user if they've given a reference sheet that already includes fai/dict/mapper index etc.
     if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && (fasta_fai || fasta_dict || fasta_mapperindexdir)) log.warn("A TSV or CSV has been supplied to `--fasta` as well as e.g. `--fasta_fai`. --fasta CSV/TSV takes priority and --fasta_* parameters will be ignored.")
-    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && (params.mitochondrion_header || params.contamination_estimation_angsd_hapmap || params.damage_manipulation_pmdtools_reference_mask )) log.warn("A TSV or CSV has been supplied to `--fasta` as well as individual reference-specific input files, e.g. `--contamination_estimation_angsd_hapmap`. Input files specified in the --fasta CSV/TSV take priority and other input parameters will be ignored.")
+    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && (params.mitochondrion_header || params.contamination_estimation_angsd_hapmap || params.damage_manipulation_pmdtools_reference_mask || params.snpcapture_bed || params.mapstats_bedtools_featurefile )) log.warn("A TSV or CSV has been supplied to `--fasta` as well as individual reference-specific input files, e.g. `--contamination_estimation_angsd_hapmap`. Input files specified in the --fasta CSV/TSV take priority and other input parameters will be ignored.")
 
     if ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) {
         // If input (multi-)reference sheet supplied
@@ -27,8 +28,9 @@ workflow REFERENCE_INDEXING {
         ch_hapmap                = REFERENCE_INDEXING_MULTI.out.hapmap
         ch_pmd_mask              = REFERENCE_INDEXING_MULTI.out.pmd_mask
         ch_snp_capture_bed       = REFERENCE_INDEXING_MULTI.out.snp_capture_bed
-        ch_snp_eigenstrat        = REFERENCE_INDEXING_MULTI.out.snp_eigenstrat
+        ch_pileupcaller_snp      = REFERENCE_INDEXING_MULTI.out.pileupcaller_snp
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_MULTI.out.sexdeterrmine_bed
+        ch_bedtools_feature      = REFERENCE_INDEXING_MULTI.out.bedtools_feature
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_MULTI.out.versions )
     } else {
         // If input FASTA and/or indicies supplied
@@ -37,8 +39,9 @@ workflow REFERENCE_INDEXING {
         ch_hapmap                = REFERENCE_INDEXING_SINGLE.out.hapmap
         ch_pmd_mask              = REFERENCE_INDEXING_SINGLE.out.pmd_mask
         ch_snp_capture_bed       = REFERENCE_INDEXING_SINGLE.out.snp_capture_bed
-        ch_snp_eigenstrat        = REFERENCE_INDEXING_SINGLE.out.snp_eigenstrat
+        ch_pileupcaller_snp      = REFERENCE_INDEXING_SINGLE.out.pileupcaller_snp
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_SINGLE.out.sexdeterrmine_bed
+        ch_bedtools_feature      = REFERENCE_INDEXING_SINGLE.out.bedtools_feature
         ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE.out.reference
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }
@@ -53,13 +56,26 @@ workflow REFERENCE_INDEXING {
     ch_pmd_mask = ch_pmd_mask
                     .filter{ it[1] != "" && it[2] != "" }
 
-    ch_snp_capture_bed = ch_snp_capture_bed
+    ch_capture_bed = ch_snp_capture_bed
                     .filter{ it[1] != "" }
+    if ( ch_capture_bed != "") {
+        ch_capture_bed_gunzip = ch_capture_bed
+                    .branch {
+                        meta, capture_bed ->
+                        forgunzip: capture_bed.extension == "gz"
+                        skip: true
+                    }
+        GUNZIP_SNPBED( ch_capture_bed_gunzip.forgunzip )
+        ch_capture_bed = GUNZIP_SNPBED.out.gunzip.mix( ch_capture_bed_gunzip.skip )
+    }
 
-    ch_snp_eigenstrat = ch_snp_eigenstrat
-                    .filter{ it[1] != "" }
+    ch_pileupcaller_snp = ch_pileupcaller_snp
+                    .filter{ it[1] != "" && it[2] != "" }
 
     ch_sexdeterrmine_bed = ch_sexdeterrmine_bed
+                    .filter{ it[1] != "" }
+
+    ch_bedtools_feature = ch_bedtools_feature
                     .filter{ it[1] != "" }
 
     emit:
@@ -67,9 +83,10 @@ workflow REFERENCE_INDEXING {
     mitochondrion_header = ch_mitochondrion_header  // [ meta, mitochondrion_header ]
     hapmap               = ch_hapmap                // [ meta, hapmap ]
     pmd_mask             = ch_pmd_mask              // [ meta, masked_fasta, capture_bed ]
-    snp_capture_bed      = ch_snp_capture_bed       // [ meta, capture_bed ]
-    snp_eigenstrat       = ch_snp_eigenstrat        // [ meta, snp_eigenstrat ]
+    snp_capture_bed      = ch_capture_bed           // [ meta, capture_bed ]
+    pileupcaller_snp     = ch_pileupcaller_snp      // [ meta, pileupcaller_bed, pileupcaller_snp ]
     sexdeterrmine_bed    = ch_sexdeterrmine_bed     // [ meta, sexdet_bed ]
+    bedtools_feature     = ch_bedtools_feature      // [ meta, bedtools_feature ]
     versions             = ch_versions
 
 }

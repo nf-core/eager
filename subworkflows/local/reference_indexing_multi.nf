@@ -38,11 +38,13 @@ workflow REFERENCE_INDEXING_MULTI {
                                                     def circular_target = row["circular_target"]
                                                     def mitochondrion   = row["mitochondrion_header"]
                                                     def capture_bed     = row["snpcapture_bed"] != "" ? file(row["snpcapture_bed"], checkIfExists: true) : ""
-                                                    def snp_file        = row["pileupcaller_snpfile"] != "" ? file(row["pileupcaller_snpfile"], checkIfExists: true) : ""
+                                                    def pileupcaller_bed = row["pileupcaller_bedfile"] != "" ? file(row["pileupcaller_bedfile"], checkIfExists: true) : ""
+                                                    def pileupcaller_snp = row["pileupcaller_snpfile"] != "" ? file(row["pileupcaller_snpfile"], checkIfExists: true) : ""
                                                     def hapmap          = row["hapmap_file"] != "" ? file(row["hapmap_file"], checkIfExists: true) : ""
                                                     def pmd_mask        = row["pmdtools_masked_fasta"] != "" ? file(row["pmdtools_masked_fasta"], checkIfExists: true) : ""
                                                     def sexdet_bed      = row["sexdeterrmine_snp_bed"] != "" ? file(row["sexdeterrmine_snp_bed"], checkIfExists: true) : ""
-                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, snp_file, hapmap, pmd_mask, sexdet_bed ]
+                                                    def bedtools_feature = row["bedtools_feature_file"] != "" ? file(row["bedtools_feature_file"], checkIfExists: true) : ""
+                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature ]
                                             }
 
 
@@ -59,14 +61,15 @@ workflow REFERENCE_INDEXING_MULTI {
 
 ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                             .multiMap {
-                                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, snp_file, hapmap, pmd_mask, sexdet_bed ->
+                                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature ->
                                 generated:            [ meta, fasta, fai, dict, mapper_index, circular_target ]
                                 mitochondrion_header: [ meta, mitochondrion ]
                                 angsd_hapmap:         [ meta, hapmap ]
                                 pmd_mask:             [ meta, pmd_mask, capture_bed ]
                                 snp_bed:              [ meta, capture_bed ]
-                                snp_eigenstrat:       [ meta, snp_file ]
+                                pileupcaller_snp:     [ meta, pileupcaller_bed, pileupcaller_snp ]
                                 sexdeterrmine_bed:    [ meta, sexdet_bed ]
+                                bedtools_feature:     [ meta, bedtools_feature ]
                             }
 
     // Detect if fasta is gzipped or not
@@ -210,7 +213,8 @@ ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
     hapmap               = ch_input_from_referencesheet.angsd_hapmap         // [ meta, hapmap ]
     pmd_mask             = ch_input_from_referencesheet.pmd_mask             // [ meta, pmd_mask, capture_bed ]
     snp_capture_bed      = ch_input_from_referencesheet.snp_bed              // [ meta, capture_bed ]
-    snp_eigenstrat       = ch_input_from_referencesheet.snp_eigenstrat       // [ meta, snp_eigenstrat ]
+    pileupcaller_snp     = ch_input_from_referencesheet.pileupcaller_snp     // [ meta, pileupcaller_snp, pileupcaller_bed ]
     sexdeterrmine_bed    = ch_input_from_referencesheet.sexdeterrmine_bed    // [ meta, sexdet_bed ]
+    bedtools_feature     = ch_input_from_referencesheet.bedtools_feature     // [ meta, bedtools_feature ]
     versions             = ch_versions
 }

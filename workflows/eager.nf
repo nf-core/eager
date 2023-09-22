@@ -101,7 +101,6 @@ include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/n
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
 include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
 include { QUALIMAP_BAMQC                                    } from '../modules/nf-core/qualimap/bamqc/main'
-include { GUNZIP as GUNZIP_SNPBED                           } from '../modules/nf-core/gunzip/main.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,28 +137,6 @@ workflow EAGER {
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
 
-    // QualiMap
-    if ( params.snpcapture_bed ) {
-      ch_snpcapture_bed_gunzip = Channel.fromPath( params.snpcapture_bed, checkIfExists: true )
-        .collect()
-        .map {
-          file ->
-              meta = file.simpleName
-          [meta,file]
-        }
-        .branch {
-          meta, bed ->
-            forgunzip: bed[0].extension == "gz"
-            skip: true
-        }
-      ch_snpcapture_bed = GUNZIP_SNPBED(ch_snpcapture_bed_gunzip.forgunzip).gunzip.mix(ch_snpcapture_bed_gunzip.skip).map{it[1]}
-
-    } else {
-      ch_snpcapture_bed = []
-    }
-
-    // Contamination estimation
-    hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -296,13 +273,30 @@ workflow EAGER {
     //
 
     if ( !params.skip_qualimap ) {
-       ch_qualimap_input = ch_dedupped_bams
+        ch_snp_capture_bed = REFERENCE_INDEXING.out.snp_capture_bed
+            .map{
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+            }
+        ch_qualimap_input = ch_dedupped_bams
             .map {
             meta, bam, bai ->
                 [ meta, bam ]
             }
-        QUALIMAP_BAMQC(ch_qualimap_input, ch_snpcapture_bed)
-        ch_versions      = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
+            .map {
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+            .combine(
+                by: 0,
+                ch_snp_capture_bed
+            )
+            .multiMap{
+                ignore_meta, meta, bam, meta2, snp_capture_bed ->
+                bam:             [ meta, bam ]
+                snp_capture_bed: [ snp_capture_bed ]
+            }
+        QUALIMAP_BAMQC( ch_qualimap_input.bam, ch_qualimap_input.snp_capture_bed )
+        ch_versions = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
+        // Qualimap multiqc files?
     }
 
     //
@@ -367,17 +361,11 @@ workflow EAGER {
     if ( params.run_mtnucratio ) {
         ch_mito_header = REFERENCE_INDEXING.out.mitochondrion_header
             .map{
-                meta, mito_header ->
-                meta2 = [:]
-                meta2.reference = meta.id
-                [ meta2, meta, mito_header ]
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
         mtnucratio_input = ch_dedupped_bams
             .map {
-                meta, bam, bai ->
-                meta2 = [:]
-                meta2.reference = meta.reference
-                [ meta2, meta, bam ]
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by: 0,
@@ -386,7 +374,7 @@ workflow EAGER {
             .multiMap{
                 ignore_meta, meta, bam, meta2, mito_header ->
                 bam:         [ meta, bam ]
-                mito_header: [ meta2, mito_header ]
+                mito_header: [ meta2, mito_header ] //should this be meta, mito_header?
             }
 
         MTNUCRATIO( mtnucratio_input.bam, mtnucratio_input.mito_header.map{ it[1] } )
@@ -453,12 +441,22 @@ workflow EAGER {
 
     if ( params.run_bedtools_coverage ) {
 
-        ch_anno_for_bedtools = Channel.fromPath(params.mapstats_bedtools_featurefile, checkIfExists: true).collect()
+        ch_bedtools_feature = REFERENCE_INDEXING.out.bedtools_feature
+                                .map{
+                                    WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                                }
 
-        ch_dedupped_for_bedtools = ch_dedupped_bams.combine(ch_anno_for_bedtools)
-        .map{
-              meta, bam, bai, anno ->
-                [meta, anno, bam]
+        ch_bedtools_input = ch_dedupped_bams
+                    .map {
+                        WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                    }
+                    .combine(
+                        by: 0,
+                        ch_bedtools_feature
+                    )
+                    .map{
+                        ignore_meta, meta, bam, bai, meta2, bedtools_feature ->
+                        [ meta, bedtools_feature, bam ]
             }
 
         // Running samtools view to get header
@@ -466,12 +464,13 @@ workflow EAGER {
 
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
 
-        BEDTOOLS_COVERAGE_BREADTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
-        BEDTOOLS_COVERAGE_DEPTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
+        BEDTOOLS_COVERAGE_BREADTH(ch_bedtools_input, ch_genome_for_bedtools)
+        BEDTOOLS_COVERAGE_DEPTH(ch_bedtools_input, ch_genome_for_bedtools)
 
         ch_versions = ch_versions.mix( SAMTOOLS_VIEW_GENOME.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
+        //Bedtools multiqc files?
     }
 
     //
