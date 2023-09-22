@@ -98,8 +98,10 @@ include { MTNUCRATIO                                        } from '../modules/n
 include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
 include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
-include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main' 
-include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf' 
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
+include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
+include { QUALIMAP_BAMQC                                    } from '../modules/nf-core/qualimap/bamqc/main'
+include { GUNZIP as GUNZIP_SNPBED                           } from '../modules/nf-core/gunzip/main.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,6 +138,29 @@ workflow EAGER {
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
 
+    // QualiMap
+    if ( params.snpcapture_bed ) {
+      ch_snpcapture_bed_gunzip = Channel.fromPath( params.snpcapture_bed, checkIfExists: true )
+        .collect()
+        .map {
+          file ->
+              meta = file.simpleName
+          [meta,file]
+        }
+        .branch {
+          meta, bed ->
+            forgunzip: bed[0].extension == "gz"
+            skip: true
+        }
+      ch_snpcapture_bed = GUNZIP_SNPBED(ch_snpcapture_bed_gunzip.forgunzip).gunzip.mix(ch_snpcapture_bed_gunzip.skip).map{it[1]}
+
+    } else {
+      ch_snpcapture_bed = []
+    }
+
+    // Contamination estimation
+    hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
+
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
@@ -144,7 +169,6 @@ workflow EAGER {
         file(params.input)
     )
     ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
@@ -265,6 +289,20 @@ workflow EAGER {
     } else {
         ch_dedupped_bams     = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
+    }
+
+    //
+    // MODULE QUALIMAP
+    //
+
+    if ( !params.skip_qualimap ) {
+       ch_qualimap_input = ch_dedupped_bams
+            .map {
+            meta, bam, bai ->
+                [ meta, bam ]
+            }
+        QUALIMAP_BAMQC(ch_qualimap_input, ch_snpcapture_bed)
+        ch_versions      = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
     }
 
     //
@@ -410,9 +448,9 @@ workflow EAGER {
 
 
     //
-    // MODULE: Bedtools coverage 
+    // MODULE: Bedtools coverage
     //
-    
+
     if ( params.run_bedtools_coverage ) {
 
         ch_anno_for_bedtools = Channel.fromPath(params.mapstats_bedtools_featurefile, checkIfExists: true).collect()
@@ -427,7 +465,7 @@ workflow EAGER {
         SAMTOOLS_VIEW_GENOME(ch_dedupped_bams)
 
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
-        
+
         BEDTOOLS_COVERAGE_BREADTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
         BEDTOOLS_COVERAGE_DEPTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
 
@@ -435,7 +473,6 @@ workflow EAGER {
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
     }
-    
 
     //
     // SUBWORKFLOW: Calculate Damage
@@ -498,6 +535,10 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([])) // Replaced with custom mixing
+
+    if ( !params.skip_qualimap ) {
+        ch_multiqc_files = ch_multiqc_files.mix( QUALIMAP_BAMQC.out.results.collect{it[1]}.ifEmpty([]) )
+    }
 
     MULTIQC (
         ch_multiqc_files.collect(),
