@@ -18,19 +18,13 @@ workflow ESTIMATE_CONTAMINATION {
     if ( params.run_contamination_estimation_angsd ) {
         angsd_input_hapmap = hapmap_input
             .map {
-                // Create additional map containing only meta.id for combining samples and hapmap
-                meta, hapmap ->
-                    meta2 = [:]
-                    meta2.reference = meta.id
-                [ meta2, meta, hapmap ]
+                // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
         angsd_input = contamination_input
             .map {
-             // Create additional map containing only meta.reference for combining samples and hapmap
-                meta, bam, bai ->
-                    meta2 = [:]
-                    meta2.reference = meta.reference
-                [ meta2, meta, bam, bai ]
+                // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by: 0,

@@ -127,4 +127,57 @@ class WorkflowEager {
 
     }
 
+    /*
+    This function can be applied to the contents of a channel row-by-row with a .map operator.
+    It assumes that the first element of the channel row is a map of metadata. It will then create a new metadata map
+    that consists of the source_attributes of the original metadata map, but named after the corresponding target_attributes.
+    The new metadata map is then prepended to the channel row, becoming the new first element.
+    If the remove flag is set to true, then the original metadata map is removed from the channel row.
+
+    Example:
+    ch_my_channel=Channel.of( [ [id:'id', sample_id:'sample_id', single_end:true, reference:"hs37d5" ], "bam", "bai" ] )
+
+    ch_my_channel.map{ row -> addNewMetaFromAttributes(row, "id", "new_attribute", false) }
+    // This will create a new channel with the following rows:
+    [ [ new_attribute: 'id' ], [id:'id', sample_id:'sample_id', single_end:true, reference:"hs37d5" ], "bam", "bai" ]
+
+    ch_my_channel.map{ row -> addNewMetaFromAttributes(row, ["id", "single_end"], ["new_attribute", "endedness"] , true) }
+    // This will create a new channel with the following rows:
+    [ [ new_attribute: 'id' , endedness: true ], "bam", "bai" ]
+
+    */
+    def public static ArrayList addNewMetaFromAttributes( ArrayList row, Object source_attributes, Object target_attributes, boolean remove = false) {
+        def meta = row[0]
+        def meta2 = [:]
+
+        // Read in target and source attributes and create a mapping between them
+        // Option A: both attributes are Strings
+        if ((source_attributes instanceof String) && (target_attributes instanceof String)) {
+                meta2[target_attributes] = meta[source_attributes]
+
+        } else if ((source_attributes instanceof List) && (target_attributes instanceof List)) {
+            if (source_attributes.size() == target_attributes.size()) {
+                for (int i = 0; i < source_attributes.size(); i++) {
+                    // Option B: Both are lists of same size
+                    meta2[target_attributes[i]] = meta[source_attributes[i]]
+                }
+            } else {
+                // Option C: Both lists, but uneven. Error.
+                throw new IllegalArgumentException("Error: The target_attributes and source_attributes lists do not have the same size.")
+            }
+        } else {
+            // Option D: Not both the same type or acceptable types. Error.
+            throw new IllegalArgumentException("Error: target_attributes and source_attributes must be of same type (both Strings or both Lists).")
+
+        }
+
+        def new_row = [ meta2 ] + row
+
+        // If replace is true, then remove the old meta
+        if (remove && new_row.size() > 1) {
+            new_row.remove(1)
+        }
+
+        return new_row
+    }
 }

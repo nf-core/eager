@@ -75,6 +75,7 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
     }
 
+    // Only run merge lanes if we have more than one BAM to merge!
     ch_input_for_lane_merge = ch_mapped_lane_bam
                                 .map {
                                     meta, bam ->
@@ -83,11 +84,21 @@ workflow MAP {
                                     [ new_meta, bam ]
                                 }
                                 .groupTuple()
+                                .branch {
+                                    meta, bam ->
+                                        println(bam.size())
+                                        merge: bam.size() > 1
+                                        skip: true
+                                }
 
-    SAMTOOLS_MERGE_LANES ( ch_input_for_lane_merge, [], [] )
+    SAMTOOLS_MERGE_LANES ( ch_input_for_lane_merge.merge, [], [] )
     ch_versions.mix( SAMTOOLS_MERGE_LANES.out.versions )
 
-    SAMTOOLS_SORT_MERGED_LANES ( SAMTOOLS_MERGE_LANES.out.bam )
+    // Then mix back merged and single lane libraries for everything downstream
+    ch_mergedlanes_for_sorting = ch_input_for_lane_merge.skip
+                                    .mix( SAMTOOLS_MERGE_LANES.out.bam )
+
+    SAMTOOLS_SORT_MERGED_LANES ( ch_mergedlanes_for_sorting )
     ch_mapped_bam = SAMTOOLS_SORT_MERGED_LANES.out.bam
     ch_versions.mix( SAMTOOLS_SORT_MERGED_LANES.out.versions )
 

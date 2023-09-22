@@ -70,9 +70,17 @@
 
   > Bushnell B, Rood J, Singer E (2017) BBMerge – Accurate paired shotgun read merging via overlap. PLOS ONE 12(10): e0185056. [https://doi.org/10.1371/journal.pone.0185056](https://doi.org/10.1371/journal.pone.0185056)
 
+- [BEDTools](https://doi.org/10.1093/bioinformatics/btq033)
+
+  > Quinlan, A. R., & Hall, I. M. (2010). BEDTools: A flexible suite of utilities for comparing genomic features. Bioinformatics, 26(6), 841–842. [https://doi.org/10.1093/bioinformatics/btq033](https://doi.org/10.1093/bioinformatics/btq033)
+
 - [PreSeq](https://doi.org/10.1038/nmeth.2375)
 
   > Daley, T., & Smith, A. D. (2013). Predicting the molecular complexity of sequencing libraries. Nature Methods, 10(4), 325–327. doi: [10.1038/nmeth.2375](https://doi.org/10.1038/nmeth.2375)
+
+- [endorS.py](https://doi.org/10.7717/peerj.10947)
+
+  > Fellows Yates JA, Lamnidis TC, Borry M, Valtueña Andrades A, Fagernäs Z, Clayton S, Garcia MU, Neukamm J, Peltzer A. 2021. Reproducible, portable, and efficient ancient genome reconstruction with nf-core/eager. PeerJ 9:e10947. doi: [10.7717/peerj.10947](https://doi.org/10.7717/peerj.10947)
 
 - [mapDamage2](https://doi.org/10.1093/bioinformatics/btt193)
 

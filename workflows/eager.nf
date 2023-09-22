@@ -32,6 +32,11 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
             exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
     }
 }
+if( params.run_bedtools_coverage ){
+    if( !params.mapstats_bedtools_featurefile ) {
+        exit 1, "[nf-core/eager] ERROR: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters."
+    }
+}
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
@@ -81,15 +86,20 @@ include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main'
-include { PRESEQ_CCURVE               } from '../modules/nf-core/preseq/ccurve/main'
-include { PRESEQ_LCEXTRAP             } from '../modules/nf-core/preseq/lcextrap/main'
-include { FALCO                       } from '../modules/nf-core/falco/main'
-include { MTNUCRATIO                  } from '../modules/nf-core/mtnucratio/main'
-include { HOST_REMOVAL                } from '../modules/local/host_removal'
+
+include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
+include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS                       } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { SAMTOOLS_INDEX                                    } from '../modules/nf-core/samtools/index/main'
+include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
+include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
+include { FALCO                                             } from '../modules/nf-core/falco/main'
+include { MTNUCRATIO                                        } from '../modules/nf-core/mtnucratio/main'
+include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
+include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main' 
+include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf' 
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -199,6 +209,16 @@ workflow EAGER {
     else {
         ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.bai )
     }
+
+
+    //
+    // MODULE: flagstats of user supplied input BAMs
+    //
+    ch_bam_bai_input = INPUT_CHECK.out.bams
+                            .join(SAMTOOLS_INDEX.out.bai)
+
+    SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
+    ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
 
     //
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
@@ -337,6 +357,44 @@ workflow EAGER {
     }
 
     //
+    // MODULE: ENDORSPY (raw, filtered, deduplicated)
+    //
+
+    ch_flagstat_for_endorspy_raw    = MAP.out.flagstat
+                                            .mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat )
+
+    if ( params.run_bamfiltering & !params.skip_deduplication ) {
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                .join (FILTER_BAM.out.flagstat)
+                                                .join (DEDUPLICATE.out.flagstat)
+    } else if ( params.run_bamfiltering & params.skip_deduplication ) {
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                        .join (FILTER_BAM.out.flagstat)
+                                                        .map{
+                                                            meta, flags_raw, flags_filtered ->
+                                                            [ meta, flags_raw, flags_filtered, [] ]
+                                                            }
+    } else if ( !params.run_bamfiltering & !params.skip_deduplication) {
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                        .join (DEDUPLICATE.out.flagstat)
+                                                        . map{
+                                                            meta, flags_raw, flags_dedup ->
+                                                            [ meta, flags_raw, [], flags_dedup ]
+                                                            }
+    } else {
+        ch_for_endorspy = ch_flagstat_for_endorspy_raw
+                                                        .map {
+                                                            meta, flags_raw ->
+                                                            [ meta, flags_raw, [], [] ]
+                                                        }
+    }
+
+    ENDORSPY ( ch_for_endorspy )
+
+    ch_versions       = ch_versions.mix( ENDORSPY.out.versions )
+    ch_multiqc_files  = ch_multiqc_files.mix( ENDORSPY.out.json.collect{it[1]}.ifEmpty([]) )
+
+    //
     // MODULE: PreSeq
     //
 
@@ -350,7 +408,36 @@ workflow EAGER {
         ch_versions = ch_versions.mix( PRESEQ_LCEXTRAP.out.versions )
     }
 
-     //
+
+    //
+    // MODULE: Bedtools coverage 
+    //
+    
+    if ( params.run_bedtools_coverage ) {
+
+        ch_anno_for_bedtools = Channel.fromPath(params.mapstats_bedtools_featurefile, checkIfExists: true).collect()
+
+        ch_dedupped_for_bedtools = ch_dedupped_bams.combine(ch_anno_for_bedtools)
+        .map{
+              meta, bam, bai, anno ->
+                [meta, anno, bam]
+            }
+
+        // Running samtools view to get header
+        SAMTOOLS_VIEW_GENOME(ch_dedupped_bams)
+
+        ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
+        
+        BEDTOOLS_COVERAGE_BREADTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
+        BEDTOOLS_COVERAGE_DEPTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
+
+        ch_versions = ch_versions.mix( SAMTOOLS_VIEW_GENOME.out.versions )
+        ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
+        ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
+    }
+    
+
+    //
     // SUBWORKFLOW: Calculate Damage
     //
 

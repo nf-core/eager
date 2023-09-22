@@ -199,6 +199,76 @@ The resulting FASTQ files can be used for data sharing purposes where the host D
 
 Alternatively you could use the resulting files for manual metagenomic screen outside of nf-core/eager (e.g. when your preferred taxonomic classifier isn't supported by nf-core/eager).
 
+### Mapping statistics
+
+#### EndorSpy
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `endorspy`
+
+  - `*.json`: json file per sample containing all the calculated percent on target, clonality and percent duplicates
+
+</details>
+
+[endorS.py](https://github.com/aidaanva/endorS.py) calculates percent on target (aka Endogenous DNA) from samtools flagstat files and prints to screen.
+The 'Percent on target (%)' reported will be different depending on the combination of samtools flagstat inputs provided.
+This program also calculates clonality (aka 'cluster factor') and percent duplicates when the flagstat file after duplicate removal is provided.
+
+Definitions and calculations:
+
+We provide up to 3 different estimates of percent on target:
+
+Percent on target (%): percent of mapping reads mapping to a specific reference. This is calculated as follows: number of reads mapping to the specific reference (Mapped_Raw) in comparison to the total number of reads (Total_Reads)
+
+$$ PercentOnTarget = { MappedRaw \over TotalReads \* 100 } $$
+
+Where $ Mapped_Raw $ is the number of reads mapping to the reference during the mapping step, and $ Total_Reads $ are the total number of reads that went into the mapping step.
+
+Percent on target modified (%): percent of mapping reads after filtering the raw bam based on quality, read length or any other filtering performed that mapped to a specific reference:
+
+$$ PercentOnTargetModified = { MappedPostFiltering \over TotalReads \* 100 } $$
+
+Where $ Mapped_Post_Filtering $ are the number of reads mapping to the reference after applying the filters.
+
+Percent on target postdedup (%): percent of deduplicated reads (either raw mapped reads or filtered mapped reads) that mapped to a specific reference:
+
+$$ PercentOnTargetPostdedup = { MappedPostDedup \over TotalReads \* 100 } $$
+
+Additionally, this script provides two different ways of estimating library complexity:
+
+Clonality (Cluster Factor in eager1): ratio of reads that have duplicated reads
+
+$$ Clonality = { TotalReadsPreDedup \over mappedDedup } $$
+
+Percent Duplicates (%): percent of mapping reads that have at least 1 duplicate. It is calculated as follows:
+
+$$ PercentDuplicates = {(TotalReadsPreDedup - MappedReadsDedup) \over TotalReadsPreDedup \* 100} $$
+
+The combination of statistics calculated would vary depending on the steps taken:
+Mapping/bam input + filtering + deduplication (all):
+Percent on target (%)
+Percent on target modified (%)
+Percent on target postdedup (%)
+Clonality
+Percent Duplicates (%)
+
+Mapping/bam input:
+Percent on target (%)
+
+Mapping/bam input + filtering:
+Percent on target (%)
+Percent on target modified (%)
+
+Mapping/bam input + deduplication:
+Percent on target (%)
+Percent on target postdedup (%)
+Clonality
+Percent Duplicates (%)
+
+> ⚠️ Warning: When bam input is provided, please keep in mind it is assumed that this is an **unfiltered** bam. If you provide an already filtered bam, the percent on target calculations will be wrong since the original total number of reads in the initial fastq/bam cannot be inferred.
+
 ### BAM Filtering
 
 <details markdown="1">
@@ -306,6 +376,26 @@ Deduplication is carried by two possible tools, as described below. However the 
 The resulting histogram file will contain estimated deduplication statistics at different theoretical sequencing depths, and can be used to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced.
 
 These curves will be displayed in the pipeline run's MultiQC report, however you can also use this file for plotting yourself for further exploration e.g. in R to find your sequencing target depth.
+
+### Mapping Statistics
+
+#### Bedtools
+
+<details markdown="1">
+<summary>Output file</summary>
+
+- `mapstats/bedtools/`
+
+  - `*.breadth.gz`: This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature.
+  - `*.depth.gz`: This file will have the the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
+
+</details>
+
+[bedtools](https://github.com/arq5x/bedtools2) utilities are a swiss-army knife of tools for a wide-range of genomics analysis tasks. Bedtools allows one to intersect, merge, count, complement, and shuffle genomic intervals from multiple files in widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF.
+
+The `bedtools coverage` tool computes both the depth and breadth of coverage of features in file B (alignment file) on the features in file A (provied by `--mapstats_bedtools_featurefile` when running the eager workflow). One advantage that bedtools coverage offers is that it not only counts the number of features that overlap an interval in file A, it also computes the fraction of bases in the interval in A that were overlapped by one or more features. Thus, bedtools coverage also computes the breadth of coverage observed for each interval in A.
+
+The output from this module can be useful for things such as checking for the presence/absence of virulence factors in ancient pathogen genomes, or getting statistics on SNP capture positions.
 
 ### Damage Manipulation
 
