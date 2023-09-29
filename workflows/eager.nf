@@ -26,14 +26,20 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
             exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
     }
 }
+
 if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
     // dust score was set but entropy method picked. If no entropy-score provided, assume it was an error and fail
     if (params.metagenomics_complexity_entropy == 0.3) {
             exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
     }
 }
+
+if ( params.run_metagenomics && ! params.metagenomics_profiling_tool ) {
+    exit 1, ("[nf-core/eager] ERROR: --run_metagenomics flagged, but no database provided! Please choose an appropriate metagenomics screening tool by setting --metagenomics_profiling_tool to one of 'malt', 'krakenuniq', 'kraken2', or 'metaphlan'")
+}
+
 if ( params.run_metagenomics && ! params.metagenomics_profiling_database ) {
-    exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database")
+    exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database. Note this database should correspond to ${params.metagenomics_profiling_tool}")
 }
 
 if ( params.metagenomics_postprocessing_tool == 'maltextract' && params.metagenomics_profiling_tool != 'malt' ) {
