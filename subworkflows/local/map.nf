@@ -27,7 +27,7 @@ workflow MAP {
         SEQKIT_SPLIT2( ch_input_for_sharding )
         ch_versions        = ch_versions.mix ( SEQKIT_SPLIT2.out.versions.first() )
 
-        reads = SEQKIT_SPLIT2.out.reads
+        sharded_reads = SEQKIT_SPLIT2.out.reads
             .transpose()
             .map {
                 meta, reads ->
@@ -36,18 +36,30 @@ workflow MAP {
                     [ new_meta, reads ] 
             }
             .groupTuple()
+        
+        ch_input_for_mapping = sharded_reads
+            .combine(index)
+            .multiMap {
+                meta, reads, meta2, index ->
+                    new_meta = meta.clone()
+                    new_meta.reference = meta2.id  
+                    reads: [ new_meta, reads ] 
+                    index: [ meta2, index ]
+            }
+
+    } else {
+        
+        ch_input_for_mapping = reads
+            .combine(index)
+            .multiMap {
+                meta, reads, meta2, index ->
+                    new_meta = meta.clone()
+                    new_meta.reference = meta2.id  
+                    reads: [ new_meta, reads ] 
+                    index: [ meta2, index ]
+            }
 
     }
-
-    ch_input_for_mapping = reads
-        .combine(index)
-        .multiMap {
-            meta, reads, meta2, index ->
-                new_meta = meta.clone()
-                new_meta.reference = meta2.id  
-                reads: [ new_meta, reads ] 
-                index: [ meta2, index ]
-        }
 
     if ( params.mapping_tool == 'bwaaln' ) {
         FASTQ_ALIGN_BWAALN ( ch_input_for_mapping.reads, ch_input_for_mapping.index )
