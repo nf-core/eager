@@ -100,7 +100,7 @@ include { ENDORSPY                                          } from '../modules/n
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
 include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
-include { QUALIMAP_BAMQC                                    } from '../modules/nf-core/qualimap/bamqc/main'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED ; QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED             } from '../modules/nf-core/qualimap/bamqc/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -289,14 +289,26 @@ workflow EAGER {
                 by: 0,
                 ch_snp_capture_bed
             )
+            .branch {
+                ignore_meta, meta, bam, meta2, snp_capture_bed ->
+                withbed: snp_capture_bed != ""
+                nobed: true
+            }
+        ch_qualimap_input_with = ch_qualimap_input.withbed
             .multiMap{
                 ignore_meta, meta, bam, meta2, snp_capture_bed ->
                 bam:             [ meta, bam ]
                 snp_capture_bed: [ snp_capture_bed ]
             }
-        QUALIMAP_BAMQC( ch_qualimap_input.bam, ch_qualimap_input.snp_capture_bed )
-        ch_versions = ch_versions.mix( QUALIMAP_BAMQC.out.versions )
-        // Qualimap multiqc files?
+        QUALIMAP_BAMQC_WITHBED( ch_qualimap_input_with.bam, ch_qualimap_input_with.snp_capture_bed )
+        ch_qualimap_input_without = ch_qualimap_input.nobed
+            .map{
+                ignore_meta, meta, bam, meta2, snp_capture_bed ->
+                [ meta, bam ]
+            }
+        QUALIMAP_BAMQC_NOBED( ch_qualimap_input_without, [] )
+        ch_qualimap_output = QUALIMAP_BAMQC_WITHBED.out.results.mix( QUALIMAP_BAMQC_NOBED.out.results )
+        ch_versions = ch_versions.mix( QUALIMAP_BAMQC_NOBED.out.versions ).mix( QUALIMAP_BAMQC_WITHBED.out.versions )
     }
 
     //
@@ -536,7 +548,7 @@ workflow EAGER {
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([])) // Replaced with custom mixing
 
     if ( !params.skip_qualimap ) {
-        ch_multiqc_files = ch_multiqc_files.mix( QUALIMAP_BAMQC.out.results.collect{it[1]}.ifEmpty([]) )
+        ch_multiqc_files = ch_multiqc_files.mix( ch_qualimap_output.collect{it[1]}.ifEmpty([]) )
     }
 
     MULTIQC (

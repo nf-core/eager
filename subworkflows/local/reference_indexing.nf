@@ -56,18 +56,20 @@ workflow REFERENCE_INDEXING {
     ch_pmd_mask = ch_pmd_mask
                     .filter{ it[1] != "" && it[2] != "" }
 
-    ch_capture_bed = ch_snp_capture_bed
-                    .filter{ it[1] != "" }
-    if ( ch_capture_bed != "") {
-        ch_capture_bed_gunzip = ch_capture_bed
+    ch_capture_bed = ch_snp_capture_bed //optional
+                    .branch {
+                        meta, capture_bed ->
+                        input: capture_bed != ""
+                        skip: true
+                    }
+    ch_capture_bed_gunzip = ch_capture_bed.input //unzip
                     .branch {
                         meta, capture_bed ->
                         forgunzip: capture_bed.extension == "gz"
                         skip: true
                     }
-        GUNZIP_SNPBED( ch_capture_bed_gunzip.forgunzip )
-        ch_capture_bed = GUNZIP_SNPBED.out.gunzip.mix( ch_capture_bed_gunzip.skip )
-    }
+    GUNZIP_SNPBED( ch_capture_bed_gunzip.forgunzip )
+    ch_capture_bed = GUNZIP_SNPBED.out.gunzip.mix( ch_capture_bed_gunzip.skip ).mix( ch_capture_bed.skip )
 
     ch_pileupcaller_snp = ch_pileupcaller_snp
                     .filter{ it[1] != "" && it[2] != "" }
