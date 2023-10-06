@@ -10,6 +10,12 @@ workflow METAGENOMICS {
     ch_multiqc_files                = Channel.empty()
     ch_versions                     = Channel.empty()
 
+    // Add single_end parameter to meta.
+    // Reads were merged before, so single_end is always true!
+    ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics.map{
+        meta, bamfiltered -> [meta+['single_end':true], bamfiltered]
+    }
+
     //
     // Run the complexity filter subworkflow
     //
@@ -28,6 +34,8 @@ workflow METAGENOMICS {
     //
 
     database = Channel.fromPath(params.metagenomics_profiling_database)
+
+
 
     METAGENOMICS_PROFILING( ch_reads_for_metagenomics, database )
 
