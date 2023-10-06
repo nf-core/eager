@@ -32,11 +32,6 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
             exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
     }
 }
-if( params.run_bedtools_coverage ){
-    if( !params.mapstats_bedtools_featurefile ) {
-        exit 1, "[nf-core/eager] ERROR: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters."
-    }
-}
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
@@ -458,7 +453,7 @@ workflow EAGER {
                                     WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
                                 }
 
-        ch_bedtools_input = ch_dedupped_bams
+        ch_bedtools_prep = ch_dedupped_bams
                     .map {
                         WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
                     }
@@ -468,21 +463,32 @@ workflow EAGER {
                     )
                     .map{
                         ignore_meta, meta, bam, bai, meta2, bedtools_feature ->
-                        [ meta, bedtools_feature, bam ]
-            }
+                        [ meta, bedtools_feature, bam, bai ]
+                    }
+                    .branch{
+                        meta, bedtools_feature, bam, bai ->
+                        withfeature: bedtools_feature != ""
+                        nobed: true
+                    }
 
         // Running samtools view to get header
-        SAMTOOLS_VIEW_GENOME(ch_dedupped_bams)
+        ch_bedtools_input = ch_bedtools_prep.withfeature
+                        .multiMap{
+                            meta, bedtools_feature, bam, bai ->
+                            bam: [ meta, bam, bai ]
+                            withfeature: [ meta, bedtools_feature, bam ]
+                        }
+
+        SAMTOOLS_VIEW_GENOME( ch_bedtools_input.bam )
 
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
 
-        BEDTOOLS_COVERAGE_BREADTH(ch_bedtools_input, ch_genome_for_bedtools)
-        BEDTOOLS_COVERAGE_DEPTH(ch_bedtools_input, ch_genome_for_bedtools)
+        BEDTOOLS_COVERAGE_BREADTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
+        BEDTOOLS_COVERAGE_DEPTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
 
         ch_versions = ch_versions.mix( SAMTOOLS_VIEW_GENOME.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
-        //Bedtools multiqc files?
     }
 
     //
