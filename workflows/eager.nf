@@ -384,9 +384,9 @@ workflow EAGER {
                 ch_mito_header
             )
             .multiMap{
-                ignore_meta, meta, bam, meta2, mito_header ->
+                ignore_meta, meta, bam, bai, meta2, mito_header ->
                 bam:         [ meta, bam ]
-                mito_header: [ meta2, mito_header ] //should this be meta, mito_header?
+                mito_header: [ meta2, mito_header ]
             }
 
         MTNUCRATIO( mtnucratio_input.bam, mtnucratio_input.mito_header.map{ it[1] } )
