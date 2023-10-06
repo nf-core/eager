@@ -165,6 +165,11 @@
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     },
+                    "samtools/depth": {
+                        "branch": "master",
+                        "git_sha": "a1ffbc1fd87bd5a829e956cc26ec9cc53af3e817",
+                        "installed_by": ["modules"]
+                    },
                     "samtools/faidx": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
@@ -204,6 +209,11 @@
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules", "bam_split_by_region"]
+                    },
+                    "sexdeterrmine": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
                     }
                 }
             },
