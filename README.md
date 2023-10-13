@@ -15,6 +15,9 @@
 
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23eager-4A154B?logo=slack)](https://nfcore.slack.com/channels/eager)
 
+>[!IMPORTANT]  
+> nf-core/eager versions 2.* are only compatible with Nextflow versions up to 22.10.6!
+
 ## Introduction
 
 <!-- nf-core: Write a 1-2 sentence summary of what data the pipeline is for and what it does -->
@@ -28,7 +31,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 ## Quick Start
 
-1. Install [`nextflow`](https://nf-co.re/usage/installation) (`>=20.07.1`)
+1. Install [`nextflow`](https://nf-co.re/usage/installation) (`>=20.07.1` && `<=22.10.6`)
 
 2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
 
@@ -52,7 +55,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     nextflow clean -f -k
     ```
 
-See [usage docs](https://nf-co.re/eager/docs/usage.md) for all of the available options when running the pipeline.
+See [usage docs](https://nf-co.re/eager/usage) for all of the available options when running the pipeline.
 
 **N.B.** You can see an overview of the run in the MultiQC report located at `./results/MultiQC/multiqc_report.html`
 
@@ -133,9 +136,9 @@ The nf-core/eager pipeline comes with documentation about the pipeline: [usage](
     * [Pipeline installation](https://nf-co.re/usage/local_installation)
     * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
     * [Reference genomes](https://nf-co.re/usage/reference_genomes)
-3. [Running the pipeline](https://nf-co.re/eager/docs/usage.md)
+3. [Running the pipeline](https://nf-co.re/eager/usage)
    * This includes tutorials, FAQs, and troubleshooting instructions
-4. [Output and how to interpret the results](https://nf-co.re/eager/docs/output.md)
+4. [Output and how to interpret the results](https://nf-co.re/eager/output)
 
 ## Credits
 
