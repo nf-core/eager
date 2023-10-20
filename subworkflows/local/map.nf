@@ -29,8 +29,7 @@ workflow MAP {
                                 .map{
                                     // create meta consistent with rest of workflow
                                     meta, bam ->
-                                    new_meta = meta.clone()
-                                    new_meta.reference = meta.id_index
+                                    new_meta = meta + [ reference: meta.id_index ]
                                 [ new_meta, bam ]
                                 }
 
@@ -41,10 +40,9 @@ workflow MAP {
                             .combine( index )
                             .multiMap {
                                 meta, reads, meta2, index ->
-                                    new_meta = meta.clone()
-                                    new_meta.reference = meta2.id
+                                    new_meta = meta + [ reference: meta2.id ]
                                     reads: [ new_meta, reads ]
-                                    index: [ meta2, index]
+                                    index: [ meta2, index ]
                             }
 
         BWA_MEM ( ch_input_for_mapping.reads, ch_input_for_mapping.index, true )
@@ -60,10 +58,9 @@ workflow MAP {
                             .combine( index )
                             .multiMap {
                                 meta, reads, meta2, index ->
-                                    new_meta = meta.clone()
-                                    new_meta.reference = meta2.id
+                                    new_meta = meta + [ reference: meta2.id ]
                                     reads: [ new_meta, reads ]
-                                    index: [ meta2, index]
+                                    index: [ meta2, index ]
                             }
 
         BOWTIE2_ALIGN ( ch_input_for_mapping.reads, ch_input_for_mapping.index, false, true )

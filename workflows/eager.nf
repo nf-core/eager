@@ -295,12 +295,14 @@ workflow EAGER {
                 bam:             [ meta, bam ]
                 snp_capture_bed: [ snp_capture_bed ]
             }
+
         QUALIMAP_BAMQC_WITHBED( ch_qualimap_input_with.bam, ch_qualimap_input_with.snp_capture_bed )
         ch_qualimap_input_without = ch_qualimap_input.nobed
             .map{
                 ignore_meta, meta, bam, meta2, snp_capture_bed ->
                 [ meta, bam ]
             }
+
         QUALIMAP_BAMQC_NOBED( ch_qualimap_input_without, [] )
         ch_qualimap_output = QUALIMAP_BAMQC_WITHBED.out.results.mix( QUALIMAP_BAMQC_NOBED.out.results )
         ch_versions = ch_versions.mix( QUALIMAP_BAMQC_NOBED.out.versions ).mix( QUALIMAP_BAMQC_WITHBED.out.versions )
