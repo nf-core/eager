@@ -834,7 +834,7 @@
                     "help_text": "Very large fastq files or many fastq files run through MALT at the same time can lead to excessively long runtimes. This parameter allows for parallelization of MALT runs. Please note, MALT is resource heavy and setting this value above the default (0) will spawn at minimum N/metagenomics_malt_group_size jobs where N is the number of samples. Please only use this if it is necessary to avoid runtime limits on your HPC cluster."
                 },
                 "metagenomics_run_postprocessing": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "Activate post-processing of metagenomics profiling tool selected.",
                     "help_text": "Activate the corresponding post-processing tool for your metagenomics profiling software. \n\nmalt --> maltextract\nkrakenuniq/kraken2 --> krakenmerge\nmetaphlan --> mergemetaphlantables\n\nNote: Postprocessing is automatically carried out when using  `kraken2` and `krakenuniq` ",
                     "default": "null",

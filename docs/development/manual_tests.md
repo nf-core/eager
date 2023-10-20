@@ -329,6 +329,8 @@ All possible parameters
 
 Tests
 
+## NOTE: metagenomics input generation will now fail pre-pipeline parameter checks, since --run_metagenomics requires the subsequent declaration of --metagenomics_profiling_tool and --metagenomics_profiling_database!
+
 ```bash
 ## Check no BAM filtering
 ## Expect: full completion of pipeline without any bam filtering execution
@@ -687,7 +689,7 @@ nextflow run main.nf -profile test,docker \
   --run_metagenomics \
   --metagenomics_profiling_tool malt \
   --metagenomics_profiling_database CUSTOM_MALT_DB \
-  --metagenomics_postprocessing_tool maltextract \
+  --metagenomics_run_postprocessing \
   --metagenomics_maltextract_ncbi_dir NCBI_DIR \
   --metagenomics_maltextract_taxon_list TAXONLISTFILE
 ```
@@ -696,6 +698,6 @@ nextflow run main.nf -profile test,docker \
 
 ```bash
 nextflow run -resume ./main.nf -profile test,docker --outdir out \
---run_metagenomics --metagenomics_profiling_tool metaphlan --metagenomics_profiling_database ./runtest/metaphlandb/ --metagenomics_postprocessing_tool mergemetaphlantables
+--run_metagenomics --metagenomics_profiling_tool metaphlan --metagenomics_profiling_database ./runtest/metaphlandb/ --metagenomics_run_postprocessing
 # 20230804: works
 ```
