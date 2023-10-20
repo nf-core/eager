@@ -654,7 +654,7 @@
             "properties": {
                 "run_metagenomics": {
                     "type": "boolean",
-                    "description": "Turn on metagenomic screening of mapped, unmapped, or all reads.",
+                    "description": "Turn on metagenomic screening of mapped, unmapped, or all reads. Requires subsequent specification of `--metagenomics_profiling_tool` and `--metagenomics_profiling_database`.",
                     "fa_icon": "fas fa-power-off",
                     "help_text": "Turns on the metagenomic screening subworkflow of the pipeline, where reads are screened against large databases. Typically used for pathogen screening or microbial community analysis.\n\nIf supplied, this will also turn on the BAM filtering subworkflow of the pipeline."
                 },
@@ -669,8 +669,8 @@
                 "run_metagenomics_complexityfiltering": {
                     "type": "boolean",
                     "fa_icon": "fas fa-power-off",
-                    "help_text": "Turns on a subworkflow of the pipeline that filters the fastq-files for complexity before the metagenomics profiling\nUse the metagenomics_complexity_tool parameter to select a method",
-                    "description": "Run a complexity filter on the metagenomics input files before classification. Specifiy the tool to use with the `metagenomics_complexity_tool` parameter, save with `metagenomics_complexity_savefastq`"
+                    "description": "Run a complexity filter on the metagenomics input files before classification. Specifiy the tool to use with the `metagenomics_complexity_tool` parameter, save with `metagenomics_complexity_savefastq`",
+                    "help_text": "Turns on a subworkflow of the pipeline that filters the fastq-files for complexity before the metagenomics profiling\nUse the metagenomics_complexity_tool parameter to select a method"
                 },
                 "metagenomics_complexity_tool": {
                     "type": "string",
@@ -710,7 +710,7 @@
                 },
                 "metagenomics_profiling_tool": {
                     "type": "string",
-                    "description": "Specify which tool to use for metagenomic profiling and screening.",
+                    "description": "Specify which tool to use for metagenomic profiling and screening. Required if `--run_metagenomics` flagged.",
                     "enum": ["malt", "metaphlan", "kraken2", "krakenuniq"],
                     "fa_icon": "fas fa-toolbox",
                     "help_text": "Select which tool to run metagenomics profiling on designated metagenomics_screening_input. These tools behave vastly differently due to performing read profiling using different methods and yield vastly different reuslts."
@@ -718,14 +718,14 @@
                 "metagenomics_profiling_database": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "Specify a databse directory to run metagenomics profiling on. In the case of kraken2, this can be a tar.gz of the directory.",
+                    "description": "Specify a databse directory to run metagenomics profiling on. In the case of kraken2, this can be a tar.gz of the directory. Required if `--run_metagenomics` flagged.",
                     "fa_icon": "fas fa-database",
                     "help_text": "Select which tool to run metagenomics profiling database to use with the designated metagenomics_profiling_tool on the selected metagenomics_screening_input. These databases are NOT cross-compatible and need to be pre-built/downloaded for use in nf-core/eager. Database construction is often a balancing act between breadth of sequence diversity and size."
                 },
                 "metagenomics_kraken_save_reads": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
-                    "description": "Turn on saving reads assigned by of KrakenUniq or Kraken2",
+                    "description": "Turn on saving reads assigned by KrakenUniq or Kraken2",
                     "help_text": "Save reads that do and do not have a taxonomic classification in your output results directory in FASTQ format.\n\n> Modifies tool parameter(s):\n> - krakenuniq: `--classified-out` and `--unclassified-out`"
                 },
                 "metagenomics_kraken_save_read_classifications": {
@@ -833,7 +833,7 @@
                     "fa_icon": "fas fa-barcode",
                     "help_text": "Very large fastq files or many fastq files run through MALT at the same time can lead to excessively long runtimes. This parameter allows for parallelization of MALT runs. Please note, MALT is resource heavy and setting this value above the default (0) will spawn at minimum N/metagenomics_malt_group_size jobs where N is the number of samples. Please only use this if it is necessary to avoid runtime limits on your HPC cluster."
                 },
-                "metagenomics_postprocessing_tool": {
+                "metagenomics_run_postprocessing": {
                     "type": "string",
                     "description": "Activate post-processing of metagenomics profiling tool selected.",
                     "help_text": "Activate the corresponding post-processing tool for your metagenomics profiling software. \n\nmalt --> maltextract\nkrakenuniq/kraken2 --> krakenmerge\nmetaphlan --> mergemetaphlantables\n\nNote: Postprocessing is automatically carried out when using  `kraken2` and `krakenuniq` ",
@@ -843,15 +843,15 @@
                 "metagenomics_maltextract_taxon_list": {
                     "type": "string",
                     "description": "Path to a text file with taxa of interest (one taxon per row, NCBI taxonomy name format)",
-                    "default": null,
-                    "help_text": "\\nPath to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format.\\n\\nOnly needed when `--metagenomics_profiling_tool malt` is also supplied.",
+                    "default": "None",
+                    "help_text": "Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format corresponding to a taxonomic node in your MALT database.\\n\\nNecessary when `--metagenomics_profiling_tool malt` specified and `--metagenomics_run_postprocessing` flagged.",
                     "fa_icon": "fas fa-align-left"
                 },
                 "metagenomics_maltextract_ncbi_dir": {
                     "type": "string",
                     "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; available: https://github.com/rhuebler/HOPS/)",
-                    "default": null,
-                    "help_text": "Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).\\n\\nOnly needed when `--metagenomics_profiling_tool malt` is also supplied.",
+                    "default": "None",
+                    "help_text": "Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).\\n\\nNecessary when `--metagenomics_profiling_tool malt` and `--metagenomics_run_postprocessing` specified.",
                     "fa_icon": "fab fa-buffer"
                 },
                 "metagenomics_maltextract_filter": {
@@ -871,47 +871,47 @@
                 },
                 "metagenomics_maltextract_destackingoff": {
                     "type": "boolean",
-                    "default": "false",
+                    "default": false,
                     "description": "Turn off destacking.",
                     "help_text": "Turn off destacking. If left on, a read that overlaps with another read will be\\nremoved (leaving a depth coverage of 1).\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--destackingOff`",
                     "fa_icon": "fab fa-stack-overflow"
                 },
                 "metagenomics_maltextract_downsamplingoff": {
                     "type": "boolean",
-                    "default": "false",
+                    "default": false,
                     "description": "Turn off downsampling.",
                     "help_text": "Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--downSampOff`",
                     "fa_icon": "fas fa-angle-double-down"
                 },
                 "metagenomics_maltextract_duplicateremovaloff": {
                     "type": "boolean",
-                    "default": "false",
+                    "default": false,
                     "description": "Turn off duplicate removal.",
-                    "help_text": "\\nTurn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--dupRemOff`",
+                    "help_text": "Turn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--dupRemOff`",
                     "fa_icon": "fas fa-copy"
                 },
                 "metagenomics_maltextract_matches": {
                     "type": "boolean",
-                    "default": "false",
+                    "default": false,
                     "description": "Turn on exporting alignments of hits in BLAST format.",
-                    "help_text": "\\nExport alignments of hits for each node in BLAST format. By default turned off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--matches`",
+                    "help_text": "Export alignments of hits for each node in BLAST format. By default turned off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--matches`",
                     "fa_icon": "fas fa-equals"
                 },
                 "metagenomics_maltextract_megansummary": {
                     "type": "boolean",
-                    "default": "false",
+                    "default": false,
                     "description": "Turn on export of MEGAN summary files.",
                     "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--meganSummary`"
                 },
-                "metagenomics_maltextract_percentidentity": {
+                "metagenomics_maltextract_minpercentidentity": {
                     "type": "number",
-                    "default": 85,
-                    "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
+                    "default": 85.0,
+                    "description": "Minimum percent identity alignments are required to have to be reported as candidate reads. Recommended to set same as MALT parameter.",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85`.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--minPI`"
                 },
-                "metagenomics_maltextract_topalignment": {
+                "metagenomics_maltextract_usetopalignment": {
                     "type": "boolean",
-                    "default": "false",
+                    "default": false,
                     "description": "Turn on using top alignments per read after filtering.",
                     "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--useTopAlignment`",
                     "fa_icon": "fas fa-bahai"

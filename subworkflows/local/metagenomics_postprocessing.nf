@@ -15,7 +15,7 @@ workflow METAGENOMICS_POSTPROCESSING {
     ch_results       = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    if ( params.metagenomics_postprocessing_tool == 'maltextract' ) {
+    if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt' ) {
 
         //maltextract doesnt accepts a meta param in the first input channel, so remove it
         ch_maltextract_input = ch_postprocessing_input.map{it[1]}
@@ -54,7 +54,7 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     }
 
-    else if ( params.metagenomics_postprocessing_tool == 'mergemetaphlantables' ) {
+    else if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'metaphlan' ) {
 
         METAPHLAN_MERGEMETAPHLANTABLES ( ch_postprocessing_input.map{ [[id:"metaphlan_profiles_all_samples_merged"], it[1]] }.groupTuple() )
 
