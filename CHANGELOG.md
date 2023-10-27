@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Dependencies`
 
-- `multiqc`: 1.14 -> 1.15 <!--TODO Update to actual latest version once mapDamage module is included in stable release -->
+- `multiqc`: 1.14 -> 1.16
 
 ### `Deprecated`
 
