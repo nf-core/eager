@@ -2,6 +2,7 @@
 // Calculate PMD scores, trim, or rescale DNA damage from mapped reads.
 //
 
+include { BEDTOOLS_MASKFASTA                                      } from '../../modules/nf-core/bedtools/maskfasta/main'
 include { MAPDAMAGE2                                              } from '../../modules/nf-core/mapdamage2/main'
 include { PMDTOOLS_FILTER                                         } from '../../modules/nf-core/pmdtools/filter/main'
 include { BAMUTIL_TRIMBAM                                         } from '../../modules/nf-core/bamutil/trimbam/main'
@@ -13,8 +14,10 @@ include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED  } from '../../
 // TODO: Add required channels and channel manipulations for reference-dependent bed masking before pmdtools. Requires multi-ref support before implementation.
 workflow MANIPULATE_DAMAGE {
     take:
-    ch_bam_bai  // [ [ meta ], bam , bai ]
-    ch_fasta    // [ [ meta ], fasta ]
+    ch_bam_bai             // [ [ meta ], bam , bai ]
+    ch_fasta               // [ [ meta ], fasta ]
+    ch_pmd_masked_fasta    // [ [ meta ], masked_fasta ]
+    ch_pmd_bed_for_masking // [ [ meta ], bed_file ]
 
     main:
     ch_versions              = Channel.empty()
