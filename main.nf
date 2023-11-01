@@ -561,7 +561,7 @@ process makeFastaIndex {
             else null
     }
     
-    when: !params.fasta_index && params.fasta && ( params.mapper == 'bwaaln' || params.mapper == 'bwamem' || params.mapper == 'circularmapper')
+    when: !params.fasta_index && params.fasta
 
     input:
     path fasta from ch_fasta_for_faidx
