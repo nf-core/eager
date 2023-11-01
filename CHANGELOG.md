@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#1017](https://github.com/nf-core/eager/issues/1017) Fixed file name collision in niche cases with multiple libraries of multiple UDG treatments.
 - [#1024](https://github.com/nf-core/eager/issues/1024) `multiqc_general_stats.txt` is now generated even if the table is a beeswarm plot in the report.
 - Updated RG tags for all mappers. RG-id now includes Sample as well as Library ID. Added `LB:` tag with the library ID.
+- [#1031](https://github.com/nf-core/eager/issues/1031) Always index fasta regardless of mapper. This ensures that DamageProfiler and genotyping processes get submitted when using bowtie2 and not providing a fasta index.
 
 ### `Dependencies`
 
