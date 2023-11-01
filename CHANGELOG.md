@@ -3,6 +3,25 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2023-11-01
+
+### `Added`
+
+- [#1020](https://github.com/nf-core/eager/issues/1020) Added mapdamage2 as an alternative for damage calculation.
+
+### `Fixed`
+
+- [#1017](https://github.com/nf-core/eager/issues/1017) Fixed file name collision in niche cases with multiple libraries of multiple UDG treatments.
+- [#1024](https://github.com/nf-core/eager/issues/1024) `multiqc_general_stats.txt` is now generated even if the table is a beeswarm plot in the report.
+- Updated RG tags for all mappers. RG-id now includes Sample as well as Library ID. Added `LB:` tag with the library ID.
+- [#1031](https://github.com/nf-core/eager/issues/1031) Always index fasta regardless of mapper. This ensures that DamageProfiler and genotyping processes get submitted when using bowtie2 and not providing a fasta index.
+
+### `Dependencies`
+
+- `multiqc`: 1.14 -> 1.16
+
+### `Deprecated`
+
 ## [2.4.7] - 2023-05-16
 
 ### `Added`

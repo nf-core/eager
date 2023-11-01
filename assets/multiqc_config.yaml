@@ -17,6 +17,7 @@ run_modules:
   - gatk
   - kraken
   - malt
+  - mapdamage
   - mtnucratio
   - multivcfanalyzer
   - picard
@@ -91,6 +92,7 @@ top_modules:
       path_filters:
         - "*.preseq"
   - "damageprofiler"
+  - "mapdamage"
   - "mtnucratio"
   - "qualimap"
   - "sexdeterrmine"
@@ -155,6 +157,11 @@ table_columns_visible:
     3 Prime2: False
     mean_readlength: True
     median: True
+  mapDamage:
+    5 Prime1: True
+    5 Prime2: True
+    3 Prime1: False
+    3 Prime2: False
   mtnucratio:
     mt_nuc_ratio: True
   QualiMap:
@@ -240,10 +247,15 @@ table_columns_placement:
     3 Prime2: 730
     mean_readlength: 740
     median: 750
+  mapDamage:
+    5 Prime1: 760
+    5 Prime2: 765
+    3 Prime1: 770
+    3 Prime2: 775
   mtnucratio:
-    mtreads: 760
-    mt_cov_avg: 770
-    mt_nuc_ratio: 780
+    mtreads: 780
+    mt_cov_avg: 785
+    mt_nuc_ratio: 790
   QualiMap:
     mapped_reads: 800
     mean_coverage: 805
