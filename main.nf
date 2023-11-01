@@ -1314,12 +1314,12 @@ process bwamem {
 
     if (!params.single_end && params.skip_collapse){
     """
-    bwa mem -t ${split_cpus} $fasta $r1 $r2 -R ""@RG\\tID:ILLUMINA-${samplename}_${libraryid}\\tSM:${samplename}\\tLB:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${split_cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
+    bwa mem -t ${split_cpus} $fasta $r1 $r2 -R "@RG\\tID:ILLUMINA-${samplename}_${libraryid}\\tSM:${samplename}\\tLB:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${split_cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index ${size} -@ ${task.cpus} "${libraryid}"_"${seqtype}".mapped.bam
     """
     } else {
     """
-    bwa mem -t ${split_cpus} $fasta $r1 -R ""@RG\\tID:ILLUMINA-${samplename}_${libraryid}\\tSM:${samplename}\\tLB:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${split_cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
+    bwa mem -t ${split_cpus} $fasta $r1 -R "@RG\\tID:ILLUMINA-${samplename}_${libraryid}\\tSM:${samplename}\\tLB:${libraryid}\\tPL:illumina\\tPU:ILLUMINA-${libraryid}-${seqtype}" | samtools sort -@ ${split_cpus} -O bam - > "${libraryid}"_"${seqtype}".mapped.bam
     samtools index -@ ${task.cpus} "${libraryid}"_"${seqtype}".mapped.bam ${size} 
     """
     }
