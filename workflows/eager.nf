@@ -76,6 +76,7 @@ include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
 include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
+include { RUN_SEXDETERMINE              } from '../subworkflows/local/sex_determination'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -160,6 +161,27 @@ workflow EAGER {
 
     // Contamination estimation
     hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
+
+    // Sex determine
+    if ( params.sexdeterrmine_bedfile ) {
+      ch_sexdeterrmine_bed = Channel.fromPath( params.sexdeterrmine_bedfile, checkIfExists: true )
+        .collect()
+        .map {
+          file ->
+              meta = file.simpleName
+          [meta,file]
+        }
+
+    } else {
+      ch_sexdeterrmine_bed = []
+    }
+
+    if ( params.sexdeterrmine_samplelist) {
+      ch_sexdeterrmine_samplelist = Channel.fromPath( params.sexdeterrmine_samplelist, checkIfExists: true )
+
+    } else {
+      ch_sexdeterrmine_samplelist = []
+    }
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -471,6 +493,24 @@ workflow EAGER {
         CALCULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_damagecalculation.fasta, ch_fasta_for_damagecalculation.fasta_fai )
         ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
+
+    }
+
+    //
+    // SUBWORKFLOW: Sex Determine
+    //
+
+    if ( params.run_sexdeterrmine ) {
+
+    ch_sexdeterrmine_input = ch_dedupped_bams
+            .map {
+            meta, bam, bai ->
+                [ meta, bam ]
+            }
+
+    RUN_SEXDETERMINE(ch_sexdeterrmine_input, ch_sexdeterrmine_bed, ch_sexdeterrmine_samplelist)
+    ch_versions      = ch_versions.mix( RUN_SEXDETERMINE.out.versions )
+    ch_multiqc_files = ch_multiqc_files.mix(RUN_SEXDETERMINE.out.mqc.collect{it[1]}.ifEmpty([]))
 
     }
 
