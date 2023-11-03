@@ -12,15 +12,16 @@ include { GATK4_HAPLOTYPECALLER                             } from '../../module
 include { FREEBAYES                                         } from '../../modules/nf-core/freebayes/main'
 include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
 // TODO Add ANGSD GTL module. The current module does not pick up the .glf.gz output files.
-
+// TODO Find a way to pass ploidy and dbsnp to the GATK modules. maybe ploidy should go in all reference metas
+?
 workflow GENOTYPE {
     take:
     ch_bam_bai              // [ [ meta ], bam , bai ]
-    ch_fasta_plus           // [ [ meta ], fasta, fai, dict ] // TODO add dbSNP
+    ch_fasta_plus           // [ [ meta ], fasta, fai, dict ]
     ch_snpcapture_bed       // [ [ meta ], bed ]
     ch_pileupcaller_bedfile // [ [ meta ], bed ]
     ch_pileupcaller_snpfile // [ [ meta ], snp ]
-    ch_dbsnp                // [ dbsnp ]
+    ch_dbsnp                // [ [ meta ], dbsnp ]
 
     main:
     ch_versions                        = Channel.empty()
