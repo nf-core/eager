@@ -39,7 +39,7 @@ workflow REFERENCE_INDEXING {
         ch_mitochondrion_header  = REFERENCE_INDEXING_SINGLE.out.mitochondrion_header
         ch_hapmap                = REFERENCE_INDEXING_SINGLE.out.hapmap
         ch_pmd_masked_fasta      = REFERENCE_INDEXING_SINGLE.out.pmd_masked_fasta
-        ch_pmd_bed_for_masking   = REFERENCE_INDEXING_MULTI.out.pmd_bed_for_masking
+        ch_pmd_bed_for_masking   = REFERENCE_INDEXING_SINGLE.out.pmd_bed_for_masking
         ch_snp_capture_bed       = REFERENCE_INDEXING_SINGLE.out.snp_capture_bed
         ch_pileupcaller_snp      = REFERENCE_INDEXING_SINGLE.out.pileupcaller_snp
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_SINGLE.out.sexdeterrmine_bed
@@ -55,27 +55,40 @@ workflow REFERENCE_INDEXING {
     ch_hapmap = ch_hapmap
                     .filter{ it[1] != "" }
 
-    ch_pmd_masked_fasta_gunzip = ch_pmd_masked_fasta
+    ch_pmd_masked_fasta = ch_pmd_masked_fasta
+                    .branch {
+                        meta, pmd_masked_fasta ->
+                        input: pmd_masked_fasta != ""
+                        skip: true
+                    }
+    ch_pmd_masked_fasta_gunzip = ch_pmd_masked_fasta.input
                     .branch {
                         meta, pmd_masked_fasta ->
                         forgunzip: pmd_masked_fasta.extension == "gz"
                         skip: true
                     }
     GUNZIP_PMDFASTA( ch_pmd_masked_fasta_gunzip.forgunzip )
-    ch_pmd_masked_fasta = ch_pmd_masked_fasta_gunzip.skip.mix( GUNZIP_FASTA.out.gunzip )
-                    .filter{ it[1] != "" }
+    ch_pmd_masked_fasta = ch_pmd_masked_fasta_gunzip.skip.mix( GUNZIP_PMDFASTA.out.gunzip ).mix( ch_pmd_masked_fasta.skip )
     ch_version = ch_versions.mix( GUNZIP_PMDFASTA.out.versions )
 
-    ch_pmd_bed_for_masking_gunzip = ch_pmd_bed_for_masking
+    ch_pmd_bed_for_masking = ch_pmd_bed_for_masking
                     .branch {
-                        meta, pmd_bed_for_masking
+                        meta, pmd_bed_for_masking ->
+                        input: pmd_bed_for_masking != ""
+                        skip: true
+                    }
+    ch_pmd_bed_for_masking_gunzip = ch_pmd_bed_for_masking.input
+                    .branch {
+                        meta, pmd_bed_for_masking ->
                         forgunzip: pmd_bed_for_masking.extension == "gz"
                         skip: true
                     }
     GUNZIP_PMDBED( ch_pmd_bed_for_masking_gunzip.forgunzip )
-    ch_pmd_bed_for_masking = ch_pmd_bed_for_masking_gunzip.skip.mix( GUNZIP_PMDBED.out.gunzip )
-                    .filter{ it[1] != "" }
+    ch_pmd_bed_for_masking = ch_pmd_bed_for_masking_gunzip.skip.mix( GUNZIP_PMDBED.out.gunzip ).mix( ch_pmd_bed_for_masking.skip )
     ch_version = ch_versions.mix( GUNZIP_PMDBED.out.versions )
+
+    ch_pmd_masking = ch_pmd_masked_fasta
+                    .combine( by: 0, ch_pmd_bed_for_masking )
 
     ch_capture_bed = ch_snp_capture_bed //bed file input is optional, so no filtering
                     .branch {
@@ -106,7 +119,7 @@ workflow REFERENCE_INDEXING {
     reference            = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, circular_target ]
     mitochondrion_header = ch_mitochondrion_header  // [ meta, mitochondrion_header ]
     hapmap               = ch_hapmap                // [ meta, hapmap ]
-    pmd_masked_fasta     = ch_pmd_masked_fasta      // [ meta, pmd_masked_fasta ]
+    pmd_masking          = ch_pmd_masking           // [ meta, pmd_masked_fasta, pmd_bed_for_masking ]
     pmd_bed_for_masking  = ch_pmd_bed_for_masking   // [ meta, pmd_bed_for_masking ]
     snp_capture_bed      = ch_capture_bed           // [ meta, capture_bed ]
     pileupcaller_snp     = ch_pileupcaller_snp      // [ meta, pileupcaller_bed, pileupcaller_snp ]

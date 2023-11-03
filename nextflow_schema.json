@@ -772,7 +772,7 @@
                     "fa_icon": "fas fa-mask",
                     "help_text": "Supplying a bedfile to this parameter activates masking of the reference fasta at the contained sites prior to running PMDtools. Positions that are in the provided bedfile will be replaced by Ns in the reference genome. \nThis can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a transition SNP to be counted as damage. Masking of the reference is done using `bedtools maskfasta`.",
                     "description": "Specify a bedfile to be used to mask the reference fasta prior to running pmdtools.",
-                    "pattern": "^\\S+\\.bed$",
+                    "pattern": "^\\S+\\.bed?(\\.gz)$",
                     "format": "file-path"
                 },
                 "run_trim_bam": {
@@ -948,7 +948,7 @@
                 },
                 "skip_qualimap": {
                     "type": "boolean",
-                    "default": "false"
+                    "default": false
                 },
                 "snpcapture_bed": {
                     "type": "string",
@@ -1154,5 +1154,11 @@
         {
             "$ref": "#/definitions/feature_annotation_statistics"
         }
-    ]
+    ],
+    "properties": {
+        "damage_manipulation_pmdtools_masked_reference": {
+            "type": "string",
+            "default": "None"
+        }
+    }
 }

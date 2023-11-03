@@ -527,7 +527,7 @@ workflow EAGER {
     // SUBWORKFLOW: aDNA Damage Manipulation
 
     if ( params.run_mapdamage_rescaling || params.run_pmd_filtering || params.run_trim_bam ) {
-        MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masked_fasta, REFERENCE_INDEXING.pmd_bed_for_masking )
+        MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masking )
         ch_multiqc_files       = ch_multiqc_files.mix( MANIPULATE_DAMAGE.out.flagstat.collect{it[1]}.ifEmpty([]) )
         ch_versions            = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
         ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
