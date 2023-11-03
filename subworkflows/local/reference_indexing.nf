@@ -31,6 +31,7 @@ workflow REFERENCE_INDEXING {
         ch_pileupcaller_snp      = REFERENCE_INDEXING_MULTI.out.pileupcaller_snp
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_MULTI.out.sexdeterrmine_bed
         ch_bedtools_feature      = REFERENCE_INDEXING_MULTI.out.bedtools_feature
+        ch_dbsnp                 = REFERENCE_INDEXING_MULTI.out.dbsnp
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_MULTI.out.versions )
     } else {
         // If input FASTA and/or indicies supplied
@@ -43,6 +44,7 @@ workflow REFERENCE_INDEXING {
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_SINGLE.out.sexdeterrmine_bed
         ch_bedtools_feature      = REFERENCE_INDEXING_SINGLE.out.bedtools_feature
         ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE.out.reference
+        ch_dbsnp                 = REFERENCE_INDEXING_SINGLE.out.dbsnp
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }
 
@@ -80,6 +82,8 @@ workflow REFERENCE_INDEXING {
     ch_bedtools_feature = ch_bedtools_feature
                     .filter{ it[1] != "" }
 
+    // TODO-DEV No filtering dbsnp cause we always need the ploidy value from its meta. Will probably need a reference sheet validator to fix this.
+
     emit:
     reference            = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, circular_target ]
     mitochondrion_header = ch_mitochondrion_header  // [ meta, mitochondrion_header ]
@@ -89,6 +93,7 @@ workflow REFERENCE_INDEXING {
     pileupcaller_snp     = ch_pileupcaller_snp      // [ meta, pileupcaller_bed, pileupcaller_snp ]
     sexdeterrmine_bed    = ch_sexdeterrmine_bed     // [ meta, sexdet_bed ]
     bedtools_feature     = ch_bedtools_feature      // [ meta, bedtools_feature ]
+    dbsnp                = ch_dbsnp                 // [ meta, dbsnp ]
     versions             = ch_versions
 
 }

@@ -29,22 +29,24 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_splitreferencesheet_for_branch = ch_splitreferencesheet_for_map
                                             .map {
                                                 row ->
-                                                    def meta            = [:]
-                                                    meta.id             = row["reference_name"]
-                                                    def fasta           = file(row["fasta"], checkIfExists: true) // mandatory parameter!
-                                                    def fai             = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
-                                                    def dict            = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
-                                                    def mapper_index    = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
-                                                    def circular_target = row["circular_target"]
-                                                    def mitochondrion   = row["mitochondrion_header"]
-                                                    def capture_bed     = row["snpcapture_bed"] != "" ? file(row["snpcapture_bed"], checkIfExists: true) : ""
-                                                    def pileupcaller_bed = row["pileupcaller_bedfile"] != "" ? file(row["pileupcaller_bedfile"], checkIfExists: true) : ""
-                                                    def pileupcaller_snp = row["pileupcaller_snpfile"] != "" ? file(row["pileupcaller_snpfile"], checkIfExists: true) : ""
-                                                    def hapmap          = row["hapmap_file"] != "" ? file(row["hapmap_file"], checkIfExists: true) : ""
-                                                    def pmd_mask        = row["pmdtools_masked_fasta"] != "" ? file(row["pmdtools_masked_fasta"], checkIfExists: true) : ""
-                                                    def sexdet_bed      = row["sexdeterrmine_snp_bed"] != "" ? file(row["sexdeterrmine_snp_bed"], checkIfExists: true) : ""
-                                                    def bedtools_feature = row["bedtools_feature_file"] != "" ? file(row["bedtools_feature_file"], checkIfExists: true) : ""
-                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature ]
+                                                    def meta                   = [:]
+                                                    meta.id                    = row["reference_name"]
+                                                    def fasta                  = file(row["fasta"], checkIfExists: true) // mandatory parameter!
+                                                    def fai                    = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
+                                                    def dict                   = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
+                                                    def mapper_index           = row["mapper_index"] != "" ? file(row["mapper_index"], checkIfExists: true) : ""
+                                                    def circular_target        = row["circular_target"]
+                                                    def mitochondrion          = row["mitochondrion_header"]
+                                                    def capture_bed            = row["snpcapture_bed"] != "" ? file(row["snpcapture_bed"], checkIfExists: true) : ""
+                                                    def pileupcaller_bed       = row["pileupcaller_bedfile"] != "" ? file(row["pileupcaller_bedfile"], checkIfExists: true) : ""
+                                                    def pileupcaller_snp       = row["pileupcaller_snpfile"] != "" ? file(row["pileupcaller_snpfile"], checkIfExists: true) : ""
+                                                    def hapmap                 = row["hapmap_file"] != "" ? file(row["hapmap_file"], checkIfExists: true) : ""
+                                                    def pmd_mask               = row["pmdtools_masked_fasta"] != "" ? file(row["pmdtools_masked_fasta"], checkIfExists: true) : ""
+                                                    def sexdet_bed             = row["sexdeterrmine_snp_bed"] != "" ? file(row["sexdeterrmine_snp_bed"], checkIfExists: true) : ""
+                                                    def bedtools_feature       = row["bedtools_feature_file"] != "" ? file(row["bedtools_feature_file"], checkIfExists: true) : ""
+                                                    def genotyping_gatk_ploidy = row["genotyping_gatk_ploidy"] != "" ? row["genotyping_gatk_ploidy"] : ""
+                                                    def genotyping_gatk_dbsnp  = row["genotyping_gatk_dbsnp"] != "" ? file(row["genotyping_gatk_dbsnp"], checkIfExists: true) : ""
+                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature, genotyping_gatk_ploidy, genotyping_gatk_dbsnp ]
                                             }
 
 
@@ -61,7 +63,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
 ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                             .multiMap {
-                                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature ->
+                                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature, genotyping_gatk_ploidy, genotyping_gatk_dbsnp ->
                                 generated:            [ meta, fasta, fai, dict, mapper_index, circular_target ]
                                 mitochondrion_header: [ meta, mitochondrion ]
                                 angsd_hapmap:         [ meta, hapmap ]
@@ -70,6 +72,7 @@ ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                                 pileupcaller_snp:     [ meta, pileupcaller_bed, pileupcaller_snp ]
                                 sexdeterrmine_bed:    [ meta, sexdet_bed ]
                                 bedtools_feature:     [ meta, bedtools_feature ]
+                                dbsnp:                [ meta + [ ploidy: genotyping_gatk_ploidy ], genotyping_gatk_dbsnp ] // Include ploidy of the reference in dbsnp meta.
                             }
 
     // Detect if fasta is gzipped or not
@@ -216,5 +219,6 @@ ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
     pileupcaller_snp     = ch_input_from_referencesheet.pileupcaller_snp     // [ meta, pileupcaller_snp, pileupcaller_bed ]
     sexdeterrmine_bed    = ch_input_from_referencesheet.sexdeterrmine_bed    // [ meta, sexdet_bed ]
     bedtools_feature     = ch_input_from_referencesheet.bedtools_feature     // [ meta, bedtools_feature ]
+    dbsnp                = ch_input_from_referencesheet.dbsnp                // [ meta + [ ploidy: genotyping_gatk_ploidy ], genotyping_gatk_dbsnp ]
     versions             = ch_versions
 }

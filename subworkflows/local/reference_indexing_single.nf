@@ -87,12 +87,14 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     def pileupcaller_snp                      = ""
                                     def sexdet_bed                            = ""
                                     def bedtools_feature                      = params.mapstats_bedtools_featurefile != null ? file(params.mapstats_bedtools_featurefile, checkIfExists: true ) : ""
-                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature ]
+                                    def genotyping_gatk_ploidy                = params.genotyping_gatk_ploidy != null ? params.genotyping_gatk_ploidy : ""
+                                    def genotyping_gatk_dbsnp                 = params.genotyping_gatk_dbsnp != null ? file(params.genotyping_gatk_dbsnp, checkIfExists: true ) : ""
+                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_ploidy, genotyping_gatk_dbsnp ]
                                 }
 
     ch_ref_index_single = ch_reference_for_mapping
                                 .multiMap{
-                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature ->
+                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_ploidy, genotyping_gatk_dbsnp ->
                                     reference:         [ meta, fasta, fai, dict, mapper_index, circular_target ]
                                     mito_header:       [ meta, mitochondrion_header ]
                                     hapmap:            [ meta, contamination_estimation_angsd_hapmap ]
@@ -101,6 +103,7 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     pileupcaller_snp:  [ meta, pileupcaller_bed, pileupcaller_snp ]
                                     sexdeterrmine_bed: [ meta, sexdet_bed ]
                                     bedtools_feature:  [ meta, bedtools_feature ]
+                                    dbsnp:             [ meta + [ ploidy: genotyping_gatk_ploidy ], genotyping_gatk_dbsnp ] // Include ploidy of the reference in dbsnp meta.
                                 }
 
     emit:
@@ -112,6 +115,7 @@ workflow REFERENCE_INDEXING_SINGLE {
     pileupcaller_snp     = ch_ref_index_single.pileupcaller_snp   // [ meta, pileupcaller_bed, pileupcaller_snp ]
     sexdeterrmine_bed    = ch_ref_index_single.sexdeterrmine_bed  // [ meta, sexdet_bed ]
     bedtools_feature     = ch_ref_index_single.bedtools_feature   // [ meta, bedtools_feature ]
+    dbsnp                = ch_ref_index_single.dbsnp              // [ meta + [ ploidy: genotyping_gatk_ploidy ], genotyping_gatk_dbsnp ]
     versions             = ch_versions
 
 }
