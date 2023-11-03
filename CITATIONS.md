@@ -12,7 +12,7 @@
 
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
-  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]. Available online https://www.bioinformatics.babraham.ac.uk/projects/fastqc/.
+  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 
@@ -93,6 +93,10 @@
 - [BamUtils](https://doi.org/10.1101/gr.176552.114)
 
   > Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. doi: [10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114)
+
+- [QualiMap](https://doi.org/10.1093/bioinformatics/btv566)
+
+  > QualiMap Okonechnikov, K., Conesa, A., & García-Alcalde, F. (2016). Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. Bioinformatics , 32(2), 292–294. Download: http://qualimap.bioinfo.cipf.es/
 
 - [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
 

@@ -94,10 +94,11 @@ Tool Specific combinations
     - with stricter threshold
 
   - BAM trimming
+
     - with default parameters
     - different length by udg treatment
 
-- All together
+  - All together
 
 ### Multi-reference tests
 
@@ -145,6 +146,10 @@ nextflow run ../main.nf -profile singularity,test --outdir ./results --input sam
 ## Test: (11) Broken path correctly fails pipeline ✅
 ## Expect: Expect fail
 nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test11.csv -ansi-log false -dump-channels --save_reference
+
+# Test: File input via reference sheet
+# Expect: Qualimap with bed, mtnucratio and angsd successful and bedtools not run for hs37d5, qualimap without bed file, mtnucratio and bedtools successful and angsd not run for Mammoth_MT
+nextflow run main.nf -profile test_multiref,docker --outdir ./results --run_bedtools_coverage --run_contamination_estimation_angsd --run_mtnucratio
 ```
 
 ### AdapterRemoval
