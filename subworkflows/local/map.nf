@@ -2,14 +2,14 @@
 // Prepare reference indexing for downstream
 //
 
-include { SEQKIT_SPLIT2                                                                                                       } from '../../modules/nf-core/seqkit/split2/main'
-include { FASTQ_ALIGN_BWAALN                                                                                                  } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
-include { BWA_MEM                                                                                                             } from '../../modules/nf-core/bwa/mem/main'
-include { BOWTIE2_ALIGN                                                                                                       } from '../../modules/nf-core/bowtie2/align/main'
-include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES                                                                              } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED_LANES                                                                        } from '../../modules/nf-core/samtools/sort/main'
+include { SEQKIT_SPLIT2                                                                                                             } from '../../modules/nf-core/seqkit/split2/main'
+include { FASTQ_ALIGN_BWAALN                                                                                                        } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { BWA_MEM                                                                                                                   } from '../../modules/nf-core/bwa/mem/main'
+include { BOWTIE2_ALIGN                                                                                                             } from '../../modules/nf-core/bowtie2/align/main'
+include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES                                                                                    } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED_LANES                                                                              } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED                                                                       } from '../../modules/nf-core/samtools/flagstat/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED                                                                             } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow MAP {
     take:
@@ -62,13 +62,31 @@ workflow MAP {
     }
 
     if ( params.mapping_tool == 'bwaaln' ) {
-        FASTQ_ALIGN_BWAALN ( ch_input_for_mapping.reads, ch_input_for_mapping.index )
+        ch_index_for_mapping = index
+        ch_reads_for_mapping = reads
 
+        FASTQ_ALIGN_BWAALN ( ch_reads_for_mapping, ch_index_for_mapping )
         ch_versions        = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
         ch_mapped_lane_bam = FASTQ_ALIGN_BWAALN.out.bam
+                                .map{
+                                    // create meta consistent with rest of workflow
+                                    meta, bam ->
+                                    new_meta = meta + [ reference: meta.id_index ]
+                                [ new_meta, bam ]
+                                }
+
         ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
     } else if ( params.mapping_tool == 'bwamem' ) {
+        ch_input_for_mapping = reads
+                            .combine( index )
+                            .multiMap {
+                                meta, reads, meta2, index ->
+                                    new_meta = meta + [ reference: meta2.id ]
+                                    reads: [ new_meta, reads ]
+                                    index: [ meta2, index ]
+                            }
+
         BWA_MEM ( ch_input_for_mapping.reads, ch_input_for_mapping.index, true )
         ch_versions        = ch_versions.mix ( BWA_MEM.out.versions.first() )
         ch_mapped_lane_bam = BWA_MEM.out.bam
@@ -78,6 +96,15 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_MEM.out.csi : SAMTOOLS_INDEX_MEM.out.bai
 
     } else if ( params.mapping_tool == 'bowtie2' ) {
+        ch_input_for_mapping = reads
+                            .combine( index )
+                            .multiMap {
+                                meta, reads, meta2, index ->
+                                    new_meta = meta + [ reference: meta2.id ]
+                                    reads: [ new_meta, reads ]
+                                    index: [ meta2, index ]
+                            }
+
         BOWTIE2_ALIGN ( ch_input_for_mapping.reads, ch_input_for_mapping.index, false, true )
         ch_versions        = ch_versions.mix ( BOWTIE2_ALIGN.out.versions.first() )
         ch_mapped_lane_bam = BOWTIE2_ALIGN.out.bam
