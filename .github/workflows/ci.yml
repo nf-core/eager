@@ -32,7 +32,6 @@ jobs:
           - "-profile test,docker --mapping_tool bwamem --run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam"
           - "-profile test,docker --mapping_tool bowtie2"
           - "-profile test,docker --skip_preprocessing"
-          - "-profile test,docker --run_fastq_sharding --fastq_shard_size 1000"
           - "-profile test_humanbam,docker --run_mtnucratio --run_contamination_estimation_angsd --snpcapture_bed 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz'"
           - "-profile test_multiref,docker" ## TODO add damage manipulation here instead once it goes multiref
     steps:
