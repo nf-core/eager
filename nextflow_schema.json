@@ -583,7 +583,7 @@
                     "type": "boolean",
                     "description": "Turn on filtering of reads in BAM files after mapping. By default, only mapped reads retained.",
                     "fa_icon": "fas fa-power-off",
-                    "help_text": "Turns on the filtering subworkflow for mapped BAM files coming out of the read alignment step. Filtering includes removal of unmapped reads, length filtering, and mapping quality filtering.\n\nWhen turning on bam filtering, by default only the mapped/unmapped filter is activated, thus only mapped reads are retained for downstream analyses. See `--bamfiltering_retainunmappedgenomicbam` to retain unmapped reads, if filtering only for length and/or quality is preferred.\n\nNote this subworkflow can also be activated if `--run_metagenomic_screening` is supplied."
+                    "help_text": "Turns on the filtering subworkflow for mapped BAM files coming out of the read alignment step. Filtering includes removal of unmapped reads, length filtering, and mapping quality filtering.\n\nWhen turning on bam filtering, by default only the mapped/unmapped filter is activated, thus only mapped reads are retained for downstream analyses. See `--bamfiltering_retainunmappedgenomicbam` to retain unmapped reads, if filtering only for length and/or quality is preferred.\n\nNote this subworkflow can also be activated if `--run_metagenomics_screening` is supplied."
                 },
                 "bamfiltering_minreadlength": {
                     "type": "integer",
