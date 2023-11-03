@@ -853,7 +853,7 @@
                     "default": "damageprofiler",
                     "description": "Specify the tool to use for damage calculation.",
                     "fa_icon": "fas fa-tools",
-                    "help_text": "Specify the tool to be used for damage calculation. Options: `damageprofiler`, `mapdamage`. By default, DamageProfiler is used.",
+                    "help_text": "Specify the tool to be used for damage calculation. DamageProfiler is generally faster than mapDamage2, but the latter has an option to limit the number of reads used. This can significantly speed up the processing of very large files, where the damage estimates are already accurate after processing only a fraction of the input. Options: `damageprofiler`, `mapdamage`. By default, DamageProfiler is used.",
                     "enum": [
                         "damageprofiler",
                         "mapdamage"
