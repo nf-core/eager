@@ -80,7 +80,7 @@ The possible columns displayed by default are as follows (note you may see addit
 * **Endogenous DNA Post-Filter (%)** This is from the endorS.py tool. It displays a percentage of mapped reads _after_ BAM filtering (i.e. for mapping quality and/or bam-level length filtering) over total reads that went into mapped (i.e. the percentage DNA content of the library that matches the reference). This column will only be displayed if BAM filtering is turned on and is based on the original mapping for total reads, and mapped reads as calculated from the post-filtering BAM.
 * **ClusterFactor** This is from **DeDup only**. This is a value representing how many duplicates in the library exist for each unique read. This ratio is calculated as `reads_before_deduplication / reads_after_deduplication`. Can be converted to %Dups by calculating `1 - (1  / CF)`. A cluster factor close to one indicates a highly complex library and could be sequenced further. Generally with a value of more than 2 you will not be gaining much more information by sequencing deeper.
 * **% Dup. Mapped Reads** This is from **Picard's markDuplicates only**. It represents the percentage of reads in your library that were exact duplicates of other reads in your library. The lower the better, as high duplication rate means lots of sequencing of the same information (and therefore is not time or cost effective).
-* **X Prime Y>Z N base** These columns are from DamageProfiler. The prime numbers represent which end of the reads the damage is referring to. The Y>Z is the type of substitution (C>T is the true damage, G>A is the complementary). You should see for no- and half-UDG treatment a decrease in frequency from the 1st to 2nd base.
+* **X Prime Y>Z N base** These columns are from DamageProfiler or mapDamage. The prime numbers represent which end of the reads the damage is referring to. The Y>Z is the type of substitution (C>T is the true damage, G>A is the complementary). You should see for no- and half-UDG treatment a decrease in frequency from the 1st to 2nd base.
 * **Mean Length Mapped Reads** This is from DamageProfiler. This is the mean length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
 * **Median Length Mapped Reads** This is from DamageProfiler. This is the median length of all de-duplicated mapped reads. Ancient DNA normally will have a mean between 30-75, however this can vary.
 * **Nr. Dedup. Mapped Reads** This is from Qualimap. This is the total number of _deduplicated_ reads that mapped to your reference genome. This is the **best** number to report for final mapped reads in final publications.
@@ -494,11 +494,11 @@ Plateauing can be caused by a number of reasons:
 * You have an over-amplified library with many PCR duplicates. You should consider rebuilding the library to maximise data to cost ratio
 * You have a low quality library made up of mappable sequencing artefacts that were able to pass filtering (e.g. adapters)
 
-### DamageProfiler
+### Damage Calculation
 
 #### Background
 
-DamageProfiler is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
+DamageProfiler and mapDamage are tools that calculate a variety of standard 'aDNA' metrics from a BAM file. The primary plots here are the misincorporation and length distribution plots. Ancient DNA undergoes depurination and hydrolysis, causing fragmentation of molecules into gradually shorter fragments, and cytosine to thymine deamination damage, that occur on the subsequent single-stranded overhangs at the ends of molecules.
 
 Therefore, three main characteristics of ancient DNA are:
 
@@ -510,7 +510,7 @@ You will receive output for each deduplicated _library_. This means that if you 
   
 #### Misincorporation Plots
 
-The MultiQC DamageProfiler module misincorporation plots shows the percent frequency (Y axis) of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The X axis represents base pairs from the end of the molecule from the given prime end, going into the middle of the molecule i.e. 1st base of molecule, 2nd base of molecule etc until the 14th base pair. The mismatches are when compared to the base of the reference genome at that position.
+The MultiQC DamageProfiler and mapDamage module misincorporation plots shows the percent frequency (Y axis) of C to T mismatches at 5' read ends and complementary G to A mismatches at the 3' ends. The X axis represents base pairs from the end of the molecule from the given prime end, going into the middle of the molecule i.e. 1st base of molecule, 2nd base of molecule etc until the 14th base pair. The mismatches are when compared to the base of the reference genome at that position.
 
 When looking at the misincorporation plots, keep the following in mind:
 
@@ -520,22 +520,24 @@ When looking at the misincorporation plots, keep the following in mind:
 * If your library is **single-stranded**, you will expect to see only C to T misincorporations at both 5' and 3' ends of the fragments.
 * We generally expect that the older the sample, or the less-ideal preservational environment (hot/wet) the greater the frequency of C to T/G to A.
 * The curve will be not smooth then you have few reads informing the frequency calculation. Read counts of less than 500 are likely not reliable.
+* If the `mapdamage_downsample` parameter was specified and mapDamage was used for damage calculation, the damage frequency for each base is based only on the specified number of reads.
 
 <p align="center">
   <img src="images/output/damageprofiler/damageprofiler_deaminationpatterns.png" width="75%" height = "75%">
 </p>
 
-> **NB:** An important difference to note compared to the MapDamage tool, which DamageProfiler is an exact-reimplementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
+> **NB:** An important difference to note compared to the mapDamage tool, which DamageProfiler is otherwise an exact-re-implementation of, is that the percent frequency on the Y axis is not fixed between 0 and 0.3, and will 'zoom' into small values the less damage there is
 
 #### Length Distribution
 
-The MultiQC DamageProfiler module length distribution plots show the frequency of read lengths across forward and reverse reads respectively.
+The MultiQC DamageProfiler and mapDamage module length distribution plots show the frequency of read lengths across forward and reverse reads respectively.
 
 When looking at the length distribution plots, keep in mind the following:
 
 * Your curves will likely not start at 0, and will start wherever your minimum read-length setting was when removing adapters.
 * You should typically see the bulk of the distribution falling between 40-120bp, which is normal for aDNA
 * You may see large peaks at paired-end turn-arounds, due to very-long reads that could not overlap for merging being present, however this reads are normally from modern contamination.
+* If the `mapdamage_downsample` parameter was specified and mapDamage was used for damage calculation, the length distribution is based only on the specified number of reads.
 
 ### QualiMap
 
@@ -686,9 +688,10 @@ Each module has it's own output directory which sit alongside the `MultiQC/` dir
 * `preseq/`: this contains a `.preseq` file for every BAM file that had enough deduplication statistics to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced. You can use this file for plotting e.g. in `R` to find your sequencing target depth.
 * `qualimap/`: this contains a sub-directory for every sample, which includes a qualimap report and associated raw statistic files. You can open the `.html` file in your internet browser to see the in-depth report (this will be more detailed than in MultiQC). This includes stuff like percent coverage, depth coverage, GC content and so on of your mapped reads.
 * `damageprofiler/`: this contains sample specific directories containing raw statistics and damage plots from DamageProfiler. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
+* `mapdamage/`: this contains sample specific directories containing raw statistics and damage plots from mapDamage. The `.pdf` files can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files. The `Runtime_log.txt` file contains runtime information.
 * `pmdtools/`: this contains raw output statistics of pmdtools (estimates of frequencies of substitutions), and BAM files which have been filtered to remove reads that do not have a Post-mortem damage (PMD) score of `--pmdtools_threshold`.
 * `trimmed_bam/`: this contains the BAM files with X number of bases trimmed off as defined with the `--bamutils_clip_half_udg_left`, `--bamutils_clip_half_udg_right`, `--bamutils_clip_none_udg_left`, and `--bamutils_clip_none_udg_right` flags and corresponding index files. You can use these BAM files for downstream analysis such as re-mapping data with more stringent parameters (if you set trimming to remove the most likely places containing damage in the read).
-* `damage_rescaling/`: this contains rescaled BAM files from mapDamage2. These BAM files have damage probabilistically removed via a bayesian model, and can be used for downstream genotyping.
+* `damage_rescaling/`: this contains rescaled BAM files from mapDamage. These BAM files have damage probabilistically removed via a bayesian model, and can be used for downstream genotyping.
 * `genotyping/`: this contains all the (gzipped) genotyping files produced by your genotyping module. The file suffix will have the genotyping tool name. You will have files corresponding to each of your deduplicated BAM files (except pileupcaller), or any turned-on downstream processes that create BAMs (e.g. trimmed bams or pmd tools). If `--gatk_ug_keep_realign_bam` supplied, this may also contain BAM files from InDel realignment when using GATK 3 and UnifiedGenotyping for variant calling. When pileupcaller is used to create eigenstrat genotypes, this directory also contains eigenstrat SNP coverage statistics.
 * `multivcfanalyzer/`: this contains all output from MultiVCFAnalyzer, including SNP calling statistics, various SNP table(s) and FASTA alignment files.
 * `sex_determination/`: this contains the output for the sex determination run. This is a single `.tsv` file that includes a table with the sample name, the number of autosomal SNPs, number of SNPs on the X/Y chromosome, the number of reads mapping to the autosomes, the number of reads mapping to the X/Y chromosome, the relative coverage on the X/Y chromosomes, and the standard error associated with the relative coverages. These measures are provided for each bam file, one row per file. If the `sexdeterrmine_bedfile` option has not been provided, the error bars cannot be trusted, and runtime will be considerably longer.
