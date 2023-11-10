@@ -767,6 +767,14 @@
                     "description": "Specify PMDScore threshold for PMDtools.",
                     "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis.\n\n> Modifies PMDtools parameter: `--threshold`"
                 },
+                "damage_manipulation_pmdtools_masked_reference": {
+                    "type": "string",
+                    "fa_icon": "fas fa-mask",
+                    "help_text": "Supplying a FASTA file to this parameter will result in filtering not conducted for the masked positions. /nThis can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a SNP to be counted as damage when it is a transition.",
+                    "description": "Specify a FASTA file with positions to be used with pmdtools.",
+                    "pattern": "^\\S+\\.fa?(\\sta)$",
+                    "format": "file-path"
+                },
                 "damage_manipulation_pmdtools_reference_mask": {
                     "type": "string",
                     "fa_icon": "fas fa-mask",
@@ -947,8 +955,7 @@
                     "fa_icon": "fab fa-creative-commons-sampling-plus"
                 },
                 "skip_qualimap": {
-                    "type": "boolean",
-                    "default": false
+                    "type": "boolean"
                 },
                 "snpcapture_bed": {
                     "type": "string",
@@ -1119,9 +1126,6 @@
             "$ref": "#/definitions/mapping"
         },
         {
-            "$ref": "#/definitions/adna_damage_analysis"
-        },
-        {
             "$ref": "#/definitions/bam_filtering"
         },
         {
@@ -1131,34 +1135,28 @@
             "$ref": "#/definitions/deduplication"
         },
         {
-            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
-        },
-        {
-            "$ref": "#/definitions/mapping_statistics"
-        },
-        {
             "$ref": "#/definitions/damage_manipulation"
         },
         {
             "$ref": "#/definitions/genotyping"
         },
         {
+            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
+        },
+        {
+            "$ref": "#/definitions/mapping_statistics"
+        },
+        {
             "$ref": "#/definitions/adna_damage_analysis"
         },
         {
-            "$ref": "#/definitions/contamination_estimation"
+            "$ref": "#/definitions/feature_annotation_statistics"
         },
         {
             "$ref": "#/definitions/host_removal"
         },
         {
-            "$ref": "#/definitions/feature_annotation_statistics"
+            "$ref": "#/definitions/contamination_estimation"
         }
-    ],
-    "properties": {
-        "damage_manipulation_pmdtools_masked_reference": {
-            "type": "string",
-            "default": "None"
-        }
-    }
+    ]
 }

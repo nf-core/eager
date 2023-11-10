@@ -73,11 +73,7 @@ workflow MANIPULATE_DAMAGE {
     }
 
     if ( params.run_pmd_filtering ) {
-        // TODO Add module to produce Masked reference from given references and bed file (with meta specifying the reference it matches)?
-        ch_pmd_masking.dump() // [DUMP] [['id':'Mammoth_MT_Krause'], '', /Users/carlhoff/Documents/git/eager/test/work/bc/021185dc5434c10dbc7ae2206f3640/1240K.pos.list_hs37d5.0based.bed]
-        ch_pmd_for_masking = ch_pmd_masking
-
-        ch_masking_prep = ch_pmd_for_masking
+        ch_masking_prep = ch_pmd_masking
                     .combine( ch_fasta, by: 0 ) // [ [meta], masked_fasta, bed, fasta ]
                     .branch {
                         meta, masked_fasta, bed, fasta ->
@@ -108,7 +104,7 @@ workflow MANIPULATE_DAMAGE {
                         [ meta, fasta ]
                     }
 
-        ch_pmd_fastas = ch_masking_output.join( ch_already_masked ).join( ch_no_masking ).dump()
+        ch_pmd_fastas = ch_masking_output.concat( ch_already_masked, ch_no_masking )
                     .map {
                         // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                         WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
