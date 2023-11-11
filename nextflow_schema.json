@@ -463,6 +463,19 @@
             "description": "Options for aligning reads against reference genome(s)",
             "default": "",
             "properties": {
+                "run_fastq_sharding": {
+                    "type": "boolean",
+                    "description": "Turn on FastQ sharding.",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "Sharding will split the FastQs into smaller chunks before mapping. These chunks are then mapped in parallel. This approach can speed up the mapping process for larger FastQ files."
+                },
+                "fastq_shard_size": {
+                    "type": "integer",
+                    "default": 1000000,
+                    "description": "Specify the number of reads in each shard when splitting.",
+                    "fa_icon": "fas fa-arrows-alt-v",
+                    "help_text": "Make sure to choose a value that makes sense for your dataset. Small values can create many files, which can end up negatively affecting the overall speed of the mapping process."
+                },
                 "mapping_tool": {
                     "type": "string",
                     "default": "bowtie2",
@@ -1119,9 +1132,6 @@
             "$ref": "#/definitions/mapping"
         },
         {
-            "$ref": "#/definitions/adna_damage_analysis"
-        },
-        {
             "$ref": "#/definitions/bam_filtering"
         },
         {
@@ -1131,25 +1141,25 @@
             "$ref": "#/definitions/deduplication"
         },
         {
-            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
-        },
-        {
-            "$ref": "#/definitions/mapping_statistics"
-        },
-        {
             "$ref": "#/definitions/damage_manipulation"
         },
         {
             "$ref": "#/definitions/genotyping"
         },
         {
+            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
+        },
+        {
+            "$ref": "#/definitions/mapping_statistics"
+        },
+        {
             "$ref": "#/definitions/adna_damage_analysis"
         },
         {
-            "$ref": "#/definitions/contamination_estimation"
+            "$ref": "#/definitions/host_removal"
         },
         {
-            "$ref": "#/definitions/host_removal"
+            "$ref": "#/definitions/contamination_estimation"
         },
         {
             "$ref": "#/definitions/feature_annotation_statistics"

@@ -34,6 +34,10 @@
 
   > Broad Institute (2019). Picard Toolkit. GitHub Repository: https://broadinstitute.github.io/picard/
 
+- [SeqKit](https://bioinf.shenwei.me/seqkit/)
+
+  > Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. PLOS ONE, 11(10), e0163962. doi:[10.1371/journal.pone.0163962](https://doi.org/10.1371/journal.pone.0163962)
+
 - [bwa](https://doi.org/10.1093/bioinformatics/btp324)
 
   > Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics , 25(14), 1754–1760. doi: [10.1093/bioinformatics/btp324](https://doi.org/10.1093/bioinformatics/btp324)
