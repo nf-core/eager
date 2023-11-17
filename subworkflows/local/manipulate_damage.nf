@@ -91,6 +91,7 @@ workflow MANIPULATE_DAMAGE {
 
         BEDTOOLS_MASKFASTA( ch_masking_input.bed, ch_masking_input.fasta )
         ch_masking_output = BEDTOOLS_MASKFASTA.out.fasta
+        ch_versions       = ch_versions.mix( BEDTOOLS_MASKFASTA.out.versions.first() )
 
         ch_already_masked = ch_masking_prep.alreadymasked
                     .map {

@@ -69,7 +69,7 @@ workflow REFERENCE_INDEXING {
                     }
     GUNZIP_PMDFASTA( ch_pmd_masked_fasta_gunzip.forgunzip )
     ch_pmd_masked_fasta = ch_pmd_masked_fasta_gunzip.skip.mix( GUNZIP_PMDFASTA.out.gunzip ).mix( ch_pmd_masked_fasta.skip )
-    ch_version = ch_versions.mix( GUNZIP_PMDFASTA.out.versions )
+    ch_version = ch_versions.mix( GUNZIP_PMDFASTA.out.versions.first() )
 
     ch_pmd_bed_for_masking = ch_pmd_bed_for_masking
                     .branch {
@@ -85,7 +85,7 @@ workflow REFERENCE_INDEXING {
                     }
     GUNZIP_PMDBED( ch_pmd_bed_for_masking_gunzip.forgunzip )
     ch_pmd_bed_for_masking = ch_pmd_bed_for_masking_gunzip.skip.mix( GUNZIP_PMDBED.out.gunzip ).mix( ch_pmd_bed_for_masking.skip )
-    ch_version = ch_versions.mix( GUNZIP_PMDBED.out.versions )
+    ch_version = ch_versions.mix( GUNZIP_PMDBED.out.versions.first() )
 
     ch_pmd_masking = ch_pmd_masked_fasta
                     .combine( by: 0, ch_pmd_bed_for_masking )
@@ -104,7 +104,7 @@ workflow REFERENCE_INDEXING {
                     }
     GUNZIP_SNPBED( ch_capture_bed_gunzip.forgunzip )
     ch_capture_bed = GUNZIP_SNPBED.out.gunzip.mix( ch_capture_bed_gunzip.skip ).mix( ch_capture_bed.skip )
-    ch_version = ch_versions.mix( GUNZIP_SNPBED.out.versions )
+    ch_version = ch_versions.mix( GUNZIP_SNPBED.out.versions.first() )
 
     ch_pileupcaller_snp = ch_pileupcaller_snp
                     .filter{ it[1] != "" && it[2] != "" }
