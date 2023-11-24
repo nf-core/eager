@@ -16,7 +16,6 @@ workflow METAGENOMICS_PROFILING {
     database
 
     main:
-
     ch_versions                  = Channel.empty()
     ch_raw_classifications       = Channel.empty()
     ch_raw_profiles              = Channel.empty()

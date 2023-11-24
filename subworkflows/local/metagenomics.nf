@@ -35,8 +35,6 @@ workflow METAGENOMICS {
 
     database = Channel.fromPath(params.metagenomics_profiling_database)
 
-
-
     METAGENOMICS_PROFILING( ch_reads_for_metagenomics, database )
 
     ch_versions      = ch_versions.mix( METAGENOMICS_PROFILING.out.versions.first() )

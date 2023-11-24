@@ -25,9 +25,7 @@ workflow METAGENOMICS_POSTPROCESSING {
 
         MALTEXTRACT ( ch_maltextract_input, tax_list, ncbi_dir)
 
-        maltex_filter = params.metagenomics_maltextract_filter
-        
-        AMPS ( MALTEXTRACT.out.results, tax_list, maltex_filter )
+        AMPS ( MALTEXTRACT.out.results, tax_list, params.metagenomics_maltextract_filter )
 
         ch_versions      = ch_versions.mix( MALTEXTRACT.out.versions.first(), AMPS.out.versions.first() )
         ch_results       = ch_results.mix( AMPS.out.candidate_pdfs, AMPS.out.tsv, AMPS.out.summary_pdf )
