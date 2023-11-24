@@ -555,17 +555,11 @@ workflow EAGER {
         ch_reference_for_genotyping = REFERENCE_INDEXING.out.reference
             // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
             .map {
-                meta, fasta, fai, dict, mapindex, circular_target, mitochondrion ->
-                [ meta, fasta, fai, dict ] // dbsnp ] // TODO add dbsnp to reference sheet.
-            }
-        ch_dbsnp = REFERENCE_INDEXING.out.dbsnp
-            .map {
-                meta, dbsnp ->
-                final_dbsnp = dbsnp != "" ? dbsnp : []
-                [ meta, final_dbsnp ]
+                meta, fasta, fai, dict, mapindex, circular_target ->
+                [ meta, fasta, fai, dict ]
             }
 
-        GENOTYPE( ch_bams_for_genotyping, ch_reference_for_genotyping, [], [], [], ch_dbsnp )
+        GENOTYPE( ch_bams_for_genotyping, ch_reference_for_genotyping, [], [], [], REFERENCE_INDEXING.out.dbsnp )
 
         ch_versions      = ch_versions.mix( GENOTYPE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( GENOTYPE.out.mqc.collect{it[1]}.ifEmpty([]) )

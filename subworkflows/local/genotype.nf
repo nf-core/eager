@@ -13,7 +13,7 @@ include { FREEBAYES                                         } from '../../module
 include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
 // TODO Add ANGSD GTL module. The current module does not pick up the .glf.gz output files.
 // TODO Find a way to pass ploidy and dbsnp to the GATK modules. maybe ploidy should go in all reference metas
-?
+
 workflow GENOTYPE {
     take:
     ch_bam_bai              // [ [ meta ], bam , bai ]
@@ -33,6 +33,14 @@ workflow GENOTYPE {
     ch_angsd_genotypes                 = Channel.empty()
     ch_bcftools_stats                  = Channel.empty()
 
+    // Replace missing dbsnps with empty lists
+    ch_dbsnp_for_gatk = ch_dbsnp
+        .map {
+            meta, dbsnp ->
+            final_dbsnp = dbsnp != "" ? dbsnp : []
+            [ meta, final_dbsnp ]
+        }
+
     if ( params.genotyping_tool == 'pileupcaller' ) {
         // SAMTOOLS_MPILEUP_PILEUPCALLER( ch_bam_bai, ch_fasta_plus )
 
@@ -50,14 +58,12 @@ workflow GENOTYPE {
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
 
-        // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
         ch_fasta_for_multimap = ch_fasta_plus
+            .join( ch_dbsnp_for_gatk ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
-            }
-            .combine( ch_dbsnp ) // TODO This will need tweaking ('by:0'?) once the dbsnp channel gets a meta.
-            .dump(tag:"dbsnp")
+            } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
 
         ch_input_for_targetcreator = ch_bams_for_multimap
             .combine( ch_fasta_for_multimap , by:0 )
