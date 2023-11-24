@@ -137,29 +137,29 @@ workflow GENOTYPE {
         ch_versions = ch_versions.mix( GATK_UNIFIEDGENOTYPER.out.versions.first() )
         ch_gatk_unifiedgenotyper_genotypes = GATK_UNIFIEDGENOTYPER.out.vcf
 
-    if ( ! params.skip_bcftools_stats ) {
-        // TODO this section could be moved outside the UG specific section into its own if clause and take input from HC and FB as well.
-        ch_bcftools_input= ch_gatk_unifiedgenotyper_genotypes
-            .map {
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
-            }
-            .combine( ch_fasta_for_multimap , by:0 )
-            .multiMap {
-                ignore_me, meta, vcf, ref_meta, fasta, fai, dict, dbsnp ->
-                    vcf:   [ meta, vcf, [] ] // bcftools stats module expects a tbi file with the vcf.
-                    fasta: [ ref_meta, fasta ]
-            }
+        if ( ! params.skip_bcftools_stats ) {
+            // TODO this section could be moved outside the UG specific section into its own if clause and take input from HC and FB as well.
+            ch_bcftools_input= ch_gatk_unifiedgenotyper_genotypes
+                .map {
+                    WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                }
+                .combine( ch_fasta_for_multimap , by:0 )
+                .multiMap {
+                    ignore_me, meta, vcf, ref_meta, fasta, fai, dict, dbsnp ->
+                        vcf:   [ meta, vcf, [] ] // bcftools stats module expects a tbi file with the vcf.
+                        fasta: [ ref_meta, fasta ]
+                }
 
-        BCFTOOLS_STATS_GENOTYPING(
-            ch_bcftools_input.vcf,  // vcf
-            [ [], [] ],             // regions
-            [ [], [] ],             // targets
-            [ [], [] ],             // samples
-            [ [], [] ],             // exons
-            ch_bcftools_input.fasta // fasta
-        )
-        ch_versions = ch_versions.mix( BCFTOOLS_STATS_GENOTYPING.out.versions.first() )
-    }
+            BCFTOOLS_STATS_GENOTYPING(
+                ch_bcftools_input.vcf,  // vcf
+                [ [], [] ],             // regions
+                [ [], [] ],             // targets
+                [ [], [] ],             // samples
+                [ [], [] ],             // exons
+                ch_bcftools_input.fasta // fasta
+            )
+            ch_versions = ch_versions.mix( BCFTOOLS_STATS_GENOTYPING.out.versions.first() )
+        }
     }
 
     if ( params.genotyping_tool == 'hc' ) {
