@@ -520,7 +520,7 @@ nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/onl
 
 ```bash
 #### Use bbduk to remove low complexity reads _without_ saving the intermediate files
-## Expect: NO additional directory created, but the files in the profiling directory contain the 'complexity' postfix
+## Expect: NO additional directory created, but the files in the profiling directory contain the 'complexity' suffix
 nextflow run main.nf -profile test,docker \
   --outdir ./out \
   --run_metagenomics \

@@ -436,8 +436,8 @@ The output directory for maltextract, as implemented under [HOPS](https://github
 - `metagenomics_screening/postprocessing/maltextract/`
   - `results`: Results output by maltextract
     - `default`: Directory containing summary TSV tables for all reads
-    - `ancient`: Directory contiaining summary TSV tables for reads with evidence of aDNA damage
-    - `pdf_candidate_profiles`: Direcotry containing directories for each candidate taxon with varying levels of support for presence of genetic material for a given sample
+    - `ancient`: Directory containing summary TSV tables for reads with evidence of aDNA damage
+    - `pdf_candidate_profiles`: Directory containing directories for each candidate taxon with varying levels of support for presence of genetic material for a given sample
     - `count_table.tsv`: TSV containing reads assigned to each node in candidate taxon list across all samples
 
 </details>
