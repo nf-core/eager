@@ -31,6 +31,7 @@ workflow REFERENCE_INDEXING_MULTI {
                                                 row ->
                                                     def meta                   = [:]
                                                     meta.id                    = row["reference_name"]
+                                                    meta.ploidy                = row["genotyping_gatk_ploidy"] != "" ? row["genotyping_gatk_ploidy"] : params.genotyping_gatk_ploidy // Use default value if none is specified. This info goes in the meta
                                                     def fasta                  = file(row["fasta"], checkIfExists: true) // mandatory parameter!
                                                     def fai                    = row["fai"] != "" ? file(row["fai"], checkIfExists: true) : ""
                                                     def dict                   = row["dict"] != "" ? file(row["dict"], checkIfExists: true) : ""
@@ -44,9 +45,8 @@ workflow REFERENCE_INDEXING_MULTI {
                                                     def pmd_mask               = row["pmdtools_masked_fasta"] != "" ? file(row["pmdtools_masked_fasta"], checkIfExists: true) : ""
                                                     def sexdet_bed             = row["sexdeterrmine_snp_bed"] != "" ? file(row["sexdeterrmine_snp_bed"], checkIfExists: true) : ""
                                                     def bedtools_feature       = row["bedtools_feature_file"] != "" ? file(row["bedtools_feature_file"], checkIfExists: true) : ""
-                                                    def genotyping_gatk_ploidy = row["genotyping_gatk_ploidy"] != "" ? row["genotyping_gatk_ploidy"] : ""
                                                     def genotyping_gatk_dbsnp  = row["genotyping_gatk_dbsnp"] != "" ? file(row["genotyping_gatk_dbsnp"], checkIfExists: true) : ""
-                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature, genotyping_gatk_ploidy, genotyping_gatk_dbsnp ]
+                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
                                             }
 
 
@@ -63,7 +63,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
 ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                             .multiMap {
-                                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature, genotyping_gatk_ploidy, genotyping_gatk_dbsnp ->
+                                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
                                 generated:            [ meta, fasta, fai, dict, mapper_index, circular_target ]
                                 mitochondrion_header: [ meta, mitochondrion ]
                                 angsd_hapmap:         [ meta, hapmap ]
@@ -72,7 +72,7 @@ ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                                 pileupcaller_snp:     [ meta, pileupcaller_bed, pileupcaller_snp ]
                                 sexdeterrmine_bed:    [ meta, sexdet_bed ]
                                 bedtools_feature:     [ meta, bedtools_feature ]
-                                dbsnp:                [ meta + [ ploidy: genotyping_gatk_ploidy ], genotyping_gatk_dbsnp ] // Include ploidy of the reference in dbsnp meta.
+                                dbsnp:                [ meta, genotyping_gatk_dbsnp ] // Include ploidy of the reference in dbsnp meta.
                             }
 
     // Detect if fasta is gzipped or not
@@ -219,6 +219,6 @@ ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
     pileupcaller_snp     = ch_input_from_referencesheet.pileupcaller_snp     // [ meta, pileupcaller_snp, pileupcaller_bed ]
     sexdeterrmine_bed    = ch_input_from_referencesheet.sexdeterrmine_bed    // [ meta, sexdet_bed ]
     bedtools_feature     = ch_input_from_referencesheet.bedtools_feature     // [ meta, bedtools_feature ]
-    dbsnp                = ch_input_from_referencesheet.dbsnp                // [ meta + [ ploidy: genotyping_gatk_ploidy ], genotyping_gatk_dbsnp ]
+    dbsnp                = ch_input_from_referencesheet.dbsnp                // [ meta, genotyping_gatk_dbsnp ]
     versions             = ch_versions
 }
