@@ -117,7 +117,7 @@ workflow METAGENOMICS_PROFILING {
             krakenuniq_db,
             params.metagenomics_krakenuniq_ram_chunk_size,
             params.metagenomics_kraken_save_reads,
-            true,
+            true, // save read assignments
             params.metagenomics_kraken_save_read_classifications
         )
 
