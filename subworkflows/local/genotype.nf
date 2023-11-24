@@ -164,6 +164,29 @@ workflow GENOTYPE {
 
     if ( params.genotyping_tool == 'hc' ) {
         // TODO
+        ch_bams_for_multimap = ch_bam_bai
+            .map {
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+
+            ch_fasta_for_multimap = ch_fasta_plus
+            .join( ch_dbsnp_for_gatk ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
+            .map {
+            // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+            } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
+
+            ch_input_for_hc = ch_bams_for_multimap
+            .combine( ch_fasta_for_multimap , by:0 )
+            .multiMap {
+                ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, dbsnp ->
+                    bam:   [ meta, bam , bai ]
+                    fasta: [ ref_meta, fasta ]
+                    fai:   [ ref_meta, fai ]
+                    dict:  [ ref_meta, dict ]
+                    dbsnp: [ ref_meta, dbsnp ]
+            }
     }
 
     if ( params.genotyping_tool == 'freebayes' ) {
