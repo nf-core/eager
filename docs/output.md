@@ -353,7 +353,7 @@ The saved files are the _good_ files, passing the `dust` or `entropy` filter tre
 
 - `metagenomics_screening/profiling/malt/`
   - `<sample_id>.rma6`: binary file containing all alignments and taxonomic information of hits that can be loaded into the [MEGAN6](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/) interactive viewer
-  - `<sample_id>.blastn.sam`: sparse SAM file containing alignments of each hit (if `--metagenomics_malt_savesamoutput`)
+  - `<sample_id>.blastn.sam`: sparse SAM file containing alignments of each hit (if `--metagenomics_malt_savereads`)
   - `*.log`: LOG file containing runtime log of MALT
 
 </details>
@@ -364,7 +364,7 @@ You will receive output for each library. This means that if you use TSV input a
 
 The main output of MALT is the `.rma6` file format, which can be only loaded into MEGAN and it's related tools.
 
-You will only receive the `.sam` files if you supply `--metagenomics_malt_savesamoutput` parameters to the pipeline.
+You will only receive the `.sam` files if you supply `--metagenomics_malt_savereads` parameters to the pipeline.
 
 ### MetaPhlAn
 
