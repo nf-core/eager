@@ -1,8 +1,8 @@
 include { MALTEXTRACT                    } from '../../modules/nf-core/maltextract/main'
 include { AMPS                           } from '../../modules/nf-core/amps/main'
-include { KRAKENPARSE                    } from '../../modules/local/krakenparse'
-include { KRAKENMERGE                    } from '../../modules/local/krakenmerge'
 include { METAPHLAN_MERGEMETAPHLANTABLES } from '../../modules/nf-core/metaphlan/mergemetaphlantables/main'
+include { TAXPASTA_STANDARDISE           } from '../../modules/nf-core/taxpasta/standardise/main'
+include { TAXPASTA_MERGE                 } from '../../modules/nf-core/taxpasta/merge/main'
 
 workflow METAGENOMICS_POSTPROCESSING {
 
@@ -35,21 +35,21 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     else if ( ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
 
-        KRAKENPARSE ( ch_postprocessing_input )
-
-        ch_list_of_kraken_parse_reads  = KRAKENPARSE.out.read_kraken_parsed.map {
-            meta, read_out -> [ read_out ]
+        ch_postprocessing_input = ch_postprocessing_input
+        .map{
+            meta, report ->
+            [report]
         }
-        ch_list_of_kraken_parse_kmer = KRAKENPARSE.out.kmer_kraken_parsed.map {
-            meta, kmer_out -> [ kmer_out ]
+        .collect()
+        .map{
+            reports ->
+            [
+                ["id":"taxpasta", "profiler":params.metagenomics_profiling_tool],
+                reports
+            ]
         }
 
-
-        KRAKENMERGE ( ch_list_of_kraken_parse_reads.collect() , ch_list_of_kraken_parse_kmer.collect() )
-
-        ch_versions      = ch_versions.mix( KRAKENPARSE.out.versions.first(), KRAKENMERGE.out.versions.first() )
-        ch_multiqc_files = ch_multiqc_files.mix( KRAKENMERGE.out.read_count_table, KRAKENMERGE.out.kmer_duplication_table )
-
+        TAXPASTA_MERGE( ch_postprocessing_input, [], [] )
     }
 
     else if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'metaphlan' ) {
