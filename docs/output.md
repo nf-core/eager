@@ -353,7 +353,7 @@ The saved files are the _good_ files, passing the `dust` or `entropy` filter tre
 
 - `metagenomics_screening/profiling/malt/`
   - `<sample_id>.rma6`: binary file containing all alignments and taxonomic information of hits that can be loaded into the [MEGAN6](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/) interactive viewer
-  - `<sample_id>.blastn.sam`: sparse SAM file containing alignments of each hit (if `--metagenomics_malt_sam_output`)
+  - `<sample_id>.blastn.sam`: sparse SAM file containing alignments of each hit (if `--metagenomics_malt_savesamoutput`)
   - `*.log`: LOG file containing runtime log of MALT
 
 </details>
@@ -364,7 +364,7 @@ You will receive output for each library. This means that if you use TSV input a
 
 The main output of MALT is the `.rma6` file format, which can be only loaded into MEGAN and it's related tools.
 
-You will only receive the `.sam` files if you supply `--malt_save_reads` parameters to the pipeline.
+You will only receive the `.sam` files if you supply `--metagenomics_malt_savesamoutput` parameters to the pipeline.
 
 ### MetaPhlAn
 
@@ -392,14 +392,14 @@ The main taxonomic profiling file from MetaPhlAn is the `*_profile.txt` file. Th
 - `metagenomics_screening/profiling/kraken2/`
   - `<sample_id>.classified.fastq.gz`: FASTQ file containing all reads that had a hit against a reference in the database for a given sample
   - `<sample_id>.unclassified.fastq.gz`: FASTQ file containing all reads that did not have a hit in the database for a given sample
-  - `<sample_id>.report.txt`: A Kraken2 report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits in the Kraken2 run for a given sample. Will be 6 column rather than 8 if `--metagenomics_kraken2_save_minimizers` specified.
+  - `<sample_id>.report.txt`: A Kraken2 report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits in the Kraken2 run for a given sample. Will be 6 column rather than 8 if `--metagenomics_kraken2_saveminimizers` specified.
   - `<sample_id>.classifiedreads.txt`: A list of read IDs and the hits each read had against each database for a given sample
 
 </details>
 
 The main taxonomic classification file from Kraken2 is the `_combined_reports.txt` or `*report.txt` file. The former provides you the broadest over view of the taxonomic classification results across all samples against a single database, where you get two columns for each sample e.g. `2_all` and `2_lvl`, as well as a summarised column summing up across all samples `tot_all` and `tot_lvl`. The latter gives you the most information for a single sample. The report file is also used for the taxpasta step.
 
-You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply `--metagenomics_kraken_save_reads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
+You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply `--metagenomics_kraken_savereads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
 
 #### KrakenUniq
 
@@ -418,7 +418,7 @@ You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply
 
 The main taxonomic classification file from KrakenUniq is the `*report.txt` file. This is an extension of the Kraken2 report with the additional k-mer coverage information that provides more information about the accuracy of hits.
 
-You will only receive the `*.fastq.gz` and `*.classifiedreads.txt` file if you supply `--metagenomics_kraken_save_reads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
+You will only receive the `*.fastq.gz` and `*.classifiedreads.txt` file if you supply `--metagenomics_kraken_savereads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
 
 :::info
 The output system of KrakenUniq can result in other `stdout` or `stderr` logging information being saved in the report file, therefore you must check your report files before downstream use!

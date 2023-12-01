@@ -616,8 +616,8 @@ nextflow run main.nf -profile test,docker \
   --run_metagenomics \
   --metagenomics_profiling_tool krakenuniq \
   --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
-  --metagenomics_kraken_save_reads \
-  --metagenomics_kraken_save_read_classifications
+  --metagenomics_kraken_savereads \
+  --metagenomics_kraken_savereadclassifications
 ```
 
 ##### kraken2
@@ -648,8 +648,8 @@ nextflow run main.nf -profile test,docker \
   --run_metagenomics \
   --metagenomics_profiling_tool kraken2 \
   --metagenomics_profiling_database CUSTOM_KRAKEN2_DB \
-  --metagenomics_kraken_save_reads \
-  --metagenomics_kraken_save_read_classifications
+  --metagenomics_kraken_savereads \
+  --metagenomics_kraken_savereadclassifications
 ```
 
 ##### malt
@@ -678,7 +678,7 @@ nextflow run main.nf -profile test,docker \
   --run_metagenomics \
   --metagenomics_profiling_tool malt \
   --metagenomics_profiling_database CUSTOM_MALT_DB \
-  --metagenomics_malt_save_reads
+  --metagenomics_malt_savereads
 ```
 
 #### postprocessing
@@ -695,8 +695,8 @@ nextflow run main.nf -profile test,docker \
   --metagenomics_profiling_tool malt \
   --metagenomics_profiling_database CUSTOM_MALT_DB \
   --metagenomics_run_postprocessing \
-  --metagenomics_maltextract_ncbi_dir NCBI_DIR \
-  --metagenomics_maltextract_taxon_list TAXONLISTFILE
+  --metagenomics_maltextract_ncbidir NCBI_DIR \
+  --metagenomics_maltextract_taxonlist TAXONLISTFILE
 ```
 
 ##### mergemetaphlantables

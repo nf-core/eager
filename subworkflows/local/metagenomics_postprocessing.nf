@@ -20,8 +20,8 @@ workflow METAGENOMICS_POSTPROCESSING {
         //maltextract doesnt accepts a meta param in the first input channel, so remove it
         ch_maltextract_input = ch_postprocessing_input.map{it[1]}
 
-        tax_list = Channel.fromPath(params.metagenomics_maltextract_taxon_list)
-        ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbi_dir)
+        tax_list = Channel.fromPath(params.metagenomics_maltextract_taxonlist)
+        ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbidir)
 
         MALTEXTRACT ( ch_maltextract_input, tax_list, ncbi_dir)
 

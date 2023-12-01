@@ -23,7 +23,7 @@ process KRAKENPARSE {
     def kmer_out = "${prefix}.kmer_kraken_parsed.csv"
     """
     kraken_parse.py \\
-        -c ${params.metagenomics_min_support_reads} \\
+        -c ${params.metagenomics_minsupportreads} \\
         -or $read_out \\
         -ok $kmer_out \\
         $report
