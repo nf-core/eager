@@ -114,10 +114,10 @@ workflow METAGENOMICS_PROFILING {
         KRAKENUNIQ_PRELOADEDKRAKENUNIQ (
             krakenuniq_reads,
             krakenuniq_db,
-            params.metagenomics_krakenuniq_ram_chunk_size,
-            params.metagenomics_kraken_save_reads,
+            params.metagenomics_krakenuniq_ramchunksize,
+            params.metagenomics_kraken_savereads,
             true, // save read assignments
-            params.metagenomics_kraken_save_read_classifications
+            params.metagenomics_kraken_savereadclassifications
         )
 
         ch_multiqc_files           = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
@@ -138,8 +138,8 @@ workflow METAGENOMICS_PROFILING {
         KRAKEN2_KRAKEN2 (
             kraken2_reads,
             kraken2_db,
-            params.metagenomics_kraken_save_reads,
-            params.metagenomics_kraken_save_read_classifications
+            params.metagenomics_kraken_savereads,
+            params.metagenomics_kraken_savereadclassifications
         )
 
         ch_multiqc_files            = ch_multiqc_files.mix( KRAKEN2_KRAKEN2.out.report )

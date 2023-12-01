@@ -700,35 +700,35 @@
                     "description": "Specify which tool to use for metagenomic profiling and screening. Required if `--run_metagenomics` flagged.",
                     "enum": ["malt", "metaphlan", "kraken2", "krakenuniq"],
                     "fa_icon": "fas fa-toolbox",
-                    "help_text": "Select which tool to run metagenomics profiling on designated metagenomics_screening_input. These tools behave vastly differently due to performing read profiling using different methods and yield vastly different reuslts."
+                    "help_text": "Select which tool to run metagenomics profiling on designated metagenomics_input. These tools behave vastly differently due to performing read profiling using different methods and yield vastly different reuslts.\n\nMALT and MetaPhlAn are alignment based, whereas Kraken2 and KrakenUniq are k-mer based.\n\nMALT has addtional postprocessing available (via `--run_metagenomics_postprocessing`) which can help authenticate alignments to a provided list of taxonomic nodes using established ancientDNA characteristics.\n\nMetaPhlAn performs profiling on the metagenomcis input data. This may be used to characterize the metagenomic community of a sample but care must be taken that you are not just looking at the modern metagenome of an ancient sample (for instance, soil microbes on a bone)\n\n Kraken2 and KrakenUniq are metagenomics classifiers that rely on fast k-mer-matching rather than whole-read alignments and are very memory efficient."
                 },
                 "metagenomics_profiling_database": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "Specify a databse directory to run metagenomics profiling on. In the case of kraken2, this can be a tar.gz of the directory. Required if `--run_metagenomics` flagged.",
                     "fa_icon": "fas fa-database",
-                    "help_text": "Select which tool to run metagenomics profiling database to use with the designated metagenomics_profiling_tool on the selected metagenomics_screening_input. These databases are NOT cross-compatible and need to be pre-built/downloaded for use in nf-core/eager. Database construction is often a balancing act between breadth of sequence diversity and size."
+                    "help_text": "Select which tool to run metagenomics profiling database to use with the designated metagenomics_profiling_tool on the selected metagenomics_input. These databases are NOT cross-compatible and need to be pre-built/downloaded for use in nf-core/eager. Database construction is often a balancing act between breadth of sequence diversity and size."
                 },
-                "metagenomics_kraken_save_reads": {
+                "metagenomics_kraken_savereads": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
                     "description": "Turn on saving reads assigned by KrakenUniq or Kraken2",
                     "help_text": "Save reads that do and do not have a taxonomic classification in your output results directory in FASTQ format.\n\n> Modifies tool parameter(s):\n> - krakenuniq: `--classified-out` and `--unclassified-out`"
                 },
-                "metagenomics_kraken_save_read_classifications": {
+                "metagenomics_kraken_savereadclassifications": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
                     "description": "Turn on saving of KrakenUniq or Kraken2 per-read taxonomic assignment file",
                     "help_text": "Save a text file that contains a list of each read that had a taxonomic assignment, with information on specific taxonomic taxonomic assignment that that read recieved.\n\n> Modifies tool parameter(s):\n> - krakenuniq: `--output`"
                 },
-                "metagenomics_krakenuniq_ram_chunk_size": {
+                "metagenomics_krakenuniq_ramchunksize": {
                     "type": "string",
                     "default": "16G",
                     "description": "Specify how large to chunk database when loading into memory for KrakenUniq",
                     "fa_icon": "fas fa-database",
                     "help_text": "nf-core/taxprofiler utilises a 'low memory' option for KrakenUniq that can reduce the amount of RAM the process requires using the `--preloaded` option.\n\nA further extension to this option is that you can specify how large each chunk of the database should be that gets loaded into memory at any one time. You can specify the amount of RAM to chunk the database to with this parameter, and is particularly useful for people with limited computational resources.\n\nMore information about this parameter can be seen [here](https://github.com/fbreitwieser/krakenuniq/blob/master/README.md#new-release-v07).\n\n> Modifies KrakenUniq parameter: --preload-size\n\n"
                 },
-                "metagenomics_kraken2_save_minimizers": {
+                "metagenomics_kraken2_saveminimizers": {
                     "type": "boolean",
                     "description": "Turn on saving minimizer information in the kraken2 report thus increasing to an eight column layout.",
                     "fa_icon": "fas fa-save",
@@ -742,7 +742,7 @@
                     "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA\nand DNA, protein and protein, or DNA reads against protein references\nrespectively. Ensure your database matches the mode. Check the\n[MALT\nmanual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)\nfor more details. Default: `'BlastN'`\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-m`\n",
                     "enum": ["BlastN", "BlastP", "BlastX"]
                 },
-                "metagenomics_malt_alignment_mode": {
+                "metagenomics_malt_alignmentmode": {
                     "type": "string",
                     "default": "SemiGlobal",
                     "description": "Specify alignment method for MALT. Options: 'Local', 'SemiGlobal'.",
@@ -750,21 +750,21 @@
                     "help_text": "Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-at`",
                     "enum": ["Local", "SemiGlobal"]
                 },
-                "metagenomics_malt_min_percent_identity": {
+                "metagenomics_malt_minpercentidentity": {
                     "type": "integer",
                     "default": 85,
                     "description": "Percent identity value threshold for MALT.",
                     "fa_icon": "fas fa-id-card",
                     "help_text": "Specify the minimum percent identity (or similarity) a sequence must have to the reference for it to be retained. Default is `85`\n\nOnly used when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-id`"
                 },
-                "metagenomics_malt_top_percent": {
+                "metagenomics_malt_toppercent": {
                     "type": "integer",
                     "default": 1,
                     "description": "Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual).",
                     "fa_icon": "fas fa-percent",
                     "help_text": "Specify the top percent value of the LCA algorithm. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): \"For each\nread, only those matches are used for taxonomic placement whose bit disjointScore is within\n10% of the best disjointScore for that read.\". Default: `1`.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-top`"
                 },
-                "metagenomics_malt_min_support_mode": {
+                "metagenomics_malt_minsupportmode": {
                     "type": "string",
                     "default": "percent",
                     "description": "Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT. Options: 'percent', 'reads'.",
@@ -772,28 +772,28 @@
                     "help_text": "Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-sup -supp`",
                     "enum": ["percent", "reads"]
                 },
-                "metagenomics_malt_min_support_percent": {
+                "metagenomics_malt_minsupportpercent": {
                     "type": "number",
                     "default": 0.01,
                     "description": "Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT.",
                     "fa_icon": "fas fa-percentage",
                     "help_text": "Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-supp`"
                 },
-                "metagenomics_min_support_reads": {
+                "metagenomics_minsupportreads": {
                     "type": "integer",
                     "default": 1,
                     "description": "Specify a minimum number of reads a taxon of sample total is required to have to be retained in malt or kraken. Not compatible with --malt_min_support_mode 'percent'.",
                     "fa_icon": "fas fa-sort-numeric-up-alt",
                     "help_text": "For usage in malt or kraken: Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'. \n For usage in kraken2 or krakenuniq: Specify the number of hits on a clade to retain it in the final report when using kraken_parse. Default: 1. \nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. \n\n> Modifies MALT or kraken_parse.py parameter: `-sup` and `-c` respectively\n"
                 },
-                "metagenomics_malt_max_queries": {
+                "metagenomics_malt_maxqueries": {
                     "type": "integer",
                     "default": 100,
                     "description": "Specify the maximum number of queries a read can have for MALT.",
                     "fa_icon": "fas fa-phone",
                     "help_text": "Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: `100`\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `-mq`"
                 },
-                "metagenomics_malt_memory_mode": {
+                "metagenomics_malt_memorymode": {
                     "type": "string",
                     "default": "load",
                     "description": "Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow. Options: 'load', 'page', 'map'.",
@@ -801,17 +801,11 @@
                     "help_text": "\nHow to load the database into memory. Options are `'load'`, `'page'` or `'map'`.\n'load' directly loads the entire database into memory prior seed look up, this\nis slow but compatible with all servers/file systems. `'page'` and `'map'`\nperform a sort of 'chunked' database loading, allowing seed look up prior entire\ndatabase loading. Note that Page and Map modes do not work properly not with\nmany remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies MALT parameter: `--memoryMode`",
                     "enum": ["load", "page", "map"]
                 },
-                "metagenomics_malt_sam_output": {
+                "metagenomics_malt_savereads": {
                     "type": "boolean",
                     "description": "Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.",
                     "fa_icon": "fas fa-file-alt",
-                    "help_text": "Specify to _also_ produce gzipped SAM files of all alignments and un-aligned reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse' format. Can be useful for downstream analyses due to more common file format. \n\n:warning: can result in very large run output directories as this is essentially duplication of the RMA6 files.\n\n> Modifies MALT parameter `-a -f`"
-                },
-                "metagenomics_malt_save_reads": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-save",
-                    "description": "Turn on saving of MALT-aligned reads",
-                    "help_text": "Turns on saving of MALT aligned reads in SAM format.\n\nNote that the SAM format produce by MALT is not completely valid, and may not work with downstream tools.\n\n> Modifies tool parameter(s):\n> - malt-run: `--alignments`, `-za`"
+                    "help_text": "Specify to _also_ produce gzipped SAM files of all alignments and un-aligned reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse' format. Can be useful for downstream analyses due to more common file format. \n\n:warning: can result in very large run output directories as this is essentially duplication of the RMA6 files.\n\n> Modified parameter for malt-run: `--alignments`"
                 },
                 "metagenomics_malt_group_size": {
                     "type": "integer",
@@ -827,14 +821,14 @@
                     "default": "true",
                     "fa_icon": "fab fa-buromobelexperte"
                 },
-                "metagenomics_maltextract_taxon_list": {
+                "metagenomics_maltextract_taxonlist": {
                     "type": "string",
                     "description": "Path to a text file with taxa of interest (one taxon per row, NCBI taxonomy name format)",
                     "default": "None",
-                    "help_text": "Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format corresponding to a taxonomic node in your MALT database.\\n\\nNecessary when `--metagenomics_profiling_tool malt` specified and `--metagenomics_run_postprocessing` flagged.",
+                    "help_text": "Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format corresponding to a taxonomic node in your MALT database. An example can be found on the [HOPS github](https://raw.githubusercontent.com/rhuebler/HOPS/external/Resources/default_list.txt).\\n\\nNecessary when `--metagenomics_profiling_tool malt` specified and `--metagenomics_run_postprocessing` flagged.",
                     "fa_icon": "fas fa-align-left"
                 },
-                "metagenomics_maltextract_ncbi_dir": {
+                "metagenomics_maltextract_ncbidir": {
                     "type": "string",
                     "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; available: https://github.com/rhuebler/HOPS/)",
                     "default": "None",

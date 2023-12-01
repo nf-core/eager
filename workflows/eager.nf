@@ -16,14 +16,14 @@ log.info logo + paramsSummaryLog(workflow) + citation
 WorkflowEager.initialise(params, log)
 
 // Check failing parameter combinations
-if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
-if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
-if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
-if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
+if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { error("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { error("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
+if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { error("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
+if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { error("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
 if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
     // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
     if (params.metagenomics_prinseq_dustscore == 0.5) {
-            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
+            error("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
     }
 }
 
@@ -33,40 +33,40 @@ if ( params.run_metagenomics ) {
     if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
         // dust score was set but entropy method picked. If no entropy-score provided, assume it was an error and fail
         if (params.metagenomics_complexity_entropy == 0.3) {
-                exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
+                error("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
         }
     }
 
     if ( ! params.metagenomics_profiling_tool ) {
-        exit 1, ("[nf-core/eager] ERROR: --run_metagenomics flagged, but no profiling tool selected! Please choose an appropriate metagenomics screening tool by setting --metagenomics_profiling_tool to one of 'malt', 'krakenuniq', 'kraken2', or 'metaphlan' and declare the path to the database directory using `--metagenomics_profiling_database`.")
+        error("[nf-core/eager] ERROR: --run_metagenomics flagged, but no profiling tool selected! Please choose an appropriate metagenomics screening tool by setting --metagenomics_profiling_tool to one of 'malt', 'krakenuniq', 'kraken2', or 'metaphlan' and declare the path to the database directory using `--metagenomics_profiling_database`.")
     }
 
     if ( ! params.metagenomics_profiling_database ) {
-        exit 1, ("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database. Note this database should correspond to ${params.metagenomics_profiling_tool}")
+        error("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database. Note this database should correspond to ${params.metagenomics_profiling_tool}")
     }
 
     if ( params.metagenomics_profiling_tool == 'malt' && params.metagenomics_run_postprocessing ) {
-        if ( ! params.metagenomics_maltextract_ncbi_dir ) {
-            exit 1, ("[nf-core/eager] ERROR: Postprocessing for MALT requires additional parameters specified. Please provide a path to the NBCI directory for MaltExtract using `--metagenomics_maltextract_ncbi_dir`.")
+        if ( ! params.metagenomics_maltextract_ncbidir ) {
+            error("[nf-core/eager] ERROR: Postprocessing for MALT requires additional parameters specified. Please provide a path to the NBCI directory for MaltExtract using `--metagenomics_maltextract_ncbidir`.")
         }
-        if ( ! params.metagenomics_maltextract_ncbi_dir ) {
-            exit 1, ("[nf-core/eager] ERROR: Postprocessing for MALT requires additional parameters specified. Please provide a path to the taxon list for MaltExtract using `--metagenomics_maltextract_taxon_list`.")
+        if ( ! params.metagenomics_maltextract_ncbidir ) {
+            error("[nf-core/eager] ERROR: Postprocessing for MALT requires additional parameters specified. Please provide a path to the taxon list for MaltExtract using `--metagenomics_maltextract_taxonlist`.")
         }
     }
 
     // warnings for metagenomics parameter combinations
-    if ( params.metagenomics_profiling_tool == 'krakenmerge' && params.metagenomics_min_support_reads == 1 ) log.warn("[nf-core/eager] Warning: The default value for krakenmerge minimum reads for outputing a node has not been changed from the default. The default is set for use with MALT and maltextract. Consider updating to the default value for krakenmerge (50 reads) by setting --metagenomics_min_support_reads 50")
+    if ( params.metagenomics_profiling_tool == 'krakenmerge' && params.metagenomics_minsupportreads == 1 ) log.warn("[nf-core/eager] Warning: The default value for krakenmerge minimum reads for outputing a node has not been changed from the default. The default is set for use with MALT and maltextract. Consider updating to the default value for krakenmerge (50 reads) by setting --metagenomics_minsupportreads 50")
 }
 
 if( params.run_bedtools_coverage ){
     if( !params.mapstats_bedtools_featurefile ) {
-        exit 1, "[nf-core/eager] ERROR: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters."
+        error("[nf-core/eager] ERROR: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters.")
     }
 }
 
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
-if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
+if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { error"[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
 
 // Report possible warnings
 if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
