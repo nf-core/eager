@@ -105,7 +105,7 @@ workflow MANIPULATE_DAMAGE {
                         [ meta, fasta ]
                     }
 
-        ch_pmd_fastas = ch_masking_output.concat( ch_already_masked, ch_no_masking )
+        ch_pmd_fastas = ch_masking_output.mix( ch_already_masked, ch_no_masking )
                     .map {
                         // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                         WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
