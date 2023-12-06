@@ -770,7 +770,7 @@
                 "damage_manipulation_pmdtools_masked_reference": {
                     "type": "string",
                     "fa_icon": "fas fa-mask",
-                    "help_text": "Supplying a FASTA file will use this file as reference for `samtools calmd` prior to PMD filtering. /nSetting SNPs part of the used capture set as `N` can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a SNP to be counted as damage when it is a transition.",
+                    "help_text": "Supplying a FASTA file will use this file as reference for `samtools calmd` prior to PMD filtering. /nSetting the SNPs that are part of the used capture set as `N` can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a SNP to be counted as damage when it is a transition.",
                     "description": "Specify a masked FASTA file with positions to be used with pmdtools.",
                     "pattern": "^\\S+\\.fa?(\\sta)$",
                     "format": "file-path"
