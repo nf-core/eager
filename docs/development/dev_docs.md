@@ -33,12 +33,12 @@ To add new input files or options to the reference sheet, you have to complete a
 
 1. Add you new parameter channel to the `if` condition selecting between the direct parameter input or the reference sheet input.
    1. below "REFERENCE_INDEXING_MULTI" for reference sheet input
-      `ch_<NEW_CHANNEL> = REFERENCE_INDEXING_MULTI.out.<NEW_EMIT>`
+      `<NEW_CHANNEL> = REFERENCE_INDEXING_MULTI.out.<NEW_EMIT>`
    2. below "REFERENCE_INDEXING_SINGLE"
-      `ch_<NEW_CHANNEL> = REFERENCE_INDEXING_SINGLE.out.<NEW_EMIT>`
+      `<NEW_CHANNEL> = REFERENCE_INDEXING_SINGLE.out.<NEW_EMIT>`
    3. Filter out options that have not been provided.
-      `ch_<NEW_CHANNEL> = ch_<NEW_CHANNEL>.filter{ it[1] != "" }`
+      `<NEW_CHANNEL> = <NEW_CHANNEL>.filter{ it[1] != "" }`
    4. Add unzipping of zipped input files with GUNZIP.
-   5. Add ch_<NEW_CHANNEL> to the final emit.
-      `<NEW_EMIT> = ch_<NEW_CHANNEL>`
+   5. Add <NEW_CHANNEL> to the final emit.
+      `<NEW_EMIT> = <NEW_CHANNEL>`
    6. Call new inputs within the main eager.nf with `REFERENCE_INDEXING.out.<NEW_EMIT>`.
