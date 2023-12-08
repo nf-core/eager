@@ -214,14 +214,12 @@
                     "type": "boolean",
                     "description": "Display help text.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "publish_dir_mode": {
@@ -245,7 +243,6 @@
                     "type": "boolean",
                     "description": "Send plain-text email instead of HTML.",
                     "fa_icon": "fas fa-remove-format",
-                    "default": false,
                     "hidden": true
                 },
                 "max_multiqc_email_size": {
@@ -260,7 +257,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "default": false,
                     "hidden": true
                 },
                 "hook_url": {
@@ -299,7 +295,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-eye-slash",
                     "description": "Show all params when using `--help`",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
                 },
@@ -307,7 +302,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters fails when an unrecognised parameter is found.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
                 },
@@ -315,7 +309,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters in lenient more.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
@@ -960,8 +953,7 @@
                     "fa_icon": "fab fa-creative-commons-sampling-plus"
                 },
                 "skip_qualimap": {
-                    "type": "boolean",
-                    "default": "false"
+                    "type": "boolean"
                 },
                 "snpcapture_bed": {
                     "type": "string",
@@ -1107,6 +1099,29 @@
                     "fa_icon": "fas fa-map"
                 }
             }
+        },
+        "human_sex_determination": {
+            "title": "Human Sex Determination",
+            "type": "object",
+            "description": "Options for the calculation of biological sex of human individuals.",
+            "default": "",
+            "properties": {
+                "run_sexdeterrmine": {
+                    "type": "boolean",
+                    "default": true,
+                    "fa_icon": "fas fa-transgender-alt",
+                    "description": "Turn on sex determination for human reference genomes. This will run on single- and double-stranded variants of a library separately.",
+                    "help_text": "Specify to run the optional process of sex determination."
+                },
+                "sexdeterrmine_bedfile": {
+                    "type": "string",
+                    "fa_icon": "fas fa-bed",
+                    "description": "Specify path to SNP panel in bed format for error bar calculation. Optional (see documentation).",
+                    "help_text": "Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate calculation. Running without this parameter will considerably increase runtime, and render the resulting error bars untrustworthy. Theoretically, any set of SNPs that are distant enough that two SNPs are unlikely to be covered by the same read can be used here. The programme was coded with the 1240K panel in mind. The path must be in quotes."
+                }
+            },
+            "fa_icon": "fas fa-transgender-alt",
+            "help_text": ""
         }
     },
     "allOf": [
@@ -1132,9 +1147,6 @@
             "$ref": "#/definitions/mapping"
         },
         {
-            "$ref": "#/definitions/adna_damage_analysis"
-        },
-        {
             "$ref": "#/definitions/bam_filtering"
         },
         {
@@ -1144,28 +1156,31 @@
             "$ref": "#/definitions/deduplication"
         },
         {
-            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
-        },
-        {
-            "$ref": "#/definitions/mapping_statistics"
-        },
-        {
             "$ref": "#/definitions/damage_manipulation"
         },
         {
             "$ref": "#/definitions/genotyping"
         },
         {
+            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
+        },
+        {
+            "$ref": "#/definitions/mapping_statistics"
+        },
+        {
             "$ref": "#/definitions/adna_damage_analysis"
         },
         {
-            "$ref": "#/definitions/contamination_estimation"
+            "$ref": "#/definitions/feature_annotation_statistics"
         },
         {
             "$ref": "#/definitions/host_removal"
         },
         {
-            "$ref": "#/definitions/feature_annotation_statistics"
+            "$ref": "#/definitions/contamination_estimation"
+        },
+        {
+            "$ref": "#/definitions/human_sex_determination"
         }
     ]
 }

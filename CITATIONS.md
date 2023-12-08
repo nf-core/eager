@@ -99,7 +99,10 @@
   > QualiMap Okonechnikov, K., Conesa, A., & García-Alcalde, F. (2016). Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. Bioinformatics , 32(2), 292–294. Download: http://qualimap.bioinfo.cipf.es/
 
 - [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
+
   > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190). Download: https://github.com/Integrative-Transcriptomics/DamageProfiler
+
+  - [Sex.DetERRmine.py](https://github.com/TCLamnidis/Sex.DetERRmine.git) Sex.DetERRmine.py Lamnidis, T.C. et al., 2018. Ancient Fennoscandian genomes reveal origin and spread of Siberian ancestry in Europe. Nature communications, 9(1), p.5018. Available at: http://dx.doi.org/10.1038/s41467-018-07483-5. Download: https://github.com/TCLamnidis/Sex.DetERRmine.git
 
 ## Software packaging/containerisation tools
 
