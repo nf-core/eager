@@ -660,14 +660,15 @@ nextflow run . -profile test,docker \
 
 ```bash
 ## Gatk on raw reads
-## Expect: One VCF per sample/reference combination. Also 1 bcftools_stats file per bam.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' -ansi-log false -dump-channels
+## Expect: One VCF per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keep_realign_bam -ansi-log false -dump-channels
 ```
 
 ```bash
-## Gatk on trimmed reads
-## Expect: One VCF per sample/reference combination, based on the trimmed bams. Also 1 bcftools_stats file per bam.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed' -ansi-log false -dump-channels --run_trim_bam \
+## Gatk on trimmed reads. Skip bcftools stats.
+## Expect: One VCF per sample/reference combination, based on the trimmed bams (this actually shows on the IndelRealigner step and not the UG step). No bcftools_stats file per VCF.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+  --run_trim_bam \
   --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
   --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
   --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
@@ -677,13 +678,30 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 
 ```bash
 ## Gatk on pmd-filtered reads
-## Expect: One VCF per sample/reference combination, based on the pmd-filtered bams. Also 1 bcftools_stats file per bam.
+## Expect: One VCF per sample/reference combination, based on the pmd-filtered bams (this actually shows on the IndelRealigner step and not the UG step). Also 1 bcftools_stats file per VCF.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'pmd' -ansi-log false -dump-channels --run_pmd_filtering
 ## Checked that the bams had fewer reads compared to the raw bams.
 ```
 
 ```bash
 ## Gatk on rescaled reads
-## Expect: One VCF per sample/reference combination, based on the rescaled bams. Also 1 bcftools_stats file per bam.
+## Expect: One VCF per sample/reference combination, based on the rescaled bams (this actually shows on the IndelRealigner step and not the UG step). Also 1 bcftools_stats file per VCF.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'rescaled' -ansi-log false -dump-channels --run_mapdamage_rescaling
+```
+
+## GATK HC
+
+```bash
+## Gatk HC on raw reads
+## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## Gatk HC on trimmed reads, with different out mode and emit confidence. Skip bcftools stats.
+## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF.
+## Checked .command.sh for correct args.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw' -ansi-log false -dump-channels --skip_bcftools_stats \
+  --genotyping_gatk_hc_emitrefconf 'BP_RESOLUTION' \
+  --genotyping_gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES'
 ```
