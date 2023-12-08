@@ -81,37 +81,40 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     meta, fasta, fai, dict, mapper_index ->
                                     //TODO: add params for snpcapturebed, snpeigenstrat and sexdetbed once implemented
                                     def contamination_estimation_angsd_hapmap = params.contamination_estimation_angsd_hapmap != null ? file( params.contamination_estimation_angsd_hapmap, checkIfExists: true ) : ""
-                                    def pmd_mask                              = params.damage_manipulation_pmdtools_reference_mask != null ? file(params.damage_manipulation_pmdtools_reference_mask, checkIfExists: true ) : ""
+                                    def pmd_masked_fasta                      = params.damage_manipulation_pmdtools_masked_reference != null ? file(params.damage_manipulation_pmdtools_masked_reference, checkIfExists: true ) : ""
+                                    def pmd_bed_for_masking                   = params.damage_manipulation_pmdtools_reference_mask != null ? file(params.damage_manipulation_pmdtools_reference_mask, checkIfExists: true ) : ""
                                     def capture_bed                           = params.snpcapture_bed != null ? file(params.snpcapture_bed, checkIfExists: true ) : ""
                                     def pileupcaller_bed                      = ""
                                     def pileupcaller_snp                      = ""
                                     def sexdet_bed                            = ""
                                     def bedtools_feature                      = params.mapstats_bedtools_featurefile != null ? file(params.mapstats_bedtools_featurefile, checkIfExists: true ) : ""
-                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature ]
+                                    [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature ]
                                 }
 
     ch_ref_index_single = ch_reference_for_mapping
                                 .multiMap{
-                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature ->
-                                    reference:         [ meta, fasta, fai, dict, mapper_index, circular_target ]
-                                    mito_header:       [ meta, mitochondrion_header ]
-                                    hapmap:            [ meta, contamination_estimation_angsd_hapmap ]
-                                    pmd_mask:          [ meta, pmd_mask, capture_bed ]
-                                    snp_bed:           [ meta, capture_bed ]
-                                    pileupcaller_snp:  [ meta, pileupcaller_bed, pileupcaller_snp ]
-                                    sexdeterrmine_bed: [ meta, sexdet_bed ]
-                                    bedtools_feature:  [ meta, bedtools_feature ]
+                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature ->
+                                    reference:           [ meta, fasta, fai, dict, mapper_index, circular_target ]
+                                    mito_header:         [ meta, mitochondrion_header ]
+                                    hapmap:              [ meta, contamination_estimation_angsd_hapmap ]
+                                    pmd_masked_fasta:    [ meta, pmd_masked_fasta ]
+                                    pmd_bed_for_masking: [ meta, pmd_bed_for_masking ]
+                                    snp_bed:             [ meta, capture_bed ]
+                                    pileupcaller_snp:    [ meta, pileupcaller_bed, pileupcaller_snp ]
+                                    sexdeterrmine_bed:   [ meta, sexdet_bed ]
+                                    bedtools_feature:    [ meta, bedtools_feature ]
                                 }
 
     emit:
-    reference            = ch_ref_index_single.reference          // [ meta, fasta, fai, dict, mapindex, circular_target ]
-    mitochondrion_header = ch_ref_index_single.mito_header        // [ meta, mito_header ]
-    hapmap               = ch_ref_index_single.hapmap             // [ meta, hapmap ]
-    pmd_mask             = ch_ref_index_single.pmd_mask           // [ meta, pmd_mask, capture_bed ]
-    snp_capture_bed      = ch_ref_index_single.snp_bed            // [ meta, capture_bed ]
-    pileupcaller_snp     = ch_ref_index_single.pileupcaller_snp   // [ meta, pileupcaller_bed, pileupcaller_snp ]
-    sexdeterrmine_bed    = ch_ref_index_single.sexdeterrmine_bed  // [ meta, sexdet_bed ]
-    bedtools_feature     = ch_ref_index_single.bedtools_feature   // [ meta, bedtools_feature ]
+    reference            = ch_ref_index_single.reference           // [ meta, fasta, fai, dict, mapindex, circular_target ]
+    mitochondrion_header = ch_ref_index_single.mito_header         // [ meta, mito_header ]
+    hapmap               = ch_ref_index_single.hapmap              // [ meta, hapmap ]
+    pmd_masked_fasta     = ch_ref_index_single.pmd_masked_fasta    // [ meta, pmd_masked_fasta ]
+    pmd_bed_for_masking  = ch_ref_index_single.pmd_bed_for_masking // [ meta, pmd_bed_for_masking ]
+    snp_capture_bed      = ch_ref_index_single.snp_bed             // [ meta, capture_bed ]
+    pileupcaller_snp     = ch_ref_index_single.pileupcaller_snp    // [ meta, pileupcaller_bed, pileupcaller_snp ]
+    sexdeterrmine_bed    = ch_ref_index_single.sexdeterrmine_bed   // [ meta, sexdet_bed ]
+    bedtools_feature     = ch_ref_index_single.bedtools_feature    // [ meta, bedtools_feature ]
     versions             = ch_versions
 
 }

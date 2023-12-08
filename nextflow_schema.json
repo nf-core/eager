@@ -780,12 +780,20 @@
                     "description": "Specify PMDScore threshold for PMDtools.",
                     "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis.\n\n> Modifies PMDtools parameter: `--threshold`"
                 },
+                "damage_manipulation_pmdtools_masked_reference": {
+                    "type": "string",
+                    "fa_icon": "fas fa-mask",
+                    "help_text": "Supplying a FASTA file will use this file as reference for `samtools calmd` prior to PMD filtering. /nSetting the SNPs that are part of the used capture set as `N` can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a SNP to be counted as damage when it is a transition.",
+                    "description": "Specify a masked FASTA file with positions to be used with pmdtools.",
+                    "pattern": "^\\S+\\.fa?(\\sta)$",
+                    "format": "file-path"
+                },
                 "damage_manipulation_pmdtools_reference_mask": {
                     "type": "string",
                     "fa_icon": "fas fa-mask",
                     "help_text": "Supplying a bedfile to this parameter activates masking of the reference fasta at the contained sites prior to running PMDtools. Positions that are in the provided bedfile will be replaced by Ns in the reference genome. \nThis can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a transition SNP to be counted as damage. Masking of the reference is done using `bedtools maskfasta`.",
                     "description": "Specify a bedfile to be used to mask the reference fasta prior to running pmdtools.",
-                    "pattern": "^\\S+\\.bed$",
+                    "pattern": "^\\S+\\.bed?(\\.gz)$",
                     "format": "file-path"
                 },
                 "run_trim_bam": {
@@ -960,8 +968,7 @@
                     "fa_icon": "fab fa-creative-commons-sampling-plus"
                 },
                 "skip_qualimap": {
-                    "type": "boolean",
-                    "default": "false"
+                    "type": "boolean"
                 },
                 "snpcapture_bed": {
                     "type": "string",
@@ -1156,13 +1163,16 @@
             "$ref": "#/definitions/adna_damage_analysis"
         },
         {
+            "$ref": "#/definitions/feature_annotation_statistics"
+        },
+        {
             "$ref": "#/definitions/host_removal"
         },
         {
             "$ref": "#/definitions/contamination_estimation"
         },
         {
-            "$ref": "#/definitions/feature_annotation_statistics"
+            "$ref": "#/definitions/contamination_estimation"
         }
     ]
 }
