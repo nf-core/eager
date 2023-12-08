@@ -12,7 +12,6 @@ include { GATK4_HAPLOTYPECALLER                             } from '../../module
 include { FREEBAYES                                         } from '../../modules/nf-core/freebayes/main'
 include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
 // TODO Add ANGSD GTL module. The current module does not pick up the .glf.gz output files.
-// TODO Find a way to pass ploidy and dbsnp to the GATK modules. maybe ploidy should go in all reference metas
 
 workflow GENOTYPE {
     take:
@@ -177,11 +176,11 @@ workflow GENOTYPE {
     }
 
     if ( params.genotyping_tool == 'freebayes' ) {
-        // TODO
+        // TODO Freebayes module needs updating to use the new meta format.
     }
 
     if ( params.genotyping_tool == 'angsd' ) {
-        // TODO
+        // TODO no module for angsd genotyping yet
     }
 
     // Run BCFTOOLS_STATS on output from GATK UG, HC and Freebayes
