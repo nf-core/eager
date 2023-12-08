@@ -1196,7 +1196,7 @@
         },
         {
             "$ref": "#/definitions/human_sex_determination"
-         },
+        },
         {
             "$ref": "#/definitions/contamination_estimation"
         }
