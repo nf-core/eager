@@ -958,7 +958,7 @@
                     "default": "EMIT_VARIANTS_ONLY",
                     "description": "Specify GATK output mode.",
                     "enum": ["EMIT_VARIANTS_ONLY", "EMIT_ALL_CONFIDENT_SITES", "EMIT_ALL_SITES"],
-                    "help_text": "If the GATK UnifiedGenotyper is selected, what type of VCF to create, i.e. produce calls for every site or just confidence sites.\n\n> Modifies GATK UnifiedGenotyper parameter: `--output_mode`",
+                    "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, this defines the output mode to use when producing the output VCF (i.e. produce calls for every site or just confidence sites.)\n\n> Modifies GATK UnifiedGenotyper parameter: `--output_mode`",
                     "fa_icon": "fas fa-bullhorn"
                 },
                 "genotyping_gatk_ug_genotype_mode": {
@@ -967,20 +967,36 @@
                     "description": "Specify UnifiedGenotyper likelihood model.",
                     "enum": ["SNP", "INDEL", "BOTH", "GENERALPLOIDYSNP", "GENERALPLOIDYINDEL"],
                     "fa_icon": "fas fa-project-diagram",
-                    "help_text": "If the GATK UnifiedGenotyper is selected, which likelihood model to follow, i.e. whether to call use SNPs or INDELS etc.\n\n> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`"
+                    "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, this sets  which likelihood model to follow, i.e. whether to call only SNPs or INDELS etc.\n\n> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`"
                 },
                 "genotyping_gatk_ug_keep_realign_bam": {
                     "type": "boolean",
                     "fa_icon": "far fa-save",
                     "description": "Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.",
-                    "help_text": "If provided when running GATK's UnifiedGenotyper, this will put into the output folder the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping.\n\nThese BAMs will be stored in the same folder as the corresponding VCF files."
+                    "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, providing this parameter will output the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping in addition to the standard VCF output.\n\nThese BAMs will be stored in the same folder as the corresponding VCF files."
                 },
                 "genotyping_gatk_ug_defaultbasequalities": {
                     "type": "integer",
                     "default": -1,
                     "description": "Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.",
-                    "help_text": "When running GATK's UnifiedGenotyper, specify a value to set base quality scores, if reads are missing this information. Might be useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to `-1` which is to not set any default quality (turned off). \n\n> Modifies GATK UnifiedGenotyper parameter: `--defaultBaseQualities`",
+                    "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, specify a value to set base quality scores, if reads are missing this information. Might be useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to `-1` which is to not set any default quality (turned off). \n\n> Modifies GATK UnifiedGenotyper parameter: `--defaultBaseQualities`",
                     "fa_icon": "fas fa-redo-alt"
+                },
+                "genotyping_gatk_hc_out_mode": {
+                    "type": "string",
+                    "default": "EMIT_VARIANTS_ONLY",
+                    "fa_icon": "fas fa-bullhorn",
+                    "description": "Specify GATK output mode.",
+                    "help_text": "If GATK HaplotypeCaller is selected as the genotyping tool, this sets the type of sites that should be included in the output VCF (i.e. produce calls for every site or just confidence sites). \n\n> Modifies GATK HaplotypeCaller parameter: `--output_mode`",
+                    "enum": ["EMIT_VARIANTS_ONLY", "EMIT_ALL_CONFIDENT_SITES", "EMIT_ALL_ACTIVE_SITES"]
+                },
+                "genotyping_gatk_hc_emitrefconf": {
+                    "type": "string",
+                    "default": "GVCF",
+                    "fa_icon": "fas fa-bullhorn",
+                    "description": "Specify HaplotypeCaller mode for emitting reference confidence calls.",
+                    "help_text": "If GATK HaplotypeCaller is selected as the genotyping tool, this sets the mode for emitting reference confidence calls.\n\n> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`",
+                    "enum": ["NONE", "BP_RESOLUTION", "GVCF"]
                 }
             },
             "fa_icon": "fas fa-sliders-h",
@@ -1071,8 +1087,7 @@
                     "fa_icon": "fab fa-creative-commons-sampling-plus"
                 },
                 "skip_qualimap": {
-                    "type": "boolean",
-                    "default": "false"
+                    "type": "boolean"
                 },
                 "snpcapture_bed": {
                     "type": "string",
@@ -1267,16 +1282,13 @@
             "$ref": "#/definitions/adna_damage_analysis"
         },
         {
+            "$ref": "#/definitions/feature_annotation_statistics"
+        },
+        {
             "$ref": "#/definitions/host_removal"
         },
         {
             "$ref": "#/definitions/contamination_estimation"
-        },
-        {
-            "$ref": "#/definitions/host_removal"
-        },
-        {
-            "$ref": "#/definitions/feature_annotation_statistics"
         }
     ]
 }
