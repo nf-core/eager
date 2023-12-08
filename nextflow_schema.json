@@ -111,12 +111,6 @@
                     "description": "Specify the FASTA header of the target chromosome to extend. Only applies when using `circularmapper`.",
                     "help_text": "The entry (chromosome, contig, etc.) in your FASTA reference that you'd like to be treated as circular.\n\nApplies only when providing a single FASTA file via `--fasta` (NOT multi-reference input - see reference TSV/CSV input).\n\n> Modifies tool parameter(s):\n> - circulargenerator `-s`\n",
                     "fa_icon": "fas fa-bullseye"
-                },
-                "fasta_mitochondrion_header": {
-                    "type": "string",
-                    "fa_icon": "fas fa-tag",
-                    "description": "Specify the name of the reference FASTA entry corresponding to the mitochondrial genome, up to the first space. Only applies when using `--run_mtnucratio`.",
-                    "help_text": "Specify the FASTA entry in the reference file specified as `--fasta` that acts as the mitochondrial 'chromosome' to base a mitochondrial-to-nuclear ratio calculation on. \n\nThe tool only accepts the first section of the header before the first space. For example, mitochondrion chromosome name is `MT` for the hs37d5/GrCH37 human reference genome.\n"
                 }
             }
         },
@@ -469,6 +463,19 @@
             "description": "Options for aligning reads against reference genome(s)",
             "default": "",
             "properties": {
+                "run_fastq_sharding": {
+                    "type": "boolean",
+                    "description": "Turn on FastQ sharding.",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "Sharding will split the FastQs into smaller chunks before mapping. These chunks are then mapped in parallel. This approach can speed up the mapping process for larger FastQ files."
+                },
+                "fastq_shard_size": {
+                    "type": "integer",
+                    "default": 1000000,
+                    "description": "Specify the number of reads in each shard when splitting.",
+                    "fa_icon": "fas fa-arrows-alt-v",
+                    "help_text": "Make sure to choose a value that makes sense for your dataset. Small values can create many files, which can end up negatively affecting the overall speed of the mapping process."
+                },
                 "mapping_tool": {
                     "type": "string",
                     "default": "bowtie2",
@@ -773,12 +780,20 @@
                     "description": "Specify PMDScore threshold for PMDtools.",
                     "help_text": "Specifies the PMDScore threshold to use in the pipeline when filtering BAM files for DNA damage. Only reads which surpass this damage score are considered for downstream DNA analysis.\n\n> Modifies PMDtools parameter: `--threshold`"
                 },
+                "damage_manipulation_pmdtools_masked_reference": {
+                    "type": "string",
+                    "fa_icon": "fas fa-mask",
+                    "help_text": "Supplying a FASTA file will use this file as reference for `samtools calmd` prior to PMD filtering. /nSetting the SNPs that are part of the used capture set as `N` can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a SNP to be counted as damage when it is a transition.",
+                    "description": "Specify a masked FASTA file with positions to be used with pmdtools.",
+                    "pattern": "^\\S+\\.fa?(\\sta)$",
+                    "format": "file-path"
+                },
                 "damage_manipulation_pmdtools_reference_mask": {
                     "type": "string",
                     "fa_icon": "fas fa-mask",
                     "help_text": "Supplying a bedfile to this parameter activates masking of the reference fasta at the contained sites prior to running PMDtools. Positions that are in the provided bedfile will be replaced by Ns in the reference genome. \nThis can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a transition SNP to be counted as damage. Masking of the reference is done using `bedtools maskfasta`.",
                     "description": "Specify a bedfile to be used to mask the reference fasta prior to running pmdtools.",
-                    "pattern": "^\\S+\\.bed$",
+                    "pattern": "^\\S+\\.bed?(\\.gz)$",
                     "format": "file-path"
                 },
                 "run_trim_bam": {
@@ -1181,6 +1196,9 @@
         },
         {
             "$ref": "#/definitions/human_sex_determination"
+         },
+        {
+            "$ref": "#/definitions/contamination_estimation"
         }
     ]
 }

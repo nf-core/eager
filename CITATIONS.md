@@ -12,7 +12,7 @@
 
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
-  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]. Available online https://www.bioinformatics.babraham.ac.uk/projects/fastqc/.
+  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 
@@ -33,6 +33,10 @@
 - [Picard Tools](https://broadinstitute.github.io/picard/)
 
   > Broad Institute (2019). Picard Toolkit. GitHub Repository: https://broadinstitute.github.io/picard/
+
+- [SeqKit](https://bioinf.shenwei.me/seqkit/)
+
+  > Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. PLOS ONE, 11(10), e0163962. doi:[10.1371/journal.pone.0163962](https://doi.org/10.1371/journal.pone.0163962)
 
 - [bwa](https://doi.org/10.1093/bioinformatics/btp324)
 

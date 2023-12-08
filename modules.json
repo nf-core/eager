@@ -22,7 +22,7 @@
                     },
                     "bamutil/trimbam": {
                         "branch": "master",
-                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     },
                     "bbmap/bbduk": {
@@ -33,6 +33,11 @@
                     "bedtools/coverage": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "bedtools/maskfasta": {
+                        "branch": "master",
+                        "git_sha": "516189e968feb4ebdd9921806988b4c12b4ac2dc",
                         "installed_by": ["modules"]
                     },
                     "bowtie2/align": {
@@ -107,7 +112,7 @@
                     },
                     "fastqc": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "9a4517e720bc812e95b56d23d15a1653b6db4f53",
                         "installed_by": ["modules"]
                     },
                     "gunzip": {
@@ -210,6 +215,11 @@
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules", "bam_split_by_region"]
                     },
+                    "seqkit/split2": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    }
                     "sexdeterrmine": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
@@ -231,7 +241,7 @@
                     },
                     "fastq_align_bwaaln": {
                         "branch": "master",
-                        "git_sha": "a9784afdd5dcda23b84e64db75dc591065d64653",
+                        "git_sha": "e2c81fea3daeacfa190f78d2b82f82361b734507",
                         "installed_by": ["subworkflows"]
                     }
                 }
