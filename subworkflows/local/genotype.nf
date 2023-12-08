@@ -124,6 +124,7 @@ workflow GENOTYPE {
                     dbsnp: [ ref_meta, dbsnp ]
             }
 
+        // TODO: Should the vcfs be indexed with bcftools index? VCFs from HC are indexed.
         GATK_UNIFIEDGENOTYPER(
             ch_bams_for_ug.bam,
             ch_bams_for_ug.fasta,
@@ -136,57 +137,43 @@ workflow GENOTYPE {
         )
         ch_versions = ch_versions.mix( GATK_UNIFIEDGENOTYPER.out.versions.first() )
         ch_gatk_unifiedgenotyper_genotypes = GATK_UNIFIEDGENOTYPER.out.vcf
-
-        if ( ! params.skip_bcftools_stats ) {
-            // TODO this section could be moved outside the UG specific section into its own if clause and take input from HC and FB as well.
-            ch_bcftools_input= ch_gatk_unifiedgenotyper_genotypes
-                .map {
-                    WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
-                }
-                .combine( ch_fasta_for_multimap , by:0 )
-                .multiMap {
-                    ignore_me, meta, vcf, ref_meta, fasta, fai, dict, dbsnp ->
-                        vcf:   [ meta, vcf, [] ] // bcftools stats module expects a tbi file with the vcf.
-                        fasta: [ ref_meta, fasta ]
-                }
-
-            BCFTOOLS_STATS_GENOTYPING(
-                ch_bcftools_input.vcf,  // vcf
-                [ [], [] ],             // regions
-                [ [], [] ],             // targets
-                [ [], [] ],             // samples
-                [ [], [] ],             // exons
-                ch_bcftools_input.fasta // fasta
-            )
-            ch_versions = ch_versions.mix( BCFTOOLS_STATS_GENOTYPING.out.versions.first() )
-        }
     }
 
     if ( params.genotyping_tool == 'hc' ) {
-        // TODO
         ch_bams_for_multimap = ch_bam_bai
             .map {
             // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
 
-            ch_fasta_for_multimap = ch_fasta_plus
+        ch_fasta_for_multimap = ch_fasta_plus
             .join( ch_dbsnp_for_gatk ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
             } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
 
-            ch_input_for_hc = ch_bams_for_multimap
+        ch_input_for_hc = ch_bams_for_multimap
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
                 ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, dbsnp ->
-                    bam:   [ meta, bam , bai ]
+                    bam:   [ meta, bam , bai, [], [] ] // No intervals or dragSTR model inputs to HC module
                     fasta: [ ref_meta, fasta ]
                     fai:   [ ref_meta, fai ]
                     dict:  [ ref_meta, dict ]
                     dbsnp: [ ref_meta, dbsnp ]
             }
+
+        GATK4_HAPLOTYPECALLER(
+            ch_input_for_hc.bam,
+            ch_input_for_hc.fasta,
+            ch_input_for_hc.fai,
+            ch_input_for_hc.dict,
+            ch_input_for_hc.dbsnp,
+            [[], []] // No dbsnp_tbi
+        )
+        ch_versions = ch_versions.mix( GATK4_HAPLOTYPECALLER.out.versions.first() )
+        ch_gatk_unifiedgenotyper_genotypes = GATK4_HAPLOTYPECALLER.out.vcf
     }
 
     if ( params.genotyping_tool == 'freebayes' ) {
@@ -195,6 +182,32 @@ workflow GENOTYPE {
 
     if ( params.genotyping_tool == 'angsd' ) {
         // TODO
+    }
+
+    // Run BCFTOOLS_STATS on output from GATK UG, HC and Freebayes
+    if ( !params.skip_bcftools_stats && ( params.genotyping_tool == 'hc' || params.genotyping_tool == 'ug' || params.genotyping_tool == 'freebayes' ) ) {
+        ch_bcftools_input= ch_gatk_unifiedgenotyper_genotypes
+            .mix( ch_gatk_haplotypecaller_genotypes )
+            .mix( ch_freebayes_genotypes )
+            .map {
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+            .combine( ch_fasta_for_multimap , by:0 )
+            .multiMap {
+                ignore_me, meta, vcf, ref_meta, fasta, fai, dict, dbsnp ->
+                    vcf:   [ meta, vcf, [] ] // bcftools stats module expects a tbi file with the vcf.
+                    fasta: [ ref_meta, fasta ]
+            }
+
+        BCFTOOLS_STATS_GENOTYPING(
+            ch_bcftools_input.vcf,  // vcf
+            [ [], [] ],             // regions
+            [ [], [] ],             // targets
+            [ [], [] ],             // samples
+            [ [], [] ],             // exons
+            ch_bcftools_input.fasta // fasta
+        )
+        ch_versions = ch_versions.mix( BCFTOOLS_STATS_GENOTYPING.out.versions.first() )
     }
 
     emit:
