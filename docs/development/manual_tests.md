@@ -699,9 +699,28 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 
 ```bash
 ## Gatk HC on trimmed reads, with different out mode and emit confidence. Skip bcftools stats.
-## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF.
+## Expect: One VCF + .tbi index per sample/reference combination.
 ## Checked .command.sh for correct args.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw' -ansi-log false -dump-channels --skip_bcftools_stats \
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
   --genotyping_gatk_hc_emitrefconf 'BP_RESOLUTION' \
   --genotyping_gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES'
+```
+
+## FREEBAYES
+
+```bash
+## Freebayes on raw reads
+## Expect: One VCF per sample/reference combination. Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## Freebayes on trimmed reads. Different options, and skip bcftools stats.
+## Expect: One VCF per sample/reference combination.
+## Checked .command.sh for correct args.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+  --run_trim_bam \
+  --genotyping_freebayes_skip_coverage 10 \
+  --genotyping_freebayes_min_alternate_count 2 \
+  --genotyping_freebayes_ploidy 1
 ```
