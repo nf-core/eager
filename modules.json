@@ -122,7 +122,7 @@
                     },
                     "freebayes": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "77978839bef6d437f21edb900b49bcbc04f9f735",
                         "installed_by": ["modules"]
                     },
                     "gatk/indelrealigner": {
