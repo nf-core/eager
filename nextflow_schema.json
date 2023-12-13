@@ -997,6 +997,27 @@
                     "description": "Specify HaplotypeCaller mode for emitting reference confidence calls.",
                     "help_text": "If GATK HaplotypeCaller is selected as the genotyping tool, this sets the mode for emitting reference confidence calls.\n\n> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`",
                     "enum": ["NONE", "BP_RESOLUTION", "GVCF"]
+                },
+                "genotyping_freebayes_min_alternate_count": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify minimum required supporting observations of an alternate allele to consider a variant.",
+                    "help_text": "Require at least this count of observations supporting an alternate allele within a single individual in order to evaluate the position.\n\n> Modifies freebayes parameter: `-C`",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "genotyping_freebayes_skip_coverage": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified.",
+                    "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than the specified value. Setting to 0 (the default) deactivates this behaviour.\n\n> Modifies freebayes parameter: `-g`",
+                    "fa_icon": "fab fa-think-peaks"
+                },
+                "genotyping_freebayes_ploidy": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Specify ploidy of sample in FreeBayes.",
+                    "help_text": "Specify ploidy of sample in FreeBayes.\n\n> Modifies freebayes parameter: `-p`",
+                    "fa_icon": "fas fa-pastafarianism"
                 }
             },
             "fa_icon": "fas fa-sliders-h",

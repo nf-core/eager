@@ -176,7 +176,41 @@ workflow GENOTYPE {
     }
 
     if ( params.genotyping_tool == 'freebayes' ) {
-        // TODO Freebayes module needs updating to use the new meta format.
+        ch_bams_for_multimap = ch_bam_bai
+            .map {
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+
+        // TODO Do we want to provide SNP capture bed file to Freebayes? It would then genotype only on those positions.
+        // NOTE: dbsnp is not used by Freebayes, but we need to provide it to the module anyway, to ensure correct cardinality of the fasta channel within the BCFTOOLS_STATS channel operations.
+        ch_fasta_for_multimap = ch_fasta_plus
+            .join( ch_dbsnp_for_gatk ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
+            .map {
+            // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+            } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
+
+        ch_input_for_freebayes = ch_bams_for_multimap
+            .combine( ch_fasta_for_multimap , by:0 )
+            .multiMap {
+                ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, dbsnp ->
+                    bam:   [ meta, bam , bai, [], [], [] ] // No second bam, second bai, or regions-BED file
+                    fasta: [ ref_meta, fasta ]
+                    fai:   [ ref_meta, fai ]
+            }
+
+        // TODO: Should the vcfs be indexed with bcftools index? VCFs from HC are indexed.
+        FREEBAYES(
+            ch_input_for_freebayes.bam,
+            ch_input_for_freebayes.fasta,
+            ch_input_for_freebayes.fai,
+            [ [], [] ], // No samples file
+            [ [], [] ], // No populations file
+            [ [], [] ]  // No CNV file
+            )
+        ch_versions = ch_versions.mix( FREEBAYES.out.versions.first() )
+        ch_freebayes_genotypes = FREEBAYES.out.vcf
     }
 
     if ( params.genotyping_tool == 'angsd' ) {
