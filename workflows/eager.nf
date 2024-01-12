@@ -135,13 +135,6 @@ workflow EAGER {
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
 
-
-    // GATK dbSNP
-    if ( params.genotyping_gatk_dbsnp ) {
-        ch_dbsnp = Channel.fromPath(params.genotyping_gatk_dbsnp, checkIfExists: true)
-    } else {
-        ch_dbsnp = Channel.empty()
-    }
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
@@ -558,8 +551,7 @@ workflow EAGER {
                 meta, fasta, fai, dict, mapindex, circular_target ->
                 [ meta, fasta, fai, dict ]
             }
-
-        GENOTYPE( ch_bams_for_genotyping, ch_reference_for_genotyping, [], [], [], REFERENCE_INDEXING.out.dbsnp )
+        GENOTYPE( ch_bams_for_genotyping, ch_reference_for_genotyping, REFERENCE_INDEXING.out.pileupcaller_bed_snp, REFERENCE_INDEXING.out.dbsnp )
 
         ch_versions      = ch_versions.mix( GENOTYPE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( GENOTYPE.out.mqc.collect{it[1]}.ifEmpty([]) )
