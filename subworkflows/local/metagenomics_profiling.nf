@@ -16,11 +16,9 @@ workflow METAGENOMICS_PROFILING {
     database
 
     main:
-    ch_versions                  = Channel.empty()
-    ch_raw_classifications       = Channel.empty()
-    ch_raw_profiles              = Channel.empty()
-    ch_multiqc_files             = Channel.empty()
-    ch_postprocessing_input      = Channel.empty()
+    ch_versions             = Channel.empty()
+    ch_multiqc_files        = Channel.empty()
+    ch_postprocessing_input = Channel.empty()
 
     /*
         PREPARE PROFILER INPUT CHANNELS & RUN PROFILING
@@ -85,10 +83,9 @@ workflow METAGENOMICS_PROFILING {
                 [ meta_new, rma ]
             }
 
-        ch_versions                 = ch_versions.mix( MALT_RUN.out.versions.first() )
-        ch_raw_classifications      = ch_raw_classifications.mix( ch_maltrun_for_megan )
-        ch_multiqc_files            = ch_multiqc_files.mix( MALT_RUN.out.log )
-        ch_postprocessing_input     = ch_postprocessing_input.mix( ch_maltrun_for_megan )
+        ch_versions             = MALT_RUN.out.versions.first()
+        ch_multiqc_files        = MALT_RUN.out.log
+        ch_postprocessing_input = ch_maltrun_for_megan
     }
 
     else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
@@ -98,13 +95,12 @@ workflow METAGENOMICS_PROFILING {
         metaphlan_db = reads.map{ meta, reads, database -> [database] }
 
         METAPHLAN_METAPHLAN ( metaphlan_reads , metaphlan_db )
-        ch_versions             = ch_versions.mix( METAPHLAN_METAPHLAN.out.versions.first() )
-        ch_raw_profiles         = ch_raw_profiles.mix( METAPHLAN_METAPHLAN.out.profile )
-        ch_postprocessing_input = ch_postprocessing_input.mix( METAPHLAN_METAPHLAN.out.profile )
+        ch_versions             = METAPHLAN_METAPHLAN.out.versions.first()
+        ch_postprocessing_input = METAPHLAN_METAPHLAN.out.profile
 
     }
 
-    if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
+    else if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
         // run kraken uniq per sample, to preserve the meta-data
 
         reads = reads.combine(database)
@@ -120,12 +116,9 @@ workflow METAGENOMICS_PROFILING {
             params.metagenomics_kraken_savereadclassifications
         )
 
-        ch_multiqc_files           = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
-        ch_versions                = ch_versions.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions.first() )
-        ch_raw_classifications     = ch_raw_classifications.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.classified_assignment )
-        ch_raw_profiles            = ch_raw_profiles.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
-        ch_multiqc_files           = ch_multiqc_files.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
-        ch_postprocessing_input    = ch_postprocessing_input.mix( KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report )
+        ch_versions             = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions.first()
+        ch_multiqc_files        = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report
+        ch_postprocessing_input = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report
     }
 
     else if ( params.metagenomics_profiling_tool == 'kraken2' ) {
@@ -142,17 +135,13 @@ workflow METAGENOMICS_PROFILING {
             params.metagenomics_kraken_savereadclassifications
         )
 
-        ch_multiqc_files            = ch_multiqc_files.mix( KRAKEN2_KRAKEN2.out.report )
-        ch_versions                 = ch_versions.mix( KRAKEN2_KRAKEN2.out.versions.first() )
-        ch_raw_classifications      = ch_raw_classifications.mix( KRAKEN2_KRAKEN2.out.classified_reads_assignment )
-        ch_raw_profiles             = ch_raw_profiles.mix( KRAKEN2_KRAKEN2.out.report )
-        ch_postprocessing_input     = ch_postprocessing_input.mix( KRAKEN2_KRAKEN2.out.report )
+        ch_multiqc_files        = KRAKEN2_KRAKEN2.out.report
+        ch_versions             = KRAKEN2_KRAKEN2.out.versions.first()
+        ch_postprocessing_input = KRAKEN2_KRAKEN2.out.report
     }
 
     emit:
-    versions             = ch_versions          // channel: [ versions.yml ]
-    classifications      = ch_raw_classifications
-    profiles             = ch_raw_profiles    // channel: [ val(meta), [ reads ] ] - should be text files or biom
+    versions             = ch_versions             // channel: [ versions.yml ]
     postprocessing_input = ch_postprocessing_input // channel: [ val(meta), [ inputs_for_postprocessing_tools ] ] // see info at metagenomics_postprocessing
     mqc                  = ch_multiqc_files
 

@@ -37,7 +37,7 @@ workflow METAGENOMICS {
 
     METAGENOMICS_PROFILING( ch_reads_for_metagenomics, database )
 
-    ch_versions      = ch_versions.mix( METAGENOMICS_PROFILING.out.versions.first() )
+    ch_versions      = ch_versions.mix( METAGENOMICS_PROFILING.out.versions )
     ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS_PROFILING.out.mqc.collect{it[1]}.ifEmpty([]) )
 
     //
@@ -48,7 +48,7 @@ workflow METAGENOMICS {
 
         METAGENOMICS_POSTPROCESSING ( METAGENOMICS_PROFILING.out.postprocessing_input )
 
-        ch_versions      = ch_versions.mix( METAGENOMICS_POSTPROCESSING.out.versions.first() )
+        ch_versions      = ch_versions.mix( METAGENOMICS_POSTPROCESSING.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS_POSTPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 

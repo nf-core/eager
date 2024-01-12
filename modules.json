@@ -145,6 +145,11 @@
                         "git_sha": "0591cad3d725d5c21337f72e638507abf709f75e",
                         "installed_by": ["modules"]
                     },
+                    "megan/rma2info": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
                     "metaphlan/metaphlan": {
                         "branch": "master",
                         "git_sha": "1038d3de36263159b4138324a646105941ac271a",
@@ -236,11 +241,6 @@
                         "installed_by": ["modules", "bam_split_by_region"]
                     },
                     "taxpasta/merge": {
-                        "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
-                        "installed_by": ["modules"]
-                    },
-                    "taxpasta/standardise": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]

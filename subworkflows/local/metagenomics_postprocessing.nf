@@ -1,6 +1,7 @@
 include { MALTEXTRACT     } from '../../modules/nf-core/maltextract/main'
 include { AMPS            } from '../../modules/nf-core/amps/main'
 include { TAXPASTA_MERGE  } from '../../modules/nf-core/taxpasta/merge/main'
+include { MEGAN_RMA2INFO  } from '../../modules/nf-core/megan/rma2info/main'
 
 workflow METAGENOMICS_POSTPROCESSING {
 
