@@ -83,8 +83,8 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     def contamination_estimation_angsd_hapmap = params.contamination_estimation_angsd_hapmap != null ? file( params.contamination_estimation_angsd_hapmap, checkIfExists: true ) : ""
                                     def pmd_mask                              = params.damage_manipulation_pmdtools_reference_mask != null ? file(params.damage_manipulation_pmdtools_reference_mask, checkIfExists: true ) : ""
                                     def capture_bed                           = params.snpcapture_bed != null ? file(params.snpcapture_bed, checkIfExists: true ) : ""
-                                    def pileupcaller_bed                      = ""
-                                    def pileupcaller_snp                      = ""
+                                    def pileupcaller_bed                      = params.genotyping_pileupcaller_bedfile != null ? file(params.genotyping_pileupcaller_bedfile, checkIfExists: true ) : ""
+                                    def pileupcaller_snp                      = params.genotyping_pileupcaller_snpfile != null ? file(params.genotyping_pileupcaller_snpfile, checkIfExists: true ) : ""
                                     def sexdet_bed                            = ""
                                     def bedtools_feature                      = params.mapstats_bedtools_featurefile != null ? file(params.mapstats_bedtools_featurefile, checkIfExists: true ) : ""
                                     def genotyping_gatk_ploidy                = params.genotyping_gatk_ploidy
@@ -95,27 +95,27 @@ workflow REFERENCE_INDEXING_SINGLE {
     ch_ref_index_single = ch_reference_for_mapping
                                 .multiMap{
                                     meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
-                                    reference:         [ meta, fasta, fai, dict, mapper_index, circular_target ]
-                                    mito_header:       [ meta, mitochondrion_header ]
-                                    hapmap:            [ meta, contamination_estimation_angsd_hapmap ]
-                                    pmd_mask:          [ meta, pmd_mask, capture_bed ]
-                                    snp_bed:           [ meta, capture_bed ]
-                                    pileupcaller_snp:  [ meta, pileupcaller_bed, pileupcaller_snp ]
-                                    sexdeterrmine_bed: [ meta, sexdet_bed ]
-                                    bedtools_feature:  [ meta, bedtools_feature ]
-                                    dbsnp:             [ meta, genotyping_gatk_dbsnp ]
+                                    reference:              [ meta, fasta, fai, dict, mapper_index, circular_target ]
+                                    mito_header:            [ meta, mitochondrion_header ]
+                                    hapmap:                 [ meta, contamination_estimation_angsd_hapmap ]
+                                    pmd_mask:               [ meta, pmd_mask, capture_bed ]
+                                    snp_bed:                [ meta, capture_bed ]
+                                    pileupcaller_bed_snp:   [ meta, pileupcaller_bed, pileupcaller_snp ]
+                                    sexdeterrmine_bed:      [ meta, sexdet_bed ]
+                                    bedtools_feature:       [ meta, bedtools_feature ]
+                                    dbsnp:                  [ meta, genotyping_gatk_dbsnp ]
                                 }
 
     emit:
-    reference            = ch_ref_index_single.reference          // [ meta, fasta, fai, dict, mapindex, circular_target ]
-    mitochondrion_header = ch_ref_index_single.mito_header        // [ meta, mito_header ]
-    hapmap               = ch_ref_index_single.hapmap             // [ meta, hapmap ]
-    pmd_mask             = ch_ref_index_single.pmd_mask           // [ meta, pmd_mask, capture_bed ]
-    snp_capture_bed      = ch_ref_index_single.snp_bed            // [ meta, capture_bed ]
-    pileupcaller_snp     = ch_ref_index_single.pileupcaller_snp   // [ meta, pileupcaller_bed, pileupcaller_snp ]
-    sexdeterrmine_bed    = ch_ref_index_single.sexdeterrmine_bed  // [ meta, sexdet_bed ]
-    bedtools_feature     = ch_ref_index_single.bedtools_feature   // [ meta, bedtools_feature ]
-    dbsnp                = ch_ref_index_single.dbsnp              // [ meta, genotyping_gatk_dbsnp ]
+    reference            = ch_ref_index_single.reference             // [ meta, fasta, fai, dict, mapindex, circular_target ]
+    mitochondrion_header = ch_ref_index_single.mito_header           // [ meta, mito_header ]
+    hapmap               = ch_ref_index_single.hapmap                // [ meta, hapmap ]
+    pmd_mask             = ch_ref_index_single.pmd_mask              // [ meta, pmd_mask, capture_bed ]
+    snp_capture_bed      = ch_ref_index_single.snp_bed               // [ meta, capture_bed ]
+    pileupcaller_bed_snp = ch_ref_index_single.pileupcaller_bed_snp  // [ meta, pileupcaller_bed, pileupcaller_snp ]
+    sexdeterrmine_bed    = ch_ref_index_single.sexdeterrmine_bed     // [ meta, sexdet_bed ]
+    bedtools_feature     = ch_ref_index_single.bedtools_feature      // [ meta, bedtools_feature ]
+    dbsnp                = ch_ref_index_single.dbsnp                 // [ meta, genotyping_gatk_dbsnp ]
     versions             = ch_versions
 
 }

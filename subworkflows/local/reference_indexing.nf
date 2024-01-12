@@ -28,7 +28,7 @@ workflow REFERENCE_INDEXING {
         ch_hapmap                = REFERENCE_INDEXING_MULTI.out.hapmap
         ch_pmd_mask              = REFERENCE_INDEXING_MULTI.out.pmd_mask
         ch_snp_capture_bed       = REFERENCE_INDEXING_MULTI.out.snp_capture_bed
-        ch_pileupcaller_snp      = REFERENCE_INDEXING_MULTI.out.pileupcaller_snp
+        ch_pileupcaller_bed_snp  = REFERENCE_INDEXING_MULTI.out.pileupcaller_bed_snp
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_MULTI.out.sexdeterrmine_bed
         ch_bedtools_feature      = REFERENCE_INDEXING_MULTI.out.bedtools_feature
         ch_dbsnp                 = REFERENCE_INDEXING_MULTI.out.dbsnp
@@ -40,7 +40,7 @@ workflow REFERENCE_INDEXING {
         ch_hapmap                = REFERENCE_INDEXING_SINGLE.out.hapmap
         ch_pmd_mask              = REFERENCE_INDEXING_SINGLE.out.pmd_mask
         ch_snp_capture_bed       = REFERENCE_INDEXING_SINGLE.out.snp_capture_bed
-        ch_pileupcaller_snp      = REFERENCE_INDEXING_SINGLE.out.pileupcaller_snp
+        ch_pileupcaller_bed_snp  = REFERENCE_INDEXING_SINGLE.out.pileupcaller_bed_snp
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_SINGLE.out.sexdeterrmine_bed
         ch_bedtools_feature      = REFERENCE_INDEXING_SINGLE.out.bedtools_feature
         ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE.out.reference
@@ -73,16 +73,17 @@ workflow REFERENCE_INDEXING {
     GUNZIP_SNPBED( ch_capture_bed_gunzip.forgunzip )
     ch_capture_bed = GUNZIP_SNPBED.out.gunzip.mix( ch_capture_bed_gunzip.skip ).mix( ch_capture_bed.skip )
 
-    ch_pileupcaller_snp = ch_pileupcaller_snp
-                    .filter{ it[1] != "" && it[2] != "" }
+    ch_pileupcaller_bed_snp = ch_pileupcaller_bed_snp
+                    .filter { it[1] != "" && it[2] != "" }
 
     ch_sexdeterrmine_bed = ch_sexdeterrmine_bed
-                    .filter{ it[1] != "" }
+                    .filter { it[1] != "" }
 
     ch_bedtools_feature = ch_bedtools_feature
-                    .filter{ it[1] != "" }
+                    .filter { it[1] != "" }
 
-    // TODO-DEV No filtering dbsnp cause we always need the ploidy value from its meta. Will probably need a reference sheet validator to fix this.
+    ch_dbsnp = ch_dbsnp
+        .filter { it[1] != "" }
 
     emit:
     reference            = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, circular_target ]
@@ -90,7 +91,7 @@ workflow REFERENCE_INDEXING {
     hapmap               = ch_hapmap                // [ meta, hapmap ]
     pmd_mask             = ch_pmd_mask              // [ meta, masked_fasta, capture_bed ]
     snp_capture_bed      = ch_capture_bed           // [ meta, capture_bed ]
-    pileupcaller_snp     = ch_pileupcaller_snp      // [ meta, pileupcaller_bed, pileupcaller_snp ]
+    pileupcaller_bed_snp = ch_pileupcaller_bed_snp  // [ meta, pileupcaller_bed, pileupcaller_snp ]
     sexdeterrmine_bed    = ch_sexdeterrmine_bed     // [ meta, sexdet_bed ]
     bedtools_feature     = ch_bedtools_feature      // [ meta, bedtools_feature ]
     dbsnp                = ch_dbsnp                 // [ meta, dbsnp ]
