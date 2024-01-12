@@ -11,9 +11,9 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     main:
     ch_versions      = Channel.empty()
-    ch_results       = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
+    // For MALT we have an additional step that includes maltextract+amps
     if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt' ) {
 
         //maltextract doesnt accepts a meta param in the first input channel, so remove it
@@ -26,35 +26,38 @@ workflow METAGENOMICS_POSTPROCESSING {
 
         AMPS ( MALTEXTRACT.out.results, tax_list, params.metagenomics_maltextract_filter )
 
+
+        //Also, prepare Malt for taxpasta by running rma2info
+
+        MEGAN_RMA2INFO( ch_postprocessing_input, true )
+        ch_postprocessing_input = MEGAN_RMA2INFO.out.txt
+
         ch_versions      = ch_versions.mix( MALTEXTRACT.out.versions.first(), AMPS.out.versions.first() )
-        ch_results       = ch_results.mix( AMPS.out.candidate_pdfs, AMPS.out.tsv, AMPS.out.summary_pdf )
         ch_multiqc_files = ch_multiqc_files.mix( AMPS.out.json )
-
     }
 
-    else if ( ['kraken2', 'krakenuniq', 'metaphlan'].contains(params.metagenomics_profiling_tool) ) {
+   // Run taxpasta for everything!
 
-        ch_postprocessing_input = ch_postprocessing_input
-        .map{
-            meta, report ->
-            [report]
-        }
-        .collect()
-        .map{
-            reports ->
+    ch_postprocessing_input = ch_postprocessing_input
+    .map{
+        meta, report ->
+        [report]
+    }
+    .collect()
+    .map{
+        reports ->
+        [
             [
-                [
-                    "id":"${params.metagenomics_profiling_tool}_profiles_all_samples_merged_taxpasta",
-                    "profiler":params.metagenomics_profiling_tool
-                ],
-                reports
-            ]
-        }
-
-        TAXPASTA_MERGE( ch_postprocessing_input, [], [] )
-        ch_versions = TAXPASTA_MERGE.out.versions
-        ch_multiqc_files = TAXPASTA_MERGE.out.merged_profiles
+                "id":"${params.metagenomics_profiling_tool}_profiles_all_samples_merged_taxpasta",
+                "profiler":params.metagenomics_profiling_tool == 'malt' ? 'megan6' : params.metagenomics_profiling_tool
+            ],
+            reports
+        ]
     }
+
+    TAXPASTA_MERGE( ch_postprocessing_input, [], [] )
+    ch_versions = ch_versions.mix(TAXPASTA_MERGE.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(TAXPASTA_MERGE.out.merged_profiles)
 
     emit:
     versions = ch_versions

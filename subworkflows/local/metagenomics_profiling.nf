@@ -77,10 +77,10 @@ workflow METAGENOMICS_PROFILING {
                     // re-extract meta from file names, use filename without rma to
                     // ensure we keep paired-end information in downstream filenames
                     // when no pair-merging
-                    def meta_new = meta.clone()
-                    meta_new['db_name'] = meta.id
-                    meta_new['id'] = rma.baseName
-                [ meta_new, rma ]
+                    [
+                        meta+['db_name':meta.id, 'id': rma.baseName],
+                        rma
+                    ]
             }
 
         ch_versions             = MALT_RUN.out.versions.first()
