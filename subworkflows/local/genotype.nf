@@ -15,12 +15,10 @@ include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../module
 
 workflow GENOTYPE {
     take:
-    ch_bam_bai              // [ [ meta ], bam , bai ]
-    ch_fasta_plus           // [ [ meta ], fasta, fai, dict ]
-    ch_snpcapture_bed       // [ [ meta ], bed ]
-    ch_pileupcaller_bedfile // [ [ meta ], bed ]
-    ch_pileupcaller_snpfile // [ [ meta ], snp ]
-    ch_dbsnp                // [ [ meta ], dbsnp ]
+    ch_bam_bai                // [ [ meta ], bam , bai ]
+    ch_fasta_plus             // [ [ meta ], fasta, fai, dict ]
+    ch_pileupcaller_aux_files // [ [ meta ], bed, snp ]
+    ch_dbsnp                  // [ [ meta ], dbsnp ]
 
     main:
     ch_versions                        = Channel.empty()
@@ -41,12 +39,66 @@ workflow GENOTYPE {
         }
 
     if ( params.genotyping_tool == 'pileupcaller' ) {
-        // SAMTOOLS_MPILEUP_PILEUPCALLER( ch_bam_bai, ch_fasta_plus )
 
-    /*
-    // TODO - this is not working yet. Need snpcapture Bed and pileupcaller snp file to add here.
-    SEQUENCETOOLS_PILEUPCALLER( ch_bam_bai, ch_fasta_plus, ch_versions, ch_multiqc_files )
-    */
+        // Compile together all reference based files
+        ch_refs_for_mpileup_pileupcaller = ch_fasta_plus
+            .join( ch_pileupcaller_aux_files ) // [ [ref_meta], fasta, fai, dict, bed, snp ]
+            .map {
+            // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+            } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, bed, snp ]
+
+        // Prepare collect bams for mpileup
+        ch_mpileup_inputs_bams = ch_bam_bai
+            .map {
+                WorkflowEager.addNewMetaFromAttributes( it, ["reference", "strandedness"] , ["reference", "strandedness"] , false )
+            }
+            .groupTuple()
+            .map {
+                combo_meta, metas, bams, bais ->
+                def ids = metas.collect { meta -> meta.id }
+                [ combo_meta + [id: ids], bams ] // Drop bais
+            } // Collect all IDs into a list in meta.id. Useful when running pileupCaller later
+
+            // Combine prepped bams and references
+            ch_mpileup_inputs = ch_mpileup_inputs_bams
+                .map {
+                    WorkflowEager.addNewMetaFromAttributes( it, "reference", "reference" , false )
+                }
+                .combine( ch_refs_for_mpileup_pileupcaller , by:0 )
+                .multiMap {
+                    ignore_me, combo_meta, bams, ref_meta, fasta, fai, dict, bed, snp ->
+                        def bedfile = bed != "" ? bed : []
+                        bams:  [ combo_meta, bams, bedfile ]
+                        fasta: [ fasta ]
+                }
+            SAMTOOLS_MPILEUP_PILEUPCALLER(
+                ch_mpileup_inputs.bams,
+                ch_mpileup_inputs.fasta
+            )
+            ch_versions = ch_versions.mix( SAMTOOLS_MPILEUP_PILEUPCALLER.out.versions.first() )
+
+            ch_pileupcaller_input = SAMTOOLS_MPILEUP_PILEUPCALLER.out.mpileup
+                .map {
+                    WorkflowEager.addNewMetaFromAttributes( it, "reference", "reference" , false )
+                }
+                .combine( ch_refs_for_mpileup_pileupcaller, by:0 )
+                .multiMap {
+                    ignore_me, meta, mpileup, ref_meta, fasta, fai, dict, bed, snp ->
+                        def snpfile = snp != "" ? snp : []
+                        mpileup: [ meta, mpileup ]
+                        snpfile: [ snpfile ]
+                }
+
+            // TODO NOTE: Maybe implement a check that unmerged R2 reads have not been kept and throw a warning for ssDNA libs? See: https://github.com/stschiff/sequenceTools/issues/24
+            ch_pileupcaller_input.mpileup.dump(tag:"mpileup", pretty: true)
+            // Run PileupCaller
+            SEQUENCETOOLS_PILEUPCALLER(
+                ch_pileupcaller_input.mpileup,
+                ch_pileupcaller_input.snpfile,
+                []
+            )
+            ch_versions = ch_versions.mix( SEQUENCETOOLS_PILEUPCALLER.out.versions.first() )
     }
 
     if ( params.genotyping_tool == 'ug' ) {
