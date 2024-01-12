@@ -817,7 +817,7 @@
                 "metagenomics_run_postprocessing": {
                     "type": "boolean",
                     "description": "Activate post-processing of metagenomics profiling tool selected.",
-                    "help_text": "Activate the corresponding post-processing tool for your metagenomics profiling software. \n\nmalt --> maltextract\nkrakenuniq/kraken2 --> krakenmerge\nmetaphlan --> mergemetaphlantables\n\nNote: Postprocessing is automatically carried out when using  `kraken2` and `krakenuniq` ",
+                    "help_text": "Activate the corresponding post-processing tool for your metagenomics profiling software. \n\nmalt --> maltextract\nkrakenuniq/kraken2/metaphlan --> taxpasta\n\nNote: Postprocessing is automatically carried out when using  `kraken2` and `krakenuniq` ",
                     "fa_icon": "fab fa-buromobelexperte"
                 },
                 "metagenomics_maltextract_taxonlist": {

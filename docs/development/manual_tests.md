@@ -700,6 +700,7 @@ nextflow run main.nf -profile test,docker \
 ```
 
 ##### mergemetaphlantables
+(update: Jan 2024, removed, parsing with taxpasta)
 
 ```bash
 nextflow run -resume ./main.nf -profile test,docker --outdir out \

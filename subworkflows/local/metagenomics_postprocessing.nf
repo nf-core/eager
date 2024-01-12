@@ -1,8 +1,6 @@
-include { MALTEXTRACT                    } from '../../modules/nf-core/maltextract/main'
-include { AMPS                           } from '../../modules/nf-core/amps/main'
-include { METAPHLAN_MERGEMETAPHLANTABLES } from '../../modules/nf-core/metaphlan/mergemetaphlantables/main'
-include { TAXPASTA_STANDARDISE           } from '../../modules/nf-core/taxpasta/standardise/main'
-include { TAXPASTA_MERGE                 } from '../../modules/nf-core/taxpasta/merge/main'
+include { MALTEXTRACT     } from '../../modules/nf-core/maltextract/main'
+include { AMPS            } from '../../modules/nf-core/amps/main'
+include { TAXPASTA_MERGE  } from '../../modules/nf-core/taxpasta/merge/main'
 
 workflow METAGENOMICS_POSTPROCESSING {
 
@@ -33,7 +31,7 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     }
 
-    else if ( ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
+    else if ( ['kraken2', 'krakenuniq', 'metaphlan'].contains(params.metagenomics_profiling_tool) ) {
 
         ch_postprocessing_input = ch_postprocessing_input
         .map{
@@ -44,21 +42,17 @@ workflow METAGENOMICS_POSTPROCESSING {
         .map{
             reports ->
             [
-                ["id":"taxpasta", "profiler":params.metagenomics_profiling_tool],
+                [
+                    "id":"${params.metagenomics_profiling_tool}_profiles_all_samples_merged_taxpasta",
+                    "profiler":params.metagenomics_profiling_tool
+                ],
                 reports
             ]
         }
 
         TAXPASTA_MERGE( ch_postprocessing_input, [], [] )
-    }
-
-    else if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'metaphlan' ) {
-
-        METAPHLAN_MERGEMETAPHLANTABLES ( ch_postprocessing_input.map{ [[id:"metaphlan_profiles_all_samples_merged"], it[1]] }.groupTuple() )
-
-        ch_versions      = ch_versions.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.versions.first() )
-        ch_multiqc_files = ch_multiqc_files.mix( METAPHLAN_MERGEMETAPHLANTABLES.out.txt )
-
+        ch_versions = TAXPASTA_MERGE.out.versions
+        ch_multiqc_files = TAXPASTA_MERGE.out.merged_profiles
     }
 
     emit:
