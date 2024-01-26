@@ -71,7 +71,7 @@ include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
 include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
-include { RUN_SEXDETERMINE              } from '../subworkflows/local/sex_determination'
+include { RUN_SEXDETERMINE              } from '../subworkflows/local/run_sex_determination'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -134,25 +134,12 @@ workflow EAGER {
     }
 
 
-    // Sex determine
+    // SUBWORKFLOW: Run Sex determination
     if ( params.sexdeterrmine_bedfile ) {
-      ch_sexdeterrmine_bed = Channel.fromPath( params.sexdeterrmine_bedfile, checkIfExists: true )
-        .collect()
-        .map {
-          file ->
-              meta = file.simpleName
-          [meta,file]
-        }
-
-    } else {
-      ch_sexdeterrmine_bed = []
-    }
-
-    if ( params.sexdeterrmine_samplelist) {
-      ch_sexdeterrmine_samplelist = Channel.fromPath( params.sexdeterrmine_samplelist, checkIfExists: true )
-
-    } else {
-      ch_sexdeterrmine_samplelist = []
+      ch_sexdeterrmine_bed = REFERENCE_INDEXING.out.sexdeterrmine_bed
+            .map{
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+            }
     }
 
     //
@@ -534,21 +521,15 @@ workflow EAGER {
     }
 
     //
-    // SUBWORKFLOW: Sex Determine
+    // SUBWORKFLOW: Run Sex Determination
     //
 
     if ( params.run_sexdeterrmine ) {
+        ch_sexdeterrmine_input = ch_dedupped_bams
 
-    ch_sexdeterrmine_input = ch_dedupped_bams
-            .map {
-            meta, bam, bai ->
-                [ meta, bam ]
-            }
-
-    RUN_SEXDETERMINE(ch_sexdeterrmine_input, ch_sexdeterrmine_bed, ch_sexdeterrmine_samplelist)
-    ch_versions      = ch_versions.mix( RUN_SEXDETERMINE.out.versions )
-    ch_multiqc_files = ch_multiqc_files.mix( RUN_SEXDETERMINE.out.mqc.collect{it[1]}.ifEmpty([]) )
-
+        RUN_SEXDETERMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed )
+        ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //
