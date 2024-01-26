@@ -11,7 +11,6 @@ workflow RUN_SEXDETERMINE {
     // samtoolsdepth_input // channel: [ val(meta1), [ bam ], [ meta2 ] [ intervals_bed ] ]
     sexdeterrmine_bam // channel: [ val(meta1), [ bam ] ]
     sexdeterrmine_bed // channel: [ [ meta2 ] [ intervals_bed ] ]
-    sexdeterrmine_list // channel: [ val(meta), [ sample_list_file ] ]
 
     main:
     ch_versions       = Channel.empty()
@@ -41,7 +40,7 @@ workflow RUN_SEXDETERMINE {
     ch_versions           = ch_versions.mix( SEXDETERRMINE.out.versions )
 
     emit:
-    coverages         = ch_coverages // channel: [ val(meta), path("*.tsv") ]
+    coverages          = ch_coverages // channel: [ val(meta), path("*.tsv") ]
     mqc                = ch_multiqc_files // channel: [ val(meta), path("*.json") ]
     versions           = ch_versions // channel: path(versions.yml)
 }
