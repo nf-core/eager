@@ -551,7 +551,12 @@ workflow EAGER {
                 meta, fasta, fai, dict, mapindex, circular_target ->
                 [ meta, fasta, fai, dict ]
             }
-        GENOTYPE( ch_bams_for_genotyping, ch_reference_for_genotyping, REFERENCE_INDEXING.out.pileupcaller_bed_snp, REFERENCE_INDEXING.out.dbsnp )
+        GENOTYPE(
+                ch_bams_for_genotyping, // [ [meta] , bam, bai ]
+                ch_reference_for_genotyping, // [ [ref_meta] , fasta, fai, dict ]
+                REFERENCE_INDEXING.out.pileupcaller_bed_snp.ifEmpty([[],[],[]]), // [ [ref_meta] , bed, snp ]
+                REFERENCE_INDEXING.out.dbsnp.ifEmpty([[],[]]) // [ [ref_meta] , dbsnp ]
+            )
 
         ch_versions      = ch_versions.mix( GENOTYPE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( GENOTYPE.out.mqc.collect{it[1]}.ifEmpty([]) )
