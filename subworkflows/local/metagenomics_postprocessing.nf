@@ -17,7 +17,11 @@ workflow METAGENOMICS_POSTPROCESSING {
     if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt' ) {
 
         //maltextract doesnt accepts a meta param in the first input channel, so remove it
-        ch_maltextract_input = ch_postprocessing_input.map{it[1]}
+        ch_maltextract_input = ch_postprocessing_input.first().map {
+            meta, rma, rma_collected ->
+                rma_collected
+            }
+        ch_maltextract_input.view()
 
         tax_list = Channel.fromPath(params.metagenomics_maltextract_taxonlist)
         ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbidir)
@@ -28,8 +32,12 @@ workflow METAGENOMICS_POSTPROCESSING {
 
 
         //Also, prepare Malt for taxpasta by running rma2info
+        ch_rma2info_input = ch_postprocessing_input.map {
+            meta, rma, rma_collected ->
+                [ meta, rma ]
+            }
 
-        MEGAN_RMA2INFO( ch_postprocessing_input, true )
+        MEGAN_RMA2INFO( ch_rma2info_input, true )
         ch_postprocessing_input = MEGAN_RMA2INFO.out.txt
 
         ch_versions      = ch_versions.mix( MALTEXTRACT.out.versions.first(), AMPS.out.versions.first() )

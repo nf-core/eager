@@ -83,9 +83,17 @@ workflow METAGENOMICS_PROFILING {
                     ]
             }
 
+        ch_maltrun_for_maltextract = MALT_RUN.out.rma6.map {
+            id,rma6 -> rma6
+        }
+        .collect()
+        .toList()
+
+        ch_maltrun_for_postprocessing = ch_maltrun_for_megan.combine(ch_maltrun_for_maltextract)
+
         ch_versions             = MALT_RUN.out.versions.first()
         ch_multiqc_files        = MALT_RUN.out.log
-        ch_postprocessing_input = ch_maltrun_for_megan
+        ch_postprocessing_input = ch_maltrun_for_postprocessing
     }
 
     else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
