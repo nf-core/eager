@@ -74,7 +74,8 @@ workflow REFERENCE_INDEXING {
     ch_capture_bed = GUNZIP_SNPBED.out.gunzip.mix( ch_capture_bed_gunzip.skip ).mix( ch_capture_bed.skip )
 
     ch_pileupcaller_bed_snp = ch_pileupcaller_bed_snp
-                    .filter { it[1] != "" && it[2] != "" }
+                    .filter { it[1] != "" || it[2] != "" } // They go together or not at all.
+                    // TODO add user warning if only one of the two is provided
 
     ch_sexdeterrmine_bed = ch_sexdeterrmine_bed
                     .filter { it[1] != "" }
