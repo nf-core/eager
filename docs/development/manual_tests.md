@@ -717,6 +717,7 @@ curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/004/ERR8958754/ERR8958754_2.fa
 ls -1 | while read file; do
 zcat $file | head -n 4000 > ${file}_reduced.fastq
 done
+cd ..
 
 echo "sample_id library_id lane colour_chemistry pairment strandedness damage_treatment r1 r2 bam bam_reference_id
 HOP001 ERR8958750 0 4 paired double half /workspace/eager/testing/test_data/ERR8958750_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958750_2.fastq.gz_reduced.fastq.gz NA NA
