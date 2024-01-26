@@ -2,8 +2,8 @@
 // Run sex determine
 //
 
-include { SAMTOOLS_DEPTH } from '../../modules/nf-core/samtools/depth/main'
-include { SEXDETERRMINE } from '../../modules/nf-core/sexdeterrmine/main'
+include { SAMTOOLS_DEPTH as SAMTOOLS_DEPTH_SEXDETERMINE } from '../../modules/nf-core/samtools/depth/main'
+include { SEXDETERRMINE                                 } from '../../modules/nf-core/sexdeterrmine/main'
 
 workflow RUN_SEXDETERMINE {
 
@@ -28,9 +28,9 @@ workflow RUN_SEXDETERMINE {
                             intervals : [ meta2, bed ]
                                     }
 
-    SAMTOOLS_DEPTH(ch_samtoolsdepth_input)
-    ch_sex_determine_input = SAMTOOLS_DEPTH.out.tsv
-    ch_versions            = ch_versions.mix( SAMTOOLS_DEPTH.out.versions )
+    SAMTOOLS_DEPTH_SEXDETERMINE(ch_samtoolsdepth_input)
+    ch_sex_determine_input = SAMTOOLS_DEPTH_SEXDETERMINE.out.tsv
+    ch_versions            = ch_versions.mix( SAMTOOLS_DEPTH_SEXDETERMINE.out.versions )
 
     // Run sex determination with samtools depth input
     // Does it need a sample list file to run?
