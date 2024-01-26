@@ -14,7 +14,6 @@ class WorkflowEager {
 
         genomeExistsError(params, log)
 
-
         if (!params.fasta) {
             Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
         }
@@ -33,16 +32,16 @@ class WorkflowEager {
                 for (param in group_params.keySet()) {
                     summary_section += "        <dt>$param</dt><dd><samp>${group_params.get(param) ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>\n"
                 }
-                summary_section += "    </dl>\n"
+                summary_section += '    </dl>\n'
             }
         }
 
-        String yaml_file_text  = "id: '${workflow.manifest.name.replace('/','-')}-summary'\n"
+        String yaml_file_text  = "id: '${workflow.manifest.name.replace('/', '-')}-summary'\n"
         yaml_file_text        += "description: ' - this information is collected when the pipeline is started.'\n"
         yaml_file_text        += "section_name: '${workflow.manifest.name} Workflow Summary'\n"
         yaml_file_text        += "section_href: 'https://github.com/${workflow.manifest.name}'\n"
         yaml_file_text        += "plot_type: 'html'\n"
-        yaml_file_text        += "data: |\n"
+        yaml_file_text        += 'data: |\n'
         yaml_file_text        += "${summary_section}"
         return yaml_file_text
     }
@@ -83,12 +82,11 @@ class WorkflowEager {
         // Convert  to a named map so can be used as with familar NXF ${workflow} variable syntax in the MultiQC YML file
         def meta = [:]
         meta.workflow = run_workflow.toMap()
-        meta["manifest_map"] = run_workflow.manifest.toMap()
+        meta['manifest_map'] = run_workflow.manifest.toMap()
 
         // Pipeline DOI
         meta["doi_text"] = meta.manifest_map.doi ? "(doi: <a href=\'https://doi.org/${meta.manifest_map.doi}\'>${meta.manifest_map.doi}</a>)" : ""
         meta["nodoi_text"] = meta.manifest_map.doi ? "": "<li>If available, make sure to update the text to include the Zenodo DOI of version of the pipeline used. </li>"
-
         // Tool references
         meta["tool_citations"] = ""
         meta["tool_bibliography"] = ""
@@ -118,5 +116,68 @@ class WorkflowEager {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.error(error_string)
         }
+    }
+
+    def public static String grabUngzippedExtension(infile) {
+
+        def split_name = infile.toString().tokenize('.')
+        def output = split_name.reverse().first() == 'gz' ? split_name.reverse()[1,0].join('.') : split_name.reverse()[0]
+
+        return '.' + output
+
+    }
+
+    /*
+    This function can be applied to the contents of a channel row-by-row with a .map operator.
+    It assumes that the first element of the channel row is a map of metadata. It will then create a new metadata map
+    that consists of the source_attributes of the original metadata map, but named after the corresponding target_attributes.
+    The new metadata map is then prepended to the channel row, becoming the new first element.
+    If the remove flag is set to true, then the original metadata map is removed from the channel row.
+
+    Example:
+    ch_my_channel=Channel.of( [ [id:'id', sample_id:'sample_id', single_end:true, reference:"hs37d5" ], "bam", "bai" ] )
+
+    ch_my_channel.map{ row -> addNewMetaFromAttributes(row, "id", "new_attribute", false) }
+    // This will create a new channel with the following rows:
+    [ [ new_attribute: 'id' ], [id:'id', sample_id:'sample_id', single_end:true, reference:"hs37d5" ], "bam", "bai" ]
+
+    ch_my_channel.map{ row -> addNewMetaFromAttributes(row, ["id", "single_end"], ["new_attribute", "endedness"] , true) }
+    // This will create a new channel with the following rows:
+    [ [ new_attribute: 'id' , endedness: true ], "bam", "bai" ]
+
+    */
+    def public static ArrayList addNewMetaFromAttributes( ArrayList row, Object source_attributes, Object target_attributes, boolean remove = false) {
+        def meta = row[0]
+        def meta2 = [:]
+
+        // Read in target and source attributes and create a mapping between them
+        // Option A: both attributes are Strings
+        if ((source_attributes instanceof String) && (target_attributes instanceof String)) {
+                meta2[target_attributes] = meta[source_attributes]
+
+        } else if ((source_attributes instanceof List) && (target_attributes instanceof List)) {
+            if (source_attributes.size() == target_attributes.size()) {
+                for (int i = 0; i < source_attributes.size(); i++) {
+                    // Option B: Both are lists of same size
+                    meta2[target_attributes[i]] = meta[source_attributes[i]]
+                }
+            } else {
+                // Option C: Both lists, but uneven. Error.
+                throw new IllegalArgumentException("Error: The target_attributes and source_attributes lists do not have the same size.")
+            }
+        } else {
+            // Option D: Not both the same type or acceptable types. Error.
+            throw new IllegalArgumentException("Error: target_attributes and source_attributes must be of same type (both Strings or both Lists).")
+
+        }
+
+        def new_row = [ meta2 ] + row
+
+        // If replace is true, then remove the old meta
+        if (remove && new_row.size() > 1) {
+            new_row.remove(1)
+        }
+
+        return new_row
     }
 }
