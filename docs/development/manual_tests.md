@@ -656,17 +656,19 @@ nextflow run . -profile test,docker \
 
 # GENOTYPING
 
+These tests were ran before library merging was implemented.
+
 ## GATK UG
 
 ```bash
-## Gatk on raw reads
+## Gatk UG on raw reads
 ## Expect: One VCF per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keep_realign_bam -ansi-log false -dump-channels
 ```
 
 ```bash
-## Gatk on trimmed reads. Skip bcftools stats.
-## Expect: One VCF per sample/reference combination, based on the trimmed bams (this actually shows on the IndelRealigner step and not the UG step). No bcftools_stats file per VCF.
+## Gatk UG on trimmed reads. Skip bcftools stats.
+## Expect: One VCF per sample/reference combination, based on the trimmed bams (this actually shows on the IndelRealigner step and not the UG step).  No IR directory. No bcftools_stats file per VCF.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
   --run_trim_bam \
   --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
@@ -677,16 +679,23 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ```
 
 ```bash
-## Gatk on pmd-filtered reads
-## Expect: One VCF per sample/reference combination, based on the pmd-filtered bams (this actually shows on the IndelRealigner step and not the UG step). Also 1 bcftools_stats file per VCF.
+## Gatk UG on pmd-filtered reads
+## Expect: One VCF per sample/reference combination, based on the pmd-filtered bams (this actually shows on the IndelRealigner step and not the UG step).  No IR directory. Also 1 bcftools_stats file per VCF.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'pmd' -ansi-log false -dump-channels --run_pmd_filtering
 ## Checked that the bams had fewer reads compared to the raw bams.
 ```
 
 ```bash
-## Gatk on rescaled reads
-## Expect: One VCF per sample/reference combination, based on the rescaled bams (this actually shows on the IndelRealigner step and not the UG step). Also 1 bcftools_stats file per VCF.
+## Gatk UG on rescaled reads
+## Expect: One VCF per sample/reference combination, based on the rescaled bams (this actually shows on the IndelRealigner step and not the UG step).  No IR directory. Also 1 bcftools_stats file per VCF.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'rescaled' -ansi-log false -dump-channels --run_mapdamage_rescaling
+```
+
+```bash
+## Gatk UG on raw reads, multiple references
+## NOTE: Actually fails due to header of BAM input in test_multiref not matching sequences in fasta (which was shortened to chr 21+ for brevity). Provided alternative input without a BAM input line. ( head -n 5 on https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/samplesheet_multilane_multilib.tsv ). It then worked fine.
+## Expect: One VCF per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
+nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keep_realign_bam -ansi-log false -dump-channels
 ```
 
 ## GATK HC
@@ -706,6 +715,13 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
   --genotyping_gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES'
 ```
 
+```bash
+## Gatk HC on raw reads, multiple references
+## NOTE: Actually fails due to header of BAM input in test_multiref not matching sequences in fasta (which was shortened to chr 21+ for brevity). Provided alternative input without a BAM input line. ( head -n 5 on https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/samplesheet_multilane_multilib.tsv ). It then worked fine.
+## Expect: One VCF + .tbi index per sample/reference combination . Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw' --genotyping_gatk_ug_keep_realign_bam -ansi-log false -dump-channels
+```
+
 ## FREEBAYES
 
 ```bash
@@ -723,4 +739,35 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
   --genotyping_freebayes_skip_coverage 10 \
   --genotyping_freebayes_min_alternate_count 2 \
   --genotyping_freebayes_ploidy 1
+```
+
+
+```bash
+## Freebayes on raw reads, multiple references
+## Freebayes does not complain about the BAM header not matching the reference.
+## Expect: One VCF per sample/reference combination. BAM input only has 1 output for the specified reference. Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw' --genotyping_gatk_ug_keep_realign_bam -ansi-log false -dump-channels
+```
+
+## PILEUPCALLER
+
+```bash
+## Pileupcaller on raw reads. No bed or snp file provided.
+## Expect: NO GENOTYPING. Pileupcaller requires a bed file and a snp file. Pipeline still executes though.
+## TODO Maybe we need a hard failure here?
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## Pileupcaller on raw reads.
+## Expect: One geno/snp/ind combination per reference/strandedness combination (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile. ind has same number of lines as number of samples of that strandedness.
+nextflow run main.nf -profile test_humanbam,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## PileupCaller on raw reads
+## This currently fails because the different libraries of JK2802 never get merged, so the sample appears twice. Library merging is needed. As a workaround, I named the sample_id of the _SE and _PE libraries aafter the library name. The two are treated as separate samples now. (--input test/samplesheet_multilane_multilib_noDupSamples.tsv)
+## Expect: One geno/snp/ind combination per reference/strandedness combination (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile. ind has same number of lines as number of samples of that strandedness.
+##   Specifically, no geno/snp/ind for the reference that has no bed/snp file (Mammoth). Only ds data present, so only 1 genotyping dataset.
+nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noDupSamples.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
 ```
