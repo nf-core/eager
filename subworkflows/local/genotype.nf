@@ -30,19 +30,28 @@ workflow GENOTYPE {
     ch_angsd_genotypes                 = Channel.empty()
     ch_bcftools_stats                  = Channel.empty()
 
-    // Replace missing dbsnps with empty lists
-    ch_dbsnp_for_gatk = ch_dbsnp
-        .map {
-            meta, dbsnp ->
-            final_dbsnp = dbsnp != "" ? dbsnp : []
-            [ meta, final_dbsnp ]
-        }
-
     if ( params.genotyping_tool == 'pileupcaller' ) {
 
         // Compile together all reference based files
-        ch_refs_for_mpileup_pileupcaller = ch_fasta_plus
-            .join( ch_pileupcaller_aux_files ) // [ [ref_meta], fasta, fai, dict, bed, snp ]
+        ch_refs_prep = ch_fasta_plus
+            // Because aux files are optional, the channel can be [[],[],[]]. remainder:true will output both the empty list and the fasta_plus channel with an added 'null'.
+            .join( ch_pileupcaller_aux_files, remainder: true ) // [ [ref_meta], fasta, fai, dict, bed, snp ]
+            // Also filter out the empty list aux_files (meta == [])
+            .filter { it[0] != [] }
+            // .branch to separate succesfully joined from unsuccesfully joined elements
+            .branch {
+                it ->
+                no_aux: it[4] == null
+                has_aux: true
+            }
+
+        // mix the two branches back together after fixing cardinality
+        ch_refs_for_mpileup_pileupcaller = ch_refs_prep.no_aux
+            .map {
+                ref_meta, fasta, fai, dict, empty ->
+                [ ref_meta, fasta, fai, dict, [], [] ]
+            }
+            .mix( ch_refs_prep.has_aux )
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
@@ -66,6 +75,8 @@ workflow GENOTYPE {
                     WorkflowEager.addNewMetaFromAttributes( it, "reference", "reference" , false )
                 }
                 .combine( ch_refs_for_mpileup_pileupcaller , by:0 )
+                // do not run if no bed file is provided
+                .filter { it[7] != []}
                 .multiMap {
                     ignore_me, combo_meta, bams, ref_meta, fasta, fai, dict, bed, snp ->
                         def bedfile = bed != "" ? bed : []
@@ -74,7 +85,7 @@ workflow GENOTYPE {
                 }
             SAMTOOLS_MPILEUP_PILEUPCALLER(
                 ch_mpileup_inputs.bams,
-                ch_mpileup_inputs.fasta
+                ch_mpileup_inputs.fasta,
             )
             ch_versions = ch_versions.mix( SAMTOOLS_MPILEUP_PILEUPCALLER.out.versions.first() )
 
@@ -85,13 +96,12 @@ workflow GENOTYPE {
                 .combine( ch_refs_for_mpileup_pileupcaller, by:0 )
                 .multiMap {
                     ignore_me, meta, mpileup, ref_meta, fasta, fai, dict, bed, snp ->
-                        def snpfile = snp != "" ? snp : []
+                        // def snpfile = snp != "" ? snp : []
                         mpileup: [ meta, mpileup ]
-                        snpfile: [ snpfile ]
+                        snpfile: snp
                 }
 
             // TODO NOTE: Maybe implement a check that unmerged R2 reads have not been kept and throw a warning for ssDNA libs? See: https://github.com/stschiff/sequenceTools/issues/24
-            ch_pileupcaller_input.mpileup.dump(tag:"mpileup", pretty: true)
             // Run PileupCaller
             SEQUENCETOOLS_PILEUPCALLER(
                 ch_pileupcaller_input.mpileup,
@@ -99,6 +109,8 @@ workflow GENOTYPE {
                 []
             )
             ch_versions = ch_versions.mix( SEQUENCETOOLS_PILEUPCALLER.out.versions.first() )
+
+            // TODO If both ds and ss data are present, merge the two datasets per reference together with paste (both have the same snp/bed file)
     }
 
     if ( params.genotyping_tool == 'ug' ) {
@@ -110,7 +122,16 @@ workflow GENOTYPE {
             }
 
         ch_fasta_for_multimap = ch_fasta_plus
-            .join( ch_dbsnp_for_gatk ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
+            // Because dbsnp is optional, the channel can be [[],[]]. remainder:true will output both the empty list and the fasta_plus channel with an added 'null'.
+            .join( ch_dbsnp, remainder:true ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
+            // Also filter out the empty list dbsnp (meta == [])
+            .filter { it[0] != [] }
+            // convert added null dbsnp into an empty list
+            .map {
+                ref_meta, fasta, fai, dict, dbsnp ->
+                def final_dbsnp = dbsnp != null ? dbsnp : []
+                [ ref_meta, fasta, fai, dict, final_dbsnp ]
+            }
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
@@ -198,7 +219,16 @@ workflow GENOTYPE {
             }
 
         ch_fasta_for_multimap = ch_fasta_plus
-            .join( ch_dbsnp_for_gatk ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
+            // Because dbsnp is optional, the channel can be [[],[]]. remainder:true will output both the empty list and the fasta_plus channel with an added 'null'.
+            .join( ch_dbsnp, remainder:true ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
+            // Also filter out the empty list dbsnp (meta == [])
+            .filter { it[0] != [] }
+            // convert added null dbsnp into an empty list
+            .map {
+                ref_meta, fasta, fai, dict, dbsnp ->
+                def final_dbsnp = dbsnp != null ? dbsnp : []
+                [ ref_meta, fasta, fai, dict, final_dbsnp ]
+            }
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
@@ -236,8 +266,18 @@ workflow GENOTYPE {
 
         // TODO Do we want to provide SNP capture bed file to Freebayes? It would then genotype only on those positions.
         // NOTE: dbsnp is not used by Freebayes, but we need to provide it to the module anyway, to ensure correct cardinality of the fasta channel within the BCFTOOLS_STATS channel operations.
+        //     i.e. to keep the definition of the ch_fasta_for_multimap channel consistent regardless of genotyper, so the `combine -> multiMap` in lines 327-328 work.
         ch_fasta_for_multimap = ch_fasta_plus
-            .join( ch_dbsnp_for_gatk ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
+            // Because dbsnp is optional, the channel can be [[],[]]. remainder:true will output both the empty list and the fasta_plus channel with an added 'null'.
+            .join( ch_dbsnp, remainder:true ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
+            // Also filter out the empty list dbsnp (meta == [])
+            .filter { it[0] != [] }
+            // convert added null dbsnp into an empty list
+            .map {
+                ref_meta, fasta, fai, dict, dbsnp ->
+                def final_dbsnp = dbsnp != null ? dbsnp : []
+                [ ref_meta, fasta, fai, dict, final_dbsnp ]
+            }
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
