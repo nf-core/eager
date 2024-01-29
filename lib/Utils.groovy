@@ -13,10 +13,10 @@ class Utils {
         Yaml parser = new Yaml()
         def channels = []
         try {
-            def config = parser.load("conda config --show channels".execute().text)
+            def config = parser.load('conda config --show channels'.execute().text)
             channels = config.channels
-        } catch(NullPointerException | IOException e) {
-            log.warn "Could not verify conda channel configuration."
+        } catch (NullPointerException | IOException e) {
+            log.warn 'Could not verify conda channel configuration.'
             return
         }
 
@@ -29,19 +29,20 @@ class Utils {
         def channel_priority_violation = false
         def n = required_channels_in_order.size()
         for (int i = 0; i < n - 1; i++) {
-            channel_priority_violation |= !(channels.indexOf(required_channels_in_order[i]) < channels.indexOf(required_channels_in_order[i+1]))
+            channel_priority_violation |= !(channels.indexOf(required_channels_in_order[i]) < channels.indexOf(required_channels_in_order[i + 1]))
         }
 
         if (channels_missing | channel_priority_violation) {
-            log.warn "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  There is a problem with your Conda configuration!\n\n" +
-                "  You will need to set-up the conda-forge and bioconda channels correctly.\n" +
-                "  Please refer to https://bioconda.github.io/\n" +
-                "  The observed channel order is \n" +
+            log.warn '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n' +
+                '  There is a problem with your Conda configuration!\n\n' +
+                '  You will need to set-up the conda-forge and bioconda channels correctly.\n' +
+                '  Please refer to https://bioconda.github.io/\n' +
+                '  The observed channel order is \n' +
                 "  ${channels}\n" +
-                "  but the following channel order is required:\n" +
+                '  but the following channel order is required:\n' +
                 "  ${required_channels_in_order}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
         }
     }
+
 }
