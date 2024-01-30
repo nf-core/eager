@@ -677,6 +677,7 @@ nextflow run . -profile test,docker \
 ```
 
 ### LIBRARY_MERGE
+
 ```bash
 ## Library merge on single reference, no damage manipulation.
 ## EXPECT: 1 bam.bai/flagstat set per sample/reference combination. 6 files total.
