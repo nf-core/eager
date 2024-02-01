@@ -48,7 +48,6 @@ workflow MAP {
             }
 
     } else {
-
         ch_input_for_mapping = reads
             .combine(index)
             .multiMap {
@@ -58,7 +57,6 @@ workflow MAP {
                     reads: [ new_meta, reads ]
                     index: [ meta2, index ]
             }
-
     }
 
     if ( params.mapping_tool == 'bwaaln' ) {
@@ -107,7 +105,7 @@ workflow MAP {
 
         BOWTIE2_ALIGN ( ch_input_for_mapping.reads, ch_input_for_mapping.index, false, true )
         ch_versions        = ch_versions.mix ( BOWTIE2_ALIGN.out.versions.first() )
-        ch_mapped_lane_bam = BOWTIE2_ALIGN.out.bam
+        ch_mapped_lane_bam = BOWTIE2_ALIGN.out.aligned
 
         SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
         ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
