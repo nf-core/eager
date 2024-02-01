@@ -1,4 +1,4 @@
-name: bedtools_maskfasta
+name: bedtools_coverage
 channels:
   - conda-forge
   - bioconda

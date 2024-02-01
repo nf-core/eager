@@ -1,7 +1,7 @@
-name: bedtools_maskfasta
+name: bowtie2_build
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::bedtools=2.31.1
+  - bioconda::bowtie2=2.5.2

@@ -1,7 +1,7 @@
-name: bedtools_maskfasta
+name: bbmap_bbduk
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::bedtools=2.31.1
+  - bioconda::bbmap=39.01
