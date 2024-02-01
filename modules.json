@@ -12,12 +12,12 @@
                     },
                     "angsd/contamination": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "3c77ca9aac783e76c3614a06db3bfe4fef619bde",
                         "installed_by": ["bam_docounts_contamination_angsd"]
                     },
                     "angsd/docounts": {
                         "branch": "master",
-                        "git_sha": "bd9e43646a9435d2f62ce4a777ae88ef10ec922d",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["bam_docounts_contamination_angsd"]
                     },
                     "bamutil/trimbam": {
@@ -221,7 +221,7 @@
                 "nf-core": {
                     "bam_docounts_contamination_angsd": {
                         "branch": "master",
-                        "git_sha": "a9784afdd5dcda23b84e64db75dc591065d64653",
+                        "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
                         "installed_by": ["subworkflows"]
                     },
                     "bam_split_by_region": {
