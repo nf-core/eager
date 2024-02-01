@@ -33,29 +33,29 @@ workflow MAP {
                 meta, reads ->
                     new_meta = meta.clone()
                     new_meta.shard_number = reads.getName().replaceAll(/.*(part_\d+).(?:fastq|fq).gz/, '$1')
-                    [ new_meta, reads ] 
+                    [ new_meta, reads ]
             }
             .groupTuple()
-        
+
         ch_input_for_mapping = sharded_reads
             .combine(index)
             .multiMap {
                 meta, reads, meta2, index ->
                     new_meta = meta.clone()
-                    new_meta.reference = meta2.id  
-                    reads: [ new_meta, reads ] 
+                    new_meta.reference = meta2.id
+                    reads: [ new_meta, reads ]
                     index: [ meta2, index ]
             }
 
     } else {
-        
+
         ch_input_for_mapping = reads
             .combine(index)
             .multiMap {
                 meta, reads, meta2, index ->
                     new_meta = meta.clone()
-                    new_meta.reference = meta2.id  
-                    reads: [ new_meta, reads ] 
+                    new_meta.reference = meta2.id
+                    reads: [ new_meta, reads ]
                     index: [ meta2, index ]
             }
 
@@ -124,12 +124,11 @@ workflow MAP {
                                 .groupTuple()
                                 .branch {
                                     meta, bam ->
-                                        println(bam.size())
                                         merge: bam.size() > 1
                                         skip: true
                                 }
 
-    SAMTOOLS_MERGE_LANES ( ch_input_for_lane_merge.merge, [], [] )
+    SAMTOOLS_MERGE_LANES ( ch_input_for_lane_merge.merge, [[], []], [[], []] )
     ch_versions.mix( SAMTOOLS_MERGE_LANES.out.versions )
 
     // Then mix back merged and single lane libraries for everything downstream
