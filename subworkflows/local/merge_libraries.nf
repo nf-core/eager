@@ -25,7 +25,7 @@ workflow MERGE_LIBRARIES {
             [ meta + [ 'single_end':true ], bam ]
         }
 
-    SAMTOOLS_MERGE_LIBRARIES ( ch_library_merge_input, [], [] )
+    SAMTOOLS_MERGE_LIBRARIES ( ch_library_merge_input, [[], []], [[], []] )
     ch_versions = ch_versions.mix( SAMTOOLS_MERGE_LIBRARIES.out.versions.first() )
 
     SAMTOOLS_SORT_MERGED_LIBRARIES ( SAMTOOLS_MERGE_LIBRARIES.out.bam )
