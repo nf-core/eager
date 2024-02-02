@@ -481,7 +481,7 @@ workflow EAGER {
                             withfeature: [ meta, bedtools_feature, bam ]
                         }
 
-        SAMTOOLS_VIEW_GENOME( ch_bedtools_input.bam )
+        SAMTOOLS_VIEW_GENOME( ch_bedtools_input.bam, [[], []], [] )
 
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
 
