@@ -22,7 +22,7 @@ workflow MERGE_LIBRARIES {
         // Discrad library-level metas, and bais. Add single_end: true to all metas (no SE/PE distinction at this point, right?)
         .map {
             meta, lib_metas, bam, bai ->
-            [ meta + [ 'single_end':true ], bam ]
+            [ meta + [ 'single_end': true ], bam ]
         }
 
     SAMTOOLS_MERGE_LIBRARIES ( ch_library_merge_input, [[], []], [[], []] )
