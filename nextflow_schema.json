@@ -908,7 +908,6 @@
                 },
                 "genotyping_pileupcaller_bedfile": {
                     "type": "string",
-                    "default": "None",
                     "fa_icon": "fas fa-bed",
                     "help_text": "Specify a SNP panel in the form of a bed file of sites at which to generate a pileup for pileupCaller.",
                     "format": "file-path",
@@ -916,7 +915,6 @@
                 },
                 "genotyping_pileupcaller_snpfile": {
                     "type": "string",
-                    "default": "None",
                     "help_text": "Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/blob/master/CONVERTF/README) format, pileupCaller will call these sites.",
                     "fa_icon": "fas fa-sliders-h",
                     "format": "file-path",
