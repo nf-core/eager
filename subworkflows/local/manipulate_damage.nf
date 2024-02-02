@@ -2,6 +2,7 @@
 // Calculate PMD scores, trim, or rescale DNA damage from mapped reads.
 //
 
+include { BEDTOOLS_MASKFASTA                                      } from '../../modules/nf-core/bedtools/maskfasta/main'
 include { MAPDAMAGE2                                              } from '../../modules/nf-core/mapdamage2/main'
 include { PMDTOOLS_FILTER                                         } from '../../modules/nf-core/pmdtools/filter/main'
 include { BAMUTIL_TRIMBAM                                         } from '../../modules/nf-core/bamutil/trimbam/main'
@@ -13,8 +14,9 @@ include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED  } from '../../
 // TODO: Add required channels and channel manipulations for reference-dependent bed masking before pmdtools. Requires multi-ref support before implementation.
 workflow MANIPULATE_DAMAGE {
     take:
-    ch_bam_bai  // [ [ meta ], bam , bai ]
-    ch_fasta    // [ [ meta ], fasta ]
+    ch_bam_bai             // [ [ meta ], bam , bai ]
+    ch_fasta               // [ [ meta ], fasta ]
+    ch_pmd_masking         // [ [ meta ], masked_fasta, bed_for_masking ]
 
     main:
     ch_versions              = Channel.empty()
@@ -35,7 +37,7 @@ workflow MANIPULATE_DAMAGE {
             // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
             WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
         }
-        .combine(ch_refs, by: 0 ) // [ [combine_meta], [meta], bam, bai, [ref_meta], fasta ]
+        .combine( ch_refs, by: 0 ) // [ [combine_meta], [meta], bam, bai, [ref_meta], fasta ]
 
     if ( params.run_mapdamage_rescaling ) {
         ch_mapdamage_prep = ch_input_for_damage_manipulation
@@ -71,17 +73,52 @@ workflow MANIPULATE_DAMAGE {
     }
 
     if ( params.run_pmd_filtering ) {
-        // TODO Add module to produce Masked reference from given references and bed file (with meta specifying the reference it matches)?
-        // if ( params.pmdtools_reference_mask) {
-        //     MASK_REFERENCE_BY_BED()
-        // }
+        ch_masking_prep = ch_pmd_masking
+                    .combine( ch_fasta, by: 0 ) // [ [meta], masked_fasta, bed, fasta ]
+                    .branch {
+                        meta, masked_fasta, bed, fasta ->
+                        alreadymasked: masked_fasta != ""
+                        tobemasked: masked_fasta == "" && bed != ""
+                        nomasking: masked_fasta == "" && bed == ""
+                    }
 
-        ch_pmdtools_input = ch_input_for_damage_manipulation
-            .multiMap {
-                ignore_me, meta, bam, bai, ref_meta, fasta ->
-                    bam: [ meta, bam, bai ]
-                    fasta: fasta
-            }
+        ch_masking_input = ch_masking_prep.tobemasked
+                    .multiMap{
+                        meta, masked_fasta, bed, fasta ->
+                        bed: [ meta, bed ]
+                        fasta: fasta
+                    }
+
+        BEDTOOLS_MASKFASTA( ch_masking_input.bed, ch_masking_input.fasta )
+        ch_masking_output = BEDTOOLS_MASKFASTA.out.fasta
+        ch_versions       = ch_versions.mix( BEDTOOLS_MASKFASTA.out.versions.first() )
+
+        ch_already_masked = ch_masking_prep.alreadymasked
+                    .map {
+                        meta, masked_fasta, bed, fasta ->
+                        [ meta, masked_fasta ]
+                    }
+
+        ch_no_masking = ch_masking_prep.nomasking
+                    .map {
+                        meta, masked_fasta, bed, fasta ->
+                        [ meta, fasta ]
+                    }
+
+        ch_pmd_fastas = ch_masking_output.mix( ch_already_masked, ch_no_masking )
+                    .map {
+                        // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+                        WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                    }
+
+        ch_pmdtools_input = ch_bam_bai
+                    .map { WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false ) }
+                    .combine( ch_pmd_fastas, by: 0 ) // [ [combine_meta], [meta], bam, bai, [ref_meta] fasta ]
+                    .multiMap {
+                        combine_meta, meta, bam, bai, ref_meta, fasta ->
+                        bam: [ meta, bam, bai ]
+                        fasta: fasta
+                    }
 
         PMDTOOLS_FILTER( ch_pmdtools_input.bam, params.damage_manipulation_pmdtools_threshold, ch_pmdtools_input.fasta )
         ch_versions       = ch_versions.mix( PMDTOOLS_FILTER.out.versions.first() )

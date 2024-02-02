@@ -42,11 +42,12 @@ workflow REFERENCE_INDEXING_MULTI {
                                                     def pileupcaller_bed       = row["pileupcaller_bedfile"]   != "" ? file(row["pileupcaller_bedfile"]     , checkIfExists: true) : ""
                                                     def pileupcaller_snp       = row["pileupcaller_snpfile"]   != "" ? file(row["pileupcaller_snpfile"]     , checkIfExists: true) : ""
                                                     def hapmap                 = row["hapmap_file"]            != "" ? file(row["hapmap_file"]              , checkIfExists: true) : ""
-                                                    def pmd_mask               = row["pmdtools_masked_fasta"]  != "" ? file(row["pmdtools_masked_fasta"]    , checkIfExists: true) : ""
+                                                    def pmd_masked_fasta       = row["pmdtools_masked_fasta"] != "" ? file(row["pmdtools_masked_fasta"], checkIfExists: true) : ""
+                                                    def pmd_bed_for_masking    = row["pmdtools_bed_for_masking"] != "" ? file(row["pmdtools_bed_for_masking"], checkIfExists: true) : ""
                                                     def sexdet_bed             = row["sexdeterrmine_snp_bed"]  != "" ? file(row["sexdeterrmine_snp_bed"]    , checkIfExists: true) : ""
                                                     def bedtools_feature       = row["bedtools_feature_file"]  != "" ? file(row["bedtools_feature_file"]    , checkIfExists: true) : ""
                                                     def genotyping_gatk_dbsnp  = row["genotyping_gatk_dbsnp"]  != "" ? file(row["genotyping_gatk_dbsnp"]    , checkIfExists: true) : ""
-                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
+                                                    [ meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
                                             }
 
 
@@ -63,11 +64,12 @@ workflow REFERENCE_INDEXING_MULTI {
 
 ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                             .multiMap {
-                                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_mask, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
+                                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
                                 generated:            [ meta, fasta, fai, dict, mapper_index, circular_target ]
                                 mitochondrion_header: [ meta, mitochondrion ]
                                 angsd_hapmap:         [ meta, hapmap ]
-                                pmd_mask:             [ meta, pmd_mask, capture_bed ]
+                                pmd_masked_fasta:     [ meta, pmd_masked_fasta ]
+                                pmd_bed_for_masking:  [ meta, pmd_bed_for_masking ]
                                 snp_bed:              [ meta, capture_bed ]
                                 pileupcaller_bed_snp: [ meta, pileupcaller_bed, pileupcaller_snp ]
                                 sexdeterrmine_bed:    [ meta, sexdet_bed ]
@@ -120,7 +122,7 @@ ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                 remainder:  [ meta, fasta, dict, mapper_index, circular_target ] // we drop fai here as we are going to make it
         }
 
-    SAMTOOLS_FAIDX ( ch_faidx_input.faidx )
+    SAMTOOLS_FAIDX ( ch_faidx_input.faidx, [ [], [] ] )
     ch_version = ch_versions.mix( SAMTOOLS_FAIDX.out.versions )
 
     // Rejoin output channel with main reference indicies channel elements
@@ -214,9 +216,10 @@ ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
     reference            = ch_indexmapper_for_reference                         // [ meta, fasta, fai, dict, mapindex, circular_target ]
     mitochondrion_header = ch_input_from_referencesheet.mitochondrion_header    // [ meta, mitochondrion ]
     hapmap               = ch_input_from_referencesheet.angsd_hapmap            // [ meta, hapmap ]
-    pmd_mask             = ch_input_from_referencesheet.pmd_mask                // [ meta, pmd_mask, capture_bed ]
+    pmd_masked_fasta     = ch_input_from_referencesheet.pmd_masked_fasta        // [ meta, pmd_masked_fasta ]
+    pmd_bed_for_masking  = ch_input_from_referencesheet.pmd_bed_for_masking     // [ meta, pmd_bed_for_masking ]
     snp_capture_bed      = ch_input_from_referencesheet.snp_bed                 // [ meta, capture_bed ]
-    pileupcaller_bed_snp = ch_input_from_referencesheet.pileupcaller_bed_snp    // [ meta, pileupcaller_snp, pileupcaller_bed ]
+    pileupcaller_bed_snp = ch_input_from_referencesheet.pileupcaller_bed_snp    // [ meta, pileupcaller_bed, pileupcaller_snp ]
     sexdeterrmine_bed    = ch_input_from_referencesheet.sexdeterrmine_bed       // [ meta, sexdet_bed ]
     bedtools_feature     = ch_input_from_referencesheet.bedtools_feature        // [ meta, bedtools_feature ]
     dbsnp                = ch_input_from_referencesheet.dbsnp                   // [ meta, genotyping_gatk_dbsnp ]

@@ -1,1 +1,6 @@
 repository_type: pipeline
+
+lint:
+  nextflow_config:
+    - config_defaults:
+        - params.contamination_estimation_angsd_hapmap
