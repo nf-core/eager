@@ -95,7 +95,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     ch_ref_index_single = ch_reference_for_mapping
                                 .multiMap{
-                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_mask, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
+                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
                                     reference:              [ meta, fasta, fai, dict, mapper_index, circular_target ]
                                     mito_header:            [ meta, mitochondrion_header ]
                                     hapmap:                 [ meta, contamination_estimation_angsd_hapmap ]
