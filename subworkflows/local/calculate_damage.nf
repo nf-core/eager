@@ -51,7 +51,7 @@ workflow CALCULATE_DAMAGE {
         CALCULATE_MAPDAMAGE2 ( ch_damagetool_input.bam, ch_damagetool_input.fasta )
 
         ch_versions      = ch_versions.mix( CALCULATE_MAPDAMAGE2.out.versions.first() )
-        ch_multiqc_files = ch_multiqc_files.mix( MAPDAMAGE2.out.folder )
+        ch_multiqc_files = ch_multiqc_files.mix( CALCULATE_MAPDAMAGE2.out.folder )
     }
 
     emit:
