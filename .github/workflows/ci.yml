@@ -36,7 +36,7 @@ jobs:
           - "-profile test_multiref,docker" ## TODO add damage manipulation here instead once it goes multiref
     steps:
       - name: Check out pipeline code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v1

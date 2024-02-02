@@ -119,7 +119,7 @@ ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                 remainder:  [ meta, fasta, dict, mapper_index, circular_target ] // we drop fai here as we are going to make it
         }
 
-    SAMTOOLS_FAIDX ( ch_faidx_input.faidx )
+    SAMTOOLS_FAIDX ( ch_faidx_input.faidx, [ [], [] ] )
     ch_version = ch_versions.mix( SAMTOOLS_FAIDX.out.versions )
 
     // Rejoin output channel with main reference indicies channel elements
