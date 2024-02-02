@@ -102,6 +102,14 @@ Tool Specific combinations
 
   - All together
 
+  - Library merge
+
+    - single reference: no damage manipulation ✅
+    - single reference: with damage manipulation, on raw data ✅
+    - single reference: with damage manipulation (trimming), on trimmed data ✅
+    - single reference: with damage manipulation (pmd + trimming), on pmd filtered data ✅
+    - multi reference: no damage manipulation ✅
+
 ### Multi-reference tests
 
 ```bash
@@ -666,6 +674,55 @@ nextflow run . -profile test,docker \
   --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
   --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
   --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
+```
+
+### LIBRARY_MERGE
+
+```bash
+## Library merge on single reference, no damage manipulation.
+## EXPECT: 1 bam.bai/flagstat set per sample/reference combination. 6 files total.
+##   Check the headers of the bams to ensure that the correct number of bams are merged (1 for JK2802, 2 for JK2782).
+##   Also, check that the bams merged are the deduplication output.
+## NOTE: JK2782 seems to have some PG tags repeated, as they apply to each input file separately.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## Library merge on single reference, merge trimmed bams.
+## EXPECT: 1 bam.bai/flagstat set per sample/reference combination. 6 files total.
+##   Check the headers of the bams to ensure that the correct number of bams are merged (1 for JK2802, 2 for JK2782).
+##   Also, check that the bams merged are trimmed. (JK2802 is full udg, but header confirms merged bam is "trimmed")
+## NOTE: JK2782 seems to have some PG tags repeated, as they apply to each input file separately.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --genotyping_source 'trimmed' -ansi-log false -dump-channels \
+  --run_trim_bam \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
+```
+
+```bash
+## Library merge on single reference, merge pmd bams. Trimming ran but not used downstream.
+## EXPECT: 1 bam.bai/flagstat set per sample/reference combination. 6 files total.
+##   Check the headers of the bams to ensure that the correct number of bams are merged (1 for JK2802, 2 for JK2782).
+##   Also, check that the bams merged are the pmd ones.
+## NOTE: JK2782 seems to have some PG tags repeated, as they apply to each input file separately.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --genotyping_source 'pmd' -ansi-log false -dump-channels \
+  --run_trim_bam \
+  --run_pmd_filtering \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
+```
+
+```bash
+## Library merge on multi reference. No damage manipulation.
+## EXPECT: 1 bam.bai/flagstat set per sample/reference combination. 15 files total. (2 refs * 2 samples * 3 files) + BAM input only on one reference (+3)
+##   Check the headers of the bams to ensure that the correct number of bams are merged (1 for JK2802, 2 for JK2782).
+##   Also, check that the bams merged are the dedupped ones.
+## NOTE: PG tags are repeated for each chromosome in the reference, times each library! Maybe there's some flag missing from samtools MERGE runs?
+nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -resume --genotyping_source 'raw' -ansi-log false -dump-channels
 ```
 
 # GENOTYPING

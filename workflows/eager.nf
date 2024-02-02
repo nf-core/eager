@@ -73,6 +73,7 @@ include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
 include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
+include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libraries'
 include { GENOTYPE                      } from '../subworkflows/local/genotype'
 
 /*
@@ -532,12 +533,21 @@ workflow EAGER {
         MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masking )
         ch_multiqc_files       = ch_multiqc_files.mix( MANIPULATE_DAMAGE.out.flagstat.collect{it[1]}.ifEmpty([]) )
         ch_versions            = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
-        ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
+        ch_bams_for_library_merge = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
     } else {
-        ch_bams_for_genotyping = ch_dedupped_bams
+        ch_bams_for_library_merge = ch_dedupped_bams
     }
 
-    // TODO Merge library-level BAMs into sample-level BAMs for genotyping.
+    //
+    // SUBWORKFLOW: MERGE LIBRARIES
+    //
+
+    // The bams being merged are always the ones specified by params.genotyping_source,
+    //   unless the user skipped damage manipulation, in which case it is the DEDUPLICATION output.
+    MERGE_LIBRARIES ( ch_bams_for_library_merge )
+    ch_versions             = ch_versions.mix( MERGE_LIBRARIES.out.versions )
+    ch_bams_for_genotyping  = MERGE_LIBRARIES.out.bam_bai
+    ch_multiqc_files        = ch_multiqc_files.mix( MERGE_LIBRARIES.out.mqc.collect{it[1]}.ifEmpty([]) ) // Not sure if this is needed, or if it needs to be moved to line 564?
 
     //
     // SUBWORKFLOW: Genotyping
