@@ -5,6 +5,7 @@
 include { SAMTOOLS_MPILEUP as SAMTOOLS_MPILEUP_PILEUPCALLER } from '../../modules/nf-core/samtools/mpileup/main'
 include { EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE     } from '../../modules/nf-core/eigenstratdatabasetools/eigenstratsnpcoverage/main'
 include { SEQUENCETOOLS_PILEUPCALLER                        } from '../../modules/nf-core/sequencetools/pileupcaller/main'
+include { COLLECT_GENOTYPES                                 } from '../../modules/local/collect_genotypes'
 include { GATK_REALIGNERTARGETCREATOR                       } from '../../modules/nf-core/gatk/realignertargetcreator/main'
 include { GATK_INDELREALIGNER                               } from '../../modules/nf-core/gatk/indelrealigner/main'
 include { GATK_UNIFIEDGENOTYPER                             } from '../../modules/nf-core/gatk/unifiedgenotyper/main'
@@ -110,7 +111,20 @@ workflow GENOTYPE {
             )
             ch_versions = ch_versions.mix( SEQUENCETOOLS_PILEUPCALLER.out.versions.first() )
 
-            // TODO If both ds and ss data are present, merge the two datasets per reference together with paste (both have the same snp/bed file)
+            // Merge/rename genotyping datasets
+            ch_final_genotypes = SEQUENCETOOLS_PILEUPCALLER.out.eigenstrat
+                .map {
+                    WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                }
+                .groupTuple()
+                .map {
+                    combo_meta, metas, geno, snp, ind ->
+                    [ combo_meta, geno, snp, ind ]
+                }
+
+            COLLECT_GENOTYPES( ch_final_genotypes )
+            ch_versions = ch_versions.mix( COLLECT_GENOTYPES.out.versions.first() )
+
     }
 
     if ( params.genotyping_tool == 'ug' ) {
