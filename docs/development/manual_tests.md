@@ -92,12 +92,15 @@ Tool Specific combinations
 
     - with default parameters
     - with stricter threshold
+    - with fasta masking
+    - with fasta masking for 1 of 2 references
 
   - BAM trimming
+
     - with default parameters
     - different length by udg treatment
 
-- All together
+  - All together
 
 ### Multi-reference tests
 
@@ -145,6 +148,10 @@ nextflow run ../main.nf -profile singularity,test --outdir ./results --input sam
 ## Test: (11) Broken path correctly fails pipeline ✅
 ## Expect: Expect fail
 nextflow run ../main.nf -profile singularity,test --outdir ./results --input samplesheet.tsv --fasta reference_sheet_multiref_test11.csv -ansi-log false -dump-channels --save_reference
+
+# Test: File input via reference sheet
+# Expect: Qualimap with bed, mtnucratio and angsd successful and bedtools not run for hs37d5, qualimap without bed file, mtnucratio and bedtools successful and angsd not run for Mammoth_MT
+nextflow run main.nf -profile test_multiref,docker --outdir ./results --run_bedtools_coverage --run_contamination_estimation_angsd --run_mtnucratio
 ```
 
 ### AdapterRemoval
@@ -608,6 +615,18 @@ nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./resul
 # JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  64
 # JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      137
 # JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      30
+```
+
+```bash
+## PMD filtering with fasta masking
+## Expect: damage_manipulation directory with *.masked.fa and bam and bai and flagstat per library
+nextflow run . -profile test_humanbam,docker --run_pmd_filtering --damage_manipulation_pmdtools_reference_mask https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz -resume --outdir ./results
+```
+
+```bash
+## PMD filtering with fasta masking for 1 of 2 references
+## Expect: damage_manipulation directory with hs37d5_chr21-MT.masked.fa and bam and bai and flagstat per library and reference (22 files total). hs37d5_chr21-MT first masked with 1240K.pos.list_hs37d5.0based.bed.gz from reference sheet, PMD filtering run with masked reference fasta for hs37d5 and non-masked reference fasta for Mammoth_MT
+nextflow run . -profile test_multiref,docker --run_pmd_filtering --outdir ./results
 ```
 
 ## BAM trimming

@@ -32,11 +32,6 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
             exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
     }
 }
-if( params.run_bedtools_coverage ){
-    if( !params.mapstats_bedtools_featurefile ) {
-        exit 1, "[nf-core/eager] ERROR: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters."
-    }
-}
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
@@ -100,6 +95,7 @@ include { ENDORSPY                                          } from '../modules/n
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
 include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED ; QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED             } from '../modules/nf-core/qualimap/bamqc/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,8 +132,6 @@ workflow EAGER {
         if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
 
-    // Contamination estimation
-    hapmap_file = file(params.contamination_estimation_angsd_hapmap, checkIfExists:true)
 
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -205,7 +199,7 @@ workflow EAGER {
     //
     ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
             .map{
-                meta, fasta, fai, dict, index, circular_target, mitochondrion ->
+                meta, fasta, fai, dict, index, circular_target ->
                 [ meta, index ]
             }
 
@@ -267,7 +261,7 @@ workflow EAGER {
 
     ch_fasta_for_deduplication = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index, circular_target, mitochondrion ->
+            meta, fasta, fai, dict, index, circular_target ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -282,6 +276,51 @@ workflow EAGER {
     } else {
         ch_dedupped_bams     = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
+    }
+
+    //
+    // MODULE QUALIMAP
+    //
+
+    if ( !params.skip_qualimap ) {
+        ch_snp_capture_bed = REFERENCE_INDEXING.out.snp_capture_bed
+            .map{
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+            }
+        ch_qualimap_input = ch_dedupped_bams
+            .map {
+            meta, bam, bai ->
+                [ meta, bam ]
+            }
+            .map {
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+            .combine(
+                by: 0,
+                ch_snp_capture_bed
+            )
+            .branch {
+                ignore_meta, meta, bam, meta2, snp_capture_bed ->
+                withbed: snp_capture_bed != ""
+                nobed: true
+            }
+        ch_qualimap_input_with = ch_qualimap_input.withbed
+            .multiMap{
+                ignore_meta, meta, bam, meta2, snp_capture_bed ->
+                bam:             [ meta, bam ]
+                snp_capture_bed: [ snp_capture_bed ]
+            }
+
+        QUALIMAP_BAMQC_WITHBED( ch_qualimap_input_with.bam, ch_qualimap_input_with.snp_capture_bed )
+        ch_qualimap_input_without = ch_qualimap_input.nobed
+            .map{
+                ignore_meta, meta, bam, meta2, snp_capture_bed ->
+                [ meta, bam ]
+            }
+
+        QUALIMAP_BAMQC_NOBED( ch_qualimap_input_without, [] )
+        ch_qualimap_output = QUALIMAP_BAMQC_WITHBED.out.results.mix( QUALIMAP_BAMQC_NOBED.out.results )
+        ch_versions = ch_versions.mix( QUALIMAP_BAMQC_NOBED.out.versions ).mix( QUALIMAP_BAMQC_WITHBED.out.versions )
     }
 
     //
@@ -344,13 +383,25 @@ workflow EAGER {
     //
 
     if ( params.run_mtnucratio ) {
+        ch_mito_header = REFERENCE_INDEXING.out.mitochondrion_header
+            .map{
+                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+            }
         mtnucratio_input = ch_dedupped_bams
-        .map {
-            meta, bam, bai ->
-            [ meta, bam ]
-        }
+            .map {
+                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+            .combine(
+                by: 0,
+                ch_mito_header
+            )
+            .multiMap{
+                ignore_meta, meta, bam, bai, meta2, mito_header ->
+                bam:         [ meta, bam ]
+                mito_header: [ meta2, mito_header ]
+            }
 
-        MTNUCRATIO( mtnucratio_input, params.mitochondrion_header )
+        MTNUCRATIO( mtnucratio_input.bam, mtnucratio_input.mito_header.map{ it[1] } )
         ch_multiqc_files = ch_multiqc_files.mix(MTNUCRATIO.out.mtnucratio.collect{it[1]}.ifEmpty([]))
         ch_versions      = ch_versions.mix( MTNUCRATIO.out.versions )
     }
@@ -414,27 +465,48 @@ workflow EAGER {
 
     if ( params.run_bedtools_coverage ) {
 
-        ch_anno_for_bedtools = Channel.fromPath(params.mapstats_bedtools_featurefile, checkIfExists: true).collect()
+        ch_bedtools_feature = REFERENCE_INDEXING.out.bedtools_feature
+                                .map{
+                                    WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                                }
 
-        ch_dedupped_for_bedtools = ch_dedupped_bams.combine(ch_anno_for_bedtools)
-        .map{
-              meta, bam, bai, anno ->
-                [meta, anno, bam]
-            }
+        ch_bedtools_prep = ch_dedupped_bams
+                    .map {
+                        WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                    }
+                    .combine(
+                        by: 0,
+                        ch_bedtools_feature
+                    )
+                    .map{
+                        ignore_meta, meta, bam, bai, meta2, bedtools_feature ->
+                        [ meta, bedtools_feature, bam, bai ]
+                    }
+                    .branch{
+                        meta, bedtools_feature, bam, bai ->
+                        withfeature: bedtools_feature != ""
+                        nobed: true
+                    }
 
         // Running samtools view to get header
-        SAMTOOLS_VIEW_GENOME(ch_dedupped_bams)
+        ch_bedtools_input = ch_bedtools_prep.withfeature
+                        .multiMap{
+                            meta, bedtools_feature, bam, bai ->
+                            bam: [ meta, bam, bai ]
+                            withfeature: [ meta, bedtools_feature, bam ]
+                        }
+
+        SAMTOOLS_VIEW_GENOME( ch_bedtools_input.bam )
 
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
 
-        BEDTOOLS_COVERAGE_BREADTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
-        BEDTOOLS_COVERAGE_DEPTH(ch_dedupped_for_bedtools, ch_genome_for_bedtools)
+        BEDTOOLS_COVERAGE_BREADTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
+        BEDTOOLS_COVERAGE_DEPTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
 
         ch_versions = ch_versions.mix( SAMTOOLS_VIEW_GENOME.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
     }
-
 
     //
     // SUBWORKFLOW: Calculate Damage
@@ -442,7 +514,7 @@ workflow EAGER {
 
     ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index, circular_target, mitochondrion ->
+            meta, fasta, fai, dict, index, circular_target ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -460,25 +532,17 @@ workflow EAGER {
 
     if ( params.run_contamination_estimation_angsd ) {
         contamination_input = ch_dedupped_bams
-        ch_hapmap = Channel.of( [ hapmap_file ] )
-        hapmap_input = REFERENCE_INDEXING.out.reference
-            .combine( ch_hapmap )
-            .map {
-                meta, fasta, fai, dict, index, circular_target, mitochondrion, hapmap ->
-                [ meta, hapmap ]
-            }
 
-        ESTIMATE_CONTAMINATION( contamination_input, hapmap_input )
+        ESTIMATE_CONTAMINATION( contamination_input, REFERENCE_INDEXING.out.hapmap )
         ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //
     // SUBWORKFLOW: aDNA Damage Manipulation
-    //
 
     if ( params.run_mapdamage_rescaling || params.run_pmd_filtering || params.run_trim_bam ) {
-        MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta )
+        MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masking )
         ch_multiqc_files       = ch_multiqc_files.mix( MANIPULATE_DAMAGE.out.flagstat.collect{it[1]}.ifEmpty([]) )
         ch_versions            = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
         ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
@@ -505,6 +569,10 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([])) // Replaced with custom mixing
 
+    if ( !params.skip_qualimap ) {
+        ch_multiqc_files = ch_multiqc_files.mix( ch_qualimap_output.collect{it[1]}.ifEmpty([]) )
+    }
+
     MULTIQC (
         ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),
@@ -524,6 +592,7 @@ workflow.onComplete {
     if (params.email || params.email_on_fail) {
         NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
     }
+    NfcoreTemplate.dump_parameters(workflow, params)
     NfcoreTemplate.summary(workflow, params, log)
     if (params.hook_url) {
         NfcoreTemplate.IM_notification(workflow, params, summary_params, projectDir, log)

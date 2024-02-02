@@ -12,7 +12,7 @@
 
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
-  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]. Available online https://www.bioinformatics.babraham.ac.uk/projects/fastqc/.
+  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 
@@ -33,6 +33,10 @@
 - [Picard Tools](https://broadinstitute.github.io/picard/)
 
   > Broad Institute (2019). Picard Toolkit. GitHub Repository: https://broadinstitute.github.io/picard/
+
+- [SeqKit](https://bioinf.shenwei.me/seqkit/)
+
+  > Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. PLOS ONE, 11(10), e0163962. doi:[10.1371/journal.pone.0163962](https://doi.org/10.1371/journal.pone.0163962)
 
 - [bwa](https://doi.org/10.1093/bioinformatics/btp324)
 
@@ -93,6 +97,10 @@
 - [BamUtils](https://doi.org/10.1101/gr.176552.114)
 
   > Jun, G., Wing, M. K., Abecasis, G. R., & Kang, H. M. (2015). An efficient and scalable analysis framework for variant extraction and refinement from population-scale DNA sequence data. Genome Research, 25(6), 918–925. doi: [10.1101/gr.176552.114](https://doi.org/10.1101/gr.176552.114)
+
+- [QualiMap](https://doi.org/10.1093/bioinformatics/btv566)
+
+  > QualiMap Okonechnikov, K., Conesa, A., & García-Alcalde, F. (2016). Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. Bioinformatics , 32(2), 292–294. Download: http://qualimap.bioinfo.cipf.es/
 
 - [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
   > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190). Download: https://github.com/Integrative-Transcriptomics/DamageProfiler
