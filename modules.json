@@ -32,7 +32,7 @@
                     },
                     "bcftools/stats": {
                         "branch": "master",
-                        "git_sha": "e2693a7e2d773b92e0649b25880ee22fe82bb79d",
+                        "git_sha": "44096c08ffdbc694f5f92ae174ea0f7ba0f37e09",
                         "installed_by": ["modules"]
                     },
                     "bedtools/coverage": {
@@ -67,17 +67,17 @@
                     },
                     "bwa/mem": {
                         "branch": "master",
-                        "git_sha": "a64788f5ad388f1d2ac5bd5f1f3f8fc81476148c",
+                        "git_sha": "1e2b7fb7106852388610c0360d234b0829eb980e",
                         "installed_by": ["modules"]
                     },
                     "bwa/sampe": {
                         "branch": "master",
-                        "git_sha": "a64788f5ad388f1d2ac5bd5f1f3f8fc81476148c",
+                        "git_sha": "1e2b7fb7106852388610c0360d234b0829eb980e",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
                     "bwa/samse": {
                         "branch": "master",
-                        "git_sha": "a64788f5ad388f1d2ac5bd5f1f3f8fc81476148c",
+                        "git_sha": "1e2b7fb7106852388610c0360d234b0829eb980e",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
                     "cat/fastq": {
@@ -102,7 +102,7 @@
                     },
                     "eigenstratdatabasetools/eigenstratsnpcoverage": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
                     "endorspy": {
@@ -117,7 +117,7 @@
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "c9488585ce7bd35ccd2a30faa2371454c8112fb9",
+                        "git_sha": "003920c7f9a8ae19b69a97171922880220bedf56",
                         "installed_by": ["modules"]
                     },
                     "fastqc": {
@@ -132,17 +132,17 @@
                     },
                     "gatk/indelrealigner": {
                         "branch": "master",
-                        "git_sha": "27902a200da5056a941cde0f15ec80878b5e837c",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
                     "gatk/realignertargetcreator": {
                         "branch": "master",
-                        "git_sha": "27902a200da5056a941cde0f15ec80878b5e837c",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
                     "gatk/unifiedgenotyper": {
                         "branch": "master",
-                        "git_sha": "27902a200da5056a941cde0f15ec80878b5e837c",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
                     "gatk4/haplotypecaller": {
@@ -167,7 +167,7 @@
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "8ec825f465b9c17f9d83000022995b4f7de6fe93",
+                        "git_sha": "9e71d8519dfbfc328c078bba14d4bd4c99e39a94",
                         "installed_by": ["modules"]
                     },
                     "picard/createsequencedictionary": {
@@ -237,7 +237,7 @@
                     },
                     "samtools/mpileup": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
                         "installed_by": ["modules"]
                     },
                     "samtools/sort": {
@@ -250,12 +250,12 @@
                         "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
                         "installed_by": ["bam_split_by_region", "modules"]
                     },
-                    "sequencetools/pileupcaller": {
+                    "seqkit/split2": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
-                    "seqkit/split2": {
+                    "sequencetools/pileupcaller": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
