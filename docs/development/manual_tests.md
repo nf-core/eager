@@ -812,7 +812,6 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
   --genotyping_freebayes_ploidy 1
 ```
 
-
 ```bash
 ## Freebayes on raw reads, multiple references
 ## Freebayes does not complain about the BAM header not matching the reference.
