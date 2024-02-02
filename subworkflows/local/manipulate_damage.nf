@@ -131,6 +131,7 @@ workflow MANIPULATE_DAMAGE {
 
         SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED( ch_pmd_filtered_bams )
         ch_pmd_filtered_flagstat = SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED.out.flagstat
+        ch_versions              = ch_versions.mix( SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED.out.versions.first() )
     }
 
     if ( params.run_trim_bam ) {

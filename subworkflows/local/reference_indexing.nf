@@ -2,9 +2,11 @@
 // Prepare reference indexing for downstream
 //
 
-include { REFERENCE_INDEXING_SINGLE                                                   } from '../../subworkflows/local/reference_indexing_single.nf'
-include { REFERENCE_INDEXING_MULTI                                                    } from '../../subworkflows/local/reference_indexing_multi.nf'
-include { GUNZIP as GUNZIP_PMDBED; GUNZIP as GUNZIP_PMDFASTA; GUNZIP as GUNZIP_SNPBED } from '../../modules/nf-core/gunzip/main.nf'
+include { REFERENCE_INDEXING_SINGLE } from '../../subworkflows/local/reference_indexing_single.nf'
+include { REFERENCE_INDEXING_MULTI  } from '../../subworkflows/local/reference_indexing_multi.nf'
+include { GUNZIP as GUNZIP_PMDBED   } from '../../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_PMDFASTA } from '../../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_SNPBED   } from '../../modules/nf-core/gunzip/main.nf'
 
 workflow REFERENCE_INDEXING {
     take:
