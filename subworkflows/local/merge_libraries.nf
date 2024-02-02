@@ -16,10 +16,9 @@ workflow MERGE_LIBRARIES {
     ch_multiqc_files = Channel.empty()
 
     ch_library_merge_input = ch_bam_bai
-        // TODO add 'id_index' to final meta? (once that also gets added to bam input). Maybe also keep SE/PE? (for now, we assume SE, see comment below)
         .map { WorkflowEager.addNewMetaFromAttributes( it, ["id", "sample_id", "strandedness", "reference"], ["id", "sample_id", "strandedness", "reference"], false ) }
         .groupTuple(by: 0)
-        // Discrad library-level metas, and bais. Add single_end: true to all metas (no SE/PE distinction at this point, right?)
+        // Discrad library-level metas, and bais. Add single_end: true to all metas (no SE/PE distinction from here on)
         .map {
             meta, lib_metas, bam, bai ->
             [ meta + [ 'single_end': true ], bam ]
