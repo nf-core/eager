@@ -837,8 +837,8 @@ nextflow run main.nf -profile test_humanbam,docker --outdir ./results -w work/ -
 
 ```bash
 ## PileupCaller on raw reads
-## This currently fails because the different libraries of JK2802 never get merged, so the sample appears twice. Library merging is needed. As a workaround, I named the sample_id of the _SE and _PE libraries aafter the library name. The two are treated as separate samples now. (--input test/samplesheet_multilane_multilib_noDupSamples.tsv)
-## Expect: One geno/snp/ind combination per reference/strandedness combination (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile. ind has same number of lines as number of samples of that strandedness.
-##   Specifically, no geno/snp/ind for the reference that has no bed/snp file (Mammoth). Only ds data present, so only 1 genotyping dataset.
-nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noDupSamples.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
+## Something is wrong with the test input BAM, that makes samtools mpileup fail. samtools quickcheck does not identify a problem, but empty mpileups are generated when the BAM input is included in as an input.
+## Expect: One geno/snp/ind combination per reference (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile (977). ind has same number of lines as number of samples (2).
+##   Specifically, no geno/snp/ind for the reference that has no bed/snp file (Mammoth). Only data for "human" reference.
+nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
 ```
