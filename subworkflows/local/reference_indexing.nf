@@ -112,7 +112,9 @@ workflow REFERENCE_INDEXING {
 
     ch_pileupcaller_bed_snp = ch_pileupcaller_bed_snp
                     .filter { it[1] != "" || it[2] != "" } // They go together or not at all.
-                    // TODO add user warning if only one of the two is provided
+                    // Check if the channel is empty, and throw an error. Will only trigger for tsv fasta input. Single reference gets validated immediately.
+                    .ifEmpty { if(params.run_genotyping && params.genotyping_tool == 'pileupcaller') { error "[nf-core/eager] ERROR: Genotyping with pileupcaller requires that both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' are provided for at least one reference genome." } }
+                    .filter{ it != null } // Remove null channel which arises if empty cause error returns null.
 
     ch_sexdeterrmine_bed = ch_sexdeterrmine_bed
                     .filter { it[1] != "" }
