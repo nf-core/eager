@@ -823,7 +823,7 @@ nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -
 
 ```bash
 ## Pileupcaller on raw reads. No bed or snp file provided.
-## Expect: NO GENOTYPING. Pileupcaller requires a bed file and a snp file. Pipeline still executes though.
+## Expect: NO GENOTYPING. Pileupcaller requires a bed file and a snp file. Throws an error.
 ## TODO Maybe we need a hard failure here?
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
 ```
