@@ -34,7 +34,7 @@ if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_pri
             exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
     }
 }
-if ( params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_snpfile || params.genotyping_pileupcaller_bedfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
+if ( params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
 
 // TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
 if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
