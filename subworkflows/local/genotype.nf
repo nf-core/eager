@@ -25,6 +25,7 @@ workflow GENOTYPE {
     ch_versions                        = Channel.empty()
     ch_multiqc_files                   = Channel.empty()
     ch_pileupcaller_genotypes          = Channel.empty()
+    ch_eigenstrat_coverage_stats       = Channel.empty()
     ch_gatk_haplotypecaller_genotypes  = Channel.empty()
     ch_gatk_unifiedgenotyper_genotypes = Channel.empty()
     ch_freebayes_genotypes             = Channel.empty()
@@ -123,8 +124,16 @@ workflow GENOTYPE {
                 }
 
             COLLECT_GENOTYPES( ch_final_genotypes )
-            ch_versions = ch_versions.mix( COLLECT_GENOTYPES.out.versions.first() )
+            ch_pileupcaller_genotypes = COLLECT_GENOTYPES.out.collected
+            ch_versions               = ch_versions.mix( COLLECT_GENOTYPES.out.versions.first() )
 
+            // Calcualte coverage stats for collected eigenstrat dataset
+            EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE(
+                ch_pileupcaller_genotypes
+            )
+            ch_eigenstrat_coverage_stats = EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE.out.tsv
+            ch_versions                  = ch_versions.mix( EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE.out.versions.first() )
+            ch_multiqc_files             = ch_multiqc_files.mix( EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE.out.json )
     }
 
     if ( params.genotyping_tool == 'ug' ) {
@@ -221,8 +230,8 @@ workflow GENOTYPE {
             ch_bams_for_ug.dbsnp,
             [[], []]  // No comp
         )
-        ch_versions = ch_versions.mix( GATK_UNIFIEDGENOTYPER.out.versions.first() )
         ch_gatk_unifiedgenotyper_genotypes = GATK_UNIFIEDGENOTYPER.out.vcf
+        ch_versions                        = ch_versions.mix( GATK_UNIFIEDGENOTYPER.out.versions.first() )
     }
 
     if ( params.genotyping_tool == 'hc' ) {
@@ -267,8 +276,8 @@ workflow GENOTYPE {
             ch_input_for_hc.dbsnp,
             [[], []] // No dbsnp_tbi
         )
-        ch_versions = ch_versions.mix( GATK4_HAPLOTYPECALLER.out.versions.first() )
-        ch_gatk_unifiedgenotyper_genotypes = GATK4_HAPLOTYPECALLER.out.vcf
+        ch_gatk_haplotypecaller_genotypes = GATK4_HAPLOTYPECALLER.out.vcf
+        ch_versions                       = ch_versions.mix( GATK4_HAPLOTYPECALLER.out.versions.first() )
     }
 
     if ( params.genotyping_tool == 'freebayes' ) {
@@ -315,8 +324,8 @@ workflow GENOTYPE {
             [ [], [] ], // No populations file
             [ [], [] ]  // No CNV file
             )
-        ch_versions = ch_versions.mix( FREEBAYES.out.versions.first() )
         ch_freebayes_genotypes = FREEBAYES.out.vcf
+        ch_versions            = ch_versions.mix( FREEBAYES.out.versions.first() )
     }
 
     if ( params.genotyping_tool == 'angsd' ) {
@@ -346,16 +355,19 @@ workflow GENOTYPE {
             [ [], [] ],             // exons
             ch_bcftools_input.fasta // fasta
         )
-        ch_versions = ch_versions.mix( BCFTOOLS_STATS_GENOTYPING.out.versions.first() )
+        ch_bcftools_stats = BCFTOOLS_STATS_GENOTYPING.out.stats
+        ch_multiqc_files  = ch_multiqc_files.mix(BCFTOOLS_STATS_GENOTYPING.out.stats)
+        ch_versions       = ch_versions.mix( BCFTOOLS_STATS_GENOTYPING.out.versions.first() )
     }
 
     emit:
-    geno_pileupcaller = ch_pileupcaller_genotypes          // [ [ meta ], geno, snp, ind ]
-    geno_gatk_hc      = ch_gatk_haplotypecaller_genotypes  // [ [ meta ], vcf ] ]
-    geno_gatk_ug      = ch_gatk_unifiedgenotyper_genotypes // [ [ meta ], vcf ] ]
-    geno_freebayes    = ch_freebayes_genotypes             // [ [ meta ], vcf ] ]
-    geno_angsd        = ch_angsd_genotypes                 // [ [ meta ], glf ] ]
-    versions          = ch_versions
-    mqc               = ch_multiqc_files
-
+    geno_pileupcaller         = ch_pileupcaller_genotypes          // [ [ meta ], geno, snp, ind ]
+    geno_gatk_hc              = ch_gatk_haplotypecaller_genotypes  // [ [ meta ], vcf ] ]
+    geno_gatk_ug              = ch_gatk_unifiedgenotyper_genotypes // [ [ meta ], vcf ] ]
+    geno_freebayes            = ch_freebayes_genotypes             // [ [ meta ], vcf ] ]
+    geno_angsd                = ch_angsd_genotypes                 // [ [ meta ], glf ] ]
+    vcf_stats                 = ch_bcftools_stats                  // [ [ meta ], stats ]
+    eigenstrat_coverage_stats = ch_eigenstrat_coverage_stats       // [ [ meta ], stats ]
+    versions                  = ch_versions
+    mqc                       = ch_multiqc_files
 }
