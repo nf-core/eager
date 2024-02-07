@@ -740,13 +740,13 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ```bash
 ## Gatk UG on trimmed reads. Skip bcftools stats.
 ## Expect: One VCF per sample/reference combination, based on the trimmed bams (this actually shows on the IndelRealigner step and not the UG step).  No IR directory. No bcftools_stats file per VCF.
+## Checked that the input bam for the UG jobs indeed had trimmed reads. (The full UDG sample has untrimmed bams.)
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
   --run_trim_bam \
   --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
   --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
   --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
   --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
-## Checked that the input bam for the UG jobs indeed had trimmed reads. (The full UDG sample has untrimmed bams.)
 ```
 
 ```bash
@@ -778,10 +778,18 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ```
 
 ```bash
+## Attempt to run Gatk HC on trimmed reads, without activating trimming.
+## Expect: FAILURE. Cannot set genotyping source to ;trimmed' without trimming.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+  --genotyping_gatk_hc_emitrefconf 'BP_RESOLUTION' \
+  --genotyping_gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES'
+```
+
+```bash
 ## Gatk HC on trimmed reads, with different out mode and emit confidence. Skip bcftools stats.
 ## Expect: One VCF + .tbi index per sample/reference combination.
 ## Checked .command.sh for correct args.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' --run_trim_bam -ansi-log false -dump-channels --skip_bcftools_stats \
   --genotyping_gatk_hc_emitrefconf 'BP_RESOLUTION' \
   --genotyping_gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES'
 ```
@@ -823,21 +831,21 @@ nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -
 
 ```bash
 ## Pileupcaller on raw reads. No bed or snp file provided.
-## Expect: NO GENOTYPING. Pileupcaller requires a bed file and a snp file. Throws an error.
-## TODO Maybe we need a hard failure here?
+## Expect: NO GENOTYPING. PileupCaller requires a bed file and a snp file. Throws an error and stops.
+##  NOTE: if --fasta is a tsv/csv, then the error is deferred to AFTER parsing and indexing the references.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
 ```
 
 ```bash
 ## Pileupcaller on raw reads.
-## Expect: One geno/snp/ind combination per reference/strandedness combination (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile. ind has same number of lines as number of samples of that strandedness.
+## Expect: One geno/snp/ind/coverage tsv combination per reference (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile (977). ind has same number of lines as number of samples (2). Coverage tsv has same lines as ind + 1 for header (3).
 nextflow run main.nf -profile test_humanbam,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
 ```
 
 ```bash
 ## PileupCaller on raw reads
 ## Something is wrong with the test input BAM, that makes samtools mpileup fail. samtools quickcheck does not identify a problem, but empty mpileups are generated when the BAM input is included in as an input.
-## Expect: One geno/snp/ind combination per reference (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile (977). ind has same number of lines as number of samples (2).
+## Expect: One geno/snp/ind/coverage tsv combination per reference (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile (977). ind has have same number of lines as number of samples (2). Coverage tsv has same lines as ind + 1 for header (3).
 ##   Specifically, no geno/snp/ind for the reference that has no bed/snp file (Mammoth). Only data for "human" reference.
 nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
 ```
