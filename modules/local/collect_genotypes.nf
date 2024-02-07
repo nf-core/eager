@@ -20,8 +20,6 @@ process COLLECT_GENOTYPES {
     script:
     prefix   = task.ext.prefix ?: "${meta.id}"
     // If there are multiple genotype datasets, then merge them, else just rename the output for consistency.
-    println "geno = ${geno.toList().size()}"
-    println "${geno.toList()}"
     if ( geno.toList().size() == 1 ) {
         """
             mv ${geno[0]} ${prefix}.geno
@@ -46,6 +44,7 @@ process COLLECT_GENOTYPES {
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
+            python: \$(python --version | sed 's/Python //g')
             collect_genotypes.py: \$(collect_genotypes.py -v)
         END_VERSIONS
         """
