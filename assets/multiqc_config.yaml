@@ -59,6 +59,7 @@ extra_fn_clean_exts:
   - ".trimmed_stats"
   - "_libmerged"
   - "_bt2"
+  - "_udg"
 
 top_modules:
   - "fastqc":
