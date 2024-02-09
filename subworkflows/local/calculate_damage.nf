@@ -38,7 +38,7 @@ workflow CALCULATE_DAMAGE {
                 fasta_fai: fasta_fai
             }
     // Calculate damage
-    if ( params.damage_calculation_tool == 'damageprofiler' ) {
+    if ( params.damagecalculation_tool == 'damageprofiler' ) {
         DAMAGEPROFILER(
                 ch_damagetool_input.bam,
                 ch_damagetool_input.fasta,
@@ -47,7 +47,7 @@ workflow CALCULATE_DAMAGE {
             )
             ch_versions       = ch_versions.mix( DAMAGEPROFILER.out.versions.first() )
             ch_multiqc_files  = ch_multiqc_files.mix( DAMAGEPROFILER.out.results )
-    } else if ( params.damage_calculation_tool == 'mapdamage' ) {
+    } else if ( params.damagecalculation_tool == 'mapdamage' ) {
         CALCULATE_MAPDAMAGE2 ( ch_damagetool_input.bam, ch_damagetool_input.fasta )
 
         ch_versions      = ch_versions.mix( CALCULATE_MAPDAMAGE2.out.versions.first() )
