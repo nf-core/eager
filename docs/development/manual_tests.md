@@ -702,7 +702,12 @@ nextflow run main.nf -profile test,docker \
 
 # for generating test data
 mkdir testing && cd testing
+wget https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Mammoth/Mammoth_MT_Krause.fasta
 git clone https://github.com/rhuebler/HOPS.git
+cd HOPS/Test_Data/Test_Database
+unzip table0.db.zip
+unzip table0.idx.zip
+cd ../../..
 mkdir test_data && cd test_data
 curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/000/ERR8958750/ERR8958750_1.fastq.gz -o ERR8958750_1.fastq.gz
 curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/000/ERR8958750/ERR8958750_2.fastq.gz -o ERR8958750_2.fastq.gz
@@ -716,6 +721,7 @@ curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/004/ERR8958754/ERR8958754_1.fa
 curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/004/ERR8958754/ERR8958754_2.fastq.gz -o ERR8958754_2.fastq.gz
 ls -1 | while read file; do
 zcat $file | head -n 4000 > ${file}_reduced.fastq
+gzip ${file}_reduced.fastq
 done
 cd ..
 

@@ -21,7 +21,6 @@ workflow METAGENOMICS_POSTPROCESSING {
             meta, rma, rma_collected ->
                 rma_collected
             }
-        ch_maltextract_input.view()
 
         tax_list = Channel.fromPath(params.metagenomics_maltextract_taxonlist)
         ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbidir)

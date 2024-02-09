@@ -354,7 +354,7 @@ The saved files are the _good_ files, passing the `dust` or `entropy` filter tre
 - `metagenomics_screening/profiling/malt/`
   - `<sample_id>.rma6`: binary file containing all alignments and taxonomic information of hits that can be loaded into the [MEGAN6](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/) interactive viewer
   - `<sample_id>.blastn.sam`: sparse SAM file containing alignments of each hit (if `--metagenomics_malt_savereads`)
-  - `*.log`: LOG file containing runtime log of MALT
+  - `*.log`: LOG file containing runtime log of MALT. NOTE: If you are running parallel malt runs with `--metagenomics_malt_group_size` set above 0, your log files will be labelled with the name of _one_ of the input files run for each of the parallel executions.
 
 </details>
 

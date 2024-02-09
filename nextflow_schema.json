@@ -812,7 +812,7 @@
                     "default": 0,
                     "description": "Define how many fastq files should be submitted in the same malt run. Default value of 0 sends all files at once.",
                     "fa_icon": "fas fa-barcode",
-                    "help_text": "Very large fastq files or many fastq files run through MALT at the same time can lead to excessively long runtimes. This parameter allows for parallelization of MALT runs. Please note, MALT is resource heavy and setting this value above the default (0) will spawn at minimum N/metagenomics_malt_group_size jobs where N is the number of samples. Please only use this if it is necessary to avoid runtime limits on your HPC cluster."
+                    "help_text": "Very many (large) fastq files run through MALT at the same time can lead to excessively long runtimes. This parameter allows for parallelization of MALT runs. Please note, MALT is resource heavy and setting this value above the default (0) will spawn at minimum N/metagenomics_malt_group_size jobs where N is the number of samples. Please only use this if it is necessary to avoid runtime limits on your HPC cluster since the overhead of loading a database is high."
                 },
                 "metagenomics_run_postprocessing": {
                     "type": "boolean",

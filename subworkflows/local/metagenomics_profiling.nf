@@ -37,21 +37,28 @@ workflow METAGENOMICS_PROFILING {
         // unnecessary. Set as database name to prevent `null` job ID and prefix.
 
         if ( params.metagenomics_malt_group_size > 0 ) {
+            ch_labels_for_malt_tmp = reads
+                .map { meta, reads -> meta }
+                .collate(params.metagenomics_malt_group_size)
+                .map(meta -> meta.first().library_id )
+
             ch_input_for_malt_tmp =  reads
                 .map { meta, reads -> reads }
                 .collate( params.metagenomics_malt_group_size ) //collate into bins of defined lengths
                 .map{
                     reads ->
                     // add new meta with db-name as id
-                    [[id: file(params.metagenomics_profiling_database).getBaseName() ], reads]
+                    [[label: file(params.metagenomics_profiling_database).getBaseName() ], reads]
                 }
-                .combine(database) //combine with database
+                .combine(database)
+                .merge(ch_labels_for_malt_tmp) //combine with database
                 .multiMap{
                     // and split apart again
-                    meta, reads, database ->
-                        reads: [meta, reads]
+                    meta, reads, database, ids ->
+                        reads: [meta + ['id':ids], reads]
                         database: database
                 }
+
             ch_input_for_malt = ch_input_for_malt_tmp.reads
             database = ch_input_for_malt_tmp.database
         }
@@ -63,7 +70,7 @@ workflow METAGENOMICS_PROFILING {
                 .map{
                     // make sure id is db_name for publishing purposes.
                     reads ->
-                    [[id: file(params.metagenomics_profiling_database).getBaseName() ], reads]
+                    [[label: file(params.metagenomics_profiling_database).getBaseName(), id: 'all' ], reads]
                 }
         }
 
