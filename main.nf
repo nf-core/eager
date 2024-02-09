@@ -2742,7 +2742,7 @@ process vcf2genome {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fasta.gz")
 
   script:
-  def out = !params.vcf2genome_outfile ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
+  def out = !params.vcf2genome_outfile ? "${samplename}.fasta" : "${samplename}_${params.vcf2genome_outfile}.fasta"
   def fasta_head = !params.vcf2genome_header ? "${samplename}" : "${params.vcf2genome_header}"
   """
   pigz -d -f -p ${task.cpus} ${vcf}

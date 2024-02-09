@@ -1336,9 +1336,9 @@
                 },
                 "vcf2genome_outfile": {
                     "type": "string",
-                    "description": "Specify name of the output FASTA file containing the consensus sequence. Do not include `.vcf` in the file name.",
+                    "description": "Specify the name of the output FASTA file containing the consensus sequence.",
                     "fa_icon": "fas fa-file-alt",
-                    "help_text": "The name of your requested output FASTA file. Do not include `.fasta` suffix.\n"
+                    "help_text": "The output FASTA file will be named `<sample_name>_<vcf2genome_outfile>.fasta`.\n"
                 },
                 "vcf2genome_header": {
                     "type": "string",
