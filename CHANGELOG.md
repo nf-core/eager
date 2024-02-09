@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - YYYY-MM-DD
+
+### `Added`
+
+- [#1037](https://github.com/nf-core/eager/issues/1037) Added an option to deactivate the `-sorted` option of bedtools coverage, in case the feature file is not sorted the same way as the fasta file.
+
+### `Fixed`
+
+### `Dependencies`
+
+- `multiqc`: 1.14 -> 1.16
+
+### `Deprecated`
+
 ## [2.5.0] - Bopfingen - 2023-11-03
 
 ### `Added`

@@ -2063,13 +2063,14 @@ process bedtools {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*")
 
   script:
+  sorting_of_anno = params.anno_file_is_unsorted ? "" : '-sorted'
   """
   ## Create genome file from bam header
   samtools view -H ${bam} | grep '@SQ' | sed 's#@SQ\tSN:\\|LN:##g' > genome.txt
   
   ##  Run bedtools
-  bedtools coverage -nonamecheck -g genome.txt -sorted -a ${anno_file} -b ${bam} | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
-  bedtools coverage -nonamecheck -g genome.txt -sorted -a ${anno_file} -b ${bam} -mean | pigz -p ${task.cpus - 1} > "${bam.baseName}".depth.gz
+  bedtools coverage -nonamecheck -g genome.txt ${sorting_of_anno} -a ${anno_file} -b ${bam} | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
+  bedtools coverage -nonamecheck -g genome.txt ${sorting_of_anno} -a ${anno_file} -b ${bam} -mean | pigz -p ${task.cpus - 1} > "${bam.baseName}".depth.gz
   """
 }
 
