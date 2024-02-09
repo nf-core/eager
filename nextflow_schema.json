@@ -984,36 +984,36 @@
                     "fa_icon": "fas fa-forward",
                     "help_text": "Turns off damage calculation to compute DNA damage profiles."
                 },
-                "damage_calculation_tool": {
+                "damagecalculation_tool": {
                     "type": "string",
                     "default": "damageprofiler",
                     "enum": ["damageprofiler", "mapdamage"],
                     "fa_icon": "fas fa-tools",
                     "description": "Specify the tool to use for damage calculation.",
-                    "help_text": "Specify the tool to be used for damage calculation. DamageProfiler is generally faster than mapDamage2, but the latter has an option to limit the number of reads used. This can significantly speed up the processing of very large files, where the damage estimates are already accurate after processing only a fraction of the input. Options: damageprofiler, mapdamage. By default, DamageProfiler is used."
+                    "help_text": "Specify the tool to be used for damage calculation. DamageProfiler is generally faster than mapDamage2, but the latter has an option to limit the number of reads used. This can significantly speed up the processing of very large files, where the damage estimates are already accurate after processing only a fraction of the input."
                 },
-                "damage_calculation_yaxis": {
+                "damagecalculation_yaxis": {
                     "type": "number",
                     "default": 0.3,
                     "description": "Specify the maximum misincorporation frequency that should be displayed on damage plot. Set to 0 to 'autoscale'.",
-                    "help_text": "Specifies what the maximum misincorporation frequency should be displayed as, in the damage plot. This is set to 0.30 (i.e. 30%) by default as this matches the popular [mapDamage2.0 program](https://ginolhac.github.io/mapDamage/).\n\n> Modifies DamageProfiler parameter: -yaxis_dp_max or mapDamage2 parameter: --ymax",
+                    "help_text": "Specifies what the maximum misincorporation frequency should be displayed as, in the damage plot.\n\n> Modifies DamageProfiler parameter: -yaxis_dp_max or mapDamage2 parameter: --ymax",
                     "fa_icon": "fas fa-ruler-combined"
                 },
-                "damage_calculation_damageprofiler_length": {
+                "damagecalculation_xaxis": {
+                    "type": "integer",
+                    "default": 25,
+                    "description": "Specify number of bases of each read to be considered for plotting damage estimation.",
+                    "help_text": "Specifies the number of bases to be considered for plotting nucleotide misincorporations.\n\n> Modifies DamageProfiler parameter: -t or mapDamage2 parameter: -m\n",
+                    "fa_icon": "far fa-chart-bar"
+                },
+                "damagecalculation_damageprofiler_length": {
                     "type": "integer",
                     "default": 100,
                     "description": "Specifies the length filter for DamageProfiler.",
-                    "help_text": "> Modifies DamageProfiler parameter: -l",
+                    "help_text": "Number of bases which are considered for frequency computations, by default set to 100.`\n\n> Modifies DamageProfiler parameter: -l",
                     "fa_icon": "fas fa-sort-amount-down"
                 },
-                "damage_calculation_damageprofiler_threshold": {
-                    "type": "integer",
-                    "default": 15,
-                    "description": "Specify number of bases of each read to consider for DamageProfiler calculations.",
-                    "help_text": "Specifies the length of the read start and end to be considered for profile generation in DamageProfiler.\n\n> Modifies DamageProfiler parameter: -t\n",
-                    "fa_icon": "far fa-chart-bar"
-                },
-                "damage_calculation_mapdamage_downsample": {
+                "damagecalculation_mapdamage_downsample": {
                     "type": "integer",
                     "default": 0,
                     "fa_icon": "fas fa-compress-alt",
