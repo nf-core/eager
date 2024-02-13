@@ -59,7 +59,8 @@ extra_fn_clean_exts:
   - ".trimmed_stats"
   - "_libmerged"
   - "_bt2"
-  - "_udg"
+  - type: "regex"
+    pattern: "_udg(half|none|full)"
 
 top_modules:
   - "fastqc":
