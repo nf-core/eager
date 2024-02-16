@@ -33,32 +33,30 @@ workflow MAP {
                 meta, reads ->
                     new_meta = meta.clone()
                     new_meta.shard_number = reads.getName().replaceAll(/.*(part_\d+).(?:fastq|fq).gz/, '$1')
-                    [ new_meta, reads ] 
+                    [ new_meta, reads ]
             }
             .groupTuple()
-        
+
         ch_input_for_mapping = sharded_reads
             .combine(index)
             .multiMap {
                 meta, reads, meta2, index ->
                     new_meta = meta.clone()
-                    new_meta.reference = meta2.id  
-                    reads: [ new_meta, reads ] 
+                    new_meta.reference = meta2.id
+                    reads: [ new_meta, reads ]
                     index: [ meta2, index ]
             }
 
     } else {
-        
         ch_input_for_mapping = reads
             .combine(index)
             .multiMap {
                 meta, reads, meta2, index ->
                     new_meta = meta.clone()
-                    new_meta.reference = meta2.id  
-                    reads: [ new_meta, reads ] 
+                    new_meta.reference = meta2.id
+                    reads: [ new_meta, reads ]
                     index: [ meta2, index ]
             }
-
     }
 
     if ( params.mapping_tool == 'bwaaln' ) {
@@ -107,7 +105,7 @@ workflow MAP {
 
         BOWTIE2_ALIGN ( ch_input_for_mapping.reads, ch_input_for_mapping.index, false, true )
         ch_versions        = ch_versions.mix ( BOWTIE2_ALIGN.out.versions.first() )
-        ch_mapped_lane_bam = BOWTIE2_ALIGN.out.bam
+        ch_mapped_lane_bam = BOWTIE2_ALIGN.out.aligned
 
         SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
         ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
@@ -124,12 +122,11 @@ workflow MAP {
                                 .groupTuple()
                                 .branch {
                                     meta, bam ->
-                                        println(bam.size())
                                         merge: bam.size() > 1
                                         skip: true
                                 }
 
-    SAMTOOLS_MERGE_LANES ( ch_input_for_lane_merge.merge, [], [] )
+    SAMTOOLS_MERGE_LANES ( ch_input_for_lane_merge.merge, [[], []], [[], []] )
     ch_versions.mix( SAMTOOLS_MERGE_LANES.out.versions )
 
     // Then mix back merged and single lane libraries for everything downstream

@@ -12,3 +12,4 @@ testing*
 bin/
 *.cff
 test/
+dev_docs.md

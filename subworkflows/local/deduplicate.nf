@@ -71,8 +71,8 @@ workflow DEDUPLICATE {
             .multiMap{
                 ignore_me, meta, bam, bai, meta2, fasta, fasta_fai ->
                 bam: [ meta, bam ]
-                fasta: fasta
-                fasta_fai: fasta_fai
+                fasta: [ meta2, fasta ]
+                fasta_fai: [ meta2, fasta_fai ]
             }
 
             // Dedup each bam
@@ -117,8 +117,8 @@ workflow DEDUPLICATE {
             // bam here is a list of bams
             ignore_me, meta, bam, meta2, fasta, fasta_fai ->
             bam:        [ meta, bam ]
-            fasta:      fasta
-            fasta_fai:  fasta_fai
+            fasta:      [ meta2, fasta ]
+            fasta_fai:  [ meta2, fasta_fai ]
         }
 
     // Merge the bams for each region into one bam
