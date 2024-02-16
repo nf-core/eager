@@ -86,7 +86,7 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     def capture_bed                           = params.snpcapture_bed != null ? file(params.snpcapture_bed, checkIfExists: true ) : ""
                                     def pileupcaller_bed                      = ""
                                     def pileupcaller_snp                      = ""
-                                    def sexdet_bed                            = ""
+                                    def sexdet_bed                            = params.sexdeterrmine_bedfile != null ? file(params.sexdeterrmine_bedfile, checkIfExists: true ) : ""
                                     def bedtools_feature                      = params.mapstats_bedtools_featurefile != null ? file(params.mapstats_bedtools_featurefile, checkIfExists: true ) : ""
                                     [ meta, fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature ]
                                 }
