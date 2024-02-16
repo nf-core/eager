@@ -8,6 +8,7 @@ include { MALT_RUN                       } from '../../modules/nf-core/malt/run/
 include { KRAKEN2_KRAKEN2                } from '../../modules/nf-core/kraken2/kraken2/main'
 include { KRAKENUNIQ_PRELOADEDKRAKENUNIQ } from '../../modules/nf-core/krakenuniq/preloadedkrakenuniq/main'
 include { METAPHLAN_METAPHLAN            } from '../../modules/nf-core/metaphlan/metaphlan/main'
+include { CAT_CAT as CAT_CAT_MALT        } from '../../modules/nf-core/cat/cat/main'
 
 workflow METAGENOMICS_PROFILING {
 
@@ -95,6 +96,21 @@ workflow METAGENOMICS_PROFILING {
         }
         .collect()
         .toList()
+
+        // Recombine log files for outputting if parallel execution was run
+        if ( params.metagenomics_malt_group_size > 0 ) {
+            ch_log_for_cat =
+                MALT_RUN.out.log
+                    .map {
+                        meta,log -> log
+                    }
+                    .collect()
+                    .map {
+                        log -> [['databasename': file(params.metagenomics_profiling_database).getBaseName()], log]
+                    }
+
+            CAT_CAT_MALT ( ch_log_for_cat )
+        }
 
         ch_maltrun_for_postprocessing = ch_maltrun_for_megan.combine(ch_maltrun_for_maltextract)
 
