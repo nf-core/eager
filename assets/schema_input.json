@@ -16,7 +16,6 @@
             "library_id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "unique": ["sample_id"],
                 "meta": ["library_id"],
                 "errorMessage": "library_id name must be provided and cannot contain spaces"
             },
@@ -40,6 +39,7 @@
             },
             "strandedness": {
                 "type": "string",
+                "unique": ["sample_id"],
                 "enum": ["single", "double"],
                 "meta": ["strandedness"],
                 "errorMessage": "Specified strandedness not recognised"
