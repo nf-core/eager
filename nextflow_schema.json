@@ -985,7 +985,7 @@
                 "anno_file_is_unsorted": {
                     "type": "boolean",
                     "fa_icon": "fas fa-random",
-                    "description": "Specify if the annotation file is not sorted in the same way as the reference fasta file.",
+                    "description": "Specify if the annotation file provided to --anno_file is not sorted in the same way as the reference fasta file.",
                     "help_text": "In cases where the annotation file is NOT sorted the same way as the reference fasta, this option should be specified. This will significantly increase the memory usage of bedtools!\n\n> Modifies bedtools parameter: `-sorted`"
                 }
             },
