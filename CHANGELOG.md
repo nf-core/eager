@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
-- [#1037](https://github.com/nf-core/eager/issues/1037) Added an option to deactivate the `-sorted` option of bedtools coverage, in case the feature file is not sorted the same way as the fasta file.
+- [#1037](https://github.com/nf-core/eager/issues/1037) Added an option to deactivate the `-sorted` option of bedtools coverage, in case the feature file is not sorted the same way as the fasta file. (♥ Thanks to @IdoBar for reporting, and contributing.)
 
 ### `Fixed`
 
