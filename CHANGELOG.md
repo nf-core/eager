@@ -3,6 +3,21 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - YYYY-MM-DD
+
+### `Added`
+
+- [#1037](https://github.com/nf-core/eager/issues/1037) Added an option to deactivate the `-sorted` option of bedtools coverage, in case the feature file is not sorted the same way as the fasta file.
+
+### `Fixed`
+
+- [#1048](https://github.com/nf-core/eager/issues/1048) `--vcf2genome_outfile` parameter now gets prefixed by the sample_name and suffixed with `.fasta` (i.e. `<sample_name>_<vcf2genome_outfile>.fasta`). This ensures we avoid overwriting the output fasta of one sample with that of another when the option is provided. (♥ Thanks to @MeriamOs for reporting.)
+- [#1047](https://github.com/nf-core/eager/issues/1047) Changed the row some statistics were reported in the General Stats table. The File name collision fixed in 2.5.0 (see #1017) caused these statistics to be reported in the wrong row due to an added suffix.
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.5.0] - Bopfingen - 2023-11-03
 
 ### `Added`

@@ -981,6 +981,12 @@
                     "description": "Path to GFF or BED file containing positions of features in reference file (--fasta). Path should be enclosed in quotes.",
                     "fa_icon": "fas fa-file-signature",
                     "help_text": "Specify the path to a GFF/BED containing the feature coordinates (or any acceptable input for [`bedtools coverage`](https://bedtools.readthedocs.io/en/latest/content/tools/coverage.html)). Must be in quotes.\n"
+                },
+                "anno_file_is_unsorted": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-random",
+                    "description": "Specify if the annotation file is not sorted in the same way as the reference fasta file.",
+                    "help_text": "In cases where the annotation file is NOT sorted the same way as the reference fasta, this option should be specified. This will significantly increase the memory usage of bedtools!\n\n> Modifies bedtools parameter: `-sorted`"
                 }
             },
             "fa_icon": "fas fa-scroll",
@@ -1330,9 +1336,9 @@
                 },
                 "vcf2genome_outfile": {
                     "type": "string",
-                    "description": "Specify name of the output FASTA file containing the consensus sequence. Do not include `.vcf` in the file name.",
+                    "description": "Specify the name of the output FASTA file containing the consensus sequence.",
                     "fa_icon": "fas fa-file-alt",
-                    "help_text": "The name of your requested output FASTA file. Do not include `.fasta` suffix.\n"
+                    "help_text": "The output FASTA file will be named `<sample_name>_<vcf2genome_outfile>.fasta`.\n"
                 },
                 "vcf2genome_header": {
                     "type": "string",
@@ -1718,7 +1724,7 @@
                 "maltextract_percentidentity": {
                     "type": "number",
                     "description": "Minimum percent identity alignments are required to have to be reported. Recommended to set same as MALT parameter.",
-                    "default": 85.0,
+                    "default": 85,
                     "fa_icon": "fas fa-id-card",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85`.\n\nOnly when `--metagenomic_tool malt` is also supplied.\n\n> Modifies MaltExtract parameter: `--minPI`"
                 },
