@@ -134,14 +134,6 @@ workflow EAGER {
     }
 
 
-    // SUBWORKFLOW: Run Sex determination
-    if ( params.sexdeterrmine_bedfile ) {
-      ch_sexdeterrmine_bed = REFERENCE_INDEXING.out.sexdeterrmine_bed
-            .map{
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
-            }
-    }
-
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
@@ -527,9 +519,9 @@ workflow EAGER {
     if ( params.run_sexdeterrmine ) {
         ch_sexdeterrmine_input = ch_dedupped_bams
 
-        RUN_SEXDETERMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed )
-        ch_versions      = ch_versions.mix( ESTIMATE_CONTAMINATION.out.versions )
-        ch_multiqc_files = ch_multiqc_files.mix( ESTIMATE_CONTAMINATION.out.mqc.collect{it[1]}.ifEmpty([]) )
+        RUN_SEXDETERMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed.dump() )
+        ch_versions      = ch_versions.mix( RUN_SEXDETERMINE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( RUN_SEXDETERMINE.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //
