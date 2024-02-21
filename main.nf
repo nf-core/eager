@@ -36,6 +36,11 @@ if ( params.bam && !params.single_end ) {
   exit 1, "[nf-core/eager] error: bams can only be specified with --single_end. Please check input command."
 }
 
+// Do not allow input bams to be suffixed with '.unmapped.bam'
+if (params.bam && params.input.endsWith('.unmapped.bam')) {
+  exit 1, "[nf-core/eager] error: Input BAM file names ending in '.unmapped.bam' are not allowed. Please rename your input BAM(s)."
+}
+
 // Validate that skip_collapse is only set to True for paired_end reads!
 if (!has_extension(params.input, "tsv") && params.skip_collapse  && params.single_end){
     exit 1, "[nf-core/eager] error: --skip_collapse can only be set for paired_end samples."
@@ -378,6 +383,9 @@ ch_input_sample_check
         def r1 = file(it[8]).getName()
         def r2 = file(it[9]).getName()
         def bam = file(it[10]).getName()
+
+        // Throw error and exit if the input bam has a name ending in '.unmapped.bam'
+        if (bam.endsWith('.unmapped.bam')) { exit 1, "[nf-core/eager] error: Input BAM file names ending in '.unmapped.bam' are not allowed. Please rename your input BAM(s)." }
 
       [r1, r2, bam]
 
@@ -2063,13 +2071,14 @@ process bedtools {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*")
 
   script:
+  sorting_of_anno = params.anno_file_is_unsorted ? "" : "-sorted"
   """
   ## Create genome file from bam header
   samtools view -H ${bam} | grep '@SQ' | sed 's#@SQ\tSN:\\|LN:##g' > genome.txt
   
   ##  Run bedtools
-  bedtools coverage -nonamecheck -g genome.txt -sorted -a ${anno_file} -b ${bam} | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
-  bedtools coverage -nonamecheck -g genome.txt -sorted -a ${anno_file} -b ${bam} -mean | pigz -p ${task.cpus - 1} > "${bam.baseName}".depth.gz
+  bedtools coverage -nonamecheck -g genome.txt ${sorting_of_anno} -a ${anno_file} -b ${bam} | pigz -p ${task.cpus - 1} > "${bam.baseName}".breadth.gz
+  bedtools coverage -nonamecheck -g genome.txt ${sorting_of_anno} -a ${anno_file} -b ${bam} -mean | pigz -p ${task.cpus - 1} > "${bam.baseName}".depth.gz
   """
 }
 
@@ -2741,7 +2750,7 @@ process vcf2genome {
   tuple samplename, libraryid, lane, seqtype, organism, strandedness, udg, path("*.fasta.gz")
 
   script:
-  def out = !params.vcf2genome_outfile ? "${samplename}.fasta" : "${params.vcf2genome_outfile}"
+  def out = !params.vcf2genome_outfile ? "${samplename}.fasta" : "${samplename}_${params.vcf2genome_outfile}.fasta"
   def fasta_head = !params.vcf2genome_header ? "${samplename}" : "${params.vcf2genome_header}"
   """
   pigz -d -f -p ${task.cpus} ${vcf}
