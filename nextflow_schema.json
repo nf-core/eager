@@ -924,8 +924,8 @@
                     "type": "string",
                     "default": "randomHaploid",
                     "fa_icon": "fas fa-toolbox",
-                    "description": "Specify the calling method to use.",
-                    "help_text": "Specify the calling method to use.\n\n> Modifies pileupCaller parameter: `--randomHaploid` `--randomDiploid` `--majorityCall`",
+                    "description": "Specify the SNP calling method to use for genotyping.",
+                    "help_text": "Specify the SNP calling method to use for genotyping. 'randomHaploid' will randomly sample a read overlapping the SNP, and produce a homozygous genotype with the allele supported by that read (often called 'pseudohaploid' or 'pseudodiploid'). 'randomDiploid` will randomly sample two reads overlapping the SNP and produce a genotype comprised of the two alleles supported by the two reads. 'majorityCall' will produce a genotype that is homozygous for the allele that appears in the majority of reads overlapping the SNP.\n\n> Modifies pileupCaller parameters: `--randomHaploid` `--randomDiploid` `--majorityCall`",
                     "enum": ["randomHaploid", "randomDiploid", "majorityCall"]
                 },
                 "genotyping_pileupcaller_transitions_mode": {
