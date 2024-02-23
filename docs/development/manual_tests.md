@@ -734,7 +734,7 @@ These tests were ran before library merging was implemented.
 ```bash
 ## Gatk UG on raw reads
 ## Expect: One VCF per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keep_realign_bam -ansi-log false -dump-channels
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels
 ```
 
 ```bash
@@ -766,7 +766,7 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ## Gatk UG on raw reads, multiple references
 ## NOTE: Actually fails due to header of BAM input in test_multiref not matching sequences in fasta (which was shortened to chr 21+ for brevity). Provided alternative input without a BAM input line. ( head -n 5 on https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/samplesheet_multilane_multilib.tsv ). It then worked fine.
 ## Expect: One VCF per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
-nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keep_realign_bam -ansi-log false -dump-channels
+nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels
 ```
 
 ## GATK HC
@@ -798,7 +798,7 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ## Gatk HC on raw reads, multiple references
 ## NOTE: Actually fails due to header of BAM input in test_multiref not matching sequences in fasta (which was shortened to chr 21+ for brevity). Provided alternative input without a BAM input line. ( head -n 5 on https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/samplesheet_multilane_multilib.tsv ). It then worked fine.
 ## Expect: One VCF + .tbi index per sample/reference combination . Also 1 bcftools_stats file per VCF.
-nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw' --genotyping_gatk_ug_keep_realign_bam -ansi-log false -dump-channels
+nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels
 ```
 
 ## FREEBAYES
@@ -824,7 +824,7 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ## Freebayes on raw reads, multiple references
 ## Freebayes does not complain about the BAM header not matching the reference.
 ## Expect: One VCF per sample/reference combination. BAM input only has 1 output for the specified reference. Also 1 bcftools_stats file per VCF.
-nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw' --genotyping_gatk_ug_keep_realign_bam -ansi-log false -dump-channels
+nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels
 ```
 
 ## PILEUPCALLER
