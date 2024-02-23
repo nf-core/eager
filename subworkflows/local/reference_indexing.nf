@@ -125,12 +125,6 @@ workflow REFERENCE_INDEXING {
     ch_dbsnp = ch_dbsnp
         .filter { it[1] != "" }
 
-    // Parameter combination validation
-    // TODO
-    // If channel ch_pileupcaller_bed_snp is empty and params.genotyping_tool == 'pileupcaller', throw error
-    // if ( ch_pileupcaller_bed_snp.isEmpty() && params.genotyping_tool == 'pileupcaller' ) {
-    //     error "No pileupcaller_bed_snp file provided, but genotyping_tool is set to 'pileupcaller'. Please provide a pileupcaller_bed_snp file."
-    // }
     emit:
     reference            = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, circular_target ]
     mitochondrion_header = ch_mitochondrion_header  // [ meta, mitochondrion_header ]
