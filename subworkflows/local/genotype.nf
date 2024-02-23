@@ -85,6 +85,7 @@ workflow GENOTYPE {
                         bams:  [ combo_meta, bams, bedfile ]
                         fasta: [ fasta ]
                 }
+
             SAMTOOLS_MPILEUP_PILEUPCALLER(
                 ch_mpileup_inputs.bams,
                 ch_mpileup_inputs.fasta,
@@ -127,7 +128,7 @@ workflow GENOTYPE {
             ch_pileupcaller_genotypes = COLLECT_GENOTYPES.out.collected
             ch_versions               = ch_versions.mix( COLLECT_GENOTYPES.out.versions.first() )
 
-            // Calcualte coverage stats for collected eigenstrat dataset
+            // Calculate coverage stats for collected eigenstrat dataset
             EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE(
                 ch_pileupcaller_genotypes
             )
@@ -202,7 +203,7 @@ workflow GENOTYPE {
             ch_input_for_indelrealigner.dict,
             [[], []] // No known_vcf
         )
-        ch_versions = ch_versions.mix( GATK_INDELREALIGNER.out.versions.first() ) // TODO is this actually needed, since all GATK modules have the same version?
+        ch_versions = ch_versions.mix( GATK_INDELREALIGNER.out.versions.first() )
 
         // Use realigned bams as input for UG. combine with reference info to get correct ordering.
         ch_bams_for_ug = GATK_INDELREALIGNER.out.bam
