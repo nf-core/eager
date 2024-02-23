@@ -896,7 +896,7 @@
                     "type": "integer",
                     "default": 30,
                     "description": "The base mapping quality to be used for genotyping with pileupcaller.",
-                    "help_text": "The minimum mapping quality to be used for genotyping with pileupCaller. Affects the `samtools mpileup` output that is used by `pileupCaller`. \n\n> Affects `-Q` parameter of `samtools mpileup`.",
+                    "help_text": "The minimum base quality to be used when generating the samtools mpileup used as input for genotyping with pileupCaller. \n\n> Modifies samtools mpileup parameter: `-Q`.",
                     "fa_icon": "fas fa-filter"
                 },
                 "genotyping_pileupcaller_min_map_quality": {
@@ -904,7 +904,7 @@
                     "default": 30,
                     "fa_icon": "fas fa-filter",
                     "description": "The minimum mapping quality to be used for genotyping with pileupcaller.",
-                    "help_text": "The minimum mapping quality to be used for genotyping with pileupCaller. Affects the `samtools mpileup` output that is used by `pileupCaller`. \n\n> Affects `-q` parameter of `samtools mpileup`."
+                    "help_text": "The minimum mapping quality to be used when generating the samtools mpileup used as input for genotyping with pileupCaller. \n\n> Modifies samtools mpileup parameter: `-q`."
                 },
                 "genotyping_pileupcaller_bedfile": {
                     "type": "string",
