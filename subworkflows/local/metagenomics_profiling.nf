@@ -32,6 +32,11 @@ workflow METAGENOMICS_PROFILING {
 
     if ( params.metagenomics_profiling_tool == 'malt' ) {
 
+        // Optional parallel run of malt available:
+        // If parallel execution, split into groups with meta id of the first library id of group
+        // Merging of maltlog will be done by concatenation
+
+        // If no parallel execution (default):
         // Reset entire input meta for MALT to just database name,
         // as we don't run run on a per-sample basis due to huge databases
         // so all samples are in one run and so sample-specific metadata
@@ -106,7 +111,7 @@ workflow METAGENOMICS_PROFILING {
                     }
                     .collect()
                     .map {
-                        log -> [['databasename': file(params.metagenomics_profiling_database).getBaseName()], log]
+                        log -> [['id': file(params.metagenomics_profiling_database).getBaseName()], log]
                     }
 
             CAT_CAT_MALT ( ch_log_for_cat )
