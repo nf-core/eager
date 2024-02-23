@@ -883,7 +883,7 @@
                     "type": "string",
                     "fa_icon": "fas fa-tools",
                     "enum": ["ug", "hc", "freebayes", "pileupcaller", "angsd"],
-                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does de novo assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute.",
+                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does de novo assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute (but is used here for compatibility with MultiVCFAnalyzer).",
                     "description": "Specify which genotyper to use between: GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller."
                 },
                 "skip_bcftools_stats": {
@@ -948,7 +948,7 @@
                     "default": 2,
                     "fa_icon": "fas fa-pastafarianism",
                     "description": "Specify GATK organism ploidy.",
-                    "help_text": "If selected, specify a GATK genotyper ploidy value of your reference organism. E.g. if you want to allow heterozygous calls from >= diploid organisms.\n\n> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: --sample-ploidy"
+                    "help_text": "If selected, specify a GATK genotyper ploidy value of your reference organism. E.g. if you want to allow heterozygous calls from >= diploid organisms (e.g. for multi-allele frequency reporting in MultiVCFAnalyzer).\n\n> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: --sample-ploidy"
                 },
                 "genotyping_gatk_dbsnp": {
                     "type": "string",
