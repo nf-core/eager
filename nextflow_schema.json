@@ -982,7 +982,7 @@
                     "fa_icon": "fas fa-project-diagram",
                     "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, this sets  which likelihood model to follow, i.e. whether to call only SNPs or INDELS etc.\n\n> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`"
                 },
-                "genotyping_gatk_ug_keep_realign_bam": {
+                "genotyping_gatk_ug_keeprealignbam": {
                     "type": "boolean",
                     "fa_icon": "far fa-save",
                     "description": "Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.",
