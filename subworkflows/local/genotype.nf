@@ -104,7 +104,6 @@ workflow GENOTYPE {
                         snpfile: snp
                 }
 
-            // TODO NOTE: Maybe implement a check that unmerged R2 reads have not been kept and throw a warning for ssDNA libs? See: https://github.com/stschiff/sequenceTools/issues/24
             // Run PileupCaller
             SEQUENCETOOLS_PILEUPCALLER(
                 ch_pileupcaller_input.mpileup,
