@@ -36,7 +36,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     // Generate FAI if not supplied, and if supplied generate meta ID
     if ( !fasta_fai ) {
-        ch_fasta_fai = SAMTOOLS_FAIDX ( ch_ungz_ref ).fai.map{[ [id: clean_name - '.fai'], it[1] ] }
+        ch_fasta_fai = SAMTOOLS_FAIDX ( ch_ungz_ref, [ [], [] ] ).fai.map{[ [id: clean_name - '.fai'], it[1] ] }
         ch_versions = ch_versions.mix( SAMTOOLS_FAIDX.out.versions.first())
     } else {
         ch_fasta_fai = Channel.fromPath(fasta_fai).map{[[id: clean_name], it ]}
