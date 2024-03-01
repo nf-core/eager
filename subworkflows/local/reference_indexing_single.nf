@@ -88,9 +88,9 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     def pileupcaller_snp                      = params.genotyping_pileupcaller_snpfile != null ? file(params.genotyping_pileupcaller_snpfile, checkIfExists: true ) : ""
                                     def sexdet_bed                            = ""
                                     def bedtools_feature                      = params.mapstats_bedtools_featurefile != null ? file(params.mapstats_bedtools_featurefile, checkIfExists: true ) : ""
-                                    def genotyping_gatk_ploidy                = params.genotyping_gatk_ploidy
+                                    def genotyping_reference_ploidy           = params.genotyping_reference_ploidy
                                     def genotyping_gatk_dbsnp                 = params.genotyping_gatk_dbsnp != null ? file(params.genotyping_gatk_dbsnp, checkIfExists: true ) : ""
-                                    [ meta + [ ploidy: genotyping_gatk_ploidy ], fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
+                                    [ meta + [ ploidy: genotyping_reference_ploidy ], fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
                                 }
 
     ch_ref_index_single = ch_reference_for_mapping

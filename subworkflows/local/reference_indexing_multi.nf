@@ -31,7 +31,7 @@ workflow REFERENCE_INDEXING_MULTI {
                                                 row ->
                                                     def meta                   = [:]
                                                     meta.id                    = row["reference_name"]
-                                                    meta.ploidy                = row["genotyping_gatk_ploidy"] != "" ? row["genotyping_gatk_ploidy"] : params.genotyping_gatk_ploidy // Use default value if none is specified. This info goes in the meta
+                                                    meta.ploidy                = row["genotyping_reference_ploidy"] != "" ? row["genotyping_reference_ploidy"] : params.genotyping_reference_ploidy // Use default value if none is specified. This info goes in the meta
                                                     def fasta                  = file(row["fasta"], checkIfExists: true) // mandatory parameter!
                                                     def fai                    = row["fai"]                    != "" ? file(row["fai"]                      , checkIfExists: true) : ""
                                                     def dict                   = row["dict"]                   != "" ? file(row["dict"]                     , checkIfExists: true) : ""

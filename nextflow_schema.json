@@ -892,6 +892,13 @@
                     "description": "Skip bcftools stats generation for VCF based variant calling statistics",
                     "help_text": "Disables running of `bcftools stats` against VCF files from GATK and FreeBayes genotypers.\n\nIf ran, `bcftools stats`  will automatically include the FASTA reference for INDEL-related statistics."
                 },
+                "genotyping_reference_ploidy": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Specify the ploidy of the reference organism.",
+                    "help_text": "Specify the desired ploidy value of your reference organism for genotyping with GATK or FreeBayes. E.g. if you want to allow heterozygous calls this value should be >= 2.\n\n> Modifies GATK UnifiedGenotyper parameter: `--sample_ploidy`\n> Modifies GATK HaplotypeCaller parameter: `--sample-ploidy`\n> Modifies FreeBayes parameter: `-p`",
+                    "fa_icon": "fas fa-pastafarianism"
+                },
                 "genotyping_pileupcaller_min_base_quality": {
                     "type": "integer",
                     "default": 30,
@@ -942,13 +949,6 @@
                     "fa_icon": "fas fa-balance-scale-right",
                     "description": "Specify GATK phred-scaled confidence threshold.",
                     "help_text": "If selected, specify a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call.\n\n> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `-stand_call_conf`"
-                },
-                "genotyping_gatk_ploidy": {
-                    "type": "integer",
-                    "default": 2,
-                    "fa_icon": "fas fa-pastafarianism",
-                    "description": "Specify GATK organism ploidy.",
-                    "help_text": "If selected, specify a GATK genotyper ploidy value of your reference organism. E.g. if you want to allow heterozygous calls from >= diploid organisms (e.g. for multi-allele frequency reporting in MultiVCFAnalyzer).\n\n> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: --sample-ploidy"
                 },
                 "genotyping_gatk_dbsnp": {
                     "type": "string",
@@ -1024,13 +1024,6 @@
                     "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified.",
                     "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than the specified value. Setting to 0 (the default) deactivates this behaviour.\n\n> Modifies freebayes parameter: `-g`",
                     "fa_icon": "fab fa-think-peaks"
-                },
-                "genotyping_freebayes_ploidy": {
-                    "type": "integer",
-                    "default": 2,
-                    "description": "Specify ploidy of sample in FreeBayes.",
-                    "help_text": "Specify ploidy of sample in FreeBayes.\n\n> Modifies freebayes parameter: `-p`",
-                    "fa_icon": "fas fa-pastafarianism"
                 }
             },
             "fa_icon": "fas fa-sliders-h",
