@@ -12,6 +12,8 @@ include { GATK_UNIFIEDGENOTYPER                             } from '../../module
 include { GATK4_HAPLOTYPECALLER                             } from '../../modules/nf-core/gatk4/haplotypecaller/main'
 include { FREEBAYES                                         } from '../../modules/nf-core/freebayes/main'
 include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
+include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_UG               } from '../../modules/nf-core/bcftools/index/main'
+include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_FREEBAYES        } from '../../modules/nf-core/bcftools/index/main'
 // TODO Add ANGSD GTL module. The current module does not pick up the .glf.gz output files.
 
 workflow GENOTYPE {
@@ -26,6 +28,7 @@ workflow GENOTYPE {
     ch_multiqc_files                   = Channel.empty()
     ch_pileupcaller_genotypes          = Channel.empty()
     ch_eigenstrat_coverage_stats       = Channel.empty()
+    ch_genotypes_vcf                   = Channel.empty()
     ch_gatk_haplotypecaller_genotypes  = Channel.empty()
     ch_gatk_unifiedgenotyper_genotypes = Channel.empty()
     ch_freebayes_genotypes             = Channel.empty()
@@ -219,7 +222,6 @@ workflow GENOTYPE {
                     dbsnp: [ ref_meta, dbsnp ]
             }
 
-        // TODO: Should the vcfs be indexed with bcftools index? VCFs from HC are indexed.
         GATK_UNIFIEDGENOTYPER(
             ch_bams_for_ug.bam,
             ch_bams_for_ug.fasta,
@@ -230,8 +232,14 @@ workflow GENOTYPE {
             ch_bams_for_ug.dbsnp,
             [[], []]  // No comp
         )
-        ch_gatk_unifiedgenotyper_genotypes = GATK_UNIFIEDGENOTYPER.out.vcf
+        ch_gatk_ug_vcf = GATK_UNIFIEDGENOTYPER.out.vcf
         ch_versions                        = ch_versions.mix( GATK_UNIFIEDGENOTYPER.out.versions.first() )
+
+        // Index the VCFs
+        BCFTOOLS_INDEX_UG( ch_gatk_ug_vcf )
+        ch_versions = ch_versions.mix( BCFTOOLS_INDEX_UG.out.versions.first() )
+
+        ch_genotypes_vcf = ch_gatk_ug_vcf.join(BCFTOOLS_INDEX_UG.out.tbi) // [ [ meta ], vcf, tbi ]
     }
 
     if ( params.genotyping_tool == 'hc' ) {
@@ -276,7 +284,7 @@ workflow GENOTYPE {
             ch_input_for_hc.dbsnp,
             [[], []] // No dbsnp_tbi
         )
-        ch_gatk_haplotypecaller_genotypes = GATK4_HAPLOTYPECALLER.out.vcf
+        ch_genotypes_vcf = GATK4_HAPLOTYPECALLER.out.vcf.join( GATK4_HAPLOTYPECALLER.out.tbi ) // [ [ meta ], vcf, tbi ]
         ch_versions                       = ch_versions.mix( GATK4_HAPLOTYPECALLER.out.versions.first() )
     }
 
@@ -315,7 +323,6 @@ workflow GENOTYPE {
                     fai:   [ ref_meta, fai ]
             }
 
-        // TODO: Should the vcfs be indexed with bcftools index? VCFs from HC are indexed.
         FREEBAYES(
             ch_input_for_freebayes.bam,
             ch_input_for_freebayes.fasta,
@@ -326,6 +333,12 @@ workflow GENOTYPE {
             )
         ch_freebayes_genotypes = FREEBAYES.out.vcf
         ch_versions            = ch_versions.mix( FREEBAYES.out.versions.first() )
+
+        // Index the VCFs
+        BCFTOOLS_INDEX_FREEBAYES( ch_freebayes_genotypes )
+        ch_versions = ch_versions.mix( BCFTOOLS_INDEX_FREEBAYES.out.versions.first() )
+
+        ch_genotypes_vcf = ch_freebayes_genotypes.join(BCFTOOLS_INDEX_FREEBAYES.out.tbi) // [ [ meta ], vcf, tbi ]
     }
 
     if ( params.genotyping_tool == 'angsd' ) {
@@ -334,16 +347,14 @@ workflow GENOTYPE {
 
     // Run BCFTOOLS_STATS on output from GATK UG, HC and Freebayes
     if ( !params.skip_bcftools_stats && ( params.genotyping_tool == 'hc' || params.genotyping_tool == 'ug' || params.genotyping_tool == 'freebayes' ) ) {
-        ch_bcftools_input= ch_gatk_unifiedgenotyper_genotypes
-            .mix( ch_gatk_haplotypecaller_genotypes )
-            .mix( ch_freebayes_genotypes )
+        ch_bcftools_input= ch_genotypes_vcf
             .map {
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
-            }
-            .combine( ch_fasta_for_multimap , by:0 )
+            }.dump(tag:"ch_bcftools_input")
+            .combine( ch_fasta_for_multimap , by:0 ).dump(tag:"ch_bcftools_combined")
             .multiMap {
-                ignore_me, meta, vcf, ref_meta, fasta, fai, dict, dbsnp ->
-                    vcf:   [ meta, vcf, [] ] // bcftools stats module expects a tbi file with the vcf.
+                ignore_me, meta, vcf, tbi, ref_meta, fasta, fai, dict, dbsnp ->
+                    vcf:   [ meta, vcf, tbi ] // bcftools stats module expects a tbi file with the vcf.
                     fasta: [ ref_meta, fasta ]
             }
 
