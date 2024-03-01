@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "http://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/eager/master/assets/schema_fasta.json",
     "title": "nf-core/eager pipeline - params.fasta schema",
     "description": "Schema for the file provided with params.fasta",
@@ -11,7 +11,7 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "meta": ["reference_name"],
-                "unique": true,
+                "uniqueItems": true,
                 "errorMessage": "Reference name must be provided and cannot contain spaces."
             },
             "fasta": {
