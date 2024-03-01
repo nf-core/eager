@@ -11,53 +11,53 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "meta": ["sample_id"],
-                "errorMessage": "Sample name must be provided and cannot contain spaces"
+                "errorMessage": "Sample name must be provided and cannot contain spaces."
             },
             "library_id": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "meta": ["library_id"],
-                "errorMessage": "library_id name must be provided and cannot contain spaces"
+                "errorMessage": "Library name must be provided and cannot contain spaces."
             },
             "lane": {
                 "type": "integer",
                 "unique": ["library_id"],
                 "meta": ["lane"],
-                "errorMessage": "Unrecognised lane type. If no lane information, specify 0"
+                "errorMessage": "Unrecognised lane number, must be an integer. If no lane information, specify 0."
             },
             "colour_chemistry": {
                 "type": "integer",
                 "enum": [2, 4],
                 "meta": ["colour_chemistry"],
-                "errorMessage": "Specified colour chemistry not recognised (e.g. 2 for Illumina NextSeq/NovaSeq or 4 Illumina MiSeq/HiSeq/BGI)"
+                "errorMessage": "Specified sequencing colour chemistry not recognised, must be '2' for Illumina NextSeq/NovaSeq or '4' for Illumina MiSeq/HiSeq/BGI."
             },
             "pairment": {
                 "type": "string",
                 "enum": ["single", "paired"],
                 "meta": ["pairment"],
-                "errorMessage": "Specified pairment not recognised. BAM containing merged reads files should be specified as single!"
+                "errorMessage": "Specified sequencing pairment not recognised, must be 'single' or 'paired'. BAM files containing merged reads files should be specified as 'single'."
             },
             "strandedness": {
                 "type": "string",
                 "unique": ["sample_id"],
                 "enum": ["single", "double"],
                 "meta": ["strandedness"],
-                "errorMessage": "Specified strandedness not recognised"
+                "errorMessage": "Specified library strandedness not recognised, must be 'single' or 'double'."
             },
             "damage_treatment": {
                 "type": "string",
                 "enum": ["none", "half", "full"],
                 "meta": ["damage_treatment"],
-                "errorMessage": "Specified damage treatment not recognised"
+                "errorMessage": "Specified damage treatment not recognised, must be 'none', 'half' or 'full'."
             },
             "r1": {
                 "type": "string",
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "exists": true,
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'."
             },
             "r2": {
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'.",
                 "anyOf": [
                     {
                         "type": "string",
@@ -75,12 +75,12 @@
                 "exists": true,
                 "unique": true,
                 "dependentRequired": ["bam_reference_id"],
-                "errorMessage": "File supplied to bam column has unrecognised extension. Options: .bam!"
+                "errorMessage": "File supplied to bam column has unrecognised extension, must be '.bam'."
             },
             "bam_reference_id": {
                 "type": "string",
                 "meta": ["bam_reference_id"],
-                "errorMessage": "A BAM reference id (corresponding to what is supplied to `--fasta`) must always be provided when providing a BAM file."
+                "errorMessage": "A BAM reference ID (corresponding to what is supplied to `--fasta`) must always be provided when providing a BAM file."
             }
         },
         "required": [
