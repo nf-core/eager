@@ -70,9 +70,9 @@ workflow GENOTYPE {
             .groupTuple()
             .map {
                 combo_meta, metas, bams, bais ->
-                def ids = metas.collect { meta -> meta.id }
-                [ combo_meta + [id: ids], bams ] // Drop bais
-            } // Collect all IDs into a list in meta.id. Useful when running pileupCaller later
+                def ids = metas.collect { meta -> meta.sample_id }
+                [ combo_meta + [sample_id: ids], bams ] // Drop bais
+            } // Collect all IDs into a list in meta.sample_id. Useful when running pileupCaller later
 
             // Combine prepped bams and references
             ch_mpileup_inputs = ch_mpileup_inputs_bams
