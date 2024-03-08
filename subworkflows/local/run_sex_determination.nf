@@ -31,12 +31,20 @@ workflow RUN_SEXDETERMINE {
                 // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
-            .combine( ch_bed, by: 0 ) // [ [combine_meta], [meta], bam, bai, [ref_meta], bed ]
+            .groupTuple(by:0)
+            //.map { meta, bam, bai -> tuple( groupKey(meta.id)) }
+            .combine( ch_bed, by: 0 ) // [ [meta], bam, bai, [ref_meta], bed ]
+            .map {
+                combo_meta, metas, bam, bai, ref_meta, bed ->
+                def ids = metas.collect { meta -> meta.id }
+                [ combo_meta + [id: ids], bam, ref_meta, bed ] // Drop bais
+            }
+            //.dump(tag:"1", pretty: true)
 
         ch_samtoolsdepth_input = ch_input_sexdetermine
                 .multiMap {
-                    ignore_me, meta, bam, bai, ref_meta, bed ->
-                        bam: [ meta, bam ]
+                    combo_meta, bam, ref_meta, bed ->
+                        bam: [ combo_meta, bam ]
                         bed: [ ref_meta, bed ]
                 }
 
