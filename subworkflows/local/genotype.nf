@@ -29,10 +29,6 @@ workflow GENOTYPE {
     ch_pileupcaller_genotypes          = Channel.empty()
     ch_eigenstrat_coverage_stats       = Channel.empty()
     ch_genotypes_vcf                   = Channel.empty()
-    ch_gatk_haplotypecaller_genotypes  = Channel.empty()
-    ch_gatk_unifiedgenotyper_genotypes = Channel.empty()
-    ch_freebayes_genotypes             = Channel.empty()
-    ch_angsd_genotypes                 = Channel.empty()
     ch_bcftools_stats                  = Channel.empty()
 
     if ( params.genotyping_tool == 'pileupcaller' ) {
@@ -372,13 +368,10 @@ workflow GENOTYPE {
     }
 
     emit:
-    geno_pileupcaller         = ch_pileupcaller_genotypes          // [ [ meta ], geno, snp, ind ]
-    geno_gatk_hc              = ch_gatk_haplotypecaller_genotypes  // [ [ meta ], vcf ] ]
-    geno_gatk_ug              = ch_gatk_unifiedgenotyper_genotypes // [ [ meta ], vcf ] ]
-    geno_freebayes            = ch_freebayes_genotypes             // [ [ meta ], vcf ] ]
-    geno_angsd                = ch_angsd_genotypes                 // [ [ meta ], glf ] ]
-    vcf_stats                 = ch_bcftools_stats                  // [ [ meta ], stats ]
-    eigenstrat_coverage_stats = ch_eigenstrat_coverage_stats       // [ [ meta ], stats ]
-    versions                  = ch_versions
-    mqc                       = ch_multiqc_files
+    eigenstrat          = ch_pileupcaller_genotypes    // [ [ meta ], geno, snp, ind ]
+    vcf                 = ch_genotypes_vcf             // [ [ meta ], vcf ] ]
+    vcf_stats           = ch_bcftools_stats            // [ [ meta ], stats ]
+    eigenstrat_coverage = ch_eigenstrat_coverage_stats // [ [ meta ], stats ]
+    versions            = ch_versions
+    mqc                 = ch_multiqc_files
 }
