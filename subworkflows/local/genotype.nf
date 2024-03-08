@@ -342,7 +342,7 @@ workflow GENOTYPE {
     }
 
     if ( params.genotyping_tool == 'angsd' ) {
-        // TODO no module for angsd genotyping yet
+        log.warn("[nf-core/eager] Genotyping with ANGSD is not yet implemented  .")
     }
 
     // Run BCFTOOLS_STATS on output from GATK UG, HC and Freebayes
