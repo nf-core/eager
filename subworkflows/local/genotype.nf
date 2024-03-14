@@ -346,8 +346,8 @@ workflow GENOTYPE {
         ch_bcftools_input= ch_genotypes_vcf
             .map {
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
-            }.dump(tag:"ch_bcftools_input")
-            .combine( ch_fasta_for_multimap , by:0 ).dump(tag:"ch_bcftools_combined")
+            }
+            .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
                 ignore_me, meta, vcf, tbi, ref_meta, fasta, fai, dict, dbsnp ->
                     vcf:   [ meta, vcf, tbi ] // bcftools stats module expects a tbi file with the vcf.
