@@ -147,7 +147,7 @@
                     },
                     "gatk/unifiedgenotyper": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "6fa52bdc450257d9dd0c149ef2f6467fcebeca5d",
                         "installed_by": ["modules"]
                     },
                     "gatk4/haplotypecaller": {
