@@ -80,22 +80,45 @@ workflow PIPELINE_INITIALISATION {
     //
     // Create channel from input file provided through params.input
     //
-    ch_samplesheet_for_split = Channel.fromSamplesheet("input")
-            .branch{
-                meta, r1, r2, bam ->
-                    fastqs: r1
-                    bams: bam
-            }
+    ch_samplesheet_for_branch = Channel.fromSamplesheet("input")
+                                    .branch {
+                                        meta, r1, r2, bam ->
+                                            bam: bam.toString().endsWith(".bam")
+                                            fastq: true
+                                    }
 
-    ch_samplesheet_fastqs = ch_samplesheet_for_split.fastqs.map {
-                            meta, r1, r2, bam ->
-                                def reads = r2 != [] ? [r1, r2] : r1
-                            [meta, reads]
-                        }
-                        .dump(tag: "ch_input_fastqs")
+    // TODO:
+    // - remove bam_reference_id from meta
+    // - add if/else statement that if single end data, only emit R1
+    ch_samplesheet_fastqs = ch_samplesheet_for_branch.fastq
+                                .map{
+                                    meta, r1, r2, bam ->
+                                    [meta, [ r1, r2 ] ]
+                                }
 
-    ch_samplesheet_bams = ch_samplesheet_for_split.bams
-                            .map { meta, r1, r2, bam -> [meta, [bam]] }
+    ch_samplesheet_bams = ch_samplesheet_for_branch.bam
+                            .map{
+                                meta, r1, r2, bam ->
+                                [ meta, bam ]
+                            }
+
+    // Extra validation!
+    //  - NO SE data allowed when using dedup
+    ch_samplesheet_fastqs.map {
+            meta, reads ->
+                seq_type = meta.subMap('single_end')
+            seq_type
+        }
+        .toList()
+        .map {
+            ids ->
+                def has_se=ids.single_end.contains(true)
+
+                if ( params.deduplication_tool == 'dedup' &&  has_se ) {
+                    exit 1, "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs."
+                }
+            [ids, has_se]
+        }
 
     emit:
     samplesheet_fastqs = ch_samplesheet_fastqs
@@ -145,6 +168,7 @@ workflow PIPELINE_COMPLETION {
     FUNCTIONS
 ========================================================================================
 */
+
 //
 // Check and validate pipeline parameters
 //
