@@ -4,10 +4,12 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { paramsSummaryMap       } from 'plugin/nf-validation'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_eager_pipeline'
+include { paramsSummaryMap         } from 'plugin/nf-validation'
+include { paramsSummaryMultiqc     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText   } from '../subworkflows/local/utils_nfcore_eager_pipeline'
+include { addNewMetaFromAttributes } from '../subworkflows/local/utils_nfcore_eager_pipeline/main'
+
 
 // TODO TO MOVE TO INPUT_PIPELINE_VALIDATION_SUBWORKFLOW_THINGY
 // Check failing parameter combinations
@@ -68,7 +70,6 @@ include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libr
 
 include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS                       } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { SAMTOOLS_INDEX                                    } from '../modules/nf-core/samtools/index/main'
 include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
 include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
@@ -90,17 +91,14 @@ include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED ; QUALIMAP_BAMQC as QUALIMAP_BA
 workflow EAGER {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
+    ch_samplesheet_fastqs // channel: samplesheet read in from --input
+    ch_samplesheet_bams
 
     main:
 
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-
-    //
-    // Input file checks
-    //
 
     // Reference
     fasta                = file(params.fasta, checkIfExists: true)
@@ -129,11 +127,11 @@ workflow EAGER {
     //
 
     if ( params.sequencing_qc_tool == "falco" ) {
-        FALCO ( INPUT_CHECK.out.fastqs )
+        FALCO ( ch_samplesheet_fastqs )
         ch_versions = ch_versions.mix( FALCO.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FALCO.out.txt.collect{it[1]}.ifEmpty([]) )
     } else {
-        FASTQC ( INPUT_CHECK.out.fastqs )
+        FASTQC ( ch_samplesheet_fastqs )
         ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FASTQC.out.zip.collect{it[1]}.ifEmpty([]) )
     }
@@ -143,12 +141,12 @@ workflow EAGER {
     //
 
     if ( !params.skip_preprocessing ) {
-        PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist )
+        PREPROCESSING ( ch_samplesheet_fastqs, adapterlist )
         ch_reads_for_mapping = PREPROCESSING.out.reads
         ch_versions          = ch_versions.mix( PREPROCESSING.out.versions )
         ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
-        ch_reads_for_mapping = INPUT_CHECK.out.fastqs
+        ch_reads_for_mapping = ch_samplesheet_fastqs
     }
 
     //
@@ -169,20 +167,20 @@ workflow EAGER {
     //  MODULE: indexing of user supplied input BAMs
     //
 
-    SAMTOOLS_INDEX ( INPUT_CHECK.out.bams )
+    SAMTOOLS_INDEX ( ch_samplesheet_bams )
     ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
 
     if ( params.fasta_largeref )
-        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.csi )
+        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX.out.csi )
     else {
-        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.bai )
+        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX.out.bai )
     }
 
 
     //
     // MODULE: flagstats of user supplied input BAMs
     //
-    ch_bam_bai_input = INPUT_CHECK.out.bams
+    ch_bam_bai_input = ch_samplesheet_bams
                             .join(SAMTOOLS_INDEX.out.bai)
 
     SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
@@ -242,7 +240,7 @@ workflow EAGER {
     if ( !params.skip_qualimap ) {
         ch_snp_capture_bed = REFERENCE_INDEXING.out.snp_capture_bed
             .map{
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
         ch_qualimap_input = ch_dedupped_bams
             .map {
@@ -250,7 +248,7 @@ workflow EAGER {
                 [ meta, bam ]
             }
             .map {
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by: 0,
@@ -296,7 +294,7 @@ workflow EAGER {
         // Preparing fastq channel for host removal to be combined with the bam channel
         // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
         // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
-        ch_fastqs_for_host_removal= INPUT_CHECK.out.fastqs.map{
+        ch_fastqs_for_host_removal= ch_samplesheet_fastqs.map{
                                                         meta, fastqs ->
                                                         new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
                                                         [ new_meta, meta, fastqs ]
@@ -342,11 +340,11 @@ workflow EAGER {
     if ( params.run_mtnucratio ) {
         ch_mito_header = REFERENCE_INDEXING.out.mitochondrion_header
             .map{
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
         mtnucratio_input = ch_dedupped_bams
             .map {
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by: 0,
@@ -424,12 +422,12 @@ workflow EAGER {
 
         ch_bedtools_feature = REFERENCE_INDEXING.out.bedtools_feature
                                 .map{
-                                    WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                                    addNewMetaFromAttributes( it, "id" , "reference" , false )
                                 }
 
         ch_bedtools_prep = ch_dedupped_bams
                     .map {
-                        WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                        addNewMetaFromAttributes( it, "reference" , "reference" , false )
                     }
                     .combine(
                         by: 0,
