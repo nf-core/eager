@@ -123,7 +123,12 @@ workflow GENOTYPE {
                 }
 
             COLLECT_GENOTYPES( ch_final_genotypes )
+            // Add genotyper info to the meta
             ch_pileupcaller_genotypes = COLLECT_GENOTYPES.out.collected
+            .map {
+                meta, geno, snp, ind ->
+                [ meta + [ genotyper: "pileupcaller" ], geno , snp, ind ]
+            }
             ch_versions               = ch_versions.mix( COLLECT_GENOTYPES.out.versions.first() )
 
             // Calculate coverage stats for collected eigenstrat dataset
@@ -235,7 +240,12 @@ workflow GENOTYPE {
         BCFTOOLS_INDEX_UG( ch_gatk_ug_vcf )
         ch_versions = ch_versions.mix( BCFTOOLS_INDEX_UG.out.versions.first() )
 
-        ch_genotypes_vcf = ch_gatk_ug_vcf.join(BCFTOOLS_INDEX_UG.out.tbi) // [ [ meta ], vcf, tbi ]
+        // Add genotyper info to the meta
+        ch_genotypes_vcf = ch_gatk_ug_vcf.join(BCFTOOLS_INDEX_UG.out.tbi)
+            .map {
+                meta, vcf, tbi ->
+                [ meta + [ genotyper: "ug" ], vcf , tbi ]
+            }
     }
 
     if ( params.genotyping_tool == 'hc' ) {
@@ -280,7 +290,12 @@ workflow GENOTYPE {
             ch_input_for_hc.dbsnp,
             [[], []] // No dbsnp_tbi
         )
-        ch_genotypes_vcf = GATK4_HAPLOTYPECALLER.out.vcf.join( GATK4_HAPLOTYPECALLER.out.tbi ) // [ [ meta ], vcf, tbi ]
+        // Add genotyper info to the meta
+        ch_genotypes_vcf = GATK4_HAPLOTYPECALLER.out.vcf.join( GATK4_HAPLOTYPECALLER.out.tbi )
+            .map {
+                meta, vcf, tbi ->
+                [ meta + [ genotyper: "hc" ], vcf , tbi ]
+            }
         ch_versions                       = ch_versions.mix( GATK4_HAPLOTYPECALLER.out.versions.first() )
     }
 
@@ -334,7 +349,12 @@ workflow GENOTYPE {
         BCFTOOLS_INDEX_FREEBAYES( ch_freebayes_genotypes )
         ch_versions = ch_versions.mix( BCFTOOLS_INDEX_FREEBAYES.out.versions.first() )
 
-        ch_genotypes_vcf = ch_freebayes_genotypes.join(BCFTOOLS_INDEX_FREEBAYES.out.tbi) // [ [ meta ], vcf, tbi ]
+        // Add genotyper info to the meta
+        ch_genotypes_vcf = ch_freebayes_genotypes.join(BCFTOOLS_INDEX_FREEBAYES.out.tbi)
+            .map {
+                meta, vcf, tbi ->
+                [ meta + [ genotyper: "freebayes" ], vcf , tbi ]
+            }
     }
 
     if ( params.genotyping_tool == 'angsd' ) {
