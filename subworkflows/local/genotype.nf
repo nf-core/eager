@@ -14,7 +14,6 @@ include { FREEBAYES                                         } from '../../module
 include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_UG               } from '../../modules/nf-core/bcftools/index/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_FREEBAYES        } from '../../modules/nf-core/bcftools/index/main'
-// TODO Add ANGSD GTL module. The current module does not pick up the .glf.gz output files.
 
 workflow GENOTYPE {
     take:
@@ -306,7 +305,6 @@ workflow GENOTYPE {
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
 
-        // TODO Do we want to provide SNP capture bed file to Freebayes? It would then genotype only on those positions.
         // NOTE: dbsnp is not used by Freebayes, but we need to provide it to the module anyway, to ensure correct cardinality of the fasta channel within the BCFTOOLS_STATS channel operations.
         //     i.e. to keep the definition of the ch_fasta_for_multimap channel consistent regardless of genotyper, so the `combine -> multiMap` in lines 327-328 work.
         ch_fasta_for_multimap = ch_fasta_plus
