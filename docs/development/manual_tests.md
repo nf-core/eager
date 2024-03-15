@@ -575,6 +575,20 @@ nextflow run ../main.nf -profile docker,test_multiref --outdir results_endorspy_
 nextflow run main.nf -profile test,conda --outdir ./results -resume
 ```
 
+#### With mapDamage2
+
+```bash
+## mapDamage2 with default parameters
+## Expect: mapdamage directory with 3pGtoA_freq, 5pCtoT_freq, dnacomp_genome, dnacomp, Fragmisincorporation_plot, Length_plot, lgdistribution, misincorporation, Runtime_log
+nextflow run main.nf -profile test,docker --outdir ./results --damagecalculation_tool mapdamage
+```
+
+```bash
+## mapDamage2 with downsampling to 100 reads
+## Expect: mapdamage directory with 3pGtoA_freq, 5pCtoT_freq, dnacomp_genome, dnacomp, Fragmisincorporation_plot, Length_plot, lgdistribution, misincorporation, Runtime_log
+nextflow run main.nf -profile test,docker --outdir ./results --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100
+```
+
 ### ESTIMATE CONTAMINATION
 
 #### With ANGSD
