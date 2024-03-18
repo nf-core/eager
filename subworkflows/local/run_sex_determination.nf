@@ -32,14 +32,12 @@ workflow RUN_SEXDETERMINE {
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .groupTuple(by:0)
-            //.map { meta, bam, bai -> tuple( groupKey(meta.id)) }
             .combine( ch_bed, by: 0 ) // [ [meta], bam, bai, [ref_meta], bed ]
             .map {
                 combo_meta, metas, bam, bai, ref_meta, bed ->
                 def ids = metas.collect { meta -> meta.id }
                 [ combo_meta + [id: ids], bam, ref_meta, bed ] // Drop bais
             }
-            //.dump(tag:"1", pretty: true)
 
         ch_samtoolsdepth_input = ch_input_sexdetermine
                 .multiMap {
