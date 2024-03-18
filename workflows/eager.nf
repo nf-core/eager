@@ -520,7 +520,7 @@ workflow EAGER {
     if ( params.run_sexdeterrmine ) {
         ch_sexdeterrmine_input = ch_dedupped_bams
 
-        RUN_SEXDETERMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed.dump() )
+        RUN_SEXDETERMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed )
         ch_versions      = ch_versions.mix( RUN_SEXDETERMINE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( RUN_SEXDETERMINE.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
