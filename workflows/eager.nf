@@ -10,32 +10,6 @@ include { softwareVersionsToYAML   } from '../subworkflows/nf-core/utils_nfcore_
 include { methodsDescriptionText   } from '../subworkflows/local/utils_nfcore_eager_pipeline'
 include { addNewMetaFromAttributes } from '../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
-
-// TODO TO MOVE TO INPUT_PIPELINE_VALIDATION_SUBWORKFLOW_THINGY
-// Check failing parameter combinations
-if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
-if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
-if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
-if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
-if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
-    // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
-    if (params.metagenomics_prinseq_dustscore == 0.5) {
-            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
-    }
-}
-if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
-    // dust score was set but entropy method picked. If no entropy-score provided, assume it was an error and fail
-    if (params.metagenomics_complexity_entropy == 0.3) {
-            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
-    }
-}
-
-// TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
-if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
-
-// Report possible warnings
-if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
@@ -108,12 +82,6 @@ workflow EAGER {
 
     // Preprocessing
     adapterlist          = params.preprocessing_skipadaptertrim ? [] : params.preprocessing_adapterlist ? file(params.preprocessing_adapterlist, checkIfExists: true) : []
-
-    // TODO: Move to input valdiation thingy
-    if ( params.preprocessing_adapterlist && !params.preprocessing_skipadaptertrim ) {
-        if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
-        if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
-    }
 
     //
     // SUBWORKFLOW: Indexing of reference files
