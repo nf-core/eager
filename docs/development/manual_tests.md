@@ -697,9 +697,58 @@ nextflow run main.nf -profile test,docker \
   --metagenomics_run_postprocessing \
   --metagenomics_maltextract_ncbidir NCBI_DIR \
   --metagenomics_maltextract_taxonlist TAXONLISTFILE
+
+
+
+# for generating test data
+mkdir testing && cd testing
+wget https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Mammoth/Mammoth_MT_Krause.fasta
+git clone https://github.com/rhuebler/HOPS.git
+cd HOPS/Test_Data/Test_Database
+unzip table0.db.zip
+unzip table0.idx.zip
+cd ../../..
+mkdir test_data && cd test_data
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/000/ERR8958750/ERR8958750_1.fastq.gz -o ERR8958750_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/000/ERR8958750/ERR8958750_2.fastq.gz -o ERR8958750_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/001/ERR8958751/ERR8958751_1.fastq.gz -o ERR8958751_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/001/ERR8958751/ERR8958751_2.fastq.gz -o ERR8958751_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/002/ERR8958752/ERR8958752_1.fastq.gz -o ERR8958752_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/002/ERR8958752/ERR8958752_2.fastq.gz -o ERR8958752_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/003/ERR8958753/ERR8958753_1.fastq.gz -o ERR8958753_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/003/ERR8958753/ERR8958753_2.fastq.gz -o ERR8958753_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/004/ERR8958754/ERR8958754_1.fastq.gz -o ERR8958754_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/004/ERR8958754/ERR8958754_2.fastq.gz -o ERR8958754_2.fastq.gz
+ls -1 | while read file; do
+zcat $file | head -n 4000 > ${file}_reduced.fastq
+gzip ${file}_reduced.fastq
+done
+cd ..
+
+echo "sample_id library_id lane colour_chemistry pairment strandedness damage_treatment r1 r2 bam bam_reference_id
+HOP001 ERR8958750 0 4 paired double half /workspace/eager/testing/test_data/ERR8958750_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958750_2.fastq.gz_reduced.fastq.gz NA NA
+HOP001 ERR8958751 0 2 paired double half /workspace/eager/testing/test_data/ERR8958751_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958751_2.fastq.gz_reduced.fastq.gz NA NA
+HOP001 ERR8958752 0 2 paired double half /workspace/eager/testing/test_data/ERR8958752_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958752_2.fastq.gz_reduced.fastq.gz NA NA
+HOP001 ERR8958753 0 2 paired double half /workspace/eager/testing/test_data/ERR8958753_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958753_2.fastq.gz_reduced.fastq.gz NA NA
+HOP001 ERR8958754 0 2 paired double none /workspace/eager/testing/test_data/ERR8958754_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958754_2.fastq.gz_reduced.fastq.gz NA NA" | sed 's/ /\t/g' > test.tsv
+
+nextflow run ../main.nf -profile docker \
+  --input test.tsv \
+  --outdir ./out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool malt \
+  --metagenomics_profiling_database /workspace/eager/testing/HOPS/Test_Data/Test_Database/ \
+  --metagenomics_run_postprocessing \
+  --metagenomics_maltextract_ncbidir HOPS/Resources \
+  --metagenomics_maltextract_taxonlist HOPS/Resources/default_list.txt \
+  --fasta Mammoth_MT_Krause.fasta \
+  --skip_damage_calculation \
+  --skip_qualimap \
+  --metagenomics_malt_group_size 3
 ```
 
 ##### mergemetaphlantables
+
 (update: Jan 2024, removed, parsing with taxpasta)
 
 ```bash

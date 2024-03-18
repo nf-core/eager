@@ -75,6 +75,11 @@
                         "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
+                    "cat/cat": {
+                        "branch": "master",
+                        "git_sha": "81f27e75847087865299cc46605deb3b09b4e0a2",
+                        "installed_by": ["modules"]
+                    },
                     "cat/fastq": {
                         "branch": "master",
                         "git_sha": "5c460c5a4736974abde2843294f35307ee2b0e5e",

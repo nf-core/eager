@@ -8,6 +8,7 @@ include { MALT_RUN                       } from '../../modules/nf-core/malt/run/
 include { KRAKEN2_KRAKEN2                } from '../../modules/nf-core/kraken2/kraken2/main'
 include { KRAKENUNIQ_PRELOADEDKRAKENUNIQ } from '../../modules/nf-core/krakenuniq/preloadedkrakenuniq/main'
 include { METAPHLAN_METAPHLAN            } from '../../modules/nf-core/metaphlan/metaphlan/main'
+include { CAT_CAT as CAT_CAT_MALT        } from '../../modules/nf-core/cat/cat/main'
 
 workflow METAGENOMICS_PROFILING {
 
@@ -31,27 +32,39 @@ workflow METAGENOMICS_PROFILING {
 
     if ( params.metagenomics_profiling_tool == 'malt' ) {
 
+        // Optional parallel run of malt available:
+        // If parallel execution, split into groups with meta id of the first library id of group
+        // Merging of maltlog will be done by concatenation
+
+        // If no parallel execution (default):
         // Reset entire input meta for MALT to just database name,
         // as we don't run run on a per-sample basis due to huge databases
         // so all samples are in one run and so sample-specific metadata
         // unnecessary. Set as database name to prevent `null` job ID and prefix.
 
         if ( params.metagenomics_malt_group_size > 0 ) {
+            ch_labels_for_malt_tmp = reads
+                .map { meta, reads -> meta }
+                .collate(params.metagenomics_malt_group_size)
+                .map(meta -> meta.first().library_id )
+
             ch_input_for_malt_tmp =  reads
                 .map { meta, reads -> reads }
                 .collate( params.metagenomics_malt_group_size ) //collate into bins of defined lengths
                 .map{
                     reads ->
                     // add new meta with db-name as id
-                    [[id: file(params.metagenomics_profiling_database).getBaseName() ], reads]
+                    [[label: file(params.metagenomics_profiling_database).getBaseName() ], reads]
                 }
-                .combine(database) //combine with database
+                .combine(database)
+                .merge(ch_labels_for_malt_tmp) //combine with database
                 .multiMap{
                     // and split apart again
-                    meta, reads, database ->
-                        reads: [meta, reads]
+                    meta, reads, database, ids ->
+                        reads: [meta + ['id':ids], reads]
                         database: database
                 }
+
             ch_input_for_malt = ch_input_for_malt_tmp.reads
             database = ch_input_for_malt_tmp.database
         }
@@ -63,7 +76,7 @@ workflow METAGENOMICS_PROFILING {
                 .map{
                     // make sure id is db_name for publishing purposes.
                     reads ->
-                    [[id: file(params.metagenomics_profiling_database).getBaseName() ], reads]
+                    [[label: file(params.metagenomics_profiling_database).getBaseName(), id: 'all' ], reads]
                 }
         }
 
@@ -83,9 +96,32 @@ workflow METAGENOMICS_PROFILING {
                     ]
             }
 
+        ch_maltrun_for_maltextract = MALT_RUN.out.rma6.map {
+            id,rma6 -> rma6
+        }
+        .collect()
+        .toList()
+
+        // Recombine log files for outputting if parallel execution was run
+        if ( params.metagenomics_malt_group_size > 0 ) {
+            ch_log_for_cat =
+                MALT_RUN.out.log
+                    .map {
+                        meta,log -> log
+                    }
+                    .collect()
+                    .map {
+                        log -> [['id': file(params.metagenomics_profiling_database).getBaseName()], log]
+                    }
+
+            CAT_CAT_MALT ( ch_log_for_cat )
+        }
+
+        ch_maltrun_for_postprocessing = ch_maltrun_for_megan.combine(ch_maltrun_for_maltextract)
+
         ch_versions             = MALT_RUN.out.versions.first()
         ch_multiqc_files        = MALT_RUN.out.log
-        ch_postprocessing_input = ch_maltrun_for_megan
+        ch_postprocessing_input = ch_maltrun_for_postprocessing
     }
 
     else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
