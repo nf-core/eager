@@ -59,7 +59,7 @@ workflow RUN_SEXDETERMINE {
         }
 
     emit:
-    coverages          = ch_coverages // channel: [ val(meta), path("*.tsv") ]
+    coverages          = ch_coverages     // channel: [ val(meta), path("*.tsv") ]
     mqc                = ch_multiqc_files // channel: [ val(meta), path("*.json") ]
-    versions           = ch_versions // channel: path(versions.yml)
+    versions           = ch_versions      // channel: path(versions.yml)
 }
