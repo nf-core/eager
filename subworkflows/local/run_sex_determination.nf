@@ -1,11 +1,11 @@
 //
-// Run sex determine
+// Run sex deterrmine
 //
 
-include { SAMTOOLS_DEPTH as SAMTOOLS_DEPTH_SEXDETERMINE } from '../../modules/nf-core/samtools/depth/main'
-include { SEXDETERRMINE                                 } from '../../modules/nf-core/sexdeterrmine/main'
+include { SAMTOOLS_DEPTH as SAMTOOLS_DEPTH_SEXDETERRMINE } from '../../modules/nf-core/samtools/depth/main'
+include { SEXDETERRMINE                                  } from '../../modules/nf-core/sexdeterrmine/main'
 
-workflow RUN_SEXDETERMINE {
+workflow RUN_SEXDETERRMINE {
 
     take:
     // samtoolsdepth_input // channel: [ val(meta1), [ bam ], [ meta2 ] [ intervals_bed ] ]
@@ -26,7 +26,7 @@ workflow RUN_SEXDETERMINE {
                 WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
 
-        ch_input_sexdetermine = sexdeterrmine_bam
+        ch_input_sexdeterrmine = sexdeterrmine_bam
             .map {
                 // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
                 WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
@@ -39,16 +39,16 @@ workflow RUN_SEXDETERMINE {
                 [ combo_meta + [id: ids], bam, ref_meta, bed ] // Drop bais
             }
 
-        ch_samtoolsdepth_input = ch_input_sexdetermine
+        ch_samtoolsdepth_input = ch_input_sexdeterrmine
                 .multiMap {
                     combo_meta, bam, ref_meta, bed ->
                         bam: [ combo_meta, bam ]
                         bed: [ ref_meta, bed ]
                 }
 
-        SAMTOOLS_DEPTH_SEXDETERMINE(ch_samtoolsdepth_input.bam, ch_samtoolsdepth_input.bed)
-        ch_sex_determine_input = SAMTOOLS_DEPTH_SEXDETERMINE.out.tsv
-        ch_versions            = ch_versions.mix( SAMTOOLS_DEPTH_SEXDETERMINE.out.versions )
+        SAMTOOLS_DEPTH_SEXDETERRMINE(ch_samtoolsdepth_input.bam, ch_samtoolsdepth_input.bed)
+        ch_sex_determine_input = SAMTOOLS_DEPTH_SEXDETERRMINE.out.tsv
+        ch_versions            = ch_versions.mix( SAMTOOLS_DEPTH_SEXDETERRMINE.out.versions )
 
         // Run sex determination with samtools depth input
         SEXDETERRMINE(ch_sex_determine_input, [])
