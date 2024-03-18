@@ -13,8 +13,8 @@ include { CAT_CAT as CAT_CAT_MALT        } from '../../modules/nf-core/cat/cat/m
 workflow METAGENOMICS_PROFILING {
 
     take:
-    reads
-    database
+    ch_reads
+    ch_database
 
     main:
     ch_versions             = Channel.empty()
@@ -137,36 +137,41 @@ workflow METAGENOMICS_PROFILING {
     }
 
     else if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
-        // run kraken uniq per sample, to preserve the meta-data
+        // run krakenuniq once for all samples
 
-        reads = reads.combine(database)
-        krakenuniq_reads = reads.map{ meta, reads, database -> [meta, reads] }
-        krakenuniq_db = reads.map{ meta, reads, database -> [database] }
+        ch_reads = ch_reads.map{ meta, file -> file }
+            .collect()
+            .map{files -> [
+                ['single_end':true], files
+            ]}
 
         KRAKENUNIQ_PRELOADEDKRAKENUNIQ (
-            krakenuniq_reads,
-            krakenuniq_db,
+            ch_reads,
+            ch_database,
             params.metagenomics_krakenuniq_ramchunksize,
             params.metagenomics_kraken_savereads,
             true, // save read assignments
             params.metagenomics_kraken_savereadclassifications
         )
 
-        ch_versions             = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions.first()
+        ch_versions             = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions
         ch_multiqc_files        = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report
         ch_postprocessing_input = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report
+
+        KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report.view()
     }
 
     else if ( params.metagenomics_profiling_tool == 'kraken2' ) {
         // run kraken2 per sample
+        // it lacks the option of krakenuniq
 
-        reads = reads.combine(database)
-        kraken2_reads = reads.map{meta, reads, database -> [meta, reads]}
-        kraken2_db = reads.map{meta, reads, database -> [database]}
+        ch_reads = ch_reads.combine(ch_database)
+        ch_kraken2_reads = ch_reads.map{meta, reads, database -> [meta, reads]}
+        ch_kraken2_db = ch_reads.map{meta, reads, database -> [database]}
 
         KRAKEN2_KRAKEN2 (
-            kraken2_reads,
-            kraken2_db,
+            ch_kraken2_reads,
+            ch_kraken2_db,
             params.metagenomics_kraken_savereads,
             params.metagenomics_kraken_savereadclassifications
         )

@@ -48,7 +48,7 @@ workflow METAGENOMICS_POSTPROCESSING {
     ch_postprocessing_input = ch_postprocessing_input
     .map{
         meta, report ->
-        [report]
+        report
     }
     .collect()
     .map{
