@@ -33,6 +33,7 @@ jobs:
           - "-profile test,docker --mapping_tool bowtie2 --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100"
           - "-profile test,docker --skip_preprocessing"
           - "-profile test_humanbam,docker --run_mtnucratio --run_contamination_estimation_angsd --snpcapture_bed 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz'"
+          - "-profile test_humanbam,docker --run_sexdeterrmine --sexdeterrmine_bedfile 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz'"
           - "-profile test_multiref,docker" ## TODO add damage manipulation here instead once it goes multiref
     steps:
       - name: Check out pipeline code
