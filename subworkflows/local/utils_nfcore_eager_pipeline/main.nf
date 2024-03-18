@@ -72,6 +72,7 @@ workflow PIPELINE_INITIALISATION {
     UTILS_NFCORE_PIPELINE (
         nextflow_cli_args
     )
+
     //
     // Custom validation for pipeline parameters
     //
@@ -81,19 +82,22 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
     ch_samplesheet_for_branch = Channel.fromSamplesheet("input")
+                                    .map{
+                                        meta, r1, r2, bam ->
+                                            meta.single_end = meta.pairment == "single" ? true : false
+                                        [ meta, r1, r2, bam ]
+                                    }
                                     .branch {
                                         meta, r1, r2, bam ->
                                             bam: bam.toString().endsWith(".bam")
                                             fastq: true
                                     }
 
-    // TODO:
-    // - remove bam_reference_id from meta
-    // - add if/else statement that if single end data, only emit R1
     ch_samplesheet_fastqs = ch_samplesheet_for_branch.fastq
                                 .map{
                                     meta, r1, r2, bam ->
-                                    [meta, [ r1, r2 ] ]
+                                        reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
+                                    [ meta.subMap( 'sample_id', 'library_id','lane', 'colour_chemistry', 'single_end', 'strandedness', 'damage_treatment' ), reads ]
                                 }
 
     ch_samplesheet_bams = ch_samplesheet_for_branch.bam
