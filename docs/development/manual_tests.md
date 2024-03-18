@@ -751,3 +751,4 @@ nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -
 ## Running sex determination subworkflow from deduplicated bams
 ## Expect: sex_deterrmine/sexdeterrmine directory with tsv summary table for all individuals.
 nextflow run main.nf -profile test_humanbam,arm,docker --outdir ./results --run_sexdeterrmine
+```
