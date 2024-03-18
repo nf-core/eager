@@ -8,7 +8,6 @@ include { SEXDETERRMINE                                  } from '../../modules/n
 workflow RUN_SEXDETERRMINE {
 
     take:
-    // samtoolsdepth_input // channel: [ val(meta1), [ bam ], [ meta2 ] [ intervals_bed ] ]
     sexdeterrmine_bam // channel: [ val(meta1), [ bam ] ]
     sexdeterrmine_bed // channel: [ [ meta2 ] [ intervals_bed ] ]
 
