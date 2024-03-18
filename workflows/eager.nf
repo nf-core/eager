@@ -83,6 +83,11 @@ workflow EAGER {
     // Preprocessing
     adapterlist          = params.preprocessing_skipadaptertrim ? [] : params.preprocessing_adapterlist ? file(params.preprocessing_adapterlist, checkIfExists: true) : []
 
+    if ( params.preprocessing_adapterlist                  && !params.preprocessing_skipadaptertrim ) {
+        if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
+        if ( params.preprocessing_tool == 'fastp'          && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
+    }
+
     //
     // SUBWORKFLOW: Indexing of reference files
     //
