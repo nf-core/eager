@@ -16,7 +16,7 @@ workflow METAGENOMICS_POSTPROCESSING {
     // For MALT we have an additional step that includes maltextract+amps
     if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt' ) {
 
-        //maltextract doesnt accepts a meta param in the first input channel, so remove it
+        //maltextract doesnt accept a meta param in the first input channel, so remove it
         ch_maltextract_input = ch_postprocessing_input.first().map {
             meta, rma, rma_collected ->
                 rma_collected
