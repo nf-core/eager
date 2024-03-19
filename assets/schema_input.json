@@ -7,30 +7,94 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "sample_id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces"
+                "meta": ["sample_id"],
+                "errorMessage": "Sample name must be provided and cannot contain spaces."
             },
-            "fastq_1": {
+            "library_id": {
                 "type": "string",
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+$",
+                "meta": ["library_id"],
+                "errorMessage": "Library name must be provided and cannot contain spaces."
             },
-            "fastq_2": {
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+            "lane": {
+                "type": "integer",
+                "unique": ["library_id"],
+                "meta": ["lane"],
+                "errorMessage": "Sequencing lane number must be provided and specified as an integer. If no lane information, specify 0."
+            },
+            "colour_chemistry": {
+                "type": "integer",
+                "enum": [2, 4],
+                "meta": ["colour_chemistry"],
+                "errorMessage": "Sequencing colour chemistry must be provided and specified as '2' for Illumina NextSeq/NovaSeq or '4' Illumina MiSeq/HiSeq/BGI."
+            },
+            "pairment": {
+                "type": "string",
+                "enum": ["single", "paired"],
+                "meta": ["pairment"],
+                "errorMessage": "Sequencing pairment must be provided and specified as 'single' or 'paired'. BAM files containing merged reads should be specified as 'single'."
+            },
+            "strandedness": {
+                "type": "string",
+                "enum": ["single", "double"],
+                "meta": ["strandedness"],
+                "errorMessage": "Library strandedness must be provided and specified as 'single' or 'double'."
+            },
+            "damage_treatment": {
+                "type": "string",
+                "enum": ["none", "half", "full"],
+                "meta": ["damage_treatment"],
+                "errorMessage": "Library damage treatment must be provided and specified as 'none', 'half' or 'full'."
+            },
+            "r1": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                "exists": true,
+                "errorMessage": "FastQ file for reads 1 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'."
+            },
+            "r2": {
+                "errorMessage": "FastQ file for reads 2 require files for reads 1, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'.",
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$"
+                        "format": "file-path",
+                        "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                        "exists": true,
+                        "dependentRequired": ["r1"]
                     },
                     {
                         "type": "string",
                         "maxLength": 0
                     }
                 ]
+            },
+            "bam": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.bam$",
+                "exists": true,
+                "unique": true,
+                "dependentRequired": ["bam_reference_id"],
+                "errorMessage": "BAM files cannot contain any spaces and must have extension '.bam'."
+            },
+            "bam_reference_id": {
+                "type": "string",
+                "meta": ["bam_reference_id"],
+                "errorMessage": "A BAM reference ID (corresponding to what is supplied to `--fasta`) must always be provided when providing a BAM file."
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": [
+            "sample_id",
+            "library_id",
+            "lane",
+            "colour_chemistry",
+            "pairment",
+            "strandedness",
+            "damage_treatment"
+        ]
     }
 }
