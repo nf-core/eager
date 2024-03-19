@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft/2020-12/schema",
+    "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/eager/master/assets/schema_input.json",
     "title": "nf-core/eager pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
@@ -21,7 +21,7 @@
             },
             "lane": {
                 "type": "integer",
-                "uniqueEntries": ["library_id"],
+                "unique": ["library_id"],
                 "meta": ["lane"],
                 "errorMessage": "Unrecognised lane number, must be an integer. If no lane information, specify 0."
             },
@@ -39,7 +39,7 @@
             },
             "strandedness": {
                 "type": "string",
-                "uniqueEntries": ["sample_id"],
+                "unique": ["sample_id"],
                 "enum": ["single", "double"],
                 "meta": ["strandedness"],
                 "errorMessage": "Specified library strandedness not recognised, must be 'single' or 'double'."
@@ -73,7 +73,7 @@
                 "type": "string",
                 "pattern": "^\\S+\\.bam$",
                 "exists": true,
-                "uniqueItems": true,
+                "unique": true,
                 "dependentRequired": ["bam_reference_id"],
                 "errorMessage": "File supplied to bam column has unrecognised extension, must be '.bam'."
             },
