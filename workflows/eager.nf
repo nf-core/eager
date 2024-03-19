@@ -42,18 +42,18 @@ include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libr
 // MODULE: Installed directly from nf-core/modules
 //
 
-include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
-include { SAMTOOLS_INDEX                                    } from '../modules/nf-core/samtools/index/main'
-include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
-include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
-include { FALCO                                             } from '../modules/nf-core/falco/main'
-include { MTNUCRATIO                                        } from '../modules/nf-core/mtnucratio/main'
-include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
-include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
+include { FASTQC                                                                                        } from '../modules/nf-core/fastqc/main'
+include { MULTIQC                                                                                       } from '../modules/nf-core/multiqc/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BAM_INPUT                                                    } from '../modules/nf-core/samtools/index/main'
+include { PRESEQ_CCURVE                                                                                 } from '../modules/nf-core/preseq/ccurve/main'
+include { PRESEQ_LCEXTRAP                                                                               } from '../modules/nf-core/preseq/lcextrap/main'
+include { FALCO                                                                                         } from '../modules/nf-core/falco/main'
+include { MTNUCRATIO                                                                                    } from '../modules/nf-core/mtnucratio/main'
+include { HOST_REMOVAL                                                                                  } from '../modules/local/host_removal'
+include { ENDORSPY                                                                                      } from '../modules/nf-core/endorspy/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT                                             } from '../modules/nf-core/samtools/flagstat/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
-include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
+include { SAMTOOLS_VIEW_GENOME                                                                          } from '../modules/local/samtools_view_genome.nf'
 include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED ; QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED             } from '../modules/nf-core/qualimap/bamqc/main'
 
 /*
@@ -69,6 +69,8 @@ workflow EAGER {
     ch_samplesheet_bams
 
     main:
+
+    log.info "Schaffa, Schaffa, Genome Baua!"
 
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
@@ -140,13 +142,13 @@ workflow EAGER {
     //  MODULE: indexing of user supplied input BAMs
     //
 
-    SAMTOOLS_INDEX ( ch_samplesheet_bams )
-    ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+    SAMTOOLS_INDEX_BAM_INPUT ( ch_samplesheet_bams )
+    ch_versions = ch_versions.mix( SAMTOOLS_INDEX_BAM_INPUT.out.versions )
 
     if ( params.fasta_largeref )
-        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX.out.csi )
+        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.csi )
     else {
-        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX.out.bai )
+        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.bai )
     }
 
 
@@ -154,7 +156,7 @@ workflow EAGER {
     // MODULE: flagstats of user supplied input BAMs
     //
     ch_bam_bai_input = ch_samplesheet_bams
-                            .join(SAMTOOLS_INDEX.out.bai)
+                            .join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
 
     SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
     ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )

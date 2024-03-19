@@ -97,7 +97,7 @@ workflow PIPELINE_INITIALISATION {
                                 .map{
                                     meta, r1, r2, bam ->
                                         reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
-                                    [ meta.subMap( 'sample_id', 'library_id','lane', 'colour_chemistry', 'single_end', 'strandedness', 'damage_treatment' ), reads ]
+                                    [ meta - meta.subMap('pairment', 'bam_reference_id'), reads ]
                                 }
 
     ch_samplesheet_bams = ch_samplesheet_for_branch.bam
