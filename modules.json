@@ -122,7 +122,7 @@
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "003920c7f9a8ae19b69a97171922880220bedf56",
+                        "git_sha": "f4ae1d942bd50c5c0b9bd2de1393ce38315ba57c",
                         "installed_by": ["modules"]
                     },
                     "fastqc": {
@@ -172,7 +172,7 @@
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "9e71d8519dfbfc328c078bba14d4bd4c99e39a94",
+                        "git_sha": "b7ebe95761cd389603f9cc0e0dc384c0f663815a",
                         "installed_by": ["modules"]
                     },
                     "picard/createsequencedictionary": {
@@ -282,6 +282,25 @@
                     "fastq_align_bwaaln": {
                         "branch": "master",
                         "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
+                        "installed_by": ["subworkflows"]
+                    }
+                }
+            },
+            "subworkflows": {
+                "nf-core": {
+                    "utils_nextflow_pipeline": {
+                        "branch": "master",
+                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
+                        "installed_by": ["subworkflows"]
+                    },
+                    "utils_nfcore_pipeline": {
+                        "branch": "master",
+                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
+                        "installed_by": ["subworkflows"]
+                    },
+                    "utils_nfvalidation_plugin": {
+                        "branch": "master",
+                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
                         "installed_by": ["subworkflows"]
                     }
                 }

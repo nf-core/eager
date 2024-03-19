@@ -2,6 +2,8 @@
 // Estimate contamination
 //
 
+include { addNewMetaFromAttributes         } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
+
 include { BAM_DOCOUNTS_CONTAMINATION_ANGSD } from '../../subworkflows/nf-core/bam_docounts_contamination_angsd/main'
 include { PRINT_CONTAMINATION_ANGSD        } from '../../modules/local/print_contamination_angsd'
 
@@ -19,12 +21,12 @@ workflow ESTIMATE_CONTAMINATION {
         angsd_input_hapmap = hapmap_input
             .map {
                 // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
         angsd_input = contamination_input
             .map {
                 // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by: 0,

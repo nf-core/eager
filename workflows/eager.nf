@@ -1,57 +1,21 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PRINT PARAMS SUMMARY
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { paramsSummaryLog; paramsSummaryMap } from 'plugin/nf-validation'
+include { paramsSummaryMap         } from 'plugin/nf-validation'
+include { paramsSummaryMultiqc     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText   } from '../subworkflows/local/utils_nfcore_eager_pipeline'
+include { addNewMetaFromAttributes } from '../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
-def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
-def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
-def summary_params = paramsSummaryMap(workflow)
-
-// Print parameter summary log to screen
-log.info logo + paramsSummaryLog(workflow) + citation
-
-WorkflowEager.initialise(params, log)
-
-// Check failing parameter combinations
-if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
-if ( params.run_genotyping                        && ! params.genotyping_tool                ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
-if ( params.run_genotyping                        && ! params.genotyping_source              ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
-if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
-if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
-if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
-if ( ! ( params.fasta.endsWith('csv') || params.fasta.endsWith('tsv') ) && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
-if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
-    // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
-    if (params.metagenomics_prinseq_dustscore == 0.5) {
-            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
-    }
-}
-if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
-    // dust score was set but entropy method picked. If no entropy-score provided, assume it was an error and fail
-    if (params.metagenomics_complexity_entropy == 0.3) {
-            exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
-    }
-}
-
-// TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
-if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
-
-// Report possible warnings
-if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+// if ( params.run_genotyping                        && ! params.genotyping_tool                ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
+// if ( params.run_genotyping                        && ! params.genotyping_source              ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
+// if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
+// if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
+// if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
+// if ( ! ( params.fasta.endsWith('csv') || params.fasta.endsWith('tsv') ) && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,7 +28,6 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
 include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
 include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
 include { MAP                           } from '../subworkflows/local/map'
@@ -89,8 +52,7 @@ include { GENOTYPE                      } from '../subworkflows/local/genotype'
 
 include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS                       } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { SAMTOOLS_INDEX                                    } from '../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BAM_INPUT        } from '../modules/nf-core/samtools/index/main'
 include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
 include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                                             } from '../modules/nf-core/falco/main'
@@ -110,19 +72,19 @@ include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED          } from '../modules/n
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Info required for completion email and summary
-def multiqc_report = []
-
 workflow EAGER {
+
+    take:
+    ch_samplesheet_fastqs // channel: samplesheet read in from --input
+    ch_samplesheet_bams
+
+    main:
 
     log.info "Schaffa, Schaffa, Genome Baua!"
 
-    ch_versions       = Channel.empty()
-    ch_multiqc_files  = Channel.empty()
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
 
-    //
-    // Input file checks
-    //
 
     // Reference
     fasta                = file(params.fasta, checkIfExists: true)
@@ -133,23 +95,10 @@ workflow EAGER {
     // Preprocessing
     adapterlist          = params.preprocessing_skipadaptertrim ? [] : params.preprocessing_adapterlist ? file(params.preprocessing_adapterlist, checkIfExists: true) : []
 
-
-    if ( params.preprocessing_adapterlist && !params.preprocessing_skipadaptertrim ) {
+    if ( params.preprocessing_adapterlist                  && !params.preprocessing_skipadaptertrim ) {
         if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
-        if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
+        if ( params.preprocessing_tool == 'fastp'          && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
-
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
-
-    INPUT_CHECK (
-        file(params.input)
-    )
-    ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
-    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    // ! There is currently no tooling to help you write a sample sheet schema
 
     //
     // SUBWORKFLOW: Indexing of reference files
@@ -163,11 +112,11 @@ workflow EAGER {
     //
 
     if ( params.sequencing_qc_tool == "falco" ) {
-        FALCO ( INPUT_CHECK.out.fastqs )
+        FALCO ( ch_samplesheet_fastqs )
         ch_versions = ch_versions.mix( FALCO.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FALCO.out.txt.collect{it[1]}.ifEmpty([]) )
     } else {
-        FASTQC ( INPUT_CHECK.out.fastqs )
+        FASTQC ( ch_samplesheet_fastqs )
         ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FASTQC.out.zip.collect{it[1]}.ifEmpty([]) )
     }
@@ -177,12 +126,12 @@ workflow EAGER {
     //
 
     if ( !params.skip_preprocessing ) {
-        PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist )
+        PREPROCESSING ( ch_samplesheet_fastqs, adapterlist )
         ch_reads_for_mapping = PREPROCESSING.out.reads
         ch_versions          = ch_versions.mix( PREPROCESSING.out.versions )
         ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
-        ch_reads_for_mapping = INPUT_CHECK.out.fastqs
+        ch_reads_for_mapping = ch_samplesheet_fastqs
     }
 
     //
@@ -203,21 +152,21 @@ workflow EAGER {
     //  MODULE: indexing of user supplied input BAMs
     //
 
-    SAMTOOLS_INDEX ( INPUT_CHECK.out.bams )
-    ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+    SAMTOOLS_INDEX_BAM_INPUT ( ch_samplesheet_bams )
+    ch_versions = ch_versions.mix( SAMTOOLS_INDEX_BAM_INPUT.out.versions )
 
     if ( params.fasta_largeref )
-        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.csi )
+        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.csi )
     else {
-        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.bai )
+        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.bai )
     }
 
 
     //
     // MODULE: flagstats of user supplied input BAMs
     //
-    ch_bam_bai_input = INPUT_CHECK.out.bams
-                            .join(SAMTOOLS_INDEX.out.bai)
+    ch_bam_bai_input = ch_samplesheet_bams
+                            .join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
 
     SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
     ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
@@ -276,7 +225,7 @@ workflow EAGER {
     if ( !params.skip_qualimap ) {
         ch_snp_capture_bed = REFERENCE_INDEXING.out.snp_capture_bed
             .map{
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
         ch_qualimap_input = ch_dedupped_bams
             .map {
@@ -284,7 +233,7 @@ workflow EAGER {
                 [ meta, bam ]
             }
             .map {
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by: 0,
@@ -330,7 +279,7 @@ workflow EAGER {
         // Preparing fastq channel for host removal to be combined with the bam channel
         // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
         // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
-        ch_fastqs_for_host_removal= INPUT_CHECK.out.fastqs.map{
+        ch_fastqs_for_host_removal= ch_samplesheet_fastqs.map{
                                                         meta, fastqs ->
                                                         new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
                                                         [ new_meta, meta, fastqs ]
@@ -376,11 +325,11 @@ workflow EAGER {
     if ( params.run_mtnucratio ) {
         ch_mito_header = REFERENCE_INDEXING.out.mitochondrion_header
             .map{
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
         mtnucratio_input = ch_dedupped_bams
             .map {
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by: 0,
@@ -458,12 +407,12 @@ workflow EAGER {
 
         ch_bedtools_feature = REFERENCE_INDEXING.out.bedtools_feature
                                 .map{
-                                    WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                                    addNewMetaFromAttributes( it, "id" , "reference" , false )
                                 }
 
         ch_bedtools_prep = ch_dedupped_bams
                     .map {
-                        WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                        addNewMetaFromAttributes( it, "reference" , "reference" , false )
                     }
                     .combine(
                         by: 0,
@@ -578,20 +527,23 @@ workflow EAGER {
     // MODULE: MultiQC
     //
 
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    //
+    // Collate and save software versions
+    //
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
+        .set { ch_collated_versions }
 
-    workflow_summary    = WorkflowEager.paramsSummaryMultiqc(workflow, summary_params)
-    ch_workflow_summary = Channel.value(workflow_summary)
-
-    methods_description    = WorkflowEager.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
-    ch_methods_description = Channel.value(methods_description)
-
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([])) // Replaced with custom mixing
+    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+    ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
+    summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
 
     if ( !params.skip_qualimap ) {
         ch_multiqc_files = ch_multiqc_files.mix( ch_qualimap_output.collect{it[1]}.ifEmpty([]) )
@@ -603,31 +555,10 @@ workflow EAGER {
         ch_multiqc_custom_config.toList(),
         ch_multiqc_logo.toList()
     )
-    multiqc_report = MULTIQC.out.report.toList()
-}
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    COMPLETION EMAIL AND SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow.onComplete {
-    if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-    }
-    NfcoreTemplate.dump_parameters(workflow, params)
-    NfcoreTemplate.summary(workflow, params, log)
-    if (params.hook_url) {
-        NfcoreTemplate.IM_notification(workflow, params, summary_params, projectDir, log)
-    }
-}
-
-workflow.onError {
-    if (workflow.errorReport.contains("Process requirement exceeds available memory")) {
-        println("🛑 Default resources exceed availability 🛑 ")
-        println("💡 See here on how to configure pipeline: https://nf-co.re/docs/usage/configuration#tuning-workflow-resources 💡")
-    }
+    emit:
+    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 
 /*
