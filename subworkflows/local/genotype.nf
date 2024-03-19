@@ -14,7 +14,7 @@ include { FREEBAYES                                         } from '../../module
 include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_UG               } from '../../modules/nf-core/bcftools/index/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_FREEBAYES        } from '../../modules/nf-core/bcftools/index/main'
-include { addNewMetaFromAttributes                          } from '../subworkflows/local/utils_nfcore_eager_pipeline/main'
+include { addNewMetaFromAttributes                          } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
 workflow GENOTYPE {
     take:
