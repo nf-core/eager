@@ -2,6 +2,8 @@
 // Merge libraries of the same sample, then sort, index, and flagstat the merged bam
 //
 
+include { addNewMetaFromAttributes                                } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
+
 include { SAMTOOLS_MERGE    as SAMTOOLS_MERGE_LIBRARIES           } from '../../modules/nf-core/samtools/merge/main'
 include { SAMTOOLS_SORT     as SAMTOOLS_SORT_MERGED_LIBRARIES     } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MERGED_LIBRARIES    } from '../../modules/nf-core/samtools/index/main'
@@ -16,7 +18,7 @@ workflow MERGE_LIBRARIES {
     ch_multiqc_files = Channel.empty()
 
     ch_library_merge_input = ch_bam_bai
-        .map { WorkflowEager.addNewMetaFromAttributes( it, ["id", "sample_id", "strandedness", "reference"], ["id", "sample_id", "strandedness", "reference"], false ) }
+        .map { addNewMetaFromAttributes( it, ["id", "sample_id", "strandedness", "reference"], ["id", "sample_id", "strandedness", "reference"], false ) }
         .groupTuple(by: 0)
         // Discrad library-level metas, and bais. Add single_end: true to all metas (no SE/PE distinction from here on)
         .map {

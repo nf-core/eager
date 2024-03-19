@@ -1,6 +1,7 @@
 //
 // Index input reference as required
 //
+include { grabUngzippedExtension          } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
 include { GUNZIP                          } from '../../modules/nf-core/gunzip/main'
 include { BWA_INDEX                       } from '../../modules/nf-core/bwa/index/main'
@@ -21,7 +22,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     ch_versions = Channel.empty()
 
-    def fasta_ext = WorkflowEager.grabUngzippedExtension(fasta)
+    def fasta_ext = grabUngzippedExtension(fasta)
     def clean_name = fasta.name.toString() - fasta_ext
 
     // Detect if fasta is gzipped or not, unzip if necessary, and generate meta ID by sanitizing file
