@@ -14,6 +14,7 @@ include { FREEBAYES                                         } from '../../module
 include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_UG               } from '../../modules/nf-core/bcftools/index/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_FREEBAYES        } from '../../modules/nf-core/bcftools/index/main'
+include { addNewMetaFromAttributes                          } from '../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
 workflow GENOTYPE {
     take:
@@ -54,13 +55,13 @@ workflow GENOTYPE {
             .mix( ch_refs_prep.has_aux )
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, bed, snp ]
 
         // Prepare collect bams for mpileup
         ch_mpileup_inputs_bams = ch_bam_bai
             .map {
-                WorkflowEager.addNewMetaFromAttributes( it, ["reference", "strandedness"] , ["reference", "strandedness"] , false )
+                addNewMetaFromAttributes( it, ["reference", "strandedness"] , ["reference", "strandedness"] , false )
             }
             .groupTuple()
             .map {
@@ -72,7 +73,7 @@ workflow GENOTYPE {
             // Combine prepped bams and references
             ch_mpileup_inputs = ch_mpileup_inputs_bams
                 .map {
-                    WorkflowEager.addNewMetaFromAttributes( it, "reference", "reference" , false )
+                    addNewMetaFromAttributes( it, "reference", "reference" , false )
                 }
                 .combine( ch_refs_for_mpileup_pileupcaller , by:0 )
                 // do not run if no bed file is provided
@@ -92,7 +93,7 @@ workflow GENOTYPE {
 
             ch_pileupcaller_input = SAMTOOLS_MPILEUP_PILEUPCALLER.out.mpileup
                 .map {
-                    WorkflowEager.addNewMetaFromAttributes( it, "reference", "reference" , false )
+                    addNewMetaFromAttributes( it, "reference", "reference" , false )
                 }
                 .combine( ch_refs_for_mpileup_pileupcaller, by:0 )
                 .multiMap {
@@ -113,7 +114,7 @@ workflow GENOTYPE {
             // Merge/rename genotyping datasets
             ch_final_genotypes = SEQUENCETOOLS_PILEUPCALLER.out.eigenstrat
                 .map {
-                    WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                    addNewMetaFromAttributes( it, "reference" , "reference" , false )
                 }
                 .groupTuple()
                 .map {
@@ -144,7 +145,7 @@ workflow GENOTYPE {
         ch_bams_for_multimap = ch_bam_bai
             .map {
             // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
 
         ch_fasta_for_multimap = ch_fasta_plus
@@ -160,7 +161,7 @@ workflow GENOTYPE {
             }
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
 
         ch_input_for_targetcreator = ch_bams_for_multimap
@@ -187,7 +188,7 @@ workflow GENOTYPE {
             .join( GATK_REALIGNERTARGETCREATOR.out.intervals )
             .map {
             // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
@@ -210,7 +211,7 @@ workflow GENOTYPE {
         // Use realigned bams as input for UG. combine with reference info to get correct ordering.
         ch_bams_for_ug = GATK_INDELREALIGNER.out.bam
             .map {
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
@@ -251,7 +252,7 @@ workflow GENOTYPE {
         ch_bams_for_multimap = ch_bam_bai
             .map {
             // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
 
         ch_fasta_for_multimap = ch_fasta_plus
@@ -267,7 +268,7 @@ workflow GENOTYPE {
             }
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
 
         ch_input_for_hc = ch_bams_for_multimap
@@ -302,7 +303,7 @@ workflow GENOTYPE {
         ch_bams_for_multimap = ch_bam_bai
             .map {
             // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
 
         // NOTE: dbsnp is not used by Freebayes, but we need to provide it to the module anyway, to ensure correct cardinality of the fasta channel within the BCFTOOLS_STATS channel operations.
@@ -320,7 +321,7 @@ workflow GENOTYPE {
             }
             .map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
 
         ch_input_for_freebayes = ch_bams_for_multimap
@@ -363,7 +364,7 @@ workflow GENOTYPE {
     if ( !params.skip_bcftools_stats && ( params.genotyping_tool == 'hc' || params.genotyping_tool == 'ug' || params.genotyping_tool == 'freebayes' ) ) {
         ch_bcftools_input= ch_genotypes_vcf
             .map {
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
