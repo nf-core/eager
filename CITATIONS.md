@@ -100,9 +100,10 @@
 
 - [QualiMap](https://doi.org/10.1093/bioinformatics/btv566)
 
-  > QualiMap Okonechnikov, K., Conesa, A., & García-Alcalde, F. (2016). Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. Bioinformatics , 32(2), 292–294. Download: http://qualimap.bioinfo.cipf.es/
+  > QualiMap Okonechnikov, K., Conesa, A., & García-Alcalde, F. (2016). Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. Bioinformatics , 32(2), 292–294. doi: [10.1093/bioinformatics/btv566](https://doi.org/10.1093/bioinformatics/btv566).
 
 - [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
+
   > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190).
 
 - [GATK 3.5](https://console.cloud.google.com/storage/browser/gatk)
@@ -119,7 +120,7 @@
 
 - [BCFtools](https://github.com/samtools/bcftools)
 
-  > Li H. A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics (2011) 27(21) 2987-93.doi: [10.1093/bioinformatics/btr509](https://doi.org/10.1093/bioinformatics/btr509)
+  > Li H. A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics (2011) 27(21) 2987-93.doi: [10.1093/bioinformatics/btr509](https://doi.org/10.1093/bioinformatics/btr509).
 
 ## Software packaging/containerisation tools
 
