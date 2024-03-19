@@ -23,43 +23,6 @@
                 "type": "integer",
                 "unique": ["library_id"],
                 "meta": ["lane"],
-                "errorMessage": "Unrecognised lane number, must be an integer. If no lane information, specify 0."
-            },
-            "colour_chemistry": {
-                "type": "integer",
-                "enum": [2, 4],
-                "meta": ["colour_chemistry"],
-                "errorMessage": "Specified sequencing colour chemistry not recognised, must be '2' for Illumina NextSeq/NovaSeq or '4' for Illumina MiSeq/HiSeq/BGI."
-            },
-            "pairment": {
-                "type": "string",
-                "enum": ["single", "paired"],
-                "meta": ["pairment"],
-                "errorMessage": "Specified sequencing pairment not recognised, must be 'single' or 'paired'. BAM files containing merged reads files should be specified as 'single'."
-            },
-            "strandedness": {
-                "type": "string",
-                "unique": ["sample_id"],
-                "enum": ["single", "double"],
-                "meta": ["strandedness"],
-                "errorMessage": "Specified library strandedness not recognised, must be 'single' or 'double'."
-            },
-            "damage_treatment": {
-                "type": "string",
-                "enum": ["none", "half", "full"],
-                "meta": ["damage_treatment"],
-                "errorMessage": "Specified damage treatment not recognised, must be 'none', 'half' or 'full'."
-            },
-            "r1": {
-                "type": "string",
-                "pattern": "^\\S+$",
-                "meta": ["library_id"],
-                "errorMessage": "Library name must be provided and cannot contain spaces."
-            },
-            "lane": {
-                "type": "integer",
-                "unique": ["library_id"],
-                "meta": ["lane"],
                 "errorMessage": "Sequencing lane number must be provided and specified as an integer. If no lane information, specify 0."
             },
             "colour_chemistry": {
