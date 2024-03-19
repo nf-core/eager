@@ -104,7 +104,8 @@ workflow PIPELINE_INITIALISATION {
                             .map{
                                 meta, r1, r2, bam ->
                                     meta.reference = meta.bam_reference_id
-                                [ meta, bam ]
+                                    meta.id_index = meta.bam_reference_id
+                                [ meta - meta.subMap('bam_reference_id'), bam ]
                             }
 
     // Extra validation
