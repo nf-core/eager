@@ -117,6 +117,10 @@
 
   > Garrison E, Marth G. Haplotype-based variant detection from short-read sequencing. arXiv preprint arXiv:1207.3907 \[q-bio.GN] 2012. doi: [10.48550/arXiv.1207.3907](https://doi.org/10.48550/arXiv.1207.3907).
 
+- [BCFtools](https://github.com/samtools/bcftools)
+
+  > Li H. A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics (2011) 27(21) 2987-93.doi: [10.1093/bioinformatics/btr509](https://doi.org/10.1093/bioinformatics/btr509)
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
