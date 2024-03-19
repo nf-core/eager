@@ -52,16 +52,56 @@
             },
             "r1": {
                 "type": "string",
+                "pattern": "^\\S+$",
+                "meta": ["library_id"],
+                "errorMessage": "Library name must be provided and cannot contain spaces."
+            },
+            "lane": {
+                "type": "integer",
+                "unique": ["library_id"],
+                "meta": ["lane"],
+                "errorMessage": "Sequencing lane number must be provided and specified as an integer. If no lane information, specify 0."
+            },
+            "colour_chemistry": {
+                "type": "integer",
+                "enum": [2, 4],
+                "meta": ["colour_chemistry"],
+                "errorMessage": "Sequencing colour chemistry must be provided and specified as '2' for Illumina NextSeq/NovaSeq or '4' Illumina MiSeq/HiSeq/BGI."
+            },
+            "pairment": {
+                "type": "string",
+                "enum": ["single", "paired"],
+                "meta": ["pairment"],
+                "errorMessage": "Sequencing pairment must be provided and specified as 'single' or 'paired'. BAM files containing merged reads should be specified as 'single'."
+            },
+            "strandedness": {
+                "type": "string",
+                "enum": ["single", "double"],
+                "meta": ["strandedness"],
+                "errorMessage": "Library strandedness must be provided and specified as 'single' or 'double'."
+            },
+            "damage_treatment": {
+                "type": "string",
+                "enum": ["none", "half", "full"],
+                "meta": ["damage_treatment"],
+                "errorMessage": "Library damage treatment must be provided and specified as 'none', 'half' or 'full'."
+            },
+            "r1": {
+                "type": "string",
+                "format": "file-path",
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "exists": true,
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'."
+                "errorMessage": "FastQ file for reads 1 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'."
             },
             "r2": {
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'.",
+                "errorMessage": "FastQ file for reads 2 require files for reads 1, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'.",
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$"
+                        "format": "file-path",
+                        "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                        "exists": true,
+                        "dependentRequired": ["r1"]
                     },
                     {
                         "type": "string",
@@ -71,11 +111,12 @@
             },
             "bam": {
                 "type": "string",
+                "format": "file-path",
                 "pattern": "^\\S+\\.bam$",
                 "exists": true,
                 "unique": true,
                 "dependentRequired": ["bam_reference_id"],
-                "errorMessage": "File supplied to bam column has unrecognised extension, must be '.bam'."
+                "errorMessage": "BAM files cannot contain any spaces and must have extension '.bam'."
             },
             "bam_reference_id": {
                 "type": "string",
