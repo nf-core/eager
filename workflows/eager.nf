@@ -10,13 +10,6 @@ include { softwareVersionsToYAML   } from '../subworkflows/nf-core/utils_nfcore_
 include { methodsDescriptionText   } from '../subworkflows/local/utils_nfcore_eager_pipeline'
 include { addNewMetaFromAttributes } from '../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
-// if ( params.run_genotyping                        && ! params.genotyping_tool                ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
-// if ( params.run_genotyping                        && ! params.genotyping_source              ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
-// if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
-// if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
-// if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
-// if ( ! ( params.fasta.endsWith('csv') || params.fasta.endsWith('tsv') ) && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
