@@ -16,18 +16,21 @@ workflow METAGENOMICS_POSTPROCESSING {
     // For MALT we have an additional step that includes maltextract+amps
     if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt' ) {
 
-        //maltextract doesnt accept a meta param in the first input channel, so remove it
         ch_maltextract_input = ch_postprocessing_input.first().map {
             meta, rma, rma_collected ->
-                rma_collected
+                [meta, rma_collected]
             }
 
         tax_list = Channel.fromPath(params.metagenomics_maltextract_taxonlist)
         ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbidir)
 
+        //#TODO: Branch of here
+
         MALTEXTRACT ( ch_maltextract_input, tax_list, ncbi_dir)
 
-        AMPS ( MALTEXTRACT.out.results, tax_list, params.metagenomics_maltextract_filter )
+        ch_amps_input = MALTEXTRACT.out.results.map{ it[1] }
+
+        AMPS ( ch_amps_input, tax_list, params.metagenomics_maltextract_filter )
 
 
         //Also, prepare Malt for taxpasta by running rma2info

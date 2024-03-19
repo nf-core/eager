@@ -142,7 +142,7 @@
                     },
                     "maltextract": {
                         "branch": "master",
-                        "git_sha": "0f8a77ff00e65eaeebc509b8156eaa983192474b",
+                        "git_sha": "8840ece9ee7528480dec95796e017be02ada0dc0",
                         "installed_by": ["modules"]
                     },
                     "mapdamage2": {
