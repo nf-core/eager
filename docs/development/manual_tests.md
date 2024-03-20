@@ -350,8 +350,6 @@ All possible parameters
 
 Tests
 
-## NOTE: metagenomics input generation will now fail pre-pipeline parameter checks, since --run_metagenomics requires the subsequent declaration of --metagenomics_profiling_tool and --metagenomics_profiling_database!
-
 ```bash
 ## Check no BAM filtering
 ## Expect: full completion of pipeline without any bam filtering execution
@@ -636,27 +634,7 @@ nextflow run main.nf -profile test,docker \
   --metagenomics_kraken_savereadclassifications
 ```
 
-<<<<<<< HEAD
 ##### kraken2
-=======
-#### With mapDamage2
-
-```bash
-## mapDamage2 with default parameters
-## Expect: mapdamage directory with 3pGtoA_freq, 5pCtoT_freq, dnacomp_genome, dnacomp, Fragmisincorporation_plot, Length_plot, lgdistribution, misincorporation, Runtime_log
-nextflow run main.nf -profile test,docker --outdir ./results --damagecalculation_tool mapdamage
-```
-
-```bash
-## mapDamage2 with downsampling to 100 reads
-## Expect: mapdamage directory with 3pGtoA_freq, 5pCtoT_freq, dnacomp_genome, dnacomp, Fragmisincorporation_plot, Length_plot, lgdistribution, misincorporation, Runtime_log
-nextflow run main.nf -profile test,docker --outdir ./results --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100
-```
-
-### ESTIMATE CONTAMINATION
-
-#### With ANGSD
->>>>>>> eager/dev
 
 ```bash
 #### Use kraken2 for metagenomics sequence classification, save only report (default)
@@ -719,42 +697,7 @@ nextflow run main.nf -profile test,docker \
 
 #### postprocessing
 
-<<<<<<< HEAD
 ##### maltextract
-=======
-```bash
-## PMD filtering with default parameters
-## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total).
-nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results
-## number of reads in each file after filtering:
-# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  70
-# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      180
-# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      55
-
-
-## PMD filtering with changed parameters
-## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total). Commands checked to ensure parameter gets propagated.
-nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results --damage_manipulation_pmdtools_threshold 4
-## number of reads in each file after filtering:
-# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  64
-# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      137
-# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      30
-```
-
-```bash
-## PMD filtering with fasta masking
-## Expect: damage_manipulation directory with *.masked.fa and bam and bai and flagstat per library
-nextflow run . -profile test_humanbam,docker --run_pmd_filtering --damage_manipulation_pmdtools_reference_mask https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz -resume --outdir ./results
-```
-
-```bash
-## PMD filtering with fasta masking for 1 of 2 references
-## Expect: damage_manipulation directory with hs37d5_chr21-MT.masked.fa and bam and bai and flagstat per library and reference (22 files total). hs37d5_chr21-MT first masked with 1240K.pos.list_hs37d5.0based.bed.gz from reference sheet, PMD filtering run with masked reference fasta for hs37d5 and non-masked reference fasta for Mammoth_MT
-nextflow run . -profile test_multiref,docker --run_pmd_filtering --outdir ./results
-```
-
-## BAM trimming
->>>>>>> eager/dev
 
 ```bash
 ### Create a SummaryTable from the Malt rma6 files
@@ -826,6 +769,175 @@ nextflow run ../main.nf -profile docker \
 nextflow run -resume ./main.nf -profile test,docker --outdir out \
 --run_metagenomics --metagenomics_profiling_tool metaphlan --metagenomics_profiling_database ./runtest/metaphlandb/ --metagenomics_run_postprocessing
 # 20230804: works
+```
+## Mapping statistics
+
+### ENDOSPY
+
+All possible paramters
+
+```
+// BAM Filtering
+params.run_bamfiltering
+//Deduplication
+params.skip_deduplication
+```
+
+Tests
+
+```{bash}
+##Check if mapping + filtering + deduplication is done, meaning params.run_bamfiltering is true and params.skip_deduplication is false
+##Expect: a json for each of the of the libraries with all the stats calculates (percent on target raw, percent on target modified, percent on target postdedup, clonality and percent duplicates)
+##Checked: there is 3 jsons with all the stats calculates
+
+nextflow run ../main.nf -profile docker,test --outdir results_endorspy_all -w results_endorspy_all/work --run_bamfiltering
+
+##Check if mapping only has been performed, meaning params.run_bamfiltering is false and params.skip_deduplication is true
+##Expect: a json for each of the of the libraries with only percent on target raw
+##Checked: there is 3 jsons with only Percent on target (%)
+
+nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_only -w results_endorspy_map_only/work --skip_deduplication --run_bamfiltering false
+
+##Check if mapping and run_bamfiltering done but no dedepup, meaning params.run_bamfiltering is true and params.skip_deduplication is true
+##Checked: there is 3 jsons with only Percent on target (%) and Percent on target modified (%) calculated
+
+nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_filtering_nodedup -w results_endorspy_map_filtering_nodedup/work --run_bamfiltering --skip_deduplication
+
+##Check if mapping and dedup done but no bam filtering, meaning params.run_bamfiltering is false and params.skip_deduplication is true
+##Checked: there is 3 jsons with Percent on target (%), Percent on target postdedup (%), Clonality and Percent Duplicates (%)
+
+nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_nofiltering_dedup -w results_endorspy_map_nofiltering_dedup/work --run_bamfiltering false
+
+##Check if mapping + filtering + deduplication is done (meaning params.run_bamfiltering is true and params.skip_deduplication is false) and multiple reference used
+##Expect: a json for each of the of the libraries with all the stats calculates (percent on target raw, percent on target modified, percent on target postdedup, clonality and percent duplicates) for each of the references
+##Checked: there is 6 jsons with all the stats calculates: one for each of the references (2) for each of the samples (3 samples in total). All the stats were calculated.
+
+nextflow run ../main.nf -profile docker,test_multiref --outdir results_endorspy_all_multiref -w results_endorspy_all_multiref/work --run_bamfiltering
+```
+
+### CALCULATE DAMAGE
+
+#### With DamageProfiler
+
+```bash
+## DamageProfiler with default parameters
+## Expect:damageprofiler directory with txt, pdf, svg for each library (19 files total per library).
+nextflow run main.nf -profile test,conda --outdir ./results -resume
+```
+
+#### With mapDamage2
+
+```bash
+## mapDamage2 with default parameters
+## Expect: mapdamage directory with 3pGtoA_freq, 5pCtoT_freq, dnacomp_genome, dnacomp, Fragmisincorporation_plot, Length_plot, lgdistribution, misincorporation, Runtime_log
+nextflow run main.nf -profile test,docker --outdir ./results --damagecalculation_tool mapdamage
+```
+
+```bash
+## mapDamage2 with downsampling to 100 reads
+## Expect: mapdamage directory with 3pGtoA_freq, 5pCtoT_freq, dnacomp_genome, dnacomp, Fragmisincorporation_plot, Length_plot, lgdistribution, misincorporation, Runtime_log
+nextflow run main.nf -profile test,docker --outdir ./results --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100
+```
+
+### ESTIMATE CONTAMINATION
+
+#### With ANGSD
+
+```bash
+## ANGSD contamination estimation with default parameters
+## Expect: contamination_estimation/angsd directory with txt for each library and 'nuclear_contamination.txt' summary table.
+nextflow run main.nf -profile test,humanbam --outdir ./results  --run_contamination_angsd -resume
+
+## ANGSD contamination estimation with quality filters reduced
+## Expect: contamination_estimation/angsd directory with txt for each library and 'nuclear_contamination.txt' summary table.
+nextflow run main.nf -profile test,humanbam --outdir ./results --run_contamination_angsd --angsd_minq 0 --angsd_mapq 0 -resume
+```
+
+### MANIPULATE DAMAGE
+
+## Rescaling
+
+```bash
+## Rescaling with default parameters
+## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG), and 2 results_* directories with 6 Stats_out_MCMC_* files each.
+nextflow run . -profile test,docker --run_mapdamage_rescaling -resume --outdir ./results
+
+## Rescaling with changed rescale lengths
+## Expect: damage_manipulation directory with a bam and bai per library (4 files total, cause one sample is full UDG), and 2 results_* directories with 6 Stats_out_MCMC_* files each.
+##   Commands checked to ensure parameter gets propagated (Yes, together with default --seq-length of 12.)
+nextflow run . -profile test,docker --run_mapdamage_rescaling --damage_manipulation_rescale_length_5p 3 --damage_manipulation_rescale_length_3p 3 -resume --outdir ./results
+```
+
+## PMD Filtering
+
+```bash
+## PMD filtering with default parameters
+## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total).
+nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results
+## number of reads in each file after filtering:
+# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  70
+# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      180
+# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      55
+
+
+## PMD filtering with changed parameters
+## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total). Commands checked to ensure parameter gets propagated.
+nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results --damage_manipulation_pmdtools_threshold 4
+## number of reads in each file after filtering:
+# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  64
+# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      137
+# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      30
+```
+
+```bash
+## PMD filtering with fasta masking
+## Expect: damage_manipulation directory with *.masked.fa and bam and bai and flagstat per library
+nextflow run . -profile test_humanbam,docker --run_pmd_filtering --damage_manipulation_pmdtools_reference_mask https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz -resume --outdir ./results
+```
+
+```bash
+## PMD filtering with fasta masking for 1 of 2 references
+## Expect: damage_manipulation directory with hs37d5_chr21-MT.masked.fa and bam and bai and flagstat per library and reference (22 files total). hs37d5_chr21-MT first masked with 1240K.pos.list_hs37d5.0based.bed.gz from reference sheet, PMD filtering run with masked reference fasta for hs37d5 and non-masked reference fasta for Mammoth_MT
+nextflow run . -profile test_multiref,docker --run_pmd_filtering --outdir ./results
+```
+
+## BAM trimming
+
+```bash
+## BAM trimming with default parameters (0bp trim)
+## Expect: damage_manipulation directory with a bam and bai per library. No trimming actually done. (6 files total. full UDG still goes through module but trimming is 0bp)
+nextflow run . -profile test,docker --run_trim_bam -resume --outdir ./results
+
+## BAM trimming with changed parameters
+## Expect: damage_manipulation directory with a bam and bai per library. Trimming is done. 0 bp for full UDG, 1-2bp for half, 5-7 for none. (6 files total)
+## Giving different on each side to make sure arguments are passed correctly.
+nextflow run . -profile test,docker \
+  -resume \
+  --outdir ./results \
+  --run_trim_bam \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
+```
+
+## All together
+
+```bash
+## All together with default parameters + non-0 trimming.
+## Expect: damage_manipulation directory with _pmdfiltered, and _pmdfiltered_trimmed bams and bai per library, plus pmd_filtered flagstat files. (5 * 3 = 15 files total).
+##   Also _rescaled bam/bai for libraries that are not full-UDG. (15 + 4 = 19 files total), and 2 results_* directories with 6 Stats_out_MCMC_* files each.
+## Number of reads in each file after trimming should match filtered flagstat.
+nextflow run . -profile test,docker \
+  -resume \
+  --outdir ./results \
+  --run_mapdamage_rescaling \
+  --run_pmd_filtering \
+  --run_trim_bam \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
 ```
 
 ### LIBRARY_MERGE
