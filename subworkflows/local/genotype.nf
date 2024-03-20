@@ -11,6 +11,7 @@ include { GATK_INDELREALIGNER                               } from '../../module
 include { GATK_UNIFIEDGENOTYPER                             } from '../../modules/nf-core/gatk/unifiedgenotyper/main'
 include { GATK4_HAPLOTYPECALLER                             } from '../../modules/nf-core/gatk4/haplotypecaller/main'
 include { FREEBAYES                                         } from '../../modules/nf-core/freebayes/main'
+include { ANGSD_GL                                          } from '../../modules/nf-core/angsd/gl/main'
 include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_UG               } from '../../modules/nf-core/bcftools/index/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_FREEBAYES        } from '../../modules/nf-core/bcftools/index/main'
