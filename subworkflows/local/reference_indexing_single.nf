@@ -8,6 +8,7 @@ include { BWA_INDEX                       } from '../../modules/nf-core/bwa/inde
 include { BOWTIE2_BUILD                   } from '../../modules/nf-core/bowtie2/build/main'
 include { SAMTOOLS_FAIDX                  } from '../../modules/nf-core/samtools/faidx/main'
 include { PICARD_CREATESEQUENCEDICTIONARY } from '../../modules/nf-core/picard/createsequencedictionary/main'
+include { MAPAD_INDEX                     } from '../../modules/nf-core/mapad/index/main'
 
 workflow REFERENCE_INDEXING_SINGLE {
 
@@ -69,6 +70,14 @@ workflow REFERENCE_INDEXING_SINGLE {
             ch_fasta_mapperindexdir = Channel.fromPath(fasta_mapperindexdir).map{[[id: clean_name], it ]}
         }
 
+    } else if ( params.mapping_tool == "mapad" ) {
+
+        if ( !fasta_mapperindexdir ) {
+            ch_fasta_mapperindexdir = MAPAD_INDEX ( ch_ungz_ref ).index
+            ch_versions = ch_versions.mix( MAPAD_INDEX.out.versions.first())
+        } else {
+            ch_fasta_mapperindexdir = Channel.fromPath(fasta_mapperindexdir).map{[[id: clean_name], it ]}
+        }
     }
 
     // Join all together into a single map. failOnMismatch allows check if
