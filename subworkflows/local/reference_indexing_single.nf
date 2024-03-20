@@ -87,7 +87,7 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     def capture_bed                           = params.snpcapture_bed != null ? file(params.snpcapture_bed, checkIfExists: true ) : ""
                                     def pileupcaller_bed                      = params.genotyping_pileupcaller_bedfile != null ? file(params.genotyping_pileupcaller_bedfile, checkIfExists: true ) : ""
                                     def pileupcaller_snp                      = params.genotyping_pileupcaller_snpfile != null ? file(params.genotyping_pileupcaller_snpfile, checkIfExists: true ) : ""
-                                    def sexdet_bed                            = ""
+                                    def sexdet_bed                            = params.sexdeterrmine_bedfile != null ? file(params.sexdeterrmine_bedfile, checkIfExists: true ) : ""
                                     def bedtools_feature                      = params.mapstats_bedtools_featurefile != null ? file(params.mapstats_bedtools_featurefile, checkIfExists: true ) : ""
                                     def genotyping_reference_ploidy           = params.genotyping_reference_ploidy
                                     def genotyping_gatk_dbsnp                 = params.genotyping_gatk_dbsnp != null ? file(params.genotyping_gatk_dbsnp, checkIfExists: true ) : ""

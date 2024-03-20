@@ -122,6 +122,10 @@
 
   > Li H. A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics (2011) 27(21) 2987-93.doi: [10.1093/bioinformatics/btr509](https://doi.org/10.1093/bioinformatics/btr509).
 
+  - [Sex.DetERRmine.py](http://dx.doi.org/10.1038/s41467-018-07483-5)
+
+  > Sex.DetERRmine.py Lamnidis, T.C. et al., 2018. Ancient Fennoscandian genomes reveal origin and spread of Siberian ancestry in Europe. Nature communications, 9(1), p.5018. Available at: http://dx.doi.org/10.1038/s41467-018-07483-5. Download: https://github.com/TCLamnidis/Sex.DetERRmine
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
