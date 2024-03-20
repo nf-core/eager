@@ -181,6 +181,8 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     genomeExistsError()
+    if ( !params.fasta                                     && !params.fasta_sheet ) { exit 1, "[nf-core/eager] ERROR: Neither FASTA file --fasta nor reference sheet --fasta_sheet have been provided."}
+    if ( params.fasta                                      && params.fasta_sheet ) { exit 1, "[nf-core/eager] ERROR: A FASTA file --fasta and a reference sheet --fasta_sheet have been provided."}
     if ( params.preprocessing_adapterlist                  && params.preprocessing_skipadaptertrim ) { log.warn("[nf-core/eager] WARNING: --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!") }
     if ( params.deduplication_tool == 'dedup'              && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
     if ( params.bamfiltering_retainunmappedgenomicbam      && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }

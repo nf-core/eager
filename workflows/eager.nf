@@ -77,7 +77,7 @@ workflow EAGER {
 
 
     // Reference
-    fasta                = file(params.fasta, checkIfExists: true)
+    fasta                = params.fasta ? file(params.fasta, checkIfExists: true) : params.fasta_sheet ? file(params.fasta_sheet, checkIfExists: true) : []
     fasta_fai            = params.fasta_fai ? file(params.fasta_fai, checkIfExists: true) : []
     fasta_dict           = params.fasta_dict ? file(params.fasta_dict, checkIfExists: true) : []
     fasta_mapperindexdir = params.fasta_mapperindexdir ? file(params.fasta_mapperindexdir, checkIfExists: true) : []

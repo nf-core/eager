@@ -18,7 +18,7 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_versions = Channel.empty()
 
 // Import reference sheet and change empty arrays to empty strings for compatibility with single reference input
-ch_splitreferencesheet_for_branch = Channel.fromSamplesheet("fasta")
+ch_splitreferencesheet_for_branch = Channel.fromSamplesheet("fasta_sheet")
                                     .map{
                                         meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
                                             meta.ploidy           = meta.ploidy == !null ? meta.ploidy : ""
