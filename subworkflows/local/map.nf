@@ -4,6 +4,7 @@
 
 include { SEQKIT_SPLIT2                                       } from '../../modules/nf-core/seqkit/split2/main'
 include { FASTQ_ALIGN_BWAALN                                  } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { FASTQ_ALIGN_MAPAD                                   } from '../../subworkflows/nf-core/fastq_align_mapad/main'
 include { BWA_MEM                                             } from '../../modules/nf-core/bwa/mem/main'
 include { BOWTIE2_ALIGN                                       } from '../../modules/nf-core/bowtie2/align/main'
 include { SAMTOOLS_MERGE    as SAMTOOLS_MERGE_LANES           } from '../../modules/nf-core/samtools/merge/main'
@@ -100,6 +101,30 @@ workflow MAP {
         SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
         ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
+
+    } else if ( params.mapping_tool == 'mapad' ) {
+        FASTQ_ALIGN_MAPAD (
+                reads,
+                index,
+                params.fasta,
+                params.mapping_mapad_p,
+                params.mapping_mapad_lib=="double_stranded" ? true : false,
+                params.mapping_mapad_f,
+                params.mapping_mapad_t,
+                params.mapping_mapad_d,
+                params.mapping_mapad_s,
+                params.mapping_mapad_i
+                )
+        ch_versions        = ch_versions.mix ( FASTQ_ALIGN_MAPAD.out.versions.first() )
+        ch_mapped_lane_bam = FASTQ_ALIGN_MAPAD.out.bam
+                                .map{
+                                    // create meta consistent with rest of workflow
+                                    meta, bam ->
+                                    new_meta = meta + [ reference: meta.id_index ]
+                                [ new_meta, bam ]
+                                }
+
+        ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_MAPAD.out.csi : FASTQ_ALIGN_MAPAD.out.bai
 
     } else if ( params.mapping_tool == 'circularmapper' ) {
         ch_elongated_reference_for_mapping = elogated_index
