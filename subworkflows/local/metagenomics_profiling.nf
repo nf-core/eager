@@ -21,15 +21,6 @@ workflow METAGENOMICS_PROFILING {
     ch_multiqc_files        = Channel.empty()
     ch_postprocessing_input = Channel.empty()
 
-    //FOR TESTING
-    def x=1
-    ch_reads = ch_reads.map{ meta, reads ->
-        [
-            meta + ['strandedness': x++%2==0 ? 'single' : 'double' ],
-            reads
-        ]
-    }
-
     /*
         PREPARE PROFILER INPUT CHANNELS & RUN PROFILING
     */
@@ -53,26 +44,33 @@ workflow METAGENOMICS_PROFILING {
 
 
         def label = file(params.metagenomics_profiling_database).getBaseName()
+
+        // For the next step we need the number of groups for the spezified number of input files
+        ch_groups =  params.metagenomics_malt_group_size > 0 ? ch_reads.collate(params.metagenomics_malt_group_size).count() : Channel.of(1)
+        // this is for enumerating the channel-entries in the ch_reads channel
         def n = 0
 
         //replace the meta in a way that groupTuple splits the entries
         //by strandedness and metagenomics_malt_group_size
-
-        ch_input_for_malt = ch_reads.map{ meta, reads ->
+        //NOTE: known limitations
+        // this method splits the entries into groups of size malt_group_size, but if there is a mix of ds and ss entries
+        // the groups are split again by ds and ss with groupTuple. So they might end up smaller than malt_group_size
+        // could be prevented by branching early and running the lower part twice for ss and ds individually
+        // but this is an edge-case and might never be relevant...
+        ch_input_for_malt = ch_reads.combine(ch_groups).map{ meta, reads, n_groups ->
             [
                 [
                     label: label,
                     strandedness:meta.strandedness,
-                    id:"${meta.strandedness}stranded_${params.metagenomics_malt_group_size > 0 ? n++%params.metagenomics_malt_group_size : 'all'}"
+                    id:"${meta.strandedness}stranded_${n++%n_groups}"
                 ],
                 reads
             ]
         }
         .groupTuple(by:0)
-        .view()
 
         // We might have multiple chunks in the reads_channel
-        // each of which requires a database
+        // each of which requires the database
         ch_input_for_malt = ch_input_for_malt.combine(ch_database)
 
         // Split Channels into reads and database
