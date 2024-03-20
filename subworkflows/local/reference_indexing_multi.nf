@@ -7,6 +7,7 @@ include { BWA_INDEX                       } from '../../modules/nf-core/bwa/inde
 include { BOWTIE2_BUILD                   } from '../../modules/nf-core/bowtie2/build/main'
 include { SAMTOOLS_FAIDX                  } from '../../modules/nf-core/samtools/faidx/main'
 include { PICARD_CREATESEQUENCEDICTIONARY } from '../../modules/nf-core/picard/createsequencedictionary/main'
+include { MAPAD_INDEX                     } from '../../modules/nf-core/mapad/index/main'
 include { samplesheetToList               } from 'plugin/nf-schema'
 
 workflow REFERENCE_INDEXING_MULTI {
@@ -166,6 +167,10 @@ workflow REFERENCE_INDEXING_MULTI {
         BOWTIE2_BUILD(ch_mapindex_input.index)
         ch_version = ch_versions.mix(BOWTIE2_BUILD.out.versions)
         ch_indexed_forremap = BOWTIE2_BUILD.out.index
+    } else if (params.mapping_tool == "mapad") {
+        MAPAD_INDEX (ch_mapindex_input.index)
+        ch_version = ch_versions.mix( MAPAD_INDEX.out.versions )
+        ch_indexed_forremap = MAPAD_INDEX.out.index
     }
 
     ch_indexed_formix = ch_indexed_forremap

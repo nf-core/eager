@@ -200,6 +200,16 @@
                         "git_sha": "8840ece9ee7528480dec95796e017be02ada0dc0",
                         "installed_by": ["modules"]
                     },
+                    "mapad/index": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "mapad/map": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["fastq_align_mapad", "modules"]
+                    },
                     "mapdamage2": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
@@ -283,17 +293,17 @@
                     "samtools/flagstat": {
                         "branch": "master",
                         "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
-                        "installed_by": ["modules"]
+                        "installed_by": ["bam_stats_samtools"]
                     },
                     "samtools/idxstats": {
                         "branch": "master",
                         "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
-                        "installed_by": ["modules"]
+                        "installed_by": ["bam_stats_samtools", "modules"]
                     },
                     "samtools/index": {
                         "branch": "master",
                         "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
-                        "installed_by": ["bam_split_by_region", "fastq_align_bwaaln"]
+                        "installed_by": ["bam_sort_stats_samtools", "bam_split_by_region", "fastq_align_bwaaln"]
                     },
                     "samtools/merge": {
                         "branch": "master",
@@ -308,7 +318,12 @@
                     "samtools/sort": {
                         "branch": "master",
                         "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
-                        "installed_by": ["modules"]
+                        "installed_by": ["bam_sort_stats_samtools", "modules"]
+                    },
+                    "samtools/stats": {
+                        "branch": "master",
+                        "git_sha": "f4596fe0bdc096cf53ec4497e83defdb3a94ff62",
+                        "installed_by": ["bam_stats_samtools"]
                     },
                     "samtools/view": {
                         "branch": "master",
@@ -354,14 +369,29 @@
                         "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
                         "installed_by": ["subworkflows"]
                     },
+                    "bam_sort_stats_samtools": {
+                        "branch": "master",
+                        "git_sha": "f4596fe0bdc096cf53ec4497e83defdb3a94ff62",
+                        "installed_by": ["fastq_align_mapad"]
+                    },
                     "bam_split_by_region": {
                         "branch": "master",
                         "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
                         "installed_by": ["subworkflows"]
                     },
+                    "bam_stats_samtools": {
+                        "branch": "master",
+                        "git_sha": "f4596fe0bdc096cf53ec4497e83defdb3a94ff62",
+                        "installed_by": ["bam_sort_stats_samtools"]
+                    },
                     "fastq_align_bwaaln": {
                         "branch": "master",
                         "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
+                        "installed_by": ["subworkflows"]
+                    },
+                    "fastq_align_mapad": {
+                        "branch": "master",
+                        "git_sha": "9f892b5da34b25da790af7baa48caeb869481bb9",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nextflow_pipeline": {
