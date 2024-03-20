@@ -48,7 +48,7 @@ workflow FILTER_BAM {
     // Generate BAM file of quality filtered and mapped-only reads,
     // optionally retaining unmapped reads, defined in modules.config
 
-    SAMTOOLS_VIEW_BAM_FILTERING ( ch_bam_for_qualityfilter, [], [] ) // fasta isn't needed until we support CRAM
+    SAMTOOLS_VIEW_BAM_FILTERING ( ch_bam_for_qualityfilter, [[], []], [] ) // fasta isn't needed until we support CRAM
     ch_versions = ch_versions.mix( SAMTOOLS_VIEW_BAM_FILTERING.out.versions.first() )
 
     SAMTOOLS_FILTER_INDEX ( SAMTOOLS_VIEW_BAM_FILTERING.out.bam )

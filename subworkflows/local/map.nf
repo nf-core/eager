@@ -2,13 +2,16 @@
 // Prepare reference indexing for downstream
 //
 
-include { FASTQ_ALIGN_BWAALN                                                                                                        } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
-include { BWA_MEM                                                                                                                   } from '../../modules/nf-core/bwa/mem/main'
-include { BOWTIE2_ALIGN                                                                                                             } from '../../modules/nf-core/bowtie2/align/main'
-include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES                                                                                    } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED_LANES                                                                              } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM; SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2; SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED                                                                             } from '../../modules/nf-core/samtools/flagstat/main'
+include { SEQKIT_SPLIT2                                 } from '../../modules/nf-core/seqkit/split2/main'
+include { FASTQ_ALIGN_BWAALN                            } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { BWA_MEM                                       } from '../../modules/nf-core/bwa/mem/main'
+include { BOWTIE2_ALIGN                                 } from '../../modules/nf-core/bowtie2/align/main'
+include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES        } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED_LANES  } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM          } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2          } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow MAP {
     take:
@@ -18,6 +21,45 @@ workflow MAP {
     main:
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
+
+    if ( params.run_fastq_sharding ) {
+
+        ch_input_for_sharding = reads
+
+        SEQKIT_SPLIT2( ch_input_for_sharding )
+        ch_versions        = ch_versions.mix ( SEQKIT_SPLIT2.out.versions.first() )
+
+        sharded_reads = SEQKIT_SPLIT2.out.reads
+            .transpose()
+            .map {
+                meta, reads ->
+                    new_meta = meta.clone()
+                    new_meta.shard_number = reads.getName().replaceAll(/.*(part_\d+).(?:fastq|fq).gz/, '$1')
+                    [ new_meta, reads ]
+            }
+            .groupTuple()
+
+        ch_input_for_mapping = sharded_reads
+            .combine(index)
+            .multiMap {
+                meta, reads, meta2, index ->
+                    new_meta = meta.clone()
+                    new_meta.reference = meta2.id
+                    reads: [ new_meta, reads ]
+                    index: [ meta2, index ]
+            }
+
+    } else {
+        ch_input_for_mapping = reads
+            .combine(index)
+            .multiMap {
+                meta, reads, meta2, index ->
+                    new_meta = meta.clone()
+                    new_meta.reference = meta2.id
+                    reads: [ new_meta, reads ]
+                    index: [ meta2, index ]
+            }
+    }
 
     if ( params.mapping_tool == 'bwaaln' ) {
         ch_index_for_mapping = index
@@ -65,7 +107,7 @@ workflow MAP {
 
         BOWTIE2_ALIGN ( ch_input_for_mapping.reads, ch_input_for_mapping.index, false, true )
         ch_versions        = ch_versions.mix ( BOWTIE2_ALIGN.out.versions.first() )
-        ch_mapped_lane_bam = BOWTIE2_ALIGN.out.bam
+        ch_mapped_lane_bam = BOWTIE2_ALIGN.out.aligned
 
         SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
         ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
@@ -76,19 +118,17 @@ workflow MAP {
     ch_input_for_lane_merge = ch_mapped_lane_bam
                                 .map {
                                     meta, bam ->
-                                    new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry'] }
-
+                                    new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry', 'shard_number'] }
                                     [ new_meta, bam ]
                                 }
                                 .groupTuple()
                                 .branch {
                                     meta, bam ->
-                                        println(bam.size())
                                         merge: bam.size() > 1
                                         skip: true
                                 }
 
-    SAMTOOLS_MERGE_LANES ( ch_input_for_lane_merge.merge, [], [] )
+    SAMTOOLS_MERGE_LANES ( ch_input_for_lane_merge.merge, [[], []], [[], []] )
     ch_versions.mix( SAMTOOLS_MERGE_LANES.out.versions )
 
     // Then mix back merged and single lane libraries for everything downstream

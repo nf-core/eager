@@ -92,6 +92,8 @@ Tool Specific combinations
 
     - with default parameters
     - with stricter threshold
+    - with fasta masking
+    - with fasta masking for 1 of 2 references
 
   - BAM trimming
 
@@ -99,6 +101,20 @@ Tool Specific combinations
     - different length by udg treatment
 
   - All together
+
+  - Library merge
+
+    - single reference: no damage manipulation ✅
+    - single reference: with damage manipulation, on raw data ✅
+    - single reference: with damage manipulation (trimming), on trimmed data ✅
+    - single reference: with damage manipulation (pmd + trimming), on pmd filtered data ✅
+    - multi reference: no damage manipulation ✅
+
+- Sex determination
+
+  - With sexdeterrmine
+
+    - with default parameters
 
 ### Multi-reference tests
 
@@ -620,7 +636,27 @@ nextflow run main.nf -profile test,docker \
   --metagenomics_kraken_savereadclassifications
 ```
 
+<<<<<<< HEAD
 ##### kraken2
+=======
+#### With mapDamage2
+
+```bash
+## mapDamage2 with default parameters
+## Expect: mapdamage directory with 3pGtoA_freq, 5pCtoT_freq, dnacomp_genome, dnacomp, Fragmisincorporation_plot, Length_plot, lgdistribution, misincorporation, Runtime_log
+nextflow run main.nf -profile test,docker --outdir ./results --damagecalculation_tool mapdamage
+```
+
+```bash
+## mapDamage2 with downsampling to 100 reads
+## Expect: mapdamage directory with 3pGtoA_freq, 5pCtoT_freq, dnacomp_genome, dnacomp, Fragmisincorporation_plot, Length_plot, lgdistribution, misincorporation, Runtime_log
+nextflow run main.nf -profile test,docker --outdir ./results --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100
+```
+
+### ESTIMATE CONTAMINATION
+
+#### With ANGSD
+>>>>>>> eager/dev
 
 ```bash
 #### Use kraken2 for metagenomics sequence classification, save only report (default)
@@ -683,7 +719,42 @@ nextflow run main.nf -profile test,docker \
 
 #### postprocessing
 
+<<<<<<< HEAD
 ##### maltextract
+=======
+```bash
+## PMD filtering with default parameters
+## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total).
+nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results
+## number of reads in each file after filtering:
+# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  70
+# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      180
+# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      55
+
+
+## PMD filtering with changed parameters
+## Expect: damage_manipulation directory with a bam and bai and flagstat per library (9 files total). Commands checked to ensure parameter gets propagated.
+nextflow run . -profile test,docker --run_pmd_filtering -resume --outdir ./results --damage_manipulation_pmdtools_threshold 4
+## number of reads in each file after filtering:
+# JK2782_JK2782_TGGCCGATCAACGA_BAM_pmdfiltered.bam:  64
+# JK2782_JK2782_TGGCCGATCAACGA_pmdfiltered.bam:      137
+# JK2802_JK2802_AGAATAACCTACCA_pmdfiltered.bam:      30
+```
+
+```bash
+## PMD filtering with fasta masking
+## Expect: damage_manipulation directory with *.masked.fa and bam and bai and flagstat per library
+nextflow run . -profile test_humanbam,docker --run_pmd_filtering --damage_manipulation_pmdtools_reference_mask https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz -resume --outdir ./results
+```
+
+```bash
+## PMD filtering with fasta masking for 1 of 2 references
+## Expect: damage_manipulation directory with hs37d5_chr21-MT.masked.fa and bam and bai and flagstat per library and reference (22 files total). hs37d5_chr21-MT first masked with 1240K.pos.list_hs37d5.0based.bed.gz from reference sheet, PMD filtering run with masked reference fasta for hs37d5 and non-masked reference fasta for Mammoth_MT
+nextflow run . -profile test_multiref,docker --run_pmd_filtering --outdir ./results
+```
+
+## BAM trimming
+>>>>>>> eager/dev
 
 ```bash
 ### Create a SummaryTable from the Malt rma6 files
@@ -755,4 +826,186 @@ nextflow run ../main.nf -profile docker \
 nextflow run -resume ./main.nf -profile test,docker --outdir out \
 --run_metagenomics --metagenomics_profiling_tool metaphlan --metagenomics_profiling_database ./runtest/metaphlandb/ --metagenomics_run_postprocessing
 # 20230804: works
+```
+
+### LIBRARY_MERGE
+
+```bash
+## Library merge on single reference, no damage manipulation.
+## EXPECT: 1 bam.bai/flagstat set per sample/reference combination. 6 files total.
+##   Check the headers of the bams to ensure that the correct number of bams are merged (1 for JK2802, 2 for JK2782).
+##   Also, check that the bams merged are the deduplication output.
+## NOTE: JK2782 seems to have some PG tags repeated, as they apply to each input file separately.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## Library merge on single reference, merge trimmed bams.
+## EXPECT: 1 bam.bai/flagstat set per sample/reference combination. 6 files total.
+##   Check the headers of the bams to ensure that the correct number of bams are merged (1 for JK2802, 2 for JK2782).
+##   Also, check that the bams merged are trimmed. (JK2802 is full udg, but header confirms merged bam is "trimmed")
+## NOTE: JK2782 seems to have some PG tags repeated, as they apply to each input file separately.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --genotyping_source 'trimmed' -ansi-log false -dump-channels \
+  --run_trim_bam \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
+```
+
+```bash
+## Library merge on single reference, merge pmd bams. Trimming ran but not used downstream.
+## EXPECT: 1 bam.bai/flagstat set per sample/reference combination. 6 files total.
+##   Check the headers of the bams to ensure that the correct number of bams are merged (1 for JK2802, 2 for JK2782).
+##   Also, check that the bams merged are the pmd ones.
+## NOTE: JK2782 seems to have some PG tags repeated, as they apply to each input file separately.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --genotyping_source 'pmd' -ansi-log false -dump-channels \
+  --run_trim_bam \
+  --run_pmd_filtering \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
+```
+
+```bash
+## Library merge on multi reference. No damage manipulation.
+## EXPECT: 1 bam.bai/flagstat set per sample/reference combination. 15 files total. (2 refs * 2 samples * 3 files) + BAM input only on one reference (+3)
+##   Check the headers of the bams to ensure that the correct number of bams are merged (1 for JK2802, 2 for JK2782).
+##   Also, check that the bams merged are the dedupped ones.
+## NOTE: PG tags are repeated for each chromosome in the reference, times each library! Maybe there's some flag missing from samtools MERGE runs?
+nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -resume --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+# Run Sexdeterrmine
+
+```bash
+## Running sex determination subworkflow from deduplicated bams
+## Expect: sex_deterrmine/sexdeterrmine directory with tsv summary table for all individuals.
+nextflow run main.nf -profile test_humanbam,arm,docker --outdir ./results --run_sexdeterrmine
+```
+
+# GENOTYPING
+
+These tests were ran before library merging was implemented.
+
+## GATK UG
+
+```bash
+## Gatk UG on raw reads
+## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels
+```
+
+```bash
+## Gatk UG on trimmed reads. Skip bcftools stats.
+## Expect: One VCF + .tbi index per sample/reference combination, based on the trimmed bams (this actually shows on the IndelRealigner step and not the UG step).  No IR directory. No bcftools_stats file per VCF.
+## Checked that the input bam for the UG jobs indeed had trimmed reads. (The full UDG sample has untrimmed bams.)
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+  --run_trim_bam \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
+  --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_left 1 \
+  --damage_manipulation_bamutils_trim_double_stranded_half_udg_right 2
+```
+
+```bash
+## Gatk UG on pmd-filtered reads
+## Expect: One VCF + .tbi index per sample/reference combination, based on the pmd-filtered bams (this actually shows on the IndelRealigner step and not the UG step).  No IR directory. Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'pmd' -ansi-log false -dump-channels --run_pmd_filtering
+## Checked that the bams had fewer reads compared to the raw bams.
+```
+
+```bash
+## Gatk UG on rescaled reads
+## Expect: One VCF + .tbi index per sample/reference combination, based on the rescaled bams (this actually shows on the IndelRealigner step and not the UG step).  No IR directory. Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'rescaled' -ansi-log false -dump-channels --run_mapdamage_rescaling
+```
+
+```bash
+## Gatk UG on raw reads, multiple references
+## NOTE: Actually fails due to header of BAM input in test_multiref not matching sequences in fasta (which was shortened to chr 21+ for brevity). Provided alternative input without a BAM input line. ( head -n 5 on https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/samplesheet_multilane_multilib.tsv ). It then worked fine.
+## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
+nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels
+```
+
+## GATK HC
+
+```bash
+## Gatk HC on raw reads
+## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## Attempt to run Gatk HC on trimmed reads, without activating trimming.
+## Expect: FAILURE. Cannot set genotyping source to ;trimmed' without trimming.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+  --genotyping_gatk_hc_emitrefconf 'BP_RESOLUTION' \
+  --genotyping_gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES'
+```
+
+```bash
+## Gatk HC on trimmed reads, with different out mode and emit confidence. Skip bcftools stats.
+## Expect: One VCF + .tbi index per sample/reference combination.
+## Checked .command.sh for correct args.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' --run_trim_bam -ansi-log false -dump-channels --skip_bcftools_stats \
+  --genotyping_gatk_hc_emitrefconf 'BP_RESOLUTION' \
+  --genotyping_gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES'
+```
+
+```bash
+## Gatk HC on raw reads, multiple references
+## NOTE: Actually fails due to header of BAM input in test_multiref not matching sequences in fasta (which was shortened to chr 21+ for brevity). Provided alternative input without a BAM input line. ( head -n 5 on https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Mammoth/samplesheet_multilane_multilib.tsv ). It then worked fine.
+## Expect: One VCF + .tbi index per sample/reference combination . Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels
+```
+
+## FREEBAYES
+
+```bash
+## Freebayes on raw reads
+## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## Freebayes on trimmed reads. Different options, and skip bcftools stats.
+## Expect: One VCF + .tbi index per sample/reference combination.
+## Checked .command.sh for correct args.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+  --run_trim_bam \
+  --genotyping_freebayes_skip_coverage 10 \
+  --genotyping_freebayes_min_alternate_count 2 \
+  --genotyping_freebayes_ploidy 1
+```
+
+```bash
+## Freebayes on raw reads, multiple references
+## Freebayes does not complain about the BAM header not matching the reference.
+## Expect: One VCF + .tbi index per sample/reference combination. BAM input only has 1 output for the specified reference. Also 1 bcftools_stats file per VCF.
+nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels
+```
+
+## PILEUPCALLER
+
+```bash
+## Pileupcaller on raw reads. No bed or snp file provided.
+## Expect: NO GENOTYPING. PileupCaller requires a bed file and a snp file. Throws an error and stops.
+##  NOTE: if --fasta is a tsv/csv, then the error is deferred to AFTER parsing and indexing the references.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## Pileupcaller on raw reads.
+## Expect: One geno/snp/ind/coverage tsv combination per reference (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile (977). ind has same number of lines as number of samples (2). Coverage tsv has same lines as ind + 1 for header (3).
+nextflow run main.nf -profile test_humanbam,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## PileupCaller on raw reads
+## Something is wrong with the test input BAM, that makes samtools mpileup fail. samtools quickcheck does not identify a problem, but empty mpileups are generated when the BAM input is included in as an input.
+## Expect: One geno/snp/ind/coverage tsv combination per reference (provided that a bed and snp file are present for the reference). geno and snp have same number of lines as SNPs in provided snpfile (977). ind has have same number of lines as number of samples (2). Coverage tsv has same lines as ind + 1 for header (3).
+##   Specifically, no geno/snp/ind for the reference that has no bed/snp file (Mammoth). Only data for "human" reference.
+nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
 ```

@@ -1,86 +1,14 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PRINT PARAMS SUMMARY
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { paramsSummaryLog; paramsSummaryMap } from 'plugin/nf-validation'
-
-def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
-def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
-def summary_params = paramsSummaryMap(workflow)
-
-// Print parameter summary log to screen
-log.info logo + paramsSummaryLog(workflow) + citation
-
-WorkflowEager.initialise(params, log)
-
-// Check failing parameter combinations
-if ( params.bamfiltering_retainunmappedgenomicbam && params.bamfiltering_mappingquality > 0  ) { error("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
-if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { error("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
-if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { error("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
-if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { error("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
-if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
-    // entropy score was set but dust method picked. If no dust-score provided, assume it was an error and fail
-    if (params.metagenomics_prinseq_dustscore == 0.5) {
-            error("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag")
-    }
-}
-
-// metagenomics related parameter checks
-if ( params.run_metagenomics ) {
-    // failing metagenomics parameter combinations/declarations
-    if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
-        // dust score was set but entropy method picked. If no entropy-score provided, assume it was an error and fail
-        if (params.metagenomics_complexity_entropy == 0.3) {
-                error("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag")
-        }
-    }
-
-    if ( ! params.metagenomics_profiling_tool ) {
-        error("[nf-core/eager] ERROR: --run_metagenomics flagged, but no profiling tool selected! Please choose an appropriate metagenomics screening tool by setting --metagenomics_profiling_tool to one of 'malt', 'krakenuniq', 'kraken2', or 'metaphlan' and declare the path to the database directory using `--metagenomics_profiling_database`.")
-    }
-
-    if ( ! params.metagenomics_profiling_database ) {
-        error("[nf-core/eager] ERROR: Please provide an appropriate database path for metagenomics screening using --metagenomics_profiling_database. Note this database should correspond to ${params.metagenomics_profiling_tool}")
-    }
-
-    if ( params.metagenomics_profiling_tool == 'malt' && params.metagenomics_run_postprocessing ) {
-        if ( ! params.metagenomics_maltextract_ncbidir ) {
-            error("[nf-core/eager] ERROR: Postprocessing for MALT requires additional parameters specified. Please provide a path to the NBCI directory for MaltExtract using `--metagenomics_maltextract_ncbidir`.")
-        }
-        if ( ! params.metagenomics_maltextract_ncbidir ) {
-            error("[nf-core/eager] ERROR: Postprocessing for MALT requires additional parameters specified. Please provide a path to the taxon list for MaltExtract using `--metagenomics_maltextract_taxonlist`.")
-        }
-    }
-
-    // warnings for metagenomics parameter combinations
-    if ( params.metagenomics_profiling_tool == 'krakenmerge' && params.metagenomics_minsupportreads == 1 ) log.warn("[nf-core/eager] Warning: The default value for krakenmerge minimum reads for outputing a node has not been changed from the default. The default is set for use with MALT and maltextract. Consider updating to the default value for krakenmerge (50 reads) by setting --metagenomics_minsupportreads 50")
-}
-
-if( params.run_bedtools_coverage ){
-    if( !params.mapstats_bedtools_featurefile ) {
-        error("[nf-core/eager] ERROR: you have turned on bedtools coverage, but not specified a BED or GFF file with --mapstats_bedtools_featurefile. Please validate your parameters.")
-    }
-}
-
-
-// TODO What to do when params.preprocessing_excludeunmerged is provided but the data is SE?
-if ( params.deduplication_tool == 'dedup' && ! params.preprocessing_excludeunmerged ) { error"[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
-
-// Report possible warnings
-if ( params.preprocessing_skipadaptertrim && params.preprocessing_adapterlist ) log.warn("[nf-core/eager] --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!")
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+include { paramsSummaryMap         } from 'plugin/nf-validation'
+include { paramsSummaryMultiqc     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText   } from '../subworkflows/local/utils_nfcore_eager_pipeline'
+include { addNewMetaFromAttributes } from '../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,16 +21,18 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { INPUT_CHECK            } from '../subworkflows/local/input_check'
-include { REFERENCE_INDEXING     } from '../subworkflows/local/reference_indexing'
-include { PREPROCESSING          } from '../subworkflows/local/preprocessing'
-include { MAP                    } from '../subworkflows/local/map'
-include { FILTER_BAM             } from '../subworkflows/local/bamfiltering.nf'
-include { DEDUPLICATE            } from '../subworkflows/local/deduplicate'
-include { MANIPULATE_DAMAGE      } from '../subworkflows/local/manipulate_damage'
-include { METAGENOMICS           } from '../subworkflows/local/metagenomics'
-include { ESTIMATE_CONTAMINATION } from '../subworkflows/local/estimate_contamination'
-include { CALCULATE_DAMAGE       } from '../subworkflows/local/calculate_damage'
+include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
+include { MAP                           } from '../subworkflows/local/map'
+include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
+include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate_damage'
+include { METAGENOMICS                  } from '../subworkflows/local/metagenomics'
+include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
+include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
+include { RUN_SEXDETERRMINE             } from '../subworkflows/local/run_sex_determination'
+include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libraries'
+include { GENOTYPE                      } from '../subworkflows/local/genotype'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,8 +46,7 @@ include { CALCULATE_DAMAGE       } from '../subworkflows/local/calculate_damage'
 
 include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS                       } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { SAMTOOLS_INDEX                                    } from '../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BAM_INPUT        } from '../modules/nf-core/samtools/index/main'
 include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
 include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
 include { FALCO                                             } from '../modules/nf-core/falco/main'
@@ -125,9 +54,11 @@ include { MTNUCRATIO                                        } from '../modules/n
 include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
 include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
-include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH      } from '../modules/nf-core/bedtools/coverage/main'
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH    } from '../modules/nf-core/bedtools/coverage/main'
 include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
-include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED ; QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED             } from '../modules/nf-core/qualimap/bamqc/main'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED            } from '../modules/nf-core/qualimap/bamqc/main'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED          } from '../modules/nf-core/qualimap/bamqc/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -135,19 +66,19 @@ include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED ; QUALIMAP_BAMQC as QUALIMAP_BA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Info required for completion email and summary
-def multiqc_report = []
-
 workflow EAGER {
+
+    take:
+    ch_samplesheet_fastqs // channel: samplesheet read in from --input
+    ch_samplesheet_bams
+
+    main:
 
     log.info "Schaffa, Schaffa, Genome Baua!"
 
-    ch_versions       = Channel.empty()
-    ch_multiqc_files  = Channel.empty()
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
 
-    //
-    // Input file checks
-    //
 
     // Reference
     fasta                = file(params.fasta, checkIfExists: true)
@@ -158,25 +89,10 @@ workflow EAGER {
     // Preprocessing
     adapterlist          = params.preprocessing_skipadaptertrim ? [] : params.preprocessing_adapterlist ? file(params.preprocessing_adapterlist, checkIfExists: true) : []
 
-
-    if ( params.preprocessing_adapterlist && !params.preprocessing_skipadaptertrim ) {
+    if ( params.preprocessing_adapterlist                  && !params.preprocessing_skipadaptertrim ) {
         if ( params.preprocessing_tool == 'adapterremoval' && !(adapterlist.extension == 'txt') ) error "[nf-core/eager] ERROR: AdapterRemoval2 adapter list requires a `.txt` format and extension. Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
-        if ( params.preprocessing_tool == 'fastp' && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
+        if ( params.preprocessing_tool == 'fastp'          && !adapterlist.extension.matches(".*(fa|fasta|fna|fas)") ) error "[nf-core/eager] ERROR: fastp adapter list requires a `.fasta` format and extension (or fa, fas, fna). Check input: --preprocessing_adapterlist ${params.preprocessing_adapterlist}"
     }
-
-
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
-
-    INPUT_CHECK (
-        file(params.input)
-    )
-    ch_versions = ch_versions.mix( INPUT_CHECK.out.versions )
-
-    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
-    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    // ! There is currently no tooling to help you write a sample sheet schema
 
     //
     // SUBWORKFLOW: Indexing of reference files
@@ -190,11 +106,11 @@ workflow EAGER {
     //
 
     if ( params.sequencing_qc_tool == "falco" ) {
-        FALCO ( INPUT_CHECK.out.fastqs )
+        FALCO ( ch_samplesheet_fastqs )
         ch_versions = ch_versions.mix( FALCO.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FALCO.out.txt.collect{it[1]}.ifEmpty([]) )
     } else {
-        FASTQC ( INPUT_CHECK.out.fastqs )
+        FASTQC ( ch_samplesheet_fastqs )
         ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FASTQC.out.zip.collect{it[1]}.ifEmpty([]) )
     }
@@ -204,12 +120,12 @@ workflow EAGER {
     //
 
     if ( !params.skip_preprocessing ) {
-        PREPROCESSING ( INPUT_CHECK.out.fastqs, adapterlist )
+        PREPROCESSING ( ch_samplesheet_fastqs, adapterlist )
         ch_reads_for_mapping = PREPROCESSING.out.reads
         ch_versions          = ch_versions.mix( PREPROCESSING.out.versions )
         ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
-        ch_reads_for_mapping = INPUT_CHECK.out.fastqs
+        ch_reads_for_mapping = ch_samplesheet_fastqs
     }
 
     //
@@ -230,21 +146,21 @@ workflow EAGER {
     //  MODULE: indexing of user supplied input BAMs
     //
 
-    SAMTOOLS_INDEX ( INPUT_CHECK.out.bams )
-    ch_versions = ch_versions.mix( SAMTOOLS_INDEX.out.versions )
+    SAMTOOLS_INDEX_BAM_INPUT ( ch_samplesheet_bams )
+    ch_versions = ch_versions.mix( SAMTOOLS_INDEX_BAM_INPUT.out.versions )
 
     if ( params.fasta_largeref )
-        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.csi )
+        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.csi )
     else {
-        ch_bams_from_input = INPUT_CHECK.out.bams.join( SAMTOOLS_INDEX.out.bai )
+        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.bai )
     }
 
 
     //
     // MODULE: flagstats of user supplied input BAMs
     //
-    ch_bam_bai_input = INPUT_CHECK.out.bams
-                            .join(SAMTOOLS_INDEX.out.bai)
+    ch_bam_bai_input = ch_samplesheet_bams
+                            .join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
 
     SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
     ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
@@ -303,7 +219,7 @@ workflow EAGER {
     if ( !params.skip_qualimap ) {
         ch_snp_capture_bed = REFERENCE_INDEXING.out.snp_capture_bed
             .map{
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
         ch_qualimap_input = ch_dedupped_bams
             .map {
@@ -311,7 +227,7 @@ workflow EAGER {
                 [ meta, bam ]
             }
             .map {
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by: 0,
@@ -357,7 +273,7 @@ workflow EAGER {
         // Preparing fastq channel for host removal to be combined with the bam channel
         // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
         // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
-        ch_fastqs_for_host_removal= INPUT_CHECK.out.fastqs.map{
+        ch_fastqs_for_host_removal= ch_samplesheet_fastqs.map{
                                                         meta, fastqs ->
                                                         new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
                                                         [ new_meta, meta, fastqs ]
@@ -452,6 +368,7 @@ workflow EAGER {
         ch_versions      = ch_versions.mix( METAGENOMICS.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS.out.ch_multiqc_files )
     }
+
     //
     // MODULE: MTNUCRATIO
     //
@@ -459,11 +376,11 @@ workflow EAGER {
     if ( params.run_mtnucratio ) {
         ch_mito_header = REFERENCE_INDEXING.out.mitochondrion_header
             .map{
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
         mtnucratio_input = ch_dedupped_bams
             .map {
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by: 0,
@@ -541,12 +458,12 @@ workflow EAGER {
 
         ch_bedtools_feature = REFERENCE_INDEXING.out.bedtools_feature
                                 .map{
-                                    WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                                    addNewMetaFromAttributes( it, "id" , "reference" , false )
                                 }
 
         ch_bedtools_prep = ch_dedupped_bams
                     .map {
-                        WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                        addNewMetaFromAttributes( it, "reference" , "reference" , false )
                     }
                     .combine(
                         by: 0,
@@ -594,11 +511,23 @@ workflow EAGER {
             fasta_fai:  [ meta, fai ]
         }
 
-    if ( !params.skip_damage_calculation ) {
+    if ( !params.skip_damagecalculation ) {
         CALCULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_damagecalculation.fasta, ch_fasta_for_damagecalculation.fasta_fai )
         ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
 
+    }
+
+    //
+    // SUBWORKFLOW: Run Sex Determination
+    //
+
+    if ( params.run_sexdeterrmine ) {
+        ch_sexdeterrmine_input = ch_dedupped_bams
+
+        RUN_SEXDETERRMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed )
+        ch_versions      = ch_versions.mix( RUN_SEXDETERRMINE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( RUN_SEXDETERRMINE.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //
@@ -615,35 +544,70 @@ workflow EAGER {
 
     //
     // SUBWORKFLOW: aDNA Damage Manipulation
-    // TODO: Add pmd_mask and snp_capture input
 
     if ( params.run_mapdamage_rescaling || params.run_pmd_filtering || params.run_trim_bam ) {
-        MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta )
+        MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masking )
         ch_multiqc_files       = ch_multiqc_files.mix( MANIPULATE_DAMAGE.out.flagstat.collect{it[1]}.ifEmpty([]) )
         ch_versions            = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
-        ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
+        ch_bams_for_library_merge = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
     } else {
-        ch_bams_for_genotyping = ch_dedupped_bams
+        ch_bams_for_library_merge = ch_dedupped_bams
+    }
+
+    //
+    // SUBWORKFLOW: MERGE LIBRARIES
+    //
+
+    // The bams being merged are always the ones specified by params.genotyping_source,
+    //   unless the user skipped damage manipulation, in which case it is the DEDUPLICATION output.
+    MERGE_LIBRARIES ( ch_bams_for_library_merge )
+    ch_versions             = ch_versions.mix( MERGE_LIBRARIES.out.versions )
+    ch_bams_for_genotyping  = MERGE_LIBRARIES.out.bam_bai
+    ch_multiqc_files        = ch_multiqc_files.mix( MERGE_LIBRARIES.out.mqc.collect{it[1]}.ifEmpty([]) ) // Not sure if this is needed, or if it needs to be moved to line 564?
+
+    //
+    // SUBWORKFLOW: Genotyping
+    //
+
+    if ( params.run_genotyping ) {
+        ch_reference_for_genotyping = REFERENCE_INDEXING.out.reference
+            // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
+            .map {
+                meta, fasta, fai, dict, mapindex, circular_target ->
+                [ meta, fasta, fai, dict ]
+            }
+        GENOTYPE(
+                ch_bams_for_genotyping, // [ [meta] , bam, bai ]
+                ch_reference_for_genotyping, // [ [ref_meta] , fasta, fai, dict ]
+                REFERENCE_INDEXING.out.pileupcaller_bed_snp.ifEmpty([[],[],[]]), // [ [ref_meta] , bed, snp ]
+                REFERENCE_INDEXING.out.dbsnp.ifEmpty([[],[]]) // [ [ref_meta] , dbsnp ]
+            )
+
+        ch_versions      = ch_versions.mix( GENOTYPE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( GENOTYPE.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //
     // MODULE: MultiQC
     //
 
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    //
+    // Collate and save software versions
+    //
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
+        .set { ch_collated_versions }
 
-    workflow_summary    = WorkflowEager.paramsSummaryMultiqc(workflow, summary_params)
-    ch_workflow_summary = Channel.value(workflow_summary)
-
-    methods_description    = WorkflowEager.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
-    ch_methods_description = Channel.value(methods_description)
-
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([])) // Replaced with custom mixing
+    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+    ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
+    summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
 
     if ( !params.skip_qualimap ) {
         ch_multiqc_files = ch_multiqc_files.mix( ch_qualimap_output.collect{it[1]}.ifEmpty([]) )
@@ -655,24 +619,10 @@ workflow EAGER {
         ch_multiqc_custom_config.toList(),
         ch_multiqc_logo.toList()
     )
-    multiqc_report = MULTIQC.out.report.toList()
-}
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    COMPLETION EMAIL AND SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow.onComplete {
-    if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-    }
-    NfcoreTemplate.dump_parameters(workflow, params)
-    NfcoreTemplate.summary(workflow, params, log)
-    if (params.hook_url) {
-        NfcoreTemplate.IM_notification(workflow, params, summary_params, projectDir, log)
-    }
+    emit:
+    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 
 /*

@@ -2,6 +2,8 @@
 //  Carry out per-chromosome deduplication
 //
 
+include { addNewMetaFromAttributes                        } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
+
 include { BUILD_INTERVALS                                 } from '../../modules/local/build_intervals'
 include { BAM_SPLIT_BY_REGION                             } from '../../subworkflows/nf-core/bam_split_by_region/main'
 include { PICARD_MARKDUPLICATES                           } from '../../modules/nf-core/picard/markduplicates/main'
@@ -24,7 +26,7 @@ workflow DEDUPLICATE {
     ch_refs = fasta.join(fasta_fai)
     .map {
         // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
-        WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+        addNewMetaFromAttributes( it, "id" , "reference" , false )
     }
 
     // Create genomic regions file for splitting the bam before deduplication
@@ -35,14 +37,14 @@ workflow DEDUPLICATE {
     ch_intervals_for_join = BUILD_INTERVALS.out.bed
     .map {
         // Replace meta with new meta that contains the meta.id value in the meta.reference attribute only
-        WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , true )
+        addNewMetaFromAttributes( it, "id" , "reference" , true )
     }
 
     // Ensure input bam matches the regions file
     ch_bam_for_split = ch_bam_bai
         .map {
             // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            addNewMetaFromAttributes( it, "reference" , "reference" , false )
         }
         .combine(
             by: 0,
@@ -62,7 +64,7 @@ workflow DEDUPLICATE {
         ch_markduplicates_input = BAM_SPLIT_BY_REGION.out.bam_bai
             .map {
                 // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .combine(
                 by:0,
@@ -71,8 +73,8 @@ workflow DEDUPLICATE {
             .multiMap{
                 ignore_me, meta, bam, bai, meta2, fasta, fasta_fai ->
                 bam: [ meta, bam ]
-                fasta: fasta
-                fasta_fai: fasta_fai
+                fasta: [ meta2, fasta ]
+                fasta_fai: [ meta2, fasta_fai ]
             }
 
             // Dedup each bam
@@ -107,7 +109,7 @@ workflow DEDUPLICATE {
         .groupTuple()
         .map {
             // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-            WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            addNewMetaFromAttributes( it, "reference" , "reference" , false )
         }
         .combine(
             by:0,
@@ -117,8 +119,8 @@ workflow DEDUPLICATE {
             // bam here is a list of bams
             ignore_me, meta, bam, meta2, fasta, fasta_fai ->
             bam:        [ meta, bam ]
-            fasta:      fasta
-            fasta_fai:  fasta_fai
+            fasta:      [ meta2, fasta ]
+            fasta_fai:  [ meta2, fasta_fai ]
         }
 
     // Merge the bams for each region into one bam
