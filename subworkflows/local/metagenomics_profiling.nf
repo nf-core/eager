@@ -54,7 +54,7 @@ workflow METAGENOMICS_PROFILING {
                 [
                     label: label,
                     strandedness:meta.strandedness,
-                    id:"${meta.strandedness}_${params.metagenomics_malt_group_size > 0 ? n++%params.metagenomics_malt_group_size : 'all'}"
+                    id:"${meta.strandedness}stranded_${params.metagenomics_malt_group_size > 0 ? n++%params.metagenomics_malt_group_size : 'all'}"
                 ],
                 reads
             ]
@@ -63,7 +63,7 @@ workflow METAGENOMICS_PROFILING {
 
         // We might have multiple chunks in the reads_channel
         // each of which requires a database
-        ch_input_for_malt = ch_input_for_malt.combine(ch_database).view()
+        ch_input_for_malt = ch_input_for_malt.combine(ch_database)
 
         // Split Channels into reads and database
         ch_input_for_malt = ch_input_for_malt.multiMap{ meta, reads, database ->
@@ -102,7 +102,7 @@ workflow METAGENOMICS_PROFILING {
                     }
                     .collect()
                     .map {
-                        log -> [['id': file(params.metagenomics_profiling_database).getBaseName()], log]
+                        log -> [['id': label], log]
                     }
 
             CAT_CAT_MALT ( ch_log_for_cat )
@@ -149,7 +149,6 @@ workflow METAGENOMICS_PROFILING {
         ch_multiqc_files        = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report
         ch_postprocessing_input = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report
 
-        KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.report.view()
     }
 
     else if ( params.metagenomics_profiling_tool == 'kraken2' ) {

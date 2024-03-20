@@ -12,6 +12,7 @@ workflow METAGENOMICS {
 
     // Add single_end parameter to meta.
     // Reads were merged before, so single_end is always true!
+
     ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics.map{
         meta, bamfiltered -> [meta+['single_end':true], bamfiltered]
     }
