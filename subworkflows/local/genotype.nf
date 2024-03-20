@@ -368,8 +368,14 @@ workflow GENOTYPE {
             .groupTuple()
                 .map {
                     combo_meta, metas, bams, bais ->
+                    def new_map = [:]
                     def ids = metas.collect { meta -> meta.sample_id }
-                    [ combo_meta + [sample_id: ids], bams ] // Drop bais
+                    def strandedness = metas.collect { meta -> meta.strandedness }
+                    def single_ends = metas.collect { meta -> meta.single_end }
+                    def reference = combo_meta.reference
+                    new_meta = [ sample_id: ids, strandedness: strandedness, single_end: single_ends, reference: reference ]
+
+                    [ combo_meta, new_meta, bams, bais ] // Drop bais
                 } // Collect all IDs into a list in meta.sample_id.
 
         ch_fasta_for_multimap = ch_fasta_plus
