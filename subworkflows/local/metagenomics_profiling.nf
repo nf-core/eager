@@ -74,10 +74,11 @@ workflow METAGENOMICS_PROFILING {
         ch_input_for_malt = ch_input_for_malt.combine(ch_database)
 
         // Split Channels into reads and database
-        ch_input_for_malt = ch_input_for_malt.multiMap{ meta, reads, database ->
-            reads: [meta, reads]
-            database: database
-        }
+        ch_input_for_malt = ch_input_for_malt
+            .multiMap{ meta, reads, database ->
+                reads: [meta, reads]
+                database: database
+            }
 
         // Run MALT
         MALT_RUN ( ch_input_for_malt.reads, ch_input_for_malt.database )
@@ -102,11 +103,14 @@ workflow METAGENOMICS_PROFILING {
 
     else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
 
-        reads = reads.combine(database)
-        metaphlan_reads = reads.map{ meta, reads, database -> [meta, reads] }
-        metaphlan_db = reads.map{ meta, reads, database -> [database] }
+        ch_metaphlan_input = ch_reads
+            .combine(ch_database)
+            .multiMap{ meta, reads, db ->
+                reads: [meta, reads]
+                database: db
+            }
 
-        METAPHLAN_METAPHLAN ( metaphlan_reads , metaphlan_db )
+        METAPHLAN_METAPHLAN ( ch_metaphlan_input.reads , ch_metaphlan_input.database )
         ch_versions             = METAPHLAN_METAPHLAN.out.versions.first()
         ch_postprocessing_input = METAPHLAN_METAPHLAN.out.profile
 
@@ -115,14 +119,17 @@ workflow METAGENOMICS_PROFILING {
     else if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
         // run krakenuniq once for all samples
 
-        ch_reads = ch_reads.map{ meta, file -> file }
-            .collect()
-            .map{files -> [
-                ['single_end':true], files
-            ]}
+        ch_krakenuniq_input = ch_reads
+            .map{ meta, file ->
+                [
+                    ['single_end':true],
+                    file
+                ]
+            }
+            .groupTuple(by:0)
 
         KRAKENUNIQ_PRELOADEDKRAKENUNIQ (
-            ch_reads,
+            ch_krakenuniq_input,
             ch_database,
             params.metagenomics_krakenuniq_ramchunksize,
             params.metagenomics_kraken_savereads,
@@ -140,13 +147,16 @@ workflow METAGENOMICS_PROFILING {
         // run kraken2 per sample
         // it lacks the option of krakenuniq
 
-        ch_reads = ch_reads.combine(ch_database)
-        ch_kraken2_reads = ch_reads.map{meta, reads, database -> [meta, reads]}
-        ch_kraken2_db = ch_reads.map{meta, reads, database -> [database]}
+        ch_kraken2_input = ch_reads
+            .combine(ch_database)
+            .multiMap{ meta, reads, db ->
+                reads: [meta, reads]
+                database: db
+            }
 
         KRAKEN2_KRAKEN2 (
-            ch_kraken2_reads,
-            ch_kraken2_db,
+            ch_kraken2_input.reads,
+            ch_kraken2_input.database,
             params.metagenomics_kraken_savereads,
             params.metagenomics_kraken_savereadclassifications
         )
