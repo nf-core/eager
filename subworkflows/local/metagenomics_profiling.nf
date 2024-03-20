@@ -42,6 +42,11 @@ workflow METAGENOMICS_PROFILING {
         // so all samples are in one run and so sample-specific metadata
         // unnecessary. Set as database name to prevent `null` job ID and prefix.
 
+        ch_reads.branch{
+            ss: it[0].strandedness == 'single'
+            ds: true
+        }.set { ch_reads_stranded }
+
         if ( params.metagenomics_malt_group_size > 0 ) {
             ch_labels_for_malt_tmp = ch_reads
                 .map { meta, reads -> meta }
@@ -70,18 +75,38 @@ workflow METAGENOMICS_PROFILING {
         }
 
         else {
-            ch_input_for_malt =  ch_reads
-                .map { meta, reads -> reads }
-                .collect()
-                .map{
-                    // make sure id is db_name for publishing purposes.
-                    reads ->
-                    [[label: file(params.metagenomics_profiling_database).getBaseName(), id: 'all' ], reads]
-                }
+            // group the double-stranded entries
+            // reduce the meta to the bare minimum common-information
+            ch_malt_input_ds = ch_reads_stranded.ds.map{ meta, reads ->
+                [
+                    [label: file(params.metagenomics_profiling_database).getBaseName(), id: 'all_ds', strandedness:'double' ],
+                    reads
+                ]
+            }
+            .groupTuple(by:0)
+            // group the single-stranded entries
+            // reduce the meta to the bare minimum common-information
+            ch_malt_input_ss = ch_reads_stranded.ss.map{ meta, reads ->
+                [
+                    [label: file(params.metagenomics_profiling_database).getBaseName(), id: 'all_ss', strandedness:'single' ],
+                    reads
+                ]
+            }
+            .groupTuple(by:0)
+            // combine to one channel again (to run MALT twice)
+            ch_input_for_malt = ch_malt_input_ds.concat(ch_malt_input_ss)
+            // combine with the database
+            ch_input_for_malt = ch_input_for_malt.combine(ch_database)
         }
 
         // Run MALT
-        MALT_RUN ( ch_input_for_malt, ch_database )
+        // Split Channels into reads and database
+        ch_input_for_malt = ch_input_for_malt.multiMap{ meta, reads, database ->
+            reads: [meta, reads]
+            database: database
+        }
+
+        MALT_RUN ( ch_input_for_malt.reads, ch_input_for_malt.database )
 
         ch_maltrun_for_megan = MALT_RUN.out.rma6
             .transpose()
