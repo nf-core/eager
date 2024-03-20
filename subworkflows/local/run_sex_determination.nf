@@ -2,6 +2,8 @@
 // Run sex deterrmine
 //
 
+include { addNewMetaFromAttributes                       } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
+
 include { SAMTOOLS_DEPTH as SAMTOOLS_DEPTH_SEXDETERRMINE } from '../../modules/nf-core/samtools/depth/main'
 include { SEXDETERRMINE                                  } from '../../modules/nf-core/sexdeterrmine/main'
 
@@ -22,13 +24,13 @@ workflow RUN_SEXDETERRMINE {
         ch_bed = sexdeterrmine_bed
             .map {
                 // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "id" , "reference" , false )
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
 
         ch_input_sexdeterrmine = sexdeterrmine_bam
             .map {
                 // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-                WorkflowEager.addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
             }
             .groupTuple(by:0)
             .combine( ch_bed, by: 0 ) // [ [meta], bam, bai, [ref_meta], bed ]
