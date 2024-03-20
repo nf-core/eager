@@ -1121,3 +1121,29 @@ nextflow run main.nf -profile test_humanbam,docker --outdir ./results -w work/ -
 ##   Specifically, no geno/snp/ind for the reference that has no bed/snp file (Mammoth). Only data for "human" reference.
 nextflow run main.nf -profile test_multiref,docker --input test/samplesheet_multilane_multilib_noBAM.tsv --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw' -ansi-log false -dump-channels
 ```
+
+## ANGSD
+
+```bash
+## ANGSD on raw reads. Default parameters. (--genotyping_angsd_glmodel 'samtools' --genotyping_angsd_glformat 'binary' )
+## Expect: One `glf.gz` file in binary format per reference.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'angsd' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## ANGSD on raw reads. gatk model, beagle binary format.
+## Expect: One `beagle.gz` file in beagle format per reference.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'angsd' --genotyping_angsd_glmodel 'gatk' --genotyping_angsd_glformat 'beagle_binary' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## ANGSD on raw reads. soapSNP model, binary_three format.
+## Expect: One `glf.gz` file in binary_three format per reference.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'angsd' --genotyping_angsd_glmodel 'soapsnp' --genotyping_angsd_glformat 'binary_three' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+```bash
+## ANGSD on raw reads. syk model, text format.
+## Expect: One `glf.gz` file in binary_three format per reference.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'angsd' --genotyping_angsd_glmodel 'syk' --genotyping_angsd_glformat 'text' --genotyping_source 'raw' -ansi-log false -dump-channels
+```
