@@ -21,6 +21,15 @@ workflow METAGENOMICS_PROFILING {
     ch_multiqc_files        = Channel.empty()
     ch_postprocessing_input = Channel.empty()
 
+    //FOR TESTING
+    def x=1
+    ch_reads = ch_reads.map{ meta, reads ->
+        [
+            meta + ['strandedness': x++%2==0 ? 'single' : 'double' ],
+            reads
+        ]
+    }
+
     /*
         PREPARE PROFILER INPUT CHANNELS & RUN PROFILING
     */
@@ -60,6 +69,7 @@ workflow METAGENOMICS_PROFILING {
             ]
         }
         .groupTuple(by:0)
+        .view()
 
         // We might have multiple chunks in the reads_channel
         // each of which requires a database
@@ -74,45 +84,22 @@ workflow METAGENOMICS_PROFILING {
         // Run MALT
         MALT_RUN ( ch_input_for_malt.reads, ch_input_for_malt.database )
 
-        ch_maltrun_for_megan = MALT_RUN.out.rma6
-            .transpose()
-            .map {
-                meta, rma ->
-                    // re-extract meta from file names, use filename without rma to
-                    // ensure we keep paired-end information in downstream filenames
-                    // when no pair-merging
-                    [
-                        meta+['db_name':meta.id, 'id': rma.baseName],
-                        rma
-                    ]
-            }
+        // Recombine log files for outputting
+        ch_log_for_cat =
+            MALT_RUN.out.log
+                .map {
+                    meta,log -> log
+                }
+                .collect()
+                .map {
+                    log -> [['id': label], log]
+                }
 
-        ch_maltrun_for_maltextract = MALT_RUN.out.rma6.map {
-            id,rma6 -> rma6
-        }
-        .collect()
-        .toList()
-
-        // Recombine log files for outputting if parallel execution was run
-        if ( params.metagenomics_malt_group_size > 0 ) {
-            ch_log_for_cat =
-                MALT_RUN.out.log
-                    .map {
-                        meta,log -> log
-                    }
-                    .collect()
-                    .map {
-                        log -> [['id': label], log]
-                    }
-
-            CAT_CAT_MALT ( ch_log_for_cat )
-        }
-
-        ch_maltrun_for_postprocessing = ch_maltrun_for_megan.combine(ch_maltrun_for_maltextract)
+        CAT_CAT_MALT ( ch_log_for_cat )
 
         ch_versions             = MALT_RUN.out.versions.first()
         ch_multiqc_files        = MALT_RUN.out.log
-        ch_postprocessing_input = ch_maltrun_for_postprocessing
+        ch_postprocessing_input = MALT_RUN.out.rma6
     }
 
     else if ( params.metagenomics_profiling_tool == 'metaphlan' ) {
