@@ -831,14 +831,14 @@
                 "metagenomics_maltextract_taxonlist": {
                     "type": "string",
                     "description": "Path to a text file with taxa of interest (one taxon per row, NCBI taxonomy name format)",
-                    "default": "None",
+                    "default": null,
                     "help_text": "Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format corresponding to a taxonomic node in your MALT database. An example can be found on the [HOPS github](https://raw.githubusercontent.com/rhuebler/HOPS/external/Resources/default_list.txt).\\n\\nNecessary when `--metagenomics_profiling_tool malt` specified and `--metagenomics_run_postprocessing` flagged.",
                     "fa_icon": "fas fa-align-left"
                 },
                 "metagenomics_maltextract_ncbidir": {
                     "type": "string",
                     "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; available: https://github.com/rhuebler/HOPS/)",
-                    "default": "None",
+                    "default": null,
                     "help_text": "Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).\\n\\nNecessary when `--metagenomics_profiling_tool malt` and `--metagenomics_run_postprocessing` specified.",
                     "fa_icon": "fab fa-buffer"
                 },
@@ -859,47 +859,41 @@
                 },
                 "metagenomics_maltextract_destackingoff": {
                     "type": "boolean",
-                    "default": false,
                     "description": "Turn off destacking.",
                     "help_text": "Turn off destacking. If left on, a read that overlaps with another read will be\\nremoved (leaving a depth coverage of 1).\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--destackingOff`",
                     "fa_icon": "fab fa-stack-overflow"
                 },
                 "metagenomics_maltextract_downsamplingoff": {
                     "type": "boolean",
-                    "default": false,
                     "description": "Turn off downsampling.",
                     "help_text": "Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--downSampOff`",
                     "fa_icon": "fas fa-angle-double-down"
                 },
                 "metagenomics_maltextract_duplicateremovaloff": {
                     "type": "boolean",
-                    "default": false,
                     "description": "Turn off duplicate removal.",
                     "help_text": "Turn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--dupRemOff`",
                     "fa_icon": "fas fa-copy"
                 },
                 "metagenomics_maltextract_matches": {
                     "type": "boolean",
-                    "default": false,
                     "description": "Turn on exporting alignments of hits in BLAST format.",
                     "help_text": "Export alignments of hits for each node in BLAST format. By default turned off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--matches`",
                     "fa_icon": "fas fa-equals"
                 },
                 "metagenomics_maltextract_megansummary": {
                     "type": "boolean",
-                    "default": false,
                     "description": "Turn on export of MEGAN summary files.",
                     "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--meganSummary`"
                 },
                 "metagenomics_maltextract_minpercentidentity": {
                     "type": "number",
-                    "default": 85.0,
+                    "default": 85,
                     "description": "Minimum percent identity alignments are required to have to be reported as candidate reads. Recommended to set same as MALT parameter.",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85`.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--minPI`"
                 },
                 "metagenomics_maltextract_usetopalignment": {
                     "type": "boolean",
-                    "default": false,
                     "description": "Turn on using top alignments per read after filtering.",
                     "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\\n\\n> Modifies MaltExtract parameter: `--useTopAlignment`",
                     "fa_icon": "fas fa-bahai"
@@ -1502,7 +1496,6 @@
             "properties": {
                 "run_sexdeterrmine": {
                     "type": "boolean",
-                    "default": false,
                     "fa_icon": "fas fa-transgender-alt",
                     "description": "Turn on sex determination for human reference genomes. This will run on single- and double-stranded variants of a library separately.",
                     "help_text": "Specify to run the optional process of sex determination."
