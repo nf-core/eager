@@ -72,25 +72,27 @@ workflow METAGENOMICS_POSTPROCESSING {
     }
 
     // Run taxpasta for everything!
-    ch_report_count = ch_postprocessing_input.count()
+    // We need to know how many reports we have, so that we can run either taxpasta standardise or taxpasta merge
+    ch_report_count = ch_postprocessing_input.transpose().count()
 
     ch_postprocessing_input = ch_postprocessing_input
-    .map{
-        meta, report ->
-        [
+        .transpose()
+        .map{
+            meta, report ->
             [
-                "id":"${params.metagenomics_profiling_tool}_profiles_all_samples_merged_taxpasta",
-                "profiler":params.metagenomics_profiling_tool == 'malt' ? 'megan6' : params.metagenomics_profiling_tool
-            ],
-            report
-        ]
-    }
-    .groupTuple(by:0)
-    .combine(ch_report_count)
-    .branch{
-        standardise: it[2] == 1
-        merge: true
-    }
+                [
+                    "id":"${params.metagenomics_profiling_tool}_profiles_all_samples_merged_taxpasta",
+                    "profiler":params.metagenomics_profiling_tool == 'malt' ? 'megan6' : params.metagenomics_profiling_tool
+                ],
+                report
+            ]
+        }
+        .groupTuple(by:0)
+        .combine(ch_report_count)
+        .branch{
+            standardise: it[2] == 1
+            merge: true
+        }
 
     ch_standardise_input = ch_postprocessing_input.standardise.map{ meta, reports, count ->
         [meta, reports]
