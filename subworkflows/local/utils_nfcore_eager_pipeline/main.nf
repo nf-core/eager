@@ -85,6 +85,7 @@ workflow PIPELINE_INITIALISATION {
                                     .map{
                                         meta, r1, r2, bam ->
                                             meta.single_end = meta.pairment == "single" ? true : false
+                                            meta.id = meta.sample_id
                                         [ meta, r1, r2, bam ]
                                     }
                                     .branch {
@@ -105,7 +106,7 @@ workflow PIPELINE_INITIALISATION {
                                 meta, r1, r2, bam ->
                                     meta.reference = meta.bam_reference_id
                                     meta.id_index = meta.bam_reference_id
-                                [ meta - meta.subMap('bam_reference_id'), bam ]
+                                [ meta - meta.subMap('pairment', 'bam_reference_id'), bam ]
                             }
 
     // Extra validation
