@@ -1025,6 +1025,22 @@
                     "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified.",
                     "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than the specified value. Setting to 0 (the default) deactivates this behaviour.\n\n> Modifies freebayes parameter: `-g`",
                     "fa_icon": "fab fa-think-peaks"
+                },
+                "genotyping_angsd_glmodel": {
+                    "type": "string",
+                    "default": "samtools",
+                    "fa_icon": "fas fa-project-diagram",
+                    "description": "Specify which ANGSD genotyping likelihood model to use.",
+                    "help_text": "Specify which genotype likelihood model to use.",
+                    "enum": ["samtools", "gatk", "soapsnp", "syk"]
+                },
+                "genotyping_angsd_glformat": {
+                    "type": "string",
+                    "default": "binary",
+                    "fa_icon": "fas fa-text-height",
+                    "description": "Specify the formatting of the output VCF for ANGSD genotype likelihood results.",
+                    "help_text": "Specifies what type of genotyping likelihood file format will be output.\n\nThe options refer to the following descriptions respectively:\n\n- `binary`: binary output of all 10 log genotype likelihood\n- `beagle_binary`: beagle likelihood file\n- `binary_three`: binary 3 times likelihood\n- `text`: text output of all 10 log genotype likelihoods.\n\nSee the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information on which to select for your downstream applications.",
+                    "enum": ["binary", "beagle_binary", "binary_three", "text"]
                 }
             },
             "fa_icon": "fas fa-sliders-h",
