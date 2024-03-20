@@ -31,6 +31,7 @@ include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomi
 include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
 include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libraries'
+include { GENOTYPE                      } from '../subworkflows/local/genotype'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,19 +43,21 @@ include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libr
 // MODULE: Installed directly from nf-core/modules
 //
 
-include { FASTQC                                                                                        } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                                                                                       } from '../modules/nf-core/multiqc/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BAM_INPUT                                                    } from '../modules/nf-core/samtools/index/main'
-include { PRESEQ_CCURVE                                                                                 } from '../modules/nf-core/preseq/ccurve/main'
-include { PRESEQ_LCEXTRAP                                                                               } from '../modules/nf-core/preseq/lcextrap/main'
-include { FALCO                                                                                         } from '../modules/nf-core/falco/main'
-include { MTNUCRATIO                                                                                    } from '../modules/nf-core/mtnucratio/main'
-include { HOST_REMOVAL                                                                                  } from '../modules/local/host_removal'
-include { ENDORSPY                                                                                      } from '../modules/nf-core/endorspy/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT                                             } from '../modules/nf-core/samtools/flagstat/main'
-include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH ; BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH } from '../modules/nf-core/bedtools/coverage/main'
-include { SAMTOOLS_VIEW_GENOME                                                                          } from '../modules/local/samtools_view_genome.nf'
-include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED ; QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED             } from '../modules/nf-core/qualimap/bamqc/main'
+include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
+include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BAM_INPUT        } from '../modules/nf-core/samtools/index/main'
+include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
+include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
+include { FALCO                                             } from '../modules/nf-core/falco/main'
+include { MTNUCRATIO                                        } from '../modules/nf-core/mtnucratio/main'
+include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
+include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH      } from '../modules/nf-core/bedtools/coverage/main'
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH    } from '../modules/nf-core/bedtools/coverage/main'
+include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED            } from '../modules/nf-core/qualimap/bamqc/main'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED          } from '../modules/nf-core/qualimap/bamqc/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -490,6 +493,28 @@ workflow EAGER {
     ch_versions             = ch_versions.mix( MERGE_LIBRARIES.out.versions )
     ch_bams_for_genotyping  = MERGE_LIBRARIES.out.bam_bai
     ch_multiqc_files        = ch_multiqc_files.mix( MERGE_LIBRARIES.out.mqc.collect{it[1]}.ifEmpty([]) ) // Not sure if this is needed, or if it needs to be moved to line 564?
+
+    //
+    // SUBWORKFLOW: Genotyping
+    //
+
+    if ( params.run_genotyping ) {
+        ch_reference_for_genotyping = REFERENCE_INDEXING.out.reference
+            // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
+            .map {
+                meta, fasta, fai, dict, mapindex, circular_target ->
+                [ meta, fasta, fai, dict ]
+            }
+        GENOTYPE(
+                ch_bams_for_genotyping, // [ [meta] , bam, bai ]
+                ch_reference_for_genotyping, // [ [ref_meta] , fasta, fai, dict ]
+                REFERENCE_INDEXING.out.pileupcaller_bed_snp.ifEmpty([[],[],[]]), // [ [ref_meta] , bed, snp ]
+                REFERENCE_INDEXING.out.dbsnp.ifEmpty([[],[]]) // [ [ref_meta] , dbsnp ]
+            )
+
+        ch_versions      = ch_versions.mix( GENOTYPE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( GENOTYPE.out.mqc.collect{it[1]}.ifEmpty([]) )
+    }
 
     //
     // MODULE: MultiQC

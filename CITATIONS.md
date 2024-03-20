@@ -100,10 +100,27 @@
 
 - [QualiMap](https://doi.org/10.1093/bioinformatics/btv566)
 
-  > QualiMap Okonechnikov, K., Conesa, A., & García-Alcalde, F. (2016). Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. Bioinformatics , 32(2), 292–294. Download: http://qualimap.bioinfo.cipf.es/
+  > QualiMap Okonechnikov, K., Conesa, A., & García-Alcalde, F. (2016). Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. Bioinformatics , 32(2), 292–294. doi: [10.1093/bioinformatics/btv566](https://doi.org/10.1093/bioinformatics/btv566).
 
 - [DamageProfiler](https://doi.org/10.1093/bioinformatics/btab190)
-  > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190). Download: https://github.com/Integrative-Transcriptomics/DamageProfiler
+
+  > DamageProfiler Neukamm, J., Peltzer, A., & Nieselt, K. (2020). DamageProfiler: Fast damage pattern calculation for ancient DNA. In Bioinformatics (btab190). doi: [10.1093/bioinformatics/btab190](https://doi.org/10.1093/bioinformatics/btab190).
+
+- [GATK 3.5](https://console.cloud.google.com/storage/browser/gatk)
+
+  > DePristo M, Banks E, Poplin R, Garimella K, Maguire J, Hartl C, Philippakis A, del Angel G, Rivas MA, Hanna M, McKenna A, Fennell T, Kernytsky A, Sivachenko A, Cibulskis K, Gabriel S, Altshuler D, Daly M. (2011). A framework for variation discovery and genotyping using next-generation DNA sequencing data. Nature Genetics, 43(5), 491–498. doi: [10.1038/ng.806](https://doi.org/10.1038/ng.806).
+
+- [GATK 4.X](https://github.com/broadinstitute/gatk/releases)
+
+  > Poplin R, Ruano-Rubio V, DePristo MA, Fennell TJ, Carneiro MO, Van der Auwera GA, Kling DE, Gauthier LD, Levy-Moonshine A, Roazen D, Shakir K, Thibault J, Chandran S, Whelan C, Lek M, Gabriel S, Daly MJ, Neale B, MacArthur DG, Banks E. (2017). Scaling accurate genetic variant discovery to tens of thousands of samples bioRxiv, 201178. doi: [10.1101/201178](https://doi.org/10.1101/201178).
+
+- [FreeBayes](https://github.com/freebayes/freebayes)
+
+  > Garrison E, Marth G. Haplotype-based variant detection from short-read sequencing. arXiv preprint arXiv:1207.3907 \[q-bio.GN] 2012. doi: [10.48550/arXiv.1207.3907](https://doi.org/10.48550/arXiv.1207.3907).
+
+- [BCFtools](https://github.com/samtools/bcftools)
+
+  > Li H. A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics (2011) 27(21) 2987-93.doi: [10.1093/bioinformatics/btr509](https://doi.org/10.1093/bioinformatics/btr509).
 
 ## Software packaging/containerisation tools
 

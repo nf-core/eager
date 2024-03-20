@@ -867,16 +867,168 @@
             "description": "Options for variant calling",
             "default": "",
             "properties": {
+                "run_genotyping": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-power-off",
+                    "description": "Turn on genotyping of BAM files.",
+                    "help_text": "Turns on genotyping. `--genotyping_source` and `--genotyping_tool` must also be provided together with this option."
+                },
                 "genotyping_source": {
                     "type": "string",
-                    "default": "raw",
                     "description": "Specify which input BAM to use for genotyping.",
                     "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' (to use the reads used as input for damage manipulation); 'pmd' (for pmdtools output); 'trimmed' (for base-clipped BAMs. Base-clipped-PMD-filtered BAMs if both filtering and trimming are requested); 'rescaled' (for mapDamage2 rescaling output).\nWarning: Depending on the parameters you provided, 'raw' can refer to all mapped reads, filtered reads (if bam filtering has been performed), or the deduplicated reads (if deduplication was performed).",
                     "fa_icon": "fas fa-faucet",
                     "enum": ["raw", "pmd", "trimmed", "rescaled"]
+                },
+                "genotyping_tool": {
+                    "type": "string",
+                    "fa_icon": "fas fa-tools",
+                    "enum": ["ug", "hc", "freebayes", "pileupcaller", "angsd"],
+                    "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does de novo assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute (but is used here for compatibility with MultiVCFAnalyzer).",
+                    "description": "Specify which genotyper to use between: GATK UnifiedGenotyper, GATK HaplotypeCaller, Freebayes, or pileupCaller."
+                },
+                "skip_bcftools_stats": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-chart-bar",
+                    "description": "Skip bcftools stats generation for VCF based variant calling statistics",
+                    "help_text": "Disables running of `bcftools stats` against VCF files from GATK and FreeBayes genotypers.\n\nIf ran, `bcftools stats`  will automatically include the FASTA reference for INDEL-related statistics."
+                },
+                "genotyping_reference_ploidy": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Specify the ploidy of the reference organism.",
+                    "help_text": "Specify the desired ploidy value of your reference organism for genotyping with GATK or FreeBayes. E.g. if you want to allow heterozygous calls this value should be >= 2.\n\n> Modifies GATK UnifiedGenotyper parameter: `--sample_ploidy`\n> Modifies GATK HaplotypeCaller parameter: `--sample-ploidy`\n> Modifies FreeBayes parameter: `-p`",
+                    "fa_icon": "fas fa-pastafarianism"
+                },
+                "genotyping_pileupcaller_min_base_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "The base mapping quality to be used for genotyping with pileupcaller.",
+                    "help_text": "The minimum base quality to be used when generating the samtools mpileup used as input for genotyping with pileupCaller. \n\n> Modifies samtools mpileup parameter: `-Q`.",
+                    "fa_icon": "fas fa-filter"
+                },
+                "genotyping_pileupcaller_min_map_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "fa_icon": "fas fa-filter",
+                    "description": "The minimum mapping quality to be used for genotyping with pileupcaller.",
+                    "help_text": "The minimum mapping quality to be used when generating the samtools mpileup used as input for genotyping with pileupCaller. \n\n> Modifies samtools mpileup parameter: `-q`."
+                },
+                "genotyping_pileupcaller_bedfile": {
+                    "type": "string",
+                    "fa_icon": "fas fa-bed",
+                    "help_text": "Specify a SNP panel in the form of a bed file of sites at which to generate a pileup for pileupCaller.",
+                    "format": "file-path",
+                    "description": "Specify the path to SNP panel in bed format for pileupCaller."
+                },
+                "genotyping_pileupcaller_snpfile": {
+                    "type": "string",
+                    "help_text": "Specify a SNP panel in [EIGENSTRAT](https://github.com/DReichLab/EIG/blob/master/CONVERTF/README) format, pileupCaller will call these sites.",
+                    "fa_icon": "fas fa-sliders-h",
+                    "format": "file-path",
+                    "description": "Specify the path to SNP panel in EIGENSTRAT format for pileupCaller."
+                },
+                "genotyping_pileupcaller_method": {
+                    "type": "string",
+                    "default": "randomHaploid",
+                    "fa_icon": "fas fa-toolbox",
+                    "description": "Specify the SNP calling method to use for genotyping.",
+                    "help_text": "Specify the SNP calling method to use for genotyping. 'randomHaploid' will randomly sample a read overlapping the SNP, and produce a homozygous genotype with the allele supported by that read (often called 'pseudohaploid' or 'pseudodiploid'). 'randomDiploid` will randomly sample two reads overlapping the SNP and produce a genotype comprised of the two alleles supported by the two reads. 'majorityCall' will produce a genotype that is homozygous for the allele that appears in the majority of reads overlapping the SNP.\n\n> Modifies pileupCaller parameters: `--randomHaploid` `--randomDiploid` `--majorityCall`",
+                    "enum": ["randomHaploid", "randomDiploid", "majorityCall"]
+                },
+                "genotyping_pileupcaller_transitions_mode": {
+                    "type": "string",
+                    "default": "AllSites",
+                    "description": "Specify the calling mode for transitions.",
+                    "help_text": "Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. \n\n> Modifies pileupCaller parameter: `--skipTransitions` `--transitionsMissing`",
+                    "enum": ["AllSites", "TransitionsMissing", "SkipTransitions"],
+                    "fa_icon": "fas fa-toggle-on"
+                },
+                "genotyping_gatk_call_conf": {
+                    "type": "integer",
+                    "default": 30,
+                    "fa_icon": "fas fa-balance-scale-right",
+                    "description": "Specify GATK phred-scaled confidence threshold.",
+                    "help_text": "If selected, specify a GATK genotyper phred-scaled confidence threshold of a given SNP/INDEL call.\n\n> Modifies GATK UnifiedGenotyper or HaplotypeCaller parameter: `-stand_call_conf`"
+                },
+                "genotyping_gatk_dbsnp": {
+                    "type": "string",
+                    "help_text": "(Optional) Specify VCF file for output VCF SNP annotation e.g. if you want to annotate your VCF file with 'rs' SNP IDs. Check GATK documentation for more information. Gzip not accepted.",
+                    "fa_icon": "fas fa-pen-alt",
+                    "description": "Specify VCF file for SNP annotation of output VCF files. Optional. Gzip not accepted.",
+                    "pattern": "^\\S+\\.vcf$",
+                    "format": "file-path",
+                    "mimetype": "VCF"
+                },
+                "genotyping_gatk_ug_downsample": {
+                    "type": "integer",
+                    "default": 250,
+                    "fa_icon": "fas fa-icicles",
+                    "description": "Maximum depth coverage allowed for genotyping before down-sampling is turned on.",
+                    "help_text": "Maximum depth coverage allowed for genotyping before down-sampling is turned on. Any position with a coverage higher than this value will be randomly down-sampled to this many reads.\n\n> Modifies GATK UnifiedGenotyper parameter: `-dcov`"
+                },
+                "genotyping_gatk_ug_out_mode": {
+                    "type": "string",
+                    "default": "EMIT_VARIANTS_ONLY",
+                    "description": "Specify GATK output mode.",
+                    "enum": ["EMIT_VARIANTS_ONLY", "EMIT_ALL_CONFIDENT_SITES", "EMIT_ALL_SITES"],
+                    "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, this defines the output mode to use when producing the output VCF (i.e. produce calls for every site or just confidence sites.)\n\n> Modifies GATK UnifiedGenotyper parameter: `--output_mode`",
+                    "fa_icon": "fas fa-bullhorn"
+                },
+                "genotyping_gatk_ug_genotype_mode": {
+                    "type": "string",
+                    "default": "SNP",
+                    "description": "Specify UnifiedGenotyper likelihood model.",
+                    "enum": ["SNP", "INDEL", "BOTH", "GENERALPLOIDYSNP", "GENERALPLOIDYINDEL"],
+                    "fa_icon": "fas fa-project-diagram",
+                    "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, this sets  which likelihood model to follow, i.e. whether to call only SNPs or INDELS etc.\n\n> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`"
+                },
+                "genotyping_gatk_ug_keeprealignbam": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-save",
+                    "description": "Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.",
+                    "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, providing this parameter will output the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping in addition to the standard VCF output.\n\nThese BAMs will be stored in the same folder as the corresponding VCF files."
+                },
+                "genotyping_gatk_ug_defaultbasequalities": {
+                    "type": "integer",
+                    "default": -1,
+                    "description": "Supply a default base quality if a read is missing a base quality score. Setting to -1 turns this off.",
+                    "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, specify a value to set base quality scores, if reads are missing this information. Might be useful if you have 'synthetically' generated reads (e.g. chopping up a reference genome). Default is set to `-1` which is to not set any default quality (turned off). \n\n> Modifies GATK UnifiedGenotyper parameter: `--defaultBaseQualities`",
+                    "fa_icon": "fas fa-redo-alt"
+                },
+                "genotyping_gatk_hc_out_mode": {
+                    "type": "string",
+                    "default": "EMIT_VARIANTS_ONLY",
+                    "fa_icon": "fas fa-bullhorn",
+                    "description": "Specify GATK output mode.",
+                    "help_text": "If GATK HaplotypeCaller is selected as the genotyping tool, this sets the type of sites that should be included in the output VCF (i.e. produce calls for every site or just confidence sites). \n\n> Modifies GATK HaplotypeCaller parameter: `--output_mode`",
+                    "enum": ["EMIT_VARIANTS_ONLY", "EMIT_ALL_CONFIDENT_SITES", "EMIT_ALL_ACTIVE_SITES"]
+                },
+                "genotyping_gatk_hc_emitrefconf": {
+                    "type": "string",
+                    "default": "GVCF",
+                    "fa_icon": "fas fa-bullhorn",
+                    "description": "Specify HaplotypeCaller mode for emitting reference confidence calls.",
+                    "help_text": "If GATK HaplotypeCaller is selected as the genotyping tool, this sets the mode for emitting reference confidence calls.\n\n> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`",
+                    "enum": ["NONE", "BP_RESOLUTION", "GVCF"]
+                },
+                "genotyping_freebayes_min_alternate_count": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify minimum required supporting observations of an alternate allele to consider a variant.",
+                    "help_text": "Require at least this count of observations supporting an alternate allele within a single individual in order to evaluate the position.\n\n> Modifies freebayes parameter: `-C`",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "genotyping_freebayes_skip_coverage": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than specified.",
+                    "help_text": "Specify to skip over regions of high depth by discarding alignments overlapping positions where total read depth is greater than the specified value. Setting to 0 (the default) deactivates this behaviour.\n\n> Modifies freebayes parameter: `-g`",
+                    "fa_icon": "fab fa-think-peaks"
                 }
             },
-            "fa_icon": "fas fa-sliders-h"
+            "fa_icon": "fas fa-sliders-h",
+            "help_text": "There are options for different genotypers (or genotype likelihood calculators) to be used. We suggest you read the documentation of each tool to find the ones that suit your needs.\n\nDocumentation for each tool:\n\n- GATK UnifiedGenotyper\n- GATK HaplotypeCaller\n- FreeBayes\n- sequenceTools pileupCaller\n\nGenotyping is performed per sample (i.e. after all types of libraries are merged), except for pileupCaller which gathers all double-stranded and single-stranded (same-type merged) libraries respectively.\nSome genotypers require additional files to be specified in the reference sheet, or using command line parameters. When using a reference sheet, only references with the required filed specified in the respective columns will be used for genotyping. "
         },
         "mitochondrial_to_nuclear_ratio": {
             "title": "Mitochondrial to Nuclear Ratio",

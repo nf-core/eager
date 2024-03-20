@@ -28,11 +28,11 @@ jobs:
           - "latest-everything"
         PARAMS:
           - "-profile test,docker --preprocessing_tool fastp --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/fastp/adapters.fasta'"
-          - "-profile test,docker --preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco"
-          - "-profile test,docker --mapping_tool bwamem --run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam"
-          - "-profile test,docker --mapping_tool bowtie2 --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100"
+          - "-profile test,docker --preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw'"
+          - "-profile test,docker --mapping_tool bwamem --run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed'"
+          - "-profile test,docker --mapping_tool bowtie2 --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100 --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw'"
           - "-profile test,docker --skip_preprocessing"
-          - "-profile test_humanbam,docker --run_mtnucratio --run_contamination_estimation_angsd --snpcapture_bed 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz'"
+          - "-profile test_humanbam,docker --run_mtnucratio --run_contamination_estimation_angsd --snpcapture_bed 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz' --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw'"
           - "-profile test_multiref,docker" ## TODO add damage manipulation here instead once it goes multiref
     steps:
       - name: Check out pipeline code
