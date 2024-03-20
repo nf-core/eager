@@ -30,6 +30,7 @@ include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate
 include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
 include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
+include { RUN_SEXDETERRMINE              } from '../subworkflows/local/run_sex_determination'
 include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libraries'
 include { GENOTYPE                      } from '../subworkflows/local/genotype'
 
@@ -457,6 +458,18 @@ workflow EAGER {
         ch_versions      = ch_versions.mix( CALCULATE_DAMAGE.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix(CALCULATE_DAMAGE.out.mqc.collect{it[1]}.ifEmpty([]))
 
+    }
+
+    //
+    // SUBWORKFLOW: Run Sex Determination
+    //
+
+    if ( params.run_sexdeterrmine ) {
+        ch_sexdeterrmine_input = ch_dedupped_bams
+
+        RUN_SEXDETERRMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed )
+        ch_versions      = ch_versions.mix( RUN_SEXDETERRMINE.out.versions )
+        ch_multiqc_files = ch_multiqc_files.mix( RUN_SEXDETERRMINE.out.mqc.collect{it[1]}.ifEmpty([]) )
     }
 
     //

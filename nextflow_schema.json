@@ -1292,6 +1292,29 @@
                     "fa_icon": "fas fa-map"
                 }
             }
+        },
+        "human_sex_determination": {
+            "title": "Human Sex Determination",
+            "type": "object",
+            "description": "Options for the calculation of biological sex of human individuals.",
+            "default": "",
+            "properties": {
+                "run_sexdeterrmine": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-transgender-alt",
+                    "description": "Turn on sex determination for human reference genomes. This will run on single- and double-stranded variants of a library separately.",
+                    "help_text": "Specify to run the optional process of sex determination."
+                },
+                "sexdeterrmine_bedfile": {
+                    "type": "string",
+                    "fa_icon": "fas fa-bed",
+                    "description": "Specify path to SNP panel in bed format for error bar calculation. Optional (see documentation).",
+                    "help_text": "Specify an optional bedfile of the list of SNPs to be used for X-/Y-rate calculation. Running without this parameter will considerably increase runtime, and render the resulting error bars untrustworthy. Theoretically, any set of SNPs that are distant enough that two SNPs are unlikely to be covered by the same read can be used here. The programme was coded with the 1240K panel in mind."
+                }
+            },
+            "fa_icon": "fas fa-transgender-alt",
+            "help_text": ""
         }
     },
     "allOf": [
@@ -1345,6 +1368,12 @@
         },
         {
             "$ref": "#/definitions/host_removal"
+        },
+        {
+            "$ref": "#/definitions/human_sex_determination"
+        },
+        {
+            "$ref": "#/definitions/contamination_estimation"
         },
         {
             "$ref": "#/definitions/contamination_estimation"

@@ -67,12 +67,12 @@
                     },
                     "bwa/aln": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "6278bf9afd4a4b2d00fa6052250e73da3d91546f",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
                     "bwa/index": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "6278bf9afd4a4b2d00fa6052250e73da3d91546f",
                         "installed_by": ["modules"]
                     },
                     "bwa/mem": {
@@ -122,7 +122,7 @@
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "f4ae1d942bd50c5c0b9bd2de1393ce38315ba57c",
+                        "git_sha": "003920c7f9a8ae19b69a97171922880220bedf56",
                         "installed_by": ["modules"]
                     },
                     "fastqc": {
@@ -210,6 +210,11 @@
                         "git_sha": "6b0e4fe14ca1b12e131f64608f0bbaf36fd11451",
                         "installed_by": ["modules"]
                     },
+                    "samtools/depth": {
+                        "branch": "master",
+                        "git_sha": "a1ffbc1fd87bd5a829e956cc26ec9cc53af3e817",
+                        "installed_by": ["modules"]
+                    },
                     "samtools/faidx": {
                         "branch": "master",
                         "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
@@ -217,27 +222,27 @@
                     },
                     "samtools/fastq": {
                         "branch": "master",
-                        "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
+                        "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
                         "installed_by": ["modules"]
                     },
                     "samtools/flagstat": {
                         "branch": "master",
-                        "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
+                        "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
                         "installed_by": ["modules"]
                     },
                     "samtools/idxstats": {
                         "branch": "master",
-                        "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
+                        "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
                         "installed_by": ["modules"]
                     },
                     "samtools/index": {
                         "branch": "master",
-                        "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
+                        "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
                         "installed_by": ["bam_split_by_region", "fastq_align_bwaaln"]
                     },
                     "samtools/merge": {
                         "branch": "master",
-                        "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
+                        "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
                         "installed_by": ["modules"]
                     },
                     "samtools/mpileup": {
@@ -247,13 +252,13 @@
                     },
                     "samtools/sort": {
                         "branch": "master",
-                        "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
+                        "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
                         "installed_by": ["modules"]
                     },
                     "samtools/view": {
                         "branch": "master",
-                        "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
-                        "installed_by": ["bam_split_by_region", "modules"]
+                        "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
+                        "installed_by": ["bam_split_by_region"]
                     },
                     "seqkit/split2": {
                         "branch": "master",
@@ -263,6 +268,11 @@
                     "sequencetools/pileupcaller": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "sexdeterrmine": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     }
                 }

@@ -110,6 +110,12 @@ Tool Specific combinations
     - single reference: with damage manipulation (pmd + trimming), on pmd filtered data ✅
     - multi reference: no damage manipulation ✅
 
+- Sex determination
+
+  - With sexdeterrmine
+
+    - with default parameters
+
 ### Multi-reference tests
 
 ```bash
@@ -737,6 +743,14 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ##   Also, check that the bams merged are the dedupped ones.
 ## NOTE: PG tags are repeated for each chromosome in the reference, times each library! Maybe there's some flag missing from samtools MERGE runs?
 nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -resume --genotyping_source 'raw' -ansi-log false -dump-channels
+```
+
+# Run Sexdeterrmine
+
+```bash
+## Running sex determination subworkflow from deduplicated bams
+## Expect: sex_deterrmine/sexdeterrmine directory with tsv summary table for all individuals.
+nextflow run main.nf -profile test_humanbam,arm,docker --outdir ./results --run_sexdeterrmine
 ```
 
 # GENOTYPING
