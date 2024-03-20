@@ -10,7 +10,7 @@
             "reference_name": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "meta": ["reference_name"],
+                "meta": ["id"],
                 "unique": true,
                 "errorMessage": "Reference name must be provided and cannot contain spaces."
             },
@@ -103,15 +103,16 @@
                 "exists": true,
                 "errorMessage": "SNP capture bed files for SexDetERRmine must not contain any spaces and have file extensions '.bed' or '.bed.gz'."
             },
-            "bedtools_featurefile": {
+            "bedtools_feature_file": {
                 "type": "string",
                 "format": "file-path",
                 "pattern": "^\\S+\\.(bed|gff|gff3)(\\.gz)?$",
                 "exists": true,
                 "errorMessage": "Feature files must not contain any spaces and have file extensions '.bed', '.bed.gz', '.gff', '.gff.gz', '.gff3' or '.gff3.gz'."
             },
-            "genotyping_gatk_ploidy": {
+            "genotyping_reference_ploidy": {
                 "type": "integer",
+                "meta": ["ploidy"],
                 "errorMessage": "Organism ploidy for GATK must be provided as integers."
             },
             "genotyping_gatk_dbsnp": {
