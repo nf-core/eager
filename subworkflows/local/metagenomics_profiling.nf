@@ -42,70 +42,36 @@ workflow METAGENOMICS_PROFILING {
         // so all samples are in one run and so sample-specific metadata
         // unnecessary. Set as database name to prevent `null` job ID and prefix.
 
-        ch_reads.branch{
-            ss: it[0].strandedness == 'single'
-            ds: true
-        }.set { ch_reads_stranded }
 
-        if ( params.metagenomics_malt_group_size > 0 ) {
-            ch_labels_for_malt_tmp = ch_reads
-                .map { meta, reads -> meta }
-                .collate(params.metagenomics_malt_group_size)
-                .map(meta -> meta.first().library_id )
+        def label = file(params.metagenomics_profiling_database).getBaseName()
+        def n = 0
 
-            ch_input_for_malt_tmp =  ch_reads
-                .map { meta, reads -> reads }
-                .collate( params.metagenomics_malt_group_size ) //collate into bins of defined lengths
-                .map{
-                    reads ->
-                    // add new meta with db-name as id
-                    [[label: file(params.metagenomics_profiling_database).getBaseName() ], reads]
-                }
-                .combine(ch_database)
-                .merge(ch_labels_for_malt_tmp) //combine with database
-                .multiMap{
-                    // and split apart again
-                    meta, reads, database, ids ->
-                        reads: [meta + ['id':ids], reads]
-                        database: database
-                }
+        //replace the meta in a way that groupTuple splits the entries
+        //by strandedness and metagenomics_malt_group_size
 
-            ch_input_for_malt = ch_input_for_malt_tmp.reads
-            ch_database = ch_input_for_malt_tmp.database
-        }
-
-        else {
-            // group the double-stranded entries
-            // reduce the meta to the bare minimum common-information
-            ch_malt_input_ds = ch_reads_stranded.ds.map{ meta, reads ->
+        ch_input_for_malt = ch_reads.map{ meta, reads ->
+            [
                 [
-                    [label: file(params.metagenomics_profiling_database).getBaseName(), id: 'all_ds', strandedness:'double' ],
-                    reads
-                ]
-            }
-            .groupTuple(by:0)
-            // group the single-stranded entries
-            // reduce the meta to the bare minimum common-information
-            ch_malt_input_ss = ch_reads_stranded.ss.map{ meta, reads ->
-                [
-                    [label: file(params.metagenomics_profiling_database).getBaseName(), id: 'all_ss', strandedness:'single' ],
-                    reads
-                ]
-            }
-            .groupTuple(by:0)
-            // combine to one channel again (to run MALT twice)
-            ch_input_for_malt = ch_malt_input_ds.concat(ch_malt_input_ss)
-            // combine with the database
-            ch_input_for_malt = ch_input_for_malt.combine(ch_database)
+                    label: label,
+                    strandedness:meta.strandedness,
+                    id:"${meta.strandedness}_${params.metagenomics_malt_group_size > 0 ? n++%params.metagenomics_malt_group_size : 'all'}"
+                ],
+                reads
+            ]
         }
+        .groupTuple(by:0)
 
-        // Run MALT
+        // We might have multiple chunks in the reads_channel
+        // each of which requires a database
+        ch_input_for_malt = ch_input_for_malt.combine(ch_database).view()
+
         // Split Channels into reads and database
         ch_input_for_malt = ch_input_for_malt.multiMap{ meta, reads, database ->
             reads: [meta, reads]
             database: database
         }
 
+        // Run MALT
         MALT_RUN ( ch_input_for_malt.reads, ch_input_for_malt.database )
 
         ch_maltrun_for_megan = MALT_RUN.out.rma6
