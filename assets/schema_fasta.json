@@ -123,9 +123,6 @@
                 "errorMessage": "SNP annotation files for GATK must not contain any spaces and have file extension '.vcf'."
             }
         },
-        "required": [
-            "reference_name",
-            "fasta"
-        ]
+        "required": ["reference_name", "fasta"]
     }
 }
