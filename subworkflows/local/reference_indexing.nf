@@ -2,9 +2,11 @@
 // Prepare reference indexing for downstream
 //
 
-include { REFERENCE_INDEXING_SINGLE                                                   } from '../../subworkflows/local/reference_indexing_single.nf'
-include { REFERENCE_INDEXING_MULTI                                                    } from '../../subworkflows/local/reference_indexing_multi.nf'
-include { GUNZIP as GUNZIP_PMDBED; GUNZIP as GUNZIP_PMDFASTA; GUNZIP as GUNZIP_SNPBED } from '../../modules/nf-core/gunzip/main.nf'
+include { REFERENCE_INDEXING_SINGLE } from '../../subworkflows/local/reference_indexing_single.nf'
+include { REFERENCE_INDEXING_MULTI  } from '../../subworkflows/local/reference_indexing_multi.nf'
+include { GUNZIP as GUNZIP_PMDBED   } from '../../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_PMDFASTA } from '../../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_SNPBED   } from '../../modules/nf-core/gunzip/main.nf'
 
 workflow REFERENCE_INDEXING {
     take:
@@ -29,9 +31,10 @@ workflow REFERENCE_INDEXING {
         ch_pmd_masked_fasta      = REFERENCE_INDEXING_MULTI.out.pmd_masked_fasta
         ch_pmd_bed_for_masking   = REFERENCE_INDEXING_MULTI.out.pmd_bed_for_masking
         ch_snp_capture_bed       = REFERENCE_INDEXING_MULTI.out.snp_capture_bed
-        ch_pileupcaller_snp      = REFERENCE_INDEXING_MULTI.out.pileupcaller_snp
+        ch_pileupcaller_bed_snp  = REFERENCE_INDEXING_MULTI.out.pileupcaller_bed_snp
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_MULTI.out.sexdeterrmine_bed
         ch_bedtools_feature      = REFERENCE_INDEXING_MULTI.out.bedtools_feature
+        ch_dbsnp                 = REFERENCE_INDEXING_MULTI.out.dbsnp
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_MULTI.out.versions )
     } else {
         // If input FASTA and/or indicies supplied
@@ -41,10 +44,11 @@ workflow REFERENCE_INDEXING {
         ch_pmd_masked_fasta      = REFERENCE_INDEXING_SINGLE.out.pmd_masked_fasta
         ch_pmd_bed_for_masking   = REFERENCE_INDEXING_SINGLE.out.pmd_bed_for_masking
         ch_snp_capture_bed       = REFERENCE_INDEXING_SINGLE.out.snp_capture_bed
-        ch_pileupcaller_snp      = REFERENCE_INDEXING_SINGLE.out.pileupcaller_snp
+        ch_pileupcaller_bed_snp  = REFERENCE_INDEXING_SINGLE.out.pileupcaller_bed_snp
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_SINGLE.out.sexdeterrmine_bed
         ch_bedtools_feature      = REFERENCE_INDEXING_SINGLE.out.bedtools_feature
         ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE.out.reference
+        ch_dbsnp                 = REFERENCE_INDEXING_SINGLE.out.dbsnp
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }
 
@@ -106,14 +110,20 @@ workflow REFERENCE_INDEXING {
     ch_capture_bed = GUNZIP_SNPBED.out.gunzip.mix( ch_capture_bed_gunzip.skip ).mix( ch_capture_bed.skip )
     ch_version = ch_versions.mix( GUNZIP_SNPBED.out.versions.first() )
 
-    ch_pileupcaller_snp = ch_pileupcaller_snp
-                    .filter{ it[1] != "" && it[2] != "" }
+    ch_pileupcaller_bed_snp = ch_pileupcaller_bed_snp
+                    .filter { it[1] != "" || it[2] != "" } // They go together or not at all.
+                    // Check if the channel is empty, and throw an error. Will only trigger for tsv fasta input. Single reference gets validated immediately.
+                    .ifEmpty { if(params.run_genotyping && params.genotyping_tool == 'pileupcaller') { error "[nf-core/eager] ERROR: Genotyping with pileupcaller requires that both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' are provided for at least one reference genome." } }
+                    .filter{ it != null } // Remove null channel which arises if empty cause error returns null.
 
     ch_sexdeterrmine_bed = ch_sexdeterrmine_bed
-                    .filter{ it[1] != "" }
+                    .filter { it[1] != "" }
 
     ch_bedtools_feature = ch_bedtools_feature
-                    .filter{ it[1] != "" }
+                    .filter { it[1] != "" }
+
+    ch_dbsnp = ch_dbsnp
+        .filter { it[1] != "" }
 
     emit:
     reference            = ch_reference_for_mapping // [ meta, fasta, fai, dict, mapindex, circular_target ]
@@ -122,9 +132,10 @@ workflow REFERENCE_INDEXING {
     pmd_masking          = ch_pmd_masking           // [ meta, pmd_masked_fasta, pmd_bed_for_masking ]
     pmd_bed_for_masking  = ch_pmd_bed_for_masking   // [ meta, pmd_bed_for_masking ]
     snp_capture_bed      = ch_capture_bed           // [ meta, capture_bed ]
-    pileupcaller_snp     = ch_pileupcaller_snp      // [ meta, pileupcaller_bed, pileupcaller_snp ]
+    pileupcaller_bed_snp = ch_pileupcaller_bed_snp  // [ meta, pileupcaller_bed, pileupcaller_snp ]
     sexdeterrmine_bed    = ch_sexdeterrmine_bed     // [ meta, sexdet_bed ]
     bedtools_feature     = ch_bedtools_feature      // [ meta, bedtools_feature ]
+    dbsnp                = ch_dbsnp                 // [ meta, dbsnp ]
     versions             = ch_versions
 
 }

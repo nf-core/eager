@@ -540,3 +540,97 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
 </details>
 
 [ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. Among other functions, ANGSD can estimate contamination for chromosomes for which one copy exists, i.e. X-chromosome for humans with karyotype XY. To do this, we first generate a binary count file for the X-chromosome (`angsd`) and then perform a Fisher's exact test for finding a p-value and jackknife to get an estimate of contamination (`contamination`). Contamination is estimated with Method of Moments (MOM) and Maximum Likelihood (ML) for both Method1 and Method2. Method1 compares the total number of minor and major reads at SNP sites with the number of minor and major reads at adjacent sites, assuming independent errors between reads and sites, while Method2 only samples one read at each site to remove the previous assumption. The results of all methods for each library, as well as respective standard errors are summarised in `nuclear_contamination.txt` and `nuclear_contamination_mqc.json`.
+
+### Sex Determination
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `sex_determination/`: this contains the output for the sex determination run. This is a single `.tsv` file that includes a table with the sample name, the number of autosomal SNPs, number of SNPs on the X/Y chromosome, the number of reads mapping to the autosomes, the number of reads mapping to the X/Y chromosome, the relative coverage on the X/Y chromosomes, and the standard error associated with the relative coverages. These measures are provided for each bam file, one row per file. If the `sexdeterrmine_bedfile` option has not been provided, the error bars cannot be trusted!
+- </details>
+
+#### Sex.DetERRmine
+
+Sex.DetERRmine calculates the coverage of your mapped reads on the X and Y chromosomes relative to the coverage on the autosomes (X-/Y-rate). This metric can be thought of as the number of copies of chromosomes X and Y that is found within each cell, relative to the autosomal copies. The number of autosomal copies is assumed to be two, meaning that an X-rate of 1.0 means there are two X chromosomes in each cell, while 0.5 means there is a single copy of the X chromosome per cell. Human females have two copies of the X chromosome and no Y chromosome (XX), while human males have one copy of each of the X and Y chromosomes (XY).
+
+When a bedfile of specific sites is provided, Sex.DetERRmine runs much faster and additionally calculates error bars around each relative coverage estimate. For this estimate to be trustworthy, the sites included in the bedfile should be spaced apart enough that a single sequencing read cannot overlap multiple sites. Hence, when a bedfile has not been provided, this error should be ignored. When a suitable bedfile is provided, each observation of a covered site is independent, and the error around the coverage is equal to the binomial error estimate. This error is then propagated during the calculation of relative coverage for the X and Y chromosomes.
+
+> Note that in nf-core/eager this will be run on single- and double-stranded variants of the same library separately. This can also help assess for differential contamination between libraries.
+
+### Genotyping
+
+#### pileupCaller
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genotyping/`
+
+  - `*.geno`: Eigenstrat-formatted file containing the table of genotype calls.
+  - `*.snp`: Eigenstrat-formatted file containing the SNP annotation of the genotype table.
+  - `*.ind`: Eigenstrat-formatted file containing the individual annotation of the genotype table.
+  - `*_coverage.tsv`: Tab-separated file containing the number of covered SNPs and total number of SNPs for each individual in the eigenstrat dataset.
+
+</details>
+
+[sequencetools pileupCaller](https://github.com/stschiff/sequenceTools) is a tool to create genotype calls from bam files using read-sampling methods. It can call genotypes from `samtools mpileup` output, and is often used for ancient DNA. The output files are in Eigenstrat format, in which the gentype dataset is split across 3 different files (similar to PLINK). The `.geno` file contains the genotype table. Each number represents the genotype call of an individual at a specific position, with each column represents an individual, while each row represents a SNP. The `.snp` file contains the SNP annotation of the genotype table, and the `.ind` file contains the individual annotation of the genotype table. We provide an additional file named `*_coverage.tsv` which contains the number of covered SNPs and total number of SNPs for each individual in the eigenstrat dataset. One dataset is generated per reference genome, which includes genotypes from both single- and double-stranded libraries.
+
+When using pileupCaller for genotyping, single-stranded and double-stranded libraries are genotyped separately. Single-stranded libraries are genotyped with the additional option `--singeStrandMode`, which ensure that deamination damage artefactts cannot affect the genotype calls, by only using the forward- or reverse-mapping reads when genotyping on transitions (depending on the alleles of the transition).
+
+#### GATK UnifiedGenotyper
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genotyping/`
+
+  - `*.vcf.gz`: VCF file containing the genotype calls for each sample.
+  - `*.vcf.gz.tbi`: Tabix index file for the VCF file.
+  - `*.stats.txt`: Statistics of the VCF file from bcftools stats.
+
+</details>
+
+[GATK's UnifiedGenotyper](https://github.com/broadinstitute/gatk-docs/blob/master/gatk3-tooldocs/3.5-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.html) uses a Bayesian genotype likelihood model to estimate simultaneously the most likely genotypes and allele frequency in a population of N samples, emitting a genotype for each sample. The system can either emit just the variant sites or complete genotypes (which includes homozygous reference calls) satisfying some phred-scaled confidence value. This tool has been deprecated by the GATK developers in favour of HaplotypeCaller, but is still cosidered a preferable genotyper for ancient DNA, given its ability to handle low coverage data. The output provided is a bgzipped VCF file for containing the genotype calls of each sample, it's index file, as well as the statistics of the VCF file generated by `bcftools stats`.
+
+#### GATK HaplotypeCaller
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genotyping/`
+
+  - `*.vcf.gz`: VCF file containing the genotype calls for each sample.
+  - `*.vcf.gz.tbi`: Tabix index file for the VCF file.
+  - `*.stats.txt`: Statistics of the VCF file from bcftools stats.
+
+</details>
+
+[GATK's HaplotypeCaller](https://gatk.broadinstitute.org/hc/en-us/articles/13832687299739-HaplotypeCaller) is capable of calling SNPs and indels simultaneously via local de-novo assembly of haplotypes in an active region. In addition, HaplotypeCaller is able to handle non-diploid organisms as well as pooled experiment data. This is the preferred genotyper for modern DNA. The output provided is a bgzipped VCF file for containing the genotype calls of each sample, it's index file, as well as the statistics of the VCF file generated by `bcftools stats`.
+
+#### FreeBayes
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genotyping/`
+
+  - `*.vcf.gz`: VCF file containing the genotype calls for each sample.
+  - `*.vcf.gz.tbi`: Tabix index file for the VCF file.
+  - `*.stats.txt`: Statistics of the VCF file from bcftools stats.
+
+</details>
+
+[FreeBayes](https://github.com/freebayes/freebayes) is a Bayesian genetic variant detector designed to find small polymorphisms, specifically SNPs (single-nucleotide polymorphisms), indels (insertions and deletions), MNPs (multi-nucleotide polymorphisms), and complex events (composite insertion and substitution events) smaller than the length of a short-read sequencing alignment. It calls variants based on the literal sequences of reads aligned to a particular target, not their precise alignment. This model is a straightforward generalization of previous ones (e.g. PolyBayes, samtools, GATK) which detect or report variants based on alignments. This method avoids one of the core problems with alignment-based variant detection - that identical sequences may have multiple possible alignments. The output provided is a bgzipped VCF file for containing the genotype calls of each sample, it's index file, as well as the statistics of the VCF file generated by `bcftools stats`.
+
+#### ANGSD
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genotyping/`
+
+  - `*.{glf,beagle}.gz`: Genotype likelihood file, containing likelihoods across all samples per reference.
+
+</details>
+
+[ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. It can estimate genotype likelihoods and allele frequencies from next-generation sequencing data. The output provided is a bgzipped genotype likelihood file, containing likelihoods across all samples per reference. Users can specify the model used for genotype likelihood estimation, as well as the output format. For more information on the available options, see the [ANGSD](https://www.popgen.dk/angsd/index.php/Genotype_Likelihoods).
