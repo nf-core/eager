@@ -205,6 +205,11 @@
                         "git_sha": "6b0e4fe14ca1b12e131f64608f0bbaf36fd11451",
                         "installed_by": ["modules"]
                     },
+                    "samtools/collatefastq": {
+                        "branch": "master",
+                        "git_sha": "f4596fe0bdc096cf53ec4497e83defdb3a94ff62",
+                        "installed_by": ["modules"]
+                    },
                     "samtools/depth": {
                         "branch": "master",
                         "git_sha": "a1ffbc1fd87bd5a829e956cc26ec9cc53af3e817",
