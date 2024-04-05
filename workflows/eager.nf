@@ -44,21 +44,23 @@ include { GENOTYPE                      } from '../subworkflows/local/genotype'
 // MODULE: Installed directly from nf-core/modules
 //
 
-include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BAM_INPUT        } from '../modules/nf-core/samtools/index/main'
-include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
-include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
-include { FALCO                                             } from '../modules/nf-core/falco/main'
-include { MTNUCRATIO                                        } from '../modules/nf-core/mtnucratio/main'
-include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
-include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
-include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH      } from '../modules/nf-core/bedtools/coverage/main'
-include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH    } from '../modules/nf-core/bedtools/coverage/main'
-include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
-include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED            } from '../modules/nf-core/qualimap/bamqc/main'
-include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED          } from '../modules/nf-core/qualimap/bamqc/main'
+include { FASTQC                                              } from '../modules/nf-core/fastqc/main'
+include { MULTIQC                                             } from '../modules/nf-core/multiqc/main'
+include { SAMTOOLS_COLLATEFASTQ as SAMTOOLS_CONVERT_INPUT_BAM } from '../modules/nf-core/samtools/collatefastq/main'
+include { CAT_FASTQ             as CAT_FASTQ_CONVERTED_BAM    } from '../modules/nf-core/cat/fastq/main'
+include { SAMTOOLS_INDEX        as SAMTOOLS_INDEX_BAM_INPUT   } from '../modules/nf-core/samtools/index/main'
+include { PRESEQ_CCURVE                                       } from '../modules/nf-core/preseq/ccurve/main'
+include { PRESEQ_LCEXTRAP                                     } from '../modules/nf-core/preseq/lcextrap/main'
+include { FALCO                                               } from '../modules/nf-core/falco/main'
+include { MTNUCRATIO                                          } from '../modules/nf-core/mtnucratio/main'
+include { HOST_REMOVAL                                        } from '../modules/local/host_removal'
+include { ENDORSPY                                            } from '../modules/nf-core/endorspy/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT   } from '../modules/nf-core/samtools/flagstat/main'
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH        } from '../modules/nf-core/bedtools/coverage/main'
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH      } from '../modules/nf-core/bedtools/coverage/main'
+include { SAMTOOLS_VIEW_GENOME                                } from '../modules/local/samtools_view_genome.nf'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED              } from '../modules/nf-core/qualimap/bamqc/main'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED            } from '../modules/nf-core/qualimap/bamqc/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,6 +97,53 @@ workflow EAGER {
     }
 
     //
+    // MODULE: Convert input BAMs back to FastQ
+    //
+
+    if (params.convert_inputbam) {
+        // Convert input BAMs back to FastQ with non-interleaved output.
+        SAMTOOLS_CONVERT_INPUT_BAM ( ch_samplesheet_bams, [ [], [] ], false )
+
+        // if BAM is single-end, pull R1 output as well as 'other' output and merge (in case collapsed reads have their R1 and R2 flags both set to 0 or 1)
+        ch_single_end_reads = SAMTOOLS_CONVERT_INPUT_BAM.out.fastq
+            .filter {
+                meta, reads ->
+                meta.single_end
+            }
+            .join(SAMTOOLS_CONVERT_INPUT_BAM.out.fastq_other)
+            .map {
+                meta, read1, fastq_other ->
+                [meta, [read1, fastq_other] ]
+            }
+            .dump(tag: "converted_se_and_other", pretty: true)
+
+        //if BAM is paired-end, pull R1 and R2 outputs, discarding 'other' output and singletons
+        ch_paired_end_reads = SAMTOOLS_CONVERT_INPUT_BAM.out.fastq
+            .filter {
+                meta, reads ->
+                ! meta.single_end
+            }
+            .dump(tag: "pe-bam", pretty: true)
+
+        // Merge the R1 and other reads for single-end BAMs
+        CAT_FASTQ_CONVERTED_BAM( ch_single_end_reads )
+        ch_fastqs_from_converted_bams = CAT_FASTQ_CONVERTED_BAM.out.reads
+            .mix(ch_paired_end_reads)
+            // drop reference and id_index from meta
+            .map {
+                meta, reads ->
+                [ meta - meta.subMap('reference', 'id_index'), reads ]
+            }
+
+        // Mix the converted fastqs with the original fastqs
+        ch_fastqs_for_preprocessing = ch_fastqs_from_converted_bams
+            .mix( ch_samplesheet_fastqs )
+    } else {
+        // If BAM conversion is not activated , just use the original fastqs
+        ch_fastqs_for_preprocessing = ch_samplesheet_fastqs
+    }
+
+    //
     // SUBWORKFLOW: Indexing of reference files
     //
 
@@ -106,11 +155,11 @@ workflow EAGER {
     //
 
     if ( params.sequencing_qc_tool == "falco" ) {
-        FALCO ( ch_samplesheet_fastqs )
+        FALCO ( ch_fastqs_for_preprocessing )
         ch_versions = ch_versions.mix( FALCO.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FALCO.out.txt.collect{it[1]}.ifEmpty([]) )
     } else {
-        FASTQC ( ch_samplesheet_fastqs )
+        FASTQC ( ch_fastqs_for_preprocessing )
         ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FASTQC.out.zip.collect{it[1]}.ifEmpty([]) )
     }
@@ -120,12 +169,12 @@ workflow EAGER {
     //
 
     if ( !params.skip_preprocessing ) {
-        PREPROCESSING ( ch_samplesheet_fastqs, adapterlist )
+        PREPROCESSING ( ch_fastqs_for_preprocessing, adapterlist )
         ch_reads_for_mapping = PREPROCESSING.out.reads
         ch_versions          = ch_versions.mix( PREPROCESSING.out.versions )
         ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
-        ch_reads_for_mapping = ch_samplesheet_fastqs
+        ch_reads_for_mapping = ch_fastqs_for_preprocessing
     }
 
     //
@@ -273,7 +322,7 @@ workflow EAGER {
         // Preparing fastq channel for host removal to be combined with the bam channel
         // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
         // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
-        ch_fastqs_for_host_removal= ch_samplesheet_fastqs.map{
+        ch_fastqs_for_host_removal= ch_fastqs_for_preprocessing.map{
                                                         meta, fastqs ->
                                                         new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
                                                         [ new_meta, meta, fastqs ]
