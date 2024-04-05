@@ -46,7 +46,7 @@ include { GENOTYPE                      } from '../subworkflows/local/genotype'
 
 include { FASTQC                                              } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                                             } from '../modules/nf-core/multiqc/main'
-include { SAMTOOLS_COLLATEFASTQ as SAMTOOLS_CONVERT_INPUT_BAM } from '../modules/nf-core/samtools/collatefastq/main'
+include { SAMTOOLS_COLLATEFASTQ as SAMTOOLS_CONVERT_BAM_INPUT } from '../modules/nf-core/samtools/collatefastq/main'
 include { CAT_FASTQ             as CAT_FASTQ_CONVERTED_BAM    } from '../modules/nf-core/cat/fastq/main'
 include { SAMTOOLS_INDEX        as SAMTOOLS_INDEX_BAM_INPUT   } from '../modules/nf-core/samtools/index/main'
 include { PRESEQ_CCURVE                                       } from '../modules/nf-core/preseq/ccurve/main'
@@ -102,15 +102,15 @@ workflow EAGER {
 
     if (params.convert_inputbam) {
         // Convert input BAMs back to FastQ with non-interleaved output.
-        SAMTOOLS_CONVERT_INPUT_BAM ( ch_samplesheet_bams, [ [], [] ], false )
+        SAMTOOLS_CONVERT_BAM_INPUT ( ch_samplesheet_bams, [ [], [] ], false )
 
         // if BAM is single-end, pull R1 output as well as 'other' output and merge (in case collapsed reads have their R1 and R2 flags both set to 0 or 1)
-        ch_single_end_reads = SAMTOOLS_CONVERT_INPUT_BAM.out.fastq
+        ch_single_end_reads = SAMTOOLS_CONVERT_BAM_INPUT.out.fastq
             .filter {
                 meta, reads ->
                 meta.single_end
             }
-            .join(SAMTOOLS_CONVERT_INPUT_BAM.out.fastq_other)
+            .join(SAMTOOLS_CONVERT_BAM_INPUT.out.fastq_other)
             .map {
                 meta, read1, fastq_other ->
                 [meta, [read1, fastq_other] ]
@@ -118,7 +118,7 @@ workflow EAGER {
             .dump(tag: "converted_se_and_other", pretty: true)
 
         //if BAM is paired-end, pull R1 and R2 outputs, discarding 'other' output and singletons
-        ch_paired_end_reads = SAMTOOLS_CONVERT_INPUT_BAM.out.fastq
+        ch_paired_end_reads = SAMTOOLS_CONVERT_BAM_INPUT.out.fastq
             .filter {
                 meta, reads ->
                 ! meta.single_end
@@ -195,24 +195,31 @@ workflow EAGER {
     //  MODULE: indexing of user supplied input BAMs
     //
 
-    SAMTOOLS_INDEX_BAM_INPUT ( ch_samplesheet_bams )
-    ch_versions = ch_versions.mix( SAMTOOLS_INDEX_BAM_INPUT.out.versions )
+    if ( !params.convert_inputbam ){
+        SAMTOOLS_INDEX_BAM_INPUT ( ch_samplesheet_bams )
+        ch_versions = ch_versions.mix( SAMTOOLS_INDEX_BAM_INPUT.out.versions )
 
-    if ( params.fasta_largeref )
-        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.csi )
-    else {
-        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.bai )
+        if ( params.fasta_largeref ) {
+            ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.csi )
+        } else {
+            ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.bai )
+        }
+
+        //
+        // MODULE: flagstats of user supplied input BAMs
+        //
+        ch_bam_bai_input = ch_samplesheet_bams
+                                .join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
+
+        SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
+        ch_versions           = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
+        ch_flagstat_input_bam = SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat // For endorspy
+
+
+    } else {
+        ch_bams_from_input    = Channel.empty()
+        ch_flagstat_input_bam = Channel.empty()
     }
-
-
-    //
-    // MODULE: flagstats of user supplied input BAMs
-    //
-    ch_bam_bai_input = ch_samplesheet_bams
-                            .join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
-
-    SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
-    ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
 
     //
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
@@ -394,7 +401,7 @@ workflow EAGER {
     //
 
     ch_flagstat_for_endorspy_raw    = MAP.out.flagstat
-                                            .mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat )
+                                            .mix( ch_flagstat_input_bam )
 
     if ( params.run_bamfiltering & !params.skip_deduplication ) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw
