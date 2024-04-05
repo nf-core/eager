@@ -11,6 +11,7 @@ include { GATK_INDELREALIGNER                               } from '../../module
 include { GATK_UNIFIEDGENOTYPER                             } from '../../modules/nf-core/gatk/unifiedgenotyper/main'
 include { GATK4_HAPLOTYPECALLER                             } from '../../modules/nf-core/gatk4/haplotypecaller/main'
 include { FREEBAYES                                         } from '../../modules/nf-core/freebayes/main'
+include { ANGSD_GL                                          } from '../../modules/nf-core/angsd/gl/main'
 include { BCFTOOLS_STATS as BCFTOOLS_STATS_GENOTYPING       } from '../../modules/nf-core/bcftools/stats/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_UG               } from '../../modules/nf-core/bcftools/index/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_FREEBAYES        } from '../../modules/nf-core/bcftools/index/main'
@@ -28,6 +29,7 @@ workflow GENOTYPE {
     ch_multiqc_files                   = Channel.empty()
     ch_pileupcaller_genotypes          = Channel.empty()
     ch_eigenstrat_coverage_stats       = Channel.empty()
+    ch_angsd_genotype_likelihoods      = Channel.empty()
     ch_genotypes_vcf                   = Channel.empty()
     ch_bcftools_stats                  = Channel.empty()
 
@@ -357,7 +359,62 @@ workflow GENOTYPE {
     }
 
     if ( params.genotyping_tool == 'angsd' ) {
-        log.warn("[nf-core/eager] Genotyping with ANGSD is not yet implemented  .")
+        ch_bams_for_multimap = ch_bam_bai
+            .map {
+            // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+            .groupTuple()
+                .map {
+                    combo_meta, metas, bams, bais ->
+                    def new_map = [:]
+                    def ids = metas.collect { meta -> meta.sample_id }
+                    def strandedness = metas.collect { meta -> meta.strandedness }
+                    def single_ends = metas.collect { meta -> meta.single_end }
+                    def reference = combo_meta.reference
+                    new_meta = [ sample_id: ids, strandedness: strandedness, single_end: single_ends, reference: reference ]
+
+                    [ combo_meta, new_meta, bams, bais ] // Drop bais
+                } // Collect all IDs into a list in meta.sample_id.
+
+        ch_fasta_for_multimap = ch_fasta_plus
+            // Because dbsnp is optional, the channel can be [[],[]]. remainder:true will output both the empty list and the fasta_plus channel with an added 'null'.
+            .join( ch_dbsnp, remainder:true ) // [ [ref_meta], fasta, fai, dict, dbsnp ]
+            // Also filter out the empty list dbsnp (meta == [])
+            .filter { it[0] != [] }
+            // convert added null dbsnp into an empty list
+            .map {
+                ref_meta, fasta, fai, dict, dbsnp ->
+                def final_dbsnp = dbsnp != null ? dbsnp : []
+                [ ref_meta, fasta, fai, dict, final_dbsnp ]
+            }
+            .map {
+            // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
+                addNewMetaFromAttributes( it, "id" , "reference" , false )
+            } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
+
+        ch_input_for_angsd = ch_bams_for_multimap
+            .combine( ch_fasta_for_multimap , by:0 )
+            .multiMap {
+                ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, dbsnp ->
+                    bam:   [ meta, bam ]
+                    fasta: [ ref_meta, fasta ]
+            }
+
+        ANGSD_GL(
+            ch_input_for_angsd.bam,
+            ch_input_for_angsd.fasta,
+            [[], []], // No errors file
+        )
+        ch_angsd_genotype_likelihoods = ANGSD_GL.out.genotype_likelihood
+        ch_versions                   = ch_versions.mix( ANGSD_GL.out.versions.first() )
+
+        // Add genotyper info to the meta
+        ch_angsd_genotype_likelihoods = ch_angsd_genotype_likelihoods
+            .map {
+                meta, glf ->
+                [ meta + [ genotyper: "angsd" ], glf ]
+            }
     }
 
     // Run BCFTOOLS_STATS on output from GATK UG, HC and Freebayes
@@ -387,10 +444,11 @@ workflow GENOTYPE {
     }
 
     emit:
-    eigenstrat          = ch_pileupcaller_genotypes    // [ [ meta ], geno, snp, ind ]
-    vcf                 = ch_genotypes_vcf             // [ [ meta ], vcf ] ]
-    vcf_stats           = ch_bcftools_stats            // [ [ meta ], stats ]
-    eigenstrat_coverage = ch_eigenstrat_coverage_stats // [ [ meta ], stats ]
+    eigenstrat          = ch_pileupcaller_genotypes     // [ [ meta ], geno, snp, ind ]
+    vcf                 = ch_genotypes_vcf              // [ [ meta ], vcf ] ]
+    vcf_stats           = ch_bcftools_stats             // [ [ meta ], stats ]
+    glf                 = ch_angsd_genotype_likelihoods // [ [ meta ], glf ]
+    eigenstrat_coverage = ch_eigenstrat_coverage_stats  // [ [ meta ], stats ]
     versions            = ch_versions
     mqc                 = ch_multiqc_files
 }

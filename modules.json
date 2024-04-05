@@ -20,6 +20,11 @@
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["bam_docounts_contamination_angsd"]
                     },
+                    "angsd/gl": {
+                        "branch": "master",
+                        "git_sha": "c22aa6082716bd372cbb8f7ccf7c83220f180864",
+                        "installed_by": ["modules"]
+                    },
                     "bamutil/trimbam": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
