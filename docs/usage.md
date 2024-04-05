@@ -273,7 +273,6 @@ Some HPC setups also allow you to run nextflow within a cluster job submitted yo
 In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
 We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
 
-```
-bash
+```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
