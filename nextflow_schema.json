@@ -792,7 +792,7 @@
                     "default": 1,
                     "description": "Specify a minimum number of reads a taxon of sample total is required to have to be retained in malt or kraken. Not compatible with --malt_min_support_mode 'percent'.",
                     "fa_icon": "fas fa-sort-numeric-up-alt",
-                    "help_text": "For usage in malt or kraken: Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'. \n For usage in kraken2 or krakenuniq: Specify the number of hits on a clade to retain it in the final report when using kraken_parse. Default: 1. \nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. \n\n> Modifies MALT or kraken_parse.py parameter: `-sup` and `-c` respectively\n"
+                    "help_text": "For usage in malt: Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.Default: 1. \nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. \n\n> Modifies MALT parameter: `-sup` \n"
                 },
                 "metagenomics_malt_maxqueries": {
                     "type": "integer",
