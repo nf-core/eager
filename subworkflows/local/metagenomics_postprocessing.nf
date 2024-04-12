@@ -26,7 +26,7 @@ workflow METAGENOMICS_POSTPROCESSING {
             .transpose()
             .map{ meta, reads ->
                 [
-                    meta+['id':"${meta.strandedness}stranded"],
+                    meta + [ 'id': "${meta.strandedness}stranded" ],
                     reads
                 ]
             }
@@ -43,7 +43,7 @@ workflow METAGENOMICS_POSTPROCESSING {
             }
 
         //RUN MaltExtract
-        MALTEXTRACT ( ch_maltextract_input.rma6, ch_maltextract_input.tax_list, ch_maltextract_input.ncbi_dir)
+        MALTEXTRACT ( ch_maltextract_input.rma6, ch_maltextract_input.tax_list, ch_maltextract_input.ncbi_dir )
 
         // now we need to run AMPS for each MALTEXTRACT output
         ch_amps_input = MALTEXTRACT.out.results.map{ it[1] }
@@ -59,7 +59,7 @@ workflow METAGENOMICS_POSTPROCESSING {
                     // ensure we keep paired-end information in downstream filenames
                     // when no pair-merging
                     [
-                        meta+['db_name':meta.id, 'id': rma.baseName],
+                        meta + ['db_name': meta.id, 'id': rma.baseName ],
                         rma
                     ]
             }

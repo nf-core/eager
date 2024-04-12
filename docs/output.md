@@ -428,7 +428,7 @@ The output system of KrakenUniq can result in other `stdout` or `stderr` logging
 
 #### taxpasta
 
-the output created by the `taxpasta merge` command. It combines the results of all the samples analyzed with eager. The file provides an overview of the classification results for all samples combined
+the output created by the `taxpasta merge` command. It combines the results of all the samples analyzed with a given metagenomic classifer by nf-core/eager. The file provides an overview of the classification results for all samples combined
 
 <details markdown=1>
 <summary>Output files</summary>
