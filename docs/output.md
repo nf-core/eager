@@ -438,9 +438,9 @@ the output created by the `taxpasta merge` command. It combines the results of a
 
 </details>
 
-#### maltextract
+#### maltExtract
 
-The output directory for maltextract, as implemented under [HOPS](https://github.com/rhuebler/HOPS), which applies various heuristics of ancient authenticity and presence to megan read assignments across a given set of candidate taxon.
+The output directory for maltExtract, as implemented under [HOPS](https://github.com/rhuebler/HOPS), which applies various heuristics of ancient authenticity and presence to MEGAN read assignments across a given set of candidate taxon.
 
 <details markdown="1">
 <summary>Output files</summary>
