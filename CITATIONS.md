@@ -130,6 +130,14 @@
 
   > Vågene, Å.J., Herbig, A., Campana, M.G., Nelly, M., García, R., Warinner, C., Sabin, S., Spyrou, M.A., Valtueña, A.A., Huson, D., Tuross, N., Bos, K.I. & Krause, J. (2018). Salmonella enterica genomes from victims of a major sixteenth-century epidemic in Mexico. Nat Ecol Evol 2, 520–528. doi: [10.1038/s41559-017-0446-6](https://doi.org/10.1038/s41559-017-0446-6)
 
+- [HOPS](https://doi.org/10.1186/s13059-019-1903-0)
+
+  > Hübler, R., Key, F.M., Warinner, C. et al. (2019). HOPS: automated detection and authentication of pathogen DNA in archaeological remains. Genome Biol 20, 280. doi: [10.1186/s13059-019-1903-0](https://doi.org/10.1186/s13059-019-1903-0)
+
+- [MEGAN](https://doi.org/10.1101/gr.5969107)
+
+  > Daniel H. Huson, Alexander F. Auch, Ji Qi, and Stephan C. Schuster (2007). MEGAN analysis of metagenomic data. Genome Res. 17000, Published in Advance January 25, 2007, doi: [10.1101/gr.5969107](https://doi.org/10.1101/gr.5969107)
+
 - [Kraken2](https://doi.org/10.1186/s13059-019-1891-0)
 
   > Wood, Derrick E., Jennifer Lu, and Ben Langmead. 2019. Improved Metagenomic Analysis with Kraken 2. Genome Biology 20 (1): 257. doi: [10.1186/s13059-019-1891-0](https://doi.org/10.1186/s13059-019-1891-0).
@@ -141,6 +149,10 @@
 - [MetaPhlAn](https://doi.org/10.1038/s41587-023-01688-w)
 
   > Blanco-Míguez, A., Beghini, F., Cumbo, F. et al. Extending and improving metagenomic taxonomic profiling with uncharacterized species using MetaPhlAn 4. Nat Biotechnol (2023). doi: [10.1038/s41587-023-01688-w](https://doi.org/10.1038/s41587-023-01688-w)
+
+- [TAXPASTA](https://doi.org/10.21105/joss.05627)
+
+  > Beber et al., (2023). TAXPASTA: TAXonomic Profile Aggregation and STAndardisation. Journal of Open Source Software, 8(87), 5627, doi: [10.21105/joss.05627](https://doi.org/10.21105/joss.05627)
 
 ## Software packaging/containerisation tools
 
