@@ -761,16 +761,6 @@ nextflow run ../main.nf -profile docker \
   --metagenomics_malt_group_size 3
 ```
 
-##### mergemetaphlantables
-
-(update: Jan 2024, removed, parsing with taxpasta)
-
-```bash
-nextflow run -resume ./main.nf -profile test,docker --outdir out \
---run_metagenomics --metagenomics_profiling_tool metaphlan --metagenomics_profiling_database ./runtest/metaphlandb/ --metagenomics_run_postprocessing
-# 20230804: works
-```
-
 ## Mapping statistics
 
 ### ENDOSPY

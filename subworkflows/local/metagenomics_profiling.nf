@@ -45,8 +45,9 @@ workflow METAGENOMICS_PROFILING {
 
         def label = file(params.metagenomics_profiling_database).getBaseName()
 
-        // For the next step we need the number of groups for the spezified number of input files
-        ch_groups =  params.metagenomics_malt_group_size > 0 ? ch_reads.collate(params.metagenomics_malt_group_size).count() : Channel.of(1)
+        // For the next step we need the number of analysis-groups for the spezified number of input files
+        // since we work with channels, we need a channel that stores that information
+        ch_tmp_groups =  params.metagenomics_malt_group_size > 0 ? ch_reads.collate(params.metagenomics_malt_group_size).count() : Channel.of(1)
         // this is for enumerating the channel-entries in the ch_reads channel
         def n = 0
 
@@ -57,7 +58,7 @@ workflow METAGENOMICS_PROFILING {
         // the groups are split again by ds and ss with groupTuple. So they might end up smaller than malt_group_size
         // could be prevented by branching early and running the lower part twice for ss and ds individually
         // but this is an edge-case and might never be relevant...
-        ch_input_for_malt = ch_reads.combine(ch_groups).map{ meta, reads, n_groups ->
+        ch_input_for_malt = ch_reads.combine(ch_tmp_groups).map{ meta, reads, n_groups ->
             [
                 [
                     label: label,

@@ -32,7 +32,7 @@ workflow METAGENOMICS_POSTPROCESSING {
             }
             .groupTuple(by:0)
 
-        // could no be two entries in the channel, so combine with the tax_list and ncbi
+        // could now be two entries in the channel, so combine with the tax_list and ncbi
         ch_maltextract_input = ch_strandedness
             .combine(tax_list)
             .combine(ncbi_dir)
