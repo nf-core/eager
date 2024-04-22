@@ -91,7 +91,7 @@
             "strandedness",
             "damage_treatment"
         ],
-        "anyOf":[
+        "anyOf": [
             {
                 "required": ["r1"]
             },
