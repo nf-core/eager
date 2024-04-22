@@ -54,23 +54,17 @@
                 "format": "file-path",
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "exists": true,
+                "unique": true,
                 "errorMessage": "FastQ file for reads 1 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'."
             },
             "r2": {
-                "errorMessage": "FastQ file for reads 2 require files for reads 1, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'.",
-                "anyOf": [
-                    {
-                        "type": "string",
-                        "format": "file-path",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                        "exists": true,
-                        "dependentRequired": ["r1"]
-                    },
-                    {
-                        "type": "string",
-                        "maxLength": 0
-                    }
-                ]
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                "exists": true,
+                "unique": true,
+                "dependentRequired": ["r1"],
+                "errorMessage": "FastQ file for reads 2 require files for reads 1, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'."
             },
             "bam": {
                 "type": "string",
@@ -84,6 +78,7 @@
             "bam_reference_id": {
                 "type": "string",
                 "meta": ["bam_reference_id"],
+                "dependentRequired": ["bam"],
                 "errorMessage": "A BAM reference ID (corresponding to what is supplied to `--fasta`) must always be provided when providing a BAM file."
             }
         },
@@ -95,6 +90,14 @@
             "pairment",
             "strandedness",
             "damage_treatment"
+        ],
+        "anyOf":[
+            {
+                "required": ["r1"]
+            },
+            {
+                "required": ["bam"]
+            }
         ]
     }
 }

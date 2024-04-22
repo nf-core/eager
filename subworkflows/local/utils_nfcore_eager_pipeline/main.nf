@@ -110,21 +110,31 @@ workflow PIPELINE_INITIALISATION {
                             }
 
     // Extra validation
-    //  - No single-ended data allowed when using dedup
-    ch_samplesheet_fastqs.map {
-            meta, reads ->
-                seq_type = meta.subMap('single_end')
-            seq_type
-        }
-        .toList()
+    // - Only paired end specified when R2 provided
+    // - No single-ended data allowed when using dedup
+    ch_samplesheet_for_branch.fastq
         .map {
-            ids ->
-                def has_se=ids.single_end.contains(true)
+            meta, r1, r2, bam ->
+                seq_type = meta.subMap('single_end')
 
-                if ( params.deduplication_tool == 'dedup' &&  has_se ) {
-                    exit 1, "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs."
+                if ( ( seq_type.single_end && r2 != [] ) | ( seq_type.single_end == "false" && r2 == [] ) ) {
+                    exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sequencing pairment has to be 'paired' when reads 2 files are provided and vice versa."
+                } else if ( seq_type.single_end && params.deduplication_tool == "dedup" ) {
+                    exit 1, "[nf-core] ERROR: Invalid input/parameter combination. '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use 'markduplicates' for runs with both SE and PE data or separate SE and PE data into separate runs."
                 }
-            [ids, has_se]
+            [ seq_type, r2 ]
+        }
+
+    // - Only single-ended specified for BAM files
+    ch_samplesheet_for_branch.bam
+        .map {
+            meta, r1, r2, bam ->
+                seq_type = meta.subMap('single_end')
+
+                if ( seq_type.single_end == "false" && bam != [] ) {
+                    exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sequencing pairment has to be 'single' when BAM files are provided."
+                }
+            [ seq_type, bam ]
         }
 
     emit:
