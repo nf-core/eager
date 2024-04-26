@@ -18,11 +18,22 @@ nextflow_pipeline {
             assertAll(
                 { assert workflow.success },
                 { assert snapshot(
-                        path("$outputDir/"),
+                        path("$outputDir/bam_filtering"),
+                        path("$outputDir/bam_input_stats"),
+                        path("$outputDir/damage_estimation"),
+                        path("$outputDir/deduplication"),
+                        path("$outputDir/final_bams"),
+                        path("$outputDir/mapping"),
+                        path("$outputDir/mapstats"),
+                        path("$outputDir/preprocessing").list().findAll { !it.toString().endsWith("zip") }, // Trhying from https://nfcore.slack.com/archives/C049MBCEW06/p1714125268254939?thread_ts=1714124614.999909&cid=C049MBCEW06
+                        path("$outputDir/samtools"), // not sure what this is...
+
                     ).match()
                 },
                 { assert new File("$outputDir/pipeline_info/nf_core_pipeline_software_mqc_versions.yml").exists() },
                 { assert new File("$outputDir/multiqc/multiqc_report.html").exists() },
+                { assert new File("$outputDir/multiqc/multiqc_data/").exists() }
+
             )
         }
     }
