@@ -1,0 +1,29 @@
+nextflow_pipeline {
+
+    name "Test pipeline: NFCORE_EAGER"
+    script "main.nf"
+    tag "pipeline"
+    tag "nfcore_eager"
+    tag "test"
+
+    test("test_profile") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(
+                        path("$outputDir/"),
+                    ).match()
+                },
+                { assert new File("$outputDir/pipeline_info/nf_core_pipeline_software_mqc_versions.yml").exists() },
+                { assert new File("$outputDir/multiqc/multiqc_report.html").exists() },
+            )
+        }
+    }
+}
