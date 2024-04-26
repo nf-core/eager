@@ -81,13 +81,15 @@ workflow PIPELINE_INITIALISATION {
     //
     // Create channel from input file provided through params.input
     //
-    ch_samplesheet_for_branch = Channel.fromSamplesheet("input")
-                                    .map{
+    ch_samplesheet = Channel.fromSamplesheet("input")
+                                    .map {
                                         meta, r1, r2, bam ->
                                             meta.single_end = meta.pairment == "single" ? true : false
                                             meta.id = meta.sample_id
                                         [ meta, r1, r2, bam ]
                                     }
+
+    ch_samplesheet_for_branch = ch_samplesheet
                                     .branch {
                                         meta, r1, r2, bam ->
                                             bam: bam.toString().endsWith(".bam")
@@ -95,14 +97,14 @@ workflow PIPELINE_INITIALISATION {
                                     }
 
     ch_samplesheet_fastqs = ch_samplesheet_for_branch.fastq
-                                .map{
+                                .map {
                                     meta, r1, r2, bam ->
                                         reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
                                     [ meta - meta.subMap('pairment', 'bam_reference_id'), reads ]
                                 }
 
     ch_samplesheet_bams = ch_samplesheet_for_branch.bam
-                            .map{
+                            .map {
                                 meta, r1, r2, bam ->
                                     meta.reference = meta.bam_reference_id
                                     meta.id_index = meta.bam_reference_id
@@ -122,7 +124,7 @@ workflow PIPELINE_INITIALISATION {
                 } else if ( seq_type.single_end && params.deduplication_tool == "dedup" ) {
                     exit 1, "[nf-core] ERROR: Invalid input/parameter combination. '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use 'markduplicates' for runs with both SE and PE data or separate SE and PE data into separate runs."
                 }
-            [ seq_type, r2 ]
+            [ meta, r1, r2, bam ]
         }
 
     // - Only single-ended specified for BAM files
@@ -134,13 +136,27 @@ workflow PIPELINE_INITIALISATION {
                 if ( seq_type.single_end == "false" && bam != [] ) {
                     exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sequencing pairment has to be 'single' when BAM files are provided."
                 }
-            [ seq_type, bam ]
+            [ meta, r1, r2, bam ]
         }
+
+    // - No single- and double-stranded libraries with same sample ID
+    ch_samplesheet_test = ch_samplesheet
+                            .map {
+                                meta, r1, r2, bam ->
+                                [ meta.subMap('sample_id'), meta.subMap('strandedness') ]
+                            }
+                            .groupTuple()
+                            .map { meta, singlestrand ->
+                                    if ( singlestrand.toList().unique().size() > 1 ) {
+                                        exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sample IDs can only be identical if library strandedness is identical."
+                                    }
+                                [ meta, singlestrand ]
+                            }
 
     emit:
     samplesheet_fastqs = ch_samplesheet_fastqs
     samplesheet_bams   = ch_samplesheet_bams
-    versions    = ch_versions
+    versions           = ch_versions
 }
 
 /*
