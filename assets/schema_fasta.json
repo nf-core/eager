@@ -19,6 +19,7 @@
                 "format": "file-path",
                 "pattern": "^\\S+\\.f(na|asta|a|as)(\\.gz)?$",
                 "exists": true,
+                "unique": true,
                 "errorMessage": "Fasta files for the mapping reference must be provided with file extensions '.fasta', '.fa', '.fas', '.fna', '.fasta.gz','.fa.gz','.fas.gz', '.fna.gz' and cannot contain any spaces."
             },
             "fai": {
@@ -65,7 +66,7 @@
                 "pattern": "^\\S+\\.bed(\\.gz)?$",
                 "exists": true,
                 "dependentRequired": ["pileupcaller_snpfile"],
-                "errorMessage": "SNP capture bed files for pileupcaller must not contain any spaces and have file extensions '.bed' or '.bed.gz'."
+                "errorMessage": "SNP capture bed files for pileupcaller must not contain any spaces, have file extensions '.bed' or '.bed.gz' and be provided alongside a pileupcall_bedfile."
             },
             "pileupcaller_snpfile": {
                 "type": "string",
@@ -73,7 +74,7 @@
                 "pattern": "^\\S+\\.snp$",
                 "exists": true,
                 "dependentRequired": ["pileupcaller_bedfile"],
-                "errorMessage": "SNP panel files for pileupcaller must not contain any spaces and have file extension '.snp'."
+                "errorMessage": "SNP panel files for pileupcaller must not contain any spaces, have file extension '.snp' and be provided alonside a pileupcaller_snpfile."
             },
             "hapmap_file": {
                 "type": "string",

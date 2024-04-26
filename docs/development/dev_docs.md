@@ -32,6 +32,7 @@ To add new input files or options to the reference sheet, you have to complete a
     `<NEW_SUBCHANNEL>: [ meta, <PARAM_NAME> ]`
     4. Add ch_input_from_referencesheet.<NEW_SUBCHANNEL> to the final emit.
     `<NEW_EMIT> = ch_input_from_referencesheet.<NEW_SUBCHANNEL>`
+    5. Add corresponding `params.<NEW>` to warning on [line 23](https://github.com/nf-core/eager/blob/927efb7a45ba1312983056213bc425612db445c7/subworkflows/local/reference_indexing.nf#L23) of the reference indexing subworkflow.
 
 ### Combining in the Reference Indexing workflow
 
