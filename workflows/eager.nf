@@ -123,7 +123,7 @@ workflow EAGER {
                 ! meta.single_end
             }
 
-        // Merge the R1 and other reads for single-end BAMs
+        // Put all the converted FASTQs back together again
         CAT_FASTQ_CONVERTED_BAM( ch_single_end_reads )
         ch_fastqs_from_converted_bams = CAT_FASTQ_CONVERTED_BAM.out.reads
             .mix(ch_paired_end_reads)
@@ -190,7 +190,7 @@ workflow EAGER {
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
 
     //
-    //  MODULE: indexing of user supplied input BAMs
+    //  MODULE: indexing of user supplied unconverted input BAMs
     //
 
     if ( !params.convert_inputbam ){
