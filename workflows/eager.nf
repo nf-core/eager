@@ -116,6 +116,9 @@ workflow EAGER {
                 [meta, [read1, fastq_other] ]
             }
 
+        // Put all the converted FASTQs with single-end reads back together again
+        CAT_FASTQ_CONVERTED_BAM( ch_single_end_reads )
+
         //if BAM is paired-end, pull R1 and R2 outputs, discarding 'other' output and singletons
         ch_paired_end_reads = SAMTOOLS_CONVERT_BAM_INPUT.out.fastq
             .filter {
@@ -123,8 +126,6 @@ workflow EAGER {
                 ! meta.single_end
             }
 
-        // Put all the converted FASTQs back together again
-        CAT_FASTQ_CONVERTED_BAM( ch_single_end_reads )
         ch_fastqs_from_converted_bams = CAT_FASTQ_CONVERTED_BAM.out.reads
             .mix(ch_paired_end_reads)
             // drop reference and id_index from meta
