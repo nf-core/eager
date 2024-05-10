@@ -46,7 +46,8 @@ params.fasta = getGenomeAttribute('fasta')
 workflow NFCORE_EAGER {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    samplesheet_fastqs // channel: samplesheet read in from --input
+    samplesheet_bams
 
     main:
 
@@ -54,7 +55,8 @@ workflow NFCORE_EAGER {
     // WORKFLOW: Run pipeline
     //
     EAGER (
-        samplesheet
+        samplesheet_fastqs,
+        samplesheet_bams
     )
 
     emit:
@@ -88,7 +90,8 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_EAGER (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.samplesheet_fastqs,
+        PIPELINE_INITIALISATION.out.samplesheet_bams,
     )
 
     //

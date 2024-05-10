@@ -1,2 +1,7 @@
 repository_type: pipeline
 nf_core_version: "2.14.1"
+
+lint:
+  nextflow_config:
+    - config_defaults:
+        - params.contamination_estimation_angsd_hapmap
