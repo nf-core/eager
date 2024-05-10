@@ -530,10 +530,6 @@ workflow EAGER {
     }
 
     //
-    // MODULE: MultiQC
-    //
-
-    //
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)
