@@ -24,7 +24,7 @@ To add new input files or options to the reference sheet, you have to complete a
         3. Add `"format": "file-path"` to check if the entered string is a file path.
         4. Add `"pattern": "<REGEX_PATTERN>"` to check that the string doesn't contain spaces (`"pattern": "^\\S+$"`), contains a certain file extension (`"pattern": "^\\S+\\.vcf$"`), etc.
         5. Add `"exists": "true"` to check if the file exists.
-        6. Add an `"errorMessage":` to be displayed if one of the checks fails.
+        6. Add an `"errorMessage":` to be displayed if one of the checks fails describing the criteria above.
     2. Add new line to the large `.map{}` operation starting on [line 22](https://github.com/nf-core/eager/blob/927efb7a45ba1312983056213bc425612db445c7/subworkflows/local/reference_indexing_multi.nf#L22) and add conversion from empty array `[]` to empty string `""`.
     `<PARAM_NAME> = <PARAM_NAME> != [] ? <PARAM_NAME> : ""`
     2. Add <PARAM_NAME> to the result of the `.map{}` operation. Double-check the order!

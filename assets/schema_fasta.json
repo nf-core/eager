@@ -46,12 +46,12 @@
             "circular_target": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "The headers of the chromosome to be extended by circularmapper must not contain any spaces."
+                "errorMessage": "The headers of the chromosome to be extended by circularmapper must not contain any spaces and no leading '>'."
             },
             "mitochondrion_header": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "The names of the fasta entry of the mapping reference corresponding to the mitochondrial genome must not contain any spaces."
+                "errorMessage": "The names of the fasta entry of the mapping reference corresponding to the mitochondrial genome must not contain any spaces and no leading '>'."
             },
             "snpcapture_bed": {
                 "type": "string",
@@ -74,14 +74,14 @@
                 "pattern": "^\\S+\\.snp$",
                 "exists": true,
                 "dependentRequired": ["pileupcaller_bedfile"],
-                "errorMessage": "SNP panel files for pileupcaller must not contain any spaces, have file extension '.snp' and be provided alonside a pileupcaller_snpfile."
+                "errorMessage": "SNP panel files for pileupcaller must not contain any spaces, have file extension '.snp' and be provided alongside a pileupcaller_snpfile."
             },
             "hapmap_file": {
                 "type": "string",
                 "format": "file-path",
                 "pattern": "^\\S+$",
                 "exists": true,
-                "errorMessage": "HapMap files for contamination estimation must not contain any spaces."
+                "errorMessage": "HapMap files for contamination estimation with ANGSD must not contain any spaces."
             },
             "pmdtools_masked_fasta": {
                 "type": "string",
@@ -113,7 +113,7 @@
             },
             "genotyping_reference_ploidy": {
                 "type": "integer",
-                "meta": ["ploidy"],
+                "meta": ["genotyping_ploidy"],
                 "errorMessage": "Organism ploidy for GATK must be provided as integers."
             },
             "genotyping_gatk_dbsnp": {
