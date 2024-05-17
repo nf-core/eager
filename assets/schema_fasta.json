@@ -114,7 +114,7 @@
             "genotyping_reference_ploidy": {
                 "type": "integer",
                 "meta": ["genotyping_ploidy"],
-                "errorMessage": "Organism ploidy for GATK must be provided as integers."
+                "errorMessage": "Organism ploidy for GATK or FreeBayes must be provided as integers."
             },
             "genotyping_gatk_dbsnp": {
                 "type": "string",
