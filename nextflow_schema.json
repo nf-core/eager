@@ -10,10 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": [
-                "input",
-                "outdir"
-            ],
+            "required": ["input", "outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -229,14 +226,7 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": [
-                        "symlink",
-                        "rellink",
-                        "link",
-                        "copy",
-                        "copyNoFollow",
-                        "move"
-                    ],
+                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
                 },
                 "email_on_fail": {
@@ -340,10 +330,7 @@
                     "default": "fastqc",
                     "description": "Specify which tool to use for sequencing quality control.",
                     "help_text": "Specify which tool to use for sequencing quality control.\n\nFalco is designed as a drop-in replacement for FastQC but written in C++ for faster computation. We recommend using falco with very large datasets (due to reduced memory constraints).",
-                    "enum": [
-                        "fastqc",
-                        "falco"
-                    ],
+                    "enum": ["fastqc", "falco"],
                     "fa_icon": "fas fa-hammer"
                 },
                 "skip_preprocessing": {
@@ -356,10 +343,7 @@
                     "type": "string",
                     "default": "fastp",
                     "description": "Specify which preprocessing tool to use.",
-                    "enum": [
-                        "fastp",
-                        "adapterremoval"
-                    ],
+                    "enum": ["fastp", "adapterremoval"],
                     "help_text": "Specify which preprocessing tool to use.\n\nAdapterRemoval is commonly used in palaeogenomics, however fastp has similar performance and has many additional functionality (including inbuilt complexity trimming) that can be often useful.",
                     "fa_icon": "fas fa-hammer"
                 },
@@ -503,12 +487,7 @@
                 "mapping_tool": {
                     "type": "string",
                     "default": "bwaaln",
-                    "enum": [
-                        "bwaaln",
-                        "bwamem",
-                        "bowtie2",
-                        "circularmapper"
-                    ],
+                    "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper"],
                     "description": "Specify which mapper to use.",
                     "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming).\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)",
                     "fa_icon": "fas fa-layer-group"
@@ -567,10 +546,7 @@
                     "description": "Specify the bowtie2 alignment mode.",
                     "help_text": "The type of read alignment to use. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. \nDefault is set following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full)\n\n> Modifies Bowtie2 presets: `--local`, `--end-to-end`",
                     "fa_icon": "fas fa-arrows-alt-h",
-                    "enum": [
-                        "local",
-                        "end-to-end"
-                    ]
+                    "enum": ["local", "end-to-end"]
                 },
                 "mapping_bowtie2_sensitivity": {
                     "type": "string",
@@ -578,12 +554,7 @@
                     "description": "Specify the level of sensitivity for the bowtie2 alignment mode.",
                     "help_text": "The Bowtie2 'preset' to use. These strings apply to both --mapping_bowtie2_alignmode options. See the Bowtie2 manual for actual settings. \nDefault is set following [Poullet and Orlando (2020)](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full), when running damaged-data without UDG treatment)\n\nModifies the Bowtie2 parameters: `--fast`, `--very-fast`, `--sensitive`, `--very-sensitive`, `--fast-local`, `--very-fast-local`, `--sensitive-local`, `--very-sensitive-local`",
                     "fa_icon": "fas fa-microscope",
-                    "enum": [
-                        "fast",
-                        "very-fast",
-                        "sensitive",
-                        "very-sensitive"
-                    ]
+                    "enum": ["fast", "very-fast", "sensitive", "very-sensitive"]
                 },
                 "mapping_bowtie2_n": {
                     "type": "integer",
@@ -699,11 +670,7 @@
                     "type": "string",
                     "default": "unmapped",
                     "description": "Specify which type of reads to use for metagenomic screening.",
-                    "enum": [
-                        "unmapped",
-                        "mapped",
-                        "all"
-                    ],
+                    "enum": ["unmapped", "mapped", "all"],
                     "fa_icon": "fas fa-hand-pointer",
                     "help_text": "You can select which reads coming out of the read alignment step will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction), or all reads.\n\n> ⚠️ If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies tool parameter(s):\n> - samtools fastq: `-f 4` / `-F 4`"
                 },
@@ -723,10 +690,7 @@
                     "type": "string",
                     "default": "bbduk",
                     "description": "Specify which tool to use for trimming, filtering or reformatting of fastq reads that go into metagenomics screening.",
-                    "enum": [
-                        "bbduk",
-                        "prinseq"
-                    ],
+                    "enum": ["bbduk", "prinseq"],
                     "fa_icon": "fas fa-hand-pointer",
                     "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or reformatting of the reads.\n\nThis intermediate file is not saved in the results directory, unless marked with `--metagenomics_complexity_savefastq`."
                 },
@@ -740,10 +704,7 @@
                 "metagenomics_prinseq_mode": {
                     "type": "string",
                     "default": "entropy",
-                    "enum": [
-                        "entropy",
-                        "dust"
-                    ],
+                    "enum": ["entropy", "dust"],
                     "fa_icon": "fas fa-check-square",
                     "description": "Specify the complexity filter mode for PRINSEQ++.",
                     "help_text": "Specify the complexity filter mode for PRINSEQ++ \n\nUse the selected mode together with the correct flag:\n'dust' requires the `--metagenomics_prinseq_dustscore` parameter set\n'entropy' requires the `--metagenomics_complexity_entropy` parameter set\n\n> Sets one of the tool parameter(s):\n> - PRINSEQ++:  `-lc_entropy`\n> - PRINSEQ++:  `-lc_dust`"
@@ -774,10 +735,7 @@
                     "default": "markduplicates",
                     "description": "Specify which tool to use for deduplication.",
                     "help_text": "Sets the duplicate read removal tool. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> ⚠️ DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
-                    "enum": [
-                        "markduplicates",
-                        "dedup"
-                    ],
+                    "enum": ["markduplicates", "dedup"],
                     "fa_icon": "fas fa-layer-group"
                 }
             },
@@ -933,23 +891,12 @@
                     "description": "Specify which input BAM to use for genotyping.",
                     "help_text": "Indicates which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' (to use the reads used as input for damage manipulation); 'pmd' (for pmdtools output); 'trimmed' (for base-clipped BAMs. Base-clipped-PMD-filtered BAMs if both filtering and trimming are requested); 'rescaled' (for mapDamage2 rescaling output).\nWarning: Depending on the parameters you provided, 'raw' can refer to all mapped reads, filtered reads (if bam filtering has been performed), or the deduplicated reads (if deduplication was performed).",
                     "fa_icon": "fas fa-faucet",
-                    "enum": [
-                        "raw",
-                        "pmd",
-                        "trimmed",
-                        "rescaled"
-                    ]
+                    "enum": ["raw", "pmd", "trimmed", "rescaled"]
                 },
                 "genotyping_tool": {
                     "type": "string",
                     "fa_icon": "fas fa-tools",
-                    "enum": [
-                        "ug",
-                        "hc",
-                        "freebayes",
-                        "pileupcaller",
-                        "angsd"
-                    ],
+                    "enum": ["ug", "hc", "freebayes", "pileupcaller", "angsd"],
                     "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does de novo assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute (but is used here for compatibility with MultiVCFAnalyzer).",
                     "description": "Specify which genotyper to use."
                 },
@@ -1000,22 +947,14 @@
                     "fa_icon": "fas fa-toolbox",
                     "description": "Specify the SNP calling method to use for genotyping with pileupCaller.",
                     "help_text": "Specify the SNP calling method to use for genotyping. 'randomHaploid' will randomly sample a read overlapping the SNP, and produce a homozygous genotype with the allele supported by that read (often called 'pseudohaploid' or 'pseudodiploid'). 'randomDiploid` will randomly sample two reads overlapping the SNP and produce a genotype comprised of the two alleles supported by the two reads. 'majorityCall' will produce a genotype that is homozygous for the allele that appears in the majority of reads overlapping the SNP.\n\n> Modifies pileupCaller parameters: `--randomHaploid` `--randomDiploid` `--majorityCall`",
-                    "enum": [
-                        "randomHaploid",
-                        "randomDiploid",
-                        "majorityCall"
-                    ]
+                    "enum": ["randomHaploid", "randomDiploid", "majorityCall"]
                 },
                 "genotyping_pileupcaller_transitions_mode": {
                     "type": "string",
                     "default": "AllSites",
                     "description": "Specify the calling mode for transitions with pileupCaller.",
                     "help_text": "Specify if genotypes of transition SNPs should be called, set to missing, or excluded from the genotypes respectively. \n\n> Modifies pileupCaller parameter: `--skipTransitions` `--transitionsMissing`",
-                    "enum": [
-                        "AllSites",
-                        "TransitionsMissing",
-                        "SkipTransitions"
-                    ],
+                    "enum": ["AllSites", "TransitionsMissing", "SkipTransitions"],
                     "fa_icon": "fas fa-toggle-on"
                 },
                 "genotyping_gatk_call_conf": {
@@ -1045,11 +984,7 @@
                     "type": "string",
                     "default": "EMIT_VARIANTS_ONLY",
                     "description": "Specify GATK Unified Genotyper output mode.",
-                    "enum": [
-                        "EMIT_VARIANTS_ONLY",
-                        "EMIT_ALL_CONFIDENT_SITES",
-                        "EMIT_ALL_SITES"
-                    ],
+                    "enum": ["EMIT_VARIANTS_ONLY", "EMIT_ALL_CONFIDENT_SITES", "EMIT_ALL_SITES"],
                     "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, this defines the output mode to use when producing the output VCF (i.e. produce calls for every site or just confidence sites.)\n\n> Modifies GATK UnifiedGenotyper parameter: `--output_mode`",
                     "fa_icon": "fas fa-bullhorn"
                 },
@@ -1057,13 +992,7 @@
                     "type": "string",
                     "default": "SNP",
                     "description": "Specify UnifiedGenotyper likelihood model.",
-                    "enum": [
-                        "SNP",
-                        "INDEL",
-                        "BOTH",
-                        "GENERALPLOIDYSNP",
-                        "GENERALPLOIDYINDEL"
-                    ],
+                    "enum": ["SNP", "INDEL", "BOTH", "GENERALPLOIDYSNP", "GENERALPLOIDYINDEL"],
                     "fa_icon": "fas fa-project-diagram",
                     "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, this sets  which likelihood model to follow, i.e. whether to call only SNPs or INDELS etc.\n\n> Modifies GATK UnifiedGenotyper parameter: `--genotype_likelihoods_model`"
                 },
@@ -1086,11 +1015,7 @@
                     "fa_icon": "fas fa-bullhorn",
                     "description": "Specify GATK HaplotypeCaller output mode.",
                     "help_text": "If GATK HaplotypeCaller is selected as the genotyping tool, this sets the type of sites that should be included in the output VCF (i.e. produce calls for every site or just confidence sites). \n\n> Modifies GATK HaplotypeCaller parameter: `--output_mode`",
-                    "enum": [
-                        "EMIT_VARIANTS_ONLY",
-                        "EMIT_ALL_CONFIDENT_SITES",
-                        "EMIT_ALL_ACTIVE_SITES"
-                    ]
+                    "enum": ["EMIT_VARIANTS_ONLY", "EMIT_ALL_CONFIDENT_SITES", "EMIT_ALL_ACTIVE_SITES"]
                 },
                 "genotyping_gatk_hc_emitrefconf": {
                     "type": "string",
@@ -1098,11 +1023,7 @@
                     "fa_icon": "fas fa-bullhorn",
                     "description": "Specify HaplotypeCaller mode for emitting reference confidence calls.",
                     "help_text": "If GATK HaplotypeCaller is selected as the genotyping tool, this sets the mode for emitting reference confidence calls.\n\n> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`",
-                    "enum": [
-                        "NONE",
-                        "BP_RESOLUTION",
-                        "GVCF"
-                    ]
+                    "enum": ["NONE", "BP_RESOLUTION", "GVCF"]
                 },
                 "genotyping_freebayes_min_alternate_count": {
                     "type": "integer",
@@ -1124,12 +1045,7 @@
                     "fa_icon": "fas fa-project-diagram",
                     "description": "Specify which ANGSD genotyping likelihood model to use.",
                     "help_text": "Specify which genotype likelihood model to use.\n\n> Modifies angsd parameter: `-GL`",
-                    "enum": [
-                        "samtools",
-                        "gatk",
-                        "soapsnp",
-                        "syk"
-                    ]
+                    "enum": ["samtools", "gatk", "soapsnp", "syk"]
                 },
                 "genotyping_angsd_glformat": {
                     "type": "string",
@@ -1137,12 +1053,7 @@
                     "fa_icon": "fas fa-text-height",
                     "description": "Specify the formatting of the output VCF for ANGSD genotype likelihood results.",
                     "help_text": "Specifies what type of genotyping likelihood file format will be output.\n\nThe options refer to the following descriptions respectively:\n\n- `binary`: binary output of all 10 log genotype likelihood\n- `beagle_binary`: beagle likelihood file\n- `binary_three`: binary 3 times likelihood\n- `text`: text output of all 10 log genotype likelihoods.\n\nSee the [ANGSD documentation](http://www.popgen.dk/angsd/) for more information on which to select for your downstream applications.\n\n> Modifies angsd parameter: `-doGlf`",
-                    "enum": [
-                        "binary",
-                        "beagle_binary",
-                        "binary_three",
-                        "text"
-                    ]
+                    "enum": ["binary", "beagle_binary", "binary_three", "text"]
                 }
             },
             "fa_icon": "fas fa-sliders-h",
@@ -1189,10 +1100,7 @@
                     "help_text": "Specify which mode of preseq to run.\n\nFrom the [PreSeq documentation](http://smithlabresearch.org/wp-content/uploads/manual.pdf):\n\nc curve is used to compute the expected complexity curve of a mapped read file with a hypergeometric formula\n\nlc extrap is used to generate the expected yield for theoretical larger experiments and bounds on the number of distinct reads in the library and the associated confidence intervals, which is computed by bootstrapping the observed duplicate counts histogram.",
                     "description": "Specify which mode of preseq to run.",
                     "fa_icon": "fas fa-toggle-on",
-                    "enum": [
-                        "c_curve",
-                        "lc_extrap"
-                    ]
+                    "enum": ["c_curve", "lc_extrap"]
                 },
                 "mapstats_preseq_stepsize": {
                     "type": "integer",
@@ -1263,10 +1171,7 @@
                 "damagecalculation_tool": {
                     "type": "string",
                     "default": "damageprofiler",
-                    "enum": [
-                        "damageprofiler",
-                        "mapdamage"
-                    ],
+                    "enum": ["damageprofiler", "mapdamage"],
                     "fa_icon": "fas fa-tools",
                     "description": "Specify the tool to use for damage calculation.",
                     "help_text": "Specify the tool to be used for damage calculation. DamageProfiler is generally faster than mapDamage2, but the latter has an option to limit the number of reads used. This can significantly speed up the processing of very large files, where the damage estimates are already accurate after processing only a fraction of the input."
@@ -1341,10 +1246,7 @@
                     "description": "Specify the host-mapped read removal mode.",
                     "help_text": "Modifies extract_map_reads.py parameter: -m",
                     "fa_icon": "fas fa-plane-slash",
-                    "enum": [
-                        "remove",
-                        "replace"
-                    ]
+                    "enum": ["remove", "replace"]
                 }
             },
             "fa_icon": "fas fa-user-slash"
