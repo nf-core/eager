@@ -80,7 +80,8 @@
                 "fasta_mapperindexdir": {
                     "type": "string",
                     "description": "Specify path to directory containing index files of the FASTA for a given mapper.",
-                    "help_text": "For most people this will likely be the same directory that contains the file you provided to `--fasta`.\n\nIf you want to use pre-existing `bwa index` indices, the directory should contain files ending in '.amb' '.ann' '.bwt'. If you want to use pre-existing `bowtie2 build` indices, the directory should contain files ending in'.1.bt2', '.2.bt2', '.rev.1.bt2'. \n\nIn any case do not include the files themselves in the path. nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa index`/`bowtie2 build` file suffixes.  If not supplied, the indices will be generated for you.\n\n"
+                    "help_text": "For most people this will likely be the same directory that contains the file you provided to `--fasta`.\n\nIf you want to use pre-existing `bwa index` indices, the directory should contain files ending in '.amb' '.ann' '.bwt'. If you want to use pre-existing `bowtie2 build` indices, the directory should contain files ending in'.1.bt2', '.2.bt2', '.rev.1.bt2'. \n\nIn any case do not include the files themselves in the path. nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa index`/`bowtie2 build` file suffixes.  If not supplied, the indices will be generated for you.\n\n",
+                    "fa_icon": "fas fa-folder-open"
                 },
                 "save_reference": {
                     "type": "boolean",
@@ -388,7 +389,7 @@
                     "default": 25,
                     "description": "Specify the minimum length reads must have to be retained.",
                     "help_text": "Specify the minimum length reads must have to be retained. \n\nReads smaller than this length after trimming are discarded and not included in downstream analyses. Typically in ancient DNA users will set this to 30 or for very old samples around 25 bp - reads any shorter that this often are not specific enough to provide useful information.\n\n> Modifies AdapterRemoval parameter: `--minlength`\n> Modifies fastp parameter: `--length_required`",
-                    "fa_icon": "fas fa-ruler"
+                    "fa_icon": "fas fa-ruler-horizontal"
                 },
                 "preprocessing_trim5p": {
                     "type": "integer",
@@ -414,14 +415,14 @@
                     "type": "boolean",
                     "description": "Specify to turn on sequence complexity filtering of reads.",
                     "help_text": "Performs a poly-G tail removal step in the beginning of the pipeline using fastp.\n\nThis can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs or NovaSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.\n\n> Modifies fastp parameter: `--trim_poly_g`",
-                    "fa_icon": "fas fa-cut"
+                    "fa_icon": "fas fa-power-off"
                 },
                 "preprocessing_fastp_complexityfilter_threshold": {
                     "type": "integer",
                     "default": 10,
                     "description": "Specify the complexity threshold that must be reached or exceeded to retain reads.",
                     "help_text": "This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming.\n\n> Modifies fastp parameter: `--poly_g_min_len`",
-                    "fa_icon": "fas fa-ruler"
+                    "fa_icon": "fas fa-filter"
                 },
                 "preprocessing_adapterremoval_preserve5p": {
                     "type": "boolean",
@@ -440,7 +441,7 @@
                     "default": 20,
                     "description": "Specify AdapterRemoval minimum base quality for trimming off bases.",
                     "help_text": "Defines the minimum read quality per base that is required for a base to be kept. Individual bases at the ends of reads falling below this threshold will be clipped off.\n\n> Modifies AdapterRemoval parameter: `--minquality`",
-                    "fa_icon": "fas fa-ruler-vertical"
+                    "fa_icon": "fas fa-filter"
                 },
                 "preprocessing_adapterremoval_skipntrimming": {
                     "type": "boolean",
@@ -452,7 +453,7 @@
                     "type": "integer",
                     "default": 1,
                     "description": "Specify the AdapterRemoval minimum adapter overlap required for trimming.",
-                    "fa_icon": "fas fa-ruler-horizontal",
+                    "fa_icon": "fas fa-filter",
                     "help_text": "Specifies a minimum number of bases that overlap with the adapter sequence before AdapterRemoval trims adapters sequences from reads.\n\n> Modifies AdapterRemoval parameter: `--minadapteroverlap`"
                 },
                 "preprocessing_adapterremoval_qualitymax": {
@@ -490,7 +491,7 @@
                     "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper"],
                     "description": "Specify which mapper to use.",
                     "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or bowtie2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing a extend-remap procedure (see Peltzer et al 2016, Genome Biology for details). Bowtie2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming).\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)",
-                    "fa_icon": "fas fa-layer-group"
+                    "fa_icon": "fas fa-hammer"
                 },
                 "fasta_largeref": {
                     "type": "boolean",
@@ -536,7 +537,7 @@
                 "mapping_bwamem_r": {
                     "type": "number",
                     "default": 1.5,
-                    "description": "Specify the  minimum seed length for alignment with BWA mem.",
+                    "description": "Specify the re-seeding threshold for alignment with BWA mem.",
                     "help_text": "Configures the re-seeding used in BWA-MEM. Default is set to BWA default.\n\n> Modifies BWA-MEM parameter: `-r`",
                     "fa_icon": "fas fa-angle-double-left"
                 },
@@ -545,7 +546,7 @@
                     "default": "local",
                     "description": "Specify the bowtie2 alignment mode.",
                     "help_text": "The type of read alignment to use. Local allows only partial alignment of read, with ends of reads possibly 'soft-clipped' (i.e. remain unaligned/ignored), if the soft-clipped alignment provides best alignment score. End-to-end requires all nucleotides to be aligned. \nDefault is set following [Cahill et al (2018)](https://doi.org/10.1093/molbev/msy018) and [Poullet and Orlando 2020](https://www.frontiersin.org/articles/10.3389/fevo.2020.00105/full)\n\n> Modifies Bowtie2 presets: `--local`, `--end-to-end`",
-                    "fa_icon": "fas fa-arrows-alt-h",
+                    "fa_icon": "fas fa-toggle-on",
                     "enum": ["local", "end-to-end"]
                 },
                 "mapping_bowtie2_sensitivity": {
@@ -589,7 +590,7 @@
                     "default": 500,
                     "description": "Specify the maximum fragment length for bowtie2 paired-end mapping mode only.",
                     "help_text": "The maximum fragment for valid paired-end alignments. Only for paired-end mapping (i.e. unmerged), and therefore typically only useful for modern data.\n\n> Modifies Bowtie2 parameter: `--maxins`",
-                    "fa_icon": "fas fa-exchange-alt"
+                    "fa_icon": "fas fa-filter"
                 }
             },
             "fa_icon": "fas fa-layer-group"
@@ -611,14 +612,14 @@
                     "default": 0,
                     "description": "Specify the minimum read length mapped reads should have for downstream genomic analysis.",
                     "help_text": "You can use this to remove mapped reads that fall below a certain length after mapping.\n\nThis can be useful to get more realistic 'endogenous DNA' or 'on target read' percentages.\n\nIf used _instead of_ minimum length read filtering at AdapterRemoval, you can get more more realistic endogenous DNA estimates when most of your reads are very short (e.g. in single-stranded libraries or samples with highly degraded DNA). In these cases, the default minimum length filter at earlier adapter clipping/read merging will remove a very large amount of your reads in your library (including valid reads), thus making an artificially small denominator for a typical endogenous DNA calculation. \n\nTherefore by retaining all of your reads until _after_ mapping (i.e., turning off the  adapter clipping/read merging filter), you can generate more 'real' endogenous DNA estimates immediately after mapping (with a better denominator). Then after estimating this, filter using this parameter to retain only 'useful' reads (i.e., those long enough to provide higher confidence of their mapped position) for downstream analyses.\n\nBy specifying `0`, no length filtering is performed.\n\nNote that by default the output BAM files of this step are _not_ stored in the results directory (as it is assumed that deduplicated BAM files are preferred). See `--bamfiltering_savefilteredbams` if you wish to save these.\n\n> Modifies tool parameter(s):\n> - filter_bam_fragment_length.py: `-l`",
-                    "fa_icon": "fas fa-ruler-horizontal"
+                    "fa_icon": "fas fa-filter"
                 },
                 "bamfiltering_mappingquality": {
                     "type": "integer",
                     "default": 0,
                     "description": "Specify the minimum mapping quality reads should have for downstream genomic analysis.",
                     "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis.\n\nBy default all reads are retained and is therefore set to 0 to ensure no quality filtering is performed.\n\nNote that by default the output BAM files of this step are _not_ stored in the results directory (as it is assumed that deduplicated BAM files are preferred). See `--bamfiltering_savefilteredbams` if you wish to save these.\n\n> Modifies tool parameter(s):\n> - samtools view `-q`",
-                    "fa_icon": "fas fa-thermometer-full"
+                    "fa_icon": "fas fa-filter"
                 },
                 "bamfilter_genomicbamfilterflag": {
                     "type": "integer",
@@ -649,7 +650,7 @@
                     "type": "boolean",
                     "description": "Specify to save the intermediate filtered genomic BAM files in the results directory.",
                     "help_text": "This saves intermediate length and/or quality filtered genomic BAM files in the results directory.",
-                    "fa_icon": "far fa-save"
+                    "fa_icon": "fas fa-save"
                 }
             },
             "fa_icon": "fas fa-filter"
@@ -691,7 +692,7 @@
                     "default": "bbduk",
                     "description": "Specify which tool to use for trimming, filtering or reformatting of fastq reads that go into metagenomics screening.",
                     "enum": ["bbduk", "prinseq"],
-                    "fa_icon": "fas fa-hand-pointer",
+                    "fa_icon": "fas fa-hammer",
                     "help_text": "You can select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or reformatting of the reads.\n\nThis intermediate file is not saved in the results directory, unless marked with `--metagenomics_complexity_savefastq`."
                 },
                 "metagenomics_complexity_entropy": {
@@ -705,14 +706,14 @@
                     "type": "string",
                     "default": "entropy",
                     "enum": ["entropy", "dust"],
-                    "fa_icon": "fas fa-check-square",
+                    "fa_icon": "fas fa-toggle-on",
                     "description": "Specify the complexity filter mode for PRINSEQ++.",
                     "help_text": "Specify the complexity filter mode for PRINSEQ++ \n\nUse the selected mode together with the correct flag:\n'dust' requires the `--metagenomics_prinseq_dustscore` parameter set\n'entropy' requires the `--metagenomics_complexity_entropy` parameter set\n\n> Sets one of the tool parameter(s):\n> - PRINSEQ++:  `-lc_entropy`\n> - PRINSEQ++:  `-lc_dust`"
                 },
                 "metagenomics_prinseq_dustscore": {
                     "type": "number",
                     "default": 0.5,
-                    "fa_icon": "fas fa-head-side-mask",
+                    "fa_icon": "fas fa-filter",
                     "description": "Specify the minimum dust score for PRINTSEQ++. complexity filtering",
                     "help_text": "Specify the minimum dust score below which low-complexity reads will be removed. A DUST score is based on how often different tri-nucleotides occur along a read.\n\n> Modifies tool parameter(s):\n> - PRINSEQ++: `--lc_dust`"
                 }
@@ -736,7 +737,7 @@
                     "description": "Specify which tool to use for deduplication.",
                     "help_text": "Sets the duplicate read removal tool. Alternatively an ancient DNA specific read deduplication tool `dedup` (Peltzer et al. 2016) is offered. The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> ⚠️ DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
                     "enum": ["markduplicates", "dedup"],
-                    "fa_icon": "fas fa-layer-group"
+                    "fa_icon": "fas fa-hammer"
                 }
             },
             "fa_icon": "fas fa-clone"
@@ -750,7 +751,7 @@
             "properties": {
                 "run_mapdamage_rescaling": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-map",
+                    "fa_icon": "fas fa-power-off",
                     "description": "Specify to turn on damage rescaling of BAM files using mapDamage2 to probabilistically remove damage.",
                     "help_text": "Turns on mapDamage2's BAM rescaling functionality. This probabilistically replaces Ts back to Cs depending on the likelihood this reference-mismatch was originally caused by damage. If the library is specified to be single stranded, this will automatically use the --single-stranded mode.\nThis process will ameliorate the effects of aDNA damage, but also increase reference-bias. \n\n**This functionality does not have any MultiQC output.**\nwarning: rescaled libraries will not be merged with non-scaled libraries of the same sample for downstream genotyping, as the model may be different for each library. If you wish to merge these, please do this manually and re-run nf-core/eager using the merged BAMs as input.\n\n> Modifies the `--rescale` parameter of mapDamage2"
                 },
@@ -806,69 +807,69 @@
                 },
                 "run_trim_bam": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-eraser",
+                    "fa_icon": "fas fa-power-off",
                     "description": "Specify to turn on BAM trimming for non-UDG or half-UDG libraries.",
                     "help_text": "Turns on the BAM trimming method. Trims off [n] bases from reads in the deduplicated BAM file. Damage assessment in PMDtools or DamageProfiler remains untouched, as data is routed through this independently. BAM trimming is typically performed to reduce errors during genotyping that can be caused by aDNA damage.\n\nBAM trimming will only affect libraries with 'damage_treatment' of  'none' or 'half'. Complete UDG treatment ('full') should have removed all damage, during library construction so trimming of 0 bp is performed. The amount of bases that will be trimmed off from each side of the molecule should be set separately for libraries with depending on their 'strandedness' and 'damage_treatment'.\n\n> Note: additional artefacts such as bar-codes or adapters should be removed prior to mapping and not in this step."
                 },
                 "damage_manipulation_bamutils_trim_double_stranded_none_udg_left": {
                     "type": "integer",
                     "default": 0,
-                    "fa_icon": "fas fa-ruler-combined",
+                    "fa_icon": "fas fa-cut",
                     "description": "Specify the number of bases to clip off reads from 'left' (5 prime) end of reads for double-stranded non-UDG libraries.",
                     "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`"
                 },
                 "damage_manipulation_bamutils_trim_double_stranded_none_udg_right": {
                     "type": "integer",
                     "default": 0,
-                    "fa_icon": "fas fa-ruler",
+                    "fa_icon": "fas fa-cut",
                     "description": "Specify the number of bases to clip off reads from 'right' (3 prime) end of reads for double-stranded non-UDG libraries.",
                     "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from double-stranded libraries whose UDG treatment is set to'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
                 },
                 "damage_manipulation_bamutils_trim_double_stranded_half_udg_left": {
                     "type": "integer",
                     "default": 0,
-                    "fa_icon": "fas fa-ruler-combined",
+                    "fa_icon": "fas fa-cut",
                     "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
                     "description": "Specify the number of bases to clip off reads from 'left'  (5 prime) end of read for double-stranded half-UDG libraries."
                 },
                 "damage_manipulation_bamutils_trim_double_stranded_half_udg_right": {
                     "type": "integer",
                     "default": 0,
-                    "fa_icon": "fas fa-ruler",
+                    "fa_icon": "fas fa-cut",
                     "description": "Specify the number of bases to clip off reads from 'right' (3 prime) end of read for double-stranded half-UDG libraries.",
                     "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from double-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
                 },
                 "damage_manipulation_bamutils_trim_single_stranded_none_udg_left": {
                     "type": "integer",
                     "default": 0,
-                    "fa_icon": "fas fa-ruler-combined",
+                    "fa_icon": "fas fa-cut",
                     "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
                     "description": "Specify the number of bases to clip off reads from 'left' (5 prime) end of read for single-stranded non-UDG libraries."
                 },
                 "damage_manipulation_bamutils_trim_single_stranded_none_udg_right": {
                     "type": "integer",
                     "default": 0,
-                    "fa_icon": "fas fa-ruler",
+                    "fa_icon": "fas fa-cut",
                     "description": "Specify the number of bases to clip off reads from 'right' (3 prime) end of read for single-stranded non-UDG libraries.",
                     "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from single-stranded libraries whose UDG treatment is set to 'none'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
                 },
                 "damage_manipulation_bamutils_trim_single_stranded_half_udg_left": {
                     "type": "integer",
                     "default": 0,
-                    "fa_icon": "fas fa-ruler-combined",
+                    "fa_icon": "fas fa-cut",
                     "help_text": "Default is set to 0, and therefore clips off no bases on the left side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-L`",
                     "description": "Specify the number of bases to clip off reads from 'left' (5 prime) end of read for single-stranded half-UDG libraries."
                 },
                 "damage_manipulation_bamutils_trim_single_stranded_half_udg_right": {
                     "type": "integer",
                     "default": 0,
-                    "fa_icon": "fas fa-ruler",
+                    "fa_icon": "fas fa-cut",
                     "description": "Specify the number of bases to clip off reads from 'right' (3 prime) end of read for single-stranded half-UDG libraries.",
                     "help_text": "Default is set to 0, and therefore clips off no bases on the right side of reads from single-stranded libraries whose UDG treatment is set to 'half'. Note that reverse reads will automatically be clipped off at the reverse side with this (automatically reverses left and right for the reverse read).\n\n> Modifies bamUtil's trimBam parameter: `-R`"
                 },
                 "damage_manipulation_bamutils_softclip": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-paint-roller",
+                    "fa_icon": "fas fa-mask",
                     "description": "Specify to turn on using soft-trimming instead of hard masking.",
                     "help_text": "By default, nf-core/eager uses hard trimming, which sets trimmed bases to 'N' with quality '!' in the BAM output. Turn this on to use soft-trimming instead, which masks reads at the read ends using the CIGAR string instead.\n\n> Modifies bam trimBam parameter: `-c`"
                 }
@@ -895,14 +896,14 @@
                 },
                 "genotyping_tool": {
                     "type": "string",
-                    "fa_icon": "fas fa-tools",
+                    "fa_icon": "fas fa-hammer",
                     "enum": ["ug", "hc", "freebayes", "pileupcaller", "angsd"],
                     "help_text": "Specifies which genotyper to use. Current options are: GATK (v3.5) UnifiedGenotyper or GATK Haplotype Caller (v4); and the FreeBayes Caller.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does de novo assembly around each variant site), be aware GATK 3.5 it is officially deprecated by the Broad Institute (but is used here for compatibility with MultiVCFAnalyzer).",
                     "description": "Specify which genotyper to use."
                 },
                 "skip_bcftools_stats": {
                     "type": "boolean",
-                    "fa_icon": "far fa-chart-bar",
+                    "fa_icon": "fas fa-forward",
                     "description": "Specify to skip bcftools stats generation for VCF-based variant calling statistics.",
                     "help_text": "Disables running of `bcftools stats` against VCF files from GATK and FreeBayes genotypers.\n\nIf ran, `bcftools stats`  will automatically include the FASTA reference for INDEL-related statistics."
                 },
@@ -986,7 +987,7 @@
                     "description": "Specify GATK Unified Genotyper output mode.",
                     "enum": ["EMIT_VARIANTS_ONLY", "EMIT_ALL_CONFIDENT_SITES", "EMIT_ALL_SITES"],
                     "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, this defines the output mode to use when producing the output VCF (i.e. produce calls for every site or just confidence sites.)\n\n> Modifies GATK UnifiedGenotyper parameter: `--output_mode`",
-                    "fa_icon": "fas fa-bullhorn"
+                    "fa_icon": "fas fa-toggle-on"
                 },
                 "genotyping_gatk_ug_genotype_mode": {
                     "type": "string",
@@ -998,7 +999,7 @@
                 },
                 "genotyping_gatk_ug_keeprealignbam": {
                     "type": "boolean",
-                    "fa_icon": "far fa-save",
+                    "fa_icon": "fas fa-save",
                     "description": "Specify to keep the BAM output of re-alignment around variants from GATK UnifiedGenotyper.",
                     "help_text": "If GATK UnifiedGenotyper is selected as the genotyping tool, providing this parameter will output the BAMs that have realigned reads (with GATK's (v3) IndelRealigner) around possible variants for improved genotyping in addition to the standard VCF output.\n\nThese BAMs will be stored in the same folder as the corresponding VCF files."
                 },
@@ -1012,7 +1013,7 @@
                 "genotyping_gatk_hc_out_mode": {
                     "type": "string",
                     "default": "EMIT_VARIANTS_ONLY",
-                    "fa_icon": "fas fa-bullhorn",
+                    "fa_icon": "fas fa-toggle-on",
                     "description": "Specify GATK HaplotypeCaller output mode.",
                     "help_text": "If GATK HaplotypeCaller is selected as the genotyping tool, this sets the type of sites that should be included in the output VCF (i.e. produce calls for every site or just confidence sites). \n\n> Modifies GATK HaplotypeCaller parameter: `--output_mode`",
                     "enum": ["EMIT_VARIANTS_ONLY", "EMIT_ALL_CONFIDENT_SITES", "EMIT_ALL_ACTIVE_SITES"]
@@ -1020,7 +1021,7 @@
                 "genotyping_gatk_hc_emitrefconf": {
                     "type": "string",
                     "default": "GVCF",
-                    "fa_icon": "fas fa-bullhorn",
+                    "fa_icon": "fas fa-toggle-on",
                     "description": "Specify HaplotypeCaller mode for emitting reference confidence calls.",
                     "help_text": "If GATK HaplotypeCaller is selected as the genotyping tool, this sets the mode for emitting reference confidence calls.\n\n> Modifies GATK HaplotypeCaller parameter: `--emit-ref-confidence`",
                     "enum": ["NONE", "BP_RESOLUTION", "GVCF"]
@@ -1030,7 +1031,7 @@
                     "default": 1,
                     "description": "Specify minimum required supporting observations of an alternate allele to consider a variant in FreeBayes.",
                     "help_text": "Require at least this count of observations supporting an alternate allele within a single individual in order to evaluate the position.\n\n> Modifies freebayes parameter: `-C`",
-                    "fa_icon": "fas fa-align-center"
+                    "fa_icon": "fas fa-filter"
                 },
                 "genotyping_freebayes_skip_coverage": {
                     "type": "integer",
@@ -1071,7 +1072,7 @@
                     "type": "boolean",
                     "description": "Specify to turn on mitochondrial to nuclear ratio calculation.",
                     "help_text": "Turn on the module to estimate the ratio of mitochondrial to nuclear reads.",
-                    "fa_icon": "fas fa-balance-scale-left"
+                    "fa_icon": "fas fa-power-off"
                 },
                 "mitochondrion_header": {
                     "type": "string",
@@ -1141,11 +1142,12 @@
                     "type": "boolean",
                     "description": "Specify to turn on preseq defects mode to extrapolate without testing for defects inlc_extrap mode.",
                     "help_text": "Activates defects mode of `lc_extrap`, which does the extrapolation without testing for defects.\n\n> Modifies preseq lc_extrap parameter: `-D`",
-                    "fa_icon": "fab fa-creative-commons-sampling-plus"
+                    "fa_icon": "fas fa-power-off"
                 },
                 "skip_qualimap": {
                     "type": "boolean",
-                    "description": "Specify to turn off coverage calculation with Qualimap."
+                    "description": "Specify to turn off coverage calculation with Qualimap.",
+                    "fa_icon": "fas fa-forward"
                 },
                 "snpcapture_bed": {
                     "type": "string",
@@ -1172,7 +1174,7 @@
                     "type": "string",
                     "default": "damageprofiler",
                     "enum": ["damageprofiler", "mapdamage"],
-                    "fa_icon": "fas fa-tools",
+                    "fa_icon": "fas fa-hammer",
                     "description": "Specify the tool to use for damage calculation.",
                     "help_text": "Specify the tool to be used for damage calculation. DamageProfiler is generally faster than mapDamage2, but the latter has an option to limit the number of reads used. This can significantly speed up the processing of very large files, where the damage estimates are already accurate after processing only a fraction of the input."
                 },
@@ -1195,7 +1197,7 @@
                     "default": 100,
                     "description": "Specify the length filter for DamageProfiler.",
                     "help_text": "Number of bases which are considered for frequency computations, by default set to 100.`\n\n> Modifies DamageProfiler parameter: -l",
-                    "fa_icon": "fas fa-sort-amount-down"
+                    "fa_icon": "fas fa-ruler-horizontal"
                 },
                 "damagecalculation_mapdamage_downsample": {
                     "type": "integer",
@@ -1215,7 +1217,7 @@
                 "run_bedtools_coverage": {
                     "type": "boolean",
                     "description": "Specify to turn on calculation of number of reads, depth and breadth coverage of features in reference with bedtools..",
-                    "fa_icon": "fas fa-chart-area",
+                    "fa_icon": "fas fa-power-off",
                     "help_text": "Specifies to turn on the bedtools module, producing statistics for breadth (or percent coverage), and depth (or X fold) coverages.\n\n> Modifies tool parameter(s):\n- bedtools coverage: `-mean`"
                 },
                 "mapstats_bedtools_featurefile": {
@@ -1245,7 +1247,7 @@
                     "default": "remove",
                     "description": "Specify the host-mapped read removal mode.",
                     "help_text": "Modifies extract_map_reads.py parameter: -m",
-                    "fa_icon": "fas fa-plane-slash",
+                    "fa_icon": "fas fa-toggle-on",
                     "enum": ["remove", "replace"]
                 }
             },
@@ -1290,14 +1292,14 @@
                     "default": 30,
                     "help_text": "> Modifies angsd parameter: `-minMapQ`",
                     "description": "Specify the minimum mapping quality reads should have for contamination estimation with ANGSD.",
-                    "fa_icon": "fas fa-thermometer-full"
+                    "fa_icon": "fas fa-filter"
                 },
                 "contamination_estimation_angsd_minq": {
                     "type": "integer",
                     "default": 30,
                     "description": "Specify the minimum base quality reads should have for contamination estimation with ANGSD.",
                     "help_text": "> Modifies angsd parameter: `-minQ`",
-                    "fa_icon": "fas fa-ruler-vertical"
+                    "fa_icon": "fas fa-filter"
                 },
                 "contamination_estimation_angsd_hapmap": {
                     "type": "string",
@@ -1316,7 +1318,7 @@
             "properties": {
                 "run_sexdeterrmine": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-transgender-alt",
+                    "fa_icon": "fas fa-power-off",
                     "description": "Specify to turn on sex determination for genomes mapped to human reference genomes with Sex.DetERRmine.",
                     "help_text": "Specify to run the optional process of sex determination."
                 },
