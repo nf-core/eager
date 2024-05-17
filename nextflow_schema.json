@@ -23,6 +23,12 @@
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/eager/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
+                "convert_inputbam": {
+                    "type": "boolean",
+                    "description": "Specify to convert input BAM files back to FASTQ for remapping",
+                    "help_text": "This parameter tells the pipeline to convert the BAM files listed in the `--input` TSV or CSV sheet back to FASTQ format to allow re-preprocessing and mapping\n\nCan be useful when you want to ensure consistent mapping parameters across all libraries when incorporating public data, however be careful of biases that may come from re-processing again (the BAM files may already be clipped, or only mapped reads with different settings are included so you may not have all reads from the original publication).",
+                    "fa_icon": "fas fa-undo-alt"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
@@ -316,6 +322,13 @@
                     "description": "Validation of parameters in lenient more.",
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
+                },
+                "pipelines_testdata_base_path": {
+                    "type": "string",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Base URL or local path to location of pipeline test dataset files",
+                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
                 }
             }
         },
@@ -1314,7 +1327,6 @@
             "properties": {
                 "run_sexdeterrmine": {
                     "type": "boolean",
-                    "default": false,
                     "fa_icon": "fas fa-transgender-alt",
                     "description": "Turn on sex determination for human reference genomes. This will run on single- and double-stranded variants of a library separately.",
                     "help_text": "Specify to run the optional process of sex determination."

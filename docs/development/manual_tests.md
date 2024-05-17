@@ -903,3 +903,11 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ## Expect: One `glf.gz` file in binary_three format per reference.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'angsd' --genotyping_angsd_glmodel 'syk' --genotyping_angsd_glformat 'text' --genotyping_source 'raw' -ansi-log false -dump-channels
 ```
+
+# CONVERT BAM INPUT
+
+```bash
+## BAM input converted to FastQ and remapped.
+## Expect: BAM input shows up in FastQC -> mapping results.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ --convert_inputbam --skip_deduplication -resume -ansi-log false -dump-channels
+```
