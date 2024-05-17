@@ -27,6 +27,18 @@ CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
 CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
 ```
 
+### Supplying BAM input
+
+It is possible to also supply BAM files as input to nf-core/eager. This can allow you to skip earlier steps of the pipeline (preprocessing and mapping) when desired - e.g. when re-processing public data. You can also convert input BAM files back to FASTQ files to re-undergo preprocessing and mapping. This may be desired when you want to standardise the mapping parameters between your own and previously published data.
+
+You will still need to fill the `pairment` column in the input TSV sheet for the BAM files. If you do not convert the BAM files back to FASTQ, you must specify the column as `single`. If you do do the conversion, you must specify the type of reads the BAM file contains, i.e.:
+
+- If the mapped reads in the BAM file are single end then specify `single`
+- If the mapped reads in the BAM file are paired-end _but merged pairs_ (i.e. overlapping pairs collapsed to a single read), then you must also supply `single`
+- If the mapped reads in the BAM file are paired-end and are _not_ merged (i.e., paired-end mapping was originally performed), then you must specify `paired`
+
+Note that if you do not specify to merge BAM converted paired-end FASTQs (i.e., request paired-end mapping), only forward and reverse pairs will be used - singletons in the BAMs will be discarded!
+
 ### Full samplesheet
 
 The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
@@ -198,6 +210,8 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
 - `apptainer`
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
+- `wave`
+  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow ` 24.03.0-edge` or later).
 - `conda`
   - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
 
