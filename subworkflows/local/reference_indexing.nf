@@ -19,8 +19,8 @@ workflow REFERENCE_INDEXING {
     ch_versions = Channel.empty()
 
     // Warn user if they've given a reference sheet that already includes fai/dict/mapper index etc.
-    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && (fasta_fai || fasta_dict || fasta_mapperindexdir)) log.warn("A TSV or CSV has been supplied to `--fasta` as well as e.g. `--fasta_fai`. --fasta CSV/TSV takes priority and --fasta_* parameters will be ignored.")
-    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && (params.mitochondrion_header || params.contamination_estimation_angsd_hapmap || params.damage_manipulation_pmdtools_reference_mask || params.snpcapture_bed || params.mapstats_bedtools_featurefile )) log.warn("A TSV or CSV has been supplied to `--fasta` as well as individual reference-specific input files, e.g. `--contamination_estimation_angsd_hapmap`. Input files specified in the --fasta CSV/TSV take priority and other input parameters will be ignored.")
+    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && ( fasta_fai || fasta_dict || fasta_mapperindexdir )) log.warn("A TSV or CSV has been supplied to `--fasta_sheet` as well as e.g. `--fasta_fai`. --fasta_sheet CSV/TSV takes priority and --fasta_* parameters will be ignored.")
+    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && ( params.mitochondrion_header || params.contamination_estimation_angsd_hapmap || params.damage_manipulation_pmdtools_reference_mask || params.damage_manipulation_pmdtools_reference_mask || params.snpcapture_bed || params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile || params.sexdeterrmine_bedfile || params.mapstats_bedtools_featurefile || params.genotyping_reference_ploidy || params.genotyping_gatk_dbsnp )) log.warn("A TSV or CSV has been supplied to `--fasta_sheet` as well as individual reference-specific input files, e.g. `--contamination_estimation_angsd_hapmap`. Input files specified in the --fasta_sheet CSV/TSV take priority and other input parameters will be ignored.")
 
     if ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) {
         // If input (multi-)reference sheet supplied

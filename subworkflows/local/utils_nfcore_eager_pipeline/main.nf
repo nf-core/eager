@@ -81,12 +81,15 @@ workflow PIPELINE_INITIALISATION {
     //
     // Create channel from input file provided through params.input
     //
-    ch_samplesheet_for_branch = Channel.fromSamplesheet("input")
-                                    .map{
+    ch_samplesheet = Channel.fromSamplesheet("input")
+                                    .map {
                                         meta, r1, r2, bam ->
                                             meta.single_end = meta.pairment == "single" ? true : false
+                                            meta.id = meta.sample_id
                                         [ meta, r1, r2, bam ]
                                     }
+
+    ch_samplesheet_for_branch = ch_samplesheet
                                     .branch {
                                         meta, r1, r2, bam ->
                                             bam: bam.toString().endsWith(".bam")
@@ -94,42 +97,66 @@ workflow PIPELINE_INITIALISATION {
                                     }
 
     ch_samplesheet_fastqs = ch_samplesheet_for_branch.fastq
-                                .map{
+                                .map {
                                     meta, r1, r2, bam ->
                                         reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
                                     [ meta - meta.subMap('pairment', 'bam_reference_id'), reads ]
                                 }
 
     ch_samplesheet_bams = ch_samplesheet_for_branch.bam
-                            .map{
+                            .map {
                                 meta, r1, r2, bam ->
                                     meta.reference = meta.bam_reference_id
                                     meta.id_index = meta.bam_reference_id
-                                [ meta - meta.subMap('bam_reference_id'), bam ]
+                                [ meta - meta.subMap('pairment', 'bam_reference_id'), bam ]
                             }
 
     // Extra validation
-    //  - No single-ended data allowed when using dedup
-    ch_samplesheet_fastqs.map {
-            meta, reads ->
-                seq_type = meta.subMap('single_end')
-            seq_type
-        }
-        .toList()
+    // - Only paired end specified when R2 provided
+    // - No single-ended data allowed when using dedup
+    ch_samplesheet_for_branch.fastq
         .map {
-            ids ->
-                def has_se=ids.single_end.contains(true)
-
-                if ( params.deduplication_tool == 'dedup' &&  has_se ) {
-                    exit 1, "[nf-core] Error: Invalid input/parameter combination: '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use  'markduplicates' for all or separate SE and PE data into separate runs."
+            meta, r1, r2, bam ->
+                if ( meta.pairment == "single" && r2 != [] ) {
+                    exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Reads 2 cannot be provided when sequencing pairment is set to 'single'."
                 }
-            [ids, has_se]
+                if ( meta.pairment == "paired" && r2 == [] ) {
+                    exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Reads 2 have to be provided when sequencing pairment is set to 'paired'."
+                }
+                if ( meta.pairment == "single" && params.deduplication_tool == "dedup" ) {
+                    exit 1, "[nf-core] ERROR: Invalid input/parameter combination. '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use 'markduplicates' for runs with both SE and PE data or separate SE and PE data into separate runs."
+                }
+            [ meta, r1, r2, bam ]
         }
+
+    // - Only single-ended specified for BAM files
+    ch_samplesheet_for_branch.bam
+        .map {
+            meta, r1, r2, bam ->
+                if ( meta.pairment == "paired" && bam != [] ) {
+                    exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sequencing pairment has to be 'single' when BAM files are provided."
+                }
+            [ meta, r1, r2, bam ]
+        }
+
+    // - No single- and double-stranded libraries with same sample ID
+    ch_samplesheet_test = ch_samplesheet
+                            .map {
+                                meta, r1, r2, bam ->
+                                [ meta.subMap('sample_id'), meta.subMap('strandedness') ]
+                            }
+                            .groupTuple()
+                            .map { meta, singlestrand ->
+                                    if ( singlestrand.toList().unique().size() > 1 ) {
+                                        exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sample IDs can only be identical if library strandedness is identical."
+                                    }
+                                [ meta, singlestrand ]
+                            }
 
     emit:
     samplesheet_fastqs = ch_samplesheet_fastqs
     samplesheet_bams   = ch_samplesheet_bams
-    versions    = ch_versions
+    versions           = ch_versions
 }
 
 /*
@@ -184,6 +211,8 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     genomeExistsError()
+    if ( !params.fasta                                     && !params.fasta_sheet ) { exit 1, "[nf-core/eager] ERROR: Neither FASTA file --fasta nor reference sheet --fasta_sheet have been provided."}
+    if ( params.fasta                                      && params.fasta_sheet ) { exit 1, "[nf-core/eager] ERROR: A FASTA file --fasta and a reference sheet --fasta_sheet have been provided. These parameters are mutually exclusive."}
     if ( params.preprocessing_adapterlist                  && params.preprocessing_skipadaptertrim ) { log.warn("[nf-core/eager] WARNING: --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!") }
     if ( params.deduplication_tool == 'dedup'              && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
     if ( params.bamfiltering_retainunmappedgenomicbam      && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
@@ -201,7 +230,7 @@ def validateInputParameters() {
     if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
     if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
     if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
-    if ( ! ( params.fasta.endsWith('csv') || params.fasta.endsWith('tsv') ) && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
+    if ( params.fasta && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
 
 }
 
