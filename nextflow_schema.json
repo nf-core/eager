@@ -16,9 +16,9 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.(c|t)sv$",
+                    "schema": "assets/schema_input.json",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/eager/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
@@ -60,9 +60,10 @@
                     "format": "file-path",
                     "exists": true,
                     "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$|^\\S+\\.(c|t)sv$",
-                    "description": "Specify path to FASTA reference genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't supply a mapper index (e.g. for BWA), this will be generated for you automatically. Combine with `--save_reference` to save mapper index for future runs.",
+                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
+                    "errorMessage": "The path to the reference FASTA file must not contain spaces and must have file extensions '.fasta', '.fa', '.fas', '.fna', '.fasta.gz','.fa.gz','.fas.gz' or '.fna.gz'.",
+                    "description": "Path to FASTA genome file.",
+                    "help_text": "This parameter is *mandatory* if `--genome` or `--fasta_sheet` are not specified. If you don't supply a mapper index (e.g. for BWA), this will be generated for you automatically. Combine with `--save_reference` to save mapper index for future runs.",
                     "fa_icon": "far fa-file-code"
                 },
                 "fasta_fai": {
@@ -88,6 +89,18 @@
                     "description": "Specify to save any pipeline-generated reference genome indices  in the results directory.",
                     "help_text": "Use this if you do not have pre-made reference FASTA indices for `bwa`, `samtools` and `picard`. If you turn this on, the indices nf-core/eager generates for you and will be saved in the `<your_output_dir>/results/reference_genomes` for you. If not supplied, nf-core/eager generated index references will be deleted.\n\n> modifies SAMtools index command: `-c`",
                     "fa_icon": "fas fa-save"
+                },
+                "fasta_sheet": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.(c|t)sv$",
+                    "schema": "assets/schema_fasta.json",
+                    "description": "Path to a tab-/comma-separated file containing reference-specific files.",
+                    "help_text": "This parameter is *mandatory* if `--genome` or `--fasta` are not specified. If you don't supply a mapper index (e.g. for BWA), this will be generated for you automatically.",
+                    "errorMessage": "The path to the reference sheet must not contain spaces and have file extension '.csv' or '.tsv'.",
+                    "fa_icon": "fas fa-table"
                 },
                 "genome": {
                     "type": "string",

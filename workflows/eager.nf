@@ -83,7 +83,7 @@ workflow EAGER {
 
 
     // Reference
-    fasta                = file(params.fasta, checkIfExists: true)
+    fasta_fn             = params.fasta ? file(params.fasta, checkIfExists: true) : params.fasta_sheet ? file(params.fasta_sheet, checkIfExists: true) : []
     fasta_fai            = params.fasta_fai ? file(params.fasta_fai, checkIfExists: true) : []
     fasta_dict           = params.fasta_dict ? file(params.fasta_dict, checkIfExists: true) : []
     fasta_mapperindexdir = params.fasta_mapperindexdir ? file(params.fasta_mapperindexdir, checkIfExists: true) : []
@@ -146,7 +146,7 @@ workflow EAGER {
     // SUBWORKFLOW: Indexing of reference files
     //
 
-    REFERENCE_INDEXING ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir )
+    REFERENCE_INDEXING ( fasta_fn, fasta_fai, fasta_dict, fasta_mapperindexdir )
     ch_versions = ch_versions.mix( REFERENCE_INDEXING.out.versions )
 
     //
