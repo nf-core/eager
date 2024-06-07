@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Fixed`
 
-- [#1048](https://github.com/nf-core/eager/issues/1048) `--vcf2genome_outfile` parameter now gets prefixed by the sample_name and suffixed with `.fasta` (i.e. `<sample_name>\_<vcf2genome_outfile>.fasta`). This ensures we avoid overwriting the output fasta of one sample with that of another when the option is provided. (♥ Thanks to @MeriamOs for reporting.)
+- [#1048](https://github.com/nf-core/eager/issues/1048) `--vcf2genome_outfile` parameter now gets prefixed by the sample_name and suffixed with `.fasta` (i.e. `<sample_name>_<vcf2genome_outfile>.fasta`). This ensures we avoid overwriting the output fasta of one sample with that of another when the option is provided. (♥ Thanks to @MeriamOs for reporting.)
 - [#1047](https://github.com/nf-core/eager/issues/1047) Changed the row some statistics were reported in the General Stats table. The File name collision fixed in 2.5.0 (see #1017) caused these statistics to be reported in the wrong row due to an added suffix.
 - [#1051](https://github.com/nf-core/eager/issues/1051) An error is now thrown if input BAM files end in `.unmapped.bam`, as this breaks the bam filtering process and empties the bam files in the process. (♥ Thanks to @PCQuilis for reporting.)
 
