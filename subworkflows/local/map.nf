@@ -103,12 +103,23 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
 
     } else if ( params.mapping_tool == 'mapad' ) {
+        ch_input_for_mapping = reads
+                            .combine( index )
+                            .multiMap {
+                                meta, reads, meta2, index, fasta ->
+                                    new_meta = meta + [ reference: meta2.id ]
+                                    reads: [ new_meta, reads ]
+                                    index: [ meta2, index ]
+                                    fasta: [ meta2, fasta ]
+                                    strandedness: meta.strandedness=="double"
+                            }
+
         FASTQ_ALIGN_MAPAD (
-                reads,
-                index,
-                params.fasta,
+                ch_input_for_mapping.reads,
+                ch_input_for_mapping.index,
+                ch_input_for_mapping.fasta,
                 params.mapping_mapad_p,
-                params.mapping_mapad_lib=="double_stranded" ? true : false,
+                ch_input_for_mapping.strandedness,
                 params.mapping_mapad_f,
                 params.mapping_mapad_t,
                 params.mapping_mapad_d,
