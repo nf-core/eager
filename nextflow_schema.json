@@ -581,14 +581,6 @@
                     "help_text": "Configures the `mapad map -p` parameter, defining how many mismatches are allowed in a read. Default is set following recommendations from [Heide et al. 2024](https://localhost) who tested when aligning to human reference genomes. \n\n> Modifies mapAD parameter: `-p`",
                     "fa_icon": "fas fa-sort-numeric-down"
                 },
-                "mapping_mapad_lib": {
-                    "type": "string",
-                    "default": "single_stranded",
-                    "description": "Specify mapAD's library-preparation parameter, which adapts its aDNA-specific mismatch scoring correspondingly.",
-                    "help_text": "Configures whether mapAD's aDNA-scoring model is set to double- or single-stranded library preparation mode. In single-stranded mode, we expect elevated C->T error rates at both ends of the reads, whereas in double-stranded mode we expect increased C->T error rates at the 5‘ end, but elevated G->A error rates at the 3’ end. Default is set to `single_stranded`.\n\n> Modifies mapAD parameter: `-l/--library`",
-                    "fa_icon": "fas fa-exchange-alt",
-                    "enum": ["single_stranded", "double_stranded"]
-                },
                 "mapping_mapad_f": {
                     "type": "number",
                     "default": 0.5,
