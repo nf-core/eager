@@ -202,12 +202,12 @@
                     },
                     "mapad/index": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "1eddaed79279c37b0eb34953b4098c258b033f96",
                         "installed_by": ["modules"]
                     },
                     "mapad/map": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "1eddaed79279c37b0eb34953b4098c258b033f96",
                         "installed_by": ["fastq_align_mapad", "modules"]
                     },
                     "mapdamage2": {
@@ -391,7 +391,7 @@
                     },
                     "fastq_align_mapad": {
                         "branch": "master",
-                        "git_sha": "9f892b5da34b25da790af7baa48caeb869481bb9",
+                        "git_sha": "1eddaed79279c37b0eb34953b4098c258b033f96",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nextflow_pipeline": {
