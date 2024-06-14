@@ -95,6 +95,16 @@
                         "git_sha": "02fd5bd7275abad27aad32d5c852e0a9b1b98882",
                         "installed_by": ["modules"]
                     },
+                    "circularmapper/circulargenerator": {
+                        "branch": "master",
+                        "git_sha": "5890d9e73aaa803fc6be94b1822539b4204d8cff",
+                        "installed_by": ["modules"]
+                    },
+                    "circularmapper/realignsamfile": {
+                        "branch": "master",
+                        "git_sha": "5890d9e73aaa803fc6be94b1822539b4204d8cff",
+                        "installed_by": ["modules"]
+                    },
                     "damageprofiler": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
