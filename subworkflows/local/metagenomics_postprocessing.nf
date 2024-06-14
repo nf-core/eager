@@ -6,9 +6,9 @@ include { MEGAN_RMA2INFO       } from '../../modules/nf-core/megan/rma2info/main
 
 workflow METAGENOMICS_POSTPROCESSING {
 
-    take:
-    ch_postprocessing_input // different between each profiling --> postprocessing tool,
-                            // defined in metagenomics profiling subworkflow
+    take: ch_postprocessing_input // different between each profiling --> postprocessing tool, defined in metagenomics profiling subworkflow
+    take: ch_tax_list
+    take: ch_ncbi_dir
 
     main:
     ch_versions      = Channel.empty()
@@ -16,9 +16,6 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     // For MALT we have an additional step that includes maltextract+amps
     if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt' ) {
-
-        tax_list = Channel.fromPath(params.metagenomics_maltextract_taxonlist)
-        ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbidir)
 
         // Malt could have been executed multiple times (group_size paramter and strandedness)
         // We want to combine the chunks, but run MaltExtract on double and singlestranded individually
@@ -34,8 +31,8 @@ workflow METAGENOMICS_POSTPROCESSING {
 
         // could now be two entries in the channel, so combine with the tax_list and ncbi
         ch_maltextract_input = ch_strandedness
-            .combine(tax_list)
-            .combine(ncbi_dir)
+            .combine(ch_tax_list)
+            .combine(ch_ncbi_dir)
             .multiMap{
                 rma6:[it[0],it[1]]
                 tax_list:it[2]

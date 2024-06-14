@@ -4,6 +4,9 @@ include { METAGENOMICS_POSTPROCESSING   } from './metagenomics_postprocessing'
 
 workflow METAGENOMICS {
     take: ch_bamfiltered_for_metagenomics
+    take: ch_database
+    take: ch_tax_list
+    take: ch_ncbi_dir
 
     main:
     // Define channels
@@ -34,9 +37,7 @@ workflow METAGENOMICS {
     // Run the profiling subworkflow
     //
 
-    database = Channel.fromPath(params.metagenomics_profiling_database)
-
-    METAGENOMICS_PROFILING( ch_reads_for_metagenomics, database )
+    METAGENOMICS_PROFILING( ch_reads_for_metagenomics, ch_database )
     ch_versions      = ch_versions.mix( METAGENOMICS_PROFILING.out.versions )
     ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS_PROFILING.out.mqc.collect{it[1]}.ifEmpty([]) )
 
@@ -46,7 +47,7 @@ workflow METAGENOMICS {
 
     if ( params.metagenomics_run_postprocessing || ['kraken2', 'krakenuniq'].contains(params.metagenomics_profiling_tool) ) {
 
-        METAGENOMICS_POSTPROCESSING ( METAGENOMICS_PROFILING.out.postprocessing_input )
+        METAGENOMICS_POSTPROCESSING ( METAGENOMICS_PROFILING.out.postprocessing_input, ch_tax_list, ch_ncbi_dir )
 
         ch_versions      = ch_versions.mix( METAGENOMICS_POSTPROCESSING.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS_POSTPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )

@@ -298,7 +298,19 @@ workflow EAGER {
     //
 
     if ( params.run_metagenomics ) {
-        METAGENOMICS ( ch_bamfiltered_for_metagenomics )
+
+        ch_database = Channel.fromPath(params.metagenomics_profiling_database)
+
+        // this is for MALT
+        ch_tax_list = Channel.empty()
+        ch_ncbi_dir = Channel.empty()
+
+        if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt' ){
+            ch_tax_list = Channel.fromPath(params.metagenomics_maltextract_taxonlist, checkIfExists:true)
+            ch_ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbidir, checkIfExists:true)
+        }
+
+        METAGENOMICS ( ch_bamfiltered_for_metagenomics, ch_database, ch_tax_list, ch_ncbi_dir )
         ch_versions      = ch_versions.mix( METAGENOMICS.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS.out.ch_multiqc_files )
     }
