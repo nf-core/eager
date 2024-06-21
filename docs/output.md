@@ -634,3 +634,14 @@ When using pileupCaller for genotyping, single-stranded and double-stranded libr
 </details>
 
 [ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. It can estimate genotype likelihoods and allele frequencies from next-generation sequencing data. The output provided is a bgzipped genotype likelihood file, containing likelihoods across all samples per reference. Users can specify the model used for genotype likelihood estimation, as well as the output format. For more information on the available options, see the [ANGSD](https://www.popgen.dk/angsd/index.php/Genotype_Likelihoods).
+
+#### CircularMapper
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `mapping/circularmapper`
+
+  - `*realigned.bam`: BAM file realigned to the extended reference
+
+</details>

@@ -1162,6 +1162,18 @@
                 "snpcapture_bed": {
                     "type": "string",
                     "description": "Path to snp capture in BED format. Provided file can also be gzipped."
+                },
+                "run_circularmapper": {
+                    "type": "boolean",
+                    "default": true,
+                    "fa_icon": "fas fa-check-circle"
+                },
+                "elongation_factor": {
+                    "type": "integer",
+                    "default": 500,
+                    "description": "Specify the number of bases to extend reference by (circularmapper only)",
+                    "help_text": "The number of bases to extend the reference genome with. By default this is set to 500 if not specified otherwise.",
+                    "fa_icon": "fas fa-external-link-alt"
                 }
             },
             "fa_icon": "fas fa-search"
@@ -1312,7 +1324,7 @@
                 },
                 "contamination_estimation_angsd_hapmap": {
                     "type": "string",
-                    "default": "${projectDir}/assets/angsd_resources/HapMapChrX.gz",
+                    "default": "/Users/judith_ballesteros/Documents/GitHub/eager/assets/angsd_resources/HapMapChrX.gz",
                     "description": "Path to HapMap file of chromosome for contamination estimation..",
                     "help_text": "The haplotype map, or \"HapMap\", records the location of haplotype blocks and their tag SNPs.",
                     "fa_icon": "fas fa-map"
@@ -1395,13 +1407,10 @@
             "$ref": "#/definitions/host_removal"
         },
         {
+            "$ref": "#/definitions/contamination_estimation"
+        },
+        {
             "$ref": "#/definitions/human_sex_determination"
-        },
-        {
-            "$ref": "#/definitions/contamination_estimation"
-        },
-        {
-            "$ref": "#/definitions/contamination_estimation"
         }
     ]
 }
