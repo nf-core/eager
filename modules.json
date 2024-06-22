@@ -67,27 +67,27 @@
                     },
                     "bwa/aln": {
                         "branch": "master",
-                        "git_sha": "6278bf9afd4a4b2d00fa6052250e73da3d91546f",
+                        "git_sha": "e0ff65e1fb313677de09f5f477ae3da30ce19b7b",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
                     "bwa/index": {
                         "branch": "master",
-                        "git_sha": "6278bf9afd4a4b2d00fa6052250e73da3d91546f",
+                        "git_sha": "e0ff65e1fb313677de09f5f477ae3da30ce19b7b",
                         "installed_by": ["modules"]
                     },
                     "bwa/mem": {
                         "branch": "master",
-                        "git_sha": "1e2b7fb7106852388610c0360d234b0829eb980e",
+                        "git_sha": "e0ff65e1fb313677de09f5f477ae3da30ce19b7b",
                         "installed_by": ["modules"]
                     },
                     "bwa/sampe": {
                         "branch": "master",
-                        "git_sha": "1e2b7fb7106852388610c0360d234b0829eb980e",
+                        "git_sha": "e0ff65e1fb313677de09f5f477ae3da30ce19b7b",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
                     "bwa/samse": {
                         "branch": "master",
-                        "git_sha": "1e2b7fb7106852388610c0360d234b0829eb980e",
+                        "git_sha": "e0ff65e1fb313677de09f5f477ae3da30ce19b7b",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
                     "cat/fastq": {

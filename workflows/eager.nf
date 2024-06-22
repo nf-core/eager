@@ -182,7 +182,7 @@ workflow EAGER {
     ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
             .map{
                 meta, fasta, fai, dict, index, circular_target ->
-                [ meta, index ]
+                [ meta, index, fasta ]
             }
 
     MAP ( ch_reads_for_mapping, ch_reference_for_mapping )
