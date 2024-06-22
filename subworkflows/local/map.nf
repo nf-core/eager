@@ -104,7 +104,7 @@ workflow MAP {
 
     } else if ( params.mapping_tool == 'mapad' ) {
         ch_input_for_mapping = reads
-                            .combine( index )
+                            .combine( index.map{ meta, index, fasta -> [ meta, index ] } )
                             .multiMap {
                                 meta, reads, meta2, index, fasta ->
                                     new_meta = meta + [ reference: meta2.id ]
