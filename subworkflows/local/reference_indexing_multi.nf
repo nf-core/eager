@@ -5,9 +5,9 @@
 include { GUNZIP as GUNZIP_FASTA          } from '../../modules/nf-core/gunzip/main'
 include { BWA_INDEX                       } from '../../modules/nf-core/bwa/index/main'
 include { BOWTIE2_BUILD                   } from '../../modules/nf-core/bowtie2/build/main'
+include { MAPAD_INDEX                     } from '../../modules/nf-core/mapad/index/main'
 include { SAMTOOLS_FAIDX                  } from '../../modules/nf-core/samtools/faidx/main'
 include { PICARD_CREATESEQUENCEDICTIONARY } from '../../modules/nf-core/picard/createsequencedictionary/main'
-include { MAPAD_INDEX                     } from '../../modules/nf-core/mapad/index/main'
 // TODO missing: circulargeneraotr?
 
 workflow REFERENCE_INDEXING_MULTI {
