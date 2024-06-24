@@ -202,12 +202,12 @@
                     },
                     "mapad/index": {
                         "branch": "master",
-                        "git_sha": "1eddaed79279c37b0eb34953b4098c258b033f96",
+                        "git_sha": "b5198a14a570e54f5bb7cae67d07697ef956f509",
                         "installed_by": ["modules"]
                     },
                     "mapad/map": {
                         "branch": "master",
-                        "git_sha": "1eddaed79279c37b0eb34953b4098c258b033f96",
+                        "git_sha": "b5198a14a570e54f5bb7cae67d07697ef956f509",
                         "installed_by": ["modules"]
                     },
                     "mapdamage2": {
