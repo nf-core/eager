@@ -30,7 +30,7 @@
 - (Optionally) create reference genome indices for mapping (`bwa`, `samtools`, and `picard`)
 - Sequencing quality control (`FastQC`, `Falco`)
 - Sequencing adapter removal, paired-end data merging (`AdapterRemoval`)
-- Read mapping to reference using (`bwa aln`, `bwa mem`, `CircularMapper`, or `bowtie2`)
+- Read mapping to reference using (`bwa aln`, `bwa mem`, `CircularMapper`, `bowtie2`, or `mapAD`)
 - Post-mapping processing, statistics and conversion to bam (`samtools`, and `preseq`)
 - Ancient DNA C-to-T damage pattern visualisation (`DamageProfiler`)
 - PCR duplicate removal (`DeDup` or `MarkDuplicates`)

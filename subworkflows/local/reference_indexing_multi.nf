@@ -5,6 +5,7 @@
 include { GUNZIP as GUNZIP_FASTA          } from '../../modules/nf-core/gunzip/main'
 include { BWA_INDEX                       } from '../../modules/nf-core/bwa/index/main'
 include { BOWTIE2_BUILD                   } from '../../modules/nf-core/bowtie2/build/main'
+include { MAPAD_INDEX                     } from '../../modules/nf-core/mapad/index/main'
 include { SAMTOOLS_FAIDX                  } from '../../modules/nf-core/samtools/faidx/main'
 include { PICARD_CREATESEQUENCEDICTIONARY } from '../../modules/nf-core/picard/createsequencedictionary/main'
 // TODO missing: circulargeneraotr?
@@ -188,6 +189,10 @@ workflow REFERENCE_INDEXING_MULTI {
         ch_indexed_forremap = BOWTIE2_BUILD.out.index
     } else if ( params.mapping_tool == "circularmapper" ) {
         println("CircularMapper Indexing Not Yet Implemented")
+    } else if ( params.mapping_tool == "mapad" ) {
+        MAPAD_INDEX ( ch_mapindex_input.index )
+        ch_version = ch_versions.mix( MAPAD_INDEX.out.versions )
+        ch_indexed_forremap = MAPAD_INDEX.out.index
     }
 
     ch_indexed_formix = ch_indexed_forremap
