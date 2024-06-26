@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+- [#1079](https://github.com/nf-core/eager/issues/1079) - Added the `lanemerging` output directory in the output documentation (♥ to @TessaZei for reporting).
+
 ### `Fixed`
 
-- [#1037](https://github.com/nf-core/eager/issues/1073) - Fixed post-adapterremoval trimmed FastQC results not being displayed in MultiQC (to @kieren-j-mitchell for reporting, fix by @jfy133 and @TCLamnidis)
+- [#1037](https://github.com/nf-core/eager/issues/1073) - Fixed post-adapterremoval trimmed FastQC results not being displayed in MultiQC (♥ to @kieren-j-mitchell for reporting, fix by @jfy133 and @TCLamnidis)
 
 ### `Dependencies`
 
