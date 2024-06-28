@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.5.2] - 2024-06-28
+
+### `Added`
+
+- [#1079](https://github.com/nf-core/eager/issues/1079) - Added the `lanemerging` output directory in the output documentation (♥ to @TessaZei for reporting, fix by @TCLamnidis).
+
+### `Fixed`
+
+- [#1037](https://github.com/nf-core/eager/issues/1073) - Fixed post-adapterremoval trimmed FastQC results not being displayed in MultiQC (♥ to @kieren-j-mitchell for reporting, fix by @jfy133 and @TCLamnidis)
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.5.1] - 2024-02-21
 
 ### `Added`

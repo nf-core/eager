@@ -74,6 +74,7 @@ top_modules:
       path_filters:
         - "*.truncated_fastqc.zip"
         - "*.combined*_fastqc.zip"
+        - "*_postartrimmed_fastqc.zip"
   - "bowtie2":
       path_filters:
         - "*_bt2.log"
