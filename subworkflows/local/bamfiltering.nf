@@ -116,7 +116,7 @@ workflow FILTER_BAM {
     if ( ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
         ch_fastq_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
     } else if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_fastq_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
+        ch_fastq_for_metagenomics = CAT_FASTQ_MAPPED.out.reads
     } else if ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) {
         ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_UNMAPPED.out.other
     } else if ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' )) {
