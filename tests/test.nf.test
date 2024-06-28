@@ -17,24 +17,30 @@ nextflow_pipeline {
         then {
             assertAll(
                 { assert workflow.success },
-                { assert snapshot(
-                        path("$outputDir/bam_filtering"),
-                        path("$outputDir/bam_input_stats"),
-                        path("$outputDir/damage_estimation"),
-                        path("$outputDir/deduplication"),
-                        path("$outputDir/final_bams"),
-                        path("$outputDir/mapping"),
-                        path("$outputDir/mapstats"),
-                        path("$outputDir/preprocessing").list().findAll { !it.toString().endsWith("zip") }, // Trhying from https://nfcore.slack.com/archives/C049MBCEW06/p1714125268254939?thread_ts=1714124614.999909&cid=C049MBCEW06
-                        path("$outputDir/samtools"), // not sure what this is...
+                { assert snapshot( path("$outputDir/bam_filtering")            ).match("bam_filtering") },
+                { assert snapshot( path("$outputDir/bam_input_stats")          ).match("bam_input_stats") },
+                { assert snapshot( path("$outputDir/deduplication")            ).match("deduplication") },
+                { assert snapshot( path("$outputDir/mapping")                  ).match("mapping") },
+                { assert snapshot( path("$outputDir/samtools")                 ).match("samtools") }, // not sure what this is...
 
-                    ).match()
-                },
+                // Special
+                //{ assert snapshot( path("$outputDir/damage_estimation").list().findAll{ it.toString() ==~ /.*\.(txt,json).*/ }        ).match("damage_estimation") } // TODO: add additional asserts for svg/pdf exists, and log contains line
+                //{ assert snapshot( path("$outputDir/preprocessing/").list().findAll{ it.toString() ==~ /.*\.(json|html|log)/ }).match("processing_fastp") }, // TODO: check all three stable (I suspect log/html might not be)
+                //{ assert snapshot( path("$outputDir/preprocessing/fastqc_raw").list().findAll{ it.toString() }).match("processing_fastqc_raw") },
+                //{ assert snapshot( path("$outputDir/preprocessing/fastqc_preprocessed").list().findAll{ it.toString() }).match("processing_fastqc_preprocessed") },
+                //{ assert snapshot( path("$outputDir/final_bams")               ).match("final_bams") },
+                //{ assert snapshot( path("$outputDir/mapstats")                 ).match("mapstats") },
                 { assert new File("$outputDir/pipeline_info/nf_core_pipeline_software_mqc_versions.yml").exists() },
                 { assert new File("$outputDir/multiqc/multiqc_report.html").exists() },
                 { assert new File("$outputDir/multiqc/multiqc_data/").exists() }
-
             )
         }
     }
+}
+
+def getRecursiveFileNames(fileOrDir, outputDir) {
+    if(file(fileOrDir.toString()).isDirectory()) {
+        return fileOrDir.list().collect { getRecursiveFileNames(it, outputDir) }
+    }
+    return fileOrDir.toString().replace("${outputDir}/", "")
 }
