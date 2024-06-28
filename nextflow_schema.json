@@ -846,7 +846,7 @@
                     "type": "string",
                     "default": "def_anc",
                     "description": "Specify which MaltExtract filter to use.",
-                    "help_text": "Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters). Options: `'def_anc'`, `'ancient'`, `'default'`, `'crawl'`, `'scan'`, `'srna'`, 'assignment'. Default: `'def_anc'`.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `-f`",
+                    "help_text": "Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters).\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `-f`",
                     "fa_icon": "fas fa-filter",
                     "enum": ["def_anc", "default", "ancient", "scan", "crawl", "srna"]
                 },
