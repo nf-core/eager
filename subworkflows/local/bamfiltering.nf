@@ -99,7 +99,7 @@ workflow FILTER_BAM {
 
     // TODO: see request https://github.com/nf-core/eager/issues/945
     if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq
+        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_MAPPED.out.fastq
                                     .mix(SAMTOOLS_FASTQ_MAPPED.out.singleton)
                                     .mix(SAMTOOLS_FASTQ_MAPPED.out.other)
                                     .groupTuple()
