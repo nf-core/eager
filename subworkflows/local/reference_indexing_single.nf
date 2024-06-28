@@ -80,7 +80,6 @@ workflow REFERENCE_INDEXING_SINGLE {
                                 .join(ch_fasta_mapperindexdir, failOnMismatch: true)
                                 .map{
                                     meta, fasta, fai, dict, mapper_index ->
-                                    //TODO: add params for snpcapturebed, snpeigenstrat and sexdetbed once implemented
                                     def contamination_estimation_angsd_hapmap = params.contamination_estimation_angsd_hapmap != null ? file( params.contamination_estimation_angsd_hapmap, checkIfExists: true ) : ""
                                     def pmd_masked_fasta                      = params.damage_manipulation_pmdtools_masked_reference != null ? file(params.damage_manipulation_pmdtools_masked_reference, checkIfExists: true ) : ""
                                     def pmd_bed_for_masking                   = params.damage_manipulation_pmdtools_reference_mask != null ? file(params.damage_manipulation_pmdtools_reference_mask, checkIfExists: true ) : ""

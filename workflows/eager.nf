@@ -44,21 +44,23 @@ include { GENOTYPE                      } from '../subworkflows/local/genotype'
 // MODULE: Installed directly from nf-core/modules
 //
 
-include { FASTQC                                            } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                                           } from '../modules/nf-core/multiqc/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BAM_INPUT        } from '../modules/nf-core/samtools/index/main'
-include { PRESEQ_CCURVE                                     } from '../modules/nf-core/preseq/ccurve/main'
-include { PRESEQ_LCEXTRAP                                   } from '../modules/nf-core/preseq/lcextrap/main'
-include { FALCO                                             } from '../modules/nf-core/falco/main'
-include { MTNUCRATIO                                        } from '../modules/nf-core/mtnucratio/main'
-include { HOST_REMOVAL                                      } from '../modules/local/host_removal'
-include { ENDORSPY                                          } from '../modules/nf-core/endorspy/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT } from '../modules/nf-core/samtools/flagstat/main'
-include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH      } from '../modules/nf-core/bedtools/coverage/main'
-include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH    } from '../modules/nf-core/bedtools/coverage/main'
-include { SAMTOOLS_VIEW_GENOME                              } from '../modules/local/samtools_view_genome.nf'
-include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED            } from '../modules/nf-core/qualimap/bamqc/main'
-include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED          } from '../modules/nf-core/qualimap/bamqc/main'
+include { FASTQC                                              } from '../modules/nf-core/fastqc/main'
+include { MULTIQC                                             } from '../modules/nf-core/multiqc/main'
+include { SAMTOOLS_COLLATEFASTQ as SAMTOOLS_CONVERT_BAM_INPUT } from '../modules/nf-core/samtools/collatefastq/main'
+include { CAT_FASTQ             as CAT_FASTQ_CONVERTED_BAM    } from '../modules/nf-core/cat/fastq/main'
+include { SAMTOOLS_INDEX        as SAMTOOLS_INDEX_BAM_INPUT   } from '../modules/nf-core/samtools/index/main'
+include { PRESEQ_CCURVE                                       } from '../modules/nf-core/preseq/ccurve/main'
+include { PRESEQ_LCEXTRAP                                     } from '../modules/nf-core/preseq/lcextrap/main'
+include { FALCO                                               } from '../modules/nf-core/falco/main'
+include { MTNUCRATIO                                          } from '../modules/nf-core/mtnucratio/main'
+include { HOST_REMOVAL                                        } from '../modules/local/host_removal'
+include { ENDORSPY                                            } from '../modules/nf-core/endorspy/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT   } from '../modules/nf-core/samtools/flagstat/main'
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH        } from '../modules/nf-core/bedtools/coverage/main'
+include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH      } from '../modules/nf-core/bedtools/coverage/main'
+include { SAMTOOLS_VIEW_GENOME                                } from '../modules/local/samtools_view_genome.nf'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED              } from '../modules/nf-core/qualimap/bamqc/main'
+include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED            } from '../modules/nf-core/qualimap/bamqc/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,7 +83,7 @@ workflow EAGER {
 
 
     // Reference
-    fasta                = file(params.fasta, checkIfExists: true)
+    fasta_fn             = params.fasta ? file(params.fasta, checkIfExists: true) : params.fasta_sheet ? file(params.fasta_sheet, checkIfExists: true) : []
     fasta_fai            = params.fasta_fai ? file(params.fasta_fai, checkIfExists: true) : []
     fasta_dict           = params.fasta_dict ? file(params.fasta_dict, checkIfExists: true) : []
     fasta_mapperindexdir = params.fasta_mapperindexdir ? file(params.fasta_mapperindexdir, checkIfExists: true) : []
@@ -95,10 +97,56 @@ workflow EAGER {
     }
 
     //
+    // MODULE: Convert input BAMs back to FastQ
+    //
+
+    if (params.convert_inputbam) {
+        // Convert input BAMs back to FastQ with non-interleaved output.
+        SAMTOOLS_CONVERT_BAM_INPUT ( ch_samplesheet_bams, [ [], [] ], false )
+
+        // if BAM is single-end, pull R1 output as well as 'other' output and merge (in case collapsed reads have their R1 and R2 flags both set to 0 or 1)
+        ch_single_end_reads = SAMTOOLS_CONVERT_BAM_INPUT.out.fastq
+            .filter {
+                meta, reads ->
+                meta.single_end
+            }
+            .join(SAMTOOLS_CONVERT_BAM_INPUT.out.fastq_other)
+            .map {
+                meta, read1, fastq_other ->
+                [meta, [read1, fastq_other] ]
+            }
+
+        // Put all the converted FASTQs with single-end reads back together again
+        CAT_FASTQ_CONVERTED_BAM( ch_single_end_reads )
+
+        //if BAM is paired-end, pull R1 and R2 outputs, discarding 'other' output and singletons
+        ch_paired_end_reads = SAMTOOLS_CONVERT_BAM_INPUT.out.fastq
+            .filter {
+                meta, reads ->
+                ! meta.single_end
+            }
+
+        ch_fastqs_from_converted_bams = CAT_FASTQ_CONVERTED_BAM.out.reads
+            .mix(ch_paired_end_reads)
+            // drop reference and id_index from meta
+            .map {
+                meta, reads ->
+                [ meta - meta.subMap('reference', 'id_index'), reads ]
+            }
+
+        // Mix the converted fastqs with the original fastqs
+        ch_fastqs_for_preprocessing = ch_fastqs_from_converted_bams
+            .mix( ch_samplesheet_fastqs )
+    } else {
+        // If BAM conversion is not activated , just use the original fastqs
+        ch_fastqs_for_preprocessing = ch_samplesheet_fastqs
+    }
+
+    //
     // SUBWORKFLOW: Indexing of reference files
     //
 
-    REFERENCE_INDEXING ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir )
+    REFERENCE_INDEXING ( fasta_fn, fasta_fai, fasta_dict, fasta_mapperindexdir )
     ch_versions = ch_versions.mix( REFERENCE_INDEXING.out.versions )
 
     //
@@ -106,11 +154,11 @@ workflow EAGER {
     //
 
     if ( params.sequencing_qc_tool == "falco" ) {
-        FALCO ( ch_samplesheet_fastqs )
+        FALCO ( ch_fastqs_for_preprocessing )
         ch_versions = ch_versions.mix( FALCO.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FALCO.out.txt.collect{it[1]}.ifEmpty([]) )
     } else {
-        FASTQC ( ch_samplesheet_fastqs )
+        FASTQC ( ch_fastqs_for_preprocessing )
         ch_versions = ch_versions.mix( FASTQC.out.versions.first() )
         ch_multiqc_files = ch_multiqc_files.mix( FASTQC.out.zip.collect{it[1]}.ifEmpty([]) )
     }
@@ -120,12 +168,12 @@ workflow EAGER {
     //
 
     if ( !params.skip_preprocessing ) {
-        PREPROCESSING ( ch_samplesheet_fastqs, adapterlist )
+        PREPROCESSING ( ch_fastqs_for_preprocessing, adapterlist )
         ch_reads_for_mapping = PREPROCESSING.out.reads
         ch_versions          = ch_versions.mix( PREPROCESSING.out.versions )
         ch_multiqc_files     = ch_multiqc_files.mix( PREPROCESSING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
-        ch_reads_for_mapping = ch_samplesheet_fastqs
+        ch_reads_for_mapping = ch_fastqs_for_preprocessing
     }
 
     //
@@ -134,7 +182,7 @@ workflow EAGER {
     ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
             .map{
                 meta, fasta, fai, dict, index, circular_target ->
-                [ meta, index ]
+                [ meta, index, fasta ]
             }
 
     MAP ( ch_reads_for_mapping, ch_reference_for_mapping )
@@ -143,27 +191,34 @@ workflow EAGER {
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
 
     //
-    //  MODULE: indexing of user supplied input BAMs
+    //  MODULE: indexing of user supplied unconverted input BAMs
     //
 
-    SAMTOOLS_INDEX_BAM_INPUT ( ch_samplesheet_bams )
-    ch_versions = ch_versions.mix( SAMTOOLS_INDEX_BAM_INPUT.out.versions )
+    if ( !params.convert_inputbam ){
+        SAMTOOLS_INDEX_BAM_INPUT ( ch_samplesheet_bams )
+        ch_versions = ch_versions.mix( SAMTOOLS_INDEX_BAM_INPUT.out.versions )
 
-    if ( params.fasta_largeref )
-        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.csi )
-    else {
-        ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.bai )
+        if ( params.fasta_largeref ) {
+            ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.csi )
+        } else {
+            ch_bams_from_input = ch_samplesheet_bams.join( SAMTOOLS_INDEX_BAM_INPUT.out.bai )
+        }
+
+        //
+        // MODULE: flagstats of user supplied input BAMs
+        //
+        ch_bam_bai_input = ch_samplesheet_bams
+                                .join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
+
+        SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
+        ch_versions           = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
+        ch_flagstat_input_bam = SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat // For endorspy
+
+
+    } else {
+        ch_bams_from_input    = Channel.empty()
+        ch_flagstat_input_bam = Channel.empty()
     }
-
-
-    //
-    // MODULE: flagstats of user supplied input BAMs
-    //
-    ch_bam_bai_input = ch_samplesheet_bams
-                            .join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
-
-    SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
-    ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
 
     //
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
@@ -274,7 +329,7 @@ workflow EAGER {
         // Preparing fastq channel for host removal to be combined with the bam channel
         // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
         // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
-        ch_fastqs_for_host_removal= ch_samplesheet_fastqs.map{
+        ch_fastqs_for_host_removal= ch_fastqs_for_preprocessing.map{
                                                         meta, fastqs ->
                                                         new_meta = meta.clone().findAll{ it.key !in [ 'lane', 'colour_chemistry', 'single_end' ] }
                                                         [ new_meta, meta, fastqs ]
@@ -348,7 +403,7 @@ workflow EAGER {
     //
 
     ch_flagstat_for_endorspy_raw    = MAP.out.flagstat
-                                            .mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat )
+                                            .mix( ch_flagstat_input_bam )
 
     if ( params.run_bamfiltering & !params.skip_deduplication ) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw
@@ -534,26 +589,47 @@ workflow EAGER {
     }
 
     //
-    // MODULE: MultiQC
-    //
-
-    //
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)
-        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
-        .set { ch_collated_versions }
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'nf_core_pipeline_software_mqc_versions.yml',
+            sort: true,
+            newLine: true
+        ).set { ch_collated_versions }
 
-    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-    ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
-    summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
+    //
+    // MODULE: MultiQC
+    //
+    ch_multiqc_config        = Channel.fromPath(
+        "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_custom_config = params.multiqc_config ?
+        Channel.fromPath(params.multiqc_config, checkIfExists: true) :
+        Channel.empty()
+    ch_multiqc_logo          = params.multiqc_logo ?
+        Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
+        Channel.empty()
+
+    summary_params      = paramsSummaryMap(
+        workflow, parameters_schema: "nextflow_schema.json")
+    ch_workflow_summary = Channel.value(paramsSummaryMultiqc(summary_params))
+
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
+        file(params.multiqc_methods_description, checkIfExists: true) :
+        file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    ch_methods_description                = Channel.value(
+        methodsDescriptionText(ch_multiqc_custom_methods_description))
+
+    ch_multiqc_files = ch_multiqc_files.mix(
+        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
+    ch_multiqc_files = ch_multiqc_files.mix(
+        ch_methods_description.collectFile(
+            name: 'methods_description_mqc.yaml',
+            sort: true
+        )
+    )
 
     if ( !params.skip_qualimap ) {
         ch_multiqc_files = ch_multiqc_files.mix( ch_qualimap_output.collect{it[1]}.ifEmpty([]) )
