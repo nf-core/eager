@@ -1319,7 +1319,7 @@
                 },
                 "contamination_estimation_angsd_hapmap": {
                     "type": "string",
-                    "default": "/Users/judith_ballesteros/Documents/GitHub/eager/assets/angsd_resources/HapMapChrX.gz",
+                    "default": "${projectDir}/assets/angsd_resources/HapMapChrX.gz",
                     "description": "Path to HapMap file of chromosome for contamination estimation..",
                     "help_text": "The haplotype map, or \"HapMap\", records the location of haplotype blocks and their tag SNPs.",
                     "fa_icon": "fas fa-map"
