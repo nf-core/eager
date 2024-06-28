@@ -6,7 +6,7 @@ include { CIRCULARMAPPER_CIRCULARGENERATOR      } from '../../modules/nf-core/ci
 include { CIRCULARMAPPER_REALIGNSAMFILE         } from '../../modules/nf-core/circularmapper/realignsamfile/main'
 include { BWA_ALN as BWA_ALN_CIRCULARMAPPER     } from '../../modules/nf-core/bwa/aln/main'
 include { BWA_INDEX as BWA_INDEX_CIRCULARMAPPER } from '../../modules/nf-core/bwa/index/main'
-include { BWA_SAMSE as BWA_SAMSE_CIRCULARMAPPER } from '../../../modules/nf-core/bwa/samse/main'
+include { BWA_SAMSE as BWA_SAMSE_CIRCULARMAPPER } from '../../modules/nf-core/bwa/samse/main'
 
 workflow CIRCULARMAPPER {
 
@@ -20,7 +20,6 @@ workflow CIRCULARMAPPER {
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
-    if ( params.run_circularmapper ) {
 
         ch_reference = fasta_reference
         ch_eval =  eval
@@ -77,5 +76,4 @@ workflow CIRCULARMAPPER {
         bam      = CIRCULARMAPPER_REALIGNSAMFILE.out.bam  // channel: [ val(meta), path(bam) ]
         versions = ch_versions         // channel: [ path(versions.yml) ]
 
-    }
 }

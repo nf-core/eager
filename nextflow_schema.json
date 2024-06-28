@@ -603,6 +603,13 @@
                     "description": "Specify the maximum fragment length for Bowtie2 paired-end mapping mode only.",
                     "help_text": "The maximum fragment for valid paired-end alignments. Only for paired-end mapping (i.e. unmerged), and therefore typically only useful for modern data.\n\n> Modifies Bowtie2 parameter: `--maxins`",
                     "fa_icon": "fas fa-exchange-alt"
+                },
+                "elongation_factor": {
+                    "type": "integer",
+                    "default": 500,
+                    "description": "Specify the number of bases to extend reference by (circularmapper only)",
+                    "help_text": "The number of bases to extend the reference genome with. By default this is set to 500 if not specified otherwise.",
+                    "fa_icon": "fas fa-external-link-alt"
                 }
             },
             "fa_icon": "fas fa-layer-group"
@@ -1162,18 +1169,6 @@
                 "snpcapture_bed": {
                     "type": "string",
                     "description": "Path to snp capture in BED format. Provided file can also be gzipped."
-                },
-                "run_circularmapper": {
-                    "type": "boolean",
-                    "default": true,
-                    "fa_icon": "fas fa-check-circle"
-                },
-                "elongation_factor": {
-                    "type": "integer",
-                    "default": 500,
-                    "description": "Specify the number of bases to extend reference by (circularmapper only)",
-                    "help_text": "The number of bases to extend the reference genome with. By default this is set to 500 if not specified otherwise.",
-                    "fa_icon": "fas fa-external-link-alt"
                 }
             },
             "fa_icon": "fas fa-search"

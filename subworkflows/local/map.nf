@@ -12,6 +12,7 @@ include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM          } from '../../modules/nf
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2          } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED } from '../../modules/nf-core/samtools/flagstat/main'
+include { CIRCULARMAPPER                                } from '../../subworkflows/local/circularmapper'
 
 workflow MAP {
     take:
@@ -113,7 +114,27 @@ workflow MAP {
         SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
         ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
+
+    } else if ( params.mapping_tool == 'circularmapper' ) {
+        ch_eval = params.elongation_factor
+
+        ch_input_for_circularmapper = reads
+        .combine(index.map{ meta, index, fasta -> [ meta, fasta ] })
+        .combine(ch_eval)
+        .multiMap {
+                                meta, reads, meta2, fasta, eval ->
+                                    reads: [ meta, reads ]
+                                    index: [ meta2, fasta ]
+                                    elon:  [ eval ]
+                            }
+        CIRCULARMAPPER(ch_input_for_circularmapper)
+        ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions.first() )
+        ch_mapped_bam      = CIRCULARMAPPER.out.bam
+        ch_mapped_bai      = Channel.empty() // Circularmapper doesn't give a bai
+
+
     }
+
 
     // Only run merge lanes if we have more than one BAM to merge!
     ch_input_for_lane_merge = ch_mapped_lane_bam
