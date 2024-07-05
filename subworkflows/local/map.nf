@@ -120,17 +120,17 @@ workflow MAP {
 
         ch_input_for_circularmapper = reads
         .combine(index.map{ meta, index, fasta -> [ meta, fasta ] })
-        .combine(ch_eval)
+        .dump(tag:"CM Inputs", pretty:true)
         .multiMap {
                                 meta, reads, meta2, fasta, eval ->
                                     reads: [ meta, reads ]
-                                    index: [ meta2, fasta ]
-                                    elon:  [ eval ]
+                                    reference: [ meta2, fasta ]
                             }
-        CIRCULARMAPPER(ch_input_for_circularmapper)
-        ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions.first() )
-        ch_mapped_bam      = CIRCULARMAPPER.out.bam
-        ch_mapped_bai      = Channel.empty() // Circularmapper doesn't give a bai
+        CIRCULARMAPPER( ch_input_for_circularmapper.reads, params.elongation_factor, ch_input_for_circularmapper.reference )
+        ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
+        // TODO - Update SWF outputs
+        ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
+        ch_mapped_lane_bai      = Channel.empty() // Circularmapper doesn't give a bai
 
 
     }

@@ -52,7 +52,7 @@ workflow REFERENCE_INDEXING_SINGLE {
     }
 
     // Generate mapper indicies if not supplied, and if supplied generate meta
-    if ( params.mapping_tool == 'bwaaln' || params.mapping_tool == 'bwamem' ){
+    if ( params.mapping_tool == 'bwaaln' || params.mapping_tool == 'bwamem' || params.mapping_tool == 'circularmapper' ){
 
         if ( !fasta_mapperindexdir ) {
             ch_fasta_mapperindexdir = BWA_INDEX ( ch_ungz_ref ).index
