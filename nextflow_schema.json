@@ -708,12 +708,6 @@
                     "fa_icon": "fas fa-hammer",
                     "help_text": "Specify to select which tool is used to generate a final set of reads for the metagenomic classifier after any necessary trimming, filtering or reformatting of the reads.\n\nThis intermediate file is not saved in the results directory unless marked with `--metagenomics_complexity_savefastq`."
                 },
-                "metagenomics_complexity_savefastq": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-save",
-                    "description": "Save FASTQ files containing the complexity filtered reads (before metagenomic classification).",
-                    "help_text": "Save the complexity-filtered fastq-files to the results directory"
-                },
                 "metagenomics_complexity_entropy": {
                     "type": "number",
                     "fa_icon": "fas fa-sort-numeric-up",
