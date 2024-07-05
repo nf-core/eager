@@ -611,6 +611,7 @@
                     "description": "Specify the number of bases to extend reference by (circularmapper only)",
                     "help_text": "The number of bases to extend the reference genome with. By default this is set to 500 if not specified otherwise.",
                     "fa_icon": "fas fa-external-link-alt"
+                }
             },
             "fa_icon": "fas fa-layer-group"
         },
