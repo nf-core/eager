@@ -75,7 +75,7 @@ workflow CIRCULARMAPPER {
 
     emit:
 
-    // bam      = CIRCULARMAPPER_REALIGNSAMFILE.out.bam  // channel: [ val(meta), path(bam) ]
+    bam      = channel.empty() //CIRCULARMAPPER_REALIGNSAMFILE.out.bam  // channel: [ val(meta), path(bam) ]
     versions = ch_versions         // channel: [ path(versions.yml) ]
 
 }
