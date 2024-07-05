@@ -21,10 +21,10 @@ workflow METAGENOMICS_POSTPROCESSING {
         // We want to combine the chunks, but run MaltExtract on double and singlestranded individually
         ch_strandedness = ch_postprocessing_input
             .transpose()
-            .map{ meta, reads ->
+            .map{ meta, rma6 ->
                 [
                     meta + [ 'id': "${meta.strandedness}stranded" ],
-                    reads
+                    rma6
                 ]
             }
             .groupTuple(by:0)

@@ -69,7 +69,7 @@ workflow METAGENOMICS_PROFILING {
         // since we work with channels, we need a channel that stores that information
         ch_tmp_groups =  params.metagenomics_malt_group_size > 0 ? ch_reads.collate(params.metagenomics_malt_group_size).count() : Channel.of(1)
         // this is for enumerating the channel-entries in the ch_reads channel
-        def n = 0
+        def groups_counter = 0
 
         //replace the meta in a way that groupTuple splits the entries
         //by strandedness and metagenomics_malt_group_size
@@ -83,7 +83,7 @@ workflow METAGENOMICS_PROFILING {
                 [
                     label: label,
                     strandedness:meta.strandedness,
-                    id:"${meta.strandedness}stranded_${n++%n_groups}"
+                    id:"${meta.strandedness}stranded_${groups_counter++%n_groups}"
                 ],
                 reads
             ]
