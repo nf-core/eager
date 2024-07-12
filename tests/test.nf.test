@@ -23,8 +23,11 @@ nextflow_pipeline {
                 { assert snapshot( path("$outputDir/mapping")                  ).match("mapping") },
                 { assert snapshot( path("$outputDir/samtools")                 ).match("samtools") }, // not sure what this is...
 
-                // Special
-                //{ assert snapshot( path("$outputDir/damage_estimation").list().findAll{ it.toString() ==~ /.*\.(txt,json).*/ }        ).match("damage_estimation") } // TODO: add additional asserts for svg/pdf exists, and log contains line
+                // Exceptions (variable md5sums)
+                { assert snapshot(
+                    file("$outputDir/damage_estimation/damage_profiler/").list().collect { getRecursiveFileNames(it) }.list()
+                    ).match("damage_estimation") // ## PROBLEM: NEED TO RECUSRIVELY LIST ALL FILES IN ALL THE SUB DIRECTORIES
+                } // TODO: add additional asserts for svg/pdf exists, and log contains line ->
                 //{ assert snapshot( path("$outputDir/preprocessing/").list().findAll{ it.toString() ==~ /.*\.(json|html|log)/ }).match("processing_fastp") }, // TODO: check all three stable (I suspect log/html might not be)
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_raw").list().findAll{ it.toString() }).match("processing_fastqc_raw") },
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_preprocessed").list().findAll{ it.toString() }).match("processing_fastqc_preprocessed") },
@@ -38,9 +41,9 @@ nextflow_pipeline {
     }
 }
 
-def getRecursiveFileNames(fileOrDir, outputDir) {
+def getRecursiveFileNames(fileOrDir) {
     if(file(fileOrDir.toString()).isDirectory()) {
-        return fileOrDir.list().collect { getRecursiveFileNames(it, outputDir) }
+        return fileOrDir.list().collect { getRecursiveFileNames(it) }
     }
-    return fileOrDir.toString().replace("${outputDir}/", "")
+    return fileOrDir.toString()
 }
