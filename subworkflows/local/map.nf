@@ -116,7 +116,7 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
 
     } else if ( params.mapping_tool == 'circularmapper' ) {
-        ch_eval = params.elongation_factor
+        ch_eval = params.mapping_circularmapper_elongation_factor
 
         ch_input_for_circularmapper = reads
         .combine(index.map{ meta, index, fasta -> [ meta, fasta ] })
@@ -126,7 +126,7 @@ workflow MAP {
                                     reads: [ meta, reads ]
                                     reference: [ meta2, fasta ]
                             }
-        CIRCULARMAPPER( ch_input_for_circularmapper.reads, params.elongation_factor, ch_input_for_circularmapper.reference )
+        CIRCULARMAPPER( ch_input_for_circularmapper.reads, params.mapping_circularmapper_elongation_factor, ch_input_for_circularmapper.reference )
         ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
         // TODO - Update SWF outputs
         ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam

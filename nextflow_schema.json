@@ -605,12 +605,24 @@
                     "help_text": "The maximum fragment for valid paired-end alignments. Only for paired-end mapping (i.e. unmerged), and therefore typically only useful for modern data.\n\n> Modifies Bowtie2 parameter: `--maxins`",
                     "fa_icon": "fas fa-exchange-alt"
                 },
-                "elongation_factor": {
+                "mapping_circularmapper_elongation_factor": {
                     "type": "integer",
                     "default": 500,
-                    "description": "Specify the number of bases to extend reference by (circularmapper only)",
+                    "description": "Specify the number of bases to extend reference by (circularmapper only).",
                     "help_text": "The number of bases to extend the reference genome with. By default this is set to 500 if not specified otherwise.",
                     "fa_icon": "fas fa-external-link-alt"
+                },
+                "mapping_circularmapper_elongated_fasta": {
+                    "type": "string",
+                    "description": "Specify an elongated reference FASTA to be used for circularmapper.",
+                    "help_text": "Specify an already elongated FASTA file for circularmapper to avoid reprocessing.",
+                    "fa_icon": "fas fa-address-book"
+                },
+                "mapping_circularmapper_elongated_fai": {
+                    "type": "string",
+                    "description": "Specify a samtools index for the elongated FASTA file.",
+                    "help_text": "Specify the index for an already elongated FASTA file to avoid reprocessing.",
+                    "fa_icon": "fas fa-address-book"
                 }
             },
             "fa_icon": "fas fa-layer-group"
