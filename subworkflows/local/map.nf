@@ -117,6 +117,35 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
 
     } else if ( params.mapping_tool == 'circularmapper' ) {
+        ch_index_for_mapping = index.map{ meta, index, fasta -> [ meta, index ] }
+        ch_elongated_reference_for_mapping = elogated_index.map{ meta, index, fasta, circular_target -> [ meta, index ] }
+        ch_reads_for_mapping = reads
+
+        CIRCULARMAPPER( ch_index_for_mapping, ch_elongated_reference_for_mapping, ch_reads_for_mapping )
+
+        // // Join the original and elongated references, then combine with the reads, and multiMap to ensure correct ordering of channel contents.
+        // ch_reads_for_circularmapper = reads.map {
+        //                                     // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+        //                                     addNewMetaFromAttributes( it, "reference" , "reference" , false )
+        //                                 }
+
+        // ch_input_for_circularmapper = index.join( elogated_index )
+        //                                 .map {
+        //                                     meta, index, fasta, elongated_index, elongated_fasta, circular_target ->
+        //                                         [ meta, index, fasta , elongated_index, elongated_fasta ]
+        //                                 }
+        //                                 .map {
+        //                                     // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
+        //                                     addNewMetaFromAttributes( it, "id" , "reference" , false )
+        //                                 }
+        //                                 .combine( ch_reads_for_circularmapper, by: 0)
+        //                                 .multiMap {
+        //                                     ignore_me, meta, index, fasta, elongated_index, elongated_fasta, circular_target, meta2, fasta, reads ->
+        //                                         reads: [ meta, reads ]
+        //                                         reference: [ meta, index, fasta ]
+        //                                         elongated_reference: [meta, elongated_index , elongated_index]
+        //                                 }
+
         // Reference elongation and indexing takes place in the reference_indexing swf.
         // Circularmapper takes non-elongated AND elongated references and reads as input (i think. wait for Alex's reply).
 
