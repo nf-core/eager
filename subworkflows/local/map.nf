@@ -16,8 +16,9 @@ include { CIRCULARMAPPER                                } from '../../subworkflo
 
 workflow MAP {
     take:
-    reads // [ [meta], [read1, reads2] ] or [ [meta], [read1] ]
-    index // [ [meta], [ index ], [ fasta ] ]
+    reads          // [ [meta], [read1, reads2] ] or [ [meta], [read1] ]
+    index          // [ [meta], [ index ], [ fasta ] ]
+    elogated_index // [ [meta], [ index ], [ fasta ], [ circular_target ] ]
 
     main:
     ch_versions       = Channel.empty()
@@ -116,21 +117,22 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
 
     } else if ( params.mapping_tool == 'circularmapper' ) {
-        ch_eval = params.elongation_factor
+        // Reference elongation and indexing takes place in the reference_indexing swf.
+        // Circularmapper takes non-elongated AND elongated references and reads as input (i think. wait for Alex's reply).
 
-        ch_input_for_circularmapper = reads
-        .combine(index.map{ meta, index, fasta -> [ meta, fasta ] })
-        .dump(tag:"CM Inputs", pretty:true)
-        .multiMap {
-                                meta, reads, meta2, fasta, eval ->
-                                    reads: [ meta, reads ]
-                                    reference: [ meta2, fasta ]
-                            }
-        CIRCULARMAPPER( ch_input_for_circularmapper.reads, params.elongation_factor, ch_input_for_circularmapper.reference )
-        ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
-        // TODO - Update SWF outputs
-        ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
-        ch_mapped_lane_bai      = Channel.empty() // Circularmapper doesn't give a bai
+        // ch_input_for_circularmapper = reads
+        //                             .combine(index.map{ meta, index, fasta -> [ meta, fasta ] })
+        //                             .dump(tag:"CM Inputs", pretty:true)
+        //                             .multiMap {
+        //                                 meta, reads, meta2, fasta ->
+        //                                     reads: [ meta, reads ]
+        //                                     reference: [ meta2, fasta ]
+        //                             }
+        // CIRCULARMAPPER( ch_input_for_circularmapper.reads, params.elongation_factor, ch_input_for_circularmapper.reference )
+        // ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
+        // // TODO - Update SWF outputs
+        // ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
+        // ch_mapped_lane_bai      = Channel.empty() // Circularmapper doesn't give a bai
 
 
     }
