@@ -2,8 +2,9 @@
 // Run circularmapper
 //
 
-include { FASTQ_ALIGN_BWAALN_ELONGATED  } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
-include { CIRCULARMAPPER_REALIGNSAMFILE } from '../../modules/nf-core/circularmapper/realignsamfile/main'
+include { FASTQ_ALIGN_BWAALN as FASTQ_ALIGN_BWAALN_ELONGATED  } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { CIRCULARMAPPER_REALIGNSAMFILE                       } from '../../modules/nf-core/circularmapper/realignsamfile/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_REALIGNED          } from '../../modules/nf-core/samtools/index/main'
 
 workflow CIRCULARMAPPER {
     take:
@@ -16,6 +17,8 @@ workflow CIRCULARMAPPER {
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
     ch_realigned_bams = Channel.empty()
+    ch_realigned_bais = Channel.empty()
+    ch_realigned_csis = Channel.empty()
 
     // While mapping with BWA will need the elongated reference index, RealignSAMFile apparently does NOT need the elongated reference to be present, only the elongation factor.
     FASTQ_ALIGN_BWAALN_ELONGATED( ch_fastq_reads, ch_elongated_index )
@@ -33,10 +36,11 @@ workflow CIRCULARMAPPER {
 
     ch_input_for_realignsamfile = FASTQ_ALIGN_BWAALN_ELONGATED.out.bam
                                 .map{
-                                    // create meta consistent with rest of workflow
+                                    // create meta consistent with rest of MAP workflow
+                                    // TODO: Check that the id_index is correctly set and remove the elongation factor suffix if necessary.
                                     meta, bam ->
-                                    new_meta = meta + [ reference: meta.id_index ]
-                                [ new_meta, bam ]
+                                        new_meta = meta + [ reference: meta.id_index ]
+                                    [ new_meta, bam ]
                                 }
                                 .map {
                                     // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
@@ -44,7 +48,7 @@ workflow CIRCULARMAPPER {
                                 }
                                 .combine( ch_ref_for_realignsamfile, by: 0 )
                                 .multiMap {
-                                    ignore_me, meta, bam, ref_meta, ref_index, ref_fasta ->
+                                    ignore_me, meta, bam, ref_meta, ref_fasta ->
                                     bam:   [ metas, bam ]
                                     fasta: [ ref_meta, ref_fasta ]
                                 }
@@ -53,9 +57,15 @@ workflow CIRCULARMAPPER {
     ch_versions       = ch_versions.mix( CIRCULARMAPPER_REALIGNSAMFILE.out.versions.first() )
     ch_realigned_bams = ch_realigned_bams.mix( CIRCULARMAPPER_REALIGNSAMFILE.out.bam )
 
+    SAMTOOLS_INDEX_REALIGNED( ch_realigned_bams )
+    ch_versions       = ch_versions.mix( SAMTOOLS_INDEX_REALIGNED.out.versions.first() )
+    ch_realigned_bais = ch_realigned_bais.mix( SAMTOOLS_INDEX_REALIGNED.out.bai )
+    ch_realigned_csis = ch_realigned_csis.mix( SAMTOOLS_INDEX_REALIGNED.out.csi )
 
     emit:
-    bam      = ch_realigned_bams // channel: [ val(meta), path(bam) ]
+    bam      = ch_realigned_bams // [ val(meta), path(bam) ]
+    bai      = ch_realigned_bais // [ val(meta), path(bai) ]
+    csi      = ch_realigned_csis // [ val(meta), path(csi) ]
     versions = ch_versions
     mqc      = ch_multiqc_files
 }
