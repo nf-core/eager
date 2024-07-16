@@ -48,6 +48,20 @@
                 "pattern": "^\\S+$",
                 "errorMessage": "The headers of the chromosome to be extended by circularmapper must not contain any spaces and no leading '>'."
             },
+            "circularmapper_elongated_fasta": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.f(na|asta|a|as)(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "The elongated Fasta files for the mapping reference must be provided with file extensions '.fasta', '.fa', '.fas', '.fna', '.fasta.gz','.fa.gz','.fas.gz', '.fna.gz' and cannot contain any spaces."
+            },
+            "circularmapper_elongated_fai": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.fai$",
+                "exists": true,
+                "errorMessage": "Elongated fasta index files for the mapping reference cannot have any spaces and must have file extension '.fai'."
+            },
             "mitochondrion_header": {
                 "type": "string",
                 "pattern": "^\\S+$",
