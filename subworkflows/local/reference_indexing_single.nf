@@ -113,7 +113,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     emit:
     reference            = ch_ref_index_single.reference             // [ meta, fasta, fai, dict, mapindex ]
-    circularmapper       = ch_ref_index_single.circularmapper        // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+    elongated_reference  = ch_ref_index_single.circularmapper        // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
     mitochondrion_header = ch_ref_index_single.mito_header           // [ meta, mito_header ]
     hapmap               = ch_ref_index_single.hapmap                // [ meta, hapmap ]
     pmd_masked_fasta     = ch_ref_index_single.pmd_masked_fasta      // [ meta, pmd_masked_fasta ]

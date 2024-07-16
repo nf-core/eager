@@ -2,12 +2,12 @@
 // Prepare reference indexing for downstream
 //
 
-include { REFERENCE_INDEXING_SINGLE } from '../../subworkflows/local/reference_indexing_single.nf'
-include { REFERENCE_INDEXING_MULTI  } from '../../subworkflows/local/reference_indexing_multi.nf'
-include { GUNZIP as GUNZIP_PMDBED   } from '../../modules/nf-core/gunzip/main.nf'
-include { GUNZIP as GUNZIP_PMDFASTA } from '../../modules/nf-core/gunzip/main.nf'
-include { GUNZIP as GUNZIP_SNPBED   } from '../../modules/nf-core/gunzip/main.nf'
-include { GUNZIP as GUNZIP_CM_FASTA } from '../../modules/nf-core/gunzip/main.nf'
+include { REFERENCE_INDEXING_SINGLE        } from '../../subworkflows/local/reference_indexing_single.nf'
+include { REFERENCE_INDEXING_MULTI         } from '../../subworkflows/local/reference_indexing_multi.nf'
+include { GUNZIP as GUNZIP_PMDBED          } from '../../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_PMDFASTA        } from '../../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_SNPBED          } from '../../modules/nf-core/gunzip/main.nf'
+include { GUNZIP as GUNZIP_ELONGATED_FASTA } from '../../modules/nf-core/gunzip/main.nf'
 
 workflow REFERENCE_INDEXING {
     take:
@@ -27,7 +27,7 @@ workflow REFERENCE_INDEXING {
         // If input (multi-)reference sheet supplied
         REFERENCE_INDEXING_MULTI ( fasta )
         ch_reference_for_mapping = REFERENCE_INDEXING_MULTI.out.reference
-        ch_circularmapper        = REFERENCE_INDEXING_MULTI.out.circularmapper
+        ch_elongated_reference   = REFERENCE_INDEXING_MULTI.out.elongated_reference
         ch_mitochondrion_header  = REFERENCE_INDEXING_MULTI.out.mitochondrion_header
         ch_hapmap                = REFERENCE_INDEXING_MULTI.out.hapmap
         ch_pmd_masked_fasta      = REFERENCE_INDEXING_MULTI.out.pmd_masked_fasta
@@ -41,7 +41,7 @@ workflow REFERENCE_INDEXING {
     } else {
         // If input FASTA and/or indicies supplied
         REFERENCE_INDEXING_SINGLE ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir )
-        ch_circularmapper        = REFERENCE_INDEXING_SINGLE.out.circularmapper
+        ch_elongated_reference   = REFERENCE_INDEXING_SINGLE.out.elongated_reference
         ch_mitochondrion_header  = REFERENCE_INDEXING_SINGLE.out.mitochondrion_header
         ch_hapmap                = REFERENCE_INDEXING_SINGLE.out.hapmap
         ch_pmd_masked_fasta      = REFERENCE_INDEXING_SINGLE.out.pmd_masked_fasta
@@ -128,30 +128,32 @@ workflow REFERENCE_INDEXING {
     ch_dbsnp = ch_dbsnp
         .filter { it[1] != "" }
 
-    ch_circularmapper_for_gunzip = ch_circularmapper
-                            .filter{ it[1] != "" || it[2] != "" || it[3] != "" }
+    ch_elongated_for_gunzip = ch_elongated_reference
+                            .filter{ it[1] != "" && it[2] != "" }
+                            .ifEmpty{ if(params.mapping_tool == "circularmapper" ) { error "[nf-core/eager]: ERROR: Mapping with circularmapper requires either a circular target or elongated reference file." } }
+                            .filter( it != null )
                             .branch{
                                 meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
                                     forgunzip: circularmapper_elongated_fasta.extension == "gz"
                                     skip: true
                             }
 
-    ch_circularmapper_input = ch_circularmapper_for_gunzip.gunzip
+    ch_elongated_input = ch_elongated_for_gunzip.gunzip
                         .multiMap{
                             meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
                                 gunzip:    [ meta, circularmapper_elongated_fasta ]
                                 remainder: [ meta, circular_target, circularmapper_elongated_fai ]
                         }
 
-    GUNZIP_CM_FASTA( ch_circularmapper_input )
-    ch_version = ch_versions.mix( GUNZIP_CM_FASTA.out.versions.first() )
+    GUNZIP_ELONGATED_FASTA( ch_elongated_input.gunzip )
+    ch_version = ch_versions.mix( GUNZIP_ELONGATED_FASTA.out.versions.first() )
 
-    ch_gunzipped_elongated      = GUNZIP_CM_FASTA.out.gunzip.join( ch_circularmapper_input.remainder, failOnMismatch: true )
-    ch_circularmapper_gunzipped = ch_circularmapper_for_gunzip.skip.mix( ch_gunzipped_elongated )
+    ch_elongated_gunzipped    = GUNZIP_ELONGATED_FASTA.out.gunzip.join( ch_elongated_input.remainder, failOnMismatch: true )
+    ch_elongated_after_gunzip = ch_elongated_for_gunzip.skip.mix( ch_elongated_gunzipped )
 
     emit:
     reference            = ch_reference_for_mapping    // [ meta, fasta, fai, dict, mapindex, circular_target ]
-    circularmapper       = ch_circularmapper_gunzipped // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+    elongated_reference  = ch_elongated_after_gunzip   // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
     mitochondrion_header = ch_mitochondrion_header     // [ meta, mitochondrion_header ]
     hapmap               = ch_hapmap                   // [ meta, hapmap ]
     pmd_masking          = ch_pmd_masking              // [ meta, pmd_masked_fasta, pmd_bed_for_masking ]

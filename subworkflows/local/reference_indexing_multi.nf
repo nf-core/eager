@@ -205,7 +205,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     emit:
     reference            = ch_indexmapper_for_reference                         // [ meta, fasta, fai, dict, mapindex ]
-    circularmapper       = ch_input_from_referencesheet.circularmapper          // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+    elongated_reference  = ch_input_from_referencesheet.circularmapper          // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
     mitochondrion_header = ch_input_from_referencesheet.mitochondrion_header    // [ meta, mitochondrion ]
     hapmap               = ch_input_from_referencesheet.angsd_hapmap            // [ meta, hapmap ]
     pmd_masked_fasta     = ch_input_from_referencesheet.pmd_masked_fasta        // [ meta, pmd_masked_fasta ]
