@@ -744,13 +744,13 @@
                     "fa_icon": "fas fa-database",
                     "help_text": "Specify a metagenomics profiling database to use with the designated metagenomics_profiling_tool on the selected metagenomics_input. Databases can be provided both as a directory, or a tar.gz of a directory. Metagenomic databases are NOT compatible across different tools (ie a MALT database is different from a kraken2 database).\n\nAll databases need to be pre-built/downloaded for use in nf-core/eager. Database construction is often a balancing act between breadth of sequence diversity and size.\n\nModifies tool parameter(s):\n> - krakenuniq: `--db`\n> - kraken2: `--db`\n> - MetaPhlAn: `--bowtie2db` and `--index`\n> - MALT: '-index'"
                 },
-                "metagenomics_kraken_savereads": {
+                "metagenomics_kraken2_savereads": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
                     "description": "Turn on saving reads assigned by KrakenUniq or Kraken2",
                     "help_text": "Save reads that do and do not have a taxonomic classification in your output results directory in FASTQ format.\n\n> Modifies tool parameter(s):\n> - krakenuniq: `--classified-out` and `--unclassified-out`"
                 },
-                "metagenomics_kraken_savereadclassifications": {
+                "metagenomics_kraken2_savereadclassifications": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
                     "description": "Turn on saving of KrakenUniq or Kraken2 per-read taxonomic assignment file",
@@ -774,7 +774,7 @@
                     "default": "BlastN",
                     "description": "Specify which alignment mode to use for MALT.",
                     "fa_icon": "fas fa-align-left",
-                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA\nand DNA, protein and protein, or DNA reads against protein references\nrespectively. Ensure your database matches the mode. Check the\n[MALT\nmanual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf)\nfor more details. Default: `'BlastN'`\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-m`\n",
+                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA\nand DNA, protein and protein, or DNA reads against protein references respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-m`\n",
                     "enum": ["BlastN", "BlastP", "BlastX"]
                 },
                 "metagenomics_malt_alignmentmode": {
@@ -790,7 +790,7 @@
                     "default": 85,
                     "description": "Percent identity value threshold for MALT.",
                     "fa_icon": "fas fa-id-card",
-                    "help_text": "Specify the minimum percent identity (or similarity) a sequence must have to the reference for it to be retained. Default is `85`\n\nOnly used when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT:`-id`"
+                    "help_text": "Specify the minimum percent identity (or similarity) a sequence must have to the reference for it to be retained.\n\nOnly used when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT:`-id`"
                 },
                 "metagenomics_malt_toppercent": {
                     "type": "integer",
@@ -812,9 +812,9 @@
                     "default": 0.01,
                     "description": "Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT.",
                     "fa_icon": "fas fa-percentage",
-                    "help_text": "Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'. Default 0.01.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-supp`"
+                    "help_text": "Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-supp`"
                 },
-                "metagenomics_minsupportreads": {
+                "metagenomics_malt_minsupportreads": {
                     "type": "integer",
                     "default": 1,
                     "description": "Specify a minimum number of reads a taxon of sample total is required to have to be retained in malt or kraken. Not compatible with --malt_min_support_mode 'percent'.",
@@ -833,7 +833,7 @@
                     "default": "load",
                     "description": "Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow.",
                     "fa_icon": "fas fa-memory",
-                    "help_text": "\nHow to load the database into memory. Options are `'load'`, `'page'` or `'map'`.\n'load' directly loads the entire database into memory prior seed look up, this\nis slow but compatible with all servers/file systems. `'page'` and `'map'`\nperform a sort of 'chunked' database loading, allowing seed look up prior entire\ndatabase loading. Note that Page and Map modes do not work properly not with\nmany remote file-systems such as GPFS. Default is `'load'`.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `--memoryMode`",
+                    "help_text": "\nHow to load the database into memory. Options are `'load'`, `'page'` or `'map'`.\n'load' directly loads the entire database into memory prior seed look up, this\nis slow but compatible with all servers/file systems. `'page'` and `'map'`\nperform a sort of 'chunked' database loading, allowing seed look up prior entire\ndatabase loading. Note that Page and Map modes do not work properly not with\nmany remote file-systems such as GPFS.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `--memoryMode`",
                     "enum": ["load", "page", "map"]
                 },
                 "metagenomics_malt_savereads": {
@@ -845,7 +845,7 @@
                 "metagenomics_malt_group_size": {
                     "type": "integer",
                     "default": 0,
-                    "description": "Define how many fastq files should be submitted in the same malt run. Default value of 0 sends all files at once.",
+                    "description": "Define how many fastq files should be submitted in the same malt run. Default value of 0 runs all files at once.",
                     "fa_icon": "fas fa-barcode",
                     "help_text": "Very many (large) fastq files run through MALT at the same time can lead to excessively long runtimes. This parameter allows for parallelization of MALT runs. Please note, MALT is resource heavy and setting this value above the default (0) will spawn at minimum N/metagenomics_malt_group_size jobs where N is the number of samples. Please only use this if it is necessary to avoid runtime limits on your HPC cluster since the overhead of loading a database is high."
                 },
@@ -881,7 +881,7 @@
                     "type": "number",
                     "default": 0.01,
                     "description": "Specify percent of top alignments to use.",
-                    "help_text": "Specify frequency of top alignments for each read to be considered for each node.\\nDefault is 0.01, i.e. 1% of all reads (where 1 would correspond to 100%).\\n\\n> :warning: this parameter follows the same concept as `--malt_top_percent` but\\n> uses a different notation i.e. integer (MALT) versus float (MALTExtract)\\n\\nDefault: `0.01`.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `-a`",
+                    "help_text": "Specify frequency of top alignments for each read to be considered for each node.\\n Note, value should be given in the format of a proportion (where 1 would correspond to 100%, and 0.1 would correspond to 10%).\\n\\n> :warning: this parameter follows the same concept as `--malt_top_percent` but uses a different notation i.e. integer (MALT) versus float (MALTExtract)\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `-a`",
                     "fa_icon": "fas fa-percent"
                 },
                 "metagenomics_maltextract_destackingoff": {
@@ -905,13 +905,13 @@
                 "metagenomics_maltextract_matches": {
                     "type": "boolean",
                     "description": "Turn on exporting alignments of hits in BLAST format.",
-                    "help_text": "Export alignments of hits for each node in BLAST format. By default turned off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `--matches`",
+                    "help_text": "Export alignments of hits for each node in BLAST format.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `--matches`",
                     "fa_icon": "fas fa-equals"
                 },
                 "metagenomics_maltextract_megansummary": {
                     "type": "boolean",
                     "description": "Turn on export of MEGAN summary files.",
-                    "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957). By default turned off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Sets tool parameter(s):\n> - MaltExtract: `--meganSummary`"
+                    "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957).\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Sets tool parameter(s):\n> - MaltExtract: `--meganSummary`"
                 },
                 "metagenomics_maltextract_minpercentidentity": {
                     "type": "number",
@@ -922,7 +922,7 @@
                 "metagenomics_maltextract_usetopalignment": {
                     "type": "boolean",
                     "description": "Turn on using top alignments per read after filtering.",
-                    "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. Default: off.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Sets tool parameter(s):\n> - MaltExtract: `--useTopAlignment`",
+                    "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. \\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Sets tool parameter(s):\n> - MaltExtract: `--useTopAlignment`",
                     "fa_icon": "fas fa-bahai"
                 }
             },

@@ -358,7 +358,7 @@ The saved files are the _good_ files, passing the `dust` or `entropy` filter tre
 
 </details>
 
-MALT is a metagenomic aligner (equivalent to BLAST, but much faster). It produces direct alignments of sequencing reads in a reference genome. It is often used for metagenomic profiling or pathogen screening, and specifically in nf-core/eager, of off-target reads from genome mapping.
+MALT is a metagenomic aligner (equivalent to BLAST, but much faster). It produces direct alignments of sequencing reads in a reference genome. It is often used for metagenomic profiling or pathogen screening, and specifically in nf-core/eager, of off-target reads from genome mapping. It is popular by palaeogenomicists as the alignment information can be used for damage pattern and other authentication criteria analysis.
 
 You will receive output for each library. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
 
@@ -399,7 +399,7 @@ The main taxonomic profiling file from MetaPhlAn is the `*_profile.txt` file. Th
 
 The main taxonomic classification file from Kraken2 is the `_combined_reports.txt` or `*report.txt` file. The former provides you the broadest over view of the taxonomic classification results across all samples against a single database, where you get two columns for each sample e.g. `2_all` and `2_lvl`, as well as a summarised column summing up across all samples `tot_all` and `tot_lvl`. The latter gives you the most information for a single sample. The report file is also used for the taxpasta step.
 
-You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply `--metagenomics_kraken_savereads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
+You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply `--metagenomics_kraken2_savereads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
 
 #### KrakenUniq
 
@@ -418,7 +418,7 @@ You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply
 
 The main taxonomic classification file from KrakenUniq is the `*report.txt` file. This is an extension of the Kraken2 report with the additional k-mer coverage information that provides more information about the accuracy of hits.
 
-You will only receive the `*.fastq.gz` and `*.classifiedreads.txt` file if you supply `--metagenomics_kraken_savereads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
+You will only receive the `*.fastq.gz` and `*.classifiedreads.txt` file if you supply `--metagenomics_kraken2_savereads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
 
 :::info
 The output system of KrakenUniq can result in other `stdout` or `stderr` logging information being saved in the report file, therefore you must check your report files before downstream use!

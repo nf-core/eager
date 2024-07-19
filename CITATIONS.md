@@ -134,9 +134,9 @@
 
   > Hübler, R., Key, F.M., Warinner, C. et al. (2019). HOPS: automated detection and authentication of pathogen DNA in archaeological remains. Genome Biol 20, 280. doi: [10.1186/s13059-019-1903-0](https://doi.org/10.1186/s13059-019-1903-0)
 
-- [MEGAN](https://doi.org/10.1101/gr.5969107)
+- [MEGAN](https://doi.org/10.1371/journal.pcbi.1004957)
 
-  > Daniel H. Huson, Alexander F. Auch, Ji Qi, and Stephan C. Schuster (2007). MEGAN analysis of metagenomic data. Genome Res. 17000, Published in Advance January 25, 2007, doi: [10.1101/gr.5969107](https://doi.org/10.1101/gr.5969107)
+  > Huson DH, Beier S, Flade I, Górska A, El-Hadidi M, Mitra S, et al. (2016) MEGAN Community Edition - Interactive Exploration and Analysis of Large-Scale Microbiome Sequencing Data. PLoS Comput Biol 12(6): e1004957. doi: [10.1371/journal.pcbi.1004957] https://doi.org/10.1371/journal.pcbi.1004957
 
 - [Kraken2](https://doi.org/10.1186/s13059-019-1891-0)
 

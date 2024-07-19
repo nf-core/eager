@@ -153,9 +153,9 @@ workflow METAGENOMICS_PROFILING {
             ch_krakenuniq_input,
             ch_database,
             params.metagenomics_krakenuniq_ramchunksize,
-            params.metagenomics_kraken_savereads,
+            params.metagenomics_kraken2_savereads,
             true, // save read assignments
-            params.metagenomics_kraken_savereadclassifications
+            params.metagenomics_kraken2_savereadclassifications
         )
 
         ch_versions             = KRAKENUNIQ_PRELOADEDKRAKENUNIQ.out.versions
@@ -178,8 +178,8 @@ workflow METAGENOMICS_PROFILING {
         KRAKEN2_KRAKEN2 (
             ch_kraken2_input.reads,
             ch_kraken2_input.database,
-            params.metagenomics_kraken_savereads,
-            params.metagenomics_kraken_savereadclassifications
+            params.metagenomics_kraken2_savereads,
+            params.metagenomics_kraken2_savereadclassifications
         )
 
         ch_multiqc_files        = KRAKEN2_KRAKEN2.out.report

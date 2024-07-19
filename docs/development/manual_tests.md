@@ -630,8 +630,8 @@ nextflow run main.nf -profile test,docker \
   --run_metagenomics \
   --metagenomics_profiling_tool krakenuniq \
   --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
-  --metagenomics_kraken_savereads \
-  --metagenomics_kraken_savereadclassifications
+  --metagenomics_kraken2_savereads \
+  --metagenomics_kraken2_savereadclassifications
 ```
 
 ##### kraken2
@@ -662,8 +662,8 @@ nextflow run main.nf -profile test,docker \
   --run_metagenomics \
   --metagenomics_profiling_tool kraken2 \
   --metagenomics_profiling_database CUSTOM_KRAKEN2_DB \
-  --metagenomics_kraken_savereads \
-  --metagenomics_kraken_savereadclassifications
+  --metagenomics_kraken2_savereads \
+  --metagenomics_kraken2_savereadclassifications
 ```
 
 ##### malt

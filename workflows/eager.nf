@@ -347,7 +347,6 @@ workflow EAGER {
         ch_versions = ch_versions.mix( HOST_REMOVAL.out.versions )
     }
 
-
     //
     // Section: Metagenomics
     //
@@ -493,7 +492,6 @@ workflow EAGER {
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
 
 
-        BEDTOOLS_COVERAGE_BREADTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
         BEDTOOLS_COVERAGE_DEPTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
 
         ch_versions = ch_versions.mix( SAMTOOLS_VIEW_GENOME.out.versions )
