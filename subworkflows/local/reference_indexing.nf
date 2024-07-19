@@ -8,6 +8,8 @@ include { GUNZIP as GUNZIP_PMDBED          } from '../../modules/nf-core/gunzip/
 include { GUNZIP as GUNZIP_PMDFASTA        } from '../../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_SNPBED          } from '../../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_ELONGATED_FASTA } from '../../modules/nf-core/gunzip/main.nf'
+include { ELONGATE_REFERENCE               } from '../../subworkflows/local/elongate_reference'
+
 
 workflow REFERENCE_INDEXING {
     take:
@@ -132,28 +134,17 @@ workflow REFERENCE_INDEXING {
                             .filter{ it[1] != "" && it[2] != "" }
                             .ifEmpty{ if(params.mapping_tool == "circularmapper" ) { error "[nf-core/eager]: ERROR: Mapping with circularmapper requires either a circular target or elongated reference file." } }
                             .filter( it != null )
-                            .branch{
-                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
-                                    forgunzip: circularmapper_elongated_fasta.extension == "gz"
-                                    skip: true
-                            }
 
-    ch_elongated_input = ch_elongated_for_gunzip.gunzip
-                        .multiMap{
-                            meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
-                                gunzip:    [ meta, circularmapper_elongated_fasta ]
-                                remainder: [ meta, circular_target, circularmapper_elongated_fai ]
-                        }
-
-    GUNZIP_ELONGATED_FASTA( ch_elongated_input.gunzip )
-    ch_version = ch_versions.mix( GUNZIP_ELONGATED_FASTA.out.versions.first() )
-
-    ch_elongated_gunzipped    = GUNZIP_ELONGATED_FASTA.out.gunzip.join( ch_elongated_input.remainder, failOnMismatch: true )
-    ch_elongated_after_gunzip = ch_elongated_for_gunzip.skip.mix( ch_elongated_gunzipped )
+    if ( params.mapping_tool == "circularmapper" ) {
+        // This ELONGATE_REFERENCE subworkflow also checks if the provided reference is gzipped, and unzips it if necessary.
+        ELONGATE_REFERENCE( ch_input_from_referencesheet.circularmapper )
+        ch_version = ch_versions.mix( ELONGATE_REFERENCE.out.versions )
+        ch_elongated_reference = ELONGATE_REFERENCE.out.circular_reference
+    }
 
     emit:
     reference            = ch_reference_for_mapping    // [ meta, fasta, fai, dict, mapindex, circular_target ]
-    elongated_reference  = ch_elongated_after_gunzip   // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+    elongated_reference  = ch_elongated_reference      // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
     mitochondrion_header = ch_mitochondrion_header     // [ meta, mitochondrion_header ]
     hapmap               = ch_hapmap                   // [ meta, hapmap ]
     pmd_masking          = ch_pmd_masking              // [ meta, pmd_masked_fasta, pmd_bed_for_masking ]
