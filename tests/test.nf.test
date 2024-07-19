@@ -27,11 +27,11 @@ nextflow_pipeline {
                     Exceptions (variable md5sums)
                 */
 
-                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.txt') ).match("damage_estimation_txt") },
-                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.json') ).match("damage_estimation_json") },
-                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.svg') ).match("damage_estimation_svg") },
-                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.pdf') ).match("damage_estimation_pdf") },
-                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.log') ).match("damage_estimation_log") },
+                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.txt')  ).match("damage_estimation_txt") },
+                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.json') ).match("damage_estimation_json") },
+                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.svg')  ).match("damage_estimation_svg") },
+                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.pdf')  ).match("damage_estimation_pdf") },
+                { assert snapshot( checkAllFilesNamesFromDirForString("$outputDir/damage_estimation/", '.log', 'FINISHED SUCCESSFULLY')  ).match("damage_estimation_log") },
                 //{ assert snapshot( path("$outputDir/preprocessing/").list().findAll{ it.toString() ==~ /.*\.(json|html|log)/ }).match("processing_fastp") }, // TODO: check all three stable (I suspect log/html might not be)
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_raw").list().findAll{ it.toString() }).match("processing_fastqc_raw") },
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_preprocessed").list().findAll{ it.toString() }).match("processing_fastqc_preprocessed") },
@@ -46,7 +46,7 @@ nextflow_pipeline {
 }
 
 // Recursively list all files in a directory and its subdirectories matching a given suffix
-def getAllFilesFromDir(dir, suffix) {
+def getAllFileNamesFromDir(dir, suffix) {
     def output = []
     new File(dir).eachFileRecurse() {
         if (it.name.toString().endsWith(suffix)) {
@@ -55,3 +55,29 @@ def getAllFilesFromDir(dir, suffix) {
     }
     return output
 }
+
+def checkAllFilesNamesFromDirForString(dir, suffix, string) {
+    def output = []
+    new File(dir).eachFileRecurse() {
+        if (it.name.toString().endsWith(suffix)) {
+            output.add(it.text.contains(string))
+        }
+    }
+    return output
+}
+
+
+//// VARIANT2 -> BUT IDEALLY JUST PASS A DIRECT REGEZ WOULD BE BETTER
+//def getAllFilesFromDir(dir, suffix) {
+//    def output = []
+//    new File(dir).eachFileRecurse() {
+//        if (it.name.toString().matches(".*\\.(${suffix.join('|')})")) {
+//            output.add(it)
+//        }
+//    }
+//    println(output)
+//    return output
+//}
+//
+//
+//getAllFilesFromDir(mydir, ["fasta","md"])
