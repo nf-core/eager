@@ -21,7 +21,7 @@ workflow REFERENCE_INDEXING {
 
     // Warn user if they've given a reference sheet that already includes fai/dict/mapper index etc.
     if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && ( fasta_fai || fasta_dict || fasta_mapperindexdir )) log.warn("A TSV or CSV has been supplied to `--fasta_sheet` as well as e.g. `--fasta_fai`. --fasta_sheet CSV/TSV takes priority and --fasta_* parameters will be ignored.")
-    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && ( params.mitochondrion_header || params.contamination_estimation_angsd_hapmap || params.damage_manipulation_pmdtools_reference_mask || params.damage_manipulation_pmdtools_reference_mask || params.snpcapture_bed || params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile || params.sexdeterrmine_bedfile || params.mapstats_bedtools_featurefile || params.genotyping_reference_ploidy || params.genotyping_gatk_dbsnp, params.fasta_circular_target, params.circularmapper_elongated_fasta, params.circularmapper_elongated_fai )) log.warn("A TSV or CSV has been supplied to `--fasta_sheet` as well as individual reference-specific input files, e.g. `--contamination_estimation_angsd_hapmap`. Input files specified in the --fasta_sheet CSV/TSV take priority and other input parameters will be ignored.")
+    if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && ( params.mitochondrion_header || params.contamination_estimation_angsd_hapmap || params.damage_manipulation_pmdtools_reference_mask || params.damage_manipulation_pmdtools_reference_mask || params.snpcapture_bed || params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile || params.sexdeterrmine_bedfile || params.mapstats_bedtools_featurefile || params.genotyping_reference_ploidy || params.genotyping_gatk_dbsnp || params.fasta_circular_target || params.circularmapper_elongated_fasta || params.circularmapper_elongated_fai )) log.warn("A TSV or CSV has been supplied to `--fasta_sheet` as well as individual reference-specific input files, e.g. `--contamination_estimation_angsd_hapmap`. Input files specified in the --fasta_sheet CSV/TSV take priority and other input parameters will be ignored.")
 
     if ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) {
         // If input (multi-)reference sheet supplied
@@ -132,12 +132,11 @@ workflow REFERENCE_INDEXING {
     if ( params.mapping_tool == "circularmapper" ) {
         // Throw errors if required parameters are missing
         ch_elongated_for_gunzip = ch_elongated_reference
-                        .filter{ it[1] != "" && it[2] != "" }
+                        .filter{ it[1] != "" || it[2] != "" }
                         .ifEmpty{ error "[nf-core/eager]: ERROR: Mapping with circularmapper requires either a circular target or elongated reference file for at least one reference." }
-                        .filter{ it != null } // Remove null channel which arises if empty cause error returns null.
 
         // This ELONGATE_REFERENCE subworkflow also checks if the provided reference is gzipped, and unzips it if necessary.
-        ELONGATE_REFERENCE( ch_input_from_referencesheet.circularmapper, ch_reference_for_mapping )
+        ELONGATE_REFERENCE( ch_reference_for_mapping, ch_elongated_reference )
         ch_version = ch_versions.mix( ELONGATE_REFERENCE.out.versions )
         ch_elongated_indexed_reference = ELONGATE_REFERENCE.out.circular_reference
     } else {
