@@ -8,6 +8,7 @@ include { BWA_INDEX as BWA_INDEX_CIRCULARISED } from '../../modules/nf-core/bwa/
 
 workflow ELONGATE_REFERENCE {
     take:
+    ch_reference            // [ meta, fasta, fai, dict, mapindex ]
     ch_elongated_reference  // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
 
     main:
@@ -105,5 +106,4 @@ workflow ELONGATE_REFERENCE {
     circular_reference = ch_circular_reference // [ meta, circular_target, fasta, fai ]
     versions           = ch_versions
     mqc                = ch_multiqc_files
-
 }
