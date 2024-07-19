@@ -7,9 +7,7 @@ include { REFERENCE_INDEXING_MULTI         } from '../../subworkflows/local/refe
 include { GUNZIP as GUNZIP_PMDBED          } from '../../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_PMDFASTA        } from '../../modules/nf-core/gunzip/main.nf'
 include { GUNZIP as GUNZIP_SNPBED          } from '../../modules/nf-core/gunzip/main.nf'
-include { GUNZIP as GUNZIP_ELONGATED_FASTA } from '../../modules/nf-core/gunzip/main.nf'
-include { ELONGATE_REFERENCE               } from '../../subworkflows/local/elongate_reference'
-
+include { ELONGATE_REFERENCE               } from '../../subworkflows/local/elongate_reference.nf'
 
 workflow REFERENCE_INDEXING {
     take:
@@ -130,30 +128,34 @@ workflow REFERENCE_INDEXING {
     ch_dbsnp = ch_dbsnp
         .filter { it[1] != "" }
 
-    ch_elongated_for_gunzip = ch_elongated_reference
-                            .filter{ it[1] != "" && it[2] != "" }
-                            .ifEmpty{ if(params.mapping_tool == "circularmapper" ) { error "[nf-core/eager]: ERROR: Mapping with circularmapper requires either a circular target or elongated reference file." } }
-                            .filter( it != null )
-
+    // Elongate reference for circularmapper if requested
     if ( params.mapping_tool == "circularmapper" ) {
+        // Throw errors if required parameters are missing
+        ch_elongated_for_gunzip = ch_elongated_reference
+                        .filter{ it[1] != "" && it[2] != "" }
+                        .ifEmpty{ error "[nf-core/eager]: ERROR: Mapping with circularmapper requires either a circular target or elongated reference file for at least one reference." }
+                        .filter( it != null ) // Remove null channel which arises if empty cause error returns null.
+
         // This ELONGATE_REFERENCE subworkflow also checks if the provided reference is gzipped, and unzips it if necessary.
-        ELONGATE_REFERENCE( ch_input_from_referencesheet.circularmapper )
+        ELONGATE_REFERENCE( ch_input_from_referencesheet.circularmapper, ch_reference_for_mapping )
         ch_version = ch_versions.mix( ELONGATE_REFERENCE.out.versions )
-        ch_elongated_reference = ELONGATE_REFERENCE.out.circular_reference
+        ch_elongated_indexed_reference = ELONGATE_REFERENCE.out.circular_reference
+    } else {
+        ch_elongated_indexed_reference = ch_elongated_reference
     }
 
     emit:
-    reference            = ch_reference_for_mapping    // [ meta, fasta, fai, dict, mapindex, circular_target ]
-    elongated_reference  = ch_elongated_reference      // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
-    mitochondrion_header = ch_mitochondrion_header     // [ meta, mitochondrion_header ]
-    hapmap               = ch_hapmap                   // [ meta, hapmap ]
-    pmd_masking          = ch_pmd_masking              // [ meta, pmd_masked_fasta, pmd_bed_for_masking ]
-    pmd_bed_for_masking  = ch_pmd_bed_for_masking      // [ meta, pmd_bed_for_masking ]
-    snp_capture_bed      = ch_capture_bed              // [ meta, capture_bed ]
-    pileupcaller_bed_snp = ch_pileupcaller_bed_snp     // [ meta, pileupcaller_bed, pileupcaller_snp ]
-    sexdeterrmine_bed    = ch_sexdeterrmine_bed        // [ meta, sexdet_bed ]
-    bedtools_feature     = ch_bedtools_feature         // [ meta, bedtools_feature ]
-    dbsnp                = ch_dbsnp                    // [ meta, dbsnp ]
+    reference            = ch_reference_for_mapping       // [ meta, fasta, fai, dict, mapindex ]
+    elongated_reference  = ch_elongated_indexed_reference // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+    mitochondrion_header = ch_mitochondrion_header        // [ meta, mitochondrion_header ]
+    hapmap               = ch_hapmap                      // [ meta, hapmap ]
+    pmd_masking          = ch_pmd_masking                 // [ meta, pmd_masked_fasta, pmd_bed_for_masking ]
+    pmd_bed_for_masking  = ch_pmd_bed_for_masking         // [ meta, pmd_bed_for_masking ]
+    snp_capture_bed      = ch_capture_bed                 // [ meta, capture_bed ]
+    pileupcaller_bed_snp = ch_pileupcaller_bed_snp        // [ meta, pileupcaller_bed, pileupcaller_snp ]
+    sexdeterrmine_bed    = ch_sexdeterrmine_bed           // [ meta, sexdet_bed ]
+    bedtools_feature     = ch_bedtools_feature            // [ meta, bedtools_feature ]
+    dbsnp                = ch_dbsnp                       // [ meta, dbsnp ]
     versions             = ch_versions
 
 }
