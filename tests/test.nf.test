@@ -22,12 +22,16 @@ nextflow_pipeline {
                 { assert snapshot( path("$outputDir/deduplication")            ).match("deduplication") },
                 { assert snapshot( path("$outputDir/mapping")                  ).match("mapping") },
                 { assert snapshot( path("$outputDir/samtools")                 ).match("samtools") }, // not sure what this is...
+                { assert snapshot( path("$outputDir/damage_estimation/")       ).match("damageprofiler") },
+                /*
+                    Exceptions (variable md5sums)
+                */
 
-                // Exceptions (variable md5sums)
-                { assert snapshot(
-                    getAllFilesFromDir("$outputDir/damage_estimation/", '.txt')
-                    ).match("damage_estimation") // ## PROBLEM: NEED TO RECUSRIVELY LIST ALL FILES IN ALL THE SUB DIRECTORIES
-                }, // TODO: add additional asserts for svg/pdf exists, and log contains line ->
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.txt') ).match("damage_estimation_txt") },
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.json') ).match("damage_estimation_json") },
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.svg').collect{ path(it.toString().split("/")[-1]) } ).match("damage_estimation_svg") },
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.pdf').collect{ path(it.toString().split("/")[-1]) } ).match("damage_estimation_pdf") },
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.log').collect{ path(it.toString().split("/")[-1]) } ).match("damage_estimation_log") },
                 //{ assert snapshot( path("$outputDir/preprocessing/").list().findAll{ it.toString() ==~ /.*\.(json|html|log)/ }).match("processing_fastp") }, // TODO: check all three stable (I suspect log/html might not be)
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_raw").list().findAll{ it.toString() }).match("processing_fastqc_raw") },
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_preprocessed").list().findAll{ it.toString() }).match("processing_fastqc_preprocessed") },
@@ -49,28 +53,6 @@ def getAllFilesFromDir(dir, suffix) {
             output.add(it)
         }
     }
-
     println(output)
     return output
 }
-
-
-// This works, how can we incorporate this into the snapshot?
-// new File('/home/james/Downloads/').eachFileRecurse() {
-//     if(it.name.endsWith('.md')) {
-//         println it
-//     }
-// }
-
-//// EVEN BETTER
-// def mydir = "/home/$USER/Downloads"
-
-// def getAllFilesFromDir(dir) {
-//  def output = []
-//  new File(dir).eachFileRecurse() {
-//    output.add(it)
-//  }
-// return output
-// }
-
-// getAllFilesFromDir(mydir)
