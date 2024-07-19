@@ -206,14 +206,40 @@
     "damage_estimation": {
         "content": [
             [
-                
+                "3pGtoA_freq.txt:md5,59aa1691a1c420dffeff4edc4a9cb0dd",
+                "editDistance.txt:md5,5feeaa4b7018320fd9937e271299375c",
+                "DNA_composition_sample.txt:md5,0a4d26c613bbc4541eb51ec1344d6ef4",
+                "lgdistribution.txt:md5,3728eba42dd0b577a8566c103c342eb4",
+                "5p_freq_misincorporations.txt:md5,fc0939e3e176deef644c0bd24cb0d141",
+                "misincorporation.txt:md5,a2d9fed1148fe02e372f0905c7e15b40",
+                "DNA_comp_genome.txt:md5,76762da07599aff410c2ec531cd19720",
+                "5pCtoT_freq.txt:md5,51511bb6d9278afeb35099ab8b117119",
+                "3p_freq_misincorporations.txt:md5,15f64d35fc97bab2fed172fec292c3c9",
+                "3pGtoA_freq.txt:md5,c32ef382b55fed96816df63993c520eb",
+                "editDistance.txt:md5,7c00cd7cc4bd87c2da4debaa2704a66a",
+                "DNA_composition_sample.txt:md5,1336769b56151d9de542610c4a8ef662",
+                "lgdistribution.txt:md5,3c176293ea8e58d1d56a95e693727f7a",
+                "5p_freq_misincorporations.txt:md5,af2192b8a97699519d060baa3c8982fe",
+                "misincorporation.txt:md5,e25101ff61a0a3c377f8bc0252ee4451",
+                "DNA_comp_genome.txt:md5,0f27b55f4a7c2731f35761be4feddbfa",
+                "5pCtoT_freq.txt:md5,d6e1401fb49387f83d842977ee47a9d2",
+                "3p_freq_misincorporations.txt:md5,2d4d9e2906c2238d27fa7e441bba2b33",
+                "3pGtoA_freq.txt:md5,24ae86cb4dd4e558412344a98d582bae",
+                "editDistance.txt:md5,059c352bf858c5ddb27e88253654e353",
+                "DNA_composition_sample.txt:md5,dd78c33e4d9367759e82c31247685a3b",
+                "lgdistribution.txt:md5,5e8760bf271b743aa3c7c96414fb9991",
+                "5p_freq_misincorporations.txt:md5,8ecb71fca75a2f86cf44eb0cf4bfd269",
+                "misincorporation.txt:md5,983d8fab464d67481b222aff57b06587",
+                "DNA_comp_genome.txt:md5,b78d2826f0e1be4990120105c83d0b06",
+                "5pCtoT_freq.txt:md5,5a04f777d38930e205213298e70e09f1",
+                "3p_freq_misincorporations.txt:md5,fe312a520a01f198bf248f396b179aff"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
-            "nextflow": "24.04.2"
+            "nextflow": "24.04.3"
         },
-        "timestamp": "2024-06-28T13:28:42.372766811"
+        "timestamp": "2024-07-19T11:30:08.690300717"
     },
     "samtools": {
         "content": [

@@ -25,9 +25,9 @@ nextflow_pipeline {
 
                 // Exceptions (variable md5sums)
                 { assert snapshot(
-                    file("$outputDir/damage_estimation/damage_profiler/").list().collect { getRecursiveFileNames(it) }.list()
+                    getAllFilesFromDir("$outputDir/damage_estimation/", '.txt')
                     ).match("damage_estimation") // ## PROBLEM: NEED TO RECUSRIVELY LIST ALL FILES IN ALL THE SUB DIRECTORIES
-                } // TODO: add additional asserts for svg/pdf exists, and log contains line ->
+                }, // TODO: add additional asserts for svg/pdf exists, and log contains line ->
                 //{ assert snapshot( path("$outputDir/preprocessing/").list().findAll{ it.toString() ==~ /.*\.(json|html|log)/ }).match("processing_fastp") }, // TODO: check all three stable (I suspect log/html might not be)
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_raw").list().findAll{ it.toString() }).match("processing_fastqc_raw") },
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_preprocessed").list().findAll{ it.toString() }).match("processing_fastqc_preprocessed") },
@@ -41,9 +41,36 @@ nextflow_pipeline {
     }
 }
 
-def getRecursiveFileNames(fileOrDir) {
-    if(file(fileOrDir.toString()).isDirectory()) {
-        return fileOrDir.list().collect { getRecursiveFileNames(it) }
+// Recursively list all files in a directory and its subdirectories matching a given suffix
+def getAllFilesFromDir(dir, suffix) {
+    def output = []
+    new File(dir).eachFileRecurse() {
+        if (it.name.toString().endsWith(suffix)) {
+            output.add(it)
+        }
     }
-    return fileOrDir.toString()
+
+    println(output)
+    return output
 }
+
+
+// This works, how can we incorporate this into the snapshot?
+// new File('/home/james/Downloads/').eachFileRecurse() {
+//     if(it.name.endsWith('.md')) {
+//         println it
+//     }
+// }
+
+//// EVEN BETTER
+// def mydir = "/home/$USER/Downloads"
+
+// def getAllFilesFromDir(dir) {
+//  def output = []
+//  new File(dir).eachFileRecurse() {
+//    output.add(it)
+//  }
+// return output
+// }
+
+// getAllFilesFromDir(mydir)
