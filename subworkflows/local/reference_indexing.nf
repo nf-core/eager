@@ -134,7 +134,7 @@ workflow REFERENCE_INDEXING {
         ch_elongated_for_gunzip = ch_elongated_reference
                         .filter{ it[1] != "" && it[2] != "" }
                         .ifEmpty{ error "[nf-core/eager]: ERROR: Mapping with circularmapper requires either a circular target or elongated reference file for at least one reference." }
-                        .filter( it != null ) // Remove null channel which arises if empty cause error returns null.
+                        .filter{ it != null } // Remove null channel which arises if empty cause error returns null.
 
         // This ELONGATE_REFERENCE subworkflow also checks if the provided reference is gzipped, and unzips it if necessary.
         ELONGATE_REFERENCE( ch_input_from_referencesheet.circularmapper, ch_reference_for_mapping )
