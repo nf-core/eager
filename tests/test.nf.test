@@ -66,8 +66,7 @@ def checkAllFilesNamesFromDirForString(dir, suffix, string) {
     return output
 }
 
-
-//// VARIANT2 -> BUT IDEALLY JUST PASS A DIRECT REGEZ WOULD BE BETTER
+//// TODO ALMOST THERE: INSTEAD OF SUFFIX JOIN, INSERT A REGEX?
 //def getAllFilesFromDir(dir, suffix) {
 //    def output = []
 //    new File(dir).eachFileRecurse() {
