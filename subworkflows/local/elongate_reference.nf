@@ -2,18 +2,44 @@
 // Elongate a reference genome by circularising the target sequence by a given elongation factor.
 //
 
-include { CIRCULARMAPPER_CIRCULARGENERATOR      } from '../../modules/nf-core/circularmapper/circulargenerator/main'
+include { GUNZIP as GUNZIP_ELONGATED_FASTA    } from '../../modules/nf-core/gunzip/main'
+include { CIRCULARMAPPER_CIRCULARGENERATOR    } from '../../modules/nf-core/circularmapper/circulargenerator/main'
 include { BWA_INDEX as BWA_INDEX_CIRCULARISED } from '../../modules/nf-core/bwa/index/main'
 
 workflow ELONGATE_REFERENCE {
     take:
-    ch_reference            // [ meta, fasta, fai, dict, mapindex ]
     ch_elongated_reference  // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
 
     main:
     ch_versions           = Channel.empty()
     ch_multiqc_files      = Channel.empty()
     ch_circular_reference = Channel.empty()
+
+    // Check if the elongated reference is gzipped, and if so, unzip it.
+    ch_elongated_branches = ch_elongated_reference
+                            .branch {
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
+
+                                    for_gunzip: circularmapper_elongated_fasta.extension == "gz"
+                                    skip_gunzip: true
+                            }
+
+    ch_elongated_for_gunzip = ch_elongated_branches.for_gunzip
+                            .map {
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
+                                    [ meta, circularmapper_elongated_fasta ]
+                            }
+
+    GUNZIP_ELONGATED_FASTA( ch_elongated_for_gunzip.for_gunzip )
+    ch_versions = ch_versions.mix( GUNZIP_ELONGATED_FASTA.out.versions.first() )
+
+    ch_elongated_unzipped_reference = ch_elongated_branches.for_gunzip
+                            .join( GUNZIP_ELONGATED_FASTA.out.gunzip )
+                            .map {
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai, unzipped_fasta ->
+                                    [ meta, circular_target, unzipped_fasta, circularmapper_elongated_fai ]
+                            }
+                            .mix( ch_elongated_branches.skip_gunzip )
 
     /*
         Check what fasta files we have.
@@ -24,7 +50,7 @@ workflow ELONGATE_REFERENCE {
             4. None of the above -> Throw error and stop execution during parameter validation
     */
 
-    ch_circulargenerator_input = ch_elongated_reference
+    ch_circulargenerator_input = ch_elongated_unzipped_reference
                             .branch{
                                 meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
                                         ready:            circularmapper_elongated_fasta != "" && circularmapper_elongated_fai != ""
@@ -76,7 +102,7 @@ workflow ELONGATE_REFERENCE {
                             .mix( ch_indexed_references )
 
     emit:
-    circular_reference = ch_circular_reference // [ meta, fasta, fai ]
+    circular_reference = ch_circular_reference // [ meta, circular_target, fasta, fai ]
     versions           = ch_versions
     mqc                = ch_multiqc_files
 
