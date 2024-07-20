@@ -2,14 +2,40 @@
     "damage_estimation_txt": {
         "content": [
             [
-                
+                "lgdistribution.txt:md5,3728eba42dd0b577a8566c103c342eb4",
+                "3pGtoA_freq.txt:md5,59aa1691a1c420dffeff4edc4a9cb0dd",
+                "5pCtoT_freq.txt:md5,51511bb6d9278afeb35099ab8b117119",
+                "misincorporation.txt:md5,a2d9fed1148fe02e372f0905c7e15b40",
+                "DNA_composition_sample.txt:md5,0a4d26c613bbc4541eb51ec1344d6ef4",
+                "DNA_comp_genome.txt:md5,76762da07599aff410c2ec531cd19720",
+                "5p_freq_misincorporations.txt:md5,fc0939e3e176deef644c0bd24cb0d141",
+                "3p_freq_misincorporations.txt:md5,15f64d35fc97bab2fed172fec292c3c9",
+                "editDistance.txt:md5,5feeaa4b7018320fd9937e271299375c",
+                "lgdistribution.txt:md5,3c176293ea8e58d1d56a95e693727f7a",
+                "3pGtoA_freq.txt:md5,c32ef382b55fed96816df63993c520eb",
+                "5pCtoT_freq.txt:md5,d6e1401fb49387f83d842977ee47a9d2",
+                "misincorporation.txt:md5,e25101ff61a0a3c377f8bc0252ee4451",
+                "DNA_composition_sample.txt:md5,1336769b56151d9de542610c4a8ef662",
+                "DNA_comp_genome.txt:md5,0f27b55f4a7c2731f35761be4feddbfa",
+                "5p_freq_misincorporations.txt:md5,af2192b8a97699519d060baa3c8982fe",
+                "3p_freq_misincorporations.txt:md5,2d4d9e2906c2238d27fa7e441bba2b33",
+                "editDistance.txt:md5,7c00cd7cc4bd87c2da4debaa2704a66a",
+                "lgdistribution.txt:md5,5e8760bf271b743aa3c7c96414fb9991",
+                "3pGtoA_freq.txt:md5,24ae86cb4dd4e558412344a98d582bae",
+                "5pCtoT_freq.txt:md5,5a04f777d38930e205213298e70e09f1",
+                "misincorporation.txt:md5,983d8fab464d67481b222aff57b06587",
+                "DNA_composition_sample.txt:md5,dd78c33e4d9367759e82c31247685a3b",
+                "DNA_comp_genome.txt:md5,b78d2826f0e1be4990120105c83d0b06",
+                "5p_freq_misincorporations.txt:md5,8ecb71fca75a2f86cf44eb0cf4bfd269",
+                "3p_freq_misincorporations.txt:md5,fe312a520a01f198bf248f396b179aff",
+                "editDistance.txt:md5,059c352bf858c5ddb27e88253654e353"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
             "nextflow": "24.04.3"
         },
-        "timestamp": "2024-07-20T06:30:48.92614635"
+        "timestamp": "2024-07-20T06:56:34.897523099"
     },
     "damage_estimation_pdf": {
         "content": [
@@ -43,6 +69,18 @@
         },
         "timestamp": "2024-06-28T13:08:37.202608535"
     },
+    "bam_input_stats": {
+        "content": [
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_8_Mammoth_MT_Krause.flagstat:md5,9a10991f5670a52975a622a8b056e2bc"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-06-28T11:25:56.650730893"
+    },
     "bam_filtering": {
         "content": [
             [
@@ -62,6 +100,20 @@
             "nextflow": "24.04.2"
         },
         "timestamp": "2024-06-28T11:25:56.604142252"
+    },
+    "damage_estimation_json": {
+        "content": [
+            [
+                "dmgprof.json:md5,49a1a9b445abf48904ead652a16fb7e4",
+                "dmgprof.json:md5,e829fb37f3e12842a6139e1d4cfe19dc",
+                "dmgprof.json:md5,98c584c20659b11692cbd1e280deeb97"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.3"
+        },
+        "timestamp": "2024-07-20T06:56:35.003394862"
     },
     "deduplication": {
         "content": [
@@ -122,106 +174,5 @@
             "nextflow": "24.04.3"
         },
         "timestamp": "2024-07-19T16:38:34.86128972"
-    },
-    "bam_input_stats": {
-        "content": [
-            [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_8_Mammoth_MT_Krause.flagstat:md5,9a10991f5670a52975a622a8b056e2bc"
-            ]
-        ],
-        "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.04.2"
-        },
-        "timestamp": "2024-06-28T11:25:56.650730893"
-    },
-    "damageprofiler": {
-        "content": [
-            [
-                [
-                    [
-                        "3pGtoA_freq.txt:md5,c32ef382b55fed96816df63993c520eb",
-                        "3p_freq_misincorporations.txt:md5,2d4d9e2906c2238d27fa7e441bba2b33",
-                        "5pCtoT_freq.txt:md5,d6e1401fb49387f83d842977ee47a9d2",
-                        "5p_freq_misincorporations.txt:md5,af2192b8a97699519d060baa3c8982fe",
-                        "DNA_comp_genome.txt:md5,0f27b55f4a7c2731f35761be4feddbfa",
-                        "DNA_composition_sample.txt:md5,1336769b56151d9de542610c4a8ef662",
-                        "DamagePlot.pdf:md5,b378181337054a65147e9d8412ce0205",
-                        "DamagePlot_five_prime.svg:md5,a81e11f16618d0c66a2db054dafcda69",
-                        "DamagePlot_three_prime.svg:md5,a80745829498d374b49e069b8a1db522",
-                        "DamageProfiler.log:md5,2eea48846d752a30a01a050d695c7ef5",
-                        "Length_plot.pdf:md5,eaa05239076af4758a052e731d0bee8d",
-                        "Length_plot_combined_data.svg:md5,a50415252328f10566f552cc1616667a",
-                        "Length_plot_forward_reverse_separated.svg:md5,df44b2dc4a913262284dd04e8e6b3029",
-                        "dmgprof.json:md5,e829fb37f3e12842a6139e1d4cfe19dc",
-                        "editDistance.txt:md5,7c00cd7cc4bd87c2da4debaa2704a66a",
-                        "edit_distance.pdf:md5,84ae6e86e57862c30eacdecf3b4f4b75",
-                        "edit_distance.svg:md5,e308dba2cea9d403d7b56ad91f3ccc3a",
-                        "lgdistribution.txt:md5,3c176293ea8e58d1d56a95e693727f7a",
-                        "misincorporation.txt:md5,e25101ff61a0a3c377f8bc0252ee4451"
-                    ],
-                    [
-                        "3pGtoA_freq.txt:md5,59aa1691a1c420dffeff4edc4a9cb0dd",
-                        "3p_freq_misincorporations.txt:md5,15f64d35fc97bab2fed172fec292c3c9",
-                        "5pCtoT_freq.txt:md5,51511bb6d9278afeb35099ab8b117119",
-                        "5p_freq_misincorporations.txt:md5,fc0939e3e176deef644c0bd24cb0d141",
-                        "DNA_comp_genome.txt:md5,76762da07599aff410c2ec531cd19720",
-                        "DNA_composition_sample.txt:md5,0a4d26c613bbc4541eb51ec1344d6ef4",
-                        "DamagePlot.pdf:md5,b0ed12708b231ee339e3d8240d57134d",
-                        "DamagePlot_five_prime.svg:md5,ce3fc490b874a8c383b7ac85f599bfd4",
-                        "DamagePlot_three_prime.svg:md5,3b3c165609259d11924060ff7d49b28e",
-                        "DamageProfiler.log:md5,2882b1207a45a0f437436a65c7dc5901",
-                        "Length_plot.pdf:md5,8b733ed5dca91968fb2a9d78e4ddd7bd",
-                        "Length_plot_combined_data.svg:md5,18aebba1736b7ad4e259f686540a79f4",
-                        "Length_plot_forward_reverse_separated.svg:md5,f26a09502b21d31c1f82af2bc7224d77",
-                        "dmgprof.json:md5,49a1a9b445abf48904ead652a16fb7e4",
-                        "editDistance.txt:md5,5feeaa4b7018320fd9937e271299375c",
-                        "edit_distance.pdf:md5,3c852e083cdb327e30f7cb8a68d5b339",
-                        "edit_distance.svg:md5,8eb09a4839016d47256a2f7cf0d83c2d",
-                        "lgdistribution.txt:md5,3728eba42dd0b577a8566c103c342eb4",
-                        "misincorporation.txt:md5,a2d9fed1148fe02e372f0905c7e15b40"
-                    ],
-                    [
-                        "3pGtoA_freq.txt:md5,24ae86cb4dd4e558412344a98d582bae",
-                        "3p_freq_misincorporations.txt:md5,fe312a520a01f198bf248f396b179aff",
-                        "5pCtoT_freq.txt:md5,5a04f777d38930e205213298e70e09f1",
-                        "5p_freq_misincorporations.txt:md5,8ecb71fca75a2f86cf44eb0cf4bfd269",
-                        "DNA_comp_genome.txt:md5,b78d2826f0e1be4990120105c83d0b06",
-                        "DNA_composition_sample.txt:md5,dd78c33e4d9367759e82c31247685a3b",
-                        "DamagePlot.pdf:md5,5ced2ffb879f42c3bc102a1a7113e0ee",
-                        "DamagePlot_five_prime.svg:md5,1283e2dc2e894b220c50e0ff435ccf6a",
-                        "DamagePlot_three_prime.svg:md5,edcbf20a695b198187c29e872ada1173",
-                        "DamageProfiler.log:md5,4f896a5781facc9fe1b176694127f77b",
-                        "Length_plot.pdf:md5,7f902e5d7c43b1e20d6ea822bc28a5d9",
-                        "Length_plot_combined_data.svg:md5,af2972902c8e9a3423c38234b99cdcd1",
-                        "Length_plot_forward_reverse_separated.svg:md5,1d1ed566ac67069c8b12ac8ef623174f",
-                        "dmgprof.json:md5,98c584c20659b11692cbd1e280deeb97",
-                        "editDistance.txt:md5,059c352bf858c5ddb27e88253654e353",
-                        "edit_distance.pdf:md5,7a800bda2871089c0b8dfa96007c0d29",
-                        "edit_distance.svg:md5,422db12854ea06660b46ebc9f272c38b",
-                        "lgdistribution.txt:md5,5e8760bf271b743aa3c7c96414fb9991",
-                        "misincorporation.txt:md5,983d8fab464d67481b222aff57b06587"
-                    ],
-                    "versions.yml:md5,2814e619e5090776204ba0c2edfa07c2"
-                ]
-            ]
-        ],
-        "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.04.3"
-        },
-        "timestamp": "2024-07-20T06:47:06.638043093"
-    },
-    "damage_estimation_json": {
-        "content": [
-            [
-                
-            ]
-        ],
-        "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.04.3"
-        },
-        "timestamp": "2024-07-20T06:30:49.131281277"
     }
 }
