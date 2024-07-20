@@ -27,8 +27,8 @@ nextflow_pipeline {
                     Exceptions (variable md5sums)
                 */
 
-                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.txt')  ).match("damage_estimation_txt") },
-                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.json') ).match("damage_estimation_json") },
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.txt')  ).match("damage_estimation_txt") },
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.json') ).match("damage_estimation_json") },
                 { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.svg')  ).match("damage_estimation_svg") },
                 { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.pdf')  ).match("damage_estimation_pdf") },
                 { assert snapshot( checkAllFilesNamesFromDirForString("$outputDir/damage_estimation/", '.log', 'FINISHED SUCCESSFULLY')  ).match("damage_estimation_log") },
@@ -46,6 +46,17 @@ nextflow_pipeline {
 }
 
 // Recursively list all files in a directory and its subdirectories matching a given suffix
+def getAllFilesFromDir(dir, suffix) {
+    def output = []
+    new File(dir).eachFileRecurse() {
+        if (it.name.toString().matches(".*\\.${suffix}")) {
+            output.add(file(it))
+        }
+    }
+    return output
+}
+
+// Recursively list all files names in a directory and its subdirectories matching a given suffix
 def getAllFileNamesFromDir(dir, suffix) {
     def output = []
     new File(dir).eachFileRecurse() {
@@ -70,7 +81,7 @@ def checkAllFilesNamesFromDirForString(dir, suffix, string) {
 //def getAllFilesFromDir(dir, suffix) {
 //    def output = []
 //    new File(dir).eachFileRecurse() {
-//        if (it.name.toString().matches(".*\\.(${suffix.join('|')})")) {
+//        if (it.name.toString().matches(".*\\.${suffix}")) {
 //            output.add(it)
 //        }
 //    }
