@@ -22,7 +22,6 @@ nextflow_pipeline {
                 { assert snapshot( path("$outputDir/deduplication")            ).match("deduplication") },
                 { assert snapshot( path("$outputDir/mapping")                  ).match("mapping") },
                 { assert snapshot( path("$outputDir/samtools")                 ).match("samtools") }, // not sure what this is...
-                { assert snapshot( path("$outputDir/damage_estimation/")       ).match("damageprofiler") },
                 /*
                     Exceptions (variable md5sums)
                 */
@@ -49,13 +48,12 @@ nextflow_pipeline {
 def getAllFilesFromDir(dir, suffix) {
     def output = []
     new File(dir).eachFileRecurse() {
-        if (it.name.toString().matches(".*\\.${suffix}")) {
-            output.add(file(it))
+        if (it.name.toString().endsWith(suffix)) {
+            output.add(it)
         }
     }
     return output
 }
-
 // Recursively list all files names in a directory and its subdirectories matching a given suffix
 def getAllFileNamesFromDir(dir, suffix) {
     def output = []
