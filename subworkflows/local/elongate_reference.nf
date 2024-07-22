@@ -38,12 +38,13 @@ workflow ELONGATE_REFERENCE {
 
     ch_elongated_unzipped = ch_elongated_reference
                             .join( GUNZIP_ELONGATED_FASTA.out.gunzip )
-                            .dump(tag: 'unzipped_fasta')
+                            .dump(tag: 'unzipped_fasta', pretty: true)
                             .map {
                                 meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai, unzipped_fasta ->
                                     def final_fasta = unzipped_fasta ?: circularmapper_elongated_fasta
                                     [ meta, circular_target, unzipped_fasta, circularmapper_elongated_fai ]
                             }
+                            .mix( ch_elongated_branches.skip_gunzip )
 
     /*
         Check what fasta files we have.
