@@ -40,22 +40,22 @@
     "damage_estimation_pdf": {
         "content": [
             [
-                "edit_distance.pdf",
-                "Length_plot.pdf",
                 "DamagePlot.pdf",
-                "edit_distance.pdf",
-                "Length_plot.pdf",
                 "DamagePlot.pdf",
-                "edit_distance.pdf",
+                "DamagePlot.pdf",
                 "Length_plot.pdf",
-                "DamagePlot.pdf"
+                "Length_plot.pdf",
+                "Length_plot.pdf",
+                "edit_distance.pdf",
+                "edit_distance.pdf",
+                "edit_distance.pdf"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
             "nextflow": "24.04.3"
         },
-        "timestamp": "2024-07-22T08:49:41.006776905"
+        "timestamp": "2024-07-22T09:06:24.538585436"
     },
     "samtools": {
         "content": [
@@ -138,28 +138,28 @@
     "damage_estimation_svg": {
         "content": [
             [
+                "DamagePlot_five_prime.svg",
+                "DamagePlot_five_prime.svg",
+                "DamagePlot_five_prime.svg",
+                "DamagePlot_three_prime.svg",
+                "DamagePlot_three_prime.svg",
                 "DamagePlot_three_prime.svg",
                 "Length_plot_combined_data.svg",
-                "edit_distance.svg",
-                "DamagePlot_five_prime.svg",
+                "Length_plot_combined_data.svg",
+                "Length_plot_combined_data.svg",
                 "Length_plot_forward_reverse_separated.svg",
-                "DamagePlot_three_prime.svg",
-                "Length_plot_combined_data.svg",
-                "edit_distance.svg",
-                "DamagePlot_five_prime.svg",
                 "Length_plot_forward_reverse_separated.svg",
-                "DamagePlot_three_prime.svg",
-                "Length_plot_combined_data.svg",
+                "Length_plot_forward_reverse_separated.svg",
                 "edit_distance.svg",
-                "DamagePlot_five_prime.svg",
-                "Length_plot_forward_reverse_separated.svg"
+                "edit_distance.svg",
+                "edit_distance.svg"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
             "nextflow": "24.04.3"
         },
-        "timestamp": "2024-07-22T08:49:40.983721036"
+        "timestamp": "2024-07-22T09:06:24.525925369"
     },
     "damage_estimation_log": {
         "content": [
