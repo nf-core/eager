@@ -44,7 +44,8 @@ nextflow_pipeline {
     }
 }
 
-// Recursively list all files in a directory and its subdirectories matching a given suffix
+// Recursively list all files in a directory and its sub-directories, matching a given suffix
+// TODO: use regex pattern instead of suffix?
 def getAllFilesFromDir(dir, suffix) {
     def output = []
     new File(dir).eachFileRecurse() {
@@ -52,9 +53,9 @@ def getAllFilesFromDir(dir, suffix) {
             output.add(it)
         }
     }
-    return output
+    return output.sort()
 }
-// Recursively list all files names in a directory and its subdirectories matching a given suffix
+// Recursively list all files names in a directory and its sub-directories, matching a given suffix, return file names
 def getAllFileNamesFromDir(dir, suffix) {
     def output = []
     new File(dir).eachFileRecurse() {
@@ -65,6 +66,7 @@ def getAllFileNamesFromDir(dir, suffix) {
     return output
 }
 
+// Recursively list all files names in a directory and its sub-directories, matching a given suffix, return if check if given string is in file
 def checkAllFilesNamesFromDirForString(dir, suffix, string) {
     def output = []
     new File(dir).eachFileRecurse() {
@@ -72,20 +74,5 @@ def checkAllFilesNamesFromDirForString(dir, suffix, string) {
             output.add(it.text.contains(string))
         }
     }
-    return output
+    return output.sort()
 }
-
-//// TODO ALMOST THERE: INSTEAD OF SUFFIX JOIN, INSERT A REGEX?
-//def getAllFilesFromDir(dir, suffix) {
-//    def output = []
-//    new File(dir).eachFileRecurse() {
-//        if (it.name.toString().matches(".*\\.${suffix}")) {
-//            output.add(it)
-//        }
-//    }
-//    println(output)
-//    return output
-//}
-//
-//
-//getAllFilesFromDir(mydir, ["fasta","md"])
