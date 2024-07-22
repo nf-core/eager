@@ -63,7 +63,7 @@ def getAllFileNamesFromDir(dir, suffix) {
             output.add(it.toString().split("/")[-1])
         }
     }
-    return output
+    return output.sort()
 }
 
 // Recursively list all files names in a directory and its sub-directories, matching a given suffix, return if check if given string is in file
