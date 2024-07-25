@@ -145,7 +145,7 @@ workflow REFERENCE_INDEXING {
 
     emit:
     reference            = ch_reference_for_mapping       // [ meta, fasta, fai, dict, mapindex ]
-    elongated_reference  = ch_elongated_indexed_reference // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+    elongated_reference  = ch_elongated_indexed_reference // [ meta, circularmapper_elongated_fasta, circularmapper_elongated_index ]
     mitochondrion_header = ch_mitochondrion_header        // [ meta, mitochondrion_header ]
     hapmap               = ch_hapmap                      // [ meta, hapmap ]
     pmd_masking          = ch_pmd_masking                 // [ meta, pmd_masked_fasta, pmd_bed_for_masking ]

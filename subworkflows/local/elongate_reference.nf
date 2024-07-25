@@ -6,12 +6,11 @@ include { GUNZIP as GUNZIP_ELONGATED_FASTA    } from '../../modules/nf-core/gunz
 include { CIRCULARMAPPER_CIRCULARGENERATOR    } from '../../modules/nf-core/circularmapper/circulargenerator/main'
 include { BWA_INDEX as BWA_INDEX_CIRCULARISED } from '../../modules/nf-core/bwa/index/main'
 // TODO Check that the unzipping correctly overwrites the zipped fasta file, and that the emitted channel is constructed correctly.
-// TODO Currently, nothing seems to get dumped in the emission channel, so some join must be off.
 
 workflow ELONGATE_REFERENCE {
     take:
     ch_reference            // [ meta, fasta, fai, dict, mapindex ]
-    ch_elongated_reference  // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+    ch_elongated_reference  // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ]
 
     main:
     ch_versions           = Channel.empty()
@@ -22,14 +21,14 @@ workflow ELONGATE_REFERENCE {
     // Check if the provided elongated reference is gzipped, and if so, unzip it.
     ch_elongated_branches = ch_elongated_reference
                             .branch {
-                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ->
                                     for_gunzip: circularmapper_elongated_fasta != '' && circularmapper_elongated_fasta.extension == "gz"
                                     skip_gunzip: true
                             }
 
     ch_elongated_for_gunzip = ch_elongated_branches.for_gunzip
                             .map {
-                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ->
                                     [ meta, circularmapper_elongated_fasta ]
                             }
 
@@ -38,11 +37,10 @@ workflow ELONGATE_REFERENCE {
 
     ch_elongated_unzipped = ch_elongated_reference
                             .join( GUNZIP_ELONGATED_FASTA.out.gunzip )
-                            .dump(tag: 'unzipped_fasta', pretty: true)
                             .map {
-                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai, unzipped_fasta ->
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index, unzipped_fasta ->
                                     def final_fasta = unzipped_fasta ?: circularmapper_elongated_fasta
-                                    [ meta, circular_target, unzipped_fasta, circularmapper_elongated_fai ]
+                                    [ meta, circular_target, unzipped_fasta, circularmapper_elongated_index ]
                             }
                             .mix( ch_elongated_branches.skip_gunzip )
 
@@ -57,9 +55,9 @@ workflow ELONGATE_REFERENCE {
 
     ch_circulargenerator_input = ch_elongated_unzipped
                             .branch{
-                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
-                                        ready:            circularmapper_elongated_fasta != "" && circularmapper_elongated_fai != ""
-                                        needs_index:      circularmapper_elongated_fasta != "" && circularmapper_elongated_fai == ""
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ->
+                                        ready:            circularmapper_elongated_fasta != "" && circularmapper_elongated_index != ""
+                                        needs_index:      circularmapper_elongated_fasta != "" && circularmapper_elongated_index == ""
                                         needs_elongation: circularmapper_elongated_fasta == "" && circular_target != ""
                             }
 
@@ -68,7 +66,7 @@ workflow ELONGATE_REFERENCE {
     ch_references_to_elongate = ch_circulargenerator_input.needs_elongation
                             .join( ch_reference )
                             .multiMap {
-                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai, fasta, fai, dict, mapindex ->
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index, fasta, fai, dict, mapindex ->
 
                                     def elongation_factor = params.mapping_circularmapper_elongation_factor
 
@@ -87,7 +85,7 @@ workflow ELONGATE_REFERENCE {
     // Collect newly generated circular references and provided ones without an index, and index them.
     ch_input_for_circular_indexing = ch_circulargenerator_input.needs_index
                             .map {
-                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ->
                                     [ meta, circularmapper_elongated_fasta ]
                             }
                             .mix( CIRCULARMAPPER_CIRCULARGENERATOR.out.fasta )
@@ -99,16 +97,15 @@ workflow ELONGATE_REFERENCE {
                             .join( BWA_INDEX_CIRCULARISED.out.index )
 
     // Then put all the indexed elongated references together, replace any zipped ones with the unzipped version, and emit them
-    ch_circular_reference = ch_circulargenerator_input.ready.dump(tag:"ready", pretty:true)
+    ch_circular_reference = ch_circulargenerator_input.ready
                             .map {
-                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ->
-                                    [ meta, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ->
+                                    [ meta, circularmapper_elongated_fasta, circularmapper_elongated_index ]
                             }
-                            .mix( ch_indexed_references.dump(tag:"indexed", pretty: true) )
-                            .dump(tag: 'circular_reference')
+                            .mix( ch_indexed_references )
 
     emit:
-    circular_reference = ch_circular_reference // [ meta, circular_target, fasta, fai ]
+    circular_reference = ch_circular_reference // [ meta, fasta, index ]
     versions           = ch_versions
     mqc                = ch_multiqc_files
 }

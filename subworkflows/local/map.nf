@@ -18,7 +18,7 @@ workflow MAP {
     take:
     reads          // [ [meta], [read1, reads2] ] or [ [meta], [read1] ]
     index          // [ [meta], [ index ], [ fasta ] ]
-    elogated_index // [ [meta], circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+    elogated_index // [ [meta], circularmapper_elongated_fasta, circularmapper_elongated_index ]
 
     main:
     ch_versions       = Channel.empty()
@@ -117,11 +117,16 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
 
     } else if ( params.mapping_tool == 'circularmapper' ) {
-        // ch_index_for_mapping = index.map{ meta, index, fasta -> [ meta, index ] }
-        // ch_elongated_reference_for_mapping = elogated_index.map{ meta, circular_target, elongated_fasta, elongated_index -> [ meta, elongated_index ] }
-        // ch_reads_for_mapping = reads
+        ch_index_for_mapping = index
+        ch_elongated_reference_for_mapping = elogated_index.map{ meta, elongated_fasta, elongated_index -> [ meta, elongated_index ] }
+        ch_reads_for_mapping = reads
 
-        // CIRCULARMAPPER( ch_index_for_mapping, ch_elongated_reference_for_mapping, ch_reads_for_mapping )
+        CIRCULARMAPPER(
+            ch_index_for_mapping,
+            ch_elongated_reference_for_mapping,
+            ch_reads_for_mapping,
+            params.mapping_circularmapper_elongation_factor
+        )
 
         // // Join the original and elongated references, then combine with the reads, and multiMap to ensure correct ordering of channel contents.
         // ch_reads_for_circularmapper = reads.map {
@@ -162,7 +167,6 @@ workflow MAP {
         // // TODO - Update SWF outputs
         ch_mapped_lane_bam      = Channel.empty() //CIRCULARMAPPER.out.bam
         ch_mapped_lane_bai      = Channel.empty() // Circularmapper doesn't give a bai
-
 
     }
 
