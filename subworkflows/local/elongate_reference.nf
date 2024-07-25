@@ -5,7 +5,6 @@
 include { GUNZIP as GUNZIP_ELONGATED_FASTA    } from '../../modules/nf-core/gunzip/main'
 include { CIRCULARMAPPER_CIRCULARGENERATOR    } from '../../modules/nf-core/circularmapper/circulargenerator/main'
 include { BWA_INDEX as BWA_INDEX_CIRCULARISED } from '../../modules/nf-core/bwa/index/main'
-// TODO Check that the unzipping correctly overwrites the zipped fasta file, and that the emitted channel is constructed correctly.
 
 workflow ELONGATE_REFERENCE {
     take:

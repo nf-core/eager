@@ -7,7 +7,6 @@ include { BWA_INDEX                       } from '../../modules/nf-core/bwa/inde
 include { BOWTIE2_BUILD                   } from '../../modules/nf-core/bowtie2/build/main'
 include { SAMTOOLS_FAIDX                  } from '../../modules/nf-core/samtools/faidx/main'
 include { PICARD_CREATESEQUENCEDICTIONARY } from '../../modules/nf-core/picard/createsequencedictionary/main'
-// TODO missing: circulargeneraotr?
 
 workflow REFERENCE_INDEXING_MULTI {
 
