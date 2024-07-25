@@ -207,10 +207,7 @@ workflow EAGER {
         //
         // MODULE: flagstats of user supplied input BAMs
         //
-        ch_bam_bai_input = ch_samplesheet_bams
-                                .join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
-
-        SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bam_bai_input )
+        SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bams_from_input )
         ch_versions           = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
         ch_flagstat_input_bam = SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat // For endorspy
 
