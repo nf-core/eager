@@ -117,56 +117,16 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
 
     } else if ( params.mapping_tool == 'circularmapper' ) {
-        ch_index_for_mapping = index
-        ch_elongated_reference_for_mapping = elogated_index.map{ meta, elongated_fasta, elongated_index -> [ meta, elongated_index ] }
-        ch_reads_for_mapping = reads
+        ch_elongated_reference_for_mapping = elogated_index
+                            .map {
+                                meta, elongated_fasta, elongated_index ->
+                                [ meta, elongated_index ]
+                                }
 
-        CIRCULARMAPPER(
-            ch_index_for_mapping,
-            ch_elongated_reference_for_mapping,
-            ch_reads_for_mapping,
-            params.mapping_circularmapper_elongation_factor
-        )
-
-        // // Join the original and elongated references, then combine with the reads, and multiMap to ensure correct ordering of channel contents.
-        // ch_reads_for_circularmapper = reads.map {
-        //                                     // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-        //                                     addNewMetaFromAttributes( it, "reference" , "reference" , false )
-        //                                 }
-
-        // ch_input_for_circularmapper = index.join( elogated_index )
-        //                                 .map {
-        //                                     meta, index, fasta, elongated_index, elongated_fasta, circular_target ->
-        //                                         [ meta, index, fasta , elongated_index, elongated_fasta ]
-        //                                 }
-        //                                 .map {
-        //                                     // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
-        //                                     addNewMetaFromAttributes( it, "id" , "reference" , false )
-        //                                 }
-        //                                 .combine( ch_reads_for_circularmapper, by: 0)
-        //                                 .multiMap {
-        //                                     ignore_me, meta, index, fasta, elongated_index, elongated_fasta, circular_target, meta2, fasta, reads ->
-        //                                         reads: [ meta, reads ]
-        //                                         reference: [ meta, index, fasta ]
-        //                                         elongated_reference: [meta, elongated_index , elongated_index]
-        //                                 }
-
-        // Reference elongation and indexing takes place in the reference_indexing swf.
-        // Circularmapper takes non-elongated AND elongated references and reads as input (i think. wait for Alex's reply).
-
-        // ch_input_for_circularmapper = reads
-        //                             .combine(index.map{ meta, index, fasta -> [ meta, fasta ] })
-        //                             .dump(tag:"CM Inputs", pretty:true)
-        //                             .multiMap {
-        //                                 meta, reads, meta2, fasta ->
-        //                                     reads: [ meta, reads ]
-        //                                     reference: [ meta2, fasta ]
-        //                             }
-        // CIRCULARMAPPER( ch_input_for_circularmapper.reads, params.elongation_factor, ch_input_for_circularmapper.reference )
-        // ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
-        // // TODO - Update SWF outputs
-        ch_mapped_lane_bam      = Channel.empty() //CIRCULARMAPPER.out.bam
-        ch_mapped_lane_bai      = Channel.empty() // Circularmapper doesn't give a bai
+        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, reads, params.mapping_circularmapper_elongation_factor )
+        ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
+        ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
+        ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai
 
     }
 
@@ -200,7 +160,7 @@ workflow MAP {
     ch_mapped_bai =  params.fasta_largeref ? SAMTOOLS_INDEX_MERGED_LANES.out.csi : SAMTOOLS_INDEX_MERGED_LANES.out.bai
     ch_versions.mix( SAMTOOLS_INDEX_MERGED_LANES.out.versions )
 
-    ch_input_for_flagstat = SAMTOOLS_SORT_MERGED_LANES.out.bam.join( SAMTOOLS_INDEX_MERGED_LANES.out.bai, failOnMismatch: true )
+    ch_input_for_flagstat = ch_mapped_bam.join( ch_mapped_bai, failOnMismatch: true )
 
     SAMTOOLS_FLAGSTAT_MAPPED ( ch_input_for_flagstat )
     ch_versions.mix( SAMTOOLS_FLAGSTAT_MAPPED.out.versions.first() )
@@ -208,7 +168,7 @@ workflow MAP {
 
     emit:
     bam        = ch_mapped_bam                            // [ [ meta ], bam ]
-    bai        = ch_mapped_bai                            // [ [ meta ], bai ]
+    bai        = ch_mapped_bai                            // [ [ meta ], bai/csi ]
     flagstat   = SAMTOOLS_FLAGSTAT_MAPPED.out.flagstat    // [ [ meta ], stats ]
     mqc        = ch_multiqc_files
     versions   = ch_versions
