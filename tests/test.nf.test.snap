@@ -1,4 +1,39 @@
 {
+    "processing_fastp": {
+        "content": [
+            [
+                [
+                    "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.html:md5,102b48e384f588d8eb4be7d817bcb2fc",
+                    "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.json:md5,f9ac29dc38bd5e51beb9ea5a8a8e22f3",
+                    "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.log:md5,78b6f6419cf5d1833d69130b91cf4277",
+                    "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.html:md5,e8ab8f112c5f75e996168ae3ec6601be",
+                    "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.json:md5,582794e200f2ddf0aad317ab42f88e79",
+                    "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.log:md5,cc245eaecedc85ef9e4d0f0e6b1f1c45"
+                ],
+                [
+                    "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,27423738f2876235bd0179f4c60b201e",
+                    "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.zip:md5,6d36ffcf221aec6c89075fa488ae559a",
+                    "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,778b001967b7a79c6487bf91e3f63080",
+                    "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip:md5,f256af908afd52f9e46ddc2fca4a1e82",
+                    "versions.yml:md5,42fbb757df8018b4595df690155d41d2"
+                ],
+                [
+                    "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,11e990678bd0874856fb6a00bf362557",
+                    "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.zip:md5,6110f9a6b661e4901cfbad326c97fa92",
+                    "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,3d5a85bfbb863cf0b224956ad0ec97c4",
+                    "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.zip:md5,88a2a863e6cec055f590206c33d82c1c",
+                    "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,489128356b4272294d2e1c3710be382e",
+                    "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip:md5,7c75f748d707a149f00498a4f57061cc",
+                    "versions.yml:md5,b4672add0ce3c990afa1a2bc9f6a7c87"
+                ]
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.3"
+        },
+        "timestamp": "2024-07-26T11:52:05.714664296"
+    },
     "damage_estimation_txt": {
         "content": [
             [
