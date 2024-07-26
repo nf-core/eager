@@ -35,7 +35,8 @@ nextflow_pipeline {
 
                 // Preprcoessing
 
-                { assert snapshot( path("$outputDir/preprocessing/")          ).match("processing_fastp") }, // TODO: check all three stable (I suspect log/html might not be)
+                { assert snapshot( path("$outputDir/preprocessing/fastp")          ).match("processing_fastp") }, // TODO: Stable: JSON, varaible: HTML, LOG
+                { assert snapshot( path("$outputDir/preprocessing/fastp")          ).match("processing_fastp") }, // TODO: Stable: HTML, variable: ZIP
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_raw").list().findAll{ it.toString() }).match("processing_fastqc_raw") },
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_preprocessed").list().findAll{ it.toString() }).match("processing_fastqc_preprocessed") },
                 //{ assert snapshot( path("$outputDir/final_bams")               ).match("final_bams") },
