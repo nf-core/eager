@@ -26,12 +26,16 @@ nextflow_pipeline {
                     Exceptions (variable md5sums)
                 */
 
-                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.txt')  ).match("damage_estimation_txt") },
-                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/", '.json') ).match("damage_estimation_json") },
-                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.svg')  ).match("damage_estimation_svg") },
-                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.pdf')  ).match("damage_estimation_pdf") },
+                // Damage Estimation
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/"    , '.txt' )  ).match("damage_estimation_txt" )  },
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/"    , '.json')  ).match("damage_estimation_json") },
+                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.svg' )  ).match("damage_estimation_svg" ) },
+                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.pdf' )  ).match("damage_estimation_pdf" ) },
                 { assert snapshot( checkAllFilesNamesFromDirForString("$outputDir/damage_estimation/", '.log', 'FINISHED SUCCESSFULLY')  ).match("damage_estimation_log") },
-                //{ assert snapshot( path("$outputDir/preprocessing/").list().findAll{ it.toString() ==~ /.*\.(json|html|log)/ }).match("processing_fastp") }, // TODO: check all three stable (I suspect log/html might not be)
+
+                // Preprcoessing
+
+                { assert snapshot( path("$outputDir/preprocessing/")          ).match("processing_fastp") }, // TODO: check all three stable (I suspect log/html might not be)
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_raw").list().findAll{ it.toString() }).match("processing_fastqc_raw") },
                 //{ assert snapshot( path("$outputDir/preprocessing/fastqc_preprocessed").list().findAll{ it.toString() }).match("processing_fastqc_preprocessed") },
                 //{ assert snapshot( path("$outputDir/final_bams")               ).match("final_bams") },
