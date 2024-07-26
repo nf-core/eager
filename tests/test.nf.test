@@ -1,0 +1,83 @@
+nextflow_pipeline {
+
+    name "Test pipeline: NFCORE_EAGER"
+    script "main.nf"
+    tag "pipeline"
+    tag "nfcore_eager"
+    tag "test"
+
+    test("test_profile") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot( path("$outputDir/bam_filtering")            ).match("bam_filtering") },
+                { assert snapshot( path("$outputDir/bam_input_stats")          ).match("bam_input_stats") },
+                { assert snapshot( path("$outputDir/deduplication")            ).match("deduplication") },
+                { assert snapshot( path("$outputDir/mapping")                  ).match("mapping") },
+                { assert snapshot( path("$outputDir/samtools")                 ).match("samtools") }, // not sure what this is...
+                /*
+                    Exceptions (variable md5sums)
+                */
+
+                // Damage Estimation
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/"    , '.txt' )  ).match("damage_estimation_txt" )  },
+                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/"    , '.json')  ).match("damage_estimation_json") },
+                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.svg' )  ).match("damage_estimation_svg" ) },
+                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.pdf' )  ).match("damage_estimation_pdf" ) },
+                { assert snapshot( checkAllFilesNamesFromDirForString("$outputDir/damage_estimation/", '.log', 'FINISHED SUCCESSFULLY')  ).match("damage_estimation_log") },
+
+                // Preprcoessing
+
+                { assert snapshot( path("$outputDir/preprocessing/fastp")          ).match("processing_fastp") }, // TODO: Stable: JSON, varaible: HTML, LOG
+                { assert snapshot( path("$outputDir/preprocessing/fastp")          ).match("processing_fastp") }, // TODO: Stable: HTML, variable: ZIP
+                //{ assert snapshot( path("$outputDir/preprocessing/fastqc_raw").list().findAll{ it.toString() }).match("processing_fastqc_raw") },
+                //{ assert snapshot( path("$outputDir/preprocessing/fastqc_preprocessed").list().findAll{ it.toString() }).match("processing_fastqc_preprocessed") },
+                //{ assert snapshot( path("$outputDir/final_bams")               ).match("final_bams") },
+                //{ assert snapshot( path("$outputDir/mapstats")                 ).match("mapstats") },
+                { assert new File("$outputDir/pipeline_info/nf_core_pipeline_software_mqc_versions.yml").exists() },
+                { assert new File("$outputDir/multiqc/multiqc_report.html").exists() },
+                { assert new File("$outputDir/multiqc/multiqc_data/").exists() }
+            )
+        }
+    }
+}
+
+// Recursively list all files in a directory and its sub-directories, matching a given suffix
+// TODO: use regex pattern instead of suffix?
+def getAllFilesFromDir(dir, suffix) {
+    def output = []
+    new File(dir).eachFileRecurse() {
+        if (it.name.toString().endsWith(suffix)) {
+            output.add(it)
+        }
+    }
+    return output.sort()
+}
+// Recursively list all files names in a directory and its sub-directories, matching a given suffix, return file names
+def getAllFileNamesFromDir(dir, suffix) {
+    def output = []
+    new File(dir).eachFileRecurse() {
+        if (it.name.toString().endsWith(suffix)) {
+            output.add(it.toString().split("/")[-1])
+        }
+    }
+    return output.sort()
+}
+
+// Recursively list all files names in a directory and its sub-directories, matching a given suffix, return if check if given string is in file
+def checkAllFilesNamesFromDirForString(dir, suffix, string) {
+    def output = []
+    new File(dir).eachFileRecurse() {
+        if (it.name.toString().endsWith(suffix)) {
+            output.add(it.text.contains(string))
+        }
+    }
+    return output.sort()
+}
