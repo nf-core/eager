@@ -2,17 +2,17 @@
 // Prepare reference indexing for downstream
 //
 
-include { SEQKIT_SPLIT2                                 } from '../../modules/nf-core/seqkit/split2/main'
-include { FASTQ_ALIGN_BWAALN                            } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
-include { BWA_MEM                                       } from '../../modules/nf-core/bwa/mem/main'
-include { BOWTIE2_ALIGN                                 } from '../../modules/nf-core/bowtie2/align/main'
-include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES        } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED_LANES  } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM          } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2          } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED } from '../../modules/nf-core/samtools/flagstat/main'
-include { CIRCULARMAPPER                                } from '../../subworkflows/local/circularmapper'
+include { SEQKIT_SPLIT2                                       } from '../../modules/nf-core/seqkit/split2/main'
+include { FASTQ_ALIGN_BWAALN                                  } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { BWA_MEM                                             } from '../../modules/nf-core/bwa/mem/main'
+include { BOWTIE2_ALIGN                                       } from '../../modules/nf-core/bowtie2/align/main'
+include { SAMTOOLS_MERGE    as SAMTOOLS_MERGE_LANES           } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT     as SAMTOOLS_SORT_MERGED_LANES     } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MEM             } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_BT2             } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MERGED_LANES    } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MERGED_LANES } from '../../modules/nf-core/samtools/flagstat/main'
+include { CIRCULARMAPPER                                      } from '../../subworkflows/local/circularmapper'
 
 workflow MAP {
     take:
@@ -162,14 +162,14 @@ workflow MAP {
 
     ch_input_for_flagstat = ch_mapped_bam.join( ch_mapped_bai, failOnMismatch: true )
 
-    SAMTOOLS_FLAGSTAT_MAPPED ( ch_input_for_flagstat )
-    ch_versions.mix( SAMTOOLS_FLAGSTAT_MAPPED.out.versions.first() )
-    ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_MAPPED.out.flagstat )
+    SAMTOOLS_FLAGSTAT_MERGED_LANES  ( ch_input_for_flagstat )
+    ch_versions.mix( SAMTOOLS_FLAGSTAT_MERGED_LANES .out.versions.first() )
+    ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_MERGED_LANES .out.flagstat )
 
     emit:
     bam        = ch_mapped_bam                            // [ [ meta ], bam ]
     bai        = ch_mapped_bai                            // [ [ meta ], bai/csi ]
-    flagstat   = SAMTOOLS_FLAGSTAT_MAPPED.out.flagstat    // [ [ meta ], stats ]
+    flagstat   = SAMTOOLS_FLAGSTAT_MERGED_LANES .out.flagstat    // [ [ meta ], stats ]
     mqc        = ch_multiqc_files
     versions   = ch_versions
 
