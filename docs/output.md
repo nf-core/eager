@@ -180,7 +180,7 @@ The resulting FASTQ files will only be present in your results directory if you 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `mapping/`
+- `mapping/bwa{aln,mem}/`
 
   - `*.bam`: Sorted reads aligned against a reference genome in BAM format with no additional filtering.
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
@@ -195,7 +195,7 @@ The resulting FASTQ files will only be present in your results directory if you 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `mapping/`
+- `mapping/bowtie2/`
 
   - `*.bam`: Sorted reads aligned against a reference genome in BAM format with no additional filtering.
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
