@@ -21,7 +21,7 @@ workflow CIRCULARMAPPER {
     ch_realigned_bais = Channel.empty()
     ch_realigned_csis = Channel.empty()
 
-    // While mapping with BWA will need the elongated reference index, RealignSAMFile apparently does NOT need the elongated reference to be present, only the elongation factor.
+    // Although mapping with BWA will need the elongated reference index, RealignSAMFile apparently does NOT need the elongated reference to be present, only the elongation factor.
     FASTQ_ALIGN_BWAALN_ELONGATED( ch_fastq_reads, ch_elongated_reference )
     ch_versions = ch_versions.mix( FASTQ_ALIGN_BWAALN_ELONGATED.out.versions.first() )
 

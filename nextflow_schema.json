@@ -140,19 +140,19 @@
                     "type": "integer",
                     "default": 500,
                     "description": "Specify the number of bases to extend reference by (circularmapper only).",
-                    "help_text": "The number of bases to extend the reference genome with. By default this is set to 500 if not specified otherwise.",
+                    "help_text": "The number of bases to extend the beginning and end of each reference genome with.",
                     "fa_icon": "fas fa-external-link-alt"
                 },
                 "fasta_circularmapper_elongatedfasta": {
                     "type": "string",
                     "description": "Specify an elongated reference FASTA to be used for circularmapper.",
-                    "help_text": "Specify an already elongated FASTA file for circularmapper to avoid reprocessing.",
+                    "help_text": "Specify an already elongated FASTA file for circularmapper to avoid regeneration.",
                     "fa_icon": "fas fa-address-book"
                 },
                 "fasta_circularmapper_elongatedindex": {
                     "type": "string",
                     "description": "Specify a samtools index for the elongated FASTA file.",
-                    "help_text": "Specify the index for an already elongated FASTA file to avoid reprocessing.",
+                    "help_text": "Specify the index for an already elongated FASTA file to avoid regeneration.",
                     "fa_icon": "fas fa-address-book"
                 }
             }
