@@ -180,7 +180,7 @@ workflow REFERENCE_INDEXING_MULTI {
                 remainder:  [ meta, fasta, fai, dict ]
         }
 
-    if ( params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" ) {
+    if ( params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" || params.mapping_tool == "circularmapper" ) {
         BWA_INDEX ( ch_mapindex_input.index )
         ch_version = ch_versions.mix( BWA_INDEX.out.versions )
         ch_indexed_forremap = BWA_INDEX.out.index
@@ -188,8 +188,6 @@ workflow REFERENCE_INDEXING_MULTI {
         BOWTIE2_BUILD ( ch_mapindex_input.index )
         ch_version = ch_versions.mix( BOWTIE2_BUILD.out.versions )
         ch_indexed_forremap = BOWTIE2_BUILD.out.index
-    } else if ( params.mapping_tool == "circularmapper" ) {
-        println("CircularMapper Indexing Not Yet Implemented")
     }
 
     ch_indexed_formix = ch_indexed_forremap
