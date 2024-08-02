@@ -67,7 +67,7 @@ workflow ELONGATE_REFERENCE {
                             .multiMap {
                                 meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index, fasta, fai, dict, mapindex ->
 
-                                    def elongation_factor = params.mapping_circularmapper_elongation_factor
+                                    def elongation_factor = params.fasta_circularmapper_elongationfactor
 
                                     fasta:              [ meta, fasta ]
                                     elongation_factor : [ meta, elongation_factor ]

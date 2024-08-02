@@ -19,14 +19,14 @@ workflow REFERENCE_INDEXING_MULTI {
     // Import reference sheet and change empty arrays to empty strings for compatibility with single reference input
     ch_splitreferencesheet_for_branch = Channel.fromSamplesheet("fasta_sheet")
                                     .map{
-                                        meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
+                                        meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
                                             meta.ploidy                    = meta.genotyping_ploidy != null ? meta.genotyping_ploidy : params.genotyping_reference_ploidy
                                             fai                            = fai != [] ? fai : ""
                                             dict                           = dict != [] ? dict : ""
                                             mapper_index                   = mapper_index != [] ? mapper_index : ""
                                             circular_target                = circular_target != [] ? circular_target : ""
-                                            circularmapper_elongated_fasta = circularmapper_elongated_fasta != [] ? circularmapper_elongated_fasta : ""
-                                            circularmapper_elongated_fai   = circularmapper_elongated_fai != [] ? circularmapper_elongated_fai : ""
+                                            circularmapper_elongatedfasta = circularmapper_elongatedfasta != [] ? circularmapper_elongatedfasta : ""
+                                            circularmapper_elongatedindex = circularmapper_elongatedindex != [] ? circularmapper_elongatedindex : ""
                                             mitochondrion                  = mitochondrion != [] ? mitochondrion : ""
                                             capture_bed                    = capture_bed != [] ? capture_bed : ""
                                             pileupcaller_bed               = pileupcaller_bed != [] ? pileupcaller_bed : ""
@@ -37,7 +37,7 @@ workflow REFERENCE_INDEXING_MULTI {
                                             sexdet_bed                     = sexdet_bed != [] ? sexdet_bed : ""
                                             bedtools_feature               = bedtools_feature != [] ? bedtools_feature : ""
                                             genotyping_gatk_dbsnp          = genotyping_gatk_dbsnp != [] ? genotyping_gatk_dbsnp : ""
-                                        [ meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
+                                        [ meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
                                     }
 
     // GENERAL DESCRIPTION FOR NEXT SECTIONS
@@ -53,9 +53,9 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                             .multiMap {
-                                meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
+                                meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
                                 generated:            [ meta, fasta, fai, dict, mapper_index ]
-                                circularmapper:       [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+                                circularmapper:       [ meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex ]
                                 mitochondrion_header: [ meta, mitochondrion ]
                                 angsd_hapmap:         [ meta, hapmap ]
                                 pmd_masked_fasta:     [ meta, pmd_masked_fasta ]
@@ -202,7 +202,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     emit:
     reference            = ch_indexmapper_for_reference                         // [ meta, fasta, fai, dict, mapindex ]
-    elongated_reference  = ch_input_from_referencesheet.circularmapper          // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_fai ]
+    elongated_reference  = ch_input_from_referencesheet.circularmapper          // [ meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex ]
     mitochondrion_header = ch_input_from_referencesheet.mitochondrion_header    // [ meta, mitochondrion ]
     hapmap               = ch_input_from_referencesheet.angsd_hapmap            // [ meta, hapmap ]
     pmd_masked_fasta     = ch_input_from_referencesheet.pmd_masked_fasta        // [ meta, pmd_masked_fasta ]

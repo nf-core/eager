@@ -287,15 +287,22 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -resume -du
 ## CircularMapper with reference elongation
 ## Expect: Reference elongation is ran, and circularmapper SWF is ran.
 ## Check: Expect the elongated reference and BWA index directory within the `reference` directory. Also 2 bam files together with their BAIs and Flagstats in the `mapping/circularmapper` directory.
-nextflow run ../main.nf -profile test,docker --outdir ./results -w work/ -resume -dump-channels -ansi-log false --fasta_circular_target 'NC_007596.2' --mapping_tool circularmapper --save_reference
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume -dump-channels -ansi-log false --fasta_circular_target 'NC_007596.2' --mapping_tool circularmapper --save_reference
 ```
 
 ```bash
 ## CircularMapper with an already elongated reference. Big reference flag. Also check that bwa_aln flags also propagate when using circularmapper.
 ## Expect: Reference elongation is NOT ran, and circularmapper SWF is ran.
 ## Check: 2 bam files together with their CSIs and Flagstats in the `mapping/circularmapper` directory.
-##        Also check the BAM headers for the -k and -n flags during BWA ALN.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume -dump-channels -ansi-log false --fasta_circular_target 'NC_007596.2' --mapping_tool circularmapper --mapping_circularmapper_elongated_fasta data/reference/Mammoth_MT_Krause_500/Mammoth_MT_Krause_500.fasta --mapping_circularmapper_elongated_fai data/reference/Mammoth_MT_Krause_500/bwa --fasta_largeref --mapping_bwaaln_n 0.05 --mapping_bwaaln_k 3
+##        Also check the .command.sh for the -k and -n flags during BWA ALN.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume -dump-channels -ansi-log false --fasta_circular_target 'NC_007596.2' --mapping_tool circularmapper --fasta_circularmapper_elongatedfasta data/reference/Mammoth_MT_Krause_500/Mammoth_MT_Krause_500.fasta --fasta_circularmapper_elongatedindex data/reference/Mammoth_MT_Krause_500/bwa --fasta_largeref --mapping_bwaaln_n 0.05 --mapping_bwaaln_k 3
+```
+
+```bash
+## Multiref with circularmapper. reference_sheet_multiref.csv edited to include elongated reference and index from first CM manual test for Mammoth_MT, and remove the human reference (save on runtime). Will still evaluate through reference_indexing_multi.
+## Expect: No elongation for Mammoth MT.
+## Check: 2 bam files together with their CSIs and Flagstats in the `mapping/circularmapper` directory. (6 files total)
+nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -resume -dump-channels -ansi-log false --fasta_sheet /Users/lamnidis/Software/github/jbv2/eager/data/reference/reference_sheet_multiref.csv --mapping_tool circularmapper --fasta_largeref --mapping_bwaaln_n 0.05 --mapping_bwaaln_k 3
 ```
 
 ## Host Removal

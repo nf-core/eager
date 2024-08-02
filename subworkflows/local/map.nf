@@ -123,7 +123,7 @@ workflow MAP {
                                 [ meta, elongated_index ]
                                 }
 
-        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, reads, params.mapping_circularmapper_elongation_factor )
+        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, reads, params.fasta_circularmapper_elongationfactor )
         ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
         ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
         ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai
