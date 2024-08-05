@@ -27,7 +27,7 @@ workflow REFERENCE_INDEXING {
         // If input (multi-)reference sheet supplied
         REFERENCE_INDEXING_MULTI ( fasta )
         ch_reference_for_mapping = REFERENCE_INDEXING_MULTI.out.reference
-        ch_elongated_reference   = REFERENCE_INDEXING_MULTI.out.elongated_reference
+        ch_reference_to_elongate   = REFERENCE_INDEXING_MULTI.out.elongated_reference
         ch_mitochondrion_header  = REFERENCE_INDEXING_MULTI.out.mitochondrion_header
         ch_hapmap                = REFERENCE_INDEXING_MULTI.out.hapmap
         ch_pmd_masked_fasta      = REFERENCE_INDEXING_MULTI.out.pmd_masked_fasta
@@ -41,7 +41,7 @@ workflow REFERENCE_INDEXING {
     } else {
         // If input FASTA and/or indicies supplied
         REFERENCE_INDEXING_SINGLE ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir )
-        ch_elongated_reference   = REFERENCE_INDEXING_SINGLE.out.elongated_reference
+        ch_reference_to_elongate   = REFERENCE_INDEXING_SINGLE.out.elongated_reference
         ch_mitochondrion_header  = REFERENCE_INDEXING_SINGLE.out.mitochondrion_header
         ch_hapmap                = REFERENCE_INDEXING_SINGLE.out.hapmap
         ch_pmd_masked_fasta      = REFERENCE_INDEXING_SINGLE.out.pmd_masked_fasta
@@ -131,16 +131,19 @@ workflow REFERENCE_INDEXING {
     // Elongate reference for circularmapper if requested
     if ( params.mapping_tool == "circularmapper" ) {
         // Throw errors if required parameters are missing
-        ch_elongated_for_gunzip = ch_elongated_reference
-                        .filter{ it[1] != "" || it[2] != "" }
+        ch_elongated_for_gunzip = ch_reference_to_elongate
+                        .filter{
+                            meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex ->
+                            circular_target != "" || circularmapper_elongatedfasta != ""
+                        }
                         .ifEmpty{ error "[nf-core/eager] ERROR: Mapping with circularmapper requires either a circular target or elongated reference file for at least one reference." }
 
         // This ELONGATE_REFERENCE subworkflow also checks if the provided reference is gzipped, and unzips it if necessary.
-        ELONGATE_REFERENCE( ch_reference_for_mapping, ch_elongated_reference )
+        ELONGATE_REFERENCE( ch_reference_for_mapping, ch_reference_to_elongate )
         ch_version = ch_versions.mix( ELONGATE_REFERENCE.out.versions )
         ch_elongated_indexed_reference = ELONGATE_REFERENCE.out.circular_reference
     } else {
-        ch_elongated_indexed_reference = ch_elongated_reference
+        ch_elongated_indexed_reference = ch_reference_to_elongate
     }
 
     emit:
