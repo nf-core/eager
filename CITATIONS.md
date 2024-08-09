@@ -126,6 +126,10 @@
 
   > Sex.DetERRmine.py Lamnidis, T.C. et al., 2018. Ancient Fennoscandian genomes reveal origin and spread of Siberian ancestry in Europe. Nature communications, 9(1), p.5018. Available at: http://dx.doi.org/10.1038/s41467-018-07483-5. Download: https://github.com/TCLamnidis/Sex.DetERRmine
 
+  - [CircularMapper](https://doi.org/10.1186/s13059-016-0918-z)
+
+  > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)

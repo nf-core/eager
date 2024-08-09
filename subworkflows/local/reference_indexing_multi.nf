@@ -7,7 +7,6 @@ include { BWA_INDEX                       } from '../../modules/nf-core/bwa/inde
 include { BOWTIE2_BUILD                   } from '../../modules/nf-core/bowtie2/build/main'
 include { SAMTOOLS_FAIDX                  } from '../../modules/nf-core/samtools/faidx/main'
 include { PICARD_CREATESEQUENCEDICTIONARY } from '../../modules/nf-core/picard/createsequencedictionary/main'
-// TODO missing: circulargeneraotr?
 
 workflow REFERENCE_INDEXING_MULTI {
 
@@ -20,23 +19,25 @@ workflow REFERENCE_INDEXING_MULTI {
     // Import reference sheet and change empty arrays to empty strings for compatibility with single reference input
     ch_splitreferencesheet_for_branch = Channel.fromSamplesheet("fasta_sheet")
                                     .map{
-                                        meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
-                                            meta.ploidy           = meta.genotyping_ploidy != null ? meta.genotyping_ploidy : params.genotyping_reference_ploidy
-                                            fai                   = fai != [] ? fai : ""
-                                            dict                  = dict != [] ? dict : ""
-                                            mapper_index          = mapper_index != [] ? mapper_index : ""
-                                            circular_target       = circular_target != [] ? circular_target : ""
-                                            mitochondrion         = mitochondrion != [] ? mitochondrion : ""
-                                            capture_bed           = capture_bed != [] ? capture_bed : ""
-                                            pileupcaller_bed      = pileupcaller_bed != [] ? pileupcaller_bed : ""
-                                            pileupcaller_snp      = pileupcaller_snp != [] ? pileupcaller_snp : ""
-                                            hapmap                = hapmap != [] ? hapmap : ""
-                                            pmd_masked_fasta      = pmd_masked_fasta != [] ? pmd_masked_fasta : ""
-                                            pmd_bed_for_masking   = pmd_bed_for_masking != [] ? pmd_bed_for_masking : ""
-                                            sexdet_bed            = sexdet_bed != [] ? sexdet_bed : ""
-                                            bedtools_feature      = bedtools_feature != [] ? bedtools_feature : ""
-                                            genotyping_gatk_dbsnp = genotyping_gatk_dbsnp != [] ? genotyping_gatk_dbsnp : ""
-                                        [ meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
+                                        meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
+                                            meta.ploidy                    = meta.genotyping_ploidy != null ? meta.genotyping_ploidy : params.genotyping_reference_ploidy
+                                            fai                            = fai != [] ? fai : ""
+                                            dict                           = dict != [] ? dict : ""
+                                            mapper_index                   = mapper_index != [] ? mapper_index : ""
+                                            circular_target                = circular_target != [] ? circular_target : ""
+                                            circularmapper_elongatedfasta = circularmapper_elongatedfasta != [] ? circularmapper_elongatedfasta : ""
+                                            circularmapper_elongatedindex = circularmapper_elongatedindex != [] ? circularmapper_elongatedindex : ""
+                                            mitochondrion                  = mitochondrion != [] ? mitochondrion : ""
+                                            capture_bed                    = capture_bed != [] ? capture_bed : ""
+                                            pileupcaller_bed               = pileupcaller_bed != [] ? pileupcaller_bed : ""
+                                            pileupcaller_snp               = pileupcaller_snp != [] ? pileupcaller_snp : ""
+                                            hapmap                         = hapmap != [] ? hapmap : ""
+                                            pmd_masked_fasta               = pmd_masked_fasta != [] ? pmd_masked_fasta : ""
+                                            pmd_bed_for_masking            = pmd_bed_for_masking != [] ? pmd_bed_for_masking : ""
+                                            sexdet_bed                     = sexdet_bed != [] ? sexdet_bed : ""
+                                            bedtools_feature               = bedtools_feature != [] ? bedtools_feature : ""
+                                            genotyping_gatk_dbsnp          = genotyping_gatk_dbsnp != [] ? genotyping_gatk_dbsnp : ""
+                                        [ meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
                                     }
 
     // GENERAL DESCRIPTION FOR NEXT SECTIONS
@@ -52,8 +53,9 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                             .multiMap {
-                                meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
-                                generated:            [ meta, fasta, fai, dict, mapper_index, circular_target ]
+                                meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
+                                generated:            [ meta, fasta, fai, dict, mapper_index ]
+                                circularmapper:       [ meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex ]
                                 mitochondrion_header: [ meta, mitochondrion ]
                                 angsd_hapmap:         [ meta, hapmap ]
                                 pmd_masked_fasta:     [ meta, pmd_masked_fasta ]
@@ -68,7 +70,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // Detect if fasta is gzipped or not
     ch_fasta_for_gunzip = ch_input_from_referencesheet.generated
                             .branch {
-                                meta, fasta, fai, dict, mapper_index, circular_target ->
+                                meta, fasta, fai, dict, mapper_index ->
                                     forgunzip: fasta.extension == "gz"
                                     skip: true
                             }
@@ -76,9 +78,9 @@ workflow REFERENCE_INDEXING_MULTI {
     // Pull out name/file to match cardinality for GUNZIP module
     ch_gunzip_input = ch_fasta_for_gunzip.forgunzip
         .multiMap {
-            meta, fasta, fai, dict, mapper_index, circular_target ->
+            meta, fasta, fai, dict, mapper_index ->
                 gunzip:    [ meta, fasta ]
-                remainder: [ meta, fai, dict, mapper_index, circular_target ]
+                remainder: [ meta, fai, dict, mapper_index ]
         }
 
 
@@ -96,7 +98,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // Separate out non-faidxed references
     ch_fasta_for_faidx = ch_fasta_for_faiindexing
         .branch {
-            meta, fasta, fai, dict, mapper_index, circular_target ->
+            meta, fasta, fai, dict, mapper_index ->
                 forfaidx: fai == ""
                 skip: true
         }
@@ -105,9 +107,9 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_faidx_input = ch_fasta_for_faidx
         .forfaidx
         .multiMap {
-            meta, fasta, fai, dict, mapper_index, circular_target ->
+            meta, fasta, fai, dict, mapper_index ->
                 faidx:      [ meta, fasta ]
-                remainder:  [ meta, fasta, dict, mapper_index, circular_target ] // we drop fai here as we are going to make it
+                remainder:  [ meta, fasta, dict, mapper_index ] // we drop fai here as we are going to make it
         }
 
     SAMTOOLS_FAIDX ( ch_faidx_input.faidx, [ [], [] ] )
@@ -117,9 +119,9 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_faidxed_formix =  SAMTOOLS_FAIDX.out.fai
                             .join( ch_faidx_input.remainder, failOnMismatch: true )
                             .map {
-                                meta, fai, fasta, dict, mapper_index, circular_target ->
+                                meta, fai, fasta, dict, mapper_index ->
 
-                                [ meta, fasta, fai, dict, mapper_index, circular_target ]
+                                [ meta, fasta, fai, dict, mapper_index ]
                             }
 
     // Mix back newly faidx'd references with the pre-indexed ones
@@ -131,7 +133,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_fasta_for_dict = ch_fasta_for_dictindexing
         .branch {
-            meta, fasta, fai, dict, mapper_index, circular_target ->
+            meta, fasta, fai, dict, mapper_index ->
                 fordict: dict == ""
                 skip: true
         }
@@ -139,9 +141,9 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_dict_input = ch_fasta_for_dict
         .fordict
         .multiMap {
-            meta, fasta, fai, dict, mapper_index, circular_target ->
+            meta, fasta, fai, dict, mapper_index ->
                 dict:      [ meta, fasta ]
-                remainder:  [ meta, fasta, fai, mapper_index, circular_target ]
+                remainder:  [ meta, fasta, fai, mapper_index ]
         }
 
     PICARD_CREATESEQUENCEDICTIONARY ( ch_dict_input.dict )
@@ -150,9 +152,9 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_dicted_formix =  PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
                             .join( ch_dict_input.remainder, failOnMismatch: true )
                             .map {
-                                meta, dict, fasta, fai, mapper_index, circular_target ->
+                                meta, dict, fasta, fai, mapper_index ->
 
-                                [ meta, fasta, fai, dict, mapper_index, circular_target ]
+                                [ meta, fasta, fai, dict, mapper_index ]
                             }
 
     ch_dict_formapperindexing = ch_fasta_for_dict.skip.mix(ch_dicted_formix)
@@ -165,7 +167,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_fasta_for_mapperindex = ch_dict_formapperindexing
         .branch {
-            meta, fasta, fai, dict, mapper_index, circular_target ->
+            meta, fasta, fai, dict, mapper_index ->
                 forindex: mapper_index == ""
                 skip: true
         }
@@ -173,12 +175,12 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_mapindex_input = ch_fasta_for_mapperindex
         .forindex
         .multiMap {
-            meta, fasta, fai, dict, mapper_index, circular_target ->
+            meta, fasta, fai, dict, mapper_index ->
                 index:      [ meta, fasta ]
-                remainder:  [ meta, fasta, fai, dict, circular_target ]
+                remainder:  [ meta, fasta, fai, dict ]
         }
 
-    if ( params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" ) {
+    if ( params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" || params.mapping_tool == "circularmapper" ) {
         BWA_INDEX ( ch_mapindex_input.index )
         ch_version = ch_versions.mix( BWA_INDEX.out.versions )
         ch_indexed_forremap = BWA_INDEX.out.index
@@ -186,22 +188,21 @@ workflow REFERENCE_INDEXING_MULTI {
         BOWTIE2_BUILD ( ch_mapindex_input.index )
         ch_version = ch_versions.mix( BOWTIE2_BUILD.out.versions )
         ch_indexed_forremap = BOWTIE2_BUILD.out.index
-    } else if ( params.mapping_tool == "circularmapper" ) {
-        println("CircularMapper Indexing Not Yet Implemented")
     }
 
     ch_indexed_formix = ch_indexed_forremap
                             .join( ch_mapindex_input.remainder, failOnMismatch: true )
                             .map {
-                                meta, mapper_index, fasta, fai, dict, circular_target ->
+                                meta, mapper_index, fasta, fai, dict ->
 
-                                [ meta, fasta, fai, dict, mapper_index, circular_target ]
+                                [ meta, fasta, fai, dict, mapper_index ]
                             }
 
     ch_indexmapper_for_reference = ch_fasta_for_mapperindex.skip.mix(ch_indexed_formix)
 
     emit:
-    reference            = ch_indexmapper_for_reference                         // [ meta, fasta, fai, dict, mapindex, circular_target ]
+    reference            = ch_indexmapper_for_reference                         // [ meta, fasta, fai, dict, mapindex ]
+    elongated_reference  = ch_input_from_referencesheet.circularmapper          // [ meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex ]
     mitochondrion_header = ch_input_from_referencesheet.mitochondrion_header    // [ meta, mitochondrion ]
     hapmap               = ch_input_from_referencesheet.angsd_hapmap            // [ meta, hapmap ]
     pmd_masked_fasta     = ch_input_from_referencesheet.pmd_masked_fasta        // [ meta, pmd_masked_fasta ]
