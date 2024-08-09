@@ -5,6 +5,7 @@
 include { GUNZIP as GUNZIP_ELONGATED_FASTA    } from '../../modules/nf-core/gunzip/main'
 include { CIRCULARMAPPER_CIRCULARGENERATOR    } from '../../modules/nf-core/circularmapper/circulargenerator/main'
 include { BWA_INDEX as BWA_INDEX_CIRCULARISED } from '../../modules/nf-core/bwa/index/main'
+// include { addNewMetaFromAttributes            } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
 workflow ELONGATE_REFERENCE {
     take:
@@ -60,6 +61,28 @@ workflow ELONGATE_REFERENCE {
                                         needs_index:      circularmapper_elongated_fasta != "" && circularmapper_elongated_index == ""
                                         needs_elongation: circularmapper_elongated_fasta == "" && circular_target != ""
                             }
+
+    // References that are already elongated, need ch_elongated_chr to be created from the circular target information
+    ch_needs_elongated_chr_list = ch_circulargenerator_input.ready
+                            .mix( ch_circulargenerator_input.needs_index )
+                            .join( ch_reference )
+                            .map {
+                                meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index, fasta, fai, dict, mapindex ->
+                                    [ meta, fasta, circular_target ]
+                            }
+                            .collectFile {
+                                meta, fasta, circular_target ->
+                                    [ "${fasta.name}_500_elongated", circular_target + '\n' ]
+                            }
+    /* The above gets the right information into the created files, but the channel then also needs a meta, which collectFile doesn't seem able to handle.
+        TODO Proposed solution:
+            - Use a map to infer the meta.id fromt he file name (i.e. file name without the suffix. since everything by now is unzipped, it should work).
+            - Then pull that info out of the ch_reference meta with addNewMetaFromAttributes.
+            - Join the channels by this meta
+            - Use a map to give the collected file the meta of the reference.
+
+        This is a bit convoluted, but it should work. Would be simpler if I could create the meta within collectFile.
+    */
 
     // Elongate references that need it
     // Join the original references to the branch of needs_elongation, to get the original fasta files, and elongate them.

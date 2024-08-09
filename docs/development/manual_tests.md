@@ -306,12 +306,12 @@ nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -
 ```
 
 ```bash
-## Multiref with circularmapper PLUS filtering.
+## Circularmapper with circularfilter.
 ## Expect: No elongation for Mammoth MT.
 ## Check: 2 bam files together with their CSIs and Flagstats in the `mapping/circularmapper` directory. (6 files total)
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume -dump-channels -ansi-log false --fasta_circular_target 'NC_007596.2' --mapping_tool circularmapper --fasta_circularmapper_elongatedfasta data/reference/Mammoth_MT_Krause_500/Mammoth_MT_Krause_500.fasta --fasta_circularmapper_elongatedindex data/reference/Mammoth_MT_Krause_500/bwa --fasta_largeref --mapping_bwaaln_n 0.05 --mapping_bwaaln_k 3 --mapping_circularmapper_circularfilter
 ```
-<!-- It seems like FILTER_BAM_FRAGMENT_LENGTH does not like CM bams produced with filtering and the process fails. -->
+<!-- When the reference is provided, no chrom_list is created, so no mapping >_< -->
 
 ## Host Removal
 
