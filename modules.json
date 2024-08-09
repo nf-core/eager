@@ -97,12 +97,12 @@
                     },
                     "circularmapper/circulargenerator": {
                         "branch": "master",
-                        "git_sha": "0148d00e72e35cd08b3d829d7de3430bc0c92a5a",
+                        "git_sha": "a7b0131370d9bc38076efad88773bca5537203d0",
                         "installed_by": ["modules"]
                     },
                     "circularmapper/realignsamfile": {
                         "branch": "master",
-                        "git_sha": "579d2d5f15e126a2190a7b709dfc77696c83688d",
+                        "git_sha": "a7b0131370d9bc38076efad88773bca5537203d0",
                         "installed_by": ["modules"]
                     },
                     "damageprofiler": {
