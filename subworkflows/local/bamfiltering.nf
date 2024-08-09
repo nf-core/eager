@@ -16,7 +16,7 @@ include { CAT_FASTQ as CAT_FASTQ_MAPPED                   } from '../../modules/
 workflow FILTER_BAM {
 
     take:
-    bam // [ [meta], [bam], [bai] ]
+    bam // [ [meta], [bam], [bai/csi] ]
 
     main:
     ch_versions       = Channel.empty()
@@ -37,9 +37,10 @@ workflow FILTER_BAM {
         ch_versions = ch_versions.mix( FILTER_BAM_FRAGMENT_LENGTH.out.versions.first() )
 
         SAMTOOLS_LENGTH_FILTER_INDEX ( FILTER_BAM_FRAGMENT_LENGTH.out.bam )
+        ch_length_filtered_index = params.fasta_largeref ? SAMTOOLS_LENGTH_FILTER_INDEX.out.csi : SAMTOOLS_LENGTH_FILTER_INDEX.out.bai
         ch_versions = ch_versions.mix( SAMTOOLS_LENGTH_FILTER_INDEX.out.versions.first() )
 
-        ch_bam_for_qualityfilter = FILTER_BAM_FRAGMENT_LENGTH.out.bam.join( SAMTOOLS_LENGTH_FILTER_INDEX.out.bai )
+        ch_bam_for_qualityfilter = FILTER_BAM_FRAGMENT_LENGTH.out.bam.join( ch_length_filtered_index )
 
     } else {
         ch_bam_for_qualityfilter = bam
@@ -52,9 +53,10 @@ workflow FILTER_BAM {
     ch_versions = ch_versions.mix( SAMTOOLS_VIEW_BAM_FILTERING.out.versions.first() )
 
     SAMTOOLS_FILTER_INDEX ( SAMTOOLS_VIEW_BAM_FILTERING.out.bam )
+    ch_filtered_bam_index = params.fasta_largeref ? SAMTOOLS_FILTER_INDEX.out.csi : SAMTOOLS_FILTER_INDEX.out.bai
     ch_versions = ch_versions.mix( SAMTOOLS_FILTER_INDEX.out.versions.first() )
 
-    ch_bam_for_genomics = SAMTOOLS_VIEW_BAM_FILTERING.out.bam.join( SAMTOOLS_FILTER_INDEX.out.bai )
+    ch_bam_for_genomics = SAMTOOLS_VIEW_BAM_FILTERING.out.bam.join( ch_filtered_bam_index )
 
     // Only run if we actually remove mapped reads
     if ( params.bamfiltering_mappingquality != 0 || params.bamfiltering_minreadlength != 0  ) {
