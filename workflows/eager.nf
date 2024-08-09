@@ -283,7 +283,7 @@ workflow EAGER {
             .map{
                 addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
-        ch_qualimap_input = ch_dedupped_bams
+        ch_qualimap_input = ch_merged_dedup_bams
             .map {
             meta, bam, bai ->
                 [ meta, bam ]
@@ -466,7 +466,7 @@ workflow EAGER {
                                     addNewMetaFromAttributes( it, "id" , "reference" , false )
                                 }
 
-        ch_bedtools_prep = ch_dedupped_bams
+        ch_bedtools_prep = ch_merged_dedup_bams
                     .map {
                         addNewMetaFromAttributes( it, "reference" , "reference" , false )
                     }
@@ -527,7 +527,7 @@ workflow EAGER {
     //
 
     if ( params.run_sexdeterrmine ) {
-        ch_sexdeterrmine_input = ch_dedupped_bams
+        ch_sexdeterrmine_input = ch_merged_dedup_bams
 
         RUN_SEXDETERRMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed )
         ch_versions      = ch_versions.mix( RUN_SEXDETERRMINE.out.versions )
