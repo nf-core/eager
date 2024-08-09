@@ -344,8 +344,8 @@ All possible parameters
     bamfiltering_savefilteredbam          = false // can include unmapped reads if --bamfiltering_retainunmappedgenomicbam specified
 
     // Metagenomic Screening
-    run_metagenomicscreening   = false
-    metagenomicscreening_input = 'unmapped' // mapped, all, unmapped -> mapped vs all specified in SAMTOOLS_FASTQ_MAPPED in modules.conf, unmapped hardcoded SAMTOOLS_FASTQ_UMAPPED
+    run_metagenomics   = false
+    metagenomics_input = 'unmapped' // mapped, all, unmapped -> mapped vs all specified in SAMTOOLS_FASTQ_MAPPED in modules.conf, unmapped hardcoded SAMTOOLS_FASTQ_UMAPPED
 ```
 
 Tests
@@ -406,45 +406,46 @@ nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log f
 
 ## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with unmapped reads to metagenomics
 # Expect: filtered BAM (samtools stats | grep SN total/mapped same), and a dump() on the ch_bam_for_metagenomics channel should report unmapped_other. Nr. of reads in dumped FASTQ should match approx unmmaped reads in results/mapping/*.flagstat
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37 --run_metagenomicscreening -dump-channels
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37 --run_metagenomics -dump-channels
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37 --run_metagenomics -dump-channels
 
 ## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with mapped only reads going to metagenomics
 # Expect: filtered BAM (samtools stats | grep SN total/mapped same), and a dump() on the ch_bam_for_metagenomics channel should report mapped_other. Nr. of reads in dumped FASTQ should match approx mmaped reads in results/mapping/*.flagstat
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37 --run_metagenomicscreening --metagenomicscreening_input 'mapped' -dump-channels
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37 --run_metagenomics --metagenomics_input 'mapped' -dump-channels
 
 ## Check BAM filtering (mapped only/length/quality on genomic bam) with metagenomics screening, with all reads going to metagenomics
 # Expect: filtered BAM (samtools stats | grep SN total/mapped same), and a dump() on the ch_bam_for_metagenomics channel should report mapped_other. Nr. of reads in dumped FASTQ should match total reads in results/mapping/*.flagstat
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37 --run_metagenomicscreening --metagenomicscreening_input 'all' -dump-channels
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --bamfiltering_minreadlength 50 --bamfiltering_mappingquality 37 --run_metagenomics --metagenomics_input 'all' -dump-channels
 
 ## Check BAM filtering NO LENGTH/QAULITY with metagenomics screening, with unmapped reads to metagenomics
 # Expect: filtered BAM (samtools stats SN quality average < 36.7 or view -q 0 vs. -q 37 is different  and  RL reads min <50), and a dump() on the ch_bam_for_metagenomics channel should report mapped_other. Nr. of reads in dumped FASTQ should match unmapped reads as calculated from results/mapping/*.flagstat. Note: No filtered flagstat expected!
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomics --metagenomics_input 'unmapped' -dump-channels
 
 ## Check BAM filtering NO LENGTH/QAULITY with metagenomics screening, with unmapped reads to metagenomics and save unmapped FASTQ
 # Expect: filtered BAM (samtools stats SN quality average < 36.7 or view -q 0 vs. -q 37 is different  and  RL reads min <50), and a dump() on the ch_bam_for_metagenomics channel should report unmapped_other. Nr. of reads in dumped FASTQ should match unmapped reads as calculated from results/mapping/*.flagstat; and unmapped other fASTQ in bam_filtering directoryt. Note: No filtered flagstat expected!
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomics --metagenomics_input 'unmapped' -dump-channels
 
 ## Check BAM filtering NO LENGTH/QAULITY with metagenomics screening, with mapped only reads going to metagenomics
 # Expect: filtered BAM (samtools stats SN quality average < 36.7 or view -q 0 vs. -q 37 is different  and  RL reads min <50), and a dump() on the ch_bam_for_metagenomics channel should report mapped_other. Nr. of reads in dumped FASTQ should be roughly matching mappd reads as calculated from results/mapping/*.flagstatt. Note: No filtered flagstat expected!
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'mapped' -dump-channels
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomics --metagenomics_input 'mapped' -dump-channels
 
 ## Check BAM filtering NO LENGTH/QAULITY with metagenomics screening, with all reads going to metagenomics
 # Expect: filtered BAM (samtools stats SN quality average < 36.7 or view -q 0 vs. -q 37 is different  and  RL reads min <50), and a dump() on the ch_bam_for_metagenomics channel should report mapped_other. Nr. of reads in dumped FASTQ should be roughly matching total reads as calculated from results/mapping/*.flagstatt. Note: No filtered flagstat expected!
 ## Some reads lost, not 100% why command looks OK... but not just unmapped as more than that
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'all' -dump-channels
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomics --metagenomics_input 'all' -dump-channels
 
 ## Check BAM filtering ONLY length filtering, with metagenomics screening, with unmapped reads to metagenomics and save unmapped FASTQ
 ## Metagenomics with length only
 # Expect: filtered BAM (samtools stats SN quality average < 36.7 or view -q 0 vs. -q 37 is different  and  RL reads min >= 50), and a dump() on the ch_bam_for_metagenomics channel should report unmapped_other. Nr. of reads in dumped FASTQ should match unmapped reads as calculated from results/mapping/*.flagstat; and unmapped other fASTQ in bam_filtering directoryt.
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels --bamfiltering_minreadlength 50
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomics --metagenomics_input 'unmapped' -dump-channels --bamfiltering_minreadlength 50
 
 ## Check BAM filtering ONLY length filtering, with metagenomics screening, with unmapped reads to metagenomics and save unmapped FASTQ
 ## Metagenomics with length only
 # Expect: filtered BAM (samtools stats SN quality average < 36.7 or view -q 0 vs. -q 37 is not different  and  RL reads min <= 50), and a dump() on the ch_bam_for_metagenomics channel should report unmapped_other. Nr. of reads in dumped FASTQ should match unmapped reads as calculated from results/mapping/*.flagstat; and unmapped other fASTQ in bam_filtering directoryt.
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomics --metagenomics_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37
 
 ## Check what happens when we do paired-end merging and sending reads to metagenomics...
-nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomicscreening --metagenomicscreening_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37 --preprocessing_skippairmerging
+nextflow run ../main.nf -profile test,singularity --outdir ./results -ansi-log false --input data/samplesheet.tsv --fasta data/reference/Mammoth_MT_Krause.fasta --run_bamfiltering --bamfiltering_savefilteredbams --run_metagenomics --metagenomics_input 'unmapped' -dump-channels --bamfiltering_mappingquality 37 --preprocessing_skippairmerging
 ```
 
 ## Deduplication
@@ -525,6 +526,241 @@ nextflow run main.nf -profile docker,test --outdir ./results/AR_dedup_merged -du
 nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/only_PE/pe_only.tsv --outdir ./results/AR_dedup_merged_PE_only -dump-channels -ansi-log false --preprocessing_tool 'adapterremoval' --deduplication_tool 'dedup' --preprocessing_excludeunmerged -resume
 ```
 
+### METAGENOMICS
+
+#### Complexityfilter
+
+##### Test bbduk
+
+```bash
+#### Use bbduk to remove low complexity reads _without_ saving the intermediate files
+## Expect: NO additional directory created, but the files in the profiling directory contain the 'complexity' suffix
+nextflow run main.nf -profile test,docker \
+  --outdir ./out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --run_metagenomics_complexityfiltering \
+  --metagenomics_complexity_tool bbduk
+```
+
+```bash
+#### Use bbduk to remove low complexity reads _with_ saving intermediate files
+## Expect: Additional directory created 'metagenomics_screening/complexity_filter/bbduk' that contains the fastq files
+## with 'complexity' postfix and a bbduk.log file for each library
+nextflow run main.nf -profile test,docker \
+  --outdir ./out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --run_metagenomics_complexityfiltering \
+  --metagenomics_complexity_tool bbduk \
+  --metagenomics_complexity_savefastq
+```
+
+## Test prinseq
+
+```bash
+#### Use prinseq to remove low complexity reads _without_ saving the intermediate files
+## Expect: NO additional directory created, but the files in the profiling directory contain the 'complexity_good_out' postfix
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --run_metagenomics_complexityfiltering \
+  --metagenomics_complexity_tool prinseq
+```
+
+```bash
+#### Use prinseq to remove low complexity reads _with_ saving the intermediate files
+## Expect: Additional directory created 'metagenomics_screening/complexity_filter/prinseq' that contains the fastq files
+## with 'complexity_good_out' postfix and a 'complexity.log' file for each library
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --run_metagenomics_complexityfiltering \
+  --metagenomics_complexity_tool prinseq
+  --metagenomics_complexity_savefastq
+```
+
+#### Profiling
+
+##### metaphlan
+
+```bash
+## metaphlan with default parameters
+## Expect:
+
+nextflow run -resume ./main.nf -profile test,docker --outdir out \
+--run_metagenomics --metagenomics_profiling_tool metaphlan --metagenomics_profiling_database ./runtest/metaphlandb/
+
+# 20230728: Works
+```
+
+##### krakenuniq
+
+```bash
+#### Use krakenuniq for metagenomics sequence classification, save only report (default)
+## Use a custom Database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/krakenuniq' that contains one 'krakenuniq.report' file for
+## each analyzed library
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB
+
+#### Use krakenuniq for metagenomics sequence classification, save fastq files
+## Use a custom Database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/krakenuniq' that contains:
+# - 'krakenuniq.report' file
+# - 'krakenuniq.classified.txt' file
+# - 'classified.fastq.gz' file
+# - 'unclassified.fastq.gz' file
+# for each analyzed library
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool krakenuniq \
+  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
+  --metagenomics_kraken2_savereads \
+  --metagenomics_kraken2_savereadclassifications
+```
+
+##### kraken2
+
+```bash
+#### Use kraken2 for metagenomics sequence classification, save only report (default)
+## Use a custom database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/kraken2' that contains a 'kraken2.report' file
+## for each analyzed library
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool kraken2 \
+  --metagenomics_profiling_database CUSTOM_KRAKEN2_DB
+
+#### Use krakenuniq for metagenomics sequence classification, save also fastq files
+## Use a custom Database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/kraken2' that contains:
+# - 'kraken2.report' file
+# - 'kraken2.classifiedreads.txt' file
+# - 'classified.fastq.gz' file
+# - 'unclassified.fastq.gz' file
+# for each analyzed library
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool kraken2 \
+  --metagenomics_profiling_database CUSTOM_KRAKEN2_DB \
+  --metagenomics_kraken2_savereads \
+  --metagenomics_kraken2_savereadclassifications
+```
+
+##### malt
+
+```bash
+#### Use MALT for metagenomics sequence classification, save only report (default)
+## Use a custom database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/malt' that contains a '.rma6' file for each analyzed library
+## and a single CUSTOM_MALT_DB-malt-run.log file
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool malt \
+  --metagenomics_profiling_database CUSTOM_MALT_DB
+
+#### Use MALT for metagenomics sequence classification, save reads
+## Use a custom database with the -profile test dataset
+## Expect: Directory created 'metagenomics_screening/profiling/malt' that contains for each analyzed library:
+# - a '.rma6' file
+# - a '.blastn.sam' file
+# and a single CUSTOM_MALT_DB-malt-run.log file
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool malt \
+  --metagenomics_profiling_database CUSTOM_MALT_DB \
+  --metagenomics_malt_savereads
+```
+
+#### postprocessing
+
+##### maltextract
+
+```bash
+### Create a SummaryTable from the Malt rma6 files
+# Expected: A directory 'metagenomics_screening/postprocessing/maltextract/results' see the docs for the content of this dir
+
+nextflow run main.nf -profile test,docker \
+  --outdir out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool malt \
+  --metagenomics_profiling_database CUSTOM_MALT_DB \
+  --metagenomics_run_postprocessing \
+  --metagenomics_maltextract_ncbidir NCBI_DIR \
+  --metagenomics_maltextract_taxonlist TAXONLISTFILE
+
+
+
+# for generating test data
+mkdir testing && cd testing
+wget https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Mammoth/Mammoth_MT_Krause.fasta
+git clone https://github.com/rhuebler/HOPS.git
+cd HOPS/Test_Data/Test_Database
+unzip table0.db.zip
+unzip table0.idx.zip
+cd ../../..
+mkdir test_data && cd test_data
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/000/ERR8958750/ERR8958750_1.fastq.gz -o ERR8958750_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/000/ERR8958750/ERR8958750_2.fastq.gz -o ERR8958750_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/001/ERR8958751/ERR8958751_1.fastq.gz -o ERR8958751_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/001/ERR8958751/ERR8958751_2.fastq.gz -o ERR8958751_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/002/ERR8958752/ERR8958752_1.fastq.gz -o ERR8958752_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/002/ERR8958752/ERR8958752_2.fastq.gz -o ERR8958752_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/003/ERR8958753/ERR8958753_1.fastq.gz -o ERR8958753_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/003/ERR8958753/ERR8958753_2.fastq.gz -o ERR8958753_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/004/ERR8958754/ERR8958754_1.fastq.gz -o ERR8958754_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR895/004/ERR8958754/ERR8958754_2.fastq.gz -o ERR8958754_2.fastq.gz
+ls -1 | while read file; do
+zcat $file | head -n 4000 > ${file}_reduced.fastq
+gzip ${file}_reduced.fastq
+done
+cd ..
+
+echo "sample_id library_id lane colour_chemistry pairment strandedness damage_treatment r1 r2 bam bam_reference_id
+HOP001 ERR8958750 0 4 paired double half /workspace/eager/testing/test_data/ERR8958750_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958750_2.fastq.gz_reduced.fastq.gz NA NA
+HOP001 ERR8958751 0 2 paired double half /workspace/eager/testing/test_data/ERR8958751_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958751_2.fastq.gz_reduced.fastq.gz NA NA
+HOP001 ERR8958752 0 2 paired double half /workspace/eager/testing/test_data/ERR8958752_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958752_2.fastq.gz_reduced.fastq.gz NA NA
+HOP001 ERR8958753 0 2 paired double half /workspace/eager/testing/test_data/ERR8958753_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958753_2.fastq.gz_reduced.fastq.gz NA NA
+HOP001 ERR8958754 0 2 paired double none /workspace/eager/testing/test_data/ERR8958754_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958754_2.fastq.gz_reduced.fastq.gz NA NA" | sed 's/ /\t/g' > test.tsv
+
+nextflow run ../main.nf -profile docker \
+  --input test.tsv \
+  --outdir ./out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool malt \
+  --metagenomics_profiling_database /workspace/eager/testing/HOPS/Test_Data/Test_Database/ \
+  --metagenomics_run_postprocessing \
+  --metagenomics_maltextract_ncbidir HOPS/Resources \
+  --metagenomics_maltextract_taxonlist HOPS/Resources/default_list.txt \
+  --fasta Mammoth_MT_Krause.fasta \
+  --skip_damage_calculation \
+  --skip_qualimap \
+  --metagenomics_malt_group_size 3
+```
+
 ## Mapping statistics
 
 ### ENDOSPY
@@ -568,7 +804,6 @@ nextflow run ../main.nf -profile docker,test --outdir results_endorspy_map_nofil
 ##Checked: there is 6 jsons with all the stats calculates: one for each of the references (2) for each of the samples (3 samples in total). All the stats were calculated.
 
 nextflow run ../main.nf -profile docker,test_multiref --outdir results_endorspy_all_multiref -w results_endorspy_all_multiref/work --run_bamfiltering
-
 ```
 
 ### CALCULATE DAMAGE
