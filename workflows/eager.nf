@@ -185,7 +185,7 @@ workflow EAGER {
                 [ meta, index, fasta ]
             }
 
-    MAP ( ch_reads_for_mapping, ch_reference_for_mapping, REFERENCE_INDEXING.out.elongated_reference )
+    MAP ( ch_reads_for_mapping, ch_reference_for_mapping, REFERENCE_INDEXING.out.elongated_reference, REFERENCE_INDEXING.out.elongated_chr_list )
 
     ch_versions       = ch_versions.mix( MAP.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )

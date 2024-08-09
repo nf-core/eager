@@ -16,6 +16,7 @@ workflow ELONGATE_REFERENCE {
     ch_multiqc_files      = Channel.empty()
     ch_circular_reference = Channel.empty()
     ch_elongated_unzipped = Channel.empty()
+    ch_elongated_chr      = Channel.empty()
 
     // Check if the provided elongated reference is gzipped, and if so, unzip it.
     ch_elongated_branches = ch_elongated_reference
@@ -79,7 +80,8 @@ workflow ELONGATE_REFERENCE {
         ch_references_to_elongate.elongation_factor,
         ch_references_to_elongate.target
     )
-    ch_versions = ch_versions.mix( CIRCULARMAPPER_CIRCULARGENERATOR.out.versions.first() )
+    ch_elongated_chr = CIRCULARMAPPER_CIRCULARGENERATOR.out.elongated
+    ch_versions      = ch_versions.mix( CIRCULARMAPPER_CIRCULARGENERATOR.out.versions.first() )
 
     // Collect newly generated circular references and provided ones without an index, and index them.
     ch_input_for_circular_indexing = ch_circulargenerator_input.needs_index
@@ -105,6 +107,7 @@ workflow ELONGATE_REFERENCE {
 
     emit:
     circular_reference = ch_circular_reference // [ meta, fasta, index ]
+    elongated_chr_list = ch_elongated_chr      // [ meta, elongated_chr_list ]
     versions           = ch_versions
     mqc                = ch_multiqc_files
 }

@@ -142,13 +142,17 @@ workflow REFERENCE_INDEXING {
         ELONGATE_REFERENCE( ch_reference_for_mapping, ch_reference_to_elongate )
         ch_version = ch_versions.mix( ELONGATE_REFERENCE.out.versions )
         ch_elongated_indexed_reference = ELONGATE_REFERENCE.out.circular_reference
+        ch_elongated_chr_list = ELONGATE_REFERENCE.out.elongated_chr_list
+
     } else {
         ch_elongated_indexed_reference = ch_reference_to_elongate
+        ch_elongated_chr_list = Channel.empty()
     }
 
     emit:
     reference            = ch_reference_for_mapping       // [ meta, fasta, fai, dict, mapindex ]
     elongated_reference  = ch_elongated_indexed_reference // [ meta, circularmapper_elongated_fasta, circularmapper_elongated_index ]
+    elongated_chr_list   = ch_elongated_chr_list          // [ meta, elongated_chr_list ]
     mitochondrion_header = ch_mitochondrion_header        // [ meta, mitochondrion_header ]
     hapmap               = ch_hapmap                      // [ meta, hapmap ]
     pmd_masking          = ch_pmd_masking                 // [ meta, pmd_masked_fasta, pmd_bed_for_masking ]

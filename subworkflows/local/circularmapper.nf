@@ -11,6 +11,7 @@ workflow CIRCULARMAPPER {
     take:
     ch_reference            // channel (mandatory): [ val(meta), path(index), path(reference) ]
     ch_elongated_reference  // channel (mandatory): [ val(meta), path(elongated_index) ]
+    ch_elongated_chr_list   // channel (mandatory): [ val(meta), path(elongated_chr_list) ]
     ch_fastq_reads          // channel (mandatory): [ val(meta), path(reads) ]. subworkImportant: meta REQUIRES single_end` entry!
     val_elongation_factor   //     int (mandatory): Elongation factor used for chromosome circularisation
 
@@ -26,9 +27,10 @@ workflow CIRCULARMAPPER {
     ch_versions = ch_versions.mix( FASTQ_ALIGN_BWAALN_ELONGATED.out.versions.first() )
 
     ch_ref_for_realignsamfile = ch_reference
+                                .join( ch_elongated_chr_list )
                                 .map {
-                                    meta, index, reference ->
-                                    [ meta, reference ]
+                                    meta, index, reference, elongated_chr_list ->
+                                    [ meta, reference, elongated_chr_list ]
                                 }
                                 .map {
                                     // Prepend a new meta that contains the meta.reference value as the new_meta.reference attribute
@@ -48,12 +50,13 @@ workflow CIRCULARMAPPER {
                                 }
                                 .combine( ch_ref_for_realignsamfile, by: 0 )
                                 .multiMap {
-                                    ignore_me, meta, bam, ref_meta, ref_fasta ->
-                                    bam:   [ meta, bam ]
-                                    fasta: [ ref_meta, ref_fasta ]
+                                    ignore_me, meta, bam, ref_meta, ref_fasta, elongated_chr_list ->
+                                    bam:      [ meta, bam ]
+                                    fasta:    [ ref_meta, ref_fasta ]
+                                    chr_list: [ ref_meta, elongated_chr_list ]
                                 }
 
-    CIRCULARMAPPER_REALIGNSAMFILE( ch_input_for_realignsamfile.bam, ch_input_for_realignsamfile.fasta, [ [], val_elongation_factor ] )
+    CIRCULARMAPPER_REALIGNSAMFILE( ch_input_for_realignsamfile.bam, ch_input_for_realignsamfile.fasta, [ [], val_elongation_factor ], ch_input_for_realignsamfile.chr_list )
     ch_versions       = ch_versions.mix( CIRCULARMAPPER_REALIGNSAMFILE.out.versions.first() )
     ch_realigned_bams = CIRCULARMAPPER_REALIGNSAMFILE.out.bam
 

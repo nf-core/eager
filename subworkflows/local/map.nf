@@ -16,9 +16,10 @@ include { CIRCULARMAPPER                                      } from '../../subw
 
 workflow MAP {
     take:
-    reads          // [ [meta], [read1, reads2] ] or [ [meta], [read1] ]
-    index          // [ [meta], [ index ], [ fasta ] ]
-    elogated_index // [ [meta], circularmapper_elongated_fasta, circularmapper_elongated_index ]
+    reads              // [ [meta], [read1, reads2] ] or [ [meta], [read1] ]
+    index              // [ [meta], [ index ], [ fasta ] ]
+    elogated_index     // [ [meta], circularmapper_elongated_fasta, circularmapper_elongated_index ]
+    elongated_chr_list // [ [meta], elongated_chr_list ]
 
     main:
     ch_versions       = Channel.empty()
@@ -123,7 +124,7 @@ workflow MAP {
                                 [ meta, elongated_index ]
                                 }
 
-        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, reads, params.fasta_circularmapper_elongationfactor )
+        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, elongated_chr_list, reads, params.fasta_circularmapper_elongationfactor )
         ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
         ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
         ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai
