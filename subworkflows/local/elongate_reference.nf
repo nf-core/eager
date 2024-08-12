@@ -5,7 +5,7 @@
 include { GUNZIP as GUNZIP_ELONGATED_FASTA    } from '../../modules/nf-core/gunzip/main'
 include { CIRCULARMAPPER_CIRCULARGENERATOR    } from '../../modules/nf-core/circularmapper/circulargenerator/main'
 include { BWA_INDEX as BWA_INDEX_CIRCULARISED } from '../../modules/nf-core/bwa/index/main'
-// include { addNewMetaFromAttributes            } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
+include { addNewMetaFromAttributes            } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
 workflow ELONGATE_REFERENCE {
     take:
@@ -62,8 +62,20 @@ workflow ELONGATE_REFERENCE {
                                         needs_elongation: circularmapper_elongated_fasta == "" && circular_target != ""
                             }
 
-    // References that are already elongated, need ch_elongated_chr to be created from the circular target information
-    ch_needs_elongated_chr_list = ch_circulargenerator_input.ready
+    /* References that are already elongated, need ch_elongated_chr to be created from the circular target information
+        1) Get the reference information ready for joinin with the new channel.
+        2) Take all subchannels from the multiMap that do not go through CircularGenerator (.ready,.needs_index) and infer the name of the elongated_chr_list expected by RealignSAMFile
+        3) Put the circular target in a file of that name FOR EACH REFERENCE. The resulting channel has no meta, so we need to add it.
+        4) Add meta, and use to merge back to the reference channel. This way we can take the original reference's meta.
+
+        This is a bit convoluted, but it should work. Would be simpler if I could create the meta within collectFile, but I did not find a way to do that.
+    */
+    ch_ref_for_chr_list = ch_reference
+                            .map {
+                                addNewMetaFromAttributes( it, "id", "id", false )
+                            }
+
+    ch_chr_list_for_already_elongated_ref = ch_circulargenerator_input.ready
                             .mix( ch_circulargenerator_input.needs_index )
                             .join( ch_reference )
                             .map {
@@ -74,15 +86,17 @@ workflow ELONGATE_REFERENCE {
                                 meta, fasta, circular_target ->
                                     [ "${fasta.name}_500_elongated", circular_target + '\n' ]
                             }
-    /* The above gets the right information into the created files, but the channel then also needs a meta, which collectFile doesn't seem able to handle.
-        TODO Proposed solution:
-            - Use a map to infer the meta.id fromt he file name (i.e. file name without the suffix. since everything by now is unzipped, it should work).
-            - Then pull that info out of the ch_reference meta with addNewMetaFromAttributes.
-            - Join the channels by this meta
-            - Use a map to give the collected file the meta of the reference.
-
-        This is a bit convoluted, but it should work. Would be simpler if I could create the meta within collectFile.
-    */
+                            .map {
+                                file ->
+                                    def id = file.getSimpleName()
+                                    [ [id: id ], file ]
+                            }
+                            .join(ch_ref_for_chr_list)
+                            .map {
+                                ignore_me, chr_list, meta, fasta, fai, dict, mapindex ->
+                                    [ meta, chr_list ]
+                            }
+                            .dump(tag: "collected_files", pretty:true)
 
     // Elongate references that need it
     // Join the original references to the branch of needs_elongation, to get the original fasta files, and elongate them.
@@ -103,7 +117,7 @@ workflow ELONGATE_REFERENCE {
         ch_references_to_elongate.elongation_factor,
         ch_references_to_elongate.target
     )
-    ch_elongated_chr = CIRCULARMAPPER_CIRCULARGENERATOR.out.elongated
+    ch_elongated_chr = ch_chr_list_for_already_elongated_ref.mix(CIRCULARMAPPER_CIRCULARGENERATOR.out.elongated)
     ch_versions      = ch_versions.mix( CIRCULARMAPPER_CIRCULARGENERATOR.out.versions.first() )
 
     // Collect newly generated circular references and provided ones without an index, and index them.
