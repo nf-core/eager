@@ -299,19 +299,19 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume -d
 ```
 
 ```bash
-## Multiref with circularmapper. reference_sheet_multiref.csv edited to include elongated reference and index from first CM manual test for Mammoth_MT, and remove the human reference (save on runtime). Will still evaluate through reference_indexing_multi.
-## Expect: No elongation for Mammoth MT.
-## Check: 2 bam files together with their CSIs and Flagstats in the `mapping/circularmapper` directory. (6 files total)
+## Multiref with circularmapper. reference_sheet_multiref.csv edited to include elongated reference and index from first CM manual test for Mammoth_MT.
+## Expect: No elongation for Mammoth MT. Elongation for hs37d5_chr21-MT reference.
+## Check: 2 bam files together with their CSIs and Flagstats in the `mapping/circularmapper` directory PER REFERENCE (3 libraries (from 2 samples) x 2 references x 3 files = 18 files total).
+##        Also, elongated hs37d5_chr21-MT is not saved, since --save_reference was not specified. But it did get elongated.
 nextflow run main.nf -profile test_multiref,docker --outdir ./results -w work/ -resume -dump-channels -ansi-log false --fasta_sheet /Users/lamnidis/Software/github/jbv2/eager/data/reference/reference_sheet_multiref.csv --mapping_tool circularmapper --fasta_largeref --mapping_bwaaln_n 0.05 --mapping_bwaaln_k 3
 ```
 
 ```bash
-## Circularmapper with circularfilter.
+## Circularmapper with circularfilter, with a provided elongated reference.
 ## Expect: No elongation for Mammoth MT.
-## Check: 2 bam files together with their CSIs and Flagstats in the `mapping/circularmapper` directory. (6 files total)
+## Check: 2 bam files together with their CSIs and Flagstats in the `mapping/circularmapper` directory. (6 files total). Ensure files have the @SQ tag of the circular choromosome.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume -dump-channels -ansi-log false --fasta_circular_target 'NC_007596.2' --mapping_tool circularmapper --fasta_circularmapper_elongatedfasta data/reference/Mammoth_MT_Krause_500/Mammoth_MT_Krause_500.fasta --fasta_circularmapper_elongatedindex data/reference/Mammoth_MT_Krause_500/bwa --fasta_largeref --mapping_bwaaln_n 0.05 --mapping_bwaaln_k 3 --mapping_circularmapper_circularfilter
 ```
-<!-- When the reference is provided, no chrom_list is created, so no mapping >_< -->
 
 ## Host Removal
 
