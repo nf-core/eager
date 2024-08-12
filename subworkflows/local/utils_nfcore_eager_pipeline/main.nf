@@ -231,7 +231,7 @@ def validateInputParameters() {
     if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
     if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
     if ( params.fasta && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
-    if ( params.fasta && params.mapping_tool == "circularmapper" && ! params.fasta_circular_target && ! params.fasta_circularmapper_elongatedfasta ) { exit 1, ("[nf-core/eager] ERROR: Mapping with circularmapper requires either --fasta_circular_target or --fasta_circularmapper_elongatedfasta. ") }
+    if ( params.fasta && params.mapping_tool == "circularmapper" && ! params.fasta_circular_target ) { exit 1, ("[nf-core/eager] ERROR: Mapping with circularmapper requires --fasta_circular_target to be provided.") }
 }
 
 //

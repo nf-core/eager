@@ -46,7 +46,7 @@
             "circular_target": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "The headers of the chromosome to be extended by circularmapper must not contain any spaces and no leading '>'."
+                "errorMessage": "The headers of the chromosome extended by circulargenerator must not contain any spaces and no leading '>'."
             },
             "circularmapper_elongatedfasta": {
                 "type": "string",

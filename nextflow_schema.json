@@ -132,7 +132,7 @@
                 },
                 "fasta_circular_target": {
                     "type": "string",
-                    "description": "Specify the FASTA header of the target chromosome to extend when using `circularmapper`.",
+                    "description": "Specify the FASTA header of the extended chromosome when using `circularmapper`.",
                     "help_text": "The entry (chromosome, contig, etc.) in your FASTA reference that you'd like to be treated as circular.\n\nApplies only when providing a single FASTA file via `--fasta` (NOT multi-reference input - see reference TSV/CSV input).\n\n> Modifies tool parameter(s):\n> - circulargenerator `-s`",
                     "fa_icon": "fas fa-bullseye"
                 },
