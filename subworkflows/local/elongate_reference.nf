@@ -96,7 +96,6 @@ workflow ELONGATE_REFERENCE {
                                 ignore_me, chr_list, meta, fasta, fai, dict, mapindex ->
                                     [ meta, chr_list ]
                             }
-                            .dump(tag: "collected_files", pretty:true)
 
     // Elongate references that need it
     // Join the original references to the branch of needs_elongation, to get the original fasta files, and elongate them.
