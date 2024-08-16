@@ -534,58 +534,29 @@ nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/onl
 
 ```bash
 #### Use bbduk to remove low complexity reads _without_ saving the intermediate files
+## Use kraken as example profiler
 ## Expect: NO additional directory created, but the files in the profiling directory contain the 'complexity' suffix
-nextflow run main.nf -profile test,docker \
-  --outdir ./out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool krakenuniq \
-  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
-  --run_metagenomics_complexityfiltering \
-  --metagenomics_complexity_tool bbduk
-```
 
-```bash
+nextflow run main.nf -profile test_krakenuniq --outdir ./out --run_metagenomics_complexityfiltering --metagenomics_complexity_tool bbduk
+
 #### Use bbduk to remove low complexity reads _with_ saving intermediate files
-## Expect: Additional directory created 'metagenomics_screening/complexity_filter/bbduk' that contains the fastq files
-## with 'complexity' postfix and a bbduk.log file for each library
-nextflow run main.nf -profile test,docker \
-  --outdir ./out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool krakenuniq \
-  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
-  --run_metagenomics_complexityfiltering \
-  --metagenomics_complexity_tool bbduk \
-  --metagenomics_complexity_savefastq
+## Expect: Additional directory created 'metagenomics_screening/complexity_filter/bbduk' containing 'complexity' fastq.gz files and a bbduk.log file for each library
+
+nextflow run main.nf -profile test_krakenuniq --outdir ./out --run_metagenomics_complexityfiltering --metagenomics_complexity_tool bbduk --metagenomics_complexity_savefastq
 ```
 
-## Test prinseq
+##### Test prinseq
 
 ```bash
 #### Use prinseq to remove low complexity reads _without_ saving the intermediate files
 ## Expect: NO additional directory created, but the files in the profiling directory contain the 'complexity_good_out' postfix
 
-nextflow run main.nf -profile test,docker \
-  --outdir out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool krakenuniq \
-  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
-  --run_metagenomics_complexityfiltering \
-  --metagenomics_complexity_tool prinseq
-```
+nextflow run main.nf -profile test_krakenuniq --outdir out --run_metagenomics_complexityfiltering --metagenomics_complexity_tool prinseq
 
-```bash
 #### Use prinseq to remove low complexity reads _with_ saving the intermediate files
-## Expect: Additional directory created 'metagenomics_screening/complexity_filter/prinseq' that contains the fastq files
-## with 'complexity_good_out' postfix and a 'complexity.log' file for each library
+## Expect: Additional directory created 'metagenomics_screening/complexity_filter/prinseq' that contains the fastq files with 'complexity_good_out' postfix and a 'complexity.log' file for each library
 
-nextflow run main.nf -profile test,docker \
-  --outdir out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool krakenuniq \
-  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
-  --run_metagenomics_complexityfiltering \
-  --metagenomics_complexity_tool prinseq
-  --metagenomics_complexity_savefastq
+nextflow run main.nf -profile test_krakenuniq --outdir out --run_metagenomics_complexityfiltering --metagenomics_complexity_tool prinseq --metagenomics_complexity_savefastq
 ```
 
 #### Profiling
@@ -593,106 +564,86 @@ nextflow run main.nf -profile test,docker \
 ##### metaphlan
 
 ```bash
-## metaphlan with default parameters
-## Expect:
+## Run metaphlan with default parameters
+## Expect: Directory created 'metagenomics/profiling/metaphlan containing
+# _profile.txt, .bowtie2out.txt and .biom.txt for each library
+## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
 
-nextflow run -resume ./main.nf -profile test,docker --outdir out \
---run_metagenomics --metagenomics_profiling_tool metaphlan --metagenomics_profiling_database ./runtest/metaphlandb/
-
-# 20230728: Works
+nextflow run main.nf -profile test_metaphlan --outdir out
 ```
 
 ##### krakenuniq
 
 ```bash
-#### Use krakenuniq for metagenomics sequence classification, save only report (default)
-## Use a custom Database with the -profile test dataset
-## Expect: Directory created 'metagenomics_screening/profiling/krakenuniq' that contains one 'krakenuniq.report' file for
-## each analyzed library
+## Run krakenuniq for metagenomics sequence classification, save only report (default)
+## Expect: Directory created 'metagenomics/profiling/krakenuniq' that contains one 'krakenuniq.report' file for each analyzed library
+## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
 
-nextflow run main.nf -profile test,docker \
-  --outdir out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool krakenuniq \
-  --metagenomics_profiling_database CUSTOM_KRAKEN_DB
+nextflow run main.nf -profile test_krakenuniq --outdir out
 
-#### Use krakenuniq for metagenomics sequence classification, save fastq files
-## Use a custom Database with the -profile test dataset
+## Use krakenuniq for metagenomics sequence classification, save fastq files
 ## Expect: Directory created 'metagenomics_screening/profiling/krakenuniq' that contains:
 # - 'krakenuniq.report' file
 # - 'krakenuniq.classified.txt' file
 # - 'classified.fastq.gz' file
 # - 'unclassified.fastq.gz' file
 # for each analyzed library
+## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
 
-nextflow run main.nf -profile test,docker \
-  --outdir out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool krakenuniq \
-  --metagenomics_profiling_database CUSTOM_KRAKEN_DB \
-  --metagenomics_kraken2_savereads \
-  --metagenomics_kraken2_savereadclassifications
+nextflow run main.nf -profile test_krakenuniq --outdir out --metagenomics_kraken2_savereads --metagenomics_kraken2_savereadclassifications
 ```
 
 ##### kraken2
 
 ```bash
 #### Use kraken2 for metagenomics sequence classification, save only report (default)
-## Use a custom database with the -profile test dataset
-## Expect: Directory created 'metagenomics_screening/profiling/kraken2' that contains a 'kraken2.report' file
+## Expect: Directory created 'metagenomics/profiling/kraken2' that contains a 'kraken2.report' file
 ## for each analyzed library
+## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
 
-nextflow run main.nf -profile test,docker \
-  --outdir out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool kraken2 \
-  --metagenomics_profiling_database CUSTOM_KRAKEN2_DB
+nextflow run main.nf -profile test_kraken2 --outdir out
 
 #### Use krakenuniq for metagenomics sequence classification, save also fastq files
-## Use a custom Database with the -profile test dataset
-## Expect: Directory created 'metagenomics_screening/profiling/kraken2' that contains:
+## Expect: Directory created 'metagenomics/profiling/kraken2' that contains:
 # - 'kraken2.report' file
 # - 'kraken2.classifiedreads.txt' file
 # - 'classified.fastq.gz' file
 # - 'unclassified.fastq.gz' file
 # for each analyzed library
+## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
 
-nextflow run main.nf -profile test,docker \
-  --outdir out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool kraken2 \
-  --metagenomics_profiling_database CUSTOM_KRAKEN2_DB \
-  --metagenomics_kraken2_savereads \
-  --metagenomics_kraken2_savereadclassifications
+
+nextflow run run main.nf -profile test_kraken2 --outdir out --metagenomics_kraken2_savereads --metagenomics_kraken2_savereadclassifications
 ```
 
 ##### malt
 
 ```bash
 #### Use MALT for metagenomics sequence classification, save only report (default)
-## Use a custom database with the -profile test dataset
-## Expect: Directory created 'metagenomics_screening/profiling/malt' that contains a '.rma6' file for each analyzed library
-## and a single CUSTOM_MALT_DB-malt-run.log file
+## Expect: Directory created 'metagenomics/profiling/malt' that contains a '.rma6' file for each analyzed library
+## and the -malt-run.log files
 
-nextflow run main.nf -profile test,docker \
-  --outdir out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool malt \
-  --metagenomics_profiling_database CUSTOM_MALT_DB
+nextflow run main.nf -profile test_malt --outdir out
 
 #### Use MALT for metagenomics sequence classification, save reads
-## Use a custom database with the -profile test dataset
-## Expect: Directory created 'metagenomics_screening/profiling/malt' that contains for each analyzed library:
+## Expect: Directory created 'metagenomics/profiling/malt' that contains for each analyzed library:
 # - a '.rma6' file
 # - a '.blastn.sam' file
-# and a single CUSTOM_MALT_DB-malt-run.log file
+# and a the malt-run.log files
 
-nextflow run main.nf -profile test,docker \
-  --outdir out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool malt \
-  --metagenomics_profiling_database CUSTOM_MALT_DB \
-  --metagenomics_malt_savereads
+nextflow run main.nf -profile test_malt --outdir out --metagenomics_malt_savereads
+
+#### Use MALT for metagenomics sequence classification, use the --metagenomics_malt_group_size flag
+## Expect: Directory created 'metagenomics/profiling/malt' that contains for each analyzed library:
+# - a '.rma6' file
+# - a '.blastn.sam' file
+# a concatenated malt-run.log file and for each group a <strandedness>_<group> logfile
+
+nextflow run main.nf -profile test_malt --outdir out --metagenomics_malt_savereads
+
+# Run Malt with missing parameters
+# Expect: Exit 1 and informative error message
+nextflow run main.nf -profile test_malt --metagenomics_run_postprocessing --outdir out
 ```
 
 #### postprocessing
@@ -701,18 +652,12 @@ nextflow run main.nf -profile test,docker \
 
 ```bash
 ### Create a SummaryTable from the Malt rma6 files
-# Expected: A directory 'metagenomics_screening/postprocessing/maltextract/results' see the docs for the content of this dir
+# Expect: A directory 'metagenomics/postprocessing/maltextract/<strandedness>/'
+# Expect: A directory 'metagenomics/postprocessing/megan_summaries'
+# Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
+# Also there will be an AMPS error which occurs if no taxa are found... Thats why it is ignored to no break the pipeline
 
-nextflow run main.nf -profile test,docker \
-  --outdir out \
-  --run_metagenomics \
-  --metagenomics_profiling_tool malt \
-  --metagenomics_profiling_database CUSTOM_MALT_DB \
-  --metagenomics_run_postprocessing \
-  --metagenomics_maltextract_ncbidir NCBI_DIR \
-  --metagenomics_maltextract_taxonlist TAXONLISTFILE
-
-
+nextflow run main.nf -profile test_malt --outdir out --metagenomics_run_postprocessing --metagenomics_maltextract_ncbidir NCBI_DIR --metagenomics_maltextract_taxonlist TAXONLISTFILE
 
 # for generating test data
 mkdir testing && cd testing

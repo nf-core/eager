@@ -420,7 +420,7 @@ You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply
 
 The main taxonomic classification file from KrakenUniq is the `*report.txt` file. This is an extension of the Kraken2 report with the additional k-mer coverage information that provides more information about the accuracy of hits.
 
-You will only receive the `*.fastq.gz` and `*.classifiedreads.txt` file if you supply `--metagenomics_kraken2_savereads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
+You will only receive the `*.fastq.gz` and `*.classifiedreads.txt` file if you supply `--metagenomics_kraken2_savereads` and/or `--metagenomics_kraken2_savereadclassifications` parameters to the pipeline.
 
 :::info
 The output system of KrakenUniq can result in other `stdout` or `stderr` logging information being saved in the report file, therefore you must check your report files before downstream use!
