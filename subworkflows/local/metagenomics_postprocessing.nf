@@ -97,7 +97,6 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     TAXPASTA_STANDARDISE( ch_standardise_input, [] )
     ch_versions = ch_versions.mix(TAXPASTA_STANDARDISE.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(TAXPASTA_STANDARDISE.out.standardised_profile)
 
     ch_merge_input = ch_postprocessing_input.merge.map{ meta, reports, count ->
         [meta, reports]
@@ -105,7 +104,6 @@ workflow METAGENOMICS_POSTPROCESSING {
 
     TAXPASTA_MERGE( ch_merge_input, [], [] )
     ch_versions = ch_versions.mix(TAXPASTA_MERGE.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(TAXPASTA_MERGE.out.merged_profiles)
 
 
     emit:
