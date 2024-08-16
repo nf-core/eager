@@ -8,7 +8,6 @@ include { BWA_INDEX                       } from '../../modules/nf-core/bwa/inde
 include { BOWTIE2_BUILD                   } from '../../modules/nf-core/bowtie2/build/main'
 include { SAMTOOLS_FAIDX                  } from '../../modules/nf-core/samtools/faidx/main'
 include { PICARD_CREATESEQUENCEDICTIONARY } from '../../modules/nf-core/picard/createsequencedictionary/main'
-// TODO missing: circulargeneraotr?
 
 workflow REFERENCE_INDEXING_SINGLE {
 
@@ -52,7 +51,7 @@ workflow REFERENCE_INDEXING_SINGLE {
     }
 
     // Generate mapper indicies if not supplied, and if supplied generate meta
-    if ( params.mapping_tool == 'bwaaln' || params.mapping_tool == 'bwamem' ){
+    if ( params.mapping_tool == 'bwaaln' || params.mapping_tool == 'bwamem' || params.mapping_tool == 'circularmapper' ){
 
         if ( !fasta_mapperindexdir ) {
             ch_fasta_mapperindexdir = BWA_INDEX ( ch_ungz_ref ).index
@@ -90,13 +89,16 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     def bedtools_feature                      = params.mapstats_bedtools_featurefile != null ? file(params.mapstats_bedtools_featurefile, checkIfExists: true ) : ""
                                     def genotyping_reference_ploidy           = params.genotyping_reference_ploidy
                                     def genotyping_gatk_dbsnp                 = params.genotyping_gatk_dbsnp != null ? file(params.genotyping_gatk_dbsnp, checkIfExists: true ) : ""
-                                    [ meta + [ ploidy: genotyping_reference_ploidy ], fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
+                                    def circularmapper_elongated_fasta        = params.fasta_circularmapper_elongatedfasta != null ? file( params.fasta_circularmapper_elongatedfasta, checkIfExists: true ) : ""
+                                    def circularmapper_elongated_index        = params.fasta_circularmapper_elongatedindex != null ? file( params.fasta_circularmapper_elongatedindex, checkIfExists: true ) : ""
+                                    [ meta + [ ploidy: genotyping_reference_ploidy ], fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index ]
                                 }
 
     ch_ref_index_single = ch_reference_for_mapping
                                 .multiMap{
-                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
-                                    reference:              [ meta, fasta, fai, dict, mapper_index, circular_target ]
+                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index ->
+                                    reference:              [ meta, fasta, fai, dict, mapper_index ]
+                                    circularmapper:         [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ]
                                     mito_header:            [ meta, mitochondrion_header ]
                                     hapmap:                 [ meta, contamination_estimation_angsd_hapmap ]
                                     pmd_masked_fasta:       [ meta, pmd_masked_fasta ]
@@ -109,7 +111,8 @@ workflow REFERENCE_INDEXING_SINGLE {
                                 }
 
     emit:
-    reference            = ch_ref_index_single.reference             // [ meta, fasta, fai, dict, mapindex, circular_target ]
+    reference            = ch_ref_index_single.reference             // [ meta, fasta, fai, dict, mapindex ]
+    elongated_reference  = ch_ref_index_single.circularmapper        // [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ]
     mitochondrion_header = ch_ref_index_single.mito_header           // [ meta, mito_header ]
     hapmap               = ch_ref_index_single.hapmap                // [ meta, hapmap ]
     pmd_masked_fasta     = ch_ref_index_single.pmd_masked_fasta      // [ meta, pmd_masked_fasta ]

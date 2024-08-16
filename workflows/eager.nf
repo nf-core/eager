@@ -181,11 +181,11 @@ workflow EAGER {
     //
     ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
             .map{
-                meta, fasta, fai, dict, index, circular_target ->
+                meta, fasta, fai, dict, index ->
                 [ meta, index, fasta ]
             }
 
-    MAP ( ch_reads_for_mapping, ch_reference_for_mapping )
+    MAP ( ch_reads_for_mapping, ch_reference_for_mapping, REFERENCE_INDEXING.out.elongated_reference, REFERENCE_INDEXING.out.elongated_chr_list )
 
     ch_versions       = ch_versions.mix( MAP.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
@@ -247,7 +247,7 @@ workflow EAGER {
 
     ch_fasta_for_deduplication = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index, circular_target ->
+            meta, fasta, fai, dict, index ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -500,7 +500,7 @@ workflow EAGER {
 
     ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index, circular_target ->
+            meta, fasta, fai, dict, index ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -567,7 +567,7 @@ workflow EAGER {
         ch_reference_for_genotyping = REFERENCE_INDEXING.out.reference
             // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
             .map {
-                meta, fasta, fai, dict, mapindex, circular_target ->
+                meta, fasta, fai, dict, mapindex ->
                 [ meta, fasta, fai, dict ]
             }
         GENOTYPE(
