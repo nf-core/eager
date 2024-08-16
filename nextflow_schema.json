@@ -628,8 +628,7 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-filter",
                     "description": "Turn on to remove reads that did not map to the circularised genome.",
-                    "help_text": "If you want to filter out reads that don't map to 
-                    the elongated/circularised chromosome (and also non-circular chromosome headers) from the resulting BAM file, turn this on.\n\n> Modifies `-f` and `-x` parameters of CircularMapper's RealignSAMFile"
+                    "help_text": "If you want to filter out reads that don't map to elongated/circularised chromosome (and also non-circular chromosome headers) from the resulting BAM file, turn this on.\n\n> Modifies `-f` and `-x` parameters of CircularMapper's RealignSAMFile"
                 }
             },
             "fa_icon": "fas fa-layer-group"
