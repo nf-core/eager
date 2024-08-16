@@ -27,7 +27,7 @@ workflow REFERENCE_INDEXING {
         // If input (multi-)reference sheet supplied
         REFERENCE_INDEXING_MULTI ( fasta )
         ch_reference_for_mapping = REFERENCE_INDEXING_MULTI.out.reference
-        ch_reference_to_elongate   = REFERENCE_INDEXING_MULTI.out.elongated_reference
+        ch_reference_to_elongate  = REFERENCE_INDEXING_MULTI.out.elongated_reference
         ch_mitochondrion_header  = REFERENCE_INDEXING_MULTI.out.mitochondrion_header
         ch_hapmap                = REFERENCE_INDEXING_MULTI.out.hapmap
         ch_pmd_masked_fasta      = REFERENCE_INDEXING_MULTI.out.pmd_masked_fasta
@@ -41,7 +41,7 @@ workflow REFERENCE_INDEXING {
     } else {
         // If input FASTA and/or indicies supplied
         REFERENCE_INDEXING_SINGLE ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir )
-        ch_reference_to_elongate   = REFERENCE_INDEXING_SINGLE.out.elongated_reference
+        ch_reference_to_elongate  = REFERENCE_INDEXING_SINGLE.out.elongated_reference
         ch_mitochondrion_header  = REFERENCE_INDEXING_SINGLE.out.mitochondrion_header
         ch_hapmap                = REFERENCE_INDEXING_SINGLE.out.hapmap
         ch_pmd_masked_fasta      = REFERENCE_INDEXING_SINGLE.out.pmd_masked_fasta
