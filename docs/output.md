@@ -382,7 +382,7 @@ You will only receive the `.sam` files if you supply `--metagenomics_malt_savere
 
 The main taxonomic profiling file from MetaPhlAn is the `*_profile.txt` file. This provides the abundance estimates from MetaPhlAn however does not include raw counts by default. The profiling-file is further processed by the taxpasta module to provide a standardised tabular output for the Metaphlan abundance estimates.
 
-Intermediate Bowtie2 output `.bowtie2out.txt`, which presents a condensed representation of the mapping results of your sequencing reads to MetaPhlAn's marker gene sequences. The alignments are listed in tab-separated columns, including Read ID and Marker Gene ID, with each alignment represented on a separate line.
+Raw counts can be inferred from the Bowtie2 output `.bowtie2out.txt`, which presents a condensed representation of the mapping results of the sequencing reads to MetaPhlAn's marker gene sequences. The alignments are listed in tab-separated columns, including Read ID and Marker Gene ID, with each alignment represented on a separate line. No hits to the marker genes results in an empty file.
 
 #### Kraken2
 
