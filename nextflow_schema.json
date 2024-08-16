@@ -797,7 +797,7 @@
                     "default": 1,
                     "description": "Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual).",
                     "fa_icon": "fas fa-percent",
-                    "help_text": "Specify the top percent value of the LCA algorithm. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): \"For each\nread, only those matches are used for taxonomic placement whose bit disjointScore is within\n10% of the best disjointScore for that read.\". Default: `1`.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-top`"
+                    "help_text": "Specify the top percent value of the LCA algorithm. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): \"For each\nread, only those matches are used for taxonomic placement whose bit disjointScore is within\n10% of the best disjointScore for that read.\".\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-top`"
                 },
                 "metagenomics_malt_minsupportmode": {
                     "type": "string",
@@ -819,14 +819,14 @@
                     "default": 1,
                     "description": "Specify a minimum number of reads a taxon of sample total is required to have to be retained in malt or kraken. Not compatible with --malt_min_support_mode 'percent'.",
                     "fa_icon": "fas fa-sort-numeric-up-alt",
-                    "help_text": "For usage in malt: Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.Default: 1. \nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. \n\n> Modifies tool parameter(s):\n> - MALT: `-sup` \n"
+                    "help_text": "For usage in malt: Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.\nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. \n\n> Modifies tool parameter(s):\n> - MALT: `-sup` \n"
                 },
                 "metagenomics_malt_maxqueries": {
                     "type": "integer",
                     "default": 100,
                     "description": "Specify the maximum number of queries a read can have for MALT.",
                     "fa_icon": "fas fa-phone",
-                    "help_text": "Specify the maximum number of alignments a read can have. All further alignments are discarded. Default: `100`\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-mq`"
+                    "help_text": "Specify the maximum number of alignments a read can have. All further alignments are discarded.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-mq`"
                 },
                 "metagenomics_malt_memorymode": {
                     "type": "string",
@@ -847,7 +847,7 @@
                     "default": 0,
                     "description": "Define how many fastq files should be submitted in the same malt run. Default value of 0 runs all files at once.",
                     "fa_icon": "fas fa-barcode",
-                    "help_text": "Very many (large) fastq files run through MALT at the same time can lead to excessively long runtimes. This parameter allows for parallelization of MALT runs. Please note, MALT is resource heavy and setting this value above the default (0) will spawn at minimum N/metagenomics_malt_group_size jobs where N is the number of samples. Please only use this if it is necessary to avoid runtime limits on your HPC cluster since the overhead of loading a database is high."
+                    "help_text": "Very many (large) fastq files run through MALT at the same time can lead to excessively long runtimes. This parameter allows for parallelization of MALT runs. Please note, MALT is resource heavy and setting this value N above the default (0) will spawn multiple metagenomics_malt_group_size jobs where N is the number of samples per group. Please only use this if it is necessary to avoid runtime limits on your HPC cluster since the overhead of loading a database is high."
                 },
                 "metagenomics_run_postprocessing": {
                     "type": "boolean",
@@ -917,7 +917,7 @@
                     "type": "number",
                     "default": 85,
                     "description": "Minimum percent identity alignments are required to have to be reported as candidate reads. Recommended to set same as MALT parameter.",
-                    "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher. Default: `85`.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `--minPI`"
+                    "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `--minPI`"
                 },
                 "metagenomics_maltextract_usetopalignment": {
                     "type": "boolean",
