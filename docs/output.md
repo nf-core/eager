@@ -307,7 +307,7 @@ You may also receive the files above if metagenomic screening is turned on.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics_screening/complexity_filter/bbduk`
+- `metagenomics/complexity_filter/bbduk`
 
   - `*_complexity.fastq.gz`: FASTQ file containing the complexity filtered reads
   - `*.log`: LOG file containing filter stats
@@ -327,7 +327,7 @@ Using complexity-filtered fastq-files as input for metagenomic classifiers can r
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics_screening/complexity_filter/prinseq`
+- `metagenomics/complexity_filter/prinseq`
 
   - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
   - `*_complexity.log`: LOG file containing filter stats
@@ -351,7 +351,7 @@ The saved files are the _good_ files, passing the `dust` or `entropy` filter tre
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics_screening/profiling/malt/`
+- `metagenomics/profiling/malt/`
   - `<sample_id>.rma6`: binary file containing all alignments and taxonomic information of hits that can be loaded into the [MEGAN6](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/) interactive viewer
   - `<sample_id>.blastn.sam`: sparse SAM file containing alignments of each hit (if `--metagenomics_malt_savereads`)
   - `*.log`: LOG files containing the log of the MALT execution. NOTE: If you are running parallel malt runs with `--metagenomics_malt_group_size` set above 0, you will obtain a log file named `<database>_<strandedness>_<group_id>-run-malt-run.log` for each group of the parallel executions. The `<database>_runtime_log_concatenated.log` file contains the concatenated logs of all the groups.
@@ -373,7 +373,7 @@ You will only receive the `.sam` files if you supply `--metagenomics_malt_savere
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics_screening/profiling/metaphlan/`
+- `metagenomics/profiling/metaphlan/`
   - `<sample_id>.biom`: taxonomic profile in BIOM format
   - `<sample_id>.bowtie2out.txt`: BowTie2 alignment information (can be re-used for skipping alignment when re-running MetaPhlAn with different parameters)
   - `<sample_id>_profile.txt`: MetaPhlAn taxonomic profile including abundance estimates
@@ -391,7 +391,7 @@ Raw counts can be inferred from the Bowtie2 output `.bowtie2out.txt`, which pres
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics_screening/profiling/kraken2/`
+- `metagenomics/profiling/kraken2/`
   - `<sample_id>.classified.fastq.gz`: FASTQ file containing all reads that had a hit against a reference in the database for a given sample
   - `<sample_id>.unclassified.fastq.gz`: FASTQ file containing all reads that did not have a hit in the database for a given sample
   - `<sample_id>.report.txt`: A Kraken2 report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits in the Kraken2 run for a given sample. Will be 6 column rather than 8 if `--metagenomics_kraken2_saveminimizers` specified.
@@ -410,7 +410,7 @@ You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics_screening/profiling/krakenuniq/`
+- `metagenomics/profiling/krakenuniq/`
   - `<sample_id>.classified.fastq.gz`: FASTQ file containing all reads that had a hit against a reference in the database for a given sample
   - `<sample_id>.unclassified.fastq.gz`: FASTQ file containing all reads that did not have a hit in the database for a given sample
   - `<sample_id>.report.txt`: A Kraken2-style report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits, with an additional column for k-mer coverage, that allows for more accurate distinguishing between false-positive/true-postitive hits
@@ -430,13 +430,13 @@ The output system of KrakenUniq can result in other `stdout` or `stderr` logging
 
 #### taxpasta
 
-The output created by the `taxpasta merge` command. It combines the results of all the samples analyzed with a given metagenomic classifer by nf-core/eager in a standardised tabular taxon-table format. The file provides an overview of the classification results for all samples combined
+The output created by the `taxpasta merge` or `taxpasta standardise` command. It combines the results of all the samples analyzed with a given metagenomic classifer by nf-core/eager in a standardised tabular taxon-table format. The file provides an overview of the classification results for all samples combined
 
 <details markdown=1>
 <summary>Output files</summary>
 
-- `metagenomics_screening/postprocessing/taxpasta/`
-  - `{metaphlan,krakenuniq,kraken2}_profiles_all_samples_merged.txt`
+- `metagenomics/postprocessing/taxpasta/`
+  - `{metaphlan,krakenuniq,kraken2,megan6}_taxpasta_table.tsv`
 
 </details>
 
@@ -447,7 +447,7 @@ The output directory for maltExtract, as implemented under [HOPS](https://github
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics_screening/postprocessing/maltextract/`
+- `metagenomics/postprocessing/maltextract/`
   - `results`: Results output by maltextract
     - `default`: Directory containing summary TSV tables for all reads
     - `ancient`: Directory containing summary TSV tables for reads with evidence of aDNA damage

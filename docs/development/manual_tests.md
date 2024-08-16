@@ -567,7 +567,7 @@ nextflow run main.nf -profile test_krakenuniq --outdir out --run_metagenomics_co
 ## Run metaphlan with default parameters
 ## Expect: Directory created 'metagenomics/profiling/metaphlan containing
 # _profile.txt, .bowtie2out.txt and .biom.txt for each library
-## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
+## Expect: 'metaphlan_taxpasta_table.tsv' in 'metagenomics/postprocessing/taxpasta/'
 
 nextflow run main.nf -profile test_metaphlan --outdir out
 ```
@@ -577,7 +577,7 @@ nextflow run main.nf -profile test_metaphlan --outdir out
 ```bash
 ## Run krakenuniq for metagenomics sequence classification, save only report (default)
 ## Expect: Directory created 'metagenomics/profiling/krakenuniq' that contains one 'krakenuniq.report' file for each analyzed library
-## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
+## Expect: 'krakenuniq_taxpasta_table.tsv' in 'metagenomics/postprocessing/taxpasta/'
 
 nextflow run main.nf -profile test_krakenuniq --outdir out
 
@@ -588,7 +588,7 @@ nextflow run main.nf -profile test_krakenuniq --outdir out
 # - 'classified.fastq.gz' file
 # - 'unclassified.fastq.gz' file
 # for each analyzed library
-## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
+## Expect: 'taxpasta_table.tsv' in 'metagenomics/postprocessing/taxpasta/'
 
 nextflow run main.nf -profile test_krakenuniq --outdir out --metagenomics_kraken2_savereads --metagenomics_kraken2_savereadclassifications
 ```
@@ -599,7 +599,7 @@ nextflow run main.nf -profile test_krakenuniq --outdir out --metagenomics_kraken
 #### Use kraken2 for metagenomics sequence classification, save only report (default)
 ## Expect: Directory created 'metagenomics/profiling/kraken2' that contains a 'kraken2.report' file
 ## for each analyzed library
-## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
+## Expect: 'kraken2_taxpasta_table.tsv' in 'metagenomics/postprocessing/taxpasta/'
 
 nextflow run main.nf -profile test_kraken2 --outdir out
 
@@ -610,7 +610,7 @@ nextflow run main.nf -profile test_kraken2 --outdir out
 # - 'classified.fastq.gz' file
 # - 'unclassified.fastq.gz' file
 # for each analyzed library
-## Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
+## Expect: 'taxpasta_table.tsv' in 'metagenomics/postprocessing/taxpasta/'
 
 
 nextflow run run main.nf -profile test_kraken2 --outdir out --metagenomics_kraken2_savereads --metagenomics_kraken2_savereadclassifications
@@ -654,7 +654,7 @@ nextflow run main.nf -profile test_malt --metagenomics_run_postprocessing --outd
 ### Create a SummaryTable from the Malt rma6 files
 # Expect: A directory 'metagenomics/postprocessing/maltextract/<strandedness>/'
 # Expect: A directory 'metagenomics/postprocessing/megan_summaries'
-# Expect: 'taxpasta_table.csv' in 'metagenomics/postprocessing/taxpasta/'
+# Expect: 'megan6_taxpasta_table.tsv' in 'metagenomics/postprocessing/taxpasta/'
 # Also there will be an AMPS error which occurs if no taxa are found... Thats why it is ignored to no break the pipeline
 
 nextflow run main.nf -profile test_malt --outdir out --metagenomics_run_postprocessing --metagenomics_maltextract_ncbidir NCBI_DIR --metagenomics_maltextract_taxonlist TAXONLISTFILE
