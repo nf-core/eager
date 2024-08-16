@@ -27,22 +27,50 @@ nextflow_pipeline {
                 */
 
                 // Damage Estimation
-                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/"    , '.txt' )  ).match("damage_estimation_txt" )  },
-                { assert snapshot( getAllFilesFromDir("$outputDir/damage_estimation/"    , '.json')  ).match("damage_estimation_json") },
-                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.svg' )  ).match("damage_estimation_svg" ) },
-                { assert snapshot( getAllFileNamesFromDir("$outputDir/damage_estimation/", '.pdf' )  ).match("damage_estimation_pdf" ) },
-                { assert snapshot( checkAllFilesNamesFromDirForString("$outputDir/damage_estimation/", '.log', 'FINISHED SUCCESSFULLY')  ).match("damage_estimation_log") },
+                { assert snapshot(
+                        getAllFilesFromDir("$outputDir/damage_estimation/"     , ".txt" ),
+                        getAllFilesFromDir("$outputDir/damage_estimation/"     , ".json"),
+                        getAllFileNamesFromDir("$outputDir/damage_estimation/" , ".svg" ),
+                        getAllFileNamesFromDir("$outputDir/damage_estimation/" , ".pdf" ),
+                        checkAllFilesNamesFromDirForString("$outputDir/damage_estimation/", '.log', 'FINISHED SUCCESSFULLY'),
+                    ).match("damage_estimation")
+                },
 
-                // Preprcoessing
+                // Preprocessing
+                { assert snapshot(
+                        getAllFilesFromDir("$outputDir/preprocessing/fastp"                 , '.json'             ),
+                        getAllFileNamesFromDir("$outputDir/preprocessing/fastp"             , '.html'             ),
+                        checkAllFilesNamesFromDirForString("$outputDir/preprocessing/fastp" , '.log', 'time used:'),
+                        getAllFilesFromDir("$outputDir/preprocessing/fastqc_raw"            , '.html'             ),
+                        getAllFileNamesFromDir("$outputDir/preprocessing/fastqc_raw"        , '.zip'              ),
+                        getAllFilesFromDir("$outputDir/preprocessing/fastqc_processed"      , '.html'             ),
+                        getAllFileNamesFromDir("$outputDir/preprocessing/fastqc_processed"  , '.zip'              ),
+                    ).match("preprocessing" )
+                },
 
-                { assert snapshot( path("$outputDir/preprocessing/fastp")          ).match("processing_fastp") }, // TODO: Stable: JSON, varaible: HTML, LOG
-                { assert snapshot( path("$outputDir/preprocessing/fastp")          ).match("processing_fastp") }, // TODO: Stable: HTML, variable: ZIP
-                //{ assert snapshot( path("$outputDir/preprocessing/fastqc_raw").list().findAll{ it.toString() }).match("processing_fastqc_raw") },
-                //{ assert snapshot( path("$outputDir/preprocessing/fastqc_preprocessed").list().findAll{ it.toString() }).match("processing_fastqc_preprocessed") },
-                //{ assert snapshot( path("$outputDir/final_bams")               ).match("final_bams") },
-                //{ assert snapshot( path("$outputDir/mapstats")                 ).match("mapstats") },
+                // Final BAMs
+                { assert snapshot(
+                        getAllFilesFromDir("$outputDir/final_bams"    , '.flagstat'),
+                        getAllFileNamesFromDir("$outputDir/final_bams", '.bam'     ),
+                        getAllFileNamesFromDir("$outputDir/final_bams", '.bai'     ),
+                    ).match("final_bams")
+                },
+
+                // mapstats
+                { assert snapshot(
+                        getAllFilesFromDir("$outputDir/mapstats", '.bed'),
+                        getAllFilesFromDir("$outputDir/mapstats", '.json'),
+                        getAllFilesFromDir("$outputDir/mapstats", '.txt'),
+                        getAllFilesFromDir("$outputDir/mapstats", '.log'),
+                        getAllFilesFromDir("$outputDir/mapstats", '.css'),
+                        getAllFilesFromDir("$outputDir/mapstats", '.png'),
+                        getAllFilesFromDir("$outputDir/mapstats", '.js'),
+                        getAllFileNamesFromDir("$outputDir/mapstats", '.html'), // For variable qualimapReport.html
+                    ).match("mapstats")
+                },
+
                 { assert new File("$outputDir/pipeline_info/nf_core_pipeline_software_mqc_versions.yml").exists() },
-                { assert new File("$outputDir/multiqc/multiqc_report.html").exists() },
+                { assert new File("$outputDir/multiqc/multiqc_report.html").exists() }, // TODO: Would be good to check all files so numbers aren't changing(?)
                 { assert new File("$outputDir/multiqc/multiqc_data/").exists() }
             )
         }
