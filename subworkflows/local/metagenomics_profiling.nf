@@ -62,7 +62,6 @@ workflow METAGENOMICS_PROFILING {
         // so all samples are in one run and so sample-specific metadata
         // unnecessary. Set as database name to prevent `null` job ID and prefix.
 
-
         def label = file(params.metagenomics_profiling_database).getBaseName()
 
         // For the next step we need the number of analysis-groups for the spezified number of input files
