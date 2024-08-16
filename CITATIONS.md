@@ -153,7 +153,7 @@
 - [TAXPASTA](https://doi.org/10.21105/joss.05627)
 
   > Beber et al., (2023). TAXPASTA: TAXonomic Profile Aggregation and STAndardisation. Journal of Open Source Software, 8(87), 5627, doi: [10.21105/joss.05627](https://doi.org/10.21105/joss.05627)
-  
+
 - [CircularMapper](https://doi.org/10.1186/s13059-016-0918-z)
 
   > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
