@@ -362,7 +362,7 @@ MALT is a metagenomic aligner (equivalent to BLAST, but much faster). It produce
 
 You will receive output for each library. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
 
-The main output of MALT is the `.rma6` file format, which can be only loaded into MEGAN and it's related tools.
+The main output of MALT is the `.rma6` file format, which can be only loaded into MEGAN and it's related tools. The rma-file is further processed by the taxpasta module to provide a standardised tabular output for the MEGAN classifications
 
 You will only receive the `.sam` files if you supply `--metagenomics_malt_savereads` parameters to the pipeline.
 
@@ -380,7 +380,9 @@ You will only receive the `.sam` files if you supply `--metagenomics_malt_savere
 
 </details>
 
-The main taxonomic profiling file from MetaPhlAn is the `*_profile.txt` file. This provides the abundance estimates from MetaPhlAn however does not include raw counts by default. Intermediate Bowtie2 output `.bowtie2out.txt`, which presents a condensed representation of the mapping results of your sequencing reads to MetaPhlAn's marker gene sequences. The alignments are listed in tab-separated columns, including Read ID and Marker Gene ID, with each alignment represented on a separate line.
+The main taxonomic profiling file from MetaPhlAn is the `*_profile.txt` file. This provides the abundance estimates from MetaPhlAn however does not include raw counts by default. The profiling-file is further processed by the taxpasta module to provide a standardised tabular output for the Metaphlan abundance estimates.
+
+Intermediate Bowtie2 output `.bowtie2out.txt`, which presents a condensed representation of the mapping results of your sequencing reads to MetaPhlAn's marker gene sequences. The alignments are listed in tab-separated columns, including Read ID and Marker Gene ID, with each alignment represented on a separate line.
 
 #### Kraken2
 
