@@ -95,6 +95,25 @@ Depending on what is supplied by the user, and if `--save_reference` is supplied
 
 It is highly recommend to move these files to a central location or cache directory on your machine to facilitate resume of the indices across different pipeline runs. In many cases indexing the reference genome for alignment can be the longest step of a pipeline run, therefore re-using indices in future runs (supplied to the pipeline with flags such as `--fasta_fai`, `--fasta_dict`, etc. or added to the reference sheet provided to `--fasta`) can greatly speed up analyses on other samples.
 
+#### Reference Elongation
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `reference/`
+  - `<reference_id>_<elongation_factor>/`
+    - `*.{fasta,fna,fa,fa}`: Uncompressed input FASTA file (if supplied to pipeline gzipped).
+    - `bwa/`:
+      - `*.fasta.{amb,ann,bwt,pac,sa}`: BWA aligner(s) reference index files from `bwa index`.
+
+</details>
+
+Mapping with `circularmapper` requires an elongated reference built by [CircularMapper/CircularGenerator](https://github.com/apeltzer/CircularMapper). CircularGenerator elongates the `--fasta_circular_target` of a supplied reference genome fasta by the number of base pairs specified in `--fasta_circularmapper_elongationfactor`.
+
+Depending on what is supplied by the user, and if `--save_reference` is supplied, this directory will contain the elongated reference fasta, as well as its corresponding bwa reference index files.
+
+It is highly recommend to move these files to a central location or cache directory on your machine to facilitate resume of the indices across different pipeline runs. In many cases indexing the reference genome for alignment can be the longest step of a pipeline run, therefore re-using indices in future runs (supplied to the pipeline with flags such as `--fasta_circularmapper_elongatedfasta`, `--fasta_circularmapper_elongatedindex`, etc. or added to the reference sheet provided to `--fasta`) can greatly speed up analyses on other samples.
+
 ### Preprocessing
 
 #### Falco
@@ -161,7 +180,7 @@ The resulting FASTQ files will only be present in your results directory if you 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `mapping/`
+- `mapping/bwa{aln,mem}/`
 
   - `*.bam`: Sorted reads aligned against a reference genome in BAM format with no additional filtering.
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
@@ -176,7 +195,7 @@ The resulting FASTQ files will only be present in your results directory if you 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `mapping/`
+- `mapping/bowtie2/`
 
   - `*.bam`: Sorted reads aligned against a reference genome in BAM format with no additional filtering.
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
@@ -185,6 +204,21 @@ The resulting FASTQ files will only be present in your results directory if you 
 </details>
 
 [Bowtie 2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long (e.g. mammalian) genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small and supports gapped, local, and paired-end alignment modes.
+
+#### CircularMapper
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `mapping/circularmapper/`
+
+  - `*.bam`: Sorted reads aligned against an elongated reference genome in BAM format with no additional filtering.
+  - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
+  - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
+
+</details>
+
+[CircularMapper RealignSAMFile](https://github.com/apeltzer/CircularMapper/tree/master) is an extension to `bwa aln` for realigning reads mapped to circularised contigs. First, an elogated/circularised reference is built using CircularGenerator, then reads are mapped to this reference using BWA ALN. The resulting BAM file is then realigned using CircularMapper RealignSAMFile. The reference coordinates of this BAM file have been adjusted to those of the original reference genome (prior to elongation).
 
 ### Host Removal
 

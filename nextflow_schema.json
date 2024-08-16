@@ -84,6 +84,12 @@
                     "help_text": "For most people this will likely be the same directory that contains the file you provided to `--fasta`.\n\nIf you want to use pre-existing `bwa index` indices, the directory should contain files ending in '.amb' '.ann' '.bwt'. If you want to use pre-existing `bowtie2 build` indices, the directory should contain files ending in'.1.bt2', '.2.bt2', '.rev.1.bt2'.\n\nIn any case do not include the files themselves in the path. nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa index`/`bowtie2 build` file suffixes. If not supplied, the indices will be generated for you.\n\n",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "fasta_largeref": {
+                    "type": "boolean",
+                    "description": "Specify to generate '.csi' BAM indices instead of '.bai' for larger reference genomes.",
+                    "help_text": "This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `.csi` indices instead of `.bai` indices to compensate for the size of the reference genome (with samtools: `-c`). This parameter is not required for smaller references (including the human reference genomes hg19 or grch37/grch38).",
+                    "fa_icon": "fas fa-address-book"
+                },
                 "save_reference": {
                     "type": "boolean",
                     "description": "Specify to save any pipeline-generated reference genome indices in the results directory.",
@@ -126,9 +132,28 @@
                 },
                 "fasta_circular_target": {
                     "type": "string",
-                    "description": "Specify the FASTA header of the target chromosome to extend when using `circularmapper`.",
+                    "description": "Specify the FASTA header of the extended chromosome when using `circularmapper`.",
                     "help_text": "The entry (chromosome, contig, etc.) in your FASTA reference that you'd like to be treated as circular.\n\nApplies only when providing a single FASTA file via `--fasta` (NOT multi-reference input - see reference TSV/CSV input).\n\n> Modifies tool parameter(s):\n> - circulargenerator `-s`",
                     "fa_icon": "fas fa-bullseye"
+                },
+                "fasta_circularmapper_elongationfactor": {
+                    "type": "integer",
+                    "default": 500,
+                    "description": "Specify the number of bases to extend reference by (circularmapper only).",
+                    "help_text": "The number of bases to extend the beginning and end of each reference genome with.",
+                    "fa_icon": "fas fa-external-link-alt"
+                },
+                "fasta_circularmapper_elongatedfasta": {
+                    "type": "string",
+                    "description": "Specify an elongated reference FASTA to be used for circularmapper.",
+                    "help_text": "Specify an already elongated FASTA file for circularmapper to avoid regeneration.",
+                    "fa_icon": "fas fa-address-book"
+                },
+                "fasta_circularmapper_elongatedindex": {
+                    "type": "string",
+                    "description": "Specify a samtools index for the elongated FASTA file.",
+                    "help_text": "Specify the index for an already elongated FASTA file to avoid regeneration.",
+                    "fa_icon": "fas fa-address-book"
                 }
             }
         },
@@ -506,12 +531,6 @@
                     "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or Bowtie 2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing an extend-remap procedure (see [Peltzer et al 2016](https://doi.org/10.1186/s13059-016-0918-z) for details). Bowtie 2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming).\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)",
                     "fa_icon": "fas fa-hammer"
                 },
-                "fasta_largeref": {
-                    "type": "boolean",
-                    "description": "Specify to generate '.csi' BAM indices instead of '.bai' for larger reference genomes.",
-                    "help_text": "This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `.csi` indices instead of `.bai` indices to compensate for the size of the reference genome (with samtools: `-c`). This parameter is not required for smaller references (including the human reference genomes hg19 or grch37/grch38).",
-                    "fa_icon": "fas fa-address-book"
-                },
                 "mapping_bwaaln_n": {
                     "type": "number",
                     "default": 0.01,
@@ -601,9 +620,15 @@
                 "mapping_bowtie2_maxins": {
                     "type": "integer",
                     "default": 500,
-                    "description": "Specify the maximum fragment length for Bowtie 2 paired-end mapping mode only.",
-                    "help_text": "Specify the maximum fragment length for valid paired-end alignments in Bowtie 2. This only applies to paired-end mapping (i.e. unmerged) and is therefore typically only useful for modern data.\n\n> Modifies Bowtie 2 parameter: `--maxins`",
-                    "fa_icon": "fas fa-filter"
+                    "description": "Specify the maximum fragment length for Bowtie2 paired-end mapping mode only.",
+                    "help_text": "The maximum fragment for valid paired-end alignments. Only for paired-end mapping (i.e. unmerged), and therefore typically only useful for modern data.\n\n> Modifies Bowtie2 parameter: `--maxins`",
+                    "fa_icon": "fas fa-exchange-alt"
+                },
+                "mapping_circularmapper_circularfilter": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-filter",
+                    "description": "Turn on to remove reads that did not map to the circularised genome.",
+                    "help_text": "If you want to filter out reads that don't map to elongated/circularised chromosome (and also non-circular chromosome headers) from the resulting BAM file, turn this on.\n\n> Modifies `-f` and `-x` parameters of CircularMapper's RealignSAMFile"
                 }
             },
             "fa_icon": "fas fa-layer-group"
@@ -1594,13 +1619,10 @@
             "$ref": "#/definitions/host_removal"
         },
         {
+            "$ref": "#/definitions/contamination_estimation"
+        },
+        {
             "$ref": "#/definitions/human_sex_determination"
-        },
-        {
-            "$ref": "#/definitions/contamination_estimation"
-        },
-        {
-            "$ref": "#/definitions/contamination_estimation"
         }
     ]
 }
