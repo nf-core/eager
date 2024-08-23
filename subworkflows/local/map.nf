@@ -104,6 +104,17 @@ workflow MAP {
         ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
 
+    } else if ( params.mapping_tool == 'circularmapper' ) {
+        ch_elongated_reference_for_mapping = elogated_index
+                            .map {
+                                meta, elongated_fasta, elongated_index ->
+                                [ meta, elongated_index ]
+                                }
+
+        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, elongated_chr_list, reads, params.fasta_circularmapper_elongationfactor )
+        ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
+        ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
+        ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai // [ [ meta ], bai/csi ]
     } else if ( params.mapping_tool == 'mapad' ) {
         ch_input_for_mapping = reads
                             .combine( index.map{ meta, index, fasta -> [ meta, index ] } )
