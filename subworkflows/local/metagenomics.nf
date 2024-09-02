@@ -3,10 +3,11 @@ include { METAGENOMICS_PROFILING        } from './metagenomics_profiling'
 include { METAGENOMICS_POSTPROCESSING   } from './metagenomics_postprocessing'
 
 workflow METAGENOMICS {
-    take: ch_bamfiltered_for_metagenomics
-    take: ch_database
-    take: ch_tax_list
-    take: ch_ncbi_dir
+    take: 
+    ch_bamfiltered_for_metagenomics
+    ch_database
+    ch_tax_list
+    ch_ncbi_dir
 
     main:
     // Define channels
