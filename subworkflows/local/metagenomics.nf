@@ -3,7 +3,7 @@ include { METAGENOMICS_PROFILING        } from './metagenomics_profiling'
 include { METAGENOMICS_POSTPROCESSING   } from './metagenomics_postprocessing'
 
 workflow METAGENOMICS {
-    take: 
+    take:
     ch_bamfiltered_for_metagenomics
     ch_database
     ch_tax_list
