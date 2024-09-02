@@ -336,7 +336,9 @@ You may also receive the files above if metagenomic screening is turned on.
 
 ### Metagenomics Complexity Filtering
 
-#### Bbduk
+#### BBDuk
+
+[BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) “Duk” stands for Decontamination Using Kmers. BBDuk was developed to combine most common data-quality-related trimming, filtering, and masking operations into a single high-performance tool.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -357,6 +359,8 @@ Using complexity-filtered fastq-files as input for metagenomic classifiers can r
 **Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
 
 #### PRINSEQ++
+
+[PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus) is a C++ implementation of the prinseq-lite.pl program. It can be used to filter, reformat or trim genomic and metagenomic sequence data.
 
 <details markdown="1">
 <summary>Output files</summary>
