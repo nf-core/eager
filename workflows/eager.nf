@@ -27,10 +27,10 @@ include { MAP                           } from '../subworkflows/local/map'
 include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
 include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate_damage'
-include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
+include { METAGENOMICS                  } from '../subworkflows/local/metagenomics'
 include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
-include { RUN_SEXDETERRMINE              } from '../subworkflows/local/run_sex_determination'
+include { RUN_SEXDETERRMINE             } from '../subworkflows/local/run_sex_determination'
 include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libraries'
 include { GENOTYPE                      } from '../subworkflows/local/genotype'
 
@@ -221,7 +221,7 @@ workflow EAGER {
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
     //
 
-    if ( params.run_bamfiltering || params.run_metagenomicscreening ) {
+    if ( params.run_bamfiltering || params.run_metagenomics ) {
 
         ch_mapped_for_bamfilter = MAP.out.bam
                                     .join(MAP.out.bai)
@@ -312,6 +312,7 @@ workflow EAGER {
     //
     // MODULE: remove reads mapping to the host from the raw fastq
     //
+
     if ( params.run_host_removal ) {
         // Preparing bam channel for host removal to be combined with the input fastq channel
         // The bam channel consist of [meta, bam, bai] and in the meta we have in addition 'single_end' always set as TRUE and 'reference' set
@@ -344,24 +345,25 @@ workflow EAGER {
     }
 
     //
-    // Section: Metagenomics screening
+    // Section: Metagenomics
     //
 
-    if( params.run_metagenomicscreening ) {
-        ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics
-            .map{ meta, fastq ->
-                [meta+['single_end':true], fastq]
-            }
+    if ( params.run_metagenomics ) {
 
-        // Check if a complexity filter is wanted?
-        if ( params.run_metagenomics_complexityfiltering ) {
-            METAGENOMICS_COMPLEXITYFILTER( ch_bamfiltered_for_metagenomics )
-            ch_reads_for_metagenomics = METAGENOMICS_COMPLEXITYFILTER.out.fastq
-            ch_versions = ch_versions.mix(METAGENOMICS_COMPLEXITYFILTER.out.versions.first())
-            ch_multiqc_files = ch_multiqc_files.mix(METAGENOMICS_COMPLEXITYFILTER.out.fastq.collect{it[1]}.ifEmpty([]))
-        } else {
-            ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
+        ch_database = Channel.fromPath(params.metagenomics_profiling_database)
+
+        // this is for MALT
+        ch_tax_list = Channel.empty()
+        ch_ncbi_dir = Channel.empty()
+
+        if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt' ){
+            ch_tax_list = Channel.fromPath(params.metagenomics_maltextract_taxonlist, checkIfExists:true)
+            ch_ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbidir, checkIfExists:true)
         }
+
+        METAGENOMICS ( ch_bamfiltered_for_metagenomics, ch_database, ch_tax_list, ch_ncbi_dir )
+        ch_versions      = ch_versions.mix( METAGENOMICS.out.versions.first() )
+        ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS.out.ch_multiqc_files )
     }
 
     //
@@ -486,11 +488,10 @@ workflow EAGER {
 
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
 
-        BEDTOOLS_COVERAGE_BREADTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
         BEDTOOLS_COVERAGE_DEPTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
 
         ch_versions = ch_versions.mix( SAMTOOLS_VIEW_GENOME.out.versions )
-        ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
+        //ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
     }
 

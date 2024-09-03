@@ -13,13 +13,12 @@ workflow METAGENOMICS_COMPLEXITYFILTER {
 
     if (params.metagenomics_complexity_tool == 'bbduk') {
         BBMAP_BBDUK( ch_bamfiltered_for_metagenomics, [] )
-        ch_versions = BBMAP_BBDUK.out.versions.first()
+        ch_versions = BBMAP_BBDUK.out.versions
         ch_reads_for_metagenomics = BBMAP_BBDUK.out.reads
     }
     else if ( params.metagenomics_complexity_tool == 'prinseq' ) {
-        // check if e.g. dustscore is set but entropy enabled
         PRINSEQPLUSPLUS ( ch_bamfiltered_for_metagenomics )
-        ch_versions = PRINSEQPLUSPLUS.out.versions.first()
+        ch_versions = PRINSEQPLUSPLUS.out.versions
         ch_reads_for_metagenomics = PRINSEQPLUSPLUS.out.good_reads
     }
 

@@ -334,14 +334,16 @@ Please be aware, that intermediate length and mapping quality filtered genomic B
 
 You may also receive the files above if metagenomic screening is turned on.
 
-### Metagenomics Screening
+### Metagenomics Complexity Filtering
 
-#### Bbduk
+#### BBDuk
+
+[BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) “Duk” stands for Decontamination Using Kmers. BBDuk was developed to combine most common data-quality-related trimming, filtering, and masking operations into a single high-performance tool.
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomic_complexity_filter/`
+- `metagenomics/complexity_filter/bbduk`
 
   - `*_complexity.fastq.gz`: FASTQ file containing the complexity filtered reads
   - `*.log`: LOG file containing filter stats
@@ -358,10 +360,12 @@ Using complexity-filtered fastq-files as input for metagenomic classifiers can r
 
 #### PRINSEQ++
 
+[PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus) is a C++ implementation of the prinseq-lite.pl program. It can be used to filter, reformat or trim genomic and metagenomic sequence data.
+
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomic_complexity_filter/`
+- `metagenomics/complexity_filter/prinseq`
 
   - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
   - `*_complexity.log`: LOG file containing filter stats
@@ -375,6 +379,122 @@ Using complexity-filtered fastq-files as input for metagenomic classifiers can r
 The saved files are the _good_ files, passing the `dust` or `entropy` filter treshold specified. The logs contain information about the amount of reads filtered.
 
 **Note:** To save output files, set the `--metagenomics_complexity_savefastq` flag
+
+### Metagenomics Profiling
+
+#### MALT
+
+[MALT](https://software-ab.cs.uni-tuebingen.de/download/malt) is a fast replacement for BLASTX, BLASTP and BLASTN, and provides both local and semi-global alignment capabilities.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `metagenomics/profiling/malt/`
+  - `<sample_id>.rma6`: binary file containing all alignments and taxonomic information of hits that can be loaded into the [MEGAN6](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/) interactive viewer
+  - `<sample_id>.blastn.sam`: sparse SAM file containing alignments of each hit (if `--metagenomics_malt_savereads`)
+  - `*.log`: LOG files containing the log of the MALT execution. NOTE: If you are running parallel malt runs with `--metagenomics_malt_group_size` set above 0, you will obtain a log file named `<database>_<strandedness>_<group_id>-run-malt-run.log` for each group of the parallel executions. The `<database>_runtime_log_concatenated.log` file contains the concatenated logs of all the groups.
+
+</details>
+
+MALT is a metagenomic aligner (equivalent to BLAST, but much faster). It produces direct alignments of sequencing reads in a reference genome. It is often used for metagenomic profiling or pathogen screening, and specifically in nf-core/eager, of off-target reads from genome mapping. It is popular by palaeogenomicists as the alignment information can be used for damage pattern and other authentication criteria analysis.
+
+You will receive output for each library. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
+
+The main output of MALT is the `.rma6` file format, which can be only loaded into MEGAN and it's related tools. The rma-file is further processed by the taxpasta module to provide a standardised tabular output for the MEGAN classifications
+
+You will only receive the `.sam` files if you supply `--metagenomics_malt_savereads` parameters to the pipeline.
+
+### MetaPhlAn
+
+[MetaPhlAn](https://github.com/biobakery/metaphlan) is a computational tool for profiling the composition of microbial communities (Bacteria, Archaea and Eukaryotes) from metagenomic shotgun sequencing data (i.e. not 16S) with species-level resolution via marker genes.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `metagenomics/profiling/metaphlan/`
+  - `<sample_id>.biom`: taxonomic profile in BIOM format
+  - `<sample_id>.bowtie2out.txt`: BowTie2 alignment information (can be re-used for skipping alignment when re-running MetaPhlAn with different parameters)
+  - `<sample_id>_profile.txt`: MetaPhlAn taxonomic profile including abundance estimates
+
+</details>
+
+The main taxonomic profiling file from MetaPhlAn is the `*_profile.txt` file. This provides the abundance estimates from MetaPhlAn however does not include raw counts by default. The profiling-file is further processed by the taxpasta module to provide a standardised tabular output for the Metaphlan abundance estimates.
+
+Raw counts can be inferred from the Bowtie2 output `.bowtie2out.txt`, which presents a condensed representation of the mapping results of the sequencing reads to MetaPhlAn's marker gene sequences. The alignments are listed in tab-separated columns, including Read ID and Marker Gene ID, with each alignment represented on a separate line. No hits to the marker genes results in an empty file.
+
+#### Kraken2
+
+[Kraken](https://ccb.jhu.edu/software/kraken2/) is a taxonomic sequence classifier that assigns taxonomic labels to DNA sequences. Kraken examines the k-mers within a query sequence and uses the information within those k-mers to query a database. That database maps -mers to the lowest common ancestor (LCA) of all genomes known to contain a given k-mer.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `metagenomics/profiling/kraken2/`
+  - `<sample_id>.classified.fastq.gz`: FASTQ file containing all reads that had a hit against a reference in the database for a given sample
+  - `<sample_id>.unclassified.fastq.gz`: FASTQ file containing all reads that did not have a hit in the database for a given sample
+  - `<sample_id>.report.txt`: A Kraken2 report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits in the Kraken2 run for a given sample. Will be 6 column rather than 8 if `--metagenomics_kraken2_saveminimizers` specified.
+  - `<sample_id>.classifiedreads.txt`: A list of read IDs and the hits each read had against each database for a given sample
+
+</details>
+
+The main taxonomic classification file from Kraken2 is the `_combined_reports.txt` or `*report.txt` file. The former provides you the broadest over view of the taxonomic classification results across all samples against a single database, where you get two columns for each sample e.g. `2_all` and `2_lvl`, as well as a summarised column summing up across all samples `tot_all` and `tot_lvl`. The latter gives you the most information for a single sample. The report file is also used for the taxpasta step.
+
+You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply `--metagenomics_kraken2_savereads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
+
+#### KrakenUniq
+
+[KrakenUniq](https://github.com/fbreitwieser/krakenuniq) (formerly KrakenHLL) is an extenson to the fast k-mer-based classification [Kraken](https://github.com/DerrickWood/kraken) with an efficient algorithm for additionally assessing the coverage of unique k-mers found in each species in a dataset.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `metagenomics/profiling/krakenuniq/`
+  - `<sample_id>.classified.fastq.gz`: FASTQ file containing all reads that had a hit against a reference in the database for a given sample
+  - `<sample_id>.unclassified.fastq.gz`: FASTQ file containing all reads that did not have a hit in the database for a given sample
+  - `<sample_id>.report.txt`: A Kraken2-style report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits, with an additional column for k-mer coverage, that allows for more accurate distinguishing between false-positive/true-postitive hits
+  - `<sample_id>.classifiedreads.txt`: A list of read IDs and the hits each read had against each database for a given sample
+
+</details>
+
+The main taxonomic classification file from KrakenUniq is the `*report.txt` file. This is an extension of the Kraken2 report with the additional k-mer coverage information that provides more information about the accuracy of hits.
+
+You will only receive the `*.fastq.gz` and `*.classifiedreads.txt` file if you supply `--metagenomics_kraken2_savereads` and/or `--metagenomics_kraken2_savereadclassifications` parameters to the pipeline.
+
+:::info
+The output system of KrakenUniq can result in other `stdout` or `stderr` logging information being saved in the report file, therefore you must check your report files before downstream use!
+:::
+
+### Metagenomics Postprocessing
+
+#### taxpasta
+
+The output created by the `taxpasta merge` or `taxpasta standardise` command. It combines the results of all the samples analyzed with a given metagenomic classifer by nf-core/eager in a standardised tabular taxon-table format. The file provides an overview of the classification results for all samples combined
+
+<details markdown=1>
+<summary>Output files</summary>
+
+- `metagenomics/postprocessing/taxpasta/`
+  - `{metaphlan,krakenuniq,kraken2,megan6}_taxpasta_table.tsv`
+
+</details>
+
+#### maltExtract
+
+The output directory for maltExtract, as implemented under [HOPS](https://github.com/rhuebler/HOPS), which applies various heuristics of ancient authenticity and presence to MEGAN read assignments across a given set of candidate taxon.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `metagenomics/postprocessing/maltextract/`
+  - `results`: Results output by maltextract
+    - `default`: Directory containing summary TSV tables for all reads
+    - `ancient`: Directory containing summary TSV tables for reads with evidence of aDNA damage
+    - `pdf_candidate_profiles`: Directory containing directories for each candidate taxon with varying levels of support for presence of genetic material for a given sample
+    - `count_table.tsv`: TSV containing reads assigned to each node in candidate taxon list across all samples
+
+</details>
+
+The main files of interest are within the `pdf_candidate_profiles` directory. The file prefixes declare various levels of confidence in a given sample, with stp1 being less confidently ancient and present than stp2, than stp3. Results are highly dependent upon the taxon being analyzed, as different microbial genera are more liable to cross mapping and contamination than others.
 
 ### Deduplication
 
