@@ -225,7 +225,6 @@ def validateInputParameters() {
     if ( params.metagenomics_complexity_tool == 'prinseq'  && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
         if (params.metagenomics_complexity_entropy == 0.3) { exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag") }
     }
-    if ( params.run_metagenomics && params.preprocessing_skippairmerging ) { exit 1, ("[nf-core/eager] ERROR: Metagenomics: Currently no support for unmerged paired end reads inputs into Metagenomics subworkflow. Please rerun without --preprocessing_skippairmerging.") }
     if (
         params.metagenomics_run_postprocessing &&
         params.metagenomics_profiling_tool == 'malt' &&

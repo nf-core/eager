@@ -93,7 +93,7 @@ workflow FILTER_BAM {
                                     .map {
                                         meta, fastqs ->
                                             def meta_new = meta.clone()
-                                            meta_new['single_end'] = true
+                                            meta_new['single_end_clone'] = true
                                         [ meta_new, fastqs.flatten() ]
                                     }
         CAT_FASTQ_UNMAPPED ( ch_paired_fastq_for_cat )
