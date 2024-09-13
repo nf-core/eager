@@ -578,49 +578,49 @@
                     "type": "number",
                     "default": 0.03,
                     "description": "Specify the -p parameter for mapAD, i.e. mismatch budget for the alignment.",
-                    "help_text": "Configures the `mapad map -p` parameter, defining how many mismatches are allowed in a read. Default is set following recommendations. \n\n> Modifies mapAD parameter: `-p`",
+                    "help_text": "Configures the `mapad map -p` parameter, defining how many mismatches are allowed in a read. Default is set following recommendations. \n\n> Modifies mapAD map parameter: `-p`",
                     "fa_icon": "fas fa-sort-numeric-down"
                 },
                 "mapping_mapad_f": {
                     "type": "number",
                     "default": 0.5,
                     "description": "Specify the -f parameter for mapAD, which sets the 5'-overhang length parameter of mapAD's aDNA scoring model.",
-                    "help_text": "Configures mapAD's 5' single-stranded overhang length parameter. Increased cytosine deamination rates are expected in single-stranded overhangs resulting from aDNA damage. The `-l` parameter adjusts the probability with which the scoring model expects a position in the read to be in a single-stranded overhang at the 5'-end (pos^`-f`). Default is set to 0.5.\n\n> Modifies mapAD parameter: `-f`",
+                    "help_text": "Configures mapAD's 5' single-stranded overhang length parameter. Increased cytosine deamination rates are expected in single-stranded overhangs resulting from aDNA damage. The `-l` parameter adjusts the probability with which the scoring model expects a position in the read to be in a single-stranded overhang at the 5'-end (pos^`-f`). Default is set to 0.5.\n\n> Modifies mapAD map parameter: `-f`",
                     "fa_icon": "fas fa-left-long"
                 },
                 "mapping_mapad_t": {
                     "type": "number",
                     "default": 0.5,
                     "description": "Specify the -t parameter for mapAD, which sets the 3'-overhang length parameter of mapAD's aDNA scoring model.",
-                    "help_text": "Configures mapAD's 3' single-stranded overhang length parameter. Increased cytosine deamination rates are expected in single-stranded overhangs resulting from aDNA damage. The `-t` parameter adjusts the probability with which the scoring model expects a position in the read to be in a single-stranded overhang at the 3'-end (pos^`-t`). Default is set to 0.5.\n\n> Modifies mapAD parameter: `-t`",
+                    "help_text": "Configures mapAD's 3' single-stranded overhang length parameter. Increased cytosine deamination rates are expected in single-stranded overhangs resulting from aDNA damage. The `-t` parameter adjusts the probability with which the scoring model expects a position in the read to be in a single-stranded overhang at the 3'-end (pos^`-t`). Default is set to 0.5.\n\n> Modifies mapAD map parameter: `-t`",
                     "fa_icon": "fas fa-right-long"
                 },
                 "mapping_mapad_d": {
                     "type": "number",
                     "default": 0.02,
                     "description": "Specify the -d parameter for mapAD, which sets the double-stranded deamination rate parameter of mapAD's aDNA scoring model.",
-                    "help_text": "Configures mapAD's double-stranded deamination rate parameter. The `-d` parameter adjusts the expected deamination rate in double-stranded central \"stems\" of aDNA fragments. Default is set to 0.02.\n\n> Modifies mapAD parameter: `-d`",
+                    "help_text": "Configures mapAD's double-stranded deamination rate parameter. The `-d` parameter adjusts the expected deamination rate in double-stranded central \"stems\" of aDNA fragments. Default is set to 0.02.\n\n> Modifies mapAD map parameter: `-d`",
                     "fa_icon": "fas fa-equals"
                 },
                 "mapping_mapad_s": {
                     "type": "number",
                     "default": 1.0,
                     "description": "Specify the -s parameter for mapAD, which sets the single-stranded deamination rate parameter of mapAD's aDNA scoring model.",
-                    "help_text": "Configures mapAD's single-stranded deamination rate parameter. The `-s` parameter adjusts the expected deamination rate in single-stranded overhangs of aDNA fragments (whose lengths are modeled via the `-f` and `-t` parameters). Default is set to 1.0.\n\n> Modifies mapAD parameter: `-s`",
+                    "help_text": "Configures mapAD's single-stranded deamination rate parameter. The `-s` parameter adjusts the expected deamination rate in single-stranded overhangs of aDNA fragments (whose lengths are modeled via the `-f` and `-t` parameters). Default is set to 1.0.\n\n> Modifies mapAD map parameter: `-s`",
                     "fa_icon": "fas fa-minus"
                 },
                 "mapping_mapad_i": {
                     "type": "number",
                     "default": 0.001,
                     "description": "Specify the -i parameter for mapAD, which adjusts the expected indel rate between reads and reference.",
-                    "help_text": "Configures mapAD's expected InDel rate parameter. The `-i` parameter adjusts the gap open penalty of mapAD's affine gap model. Default is set to 0.001.\n\n> Modifies mapAD parameter: `-i`",
+                    "help_text": "Configures mapAD's expected InDel rate parameter. The `-i` parameter adjusts the gap open penalty of mapAD's affine gap model. Default is set to 0.001.\n\n> Modifies mapAD map parameter: `-i`",
                     "fa_icon": "fas fa-ellipsis"
                 },
                 "mapping_mapad_x": {
                     "type": "number",
                     "default": 0.5,
                     "description": "Specify the -x parameter for mapAD, which adjusts the gap extension penalty.",
-                    "help_text": "Configures mapAD's gap extension penalty. The `-x` parameter adjusts the gap extension penalty as a fraction of a representative mismatch penalty. Default is set to 0.5.\n\n> Modifies mapAD parameter: `-x`",
+                    "help_text": "Configures mapAD's gap extension penalty. The `-x` parameter adjusts the gap extension penalty as a fraction of a representative mismatch penalty. Default is set to 0.5.\n\n> Modifies mapAD map parameter: `-x`",
                     "fa_icon": "fas fa-arrow-right-from-bracket"
                 }
             },
