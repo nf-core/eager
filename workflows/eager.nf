@@ -21,18 +21,19 @@ include { addNewMetaFromAttributes } from '../subworkflows/local/utils_nfcore_ea
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
-include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
-include { MAP                           } from '../subworkflows/local/map'
-include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
-include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
-include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate_damage'
-include { METAGENOMICS                  } from '../subworkflows/local/metagenomics'
-include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
-include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
-include { RUN_SEXDETERRMINE             } from '../subworkflows/local/run_sex_determination'
-include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libraries'
-include { GENOTYPE                      } from '../subworkflows/local/genotype'
+include { REFERENCE_INDEXING                            } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING                                 } from '../subworkflows/local/preprocessing'
+include { MAP                                           } from '../subworkflows/local/map'
+include { FILTER_BAM                                    } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE                                   } from '../subworkflows/local/deduplicate'
+include { MANIPULATE_DAMAGE                             } from '../subworkflows/local/manipulate_damage'
+include { METAGENOMICS_COMPLEXITYFILTER                 } from '../subworkflows/local/metagenomics_complexityfilter'
+include { ESTIMATE_CONTAMINATION                        } from '../subworkflows/local/estimate_contamination'
+include { CALCULATE_DAMAGE                              } from '../subworkflows/local/calculate_damage'
+include { RUN_SEXDETERRMINE                             } from '../subworkflows/local/run_sex_determination'
+include { MERGE_LIBRARIES                               } from '../subworkflows/local/merge_libraries'
+include { MERGE_LIBRARIES as MERGE_LIBRARIES_GENOTYPING } from '../subworkflows/local/merge_libraries'
+include { GENOTYPE                                      } from '../subworkflows/local/genotype'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -265,6 +266,15 @@ workflow EAGER {
     }
 
     //
+    // SUBWORKFLOW: Merge libraries per sample
+    //
+
+    MERGE_LIBRARIES ( ch_dedupped_bams )
+    ch_versions          = ch_versions.mix( MERGE_LIBRARIES.out.versions )
+    ch_merged_dedup_bams = MERGE_LIBRARIES.out.bam_bai
+    ch_multiqc_files     = ch_multiqc_files.mix( MERGE_LIBRARIES.out.mqc.collect{it[1]}.ifEmpty([]) )
+
+    //
     // MODULE QUALIMAP
     //
 
@@ -273,7 +283,7 @@ workflow EAGER {
             .map{
                 addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
-        ch_qualimap_input = ch_dedupped_bams
+        ch_qualimap_input = ch_merged_dedup_bams
             .map {
             meta, bam, bai ->
                 [ meta, bam ]
@@ -458,7 +468,7 @@ workflow EAGER {
                                     addNewMetaFromAttributes( it, "id" , "reference" , false )
                                 }
 
-        ch_bedtools_prep = ch_dedupped_bams
+        ch_bedtools_prep = ch_merged_dedup_bams
                     .map {
                         addNewMetaFromAttributes( it, "reference" , "reference" , false )
                     }
@@ -518,7 +528,7 @@ workflow EAGER {
     //
 
     if ( params.run_sexdeterrmine ) {
-        ch_sexdeterrmine_input = ch_dedupped_bams
+        ch_sexdeterrmine_input = ch_merged_dedup_bams
 
         RUN_SEXDETERRMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed )
         ch_versions      = ch_versions.mix( RUN_SEXDETERRMINE.out.versions )
@@ -539,26 +549,22 @@ workflow EAGER {
 
     //
     // SUBWORKFLOW: aDNA Damage Manipulation
+    //
 
     if ( params.run_mapdamage_rescaling || params.run_pmd_filtering || params.run_trim_bam ) {
         MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masking )
-        ch_multiqc_files       = ch_multiqc_files.mix( MANIPULATE_DAMAGE.out.flagstat.collect{it[1]}.ifEmpty([]) )
-        ch_versions            = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
-        ch_bams_for_library_merge = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
+        ch_multiqc_files          = ch_multiqc_files.mix( MANIPULATE_DAMAGE.out.flagstat.collect{it[1]}.ifEmpty([]) )
+        ch_versions               = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
+        ch_bams_for_library_merge = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_merged_dedup_bams
+
+    // SUBWORKFLOW: merge libraries for genotyping
+        MERGE_LIBRARIES_GENOTYPING ( ch_bams_for_library_merge )
+        ch_versions            = ch_versions.mix( MERGE_LIBRARIES_GENOTYPING.out.versions )
+        ch_bams_for_genotyping = MERGE_LIBRARIES_GENOTYPING.out.bam_bai
+        ch_multiqc_files       = ch_multiqc_files.mix( MERGE_LIBRARIES_GENOTYPING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
-        ch_bams_for_library_merge = ch_dedupped_bams
+        ch_bams_for_genotyping = ch_merged_dedup_bams
     }
-
-    //
-    // SUBWORKFLOW: MERGE LIBRARIES
-    //
-
-    // The bams being merged are always the ones specified by params.genotyping_source,
-    //   unless the user skipped damage manipulation, in which case it is the DEDUPLICATION output.
-    MERGE_LIBRARIES ( ch_bams_for_library_merge )
-    ch_versions             = ch_versions.mix( MERGE_LIBRARIES.out.versions )
-    ch_bams_for_genotyping  = MERGE_LIBRARIES.out.bam_bai
-    ch_multiqc_files        = ch_multiqc_files.mix( MERGE_LIBRARIES.out.mqc.collect{it[1]}.ifEmpty([]) ) // Not sure if this is needed, or if it needs to be moved to line 564?
 
     //
     // SUBWORKFLOW: Genotyping
