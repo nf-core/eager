@@ -21,18 +21,19 @@ include { addNewMetaFromAttributes } from '../subworkflows/local/utils_nfcore_ea
 //
 
 // TODO rename to active: index_reference, filter_bam etc.
-include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
-include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
-include { MAP                           } from '../subworkflows/local/map'
-include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
-include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
-include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate_damage'
-include { METAGENOMICS_COMPLEXITYFILTER } from '../subworkflows/local/metagenomics_complexityfilter'
-include { ESTIMATE_CONTAMINATION        } from '../subworkflows/local/estimate_contamination'
-include { CALCULATE_DAMAGE              } from '../subworkflows/local/calculate_damage'
-include { RUN_SEXDETERRMINE              } from '../subworkflows/local/run_sex_determination'
-include { MERGE_LIBRARIES               } from '../subworkflows/local/merge_libraries'
-include { GENOTYPE                      } from '../subworkflows/local/genotype'
+include { REFERENCE_INDEXING                            } from '../subworkflows/local/reference_indexing'
+include { PREPROCESSING                                 } from '../subworkflows/local/preprocessing'
+include { MAP                                           } from '../subworkflows/local/map'
+include { FILTER_BAM                                    } from '../subworkflows/local/bamfiltering.nf'
+include { DEDUPLICATE                                   } from '../subworkflows/local/deduplicate'
+include { MANIPULATE_DAMAGE                             } from '../subworkflows/local/manipulate_damage'
+include { METAGENOMICS_COMPLEXITYFILTER                 } from '../subworkflows/local/metagenomics_complexityfilter'
+include { ESTIMATE_CONTAMINATION                        } from '../subworkflows/local/estimate_contamination'
+include { CALCULATE_DAMAGE                              } from '../subworkflows/local/calculate_damage'
+include { RUN_SEXDETERRMINE                             } from '../subworkflows/local/run_sex_determination'
+include { MERGE_LIBRARIES                               } from '../subworkflows/local/merge_libraries'
+include { MERGE_LIBRARIES as MERGE_LIBRARIES_GENOTYPING } from '../subworkflows/local/merge_libraries'
+include { GENOTYPE                                      } from '../subworkflows/local/genotype'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -181,11 +182,11 @@ workflow EAGER {
     //
     ch_reference_for_mapping = REFERENCE_INDEXING.out.reference
             .map{
-                meta, fasta, fai, dict, index, circular_target ->
+                meta, fasta, fai, dict, index ->
                 [ meta, index, fasta ]
             }
 
-    MAP ( ch_reads_for_mapping, ch_reference_for_mapping )
+    MAP ( ch_reads_for_mapping, ch_reference_for_mapping, REFERENCE_INDEXING.out.elongated_reference, REFERENCE_INDEXING.out.elongated_chr_list )
 
     ch_versions       = ch_versions.mix( MAP.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( MAP.out.mqc.collect{it[1]}.ifEmpty([]) )
@@ -221,7 +222,7 @@ workflow EAGER {
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
     //
 
-    if ( params.run_bamfiltering || params.run_metagenomicscreening ) {
+    if ( params.run_bamfiltering || params.run_metagenomics ) {
 
         ch_mapped_for_bamfilter = MAP.out.bam
                                     .join(MAP.out.bai)
@@ -247,7 +248,7 @@ workflow EAGER {
 
     ch_fasta_for_deduplication = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index, circular_target ->
+            meta, fasta, fai, dict, index ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -265,6 +266,15 @@ workflow EAGER {
     }
 
     //
+    // SUBWORKFLOW: Merge libraries per sample
+    //
+
+    MERGE_LIBRARIES ( ch_dedupped_bams )
+    ch_versions          = ch_versions.mix( MERGE_LIBRARIES.out.versions )
+    ch_merged_dedup_bams = MERGE_LIBRARIES.out.bam_bai
+    ch_multiqc_files     = ch_multiqc_files.mix( MERGE_LIBRARIES.out.mqc.collect{it[1]}.ifEmpty([]) )
+
+    //
     // MODULE QUALIMAP
     //
 
@@ -273,7 +283,7 @@ workflow EAGER {
             .map{
                 addNewMetaFromAttributes( it, "id" , "reference" , false )
             }
-        ch_qualimap_input = ch_dedupped_bams
+        ch_qualimap_input = ch_merged_dedup_bams
             .map {
             meta, bam, bai ->
                 [ meta, bam ]
@@ -312,6 +322,7 @@ workflow EAGER {
     //
     // MODULE: remove reads mapping to the host from the raw fastq
     //
+
     if ( params.run_host_removal ) {
         // Preparing bam channel for host removal to be combined with the input fastq channel
         // The bam channel consist of [meta, bam, bai] and in the meta we have in addition 'single_end' always set as TRUE and 'reference' set
@@ -344,24 +355,25 @@ workflow EAGER {
     }
 
     //
-    // Section: Metagenomics screening
+    // Section: Metagenomics
     //
 
-    if( params.run_metagenomicscreening ) {
-        ch_bamfiltered_for_metagenomics = ch_bamfiltered_for_metagenomics
-            .map{ meta, fastq ->
-                [meta+['single_end':true], fastq]
-            }
+    if ( params.run_metagenomics ) {
 
-        // Check if a complexity filter is wanted?
-        if ( params.run_metagenomics_complexityfiltering ) {
-            METAGENOMICS_COMPLEXITYFILTER( ch_bamfiltered_for_metagenomics )
-            ch_reads_for_metagenomics = METAGENOMICS_COMPLEXITYFILTER.out.fastq
-            ch_versions = ch_versions.mix(METAGENOMICS_COMPLEXITYFILTER.out.versions.first())
-            ch_multiqc_files = ch_multiqc_files.mix(METAGENOMICS_COMPLEXITYFILTER.out.fastq.collect{it[1]}.ifEmpty([]))
-        } else {
-            ch_reads_for_metagenomics = ch_bamfiltered_for_metagenomics
+        ch_database = Channel.fromPath(params.metagenomics_profiling_database)
+
+        // this is for MALT
+        ch_tax_list = Channel.empty()
+        ch_ncbi_dir = Channel.empty()
+
+        if ( params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt' ){
+            ch_tax_list = Channel.fromPath(params.metagenomics_maltextract_taxonlist, checkIfExists:true)
+            ch_ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbidir, checkIfExists:true)
         }
+
+        METAGENOMICS ( ch_bamfiltered_for_metagenomics, ch_database, ch_tax_list, ch_ncbi_dir )
+        ch_versions      = ch_versions.mix( METAGENOMICS.out.versions.first() )
+        ch_multiqc_files = ch_multiqc_files.mix( METAGENOMICS.out.ch_multiqc_files )
     }
 
     //
@@ -456,7 +468,7 @@ workflow EAGER {
                                     addNewMetaFromAttributes( it, "id" , "reference" , false )
                                 }
 
-        ch_bedtools_prep = ch_dedupped_bams
+        ch_bedtools_prep = ch_merged_dedup_bams
                     .map {
                         addNewMetaFromAttributes( it, "reference" , "reference" , false )
                     }
@@ -486,11 +498,10 @@ workflow EAGER {
 
         ch_genome_for_bedtools = SAMTOOLS_VIEW_GENOME.out.genome
 
-        BEDTOOLS_COVERAGE_BREADTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
         BEDTOOLS_COVERAGE_DEPTH(ch_bedtools_input.withfeature, ch_genome_for_bedtools)
 
         ch_versions = ch_versions.mix( SAMTOOLS_VIEW_GENOME.out.versions )
-        ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
+        //ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_BREADTH.out.versions )
         ch_versions = ch_versions.mix( BEDTOOLS_COVERAGE_DEPTH.out.versions )
     }
 
@@ -500,7 +511,7 @@ workflow EAGER {
 
     ch_fasta_for_damagecalculation = REFERENCE_INDEXING.out.reference
         .multiMap{
-            meta, fasta, fai, dict, index, circular_target ->
+            meta, fasta, fai, dict, index ->
             fasta:      [ meta, fasta ]
             fasta_fai:  [ meta, fai ]
         }
@@ -517,7 +528,7 @@ workflow EAGER {
     //
 
     if ( params.run_sexdeterrmine ) {
-        ch_sexdeterrmine_input = ch_dedupped_bams
+        ch_sexdeterrmine_input = ch_merged_dedup_bams
 
         RUN_SEXDETERRMINE(ch_sexdeterrmine_input, REFERENCE_INDEXING.out.sexdeterrmine_bed )
         ch_versions      = ch_versions.mix( RUN_SEXDETERRMINE.out.versions )
@@ -538,26 +549,22 @@ workflow EAGER {
 
     //
     // SUBWORKFLOW: aDNA Damage Manipulation
+    //
 
     if ( params.run_mapdamage_rescaling || params.run_pmd_filtering || params.run_trim_bam ) {
         MANIPULATE_DAMAGE( ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masking )
-        ch_multiqc_files       = ch_multiqc_files.mix( MANIPULATE_DAMAGE.out.flagstat.collect{it[1]}.ifEmpty([]) )
-        ch_versions            = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
-        ch_bams_for_library_merge = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
+        ch_multiqc_files          = ch_multiqc_files.mix( MANIPULATE_DAMAGE.out.flagstat.collect{it[1]}.ifEmpty([]) )
+        ch_versions               = ch_versions.mix( MANIPULATE_DAMAGE.out.versions )
+        ch_bams_for_library_merge = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_merged_dedup_bams
+
+    // SUBWORKFLOW: merge libraries for genotyping
+        MERGE_LIBRARIES_GENOTYPING ( ch_bams_for_library_merge )
+        ch_versions            = ch_versions.mix( MERGE_LIBRARIES_GENOTYPING.out.versions )
+        ch_bams_for_genotyping = MERGE_LIBRARIES_GENOTYPING.out.bam_bai
+        ch_multiqc_files       = ch_multiqc_files.mix( MERGE_LIBRARIES_GENOTYPING.out.mqc.collect{it[1]}.ifEmpty([]) )
     } else {
-        ch_bams_for_library_merge = ch_dedupped_bams
+        ch_bams_for_genotyping = ch_merged_dedup_bams
     }
-
-    //
-    // SUBWORKFLOW: MERGE LIBRARIES
-    //
-
-    // The bams being merged are always the ones specified by params.genotyping_source,
-    //   unless the user skipped damage manipulation, in which case it is the DEDUPLICATION output.
-    MERGE_LIBRARIES ( ch_bams_for_library_merge )
-    ch_versions             = ch_versions.mix( MERGE_LIBRARIES.out.versions )
-    ch_bams_for_genotyping  = MERGE_LIBRARIES.out.bam_bai
-    ch_multiqc_files        = ch_multiqc_files.mix( MERGE_LIBRARIES.out.mqc.collect{it[1]}.ifEmpty([]) ) // Not sure if this is needed, or if it needs to be moved to line 564?
 
     //
     // SUBWORKFLOW: Genotyping
@@ -567,7 +574,7 @@ workflow EAGER {
         ch_reference_for_genotyping = REFERENCE_INDEXING.out.reference
             // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
             .map {
-                meta, fasta, fai, dict, mapindex, circular_target ->
+                meta, fasta, fai, dict, mapindex ->
                 [ meta, fasta, fai, dict ]
             }
         GENOTYPE(
