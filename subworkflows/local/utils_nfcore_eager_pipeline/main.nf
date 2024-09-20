@@ -225,13 +225,22 @@ def validateInputParameters() {
     if ( params.metagenomics_complexity_tool == 'prinseq'  && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
         if (params.metagenomics_complexity_entropy == 0.3) { exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag") }
     }
+    if ( params.run_metagenomics && params.preprocessing_skippairmerging ) { exit 1, ("[nf-core/eager] ERROR: Metagenomics: Currently no support for unmerged paired end reads inputs into Metagenomics subworkflow. Please rerun without --preprocessing_skippairmerging.") }
+    if (
+        params.metagenomics_run_postprocessing &&
+        params.metagenomics_profiling_tool == 'malt' &&
+        (
+            !params.metagenomics_maltextract_taxonlist ||
+            !params.metagenomics_maltextract_ncbidir
+        )
+    ){ exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked MALT with postprocessing but didnt provided required input files. Please provide the --metagenomics_maltextract_taxonlist and --metagenomics_maltextract_ncbidir flags") }
     if ( params.run_genotyping                        && ! params.genotyping_tool                ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
     if ( params.run_genotyping                        && ! params.genotyping_source              ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
     if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
     if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
     if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
     if ( params.fasta && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
-
+    if ( params.fasta && params.mapping_tool == "circularmapper" && !params.fasta_circular_target ) { exit 1, ("[nf-core/eager] ERROR: Mapping with circularmapper requires --fasta_circular_target to be provided.") }
 }
 
 //
