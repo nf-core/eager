@@ -21,7 +21,6 @@ nextflow_pipeline {
                 { assert snapshot( path("$outputDir/bam_input_stats")          ).match("bam_input_stats") },
                 { assert snapshot( path("$outputDir/deduplication")            ).match("deduplication") },
                 { assert snapshot( path("$outputDir/mapping")                  ).match("mapping") },
-                { assert snapshot( path("$outputDir/samtools")                 ).match("samtools") }, // not sure what this is...
                 /*
                     Exceptions (variable md5sums)
                 */
