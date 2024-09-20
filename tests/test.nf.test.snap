@@ -14,9 +14,9 @@
                 true
             ],
             [
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,9f19b0007a222be60077dcbfcba5cf4b",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,3f6a3d8f402fc829df44e13e3916bcfb",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,1acb03553efd12d73720e90a6317a7bb"
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,b1b7614a35f95ac42d34e1a774046a1b",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,e37f07392c6f70561974acc0dd1b76f6",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,dac939ea01e2cbd52131d536fee1e3fc"
             ],
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.zip",
@@ -24,8 +24,8 @@
                 "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip"
             ],
             [
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,022dd0976a7ba3a981f3f728a510c4bf",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,c371a1b24b2147e300de349096dc70c4"
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,4f0f68065302f1a8e0f207787d842d14",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,1c149d72cae7ad66416eefb894d91f24"
             ],
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.zip",
@@ -33,10 +33,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.8.4",
+            "nf-test": "0.9.0",
             "nextflow": "24.04.4"
         },
-        "timestamp": "2024-08-16T11:03:16.860974221"
+        "timestamp": "2024-09-20T10:57:38.113904584"
     },
     "mapstats": {
         "content": [
@@ -57,16 +57,16 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.c_curve.txt:md5,ba8059ca2396fb898593c1e66e56a7bc",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.c_curve.txt:md5,817f35dc7ce2983a7d0f558debd6e94b",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.c_curve.txt:md5,1384a88b531ab872c0069e71fccbe97a",
-                "genome_results.txt:md5,bed8dd40a1960be1e27f078ebc275c72",
-                "coverage_across_reference.txt:md5,a3b137574b656048055259e3701dfa66",
-                "coverage_histogram.txt:md5,ef11ed244dea633816635cef4f6ccda2",
-                "duplication_rate_histogram.txt:md5,8de6fc70137f8be2f33ecc5b7e2f2fcb",
-                "genome_fraction_coverage.txt:md5,c4a5b85386d67af270ca1f6bd1f6be91",
-                "homopolymer_indels.txt:md5,28817a010a023836fcf6aac4e1e3976f",
-                "mapped_reads_gc-content_distribution.txt:md5,bf2a85175315e6cf13e2bd861f213977",
-                "mapped_reads_nucleotide_content.txt:md5,bc7b633508a2b831ecb2d7522824fe25",
-                "mapping_quality_across_reference.txt:md5,88854b58e0eb73b589be5da543b0189f",
-                "mapping_quality_histogram.txt:md5,78ac23aa0a0184e4a06144e7a488828d",
+                "genome_results.txt:md5,77e34a3588c1743562d89580054a0307",
+                "coverage_across_reference.txt:md5,b724388bf0301fb73cc95adcd99f3e9f",
+                "coverage_histogram.txt:md5,402146079b9e04bc1acc5f02e7b61d7c",
+                "duplication_rate_histogram.txt:md5,e6f1a6e48ba04b2aa69a09b56e10962b",
+                "genome_fraction_coverage.txt:md5,058852542e5052d456c3e41b2ad7fe68",
+                "homopolymer_indels.txt:md5,2cc3cb5d9105a4d5feca2b3dbe32494e",
+                "mapped_reads_gc-content_distribution.txt:md5,3262dd7abf0325ccc7935277ecff9458",
+                "mapped_reads_nucleotide_content.txt:md5,714ea0b92f3d0919bda34ee521035b47",
+                "mapping_quality_across_reference.txt:md5,bde42f64a3d9d8611a76a2402fa29fb2",
+                "mapping_quality_histogram.txt:md5,3943155d987a6d966950b4b77666cd4e",
                 "genome_results.txt:md5,10318c6586c06f3d7d3a68cb0b53ed26",
                 "coverage_across_reference.txt:md5,3be6bd7fef9e81d56792b58e902949ed",
                 "coverage_histogram.txt:md5,8aaee99c160b7b5e030ee6fc891d9837",
@@ -108,16 +108,16 @@
                 "qualimap_logo_small.png:md5,7526f145a97be4682fd59e27dda4f71b",
                 "up-pressed.png:md5,8ea9bd109342f87fee97943b479c6f7e",
                 "up.png:md5,ecc373278454cc8ecc12d6ca69e55b36",
-                "genome_coverage_0to50_histogram.png:md5,eb29e0180058c837d275b0253fe50b8d",
-                "genome_coverage_across_reference.png:md5,e5ea8086fd0d512eef4ae5bb6014c50d",
-                "genome_coverage_histogram.png:md5,b8cf92a57b487da85b391a6844821e65",
-                "genome_coverage_quotes.png:md5,3336998ed9ec412cabb783858264c55f",
-                "genome_gc_content_per_window.png:md5,afa61450a1945d3abd7b6f5eba8e11b4",
-                "genome_homopolymer_indels.png:md5,cc446ea163990a3881ea3f53216beaec",
-                "genome_mapping_quality_across_reference.png:md5,0e32ab0698e64e2136a5ad9d692839f7",
-                "genome_mapping_quality_histogram.png:md5,cd3610da594d50dcae9ffb741301951e",
-                "genome_reads_content_per_read_position.png:md5,a4a6fd6472da7e2f3f5fc3de382cb26a",
-                "genome_uniq_read_starts_histogram.png:md5,e36ced7d2c5fe81b57c3a438cfa7d2d0",
+                "genome_coverage_0to50_histogram.png:md5,80aa3c94722e4c938393a45b7015a813",
+                "genome_coverage_across_reference.png:md5,64b7b05ec75f24d60cb779d234fc2399",
+                "genome_coverage_histogram.png:md5,ef7314fa488b67773f9174cfd96a7b64",
+                "genome_coverage_quotes.png:md5,7e83e24f741f74978d5c1ed479d86eb2",
+                "genome_gc_content_per_window.png:md5,e0e20c8a65b6d41c88a6a2ef44a9ec1a",
+                "genome_homopolymer_indels.png:md5,e2cdb644cfca349cc7a7151175d32f0d",
+                "genome_mapping_quality_across_reference.png:md5,7108d78085bef09350214151e3429b89",
+                "genome_mapping_quality_histogram.png:md5,a9f0ca725de66c600d127baeff3d63ea",
+                "genome_reads_content_per_read_position.png:md5,650b98e61e3bc39351effe0a79c21876",
+                "genome_uniq_read_starts_histogram.png:md5,d1e870f849ba228e52d5be513eb86c8a",
                 "bgfooter.png:md5,ed01bb040346e4623cc87de331ddb4e1",
                 "bgtop.png:md5,626a50532dc6e5adbdd968746ef318e8",
                 "comment-bright.png:md5,0c850bb4920b581bf5e5dba5fa493a64",
@@ -161,10 +161,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.8.4",
+            "nf-test": "0.9.0",
             "nextflow": "24.04.4"
         },
-        "timestamp": "2024-08-16T12:04:33.873658436"
+        "timestamp": "2024-09-20T11:07:00.152185112"
     },
     "samtools": {
         "content": [
@@ -173,10 +173,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.04.2"
+            "nf-test": "0.9.0",
+            "nextflow": "24.04.4"
         },
-        "timestamp": "2024-06-28T13:08:37.202608535"
+        "timestamp": "2024-09-20T10:57:38.068432505"
     },
     "damage_estimation": {
         "content": [
@@ -249,10 +249,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.8.4",
+            "nf-test": "0.9.0",
             "nextflow": "24.04.4"
         },
-        "timestamp": "2024-08-16T11:03:16.826516976"
+        "timestamp": "2024-09-20T10:57:38.096518513"
     },
     "bam_input_stats": {
         "content": [
@@ -261,10 +261,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.04.2"
+            "nf-test": "0.9.0",
+            "nextflow": "24.04.4"
         },
-        "timestamp": "2024-06-28T11:25:56.650730893"
+        "timestamp": "2024-09-20T10:57:38.041184597"
     },
     "final_bams": {
         "content": [
@@ -282,10 +282,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.8.4",
+            "nf-test": "0.9.0",
             "nextflow": "24.04.4"
         },
-        "timestamp": "2024-08-16T11:34:59.933035276"
+        "timestamp": "2024-09-20T10:57:38.149826087"
     },
     "bam_filtering": {
         "content": [
@@ -302,10 +302,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.04.2"
+            "nf-test": "0.9.0",
+            "nextflow": "24.04.4"
         },
-        "timestamp": "2024-06-28T11:25:56.604142252"
+        "timestamp": "2024-09-20T10:57:38.02774831"
     },
     "deduplication": {
         "content": [
@@ -322,9 +322,19 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.04.2"
+            "nf-test": "0.9.0",
+            "nextflow": "24.04.4"
         },
-        "timestamp": "2024-06-28T11:25:56.733997039"
+        "timestamp": "2024-09-20T10:57:38.047231003"
+    },
+    "multiqc": {
+        "content": [
+            true
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "24.04.4"
+        },
+        "timestamp": "2024-09-20T11:07:00.208492844"
     }
 }
