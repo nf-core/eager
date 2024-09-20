@@ -41,12 +41,8 @@
     "mapstats": {
         "content": [
             [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_breadth.bed:md5,45b641735c8e2b4be10766a5c246068d",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_depth.bed:md5,2b6ffd36b2fb3b8b2b52b928d7a63158",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_breadth.bed:md5,5286794122bb3c67d49cc858d40f0c31",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_depth.bed:md5,5065bd5c0001f20bf4f03d62297cf4ca",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_breadth.bed:md5,16b5f8952d87e236a63e681293691832",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_depth.bed:md5,1b4f117a16c712b7c67809d7e4ec279f"
+                "JK2782_Mammoth_MT_Krause_depth.bed:md5,0ce780693dc76e02352d8b43c5bd3549",
+                "JK2802_Mammoth_MT_Krause_depth.bed:md5,1b4f117a16c712b7c67809d7e4ec279f"
             ],
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_percent_on_target_mqc.json:md5,a3ccef0b8d19d69457b817898a2a5604",
@@ -57,17 +53,17 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.c_curve.txt:md5,ba8059ca2396fb898593c1e66e56a7bc",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.c_curve.txt:md5,817f35dc7ce2983a7d0f558debd6e94b",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.c_curve.txt:md5,1384a88b531ab872c0069e71fccbe97a",
-                "genome_results.txt:md5,77e34a3588c1743562d89580054a0307",
-                "coverage_across_reference.txt:md5,b724388bf0301fb73cc95adcd99f3e9f",
-                "coverage_histogram.txt:md5,402146079b9e04bc1acc5f02e7b61d7c",
-                "duplication_rate_histogram.txt:md5,e6f1a6e48ba04b2aa69a09b56e10962b",
-                "genome_fraction_coverage.txt:md5,058852542e5052d456c3e41b2ad7fe68",
-                "homopolymer_indels.txt:md5,2cc3cb5d9105a4d5feca2b3dbe32494e",
-                "mapped_reads_gc-content_distribution.txt:md5,3262dd7abf0325ccc7935277ecff9458",
-                "mapped_reads_nucleotide_content.txt:md5,714ea0b92f3d0919bda34ee521035b47",
-                "mapping_quality_across_reference.txt:md5,bde42f64a3d9d8611a76a2402fa29fb2",
-                "mapping_quality_histogram.txt:md5,3943155d987a6d966950b4b77666cd4e",
-                "genome_results.txt:md5,10318c6586c06f3d7d3a68cb0b53ed26",
+                "genome_results.txt:md5,599b430297daed72a6f585882966f406",
+                "coverage_across_reference.txt:md5,cbafd81e7d9dcf5702d361008fb8d918",
+                "coverage_histogram.txt:md5,0085fba437f097d06c84e359c79646e4",
+                "duplication_rate_histogram.txt:md5,5e67619dcc46b155fe2e8a63b57a72e3",
+                "genome_fraction_coverage.txt:md5,db875d590d979d2827ff51e2536977fd",
+                "homopolymer_indels.txt:md5,7326bf50d7686153070c4f9c5db70076",
+                "mapped_reads_gc-content_distribution.txt:md5,29194ef2aaf74632ae348699fe38431d",
+                "mapped_reads_nucleotide_content.txt:md5,012f59aa43418782c4159bca8669a0b1",
+                "mapping_quality_across_reference.txt:md5,12723c3add1566c527b57ff89f21dec7",
+                "mapping_quality_histogram.txt:md5,805f4ecf01c21e2e9fec3b6402c1f62c",
+                "genome_results.txt:md5,f6d35c23075fbec197c088ede3bda265",
                 "coverage_across_reference.txt:md5,3be6bd7fef9e81d56792b58e902949ed",
                 "coverage_histogram.txt:md5,8aaee99c160b7b5e030ee6fc891d9837",
                 "duplication_rate_histogram.txt:md5,ffd92c4701b07a4f3b6a580928770fe4",
@@ -108,16 +104,16 @@
                 "qualimap_logo_small.png:md5,7526f145a97be4682fd59e27dda4f71b",
                 "up-pressed.png:md5,8ea9bd109342f87fee97943b479c6f7e",
                 "up.png:md5,ecc373278454cc8ecc12d6ca69e55b36",
-                "genome_coverage_0to50_histogram.png:md5,80aa3c94722e4c938393a45b7015a813",
-                "genome_coverage_across_reference.png:md5,64b7b05ec75f24d60cb779d234fc2399",
-                "genome_coverage_histogram.png:md5,ef7314fa488b67773f9174cfd96a7b64",
-                "genome_coverage_quotes.png:md5,7e83e24f741f74978d5c1ed479d86eb2",
-                "genome_gc_content_per_window.png:md5,e0e20c8a65b6d41c88a6a2ef44a9ec1a",
-                "genome_homopolymer_indels.png:md5,e2cdb644cfca349cc7a7151175d32f0d",
-                "genome_mapping_quality_across_reference.png:md5,7108d78085bef09350214151e3429b89",
-                "genome_mapping_quality_histogram.png:md5,a9f0ca725de66c600d127baeff3d63ea",
-                "genome_reads_content_per_read_position.png:md5,650b98e61e3bc39351effe0a79c21876",
-                "genome_uniq_read_starts_histogram.png:md5,d1e870f849ba228e52d5be513eb86c8a",
+                "genome_coverage_0to50_histogram.png:md5,aa1f50ccad2c5e36e1ab5f7268d90494",
+                "genome_coverage_across_reference.png:md5,b46a6c2246f0346ea3199c7632912938",
+                "genome_coverage_histogram.png:md5,53bf813fca7fe3f535f231a507f33975",
+                "genome_coverage_quotes.png:md5,df8ff67a870eb38b9d2ea46eff618df4",
+                "genome_gc_content_per_window.png:md5,f22525406bd9d5e7c041ae83f65d0840",
+                "genome_homopolymer_indels.png:md5,a3264f44fff09fa857d76be73a847004",
+                "genome_mapping_quality_across_reference.png:md5,3e6ba19761e7dc4362a4edf0c610b41a",
+                "genome_mapping_quality_histogram.png:md5,fd2517bb1bec297e020cb544bd444c5e",
+                "genome_reads_content_per_read_position.png:md5,52d8200160ba180c697ae3b6329edf44",
+                "genome_uniq_read_starts_histogram.png:md5,0d232d6a527275c0afeeca9bd5891b84",
                 "bgfooter.png:md5,ed01bb040346e4623cc87de331ddb4e1",
                 "bgtop.png:md5,626a50532dc6e5adbdd968746ef318e8",
                 "comment-bright.png:md5,0c850bb4920b581bf5e5dba5fa493a64",
@@ -131,17 +127,17 @@
                 "qualimap_logo_small.png:md5,7526f145a97be4682fd59e27dda4f71b",
                 "up-pressed.png:md5,8ea9bd109342f87fee97943b479c6f7e",
                 "up.png:md5,ecc373278454cc8ecc12d6ca69e55b36",
-                "genome_coverage_0to50_histogram.png:md5,405e3b012c5092a33e099042c7a479f8",
-                "genome_coverage_across_reference.png:md5,96f145a33a8c56cdaebb7f0197c476e4",
-                "genome_coverage_histogram.png:md5,53ad483690ce3db0286c493421b165f5",
-                "genome_coverage_quotes.png:md5,dea5046f36d0963ee25ca1ac51154382",
-                "genome_gc_content_per_window.png:md5,8206f9e95c9889911668f38a154faa52",
-                "genome_homopolymer_indels.png:md5,66811ef0c7fe5e32392e8dfced3c68f1",
-                "genome_mapping_quality_across_reference.png:md5,61a09c6116481dc68b408683d8d5d09c",
-                "genome_mapping_quality_histogram.png:md5,50c3e22a2d17c314ad30b06ff7993396",
-                "genome_reads_clipping_profile.png:md5,386954c65ba40aee3129aa3fd840445d",
-                "genome_reads_content_per_read_position.png:md5,587bd7978b3e18a65099f06c119c3f04",
-                "genome_uniq_read_starts_histogram.png:md5,4f7305df090a4ad3bc87342740d414ef"
+                "genome_coverage_0to50_histogram.png:md5,1d7153eab39f6180d7849f7a27c141be",
+                "genome_coverage_across_reference.png:md5,c8fa8d6eac53b3ef82fada6bc590333f",
+                "genome_coverage_histogram.png:md5,18ba01bd5afb81bb0b8e8dcce9ea10fe",
+                "genome_coverage_quotes.png:md5,0efb14b603c1bad8694aeee5a9f9f7ab",
+                "genome_gc_content_per_window.png:md5,75d2ad4e61179b800ea304798aa7a3a0",
+                "genome_homopolymer_indels.png:md5,bf9200f34a3fbfa05dd81891f4d08273",
+                "genome_mapping_quality_across_reference.png:md5,1bf5ba992c940fe2f7b0112d43ce917b",
+                "genome_mapping_quality_histogram.png:md5,e6d9f0c426a54226f9ee6585b57cf783",
+                "genome_reads_clipping_profile.png:md5,9c2d6a5f67319f6d2de110d3397e5a97",
+                "genome_reads_content_per_read_position.png:md5,73911bc8f836dea7d112ffbd3de1682e",
+                "genome_uniq_read_starts_histogram.png:md5,9412271ffb21c94e7a3e52955c0f246a"
             ],
             [
                 "doctools.js:md5,5ff571aa60e63f69c1890283e240ff8d",
@@ -164,19 +160,7 @@
             "nf-test": "0.9.0",
             "nextflow": "24.04.4"
         },
-        "timestamp": "2024-09-20T11:07:00.152185112"
-    },
-    "samtools": {
-        "content": [
-            [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM.bam.bai:md5,159e97ddc9270c8d941f42f5553cf4fe"
-            ]
-        ],
-        "meta": {
-            "nf-test": "0.9.0",
-            "nextflow": "24.04.4"
-        },
-        "timestamp": "2024-09-20T10:57:38.068432505"
+        "timestamp": "2024-09-20T11:31:43.218013576"
     },
     "damage_estimation": {
         "content": [
