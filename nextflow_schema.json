@@ -623,34 +623,34 @@
                     "help_text": "Configures mapAD's gap extension penalty. The `-x` parameter adjusts the gap extension penalty as a fraction of a representative mismatch penalty. Default is set to 0.5.\n\n> Modifies mapAD map parameter: `-x`",
                     "fa_icon": "fas fa-angle-double-right"
                 },
-                "mapping_mapad_gap_read_end_distance": {
+                "mapping_mapad_gapreadenddistance": {
                     "type": "number",
                     "default": 5,
                     "description": "Specify the --gap_dist_ends parameter for mapAD, which defines the distance from the read ends in which no gaps are permitted.",
                     "help_text": "Configures mapAD's `--gap_dist_ends` parameter which defines the distance from the read ends in which no gaps are permitted. Default is set to mapAD's default (5).\n\n> Modifies mapAD map parameter: `--gap_dist_ends`",
                     "fa_icon": "fas fa-step-forward"
                 },
-                "mapping_mapad_max_num_open_gaps": {
+                "mapping_mapad_maxnumopengaps": {
                     "type": "number",
                     "default": 2,
                     "description": "Specify the number of gaps allowed for alignment with mapAD.",
                     "help_text": "Specify the number of gaps allowed for mapping with mapAD. Default is set to mapAD's default (2).\n\n> Modifies mapAD map parameter: `--max_num_gaps_open`",
                     "fa_icon": "fas fa-people-arrows"
                 },
-                "mapping_mapad_D": {
+                "mapping_mapad_baseerrorrate": {
                     "type": "number",
                     "default": 0.02,
                     "description": "Specify the base error rate parameter for mapAD.",
                     "help_text": "Configures mapAD's base error rate parameter. The `-D` parameter adjusts the base error rate which is one of the underlying parts of mapAD's scoring model. Should not normally need to be adjusted. Default is set to mapAD's default (0.02).\n\n> Modifies mapAD map parameter: `-D`",
                     "fa_icon": "fas fa-percentage"
                 },
-                "mapping_mapad_ignore_base_qual": {
+                "mapping_mapad_ignorebasequal": {
                     "type": "boolean",
                     "description": "Set the --ignore_base_quality flag, which instructs mapAD to ignore base quality values in its scoring model.",
                     "help_text": "Without this flag, mapAD is more permissive in terms of mismatches if the quality of the base is low. Default is set to mapAD's default.\n\n> Modifies mapAD map parameter: `--ignore_base_quality`",
                     "fa_icon": "fas fa-asterisk"
                 },
-                "mapping_mapad_stack_limit_abort": {
+                "mapping_mapad_stacklimitabort": {
                     "type": "boolean",
                     "description": "Set the --stack_limit_abort flag, which instructs mapAD to not try and recover from a full backtracking stack.",
                     "help_text": "Without this flag, mapAD tries to recover from a full backtracking stack by removing low-scoring sub-alignments. This can help to recover from difficult to map reads, at the cost of a slower alignment. Setting this flag will speed up the alignment process. Default is set to mapAD's default.\n\n> Modifies mapAD map parameter: `--stack_limit_abort`",
