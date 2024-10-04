@@ -66,7 +66,7 @@ workflow MAP {
 
     if ( params.mapping_tool == 'bwaaln' ) {
         ch_index_for_mapping = index.map{ meta, index, fasta -> [ meta, index ] }
-        ch_reads_for_mapping = reads
+        ch_reads_for_mapping = ch_input_for_mapping.reads
 
         FASTQ_ALIGN_BWAALN ( ch_reads_for_mapping, ch_index_for_mapping )
         ch_versions        = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
@@ -81,7 +81,7 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
     } else if ( params.mapping_tool == 'bwamem' ) {
-        ch_input_for_mapping = reads
+        ch_input_for_mapping = ch_input_for_mapping.reads
                             .combine( index )
                             .multiMap {
                                 meta, reads, meta2, index, fasta ->
@@ -100,7 +100,7 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_MEM.out.csi : SAMTOOLS_INDEX_MEM.out.bai
 
     } else if ( params.mapping_tool == 'bowtie2' ) {
-        ch_input_for_mapping = reads
+        ch_input_for_mapping = ch_input_for_mapping.reads
                             .combine( index.map{ meta, index, fasta -> [ meta, index ] } )
                             .multiMap {
                                 meta, reads, meta2, index ->
@@ -124,7 +124,7 @@ workflow MAP {
                                 [ meta, elongated_index ]
                                 }
 
-        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, elongated_chr_list, reads, params.fasta_circularmapper_elongationfactor )
+        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, elongated_chr_list, ch_input_for_mapping.reads, params.fasta_circularmapper_elongationfactor )
         ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
         ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
         ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai // [ [ meta ], bai/csi ]
