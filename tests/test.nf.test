@@ -1,0 +1,95 @@
+nextflow_pipeline {
+
+    name "Test pipeline: NFCORE_EAGER"
+    script "main.nf"
+    tag "pipeline"
+    tag "nfcore_eager"
+    tag "test"
+
+    test("test_profile") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+
+            // Each top level results directory should be tested with individual snapshots/variables
+            // stable_name_<dir> is for files with varaible md5sums (i.e. content) so only names will be compared
+            // stable_content_<dir> is for files with stable md5sums (i.e. content) so md5sums will be compared
+            // For both functions, use the third argument to specify globs to exclude certain files
+            // If a directory is fully stable, you can drop `stable_name_*`
+            // Generate with: nf-test test --tag test --profile docker,test --update-snapshot
+            def stable_name_bamfiltering    = getAllFilesFromDir("$outputDir/bam_filtering", true , null, null )
+            def stable_content_bamfiltering = getAllFilesFromDir("$outputDir/bam_filtering", false, null, null )
+
+            assertAll(
+                { assert workflow.success },
+
+                { assert snapshot( stable_name_bamfiltering*.name, stable_content_bamfiltering ).match("bam_filtering") },
+                // { assert snapshot( path("$outputDir/bam_input_stats")          ).match("bam_input_stats") },
+                // { assert snapshot( path("$outputDir/deduplication")            ).match("deduplication") },
+                // { assert snapshot( path("$outputDir/mapping")                  ).match("mapping") },
+                // /*
+                //     Exceptions (variable md5sums)
+                // */
+
+                // // Damage Estimation
+                // { assert snapshot(
+                //         getAllFilesFromDir("$outputDir/damage_estimation/"     , ".txt" ),
+                //         getAllFilesFromDir("$outputDir/damage_estimation/"     , ".json"),
+                //         getAllFileNamesFromDir("$outputDir/damage_estimation/" , ".svg" ),
+                //         getAllFileNamesFromDir("$outputDir/damage_estimation/" , ".pdf" ),
+                //         checkAllFilesNamesFromDirForString("$outputDir/damage_estimation/", '.log', 'FINISHED SUCCESSFULLY'),
+                //     ).match("damage_estimation")
+                // },
+
+                // // Preprocessing
+                // { assert snapshot(
+                //         getAllFilesFromDir("$outputDir/preprocessing/fastp"                 , '.json'             ),
+                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastp"             , '.html'             ),
+                //         checkAllFilesNamesFromDirForString("$outputDir/preprocessing/fastp" , '.log', 'time used:'),
+                //         getAllFilesFromDir("$outputDir/preprocessing/fastqc_raw"            , '.html'             ),
+                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastqc_raw"        , '.zip'              ),
+                //         getAllFilesFromDir("$outputDir/preprocessing/fastqc_processed"      , '.html'             ),
+                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastqc_processed"  , '.zip'              ),
+                //     ).match("preprocessing" )
+                // },
+
+                // // Final BAMs
+                // { assert snapshot(
+                //         getAllFilesFromDir("$outputDir/final_bams"    , '.flagstat'),
+                //         getAllFileNamesFromDir("$outputDir/final_bams", '.bam'     ),
+                //         getAllFileNamesFromDir("$outputDir/final_bams", '.bai'     ),
+                //     ).match("final_bams")
+                // },
+
+                // // Mapstats
+                // { assert snapshot(
+                //         getAllFilesFromDir("$outputDir/mapstats", '.bed'),
+                //         getAllFilesFromDir("$outputDir/mapstats", '.json'),
+                //         getAllFilesFromDir("$outputDir/mapstats", '.txt'),
+                //         getAllFilesFromDir("$outputDir/mapstats", '.log'),
+                //         getAllFilesFromDir("$outputDir/mapstats", '.css'),
+                //         getAllFilesFromDir("$outputDir/mapstats", '.png'),
+                //         getAllFilesFromDir("$outputDir/mapstats", '.js'),
+                //         getAllFileNamesFromDir("$outputDir/mapstats", '.html'), // For variable qualimapReport.html
+                //     ).match("mapstats")
+                // },
+
+                // // MultiQC
+                // { assert snapshot(
+                //         path("$outputDir/multiqc/multiqc_report.html").exists()
+                //     ).match("multiqc")
+                // },
+
+                // Versions
+                { assert new File("$outputDir/pipeline_info/nf_core_pipeline_software_mqc_versions.yml").exists() },
+
+
+            )
+        }
+    }
+}
