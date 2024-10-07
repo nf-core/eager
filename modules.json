@@ -200,6 +200,16 @@
                         "git_sha": "8840ece9ee7528480dec95796e017be02ada0dc0",
                         "installed_by": ["modules"]
                     },
+                    "mapad/index": {
+                        "branch": "master",
+                        "git_sha": "b5198a14a570e54f5bb7cae67d07697ef956f509",
+                        "installed_by": ["modules"]
+                    },
+                    "mapad/map": {
+                        "branch": "master",
+                        "git_sha": "b5198a14a570e54f5bb7cae67d07697ef956f509",
+                        "installed_by": ["modules"]
+                    },
                     "mapdamage2": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
