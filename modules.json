@@ -225,6 +225,11 @@
                         "git_sha": "b7ebe95761cd389603f9cc0e0dc384c0f663815a",
                         "installed_by": ["modules"]
                     },
+                    "multivcfanalyzer": {
+                        "branch": "master",
+                        "git_sha": "b34fb117e397e72a070cde8adf21b758670c90f5",
+                        "installed_by": ["modules"]
+                    },
                     "picard/createsequencedictionary": {
                         "branch": "master",
                         "git_sha": "20b0918591d4ba20047d7e13e5094bcceba81447",
