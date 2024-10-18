@@ -86,39 +86,35 @@ workflow FILTER_BAM {
     }
 
     if ( ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
-        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq
+        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq.filter { !it[0].single_end }
+
+        ch_single_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq
                                     .mix(SAMTOOLS_FASTQ_UNMAPPED.out.singleton)
                                     .mix(SAMTOOLS_FASTQ_UNMAPPED.out.other)
                                     .groupTuple()
-                                    .map {
-                                        meta, fastqs ->
-                                            def meta_new = meta.clone()
-                                            meta_new['single_end_clone'] = true
-                                        [ meta_new, fastqs.flatten() ]
-                                    }
-        CAT_FASTQ_UNMAPPED ( ch_paired_fastq_for_cat )
+                                    .filter{ it[0].single_end }
+
+        CAT_FASTQ_UNMAPPED ( ch_single_fastq_for_cat )
     }
 
     // TODO: see request https://github.com/nf-core/eager/issues/945
     if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_MAPPED.out.fastq
+        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq.filter { !it[0].single_end }
+
+        ch_single_fastq_for_cat = SAMTOOLS_FASTQ_MAPPED.out.fastq
                                     .mix(SAMTOOLS_FASTQ_MAPPED.out.singleton)
                                     .mix(SAMTOOLS_FASTQ_MAPPED.out.other)
                                     .groupTuple()
-                                    .map {
-                                        meta, fastqs ->
-                                            def meta_new = meta.clone()
-                                            meta_new['single_end'] = true
-                                        [ meta_new, fastqs.flatten() ]
-                                    }
-        CAT_FASTQ_MAPPED ( ch_paired_fastq_for_cat )
+                                    .filter{ it[0].single_end }
+
+        CAT_FASTQ_MAPPED ( ch_single_fastq_for_cat )
     }
 
     // Routing for metagenomic screening -> first accounting for paired-end mapping, then merged mapping, then no metagenomics
     if ( ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
-        ch_fastq_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
+        ch_fastq_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads.mix(ch_paired_fastq_for_cat)
     } else if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_fastq_for_metagenomics = CAT_FASTQ_MAPPED.out.reads
+        ch_fastq_for_metagenomics = CAT_FASTQ_MAPPED.out.reads.mix(ch_paired_fastq_for_cat)
     } else if ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) {
         ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_UNMAPPED.out.other
     } else if ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' )) {
