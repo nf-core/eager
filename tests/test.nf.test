@@ -19,41 +19,41 @@ nextflow_pipeline {
             // Each top level results directory should be tested with individual snapshots/variables
             // stable_name_<dir> is for files with varaible md5sums (i.e. content) so only names will be compared
             // stable_content_<dir> is for files with stable md5sums (i.e. content) so md5sums will be compared
-            // For both functions, use the third argument to specify globs to exclude certain files
+            // For both cases, use the third argument to specify globs to exclude certain files
             // If a directory is fully stable, you can drop `stable_name_*`
             // Generate with: nf-test test --tag test --profile docker,test --update-snapshot
-            def stable_name_bamfiltering    = getAllFilesFromDir("$outputDir/bam_filtering", true , null, null )
-            def stable_content_bamfiltering = getAllFilesFromDir("$outputDir/bam_filtering", false, null, null )
+            // Test with:     nf-test test --tag test --profile docker,test
+            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , true , null                        , null , ['*', '**/*'] )
+            def stable_content_bamfiltering     = getAllFilesFromDir("$outputDir/bam_filtering"     , true , null                        , null , ['*', '**/*'] )
+            def stable_content_baminputstats    = getAllFilesFromDir("$outputDir/bam_input_stats"   , true , null                        , null , ['*', '**/*'] )
+            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true , null                        , null , ['*', '**/*'] )
+            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true , null                        , null , ['*', '**/*'] )
+            def stable_content_damageestimation = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{svg,pdf,log}']         , null , ['**/*.{txt,json}'] )
+            def stable_name_damageestimation    = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{txt,json}']            , null , ['**/*.{svg,pdf,log}'] )
+            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.zip', '**/fastp/*.html'], null , ['*', '**/*'] )
+            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                        , null , ['*', '**/*'] )
 
             assertAll(
                 { assert workflow.success },
+                // This checks that there are no missing or additional output files.
+                // Also a good starting point to look at all the files in the output folder than need to be checked in subsequent sections.
+                { assert snapshot( stable_name_all*.name            ).match("all_files") },
 
-                { assert snapshot( stable_name_bamfiltering*.name, stable_content_bamfiltering ).match("bam_filtering") },
-                // { assert snapshot( path("$outputDir/bam_input_stats")          ).match("bam_input_stats") },
-                // { assert snapshot( path("$outputDir/deduplication")            ).match("deduplication") },
-                // { assert snapshot( path("$outputDir/mapping")                  ).match("mapping") },
-                // /*
-                //     Exceptions (variable md5sums)
-                // */
-
-                // // Damage Estimation
-                // { assert snapshot(
-                //         getAllFilesFromDir("$outputDir/damage_estimation/"     , ".txt" ),
-                //         getAllFilesFromDir("$outputDir/damage_estimation/"     , ".json"),
-                //         getAllFileNamesFromDir("$outputDir/damage_estimation/" , ".svg" ),
-                //         getAllFileNamesFromDir("$outputDir/damage_estimation/" , ".pdf" ),
-                //         checkAllFilesNamesFromDirForString("$outputDir/damage_estimation/", '.log', 'FINISHED SUCCESSFULLY'),
-                //     ).match("damage_estimation")
-                // },
+                // Checking changes to contents of each section
+                { assert snapshot( stable_content_bamfiltering      ).match("bam_filtering") },
+                { assert snapshot( stable_content_baminputstats     ).match("bam_input_stats") },
+                { assert snapshot( stable_content_deduplication     ).match("deduplication") },
+                { assert snapshot( stable_content_mapping           ).match("mapping") },
+                { assert snapshot( stable_content_damageestimation, stable_name_damageestimation*.name ).match("damage_estimation") },
 
                 // // Preprocessing
                 // { assert snapshot(
                 //         getAllFilesFromDir("$outputDir/preprocessing/fastp"                 , '.json'             ),
-                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastp"             , '.html'             ),
-                //         checkAllFilesNamesFromDirForString("$outputDir/preprocessing/fastp" , '.log', 'time used:'),
                 //         getAllFilesFromDir("$outputDir/preprocessing/fastqc_raw"            , '.html'             ),
-                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastqc_raw"        , '.zip'              ),
                 //         getAllFilesFromDir("$outputDir/preprocessing/fastqc_processed"      , '.html'             ),
+                //         checkAllFilesNamesFromDirForString("$outputDir/preprocessing/fastp" , '.log', 'time used:'),
+                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastp"             , '.html'             ),
+                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastqc_raw"        , '.zip'              ),
                 //         getAllFileNamesFromDir("$outputDir/preprocessing/fastqc_processed"  , '.zip'              ),
                 //     ).match("preprocessing" )
                 // },
