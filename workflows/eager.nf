@@ -585,6 +585,23 @@ workflow EAGER {
     }
 
     //
+    // SUBWORKFLOW: Consensus sequence
+    //
+    if ( params.run_consensus_sequence ) {
+        ch_reference_for_consensus_sequence = REFERENCE_INDEXING.out.reference
+            // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
+            .map {
+                meta, fasta, fai, dict, mapindex, circular_target ->
+                [ meta, fasta, fai ]
+            }
+    CONSENSUS_SEQUENCE(
+                        ch_vcf_for_consensus_sequence = GENOTYPE.out.vcf
+                        ch_reference_for_consensus_sequence
+    )
+
+    }
+
+    //
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)

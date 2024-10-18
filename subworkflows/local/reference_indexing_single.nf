@@ -91,7 +91,8 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     def bedtools_feature                      = params.mapstats_bedtools_featurefile != null ? file(params.mapstats_bedtools_featurefile, checkIfExists: true ) : ""
                                     def genotyping_reference_ploidy           = params.genotyping_reference_ploidy
                                     def genotyping_gatk_dbsnp                 = params.genotyping_gatk_dbsnp != null ? file(params.genotyping_gatk_dbsnp, checkIfExists: true ) : ""
-                                    [ meta + [ ploidy: genotyping_reference_ploidy ], fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ]
+                                    def consensus_sequence_mva_additional_vcf = params.consensus_multivcfanalyzer_additional_vcf_files != null ? file(params.consensus_multivcfanalyzer_additional_vcf_files, checkIfExists: true ) : ""
+                                    [ meta + [ ploidy: genotyping_reference_ploidy ], fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_sequence_mva_additional_vcf ]
                                 }
 
     ch_ref_index_single = ch_reference_for_mapping
@@ -107,6 +108,7 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     sexdeterrmine_bed:      [ meta, sexdet_bed ]
                                     bedtools_feature:       [ meta, bedtools_feature ]
                                     dbsnp:                  [ meta, genotyping_gatk_dbsnp ]
+                                    mva_additional_vcfs:    [ meta, consensus_sequence_mva_additional_vcf ]
                                 }
 
     emit:
@@ -120,6 +122,7 @@ workflow REFERENCE_INDEXING_SINGLE {
     sexdeterrmine_bed    = ch_ref_index_single.sexdeterrmine_bed     // [ meta, sexdet_bed ]
     bedtools_feature     = ch_ref_index_single.bedtools_feature      // [ meta, bedtools_feature ]
     dbsnp                = ch_ref_index_single.dbsnp                 // [ meta, genotyping_gatk_dbsnp ]
+    mva_additional_vcfs  = ch_ref_index_single.mva_additional_vcfs   // [ meta, consensus_sequence_mva_additional_vcf ]
     versions             = ch_versions
 
 }
