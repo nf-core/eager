@@ -137,7 +137,7 @@ workflow METAGENOMICS_PROFILING {
     }
 
     else if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
-        // run krakenuniq once for all samples
+        // run krakenuniq once for all samples, unless non-merged PE vs SE data
 
         ch_krakenuniq_input = ch_reads
             .map{ meta, file ->
