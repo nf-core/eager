@@ -1,0 +1,143 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/eager/master/assets/schema_fasta.json",
+    "title": "nf-core/eager pipeline - params.fasta schema",
+    "description": "Schema for the file provided with params.fasta",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "reference_name": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "meta": ["id"],
+                "unique": true,
+                "errorMessage": "Reference name must be provided and cannot contain spaces."
+            },
+            "fasta": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.f(na|asta|a|as)(\\.gz)?$",
+                "exists": true,
+                "unique": true,
+                "errorMessage": "Fasta files for the mapping reference must be provided with file extensions '.fasta', '.fa', '.fas', '.fna', '.fasta.gz','.fa.gz','.fas.gz', '.fna.gz' and cannot contain any spaces."
+            },
+            "fai": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.fai$",
+                "exists": true,
+                "errorMessage": "Fasta index files for the mapping reference cannot have any spaces and must have file extension '.fai'."
+            },
+            "dict": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.dict$",
+                "exists": true,
+                "errorMessage": "Picard sequence dictionary files for the mapping reference cannot have any spaces and must have file extensions '.dict'."
+            },
+            "mapper_index": {
+                "type": "string",
+                "format": "directory-path",
+                "pattern": "^\\S+$",
+                "exists": true,
+                "errorMessage": "The directories of the index files for the mapping reference for a given mapper must not contain any spaces and have file extensions ''."
+            },
+            "circular_target": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "The headers of the chromosome extended by circulargenerator must not contain any spaces and no leading '>'."
+            },
+            "circularmapper_elongatedfasta": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.f(na|asta|a|as)(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "The elongated Fasta files for the mapping reference must be provided with file extensions '.fasta', '.fa', '.fas', '.fna', '.fasta.gz','.fa.gz','.fas.gz', '.fna.gz' and cannot contain any spaces."
+            },
+            "circularmapper_elongatedindex": {
+                "type": "string",
+                "format": "directory-path",
+                "pattern": "^\\S+$",
+                "exists": true,
+                "errorMessage": "The directories of the index files for the elongated mapping reference for circularmapper must not contain any spaces and have file extensions ''."
+            },
+            "mitochondrion_header": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "The names of the fasta entry of the mapping reference corresponding to the mitochondrial genome must not contain any spaces and no leading '>'."
+            },
+            "snpcapture_bed": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.bed(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "SNP capture bed files must not contain any spaces and have file extensions '.bed' or '.bed.gz'."
+            },
+            "pileupcaller_bedfile": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.bed(\\.gz)?$",
+                "exists": true,
+                "dependentRequired": ["pileupcaller_snpfile"],
+                "errorMessage": "SNP capture bed files for pileupcaller must not contain any spaces, have file extensions '.bed' or '.bed.gz' and be provided alongside a pileupcall_bedfile."
+            },
+            "pileupcaller_snpfile": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.snp$",
+                "exists": true,
+                "dependentRequired": ["pileupcaller_bedfile"],
+                "errorMessage": "SNP panel files for pileupcaller must not contain any spaces, have file extension '.snp' and be provided alongside a pileupcaller_snpfile."
+            },
+            "hapmap_file": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+$",
+                "exists": true,
+                "errorMessage": "HapMap files for contamination estimation with ANGSD must not contain any spaces."
+            },
+            "pmdtools_masked_fasta": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.f(na|asta|a|as)(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "Masked fasta files for PMDtools must not contain any spaces and have file extensions '.fasta', '.fa', '.fas', '.fna', '.fasta.gz','.fa.gz','.fas.gz' or '.fna.gz'."
+            },
+            "pmdtools_bed_for_masking": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.bed(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "SNP capture bed files to mask the reference for PMDtools must not contain any spaces and have file extensions '.bed' or '.bed.gz'."
+            },
+            "sexdeterrmine_snp_bed": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.bed?(\\.gz)$",
+                "exists": true,
+                "errorMessage": "SNP capture bed files for SexDetERRmine must not contain any spaces and have file extensions '.bed' or '.bed.gz'."
+            },
+            "bedtools_feature_file": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.(bed|gff|gff3)(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "Feature files must not contain any spaces and have file extensions '.bed', '.bed.gz', '.gff', '.gff.gz', '.gff3' or '.gff3.gz'."
+            },
+            "genotyping_reference_ploidy": {
+                "type": "integer",
+                "meta": ["genotyping_ploidy"],
+                "errorMessage": "Organism ploidy for GATK or FreeBayes must be provided as integers."
+            },
+            "genotyping_gatk_dbsnp": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.vcf$",
+                "exists": true,
+                "errorMessage": "SNP annotation files for GATK must not contain any spaces and have file extension '.vcf'."
+            }
+        },
+        "required": ["reference_name", "fasta"]
+    }
+}

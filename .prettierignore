@@ -10,3 +10,6 @@ testing/
 testing*
 *.pyc
 bin/
+*.cff
+test/
+dev_docs.md
