@@ -142,7 +142,7 @@ workflow METAGENOMICS_PROFILING {
         ch_krakenuniq_input = ch_reads
             .map{ meta, file ->
                 [
-                    ['single_end':meta['single_end']],
+                    ['single_end':meta['single_end']], // retain single_end vs paired_end bools for input splitting
                     file
                 ]
             }
@@ -158,14 +158,10 @@ workflow METAGENOMICS_PROFILING {
                     meta_files_input: [meta, files]
                     database: database
             }
-// NOTE to self: it will try to submit all reads to the process at once,
-// then any PE reads will be lists within the list of read inputs with the single single_end_clone meta
-// eg [single_end_clone:true], [/workspace/eager/work/24/66b0b0000323ab315c1e4d499a8b53/JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.merged.fastq.gz, /workspace/eager/work/03/4fcf3b2285211d76322257a51ace29/JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.merged.fastq.gz, [/workspace/eager/work/eb/2d257c378f932115ea34e338bee444/JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_1.merged.fastq.gz, /workspace/eager/work/eb/2d257c378f932115ea34e338bee444/JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_2.merged.fastq.gz]]]
-//
-// so solution must split the inputs to krakenuniq by the PE and SE reads and then remerge the channel for outputting
 
         KRAKENUNIQ_PRELOADEDKRAKENUNIQ (
             ch_krakenuniq_input.meta_files_input,
+            'fastq', // only fastq files can get to the input channel
             ch_krakenuniq_input.database,
             params.metagenomics_krakenuniq_ramchunksize,
             params.metagenomics_kraken2_savereads,
