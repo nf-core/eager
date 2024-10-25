@@ -137,6 +137,13 @@
                 "exists": true,
                 "errorMessage": "SNP annotation files for GATK must not contain any spaces and have file extension '.vcf'."
             }
+            "consensus_multivcfanalyzer_additional_vcf_files": {
+                "type": "string",
+                "format": "directory-path",
+                "pattern": "^\\S+$",
+                "exists": true,
+                "errorMessage": "The directory containing the additional vcf files for multivcfanalyzer must not contain any spaces and have file extensions ''."
+            }
         },
         "required": ["reference_name", "fasta"]
     }
