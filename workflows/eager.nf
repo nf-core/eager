@@ -71,8 +71,8 @@ include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED            } from '../modules
 
 workflow EAGER {
     take:
-    ch_samplesheet_fastqs // channel: samplesheet read in from --input
-    ch_samplesheet_bams  
+    ch_samplesheet_fastqs // channel: samplesheet FASTQ entries read in from --input
+    ch_samplesheet_bams   // channel: samplesheet BAM entries read in from --input
 
     main:
 
