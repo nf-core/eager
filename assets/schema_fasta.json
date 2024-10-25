@@ -11,7 +11,6 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "meta": ["id"],
-                "unique": true,
                 "errorMessage": "Reference name must be provided and cannot contain spaces."
             },
             "fasta": {
@@ -19,7 +18,6 @@
                 "format": "file-path",
                 "pattern": "^\\S+\\.f(na|asta|a|as)(\\.gz)?$",
                 "exists": true,
-                "unique": true,
                 "errorMessage": "Fasta files for the mapping reference must be provided with file extensions '.fasta', '.fa', '.fas', '.fna', '.fasta.gz','.fa.gz','.fas.gz', '.fna.gz' and cannot contain any spaces."
             },
             "fai": {
@@ -79,7 +77,6 @@
                 "format": "file-path",
                 "pattern": "^\\S+\\.bed(\\.gz)?$",
                 "exists": true,
-                "dependentRequired": ["pileupcaller_snpfile"],
                 "errorMessage": "SNP capture bed files for pileupcaller must not contain any spaces, have file extensions '.bed' or '.bed.gz' and be provided alongside a pileupcall_bedfile."
             },
             "pileupcaller_snpfile": {
@@ -87,7 +84,6 @@
                 "format": "file-path",
                 "pattern": "^\\S+\\.snp$",
                 "exists": true,
-                "dependentRequired": ["pileupcaller_bedfile"],
                 "errorMessage": "SNP panel files for pileupcaller must not contain any spaces, have file extension '.snp' and be provided alongside a pileupcaller_snpfile."
             },
             "hapmap_file": {
@@ -138,6 +134,13 @@
                 "errorMessage": "SNP annotation files for GATK must not contain any spaces and have file extension '.vcf'."
             }
         },
-        "required": ["reference_name", "fasta"]
-    }
+        "required": ["reference_name", "fasta"],
+        "dependentRequired": {
+            "pileupcaller_snpfile": ["pileupcaller_bedfile"],
+            "pileupcaller_bedfile": ["pileupcaller_snpfile"],
+            "bam": ["bam_reference_id"],
+            "bam_reference_id": ["bam"]
+        }
+    },
+    "allOf": [{ "uniqueEntries": "reference_name" }, { "uniqueEntries": "fasta" }]
 }
