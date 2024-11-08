@@ -23,16 +23,17 @@ nextflow_pipeline {
             // If a directory is fully stable, you can drop `stable_name_*`
             // Generate with: nf-test test --tag test --profile docker,test --update-snapshot
             // Test with:     nf-test test --tag test --profile docker,test
-            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , true , null                        , null , ['*', '**/*'] )
-            def stable_content_bamfiltering     = getAllFilesFromDir("$outputDir/bam_filtering"     , true , null                        , null , ['*', '**/*'] )
-            def stable_content_baminputstats    = getAllFilesFromDir("$outputDir/bam_input_stats"   , true , null                        , null , ['*', '**/*'] )
-            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true , null                        , null , ['*', '**/*'] )
-            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true , null                        , null , ['*', '**/*'] )
+            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , true , ['pipeline_info/*']            , null , ['*', '**/*'] )
+            def stable_content_bamfiltering     = getAllFilesFromDir("$outputDir/bam_filtering"     , true , null                           , null , ['*', '**/*'] )
+            def stable_content_baminputstats    = getAllFilesFromDir("$outputDir/bam_input_stats"   , true , null                           , null , ['*', '**/*'] )
+            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true , null                           , null , ['*', '**/*'] )
+            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true , null                           , null , ['*', '**/*'] )
             def stable_content_damageestimation = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{svg,pdf,log}']         , null , ['**/*.{txt,json}'] )
             def stable_name_damageestimation    = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{txt,json}']            , null , ['**/*.{svg,pdf,log}'] )
-            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.zip', '**/fastp/*.html'], null , ['*', '**/*'] )
-            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                        , null , ['*', '**/*'] )
+            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.zip', '**/fastp/*.html', '**/*.log'], null , ['*', '**/*'] )
+            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                           , null , ['*', '**/*', '**/*.zip', '**/fastp/*.html', '**/*.log'] )
 
+            // TODO
             assertAll(
                 { assert workflow.success },
                 // This checks that there are no missing or additional output files.
@@ -45,6 +46,7 @@ nextflow_pipeline {
                 { assert snapshot( stable_content_deduplication     ).match("deduplication") },
                 { assert snapshot( stable_content_mapping           ).match("mapping") },
                 { assert snapshot( stable_content_damageestimation, stable_name_damageestimation*.name ).match("damage_estimation") },
+                { assert snapshot( stable_content_preprocessing   , stable_name_preprocessing*.name    ).match("preprocessing") },
 
                 // // Preprocessing
                 // { assert snapshot(
