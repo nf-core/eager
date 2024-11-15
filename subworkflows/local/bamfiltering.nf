@@ -97,7 +97,6 @@ workflow FILTER_BAM {
         CAT_FASTQ_UNMAPPED ( ch_single_fastq_for_cat )
     }
 
-    // TODO: see request https://github.com/nf-core/eager/issues/945
     if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
         ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq.filter { !it[0].single_end }
 
