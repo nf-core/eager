@@ -420,98 +420,33 @@
     "preprocessing": {
         "content": [
             [
-                [
-                    [
-                        "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.html:md5,4beda4c1448b5b177df5fddf7daa9b2e",
-                        "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.json:md5,f9ac29dc38bd5e51beb9ea5a8a8e22f3",
-                        "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.log:md5,c21fa8d047f6b6bd33345b1ae1456a1d",
-                        "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.html:md5,af1d0c020f7ec3d38086f12a095ddccd",
-                        "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.json:md5,582794e200f2ddf0aad317ab42f88e79",
-                        "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.log:md5,24fcf4403ef0a4c8f8689711c3232a9c"
-                    ],
-                    [
-                        "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,e6260d182412653e3f01b8c0954aeec7",
-                        "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.zip:md5,d2ba57805e391e95e55af4da683c8ef9",
-                        "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,4180661ed56d1fe76fbd48594b1751dc",
-                        "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip:md5,83cb1e35a602bdd38b538071e9d5f702",
-                        "versions.yml:md5,42fbb757df8018b4595df690155d41d2"
-                    ],
-                    [
-                        "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,aa796cca681e4eaa173de6a84ab33adf",
-                        "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.zip:md5,355aa406567f32ca1e1d47ce2b077538",
-                        "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,c6050df9be87a8656945d37c881af387",
-                        "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.zip:md5,d9b3b283e68d7bdaaafc896e8cebdd99",
-                        "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,73f4dda105ba4c1ed8f1612f6a05006c",
-                        "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip:md5,af50d976d765d9e8fc38e86aab9d4f5c",
-                        "versions.yml:md5,b4672add0ce3c990afa1a2bc9f6a7c87"
-                    ]
-                ],
-                [
-                    "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.html:md5,4beda4c1448b5b177df5fddf7daa9b2e",
-                    "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.json:md5,f9ac29dc38bd5e51beb9ea5a8a8e22f3",
-                    "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.log:md5,c21fa8d047f6b6bd33345b1ae1456a1d",
-                    "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.html:md5,af1d0c020f7ec3d38086f12a095ddccd",
-                    "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.json:md5,582794e200f2ddf0aad317ab42f88e79",
-                    "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.log:md5,24fcf4403ef0a4c8f8689711c3232a9c"
-                ],
-                "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.html:md5,4beda4c1448b5b177df5fddf7daa9b2e",
                 "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.json:md5,f9ac29dc38bd5e51beb9ea5a8a8e22f3",
-                "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.html:md5,af1d0c020f7ec3d38086f12a095ddccd",
                 "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.json:md5,582794e200f2ddf0aad317ab42f88e79",
-                [
-                    "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,e6260d182412653e3f01b8c0954aeec7",
-                    "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.zip:md5,d2ba57805e391e95e55af4da683c8ef9",
-                    "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,4180661ed56d1fe76fbd48594b1751dc",
-                    "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip:md5,83cb1e35a602bdd38b538071e9d5f702",
-                    "versions.yml:md5,42fbb757df8018b4595df690155d41d2"
-                ],
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,e6260d182412653e3f01b8c0954aeec7",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,4180661ed56d1fe76fbd48594b1751dc",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,14d794c39c5c3998cdc1c4770911d20e",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,5e2f93a06a9bd00a2118c055cdfca4f1",
                 "versions.yml:md5,42fbb757df8018b4595df690155d41d2",
-                [
-                    "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,aa796cca681e4eaa173de6a84ab33adf",
-                    "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.zip:md5,355aa406567f32ca1e1d47ce2b077538",
-                    "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,c6050df9be87a8656945d37c881af387",
-                    "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.zip:md5,d9b3b283e68d7bdaaafc896e8cebdd99",
-                    "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,73f4dda105ba4c1ed8f1612f6a05006c",
-                    "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip:md5,af50d976d765d9e8fc38e86aab9d4f5c",
-                    "versions.yml:md5,b4672add0ce3c990afa1a2bc9f6a7c87"
-                ],
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,aa796cca681e4eaa173de6a84ab33adf",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,c6050df9be87a8656945d37c881af387",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,73f4dda105ba4c1ed8f1612f6a05006c",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,90b646e37c699ff125981e207bd3fe12",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,09190f8d40469fcec9cc2afb0906054c",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,1a33e804cd769815918096cd19ceb4f6",
                 "versions.yml:md5,b4672add0ce3c990afa1a2bc9f6a7c87"
             ],
             [
-                "preprocessing",
-                "fastp",
                 "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.html",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.json",
                 "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.log",
                 "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.html",
-                "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.json",
                 "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.log",
-                "fastqc_processed",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html",
                 "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.zip",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html",
                 "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip",
-                "versions.yml",
-                "fastqc_raw",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html",
                 "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.zip",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html",
                 "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.zip",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip",
-                "versions.yml"
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
-            "nextflow": "23.10.1"
+            "nextflow": "24.10.0"
         },
-        "timestamp": "2024-10-25T12:12:45.544765"
+        "timestamp": "2024-11-29T14:21:52.277733"
     },
     "damage_estimation": {
         "content": [
@@ -608,9 +543,9 @@
                     "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam.bai:md5,7df7cd0e935892e537efab3ea4d07fb6",
                     "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.flagstat:md5,a9fbd8c9a6f8bb02b191f4140f91d04a",
                     "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,2ed08bcbefcff2d136bf7323205204a1",
-                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai:md5,3c8604019275477c10f246d71755b8d4",
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai:md5,2c5895eae8a2cf6e1618be82d738ce3f",
                     "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.flagstat:md5,f6c739b729c06e17ca205c64478ad823",
-                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,fe713cfec5a15eca758b0e7e16a8f89e"
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,434a257dd57b5ed45b3feb25bb4c9002"
                 ],
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam.bai:md5,d1823ee5a37ad32007d0923731127935",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.flagstat:md5,39fd430cc77fc71f71d75a221c1b7880",
@@ -618,16 +553,16 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam.bai:md5,7df7cd0e935892e537efab3ea4d07fb6",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.flagstat:md5,a9fbd8c9a6f8bb02b191f4140f91d04a",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,2ed08bcbefcff2d136bf7323205204a1",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai:md5,3c8604019275477c10f246d71755b8d4",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai:md5,2c5895eae8a2cf6e1618be82d738ce3f",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.flagstat:md5,f6c739b729c06e17ca205c64478ad823",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,fe713cfec5a15eca758b0e7e16a8f89e"
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,434a257dd57b5ed45b3feb25bb4c9002"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
-            "nextflow": "23.10.1"
+            "nextflow": "24.10.0"
         },
-        "timestamp": "2024-10-25T11:55:05.514625"
+        "timestamp": "2024-11-29T14:27:13.20359"
     },
     "deduplication": {
         "content": [
@@ -639,8 +574,8 @@
                     "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam:md5,b806a87d8474da66892859492fefc380",
                     "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam.bai:md5,f499fad6abe17aef3e7548d1325db0de",
                     "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.flagstat:md5,dde5f59b006afdae2ff5fab85bc8ea92",
-                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam:md5,5e1839765b1b23a630a610e6c732c7df",
-                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam.bai:md5,aa755b2c836387c3c872cbf60cfa86da",
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam:md5,680bbfc1c8df6b77e5742a0aaedfdb2a",
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam.bai:md5,e1f8e1cf5c2576a228dea0e5b8e29c2f",
                     "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.flagstat:md5,fb4d234136f242c20db27979caa604cf"
                 ],
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam:md5,cafd8aec87c34a34a599aaf881bac4c2",
@@ -649,15 +584,15 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam:md5,b806a87d8474da66892859492fefc380",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam.bai:md5,f499fad6abe17aef3e7548d1325db0de",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.flagstat:md5,dde5f59b006afdae2ff5fab85bc8ea92",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam:md5,5e1839765b1b23a630a610e6c732c7df",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam.bai:md5,aa755b2c836387c3c872cbf60cfa86da",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam:md5,680bbfc1c8df6b77e5742a0aaedfdb2a",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam.bai:md5,e1f8e1cf5c2576a228dea0e5b8e29c2f",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.flagstat:md5,fb4d234136f242c20db27979caa604cf"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
-            "nextflow": "23.10.1"
+            "nextflow": "24.10.0"
         },
-        "timestamp": "2024-10-25T11:55:05.589676"
+        "timestamp": "2024-11-29T14:27:13.288364"
     }
 }
