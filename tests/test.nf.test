@@ -17,7 +17,7 @@ nextflow_pipeline {
         then {
 
             // Each top level results directory should be tested with individual snapshots/variables
-            // stable_name_<dir> is for files with varaible md5sums (i.e. content) so only names will be compared
+            // stable_name_<dir> is for files with variable md5sums (i.e. content) so only names will be compared
             // stable_content_<dir> is for files with stable md5sums (i.e. content) so md5sums will be compared
             // For both cases, use the third argument to specify globs to exclude certain files
             // If a directory is fully stable, you can drop `stable_name_*`
@@ -30,8 +30,8 @@ nextflow_pipeline {
             def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true , null                           , null , ['*', '**/*'] )
             def stable_content_damageestimation = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{svg,pdf,log}']         , null , ['**/*.{txt,json}'] )
             def stable_name_damageestimation    = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{txt,json}']            , null , ['**/*.{svg,pdf,log}'] )
-            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.zip', '**/fastp/*.html', '**/*.log'], null , ['*', '**/*'] )
-            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                           , null , ['*', '**/*', '**/*.zip', '**/fastp/*.html', '**/*.log'] )
+            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.{zip,log}', '**/*fastp.html'], null , ['**/*'] )
+            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                           , null , ['**/*.{zip,log}', '**/*fastp.html'] )
 
             // TODO
             assertAll(
