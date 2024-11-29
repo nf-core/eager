@@ -69,9 +69,9 @@ workflow PIPELINE_INITIALISATION {
     validateInputParameters()
 
     //
-    // Create channel from input file provided through params.input
+    // Create channel from input file provided through input
     //
-    ch_samplesheet = Channel.fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
+    ch_samplesheet = Channel.fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
                                     .map {
                                         meta, r1, r2, bam ->
                                             meta.single_end = meta.pairment == "single" ? true : false

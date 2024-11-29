@@ -18,7 +18,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     // Import reference sheet and change empty arrays to empty strings for compatibility with single reference input
     ch_splitreferencesheet_for_branch = Channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_fasta.json"))
+        .fromList(samplesheetToList(referencesheet, "${projectDir}/assets/schema_fasta.json"))
         .map { meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
             meta.ploidy = meta.genotyping_ploidy != null ? meta.genotyping_ploidy : params.genotyping_reference_ploidy
             fai = fai != [] ? fai : ""
