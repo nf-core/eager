@@ -26,12 +26,16 @@ nextflow_pipeline {
             def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , true , ['pipeline_info/*']            , null , ['*', '**/*'] )
             def stable_content_bamfiltering     = getAllFilesFromDir("$outputDir/bam_filtering"     , true , null                           , null , ['*', '**/*'] )
             def stable_content_baminputstats    = getAllFilesFromDir("$outputDir/bam_input_stats"   , true , null                           , null , ['*', '**/*'] )
-            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true , null                           , null , ['*', '**/*'] )
-            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true , null                           , null , ['*', '**/*'] )
             def stable_content_damageestimation = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{svg,pdf,log}']         , null , ['**/*.{txt,json}'] )
             def stable_name_damageestimation    = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{txt,json}']            , null , ['**/*.{svg,pdf,log}'] )
+            // TODO: BAM and (mostly) BAI md5sums are unstable. Need to use nft-utils to test read md5sums, while excluding header?
+            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true , null                           , null , ['*', '**/*'] )
+            // Final_bams
+            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true , null                           , null , ['*', '**/*'] )
+            // mapstats
             def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.{zip,log}', '**/*fastp.html'], null , ['**/*'] )
             def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                           , null , ['**/*.{zip,log}', '**/*fastp.html'] )
+            // MultiQC
 
             // TODO
             assertAll(
