@@ -3,14 +3,20 @@
         "content": [
             [
                 "bam_filtering",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam.bai",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.flagstat",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam.bai",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.flagstat",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.flagstat",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai",
                 "bam_input_stats",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_8_Mammoth_MT_Krause.flagstat",
@@ -409,18 +415,18 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-03T15:44:59.263536"
+        "timestamp": "2024-12-04T13:37:15.214733"
     },
     "preprocessing": {
         "content": [
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.json:md5,f9ac29dc38bd5e51beb9ea5a8a8e22f3",
                 "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.json:md5,582794e200f2ddf0aad317ab42f88e79",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,5ee82fdee4ea1812c5a2764a5e9c3690",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,81ca4a5e72ee4fa4564f07d99eb8b8e5",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,fe839c880d50c711b997a74f48720083",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,8f34be1cd9c78064e009e37d14b23100",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,d08512475ff4095d7cfb16124fde0ea5"
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,cafc7546b16d11158ab4af3652d27bde",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,d3be99e70b727f8f17bbd392f1380f85",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,29ab436a49ce1044dc5a5fa612bab20b",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,925827742ec7c6df88383cf2eefaeab4",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,cf824172790dce7d01170f758cc1790d"
             ],
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.html",
@@ -438,7 +444,7 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-03T15:44:59.725843"
+        "timestamp": "2024-12-04T13:37:15.666337"
     },
     "damage_estimation": {
         "content": [
@@ -508,7 +514,7 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-03T15:44:59.59473"
+        "timestamp": "2024-12-04T13:37:15.583413"
     },
     "bam_input_stats": {
         "content": [
@@ -521,40 +527,54 @@
         ],
         "meta": {
             "nf-test": "0.8.4",
-            "nextflow": "23.10.1"
+            "nextflow": "24.10.0"
         },
-        "timestamp": "2024-10-18T11:21:25.027198"
+        "timestamp": "2024-12-04T13:37:15.352919"
     },
     "bam_filtering": {
         "content": [
             [
                 [
+                    "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam:md5,ef5588f6d91b445e45d9a535663b23da",
                     "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam.bai:md5,d1823ee5a37ad32007d0923731127935",
                     "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.flagstat:md5,39fd430cc77fc71f71d75a221c1b7880",
+                    "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam:md5,5e3d07425f31c39146c6782a4a006274",
                     "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,159e97ddc9270c8d941f42f5553cf4fe",
-                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam.bai:md5,7df7cd0e935892e537efab3ea4d07fb6",
+                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam:md5,b1f8d455673bfe9ddd0c30f8202f7fdc",
+                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam.bai:md5,47d808ec3844254317d8232d641bb2e2",
                     "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.flagstat:md5,a9fbd8c9a6f8bb02b191f4140f91d04a",
-                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,2ed08bcbefcff2d136bf7323205204a1",
-                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai:md5,2c5895eae8a2cf6e1618be82d738ce3f",
+                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam:md5,735d1de6a650056f960f14777f64abac",
+                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,2d74ea6c8c69d6f2aefea345518251e6",
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam:md5,da3c74992faf7b6efbf18cf196232f1d",
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai:md5,3c8604019275477c10f246d71755b8d4",
                     "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.flagstat:md5,f6c739b729c06e17ca205c64478ad823",
-                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,434a257dd57b5ed45b3feb25bb4c9002"
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam:md5,9f672ec8e12cd0b669f2b2c11f1bfe4b",
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,fe713cfec5a15eca758b0e7e16a8f89e"
                 ],
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam.bai:md5,d1823ee5a37ad32007d0923731127935",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.flagstat:md5,39fd430cc77fc71f71d75a221c1b7880",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,159e97ddc9270c8d941f42f5553cf4fe",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam.bai:md5,7df7cd0e935892e537efab3ea4d07fb6",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.flagstat:md5,a9fbd8c9a6f8bb02b191f4140f91d04a",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,2ed08bcbefcff2d136bf7323205204a1",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai:md5,2c5895eae8a2cf6e1618be82d738ce3f",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.flagstat:md5,f6c739b729c06e17ca205c64478ad823",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai:md5,434a257dd57b5ed45b3feb25bb4c9002"
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.flagstat:md5,f6c739b729c06e17ca205c64478ad823"
+            ],
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-03T17:14:21.46804"
+        "timestamp": "2024-12-04T14:38:45.664872"
     },
     "deduplication": {
         "content": [
@@ -563,28 +583,30 @@
                     "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam:md5,cafd8aec87c34a34a599aaf881bac4c2",
                     "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam.bai:md5,196d7c4df7b32afc5209fdf7fff96a37",
                     "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.flagstat:md5,715d840d3bab5a05934825cd9b799ef3",
-                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam:md5,b806a87d8474da66892859492fefc380",
-                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam.bai:md5,f499fad6abe17aef3e7548d1325db0de",
+                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam:md5,1b69fddaf3c71642d02d6849e882e9e9",
+                    "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam.bai:md5,c7cf02b36e4bde41184640ee3ba2ef1c",
                     "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.flagstat:md5,dde5f59b006afdae2ff5fab85bc8ea92",
-                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam:md5,680bbfc1c8df6b77e5742a0aaedfdb2a",
-                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam.bai:md5,e1f8e1cf5c2576a228dea0e5b8e29c2f",
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam:md5,5e1839765b1b23a630a610e6c732c7df",
+                    "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam.bai:md5,aa755b2c836387c3c872cbf60cfa86da",
                     "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.flagstat:md5,fb4d234136f242c20db27979caa604cf"
                 ],
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam:md5,cafd8aec87c34a34a599aaf881bac4c2",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam.bai:md5,196d7c4df7b32afc5209fdf7fff96a37",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.flagstat:md5,715d840d3bab5a05934825cd9b799ef3",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam:md5,b806a87d8474da66892859492fefc380",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam.bai:md5,f499fad6abe17aef3e7548d1325db0de",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.flagstat:md5,dde5f59b006afdae2ff5fab85bc8ea92",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam:md5,680bbfc1c8df6b77e5742a0aaedfdb2a",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam.bai:md5,e1f8e1cf5c2576a228dea0e5b8e29c2f",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.flagstat:md5,fb4d234136f242c20db27979caa604cf"
+            ],
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam.bai",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_dedupped.bam.bai"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-03T17:14:21.53873"
+        "timestamp": "2024-12-04T14:38:45.741566"
     }
 }
