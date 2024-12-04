@@ -28,32 +28,33 @@ nextflow_pipeline {
             //   b) the order of the reads in the BAMs is not stable (sorted, but reads that share a start position can be in any order)
             //   point b) also causes BAIs to be unstable.
 
-            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , true , ['pipeline_info/*']            , null , ['*', '**/*'] )
+            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , true , ['pipeline_info/*']                 , null , ['*', '**/*'] )
 
             //Bam filtering
-            def stable_content_bamfiltering     = getAllFilesFromDir("$outputDir/bam_filtering"     , true , ['*.{bam,bai}']                , null , ['*', '**/*'] )
-            def stable_name_bamfiltering        = getAllFilesFromDir("$outputDir/bam_filtering"     , true , null                           , null , ['*.{bam,bai}'] )
+            def stable_content_bamfiltering     = getAllFilesFromDir("$outputDir/bam_filtering"     , true , ['*.{bam,bai}']                     , null , ['*.flagstat'] )
+            def stable_name_bamfiltering        = getAllFilesFromDir("$outputDir/bam_filtering"     , true , ['*.flagstat']                      , null , ['*.{bam,bai}'] )
 
             // Bam input stats
-            def stable_content_baminputstats    = getAllFilesFromDir("$outputDir/bam_input_stats"   , true , null                           , null , ['*', '**/*'] )
+            def stable_content_baminputstats    = getAllFilesFromDir("$outputDir/bam_input_stats"   , true , null                                , null , ['*', '**/*'] )
 
             // Damage estimation
-            def stable_content_damageestimation = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{svg,pdf,log}']         , null , ['**/*.{txt,json}'] )
-            def stable_name_damageestimation    = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{txt,json}']            , null , ['**/*.{svg,pdf,log}'] )
+            def stable_content_damageestimation = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{svg,pdf,log}']              , null , ['**/*.{txt,json}'] )
+            def stable_name_damageestimation    = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{txt,json}']                 , null , ['**/*.{svg,pdf,log}'] )
 
             // Deduplication
-            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true , ['*.{bam,bai}']                , null , ['*', '**/*'] )
-            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , true , null                           , null , ['*.{bam,bai}'] )
+            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true , ['*.{bam,bai}']                     , null , ['*.flagstat'] )
+            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , true , ['*.flagstat']                      , null , ['*.{bam,bai}'] )
 
             // TODO Final_bams
 
             //Mapping
-            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true , ['*.{bam,bai}']                , null , ['*', '**/*'] )
-            def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , true , null                           , null , ['*.{bam,bai}'] )
+            // TODO For some reason mapping results are not picked up now...
+            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true , null                                , null , ['**/*.flagstat'] )
+            def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , true , null                                , null , ['**/*.{bam,bai}'] )
 
             // mapstats
             def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.{zip,log}', '**/*fastp.html'], null , ['**/*'] )
-            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                           , null , ['**/*.{zip,log}', '**/*fastp.html'] )
+            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                                , null , ['**/*.{zip,log}', '**/*fastp.html'] )
 
             // TODO MultiQC
 
