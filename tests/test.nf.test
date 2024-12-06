@@ -35,7 +35,7 @@ nextflow_pipeline {
             def stable_name_bamfiltering        = getAllFilesFromDir("$outputDir/bam_filtering"     , true , ['*.flagstat']                      , null , ['*.{bam,bai}'] )
 
             // Bam input stats
-            def stable_content_baminputstats    = getAllFilesFromDir("$outputDir/bam_input_stats"   , true , null                                , null , ['*', '**/*'] )
+            def stable_content_baminputstats    = getAllFilesFromDir("$outputDir/bam_input_stats"   , true , null                                , null , ['*.flagstat'] )
 
             // Damage estimation
             def stable_content_damageestimation = getAllFilesFromDir("$outputDir/damage_estimation" , true , ['**/*.{svg,pdf,log}']              , null , ['**/*.{txt,json}'] )
