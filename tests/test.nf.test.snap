@@ -415,18 +415,130 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-04T15:59:35.203062"
+        "timestamp": "2024-12-06T11:48:13.885725"
+    },
+    "mapstats": {
+        "content": [
+            [
+                "JK2782_Mammoth_MT_Krause_depth.bed:md5,0ce780693dc76e02352d8b43c5bd3549",
+                "JK2802_Mammoth_MT_Krause_depth.bed:md5,1b4f117a16c712b7c67809d7e4ec279f",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_percent_on_target_mqc.json:md5,a3ccef0b8d19d69457b817898a2a5604",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_percent_on_target_mqc.json:md5,58df3f7e6ba65086daa94e49fe6b60f3",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_percent_on_target_mqc.json:md5,f771d9d15a744ea8a7031d36551ec7b3",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.c_curve.txt:md5,ba8059ca2396fb898593c1e66e56a7bc",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.command.log:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.c_curve.txt:md5,817f35dc7ce2983a7d0f558debd6e94b",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.command.log:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.c_curve.txt:md5,1384a88b531ab872c0069e71fccbe97a",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.command.log:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "agogo.css:md5,bd757b1a7ce6fdc0288ba148680f4583",
+                "basic.css:md5,25b2823342c0604924a2870eeb4e7e94",
+                "bgfooter.png:md5,ed01bb040346e4623cc87de331ddb4e1",
+                "bgtop.png:md5,626a50532dc6e5adbdd968746ef318e8",
+                "comment-bright.png:md5,0c850bb4920b581bf5e5dba5fa493a64",
+                "comment-close.png:md5,2635dda49c823e8122d4d11ed385f33d",
+                "comment.png:md5,882e40f3d6a16c6ed35659b105251525",
+                "doctools.js:md5,5ff571aa60e63f69c1890283e240ff8d",
+                "down-pressed.png:md5,ebe8979581eda700fb234a73c661a4b9",
+                "down.png:md5,f6f3c819cc7ca27d7fd3347e5e7ffe0f",
+                "file.png:md5,6587e59c55e626744eb6fc11129d99a7",
+                "jquery.js:md5,10092eee563dec2dca82b77d2cf5a1ae",
+                "minus.png:md5,8d572395aa95c89584a09813ada4dfa1",
+                "plus.png:md5,0125e6faa04e2cf0141a2d599d3bb220",
+                "pygments.css:md5,d625a0adb949f181bd0d3f1432b0fa7f",
+                "qualimap_logo_small.png:md5,7526f145a97be4682fd59e27dda4f71b",
+                "report.css:md5,7a5f09eaf7c176f966f4e8854168b812",
+                "searchtools.js:md5,d550841adeedc8ed47c40ee607620937",
+                "underscore.js:md5,db5ba047a66617d4cd3e8c5099cc51db",
+                "up-pressed.png:md5,8ea9bd109342f87fee97943b479c6f7e",
+                "up.png:md5,ecc373278454cc8ecc12d6ca69e55b36",
+                "websupport.js:md5,9e61e1e8a7433c56bd7e5a615affcf85",
+                "genome_results.txt:md5,599b430297daed72a6f585882966f406",
+                "genome_coverage_0to50_histogram.png:md5,aa1f50ccad2c5e36e1ab5f7268d90494",
+                "genome_coverage_across_reference.png:md5,b46a6c2246f0346ea3199c7632912938",
+                "genome_coverage_histogram.png:md5,53bf813fca7fe3f535f231a507f33975",
+                "genome_coverage_quotes.png:md5,df8ff67a870eb38b9d2ea46eff618df4",
+                "genome_gc_content_per_window.png:md5,c39f691057fbf9638a20442aa3754cea",
+                "genome_homopolymer_indels.png:md5,a3264f44fff09fa857d76be73a847004",
+                "genome_mapping_quality_across_reference.png:md5,3e6ba19761e7dc4362a4edf0c610b41a",
+                "genome_mapping_quality_histogram.png:md5,fd2517bb1bec297e020cb544bd444c5e",
+                "genome_reads_content_per_read_position.png:md5,52d8200160ba180c697ae3b6329edf44",
+                "genome_uniq_read_starts_histogram.png:md5,0d232d6a527275c0afeeca9bd5891b84",
+                "coverage_across_reference.txt:md5,cbafd81e7d9dcf5702d361008fb8d918",
+                "coverage_histogram.txt:md5,0085fba437f097d06c84e359c79646e4",
+                "duplication_rate_histogram.txt:md5,5e67619dcc46b155fe2e8a63b57a72e3",
+                "genome_fraction_coverage.txt:md5,db875d590d979d2827ff51e2536977fd",
+                "homopolymer_indels.txt:md5,7326bf50d7686153070c4f9c5db70076",
+                "mapped_reads_gc-content_distribution.txt:md5,2439c7211bf48bed6fd9bae68c75bb5b",
+                "mapped_reads_nucleotide_content.txt:md5,012f59aa43418782c4159bca8669a0b1",
+                "mapping_quality_across_reference.txt:md5,12723c3add1566c527b57ff89f21dec7",
+                "mapping_quality_histogram.txt:md5,805f4ecf01c21e2e9fec3b6402c1f62c",
+                "agogo.css:md5,bd757b1a7ce6fdc0288ba148680f4583",
+                "basic.css:md5,25b2823342c0604924a2870eeb4e7e94",
+                "bgfooter.png:md5,ed01bb040346e4623cc87de331ddb4e1",
+                "bgtop.png:md5,626a50532dc6e5adbdd968746ef318e8",
+                "comment-bright.png:md5,0c850bb4920b581bf5e5dba5fa493a64",
+                "comment-close.png:md5,2635dda49c823e8122d4d11ed385f33d",
+                "comment.png:md5,882e40f3d6a16c6ed35659b105251525",
+                "doctools.js:md5,5ff571aa60e63f69c1890283e240ff8d",
+                "down-pressed.png:md5,ebe8979581eda700fb234a73c661a4b9",
+                "down.png:md5,f6f3c819cc7ca27d7fd3347e5e7ffe0f",
+                "file.png:md5,6587e59c55e626744eb6fc11129d99a7",
+                "jquery.js:md5,10092eee563dec2dca82b77d2cf5a1ae",
+                "minus.png:md5,8d572395aa95c89584a09813ada4dfa1",
+                "plus.png:md5,0125e6faa04e2cf0141a2d599d3bb220",
+                "pygments.css:md5,d625a0adb949f181bd0d3f1432b0fa7f",
+                "qualimap_logo_small.png:md5,7526f145a97be4682fd59e27dda4f71b",
+                "report.css:md5,7a5f09eaf7c176f966f4e8854168b812",
+                "searchtools.js:md5,d550841adeedc8ed47c40ee607620937",
+                "underscore.js:md5,db5ba047a66617d4cd3e8c5099cc51db",
+                "up-pressed.png:md5,8ea9bd109342f87fee97943b479c6f7e",
+                "up.png:md5,ecc373278454cc8ecc12d6ca69e55b36",
+                "websupport.js:md5,9e61e1e8a7433c56bd7e5a615affcf85",
+                "genome_results.txt:md5,f6d35c23075fbec197c088ede3bda265",
+                "genome_coverage_0to50_histogram.png:md5,1d7153eab39f6180d7849f7a27c141be",
+                "genome_coverage_across_reference.png:md5,c8fa8d6eac53b3ef82fada6bc590333f",
+                "genome_coverage_histogram.png:md5,18ba01bd5afb81bb0b8e8dcce9ea10fe",
+                "genome_coverage_quotes.png:md5,0efb14b603c1bad8694aeee5a9f9f7ab",
+                "genome_gc_content_per_window.png:md5,75d2ad4e61179b800ea304798aa7a3a0",
+                "genome_homopolymer_indels.png:md5,bf9200f34a3fbfa05dd81891f4d08273",
+                "genome_mapping_quality_across_reference.png:md5,1bf5ba992c940fe2f7b0112d43ce917b",
+                "genome_mapping_quality_histogram.png:md5,e6d9f0c426a54226f9ee6585b57cf783",
+                "genome_reads_clipping_profile.png:md5,9c2d6a5f67319f6d2de110d3397e5a97",
+                "genome_reads_content_per_read_position.png:md5,73911bc8f836dea7d112ffbd3de1682e",
+                "genome_uniq_read_starts_histogram.png:md5,9412271ffb21c94e7a3e52955c0f246a",
+                "coverage_across_reference.txt:md5,3be6bd7fef9e81d56792b58e902949ed",
+                "coverage_histogram.txt:md5,8aaee99c160b7b5e030ee6fc891d9837",
+                "duplication_rate_histogram.txt:md5,ffd92c4701b07a4f3b6a580928770fe4",
+                "genome_fraction_coverage.txt:md5,f2e4bc958f9df721a6adccbc69de9706",
+                "homopolymer_indels.txt:md5,e6beb36c6aab5de9cb6d9e2357f82995",
+                "mapped_reads_clipping_profile.txt:md5,f3ee469d515a49d50ac4e438ddfc8b57",
+                "mapped_reads_gc-content_distribution.txt:md5,818ed0f391e3d08fee4f102721127976",
+                "mapped_reads_nucleotide_content.txt:md5,058c7dc070f76bc2c1913595070f9066",
+                "mapping_quality_across_reference.txt:md5,fb2c0f2f4c95c698ab67520cb3f2db5a",
+                "mapping_quality_histogram.txt:md5,4c5a2755f3eec182031390f7bb0d4d0f"
+            ],
+            [
+                "qualimapReport.html",
+                "qualimapReport.html"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.0"
+        },
+        "timestamp": "2024-12-06T11:48:14.067585"
     },
     "preprocessing": {
         "content": [
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.json:md5,f9ac29dc38bd5e51beb9ea5a8a8e22f3",
                 "JK2802_JK2802_AGAATAACCTACCA_L2.fastp.json:md5,582794e200f2ddf0aad317ab42f88e79",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,cafc7546b16d11158ab4af3652d27bde",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,d3be99e70b727f8f17bbd392f1380f85",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,29ab436a49ce1044dc5a5fa612bab20b",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,925827742ec7c6df88383cf2eefaeab4",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,cf824172790dce7d01170f758cc1790d"
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_fastqc.html:md5,9ef46c888ba9b9fde3d6100249bbf2cb",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,bdae5c26be457bd61a5f40e3378e79fe",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,cfdadc1f8e2a3ff6238d404c2f69eb65",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,93c488b52c8addf9b12fb3275b7555aa",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,d91b50b71a4102be9b0460bf5ae1cb3f"
             ],
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.html",
@@ -444,7 +556,7 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-04T15:59:35.487791"
+        "timestamp": "2024-12-06T11:48:14.351935"
     },
     "damage_estimation": {
         "content": [
@@ -514,14 +626,11 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-04T15:59:35.405707"
+        "timestamp": "2024-12-06T11:48:14.264209"
     },
     "bam_input_stats": {
         "content": [
             [
-                [
-                    "JK2782_JK2782_TGGCCGATCAACGA_BAM_8_Mammoth_MT_Krause.flagstat:md5,9a10991f5670a52975a622a8b056e2bc"
-                ],
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_8_Mammoth_MT_Krause.flagstat:md5,9a10991f5670a52975a622a8b056e2bc"
             ]
         ],
@@ -529,7 +638,26 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-04T15:59:35.281551"
+        "timestamp": "2024-12-06T11:52:26.966809"
+    },
+    "final_bams": {
+        "content": [
+            [
+                "JK2782_Mammoth_MT_Krause.flagstat:md5,04ff612d7bb381cca5bda876b7ed7d13",
+                "JK2802_Mammoth_MT_Krause.flagstat:md5,fb4d234136f242c20db27979caa604cf"
+            ],
+            [
+                "JK2782_Mammoth_MT_Krause.bam",
+                "JK2782_Mammoth_MT_Krause.bam.bai",
+                "JK2802_Mammoth_MT_Krause.bam",
+                "JK2802_Mammoth_MT_Krause.bam.bai"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.0"
+        },
+        "timestamp": "2024-12-06T11:48:14.019821"
     },
     "bam_filtering": {
         "content": [
@@ -557,7 +685,7 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-04T15:59:35.253309"
+        "timestamp": "2024-12-06T11:48:13.932415"
     },
     "deduplication": {
         "content": [
@@ -579,6 +707,25 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-04T15:59:35.308454"
+        "timestamp": "2024-12-06T11:48:13.991772"
+    },
+    "mapping_output": {
+        "content": [
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.flagstat:md5,98a2f8bb2aa9678e4cf9578ee9ab3b0e",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.flagstat:md5,cb86b29c65c8c123a8863330316c6400"
+            ],
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.bam.bai",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.bam",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.bam.bai"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.0"
+        },
+        "timestamp": "2024-12-06T11:48:14.044967"
     }
 }
