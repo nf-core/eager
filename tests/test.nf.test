@@ -45,14 +45,19 @@ nextflow_pipeline {
             def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true , ['*.{bam,bai}']                     , null , ['*.flagstat'] )
             def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , true , ['*.flagstat']                      , null , ['*.{bam,bai}'] )
 
-            // TODO Final_bams
+            // Final_bams
+            def stable_content_final_bams       = getAllFilesFromDir("$outputDir/final_bams"        , true , null                                , null , ['**/*.flagstat']  )
+            def stable_name_final_bams          = getAllFilesFromDir("$outputDir/final_bams"        , true , null                                , null , ['**/*.{bam,bai}']  )
 
             //Mapping
-            // TODO For some reason mapping results are not picked up now...
             def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true , null                                , null , ['**/*.flagstat'] )
             def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , true , null                                , null , ['**/*.{bam,bai}'] )
 
-            // mapstats
+            // Mapstats
+            def stable_content_mapstats         = getAllFilesFromDir("$outputDir/mapstats"          , true , ['**/*.html']                      , null , ['**/*.{bed,json,txt,log,css,png,js}'] )
+            def stable_name_mapstats            = getAllFilesFromDir("$outputDir/mapstats"          , true , null                               , null , ['**/*.html'] )
+
+            // Preprocessing
             def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.{zip,log}', '**/*fastp.html'], null , ['**/*'] )
             def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                                , null , ['**/*.{zip,log}', '**/*fastp.html'] )
 
@@ -66,45 +71,15 @@ nextflow_pipeline {
                 { assert snapshot( stable_name_all*.name            ).match("all_files") },
 
                 // Checking changes to contents of each section
-                { assert snapshot( stable_content_bamfiltering    , stable_name_bamfiltering*.name  ).match("bam_filtering") },
+                { assert snapshot( stable_content_bamfiltering    , stable_name_bamfiltering*.name     ).match("bam_filtering") },
                 { assert snapshot( stable_content_baminputstats   ).match("bam_input_stats") },
                 { assert snapshot( stable_content_deduplication   , stable_name_deduplication*.name    ).match("deduplication") },
-                { assert snapshot( stable_content_mapping         , stable_name_mapping*.name          ).match("mapping") },
+                { assert snapshot( stable_content_final_bams      , stable_name_final_bams*.name       ).match("final_bams") },
+                // NOTE: The snapshot section for mapping cannot be named 'mapping'. See https://github.com/askimed/nf-test/issues/279
+                { assert snapshot( stable_content_mapping         , stable_name_mapping*.name          ).match("mapping_output") },
+                { assert snapshot( stable_content_mapstats        , stable_name_mapstats*.name         ).match("mapstats") },
                 { assert snapshot( stable_content_damageestimation, stable_name_damageestimation*.name ).match("damage_estimation") },
                 { assert snapshot( stable_content_preprocessing   , stable_name_preprocessing*.name    ).match("preprocessing") },
-
-                // // Preprocessing
-                // { assert snapshot(
-                //         getAllFilesFromDir("$outputDir/preprocessing/fastp"                 , '.json'             ),
-                //         getAllFilesFromDir("$outputDir/preprocessing/fastqc_raw"            , '.html'             ),
-                //         getAllFilesFromDir("$outputDir/preprocessing/fastqc_processed"      , '.html'             ),
-                //         checkAllFilesNamesFromDirForString("$outputDir/preprocessing/fastp" , '.log', 'time used:'),
-                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastp"             , '.html'             ),
-                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastqc_raw"        , '.zip'              ),
-                //         getAllFileNamesFromDir("$outputDir/preprocessing/fastqc_processed"  , '.zip'              ),
-                //     ).match("preprocessing" )
-                // },
-
-                // // Final BAMs
-                // { assert snapshot(
-                //         getAllFilesFromDir("$outputDir/final_bams"    , '.flagstat'),
-                //         getAllFileNamesFromDir("$outputDir/final_bams", '.bam'     ),
-                //         getAllFileNamesFromDir("$outputDir/final_bams", '.bai'     ),
-                //     ).match("final_bams")
-                // },
-
-                // // Mapstats
-                // { assert snapshot(
-                //         getAllFilesFromDir("$outputDir/mapstats", '.bed'),
-                //         getAllFilesFromDir("$outputDir/mapstats", '.json'),
-                //         getAllFilesFromDir("$outputDir/mapstats", '.txt'),
-                //         getAllFilesFromDir("$outputDir/mapstats", '.log'),
-                //         getAllFilesFromDir("$outputDir/mapstats", '.css'),
-                //         getAllFilesFromDir("$outputDir/mapstats", '.png'),
-                //         getAllFilesFromDir("$outputDir/mapstats", '.js'),
-                //         getAllFileNamesFromDir("$outputDir/mapstats", '.html'), // For variable qualimapReport.html
-                //     ).match("mapstats")
-                // },
 
                 // // MultiQC
                 // { assert snapshot(
