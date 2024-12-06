@@ -54,8 +54,9 @@ nextflow_pipeline {
             def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , true , null                                , null , ['**/*.{bam,bai}'] )
 
             // Mapstats
-            def stable_content_mapstats         = getAllFilesFromDir("$outputDir/mapstats"          , true , ['**/*.html']                      , null , ['**/*.{bed,json,txt,log,css,png,js}'] )
-            def stable_name_mapstats            = getAllFilesFromDir("$outputDir/mapstats"          , true , null                               , null , ['**/*.html'] )
+            // NOTE: GC content data and plot has minor changes between runs. I suspect this is because of the order of reads that start at the same position being unstable, but I am not sure.
+            def stable_content_mapstats         = getAllFilesFromDir("$outputDir/mapstats"          , true , ['**/*.html', '**/mapped_reads_gc-content_distribution.txt', '**/genome_gc_content_per_window.png'], null , ['**/*.{bed,json,txt,log,css,png,js}'] )
+            def stable_name_mapstats            = getAllFilesFromDir("$outputDir/mapstats"          , true , null                                                                                               , null , ['**/*.html', '**/mapped_reads_gc-content_distribution.txt', '**/genome_gc_content_per_window.png'] )
 
             // Preprocessing
             def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.{zip,log}', '**/*fastp.html'], null , ['**/*'] )

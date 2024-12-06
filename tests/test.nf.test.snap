@@ -415,7 +415,7 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-06T11:48:13.885725"
+        "timestamp": "2024-12-06T16:19:51.141013"
     },
     "mapstats": {
         "content": [
@@ -458,7 +458,6 @@
                 "genome_coverage_across_reference.png:md5,b46a6c2246f0346ea3199c7632912938",
                 "genome_coverage_histogram.png:md5,53bf813fca7fe3f535f231a507f33975",
                 "genome_coverage_quotes.png:md5,df8ff67a870eb38b9d2ea46eff618df4",
-                "genome_gc_content_per_window.png:md5,c39f691057fbf9638a20442aa3754cea",
                 "genome_homopolymer_indels.png:md5,a3264f44fff09fa857d76be73a847004",
                 "genome_mapping_quality_across_reference.png:md5,3e6ba19761e7dc4362a4edf0c610b41a",
                 "genome_mapping_quality_histogram.png:md5,fd2517bb1bec297e020cb544bd444c5e",
@@ -469,7 +468,6 @@
                 "duplication_rate_histogram.txt:md5,5e67619dcc46b155fe2e8a63b57a72e3",
                 "genome_fraction_coverage.txt:md5,db875d590d979d2827ff51e2536977fd",
                 "homopolymer_indels.txt:md5,7326bf50d7686153070c4f9c5db70076",
-                "mapped_reads_gc-content_distribution.txt:md5,2439c7211bf48bed6fd9bae68c75bb5b",
                 "mapped_reads_nucleotide_content.txt:md5,012f59aa43418782c4159bca8669a0b1",
                 "mapping_quality_across_reference.txt:md5,12723c3add1566c527b57ff89f21dec7",
                 "mapping_quality_histogram.txt:md5,805f4ecf01c21e2e9fec3b6402c1f62c",
@@ -500,7 +498,6 @@
                 "genome_coverage_across_reference.png:md5,c8fa8d6eac53b3ef82fada6bc590333f",
                 "genome_coverage_histogram.png:md5,18ba01bd5afb81bb0b8e8dcce9ea10fe",
                 "genome_coverage_quotes.png:md5,0efb14b603c1bad8694aeee5a9f9f7ab",
-                "genome_gc_content_per_window.png:md5,75d2ad4e61179b800ea304798aa7a3a0",
                 "genome_homopolymer_indels.png:md5,bf9200f34a3fbfa05dd81891f4d08273",
                 "genome_mapping_quality_across_reference.png:md5,1bf5ba992c940fe2f7b0112d43ce917b",
                 "genome_mapping_quality_histogram.png:md5,e6d9f0c426a54226f9ee6585b57cf783",
@@ -513,21 +510,24 @@
                 "genome_fraction_coverage.txt:md5,f2e4bc958f9df721a6adccbc69de9706",
                 "homopolymer_indels.txt:md5,e6beb36c6aab5de9cb6d9e2357f82995",
                 "mapped_reads_clipping_profile.txt:md5,f3ee469d515a49d50ac4e438ddfc8b57",
-                "mapped_reads_gc-content_distribution.txt:md5,818ed0f391e3d08fee4f102721127976",
                 "mapped_reads_nucleotide_content.txt:md5,058c7dc070f76bc2c1913595070f9066",
                 "mapping_quality_across_reference.txt:md5,fb2c0f2f4c95c698ab67520cb3f2db5a",
                 "mapping_quality_histogram.txt:md5,4c5a2755f3eec182031390f7bb0d4d0f"
             ],
             [
+                "genome_gc_content_per_window.png",
                 "qualimapReport.html",
-                "qualimapReport.html"
+                "mapped_reads_gc-content_distribution.txt",
+                "genome_gc_content_per_window.png",
+                "qualimapReport.html",
+                "mapped_reads_gc-content_distribution.txt"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2024-12-06T11:48:14.067585"
+        "timestamp": "2024-12-06T15:58:37.710365"
     },
     "preprocessing": {
         "content": [
