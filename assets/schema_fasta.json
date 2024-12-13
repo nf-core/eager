@@ -142,5 +142,5 @@
             "bam_reference_id": ["bam"]
         }
     },
-    "allOf": [{ "uniqueEntries": "reference_name" }, { "uniqueEntries": "fasta" }]
+    "uniqueEntries": ["reference_name", "fasta"]
 }
