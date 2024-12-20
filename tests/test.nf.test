@@ -65,7 +65,6 @@ nextflow_pipeline {
             def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true , ['**/*.{zip,log}', '**/*fastp.html'], null , ['**/*'] )
             def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true , null                                , null , ['**/*.{zip,log}', '**/*fastp.html'] )
 
-            // TODO
             assertAll(
                 { assert workflow.success },
                 // This checks that there are no missing or additional output files.
