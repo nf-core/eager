@@ -34,6 +34,7 @@ include { RUN_SEXDETERRMINE                             } from '../subworkflows/
 include { MERGE_LIBRARIES                               } from '../subworkflows/local/merge_libraries'
 include { MERGE_LIBRARIES as MERGE_LIBRARIES_GENOTYPING } from '../subworkflows/local/merge_libraries'
 include { GENOTYPE                                      } from '../subworkflows/local/genotype'
+include { CONSENSUS_SEQUENCE                            } from '../subworkflows/local/consensus_sequence'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -599,7 +600,8 @@ workflow EAGER {
                 [ meta, fasta, fai ]
             }
     CONSENSUS_SEQUENCE(
-                        ch_vcf_for_consensus_sequence = GENOTYPE.out.vcf
+                        GENOTYPE.out.vcf,
+                        REFERENCE_INDEXING.out.mva.ifEmpty([ [], [], [], [] ]),
                         ch_reference_for_consensus_sequence
     )
 

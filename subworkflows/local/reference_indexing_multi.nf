@@ -20,25 +20,28 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_splitreferencesheet_for_branch = Channel.fromSamplesheet("fasta_sheet")
                                     .map{
                                         meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files ->
-                                            meta.ploidy                                     = meta.genotyping_ploidy != null ? meta.genotyping_ploidy : params.genotyping_reference_ploidy
-                                            fai                                             = fai != [] ? fai : ""
-                                            dict                                            = dict != [] ? dict : ""
-                                            mapper_index                                    = mapper_index != [] ? mapper_index : ""
-                                            circular_target                                 = circular_target != [] ? circular_target : ""
-                                            circularmapper_elongatedfasta                   = circularmapper_elongatedfasta != [] ? circularmapper_elongatedfasta : ""
-                                            circularmapper_elongatedindex                   = circularmapper_elongatedindex != [] ? circularmapper_elongatedindex : ""
-                                            mitochondrion                                   = mitochondrion != [] ? mitochondrion : ""
-                                            capture_bed                                     = capture_bed != [] ? capture_bed : ""
-                                            pileupcaller_bed                                = pileupcaller_bed != [] ? pileupcaller_bed : ""
-                                            pileupcaller_snp                                = pileupcaller_snp != [] ? pileupcaller_snp : ""
-                                            hapmap                                          = hapmap != [] ? hapmap : ""
-                                            pmd_masked_fasta                                = pmd_masked_fasta != [] ? pmd_masked_fasta : ""
-                                            pmd_bed_for_masking                             = pmd_bed_for_masking != [] ? pmd_bed_for_masking : ""
-                                            sexdet_bed                                      = sexdet_bed != [] ? sexdet_bed : ""
-                                            bedtools_feature                                = bedtools_feature != [] ? bedtools_feature : ""
-                                            genotyping_gatk_dbsnp                           = genotyping_gatk_dbsnp != [] ? genotyping_gatk_dbsnp : ""
-                                            consensus_multivcfanalyzer_additional_vcf_files = consensus_multivcfanalyzer_additional_vcf_files != [] ? consensus_multivcfanalyzer_additional_vcf_files : ""
-                                        [ meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files ]
+                                            meta.ploidy                                          = meta.genotyping_ploidy != null ? meta.genotyping_ploidy : params.genotyping_reference_ploidy
+                                            fai                                                  = fai != [] ? fai : ""
+                                            dict                                                 = dict != [] ? dict : ""
+                                            mapper_index                                         = mapper_index != [] ? mapper_index : ""
+                                            circular_target                                      = circular_target != [] ? circular_target : ""
+                                            circularmapper_elongatedfasta                        = circularmapper_elongatedfasta != [] ? circularmapper_elongatedfasta : ""
+                                            circularmapper_elongatedindex                        = circularmapper_elongatedindex != [] ? circularmapper_elongatedindex : ""
+                                            mitochondrion                                        = mitochondrion != [] ? mitochondrion : ""
+                                            capture_bed                                          = capture_bed != [] ? capture_bed : ""
+                                            pileupcaller_bed                                     = pileupcaller_bed != [] ? pileupcaller_bed : ""
+                                            pileupcaller_snp                                     = pileupcaller_snp != [] ? pileupcaller_snp : ""
+                                            hapmap                                               = hapmap != [] ? hapmap : ""
+                                            pmd_masked_fasta                                     = pmd_masked_fasta != [] ? pmd_masked_fasta : ""
+                                            pmd_bed_for_masking                                  = pmd_bed_for_masking != [] ? pmd_bed_for_masking : ""
+                                            sexdet_bed                                           = sexdet_bed != [] ? sexdet_bed : ""
+                                            bedtools_feature                                     = bedtools_feature != [] ? bedtools_feature : ""
+                                            genotyping_gatk_dbsnp                                = genotyping_gatk_dbsnp != [] ? genotyping_gatk_dbsnp : ""
+                                            consensus_multivcfanalyzer_additional_vcf_files      = consensus_multivcfanalyzer_additional_vcf_files != [] ? consensus_multivcfanalyzer_additional_vcf_files : ""
+                                            consensus_multivcfanalyzer_reference_gff_annotations = consensus_multivcfanalyzer_reference_gff_annotations != [] ? consensus_multivcfanalyzer_reference_gff_annotations : ""
+                                            consensus_multivcfanalyzer_reference_gff_exclude     = consensus_multivcfanalyzer_reference_gff_exclude != [] ? consensus_multivcfanalyzer_reference_gff_exclude : ""
+                                            consensus_multivcfanalyzer_reference_snpeff_results  = consensus_multivcfanalyzer_reference_snpeff_results != [] ? consensus_multivcfanalyzer_reference_gff_exclude : ""
+                                        [ meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
                                     }
 
     // GENERAL DESCRIPTION FOR NEXT SECTIONS
@@ -54,7 +57,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
                             .multiMap {
-                                meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files ->
+                                meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ->
                                 generated:            [ meta, fasta, fai, dict, mapper_index ]
                                 circularmapper:       [ meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex ]
                                 mitochondrion_header: [ meta, mitochondrion ]
@@ -66,7 +69,7 @@ workflow REFERENCE_INDEXING_MULTI {
                                 sexdeterrmine_bed:    [ meta, sexdet_bed ]
                                 bedtools_feature:     [ meta, bedtools_feature ]
                                 dbsnp:                [ meta, genotyping_gatk_dbsnp ]
-                                mva_additional_vcfs:  [ meta, consensus_multivcfanalyzer_additional_vcf_files ]
+                                mva:                  [ meta, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
                             }
 
     // Detect if fasta is gzipped or not
@@ -214,6 +217,6 @@ workflow REFERENCE_INDEXING_MULTI {
     sexdeterrmine_bed    = ch_input_from_referencesheet.sexdeterrmine_bed        // [ meta, sexdet_bed ]
     bedtools_feature     = ch_input_from_referencesheet.bedtools_feature         // [ meta, bedtools_feature ]
     dbsnp                = ch_input_from_referencesheet.dbsnp                    // [ meta, genotyping_gatk_dbsnp ]
-    mva_additional_vcfs  = ch_input_from_referencesheet.mva_additional_vcfs // [ meta, consensus_multivcfanalyzer_additional_vcf_files ]
+    mva                  = ch_input_from_referencesheet.mva                      // [ meta, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
     versions             = ch_versions
 }

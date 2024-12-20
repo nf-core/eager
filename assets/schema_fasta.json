@@ -136,13 +136,34 @@
                 "pattern": "^\\S+\\.vcf$",
                 "exists": true,
                 "errorMessage": "SNP annotation files for GATK must not contain any spaces and have file extension '.vcf'."
-            }
+            },
             "consensus_multivcfanalyzer_additional_vcf_files": {
                 "type": "string",
                 "format": "directory-path",
-                "pattern": "^\\S+$",
+                "pattern": "^\\S+\\.$",
                 "exists": true,
-                "errorMessage": "The directory containing the additional vcf files for multivcfanalyzer must not contain any spaces and have file extensions ''."
+                "errorMessage": "The directory containing the additional vcf files for multivcfanalyzer must not contain any spaces and have file extensions ''. Wildcards allowed."
+            },
+            "consensus_multivcfanalyzer_reference_gff_annotations": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.gff(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "The annotation file must not contain any spaces and have file extension '.gff'."
+            },
+            "consensus_multivcfanalyzer_reference_gff_exclude": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.gff(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "The annotation file must not contain any spaces and have file extension '.gff'."
+            },
+            "consensus_multivcfanalyzer_reference_snpeff_results": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.txt$",
+                "exists": true,
+                "errorMessage": "The snpeff file containing the results from the SnpEff analysis must not contain any spaces and have file extensions 'txt'."
             }
         },
         "required": ["reference_name", "fasta"]

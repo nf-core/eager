@@ -158,6 +158,10 @@
 
   > Peltzer, A., Jäger, G., Herbig, A., Seitz, A., Kniep, C., Krause, J., & Nieselt, K. (2016). EAGER: efficient ancient genome reconstruction. Genome Biology, 17(1), 1–14. doi: [10.1186/s13059-016-0918-z](https://doi.org/10.1186/s13059-016-0918-z)
 
+- [MultiVCFAnalyzer](doi:10.1038/nature13591)
+
+  > Bos, K. I., Harkins, K. M., Herbig A. et al., (2014). Pre-Columbian mycobacterial genomes reveal seals as a source of New World human tuberculosis. Nature, 514, 494–497. doi: [10.1038/nature13591](https://doi.org/10.1038/nature13591)
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
