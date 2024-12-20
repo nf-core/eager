@@ -1,8 +1,15 @@
-repository_type: pipeline
-nf_core_version: "2.14.1"
-
 lint:
   nextflow_config:
     - config_defaults:
         - params.contamination_estimation_angsd_hapmap
-  actions_ci: False
+nf_core_version: 3.1.0
+repository_type: pipeline
+template:
+  author: The nf-core/eager community
+  description: A fully reproducible and state-of-the-art ancient DNA analysis pipeline
+  force: false
+  is_nfcore: true
+  name: eager
+  org: nf-core
+  outdir: .
+  version: 3.0.0dev
