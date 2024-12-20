@@ -601,7 +601,7 @@ workflow EAGER {
             }
     CONSENSUS_SEQUENCE(
                         GENOTYPE.out.vcf,
-                        REFERENCE_INDEXING.out.mva.ifEmpty([ [], [], [], [] ]),
+                        REFERENCE_INDEXING.out.mva.ifEmpty([ [], [], [], [], [] ]),
                         ch_reference_for_consensus_sequence
     )
 
