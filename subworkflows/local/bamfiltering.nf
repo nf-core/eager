@@ -80,7 +80,7 @@ workflow FILTER_BAM {
 
     // Solution to the Andrades Valtueña-Light Problem: mapped bam for metagenomics (with options for quality- and length filtered)
 
-    if ( params.bamfiltering_generatemappedfastq ||  ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) ) {
+    if ( params.bamfiltering_generatemappedfastq || ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) ) {
         SAMTOOLS_FASTQ_MAPPED ( bam.map{[ it[0], it[1] ]}, false )
         ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_MAPPED.out.versions.first() )
     }
@@ -98,7 +98,7 @@ workflow FILTER_BAM {
     }
 
     if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq.filter { !it[0].single_end }
+        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_MAPPED.out.fastq.filter { !it[0].single_end }
 
         ch_single_fastq_for_cat = SAMTOOLS_FASTQ_MAPPED.out.fastq
                                     .mix(SAMTOOLS_FASTQ_MAPPED.out.singleton)
