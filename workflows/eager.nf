@@ -27,7 +27,7 @@ include { MAP                                                 } from '../subwork
 include { FILTER_BAM                                          } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                                         } from '../subworkflows/local/deduplicate'
 include { MANIPULATE_DAMAGE                                   } from '../subworkflows/local/manipulate_damage'
-include { METAGENOMICS_COMPLEXITYFILTER                       } from '../subworkflows/local/metagenomics_complexityfilter'
+include { METAGENOMICS                                        } from '../subworkflows/local/metagenomics'
 include { ESTIMATE_CONTAMINATION                              } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE                                    } from '../subworkflows/local/calculate_damage'
 include { RUN_SEXDETERRMINE                                   } from '../subworkflows/local/run_sex_determination'
