@@ -86,8 +86,7 @@ nextflow_pipeline {
                 { assert snapshot( stable_content_preprocessing   , stable_name_preprocessing*.name    ).match("preprocessing") },
 
                 // Versions
-                { assert new File("$outputDir/pipeline_info/nf_core_pipeline_software_mqc_versions.yml").exists() },
-
+                { assert new File("$outputDir/pipeline_info/nf_core_eager_software_mqc_versions.yml").exists() },
 
             )
         }
