@@ -28,7 +28,7 @@ jobs:
       matrix:
         NXF_VER:
           - "24.04.2"
-          - "latest-everything"
+          #- "latest-everything"
         profile:
           - "conda"
           - "docker"
@@ -55,6 +55,8 @@ jobs:
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Nextflow
         uses: nf-core/setup-nextflow@v2

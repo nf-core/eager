@@ -2,7 +2,7 @@ lint:
   nextflow_config:
     - config_defaults:
         - params.contamination_estimation_angsd_hapmap
-nf_core_version: 3.1.0
+nf_core_version: 3.1.2
 repository_type: pipeline
 template:
   author: The nf-core/eager community
