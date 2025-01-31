@@ -2,21 +2,24 @@
 // Prepare reference indexing for downstream
 //
 
-include { SEQKIT_SPLIT2                                 } from '../../modules/nf-core/seqkit/split2/main'
-include { FASTQ_ALIGN_BWAALN                            } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
-include { BWA_MEM                                       } from '../../modules/nf-core/bwa/mem/main'
-include { BOWTIE2_ALIGN                                 } from '../../modules/nf-core/bowtie2/align/main'
-include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES        } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED_LANES  } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MEM          } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_BT2          } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED } from '../../modules/nf-core/samtools/flagstat/main'
+include { SEQKIT_SPLIT2                                       } from '../../modules/nf-core/seqkit/split2/main'
+include { FASTQ_ALIGN_BWAALN                                  } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { BWA_MEM                                             } from '../../modules/nf-core/bwa/mem/main'
+include { BOWTIE2_ALIGN                                       } from '../../modules/nf-core/bowtie2/align/main'
+include { SAMTOOLS_MERGE    as SAMTOOLS_MERGE_LANES           } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT     as SAMTOOLS_SORT_MERGED_LANES     } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MEM             } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_BT2             } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MERGED_LANES    } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MERGED_LANES } from '../../modules/nf-core/samtools/flagstat/main'
+include { CIRCULARMAPPER                                      } from '../../subworkflows/local/circularmapper'
 
 workflow MAP {
     take:
-    reads // [ [meta], [read1, reads2] ] or [ [meta], [read1] ]
-    index // [ [meta], [ index ], [ fasta ] ]
+    reads              // [ [meta], [read1, reads2] ] or [ [meta], [read1] ]
+    index              // [ [meta], [ index ], [ fasta ] ]
+    elogated_index     // [ [meta], circularmapper_elongated_fasta, circularmapper_elongated_index ]
+    elongated_chr_list // [ [meta], elongated_chr_list ]
 
     main:
     ch_versions       = Channel.empty()
@@ -63,7 +66,7 @@ workflow MAP {
 
     if ( params.mapping_tool == 'bwaaln' ) {
         ch_index_for_mapping = index.map{ meta, index, fasta -> [ meta, index ] }
-        ch_reads_for_mapping = reads
+        ch_reads_for_mapping = ch_input_for_mapping.reads
 
         FASTQ_ALIGN_BWAALN ( ch_reads_for_mapping, ch_index_for_mapping )
         ch_versions        = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
@@ -78,7 +81,7 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
     } else if ( params.mapping_tool == 'bwamem' ) {
-        ch_input_for_mapping = reads
+        ch_input_for_mapping = ch_input_for_mapping.reads
                             .combine( index )
                             .multiMap {
                                 meta, reads, meta2, index, fasta ->
@@ -97,7 +100,7 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_MEM.out.csi : SAMTOOLS_INDEX_MEM.out.bai
 
     } else if ( params.mapping_tool == 'bowtie2' ) {
-        ch_input_for_mapping = reads
+        ch_input_for_mapping = ch_input_for_mapping.reads
                             .combine( index.map{ meta, index, fasta -> [ meta, index ] } )
                             .multiMap {
                                 meta, reads, meta2, index ->
@@ -113,7 +116,20 @@ workflow MAP {
         SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
         ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
+
+    } else if ( params.mapping_tool == 'circularmapper' ) {
+        ch_elongated_reference_for_mapping = elogated_index
+                            .map {
+                                meta, elongated_fasta, elongated_index ->
+                                [ meta, elongated_index ]
+                                }
+
+        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, elongated_chr_list, ch_input_for_mapping.reads, params.fasta_circularmapper_elongationfactor )
+        ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
+        ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
+        ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai // [ [ meta ], bai/csi ]
     }
+
 
     // Only run merge lanes if we have more than one BAM to merge!
     ch_input_for_lane_merge = ch_mapped_lane_bam
@@ -144,16 +160,16 @@ workflow MAP {
     ch_mapped_bai =  params.fasta_largeref ? SAMTOOLS_INDEX_MERGED_LANES.out.csi : SAMTOOLS_INDEX_MERGED_LANES.out.bai
     ch_versions.mix( SAMTOOLS_INDEX_MERGED_LANES.out.versions )
 
-    ch_input_for_flagstat = SAMTOOLS_SORT_MERGED_LANES.out.bam.join( SAMTOOLS_INDEX_MERGED_LANES.out.bai, failOnMismatch: true )
+    ch_input_for_flagstat = ch_mapped_bam.join( ch_mapped_bai, failOnMismatch: true )
 
-    SAMTOOLS_FLAGSTAT_MAPPED ( ch_input_for_flagstat )
-    ch_versions.mix( SAMTOOLS_FLAGSTAT_MAPPED.out.versions.first() )
-    ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_MAPPED.out.flagstat )
+    SAMTOOLS_FLAGSTAT_MERGED_LANES  ( ch_input_for_flagstat )
+    ch_versions.mix( SAMTOOLS_FLAGSTAT_MERGED_LANES .out.versions.first() )
+    ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_MERGED_LANES .out.flagstat )
 
     emit:
     bam        = ch_mapped_bam                            // [ [ meta ], bam ]
-    bai        = ch_mapped_bai                            // [ [ meta ], bai ]
-    flagstat   = SAMTOOLS_FLAGSTAT_MAPPED.out.flagstat    // [ [ meta ], stats ]
+    bai        = ch_mapped_bai                            // [ [ meta ], bai/csi ]
+    flagstat   = SAMTOOLS_FLAGSTAT_MERGED_LANES .out.flagstat    // [ [ meta ], stats ]
     mqc        = ch_multiqc_files
     versions   = ch_versions
 

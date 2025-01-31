@@ -7,9 +7,12 @@ on:
   pull_request:
   release:
     types: [published]
+  workflow_dispatch:
 
 env:
   NXF_ANSI_LOG: false
+  NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
+  NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
@@ -17,39 +20,77 @@ concurrency:
 
 jobs:
   test:
-    name: Run pipeline with test data
+    name: "Run pipeline with test data (${{ matrix.NXF_VER }} | ${{ matrix.test_name }} | ${{ matrix.profile }})"
     # Only run on push if this is the nf-core dev branch (merged PRs)
     if: "${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/eager') }}"
     runs-on: ubuntu-latest
     strategy:
       matrix:
         NXF_VER:
-          - "23.04.0"
-          - "latest-everything"
+          - "24.04.2"
+          #- "latest-everything"
+        profile:
+          - "conda"
+          - "docker"
+          - "singularity"
+        test_name:
+          - "test"
+        isMaster:
+          - ${{ github.base_ref == 'master' }}
+        # Exclude conda and singularity on dev
+        exclude:
+          - isMaster: false
+            profile: "conda"
+          - isMaster: false
+            profile: "singularity"
         PARAMS:
-          - "-profile test,docker --preprocessing_tool fastp --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/fastp/adapters.fasta'"
-          - "-profile test,docker --preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw'"
-          - "-profile test,docker --mapping_tool bwamem --run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed'"
-          - "-profile test,docker --mapping_tool bowtie2 --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100 --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw'"
-          - "-profile test,docker --skip_preprocessing --convert_inputbam"
-          - "-profile test_humanbam,docker --run_mtnucratio --run_contamination_estimation_angsd --snpcapture_bed 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz' --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw'"
-          - "-profile test_humanbam,docker --run_sexdeterrmine --run_genotyping --genotyping_tool 'angsd' --genotyping_source 'raw'"
-          - "-profile test_multiref,docker" ## TODO add damage manipulation here instead once it goes multiref
+          - " --preprocessing_tool fastp --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/fastp/adapters.fasta'"
+          - " --preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw'"
+          - " --mapping_tool bwamem --run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed'"
+          - " --mapping_tool bowtie2 --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100 --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw'"
+          - " --mapping_tool circularmapper --skip_preprocessing --convert_inputbam --fasta_circular_target 'NC_007596.2' --fasta_circularmapper_elongationfactor 500"
+          - "_humanbam --run_mtnucratio --run_contamination_estimation_angsd --snpcapture_bed 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz' --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw'"
+          - "_humanbam --run_sexdeterrmine --run_genotyping --genotyping_tool 'angsd' --genotyping_source 'raw'"
+          - "_multiref" ## TODO add damage manipulation here instead once it goes multiref
     steps:
       - name: Check out pipeline code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
 
-      - name: Install Nextflow
+      - name: Set up Nextflow
         uses: nf-core/setup-nextflow@v2
         with:
           version: "${{ matrix.NXF_VER }}"
 
-      - name: Disk space cleanup
+      - name: Set up Apptainer
+        if: matrix.profile == 'singularity'
+        uses: eWaterCycle/setup-apptainer@main
+
+      - name: Set up Singularity
+        if: matrix.profile == 'singularity'
+        run: |
+          mkdir -p $NXF_SINGULARITY_CACHEDIR
+          mkdir -p $NXF_SINGULARITY_LIBRARYDIR
+
+      - name: Set up Miniconda
+        if: matrix.profile == 'conda'
+        uses: conda-incubator/setup-miniconda@a4260408e20b96e80095f42ff7f1a15b27dd94ca # v3
+        with:
+          miniconda-version: "latest"
+          auto-update-conda: true
+          conda-solver: libmamba
+          channels: conda-forge,bioconda
+
+      - name: Set up Conda
+        if: matrix.profile == 'conda'
+        run: |
+          echo $(realpath $CONDA)/condabin >> $GITHUB_PATH
+          echo $(realpath python) >> $GITHUB_PATH
+
+      - name: Clean up Disk space
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
 
-      - name: Run pipeline with test data
-        # TODO nf-core: You can customise CI pipeline run tests as required
-        # For example: adding multiple test runs with different parameters
-        # Remember that you can parallelise this by using strategy.matrix
+      - name: "Run pipeline with test data ${{ matrix.NXF_VER }} | ${{ matrix.test_name }} | ${{ matrix.profile }}"
         run: |
-          nextflow run ${GITHUB_WORKSPACE} --outdir ./results ${{ matrix.PARAMS }}
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{matrix.profile}},${{ matrix.test_name }}${{ matrix.PARAMS }} --outdir ./results

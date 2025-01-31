@@ -1,8 +1,8 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/eager/master/assets/schema_fasta.json",
-    "title": "nf-core/eager pipeline - params.fasta schema",
-    "description": "Schema for the file provided with params.fasta",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/eager/master/assets/schema_input.json",
+    "title": "nf-core/eager pipeline - params.input schema",
+    "description": "Schema for the file provided with params.input",
     "type": "array",
     "items": {
         "type": "object",
@@ -11,7 +11,6 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "meta": ["id"],
-                "unique": true,
                 "errorMessage": "Reference name must be provided and cannot contain spaces."
             },
             "fasta": {
@@ -19,7 +18,6 @@
                 "format": "file-path",
                 "pattern": "^\\S+\\.f(na|asta|a|as)(\\.gz)?$",
                 "exists": true,
-                "unique": true,
                 "errorMessage": "Fasta files for the mapping reference must be provided with file extensions '.fasta', '.fa', '.fas', '.fna', '.fasta.gz','.fa.gz','.fas.gz', '.fna.gz' and cannot contain any spaces."
             },
             "fai": {
@@ -46,7 +44,21 @@
             "circular_target": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "The headers of the chromosome to be extended by circularmapper must not contain any spaces and no leading '>'."
+                "errorMessage": "The headers of the chromosome extended by circulargenerator must not contain any spaces and no leading '>'."
+            },
+            "circularmapper_elongatedfasta": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.f(na|asta|a|as)(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "The elongated Fasta files for the mapping reference must be provided with file extensions '.fasta', '.fa', '.fas', '.fna', '.fasta.gz','.fa.gz','.fas.gz', '.fna.gz' and cannot contain any spaces."
+            },
+            "circularmapper_elongatedindex": {
+                "type": "string",
+                "format": "directory-path",
+                "pattern": "^\\S+$",
+                "exists": true,
+                "errorMessage": "The directories of the index files for the elongated mapping reference for circularmapper must not contain any spaces and have file extensions ''."
             },
             "mitochondrion_header": {
                 "type": "string",
@@ -65,7 +77,6 @@
                 "format": "file-path",
                 "pattern": "^\\S+\\.bed(\\.gz)?$",
                 "exists": true,
-                "dependentRequired": ["pileupcaller_snpfile"],
                 "errorMessage": "SNP capture bed files for pileupcaller must not contain any spaces, have file extensions '.bed' or '.bed.gz' and be provided alongside a pileupcall_bedfile."
             },
             "pileupcaller_snpfile": {
@@ -73,7 +84,6 @@
                 "format": "file-path",
                 "pattern": "^\\S+\\.snp$",
                 "exists": true,
-                "dependentRequired": ["pileupcaller_bedfile"],
                 "errorMessage": "SNP panel files for pileupcaller must not contain any spaces, have file extension '.snp' and be provided alongside a pileupcaller_snpfile."
             },
             "hapmap_file": {
@@ -124,6 +134,13 @@
                 "errorMessage": "SNP annotation files for GATK must not contain any spaces and have file extension '.vcf'."
             }
         },
-        "required": ["reference_name", "fasta"]
-    }
+        "required": ["reference_name", "fasta"],
+        "dependentRequired": {
+            "pileupcaller_snpfile": ["pileupcaller_bedfile"],
+            "pileupcaller_bedfile": ["pileupcaller_snpfile"],
+            "bam": ["bam_reference_id"],
+            "bam_reference_id": ["bam"]
+        }
+    },
+    "uniqueEntries": ["reference_name", "fasta"]
 }

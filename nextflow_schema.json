@@ -1,10 +1,10 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/eager/master/nextflow_schema.json",
     "title": "nf-core/eager pipeline parameters",
     "description": "A fully reproducible and state-of-the-art ancient DNA analysis pipeline",
     "type": "object",
-    "definitions": {
+    "$defs": {
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -84,6 +84,12 @@
                     "help_text": "For most people this will likely be the same directory that contains the file you provided to `--fasta`.\n\nIf you want to use pre-existing `bwa index` indices, the directory should contain files ending in '.amb' '.ann' '.bwt'. If you want to use pre-existing `bowtie2 build` indices, the directory should contain files ending in'.1.bt2', '.2.bt2', '.rev.1.bt2'.\n\nIn any case do not include the files themselves in the path. nf-core/eager will automagically detect the index files by searching for the FASTA filename with the corresponding `bwa index`/`bowtie2 build` file suffixes. If not supplied, the indices will be generated for you.\n\n",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "fasta_largeref": {
+                    "type": "boolean",
+                    "description": "Specify to generate '.csi' BAM indices instead of '.bai' for larger reference genomes.",
+                    "help_text": "This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `.csi` indices instead of `.bai` indices to compensate for the size of the reference genome (with samtools: `-c`). This parameter is not required for smaller references (including the human reference genomes hg19 or grch37/grch38).",
+                    "fa_icon": "fas fa-address-book"
+                },
                 "save_reference": {
                     "type": "boolean",
                     "description": "Specify to save any pipeline-generated reference genome indices in the results directory.",
@@ -126,9 +132,28 @@
                 },
                 "fasta_circular_target": {
                     "type": "string",
-                    "description": "Specify the FASTA header of the target chromosome to extend when using `circularmapper`.",
+                    "description": "Specify the FASTA header of the extended chromosome when using `circularmapper`.",
                     "help_text": "The entry (chromosome, contig, etc.) in your FASTA reference that you'd like to be treated as circular.\n\nApplies only when providing a single FASTA file via `--fasta` (NOT multi-reference input - see reference TSV/CSV input).\n\n> Modifies tool parameter(s):\n> - circulargenerator `-s`",
                     "fa_icon": "fas fa-bullseye"
+                },
+                "fasta_circularmapper_elongationfactor": {
+                    "type": "integer",
+                    "default": 500,
+                    "description": "Specify the number of bases to extend reference by (circularmapper only).",
+                    "help_text": "The number of bases to extend the beginning and end of each reference genome with.",
+                    "fa_icon": "fas fa-external-link-alt"
+                },
+                "fasta_circularmapper_elongatedfasta": {
+                    "type": "string",
+                    "description": "Specify an elongated reference FASTA to be used for circularmapper.",
+                    "help_text": "Specify an already elongated FASTA file for circularmapper to avoid regeneration.",
+                    "fa_icon": "fas fa-address-book"
+                },
+                "fasta_circularmapper_elongatedindex": {
+                    "type": "string",
+                    "description": "Specify a samtools index for the elongated FASTA file.",
+                    "help_text": "Specify the index for an already elongated FASTA file to avoid regeneration.",
+                    "fa_icon": "fas fa-address-book"
                 }
             }
         },
@@ -180,41 +205,6 @@
                 }
             }
         },
-        "max_job_request_options": {
-            "title": "Max job request options",
-            "type": "object",
-            "fa_icon": "fab fa-acquisitions-incorporated",
-            "description": "Set the top limit for requested resources for any single job.",
-            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
-            "properties": {
-                "max_cpus": {
-                    "type": "integer",
-                    "description": "Maximum number of CPUs that can be requested for any single job.",
-                    "default": 16,
-                    "fa_icon": "fas fa-microchip",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
-                },
-                "max_memory": {
-                    "type": "string",
-                    "description": "Maximum amount of memory that can be requested for any single job.",
-                    "default": "128.GB",
-                    "fa_icon": "fas fa-memory",
-                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
-                },
-                "max_time": {
-                    "type": "string",
-                    "description": "Maximum amount of time that can be requested for any single job.",
-                    "default": "240.h",
-                    "fa_icon": "far fa-clock",
-                    "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
-                }
-            }
-        },
         "generic_options": {
             "title": "Generic options",
             "type": "object",
@@ -222,12 +212,6 @@
             "description": "Less common options for the pipeline, typically set in a config file.",
             "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
             "properties": {
-                "help": {
-                    "type": "boolean",
-                    "description": "Display help text.",
-                    "fa_icon": "fas fa-question-circle",
-                    "hidden": true
-                },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
@@ -303,32 +287,17 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "validationShowHiddenParams": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-eye-slash",
-                    "description": "Show all params when using `--help`",
-                    "hidden": true,
-                    "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
-                },
-                "validationFailUnrecognisedParams": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters fails when an unrecognised parameter is found.",
-                    "hidden": true,
-                    "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
-                },
-                "validationLenientMode": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters in lenient more.",
-                    "hidden": true,
-                    "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
-                },
                 "pipelines_testdata_base_path": {
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of pipeline test dataset files",
                     "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
+                },
+                "trace_report_suffix": {
+                    "type": "string",
+                    "fa_icon": "far calendar",
+                    "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
                 }
             }
@@ -506,12 +475,6 @@
                     "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or Bowtie 2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing an extend-remap procedure (see [Peltzer et al 2016](https://doi.org/10.1186/s13059-016-0918-z) for details). Bowtie 2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming).\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)",
                     "fa_icon": "fas fa-hammer"
                 },
-                "fasta_largeref": {
-                    "type": "boolean",
-                    "description": "Specify to generate '.csi' BAM indices instead of '.bai' for larger reference genomes.",
-                    "help_text": "This parameter is required to be set for large reference genomes. If your reference genome is larger than 3.5GB, the `samtools index` calls in the pipeline need to generate `.csi` indices instead of `.bai` indices to compensate for the size of the reference genome (with samtools: `-c`). This parameter is not required for smaller references (including the human reference genomes hg19 or grch37/grch38).",
-                    "fa_icon": "fas fa-address-book"
-                },
                 "mapping_bwaaln_n": {
                     "type": "number",
                     "default": 0.01,
@@ -601,9 +564,15 @@
                 "mapping_bowtie2_maxins": {
                     "type": "integer",
                     "default": 500,
-                    "description": "Specify the maximum fragment length for Bowtie 2 paired-end mapping mode only.",
-                    "help_text": "Specify the maximum fragment length for valid paired-end alignments in Bowtie 2. This only applies to paired-end mapping (i.e. unmerged) and is therefore typically only useful for modern data.\n\n> Modifies Bowtie 2 parameter: `--maxins`",
-                    "fa_icon": "fas fa-filter"
+                    "description": "Specify the maximum fragment length for Bowtie2 paired-end mapping mode only.",
+                    "help_text": "The maximum fragment for valid paired-end alignments. Only for paired-end mapping (i.e. unmerged), and therefore typically only useful for modern data.\n\n> Modifies Bowtie2 parameter: `--maxins`",
+                    "fa_icon": "fas fa-exchange-alt"
+                },
+                "mapping_circularmapper_circularfilter": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-filter",
+                    "description": "Turn on to remove reads that did not map to the circularised genome.",
+                    "help_text": "If you want to filter out reads that don't map to elongated/circularised chromosome (and also non-circular chromosome headers) from the resulting BAM file, turn this on.\n\n> Modifies `-f` and `-x` parameters of CircularMapper's RealignSAMFile"
                 }
             },
             "fa_icon": "fas fa-layer-group"
@@ -618,7 +587,7 @@
                     "type": "boolean",
                     "description": "Specify to turn on filtering of reads in BAM files after mapping. By default, only mapped reads retained.",
                     "fa_icon": "fas fa-power-off",
-                    "help_text": "Specify to turns on the filtering subworkflow for mapped BAM files after the read alignment step. Filtering includes removal of unmapped reads, length filtering, and mapping quality filtering.\n\nWhen turning on BAM filtering, by default only the mapped/unmapped filter is activated, thus only mapped reads are retained for downstream analyses. See `--bamfiltering_retainunmappedgenomicbam` to retain unmapped reads, if filtering only for length and/or quality is preferred.\n\nNote this subworkflow can also be activated if `--run_metagenomic_screening` is supplied."
+                    "help_text": "Turns on the filtering subworkflow for mapped BAM files after the read alignment step. Filtering includes removal of unmapped reads, length filtering, and mapping quality filtering.\n\nWhen turning on BAM filtering, by default only the mapped/unmapped filter is activated, thus only mapped reads are retained for downstream analyses. See `--bamfiltering_retainunmappedgenomicbam` to retain unmapped reads, if filtering only for length and/or quality is preferred.\n\nNote this subworkflow can also be activated if `--run_metagenomics` is supplied."
                 },
                 "bamfiltering_minreadlength": {
                     "type": "integer",
@@ -644,7 +613,7 @@
                 "bamfiltering_retainunmappedgenomicbam": {
                     "type": "boolean",
                     "description": "Specify to retain unmapped reads in the BAM file used for downstream genomic analyses.",
-                    "help_text": "Specify to retain unmapped reads (optionally also length-filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomicscreening_input` is set to `all`.\n\n> ⚠️ This will likely slow down run time of downstream pipeline steps!\n\n> Modifies samtools view parameters: `-f 4` / `-F 4`",
+                    "help_text": "Specify to retain unmapped reads (optionally also length filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomics_input` is set to `all`.\n\n> ⚠️ This will likely slow down run time of downstream pipeline steps!\n\n> Modifies tool parameter(s):\n> - samtools view: `-f 4` / `-F 4`",
                     "fa_icon": "fas fa-piggy-bank"
                 },
                 "bamfiltering_generateunmappedfastq": {
@@ -674,13 +643,13 @@
             "description": "Options related to metagenomic screening.",
             "default": "",
             "properties": {
-                "run_metagenomicscreening": {
+                "run_metagenomics": {
                     "type": "boolean",
                     "description": "Specify to turn on metagenomic screening of mapped, unmapped or all reads.",
                     "fa_icon": "fas fa-power-off",
-                    "help_text": "Specify to turn on the metagenomic screening subworkflow of the pipeline, where reads are screened against large databases. Typically used for pathogen screening or microbial community analysis.\n\nIf supplied, this will also turn on the BAM filtering subworkflow of the pipeline."
+                    "help_text": "Specify to turn on the metagenomic screening subworkflow of the pipeline, where reads are screened against large databases. Typically used for pathogen screening or microbial community analysis.\n\nIf supplied, this will also turn on the BAM filtering subworkflow of the pipeline.\n\nRequires subsequent specification of `--metagenomics_profiling_tool` and `--metagenomics_profiling_database`."
                 },
-                "metagenomicscreening_input": {
+                "metagenomics_input": {
                     "type": "string",
                     "default": "unmapped",
                     "description": "Specify which type of reads to use for metagenomic screening.",
@@ -691,7 +660,7 @@
                 "run_metagenomics_complexityfiltering": {
                     "type": "boolean",
                     "fa_icon": "fas fa-power-off",
-                    "help_text": "Specify to turn on a subworkflow of the pipeline that filters the FASTQ files for complexity before the metagenomics profiling.\nUse the metagenomics_complexity_tool parameter to select a method.",
+                    "help_text": "Specify to turn on a subworkflow of the pipeline that filters the FASTQ files for complexity before the metagenomics profiling.\nUse the `--metagenomics_complexity_tool` parameter to select a method.",
                     "description": "Specify to run a complexity filter on the metagenomics input files before classification."
                 },
                 "metagenomics_complexity_savefastq": {
@@ -726,9 +695,204 @@
                 "metagenomics_prinseq_dustscore": {
                     "type": "number",
                     "default": 0.5,
+                    "fa_icon": "fas fa-head-side-mask",
+                    "description": "Specify the minimum dust score for PRINTSEQ++ complexity filtering",
+                    "help_text": "Specify the minimum dust score below which low-complexity reads will be removed. A DUST score is based on how often different tri-nucleotides occur along a read.\n\n> Modifies tool parameter(s):\n> - PRINSEQ++: `--lc_dust`"
+                },
+                "metagenomics_profiling_tool": {
+                    "type": "string",
+                    "description": "Specify which tool to use for metagenomic profiling and screening. Required if `--run_metagenomics` flagged.",
+                    "enum": ["malt", "metaphlan", "kraken2", "krakenuniq"],
+                    "fa_icon": "fas fa-toolbox",
+                    "help_text": "Select which tool to run metagenomics profiling on designated metagenomics_input. These tools behave vastly differently due to performing read profiling using different methods and yield vastly different reuslts.\n\nMALT and MetaPhlAn are alignment based, whereas Kraken2 and KrakenUniq are k-mer based.\n\nMALT has addtional postprocessing available (via `--run_metagenomics_postprocessing`) which can help authenticate alignments to a provided list of taxonomic nodes using established ancientDNA characteristics.\n\nMetaPhlAn performs profiling on the metagenomcis input data. This may be used to characterize the metagenomic community of a sample but care must be taken that you are not just looking at the modern metagenome of an ancient sample (for instance, soil microbes on a bone)\n\n Kraken2 and KrakenUniq are metagenomics classifiers that rely on fast k-mer-matching rather than whole-read alignments and are very memory efficient."
+                },
+                "metagenomics_profiling_database": {
+                    "type": "string",
+                    "format": "path",
+                    "description": "Specify a databse directory or .tar.gz file of a database directory to run metagenomics profiling on. Required if `--run_metagenomics` flagged.",
+                    "fa_icon": "fas fa-database",
+                    "help_text": "Specify a metagenomics profiling database to use with the designated metagenomics_profiling_tool on the selected metagenomics_input. Databases can be provided both as a directory, or a tar.gz of a directory. Metagenomic databases are NOT compatible across different tools (ie a MALT database is different from a kraken2 database).\n\nAll databases need to be pre-built/downloaded for use in nf-core/eager. Database construction is often a balancing act between breadth of sequence diversity and size.\n\nModifies tool parameter(s):\n> - krakenuniq: `--db`\n> - kraken2: `--db`\n> - MetaPhlAn: `--bowtie2db` and `--index`\n> - MALT: '-index'"
+                },
+                "metagenomics_kraken2_savereads": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Turn on saving reads assigned by KrakenUniq or Kraken2",
+                    "help_text": "Save reads that do and do not have a taxonomic classification in your output results directory in FASTQ format.\n\n> Modifies tool parameter(s):\n> - krakenuniq: `--classified-out` and `--unclassified-out`"
+                },
+                "metagenomics_kraken2_savereadclassifications": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Turn on saving of KrakenUniq or Kraken2 per-read taxonomic assignment file",
+                    "help_text": "Save a text file that contains a list of each read that had a taxonomic assignment, with information on specific taxonomic taxonomic assignment that that read recieved.\n\n> Modifies tool parameter(s):\n> - krakenuniq: `--output`"
+                },
+                "metagenomics_krakenuniq_ramchunksize": {
+                    "type": "string",
+                    "default": "16G",
+                    "description": "Specify how large to chunk database when loading into memory for KrakenUniq",
+                    "fa_icon": "fas fa-database",
+                    "help_text": "nf-core/eager utilises a 'low memory' option for KrakenUniq that can reduce the amount of RAM the process requires using the `--preloaded` option.\n\nA further extension to this option is that you can specify how large each chunk of the database should be that gets loaded into memory at any one time. You can specify the amount of RAM to chunk the database to with this parameter, and is particularly useful for people with limited computational resources.\n\nMore information about this parameter can be seen [here](https://github.com/fbreitwieser/krakenuniq/blob/master/README.md#new-release-v07).\n\n> Modifies KrakenUniq parameter: --preload-size\n\n"
+                },
+                "metagenomics_kraken2_saveminimizers": {
+                    "type": "boolean",
+                    "description": "Turn on saving minimizer information in the kraken2 report thus increasing to an eight column layout.",
+                    "fa_icon": "fas fa-save",
+                    "help_text": "Turn on saving minimizer information in the kraken2 report thus increasing to an eight column layout.\n\n Modifies kraken2 parameter: `--report-minimizer-data`."
+                },
+                "metagenomics_malt_mode": {
+                    "type": "string",
+                    "default": "BlastN",
+                    "description": "Specify which alignment mode to use for MALT.",
+                    "fa_icon": "fas fa-align-left",
+                    "help_text": "Use this to run the program in 'BlastN', 'BlastP', 'BlastX' modes to align DNA\nand DNA, protein and protein, or DNA reads against protein references respectively. Ensure your database matches the mode. Check the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf) for more details.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-m`\n",
+                    "enum": ["BlastN", "BlastP", "BlastX"]
+                },
+                "metagenomics_malt_alignmentmode": {
+                    "type": "string",
+                    "default": "SemiGlobal",
+                    "description": "Specify alignment method for MALT.",
+                    "fa_icon": "fas fa-align-center",
+                    "help_text": "Specify what alignment algorithm to use. Options are 'Local' or 'SemiGlobal'. Local is a BLAST like alignment, but is much slower. Semi-global alignment aligns reads end-to-end. Default: `'SemiGlobal'`\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-at`",
+                    "enum": ["Local", "SemiGlobal"]
+                },
+                "metagenomics_malt_minpercentidentity": {
+                    "type": "integer",
+                    "default": 85,
+                    "description": "Percent identity value threshold for MALT.",
+                    "fa_icon": "fas fa-id-card",
+                    "help_text": "Specify the minimum percent identity (or similarity) a sequence must have to the reference for it to be retained.\n\nOnly used when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT:`-id`"
+                },
+                "metagenomics_malt_toppercent": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify the percent for LCA algorithm for MALT (see MEGAN6 CE manual).",
+                    "fa_icon": "fas fa-percent",
+                    "help_text": "Specify the top percent value of the LCA algorithm. From the [MALT manual](http://ab.inf.uni-tuebingen.de/data/software/malt/download/manual.pdf): \"For each\nread, only those matches are used for taxonomic placement whose bit disjointScore is within\n10% of the best disjointScore for that read.\".\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-top`"
+                },
+                "metagenomics_malt_minsupportmode": {
+                    "type": "string",
+                    "default": "percent",
+                    "description": "Specify whether to use percent or raw number of reads for minimum support required for taxon to be retained for MALT.",
+                    "fa_icon": "fas fa-drumstick-bite",
+                    "help_text": "Specify whether to use a percentage, or raw number of reads as the value used to decide the minimum support a taxon requires to be retained.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-sup` and  `-supp`",
+                    "enum": ["percent", "reads"]
+                },
+                "metagenomics_malt_minsupportpercent": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Specify the minimum percentage of reads a taxon of sample total is required to have to be retained for MALT.",
+                    "fa_icon": "fas fa-percentage",
+                    "help_text": "Specify the minimum number of reads (as a percentage of all assigned reads) a given taxon is required to have to be retained as a positive 'hit' in the RMA6 file. This only applies when `--malt_min_support_mode` is set to 'percent'.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-supp`"
+                },
+                "metagenomics_malt_minsupportreads": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Specify a minimum number of reads a taxon of sample total is required to have to be retained in malt or kraken. Not compatible with --malt_min_support_mode 'percent'.",
+                    "fa_icon": "fas fa-sort-numeric-up-alt",
+                    "help_text": "For usage in malt: Specify the minimum number of reads a given taxon is required to have to be retained as a positive 'hit'.\nFor malt, this only applies when `--malt_min_support_mode` is set to 'reads'. \n\n> Modifies tool parameter(s):\n> - MALT: `-sup` \n"
+                },
+                "metagenomics_malt_maxqueries": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Specify the maximum number of queries a read can have for MALT.",
+                    "fa_icon": "fas fa-phone",
+                    "help_text": "Specify the maximum number of alignments a read can have. All further alignments are discarded.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `-mq`"
+                },
+                "metagenomics_malt_memorymode": {
+                    "type": "string",
+                    "default": "load",
+                    "description": "Specify the memory load method. Do not use 'map' with GPFS file systems for MALT as can be very slow.",
+                    "fa_icon": "fas fa-memory",
+                    "help_text": "\nHow to load the database into memory. Options are `'load'`, `'page'` or `'map'`.\n'load' directly loads the entire database into memory prior seed look up, this\nis slow but compatible with all servers/file systems. `'page'` and `'map'`\nperform a sort of 'chunked' database loading, allowing seed look up prior entire\ndatabase loading. Note that Page and Map modes do not work properly not with\nmany remote file-systems such as GPFS.\n\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MALT: `--memoryMode`",
+                    "enum": ["load", "page", "map"]
+                },
+                "metagenomics_malt_savereads": {
+                    "type": "boolean",
+                    "description": "Specify to also produce SAM alignment files. Note this includes both aligned and unaligned reads, and are gzipped. Note this will result in very large file sizes.",
+                    "fa_icon": "fas fa-file-alt",
+                    "help_text": "Specify to _also_ produce gzipped SAM files of all alignments and un-aligned reads in addition to RMA6 files. These are **not** soft-clipped or in 'sparse' format. Can be useful for downstream analyses due to more common file format. \n\n:warning: can result in very large run output directories as this is essentially duplication of the RMA6 files.\n\n> Sets tool parameter(s):\n> - MALT: `--alignments`"
+                },
+                "metagenomics_malt_group_size": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Define how many fastq files should be submitted in the same malt run. Default value of 0 runs all files at once.",
+                    "fa_icon": "fas fa-barcode",
+                    "help_text": "Very many (large) fastq files run through MALT at the same time can lead to excessively long runtimes. This parameter allows for parallelization of MALT runs. Please note, MALT is resource heavy and setting this value N above the default (0) will spawn multiple metagenomics_malt_group_size jobs where N is the number of samples per group. Please only use this if it is necessary to avoid runtime limits on your HPC cluster since the overhead of loading a database is high."
+                },
+                "metagenomics_run_postprocessing": {
+                    "type": "boolean",
+                    "description": "Activate post-processing of metagenomics profiling tool selected.",
+                    "help_text": "Activate the corresponding post-processing tool for your metagenomics profiling software. \n\nmalt --> maltextract\nkrakenuniq/kraken2/metaphlan --> taxpasta\n\nNote: Postprocessing is automatically carried out when using  `kraken2` and `krakenuniq` ",
+                    "fa_icon": "fab fa-buromobelexperte"
+                },
+                "metagenomics_maltextract_taxonlist": {
+                    "type": "string",
+                    "description": "Path to a text file with taxa of interest (one taxon per row, NCBI taxonomy name format)",
+                    "default": null,
+                    "help_text": "Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format corresponding to a taxonomic node in your MALT database. An example can be found on the [HOPS github](https://raw.githubusercontent.com/rhuebler/HOPS/external/Resources/default_list.txt).\\n\\nNecessary when `--metagenomics_profiling_tool malt` specified and `--metagenomics_run_postprocessing` flagged.\n\n Modifies tool parameter(s):\n> - MaltExtract: `-t`",
+                    "fa_icon": "fas fa-align-left"
+                },
+                "metagenomics_maltextract_ncbidir": {
+                    "type": "string",
+                    "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; available: https://github.com/rhuebler/HOPS/)",
+                    "default": null,
+                    "help_text": "Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).\\n\\nNecessary when `--metagenomics_profiling_tool malt` and `--metagenomics_run_postprocessing` specified.\n\n Modifies tool parameter(s):\n> - MaltExtract: `-r`",
+                    "fa_icon": "fab fa-buffer"
+                },
+                "metagenomics_maltextract_filter": {
+                    "type": "string",
+                    "default": "def_anc",
+                    "description": "Specify which MaltExtract filter to use.",
+                    "help_text": "Specify which MaltExtract filter to use. This is used to specify what types of characteristics to scan for. The default will output statistics on all alignments, and then a second set with just reads with one C to T mismatch in the first 5 bases. Further details on other parameters can be seen in the [HOPS documentation](https://github.com/rhuebler/HOPS/#maltextract-parameters).\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `-f`",
                     "fa_icon": "fas fa-filter",
-                    "description": "Specify the minimum dust score for PRINTSEQ++ complexity filtering.",
-                    "help_text": "Specify the minimum dust score below which low-complexity reads will be removed. A dust score is based on how often different tri-nucleotides occur along a read.\n\n> Modifies PRINSEQ++ parameter: `--lc_dust`"
+                    "enum": ["def_anc", "default", "ancient", "scan", "crawl", "srna"]
+                },
+                "metagenomics_maltextract_toppercent": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "Specify percent of top alignments to use.",
+                    "help_text": "Specify frequency of top alignments for each read to be considered for each node.\\n Note, value should be given in the format of a proportion (where 1 would correspond to 100%, and 0.1 would correspond to 10%).\\n\\n> :warning: this parameter follows the same concept as `--malt_top_percent` but uses a different notation i.e. integer (MALT) versus float (MALTExtract)\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `-a`",
+                    "fa_icon": "fas fa-percent"
+                },
+                "metagenomics_maltextract_destackingoff": {
+                    "type": "boolean",
+                    "description": "Turn off destacking.",
+                    "help_text": "Turn off destacking. If left on, a read that overlaps with another read will be\\nremoved (leaving a depth coverage of 1).\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Sets tool parameter(s):\n> - MaltExtract: `--destackingOff`",
+                    "fa_icon": "fab fa-stack-overflow"
+                },
+                "metagenomics_maltextract_downsamplingoff": {
+                    "type": "boolean",
+                    "description": "Turn off downsampling.",
+                    "help_text": "Turn off downsampling. By default, downsampling is on and will randomly select 10,000 reads if the number of reads on a node exceeds this number. This is to speed up processing, under the assumption at 10,000 reads the species is a 'true positive'.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Sets tool parameter(s):\n> - MaltExtract: `--downSampOff`",
+                    "fa_icon": "fas fa-angle-double-down"
+                },
+                "metagenomics_maltextract_duplicateremovaloff": {
+                    "type": "boolean",
+                    "description": "Turn off duplicate removal.",
+                    "help_text": "Turn off duplicate removal. By default, reads that are an exact copy (i.e. same start, stop coordinate and exact sequence match) will be removed as it is considered a PCR duplicate.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Sets tool parameter(s):\n> - MaltExtract: `--dupRemOff`",
+                    "fa_icon": "fas fa-copy"
+                },
+                "metagenomics_maltextract_matches": {
+                    "type": "boolean",
+                    "description": "Turn on exporting alignments of hits in BLAST format.",
+                    "help_text": "Export alignments of hits for each node in BLAST format.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `--matches`",
+                    "fa_icon": "fas fa-equals"
+                },
+                "metagenomics_maltextract_megansummary": {
+                    "type": "boolean",
+                    "description": "Turn on export of MEGAN summary files.",
+                    "help_text": "Export 'minimal' summary files (i.e. without alignments) that can be loaded into [MEGAN6](https://doi.org/10.1371/journal.pcbi.1004957).\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Sets tool parameter(s):\n> - MaltExtract: `--meganSummary`"
+                },
+                "metagenomics_maltextract_minpercentidentity": {
+                    "type": "number",
+                    "default": 85,
+                    "description": "Minimum percent identity alignments are required to have to be reported as candidate reads. Recommended to set same as MALT parameter.",
+                    "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `--minPI`"
+                },
+                "metagenomics_maltextract_usetopalignment": {
+                    "type": "boolean",
+                    "description": "Turn on using top alignments per read after filtering.",
+                    "help_text": "Use the best alignment of each read for every statistic, except for those concerning read distribution and coverage. \\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Sets tool parameter(s):\n> - MaltExtract: `--useTopAlignment`",
+                    "fa_icon": "fas fa-bahai"
                 }
             },
             "fa_icon": "fas fa-search"
@@ -1348,64 +1512,58 @@
     },
     "allOf": [
         {
-            "$ref": "#/definitions/input_output_options"
+            "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/definitions/reference_genome_options"
+            "$ref": "#/$defs/reference_genome_options"
         },
         {
-            "$ref": "#/definitions/institutional_config_options"
+            "$ref": "#/$defs/institutional_config_options"
         },
         {
-            "$ref": "#/definitions/max_job_request_options"
+            "$ref": "#/$defs/generic_options"
         },
         {
-            "$ref": "#/definitions/generic_options"
+            "$ref": "#/$defs/preprocessing"
         },
         {
-            "$ref": "#/definitions/preprocessing"
+            "$ref": "#/$defs/mapping"
         },
         {
-            "$ref": "#/definitions/mapping"
+            "$ref": "#/$defs/bam_filtering"
         },
         {
-            "$ref": "#/definitions/bam_filtering"
+            "$ref": "#/$defs/metagenomics"
         },
         {
-            "$ref": "#/definitions/metagenomics"
+            "$ref": "#/$defs/deduplication"
         },
         {
-            "$ref": "#/definitions/deduplication"
+            "$ref": "#/$defs/damage_manipulation"
         },
         {
-            "$ref": "#/definitions/damage_manipulation"
+            "$ref": "#/$defs/genotyping"
         },
         {
-            "$ref": "#/definitions/genotyping"
+            "$ref": "#/$defs/mitochondrial_to_nuclear_ratio"
         },
         {
-            "$ref": "#/definitions/mitochondrial_to_nuclear_ratio"
+            "$ref": "#/$defs/mapping_statistics"
         },
         {
-            "$ref": "#/definitions/mapping_statistics"
+            "$ref": "#/$defs/adna_damage_analysis"
         },
         {
-            "$ref": "#/definitions/adna_damage_analysis"
+            "$ref": "#/$defs/feature_annotation_statistics"
         },
         {
-            "$ref": "#/definitions/feature_annotation_statistics"
+            "$ref": "#/$defs/host_removal"
         },
         {
-            "$ref": "#/definitions/host_removal"
+            "$ref": "#/$defs/contamination_estimation"
         },
         {
-            "$ref": "#/definitions/human_sex_determination"
-        },
-        {
-            "$ref": "#/definitions/contamination_estimation"
-        },
-        {
-            "$ref": "#/definitions/contamination_estimation"
+            "$ref": "#/$defs/human_sex_determination"
         }
     ]
 }
