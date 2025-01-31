@@ -116,7 +116,7 @@ workflow MAP {
         ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
         ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai // [ [ meta ], bai/csi ]
     } else if ( params.mapping_tool == 'mapad' ) {
-        ch_input_for_mapping = reads
+        ch_input_for_mapping = ch_input_for_mapping
                             .combine( index.map{ meta, index, fasta -> [ meta, index ] } )
                             .multiMap {
                                 meta, reads, meta2, index ->
