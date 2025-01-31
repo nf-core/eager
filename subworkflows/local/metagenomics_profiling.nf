@@ -150,7 +150,7 @@ workflow METAGENOMICS_PROFILING {
                 .map { meta, files ->
                 [
                     meta, files.flatten()
-                ]}.view()
+                ]}
 
         ch_krakenuniq_input = ch_krakenuniq_input.combine(ch_database)
             .multiMap{
