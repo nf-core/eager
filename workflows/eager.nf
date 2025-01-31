@@ -57,7 +57,6 @@ include { FALCO                                               } from '../modules
 include { MTNUCRATIO                                          } from '../modules/nf-core/mtnucratio/main'
 include { HOST_REMOVAL                                        } from '../modules/local/host_removal'
 include { ENDORSPY                                            } from '../modules/nf-core/endorspy/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTATS_BAM_INPUT   } from '../modules/nf-core/samtools/flagstat/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH        } from '../modules/nf-core/bedtools/coverage/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH      } from '../modules/nf-core/bedtools/coverage/main'
 include { SAMTOOLS_VIEW_GENOME                                } from '../modules/local/samtools_view_genome.nf'
@@ -202,13 +201,6 @@ workflow EAGER {
         else {
             ch_bams_from_input = ch_samplesheet_bams.join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
         }
-
-        //
-        // MODULE: flagstats of user supplied input BAMs
-        // Maybe remove if subworkflow is already running it?
-        // SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bams_from_input )
-        // ch_versions           = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
-        // ch_flagstat_input_bam = SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat // For endorspy
 
         // SUBWORKFLOW: Merging lanes for ch_bams_from_input
 
