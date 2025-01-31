@@ -50,7 +50,7 @@ def validate_eigenstrat(genof, snpf, indf):
 
 VERSION = "1.0.0"
 
-parser = argparse.ArgumentParser(usage="%(prog)s (-i <Input file prefix>) (-c <input ind file> | -R | -E) [-L <SAMPLE LIST> | -S Ind [-S Ind2]] [-o <OUTPUT FILE PREFIX>]" , description="A tool to check two different EingenStrat databses for shared individuals, and extract or remove individuals from an EigenStrat database.")
+parser = argparse.ArgumentParser(usage="%(prog)s [-v] (-g1 <GENO FILE 1 NAME>) (-s1 <SNP FILE 1 NAME>) (-i1 <IND FILE 1 NAME>) (-g2 <GENO FILE 2 NAME>) (-s2 <SNP FILE 2 NAME>) (-i2 <IND FILE 2 NAME>) (-o <OUTPUT FILE PREFIX>)" , description="A tool to put together two EIGENSTRAT datasets of genotyped on the same SNP set into a single dataset.")
 parser._optionals.title = "Available options"
 parser.add_argument("-g1", "--genoFn1", type = str, metavar = "<GENO FILE 1 NAME>",    required = True, help = "The path to the input geno file of the first dataset.")
 parser.add_argument("-s1", "--snpFn1",  type = str, metavar = "<SNP FILE 1 NAME>",     required = True, help = "The path to the input snp file of the first dataset.")
