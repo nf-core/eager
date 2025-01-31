@@ -24,6 +24,7 @@ include { addNewMetaFromAttributes } from '../subworkflows/local/utils_nfcore_ea
 include { REFERENCE_INDEXING            } from '../subworkflows/local/reference_indexing'
 include { PREPROCESSING                 } from '../subworkflows/local/preprocessing'
 include { MAP                           } from '../subworkflows/local/map'
+include { MERGE_LANES_INPUTBAM          } from '../subworkflows/local/merge_lanes_inputbam'
 include { FILTER_BAM                    } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                   } from '../subworkflows/local/deduplicate'
 include { MANIPULATE_DAMAGE             } from '../subworkflows/local/manipulate_damage'
@@ -206,16 +207,22 @@ workflow EAGER {
 
         //
         // MODULE: flagstats of user supplied input BAMs
-        //
-        SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bams_from_input )
-        ch_versions           = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
-        ch_flagstat_input_bam = SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat // For endorspy
+        // Maybe remove if subworkflow is already running it?
+        // SAMTOOLS_FLAGSTATS_BAM_INPUT ( ch_bams_from_input )
+        // ch_versions           = ch_versions.mix( SAMTOOLS_FLAGSTATS_BAM_INPUT.out.versions )
+        // ch_flagstat_input_bam = SAMTOOLS_FLAGSTATS_BAM_INPUT.out.flagstat // For endorspy
 
+        // SUBWORKFLOW: Merging lanes for ch_bams_from_input
+
+        MERGE_LANES_INPUTBAM(ch_bams_from_input)
+        ch_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.bam
+                                            .join(MERGE_LANES_INPUTBAM.out.bai)
 
     } else {
         ch_bams_from_input    = Channel.empty()
         ch_flagstat_input_bam = Channel.empty()
     }
+
 
     //
     // SUBWORKFLOW: bam filtering (length, mapped/unmapped, quality etc.)
@@ -225,7 +232,7 @@ workflow EAGER {
 
         ch_mapped_for_bamfilter = MAP.out.bam
                                     .join(MAP.out.bai)
-                                    .mix(ch_bams_from_input)
+                                    .mix(ch_bams_from_input_lanemerged)
 
         FILTER_BAM ( ch_mapped_for_bamfilter )
         ch_bamfiltered_for_deduplication = FILTER_BAM.out.genomics
@@ -236,7 +243,7 @@ workflow EAGER {
     } else {
         ch_bamfiltered_for_deduplication = MAP.out.bam
                                                 .join(MAP.out.bai)
-                                                .mix(ch_bams_from_input)
+                                                .mix(ch_bams_from_input_lanemerged)
     }
 
     ch_reads_for_deduplication = ch_bamfiltered_for_deduplication
@@ -397,7 +404,7 @@ workflow EAGER {
     //
 
     ch_flagstat_for_endorspy_raw    = MAP.out.flagstat
-                                            .mix( ch_flagstat_input_bam )
+                                            .mix( MERGE_LANES_INPUTBAM.out.flagstat )
 
     if ( params.run_bamfiltering & !params.skip_deduplication ) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw
