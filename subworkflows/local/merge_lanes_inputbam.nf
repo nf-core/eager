@@ -9,14 +9,14 @@ include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED    } from '../../modules
 
 workflow MERGE_LANES_INPUTBAM {
     take:
-    bams // [ [meta], [bams] [bais]]
+    bams // [ [meta], [bams] ]
 
     main:
     ch_versions       = Channel.empty()
     ch_multiqc_files  = Channel.empty()
 
     ch_input_for_lane_merge = bams
-                                .map { meta, bam, bai -> [ meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry', 'shard_number'] }, bam ] }
+                                .map { meta, bam -> [ meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry', 'shard_number'] }, bam ] }
                                 .groupTuple()
                                 .branch {
                                     meta, bam ->

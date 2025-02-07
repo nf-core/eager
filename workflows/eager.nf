@@ -199,7 +199,7 @@ workflow EAGER {
             ch_bams_from_input = ch_samplesheet_bams.join(SAMTOOLS_INDEX_BAM_INPUT.out.csi)
         }
         else {
-            ch_bams_from_input = ch_samplesheet_bams.join(SAMTOOLS_INDEX_BAM_INPUT.out.bai)
+            ch_bams_from_input = ch_samplesheet_bams
         }
 
         // SUBWORKFLOW: Merging lanes for ch_bams_from_input
