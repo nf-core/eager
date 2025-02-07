@@ -209,8 +209,8 @@ workflow EAGER {
                                             .join(MERGE_LANES_INPUTBAM.out.bai)
 
     } else {
-        ch_bams_from_input    = Channel.empty()
-        ch_flagstat_input_bam = Channel.empty()
+        ch_bams_from_input_lanemerged = Channel.empty()
+        ch_flagstat_input_bam         = Channel.empty()
     }
 
 
