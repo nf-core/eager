@@ -207,10 +207,11 @@ workflow EAGER {
         MERGE_LANES_INPUTBAM(ch_bams_from_input)
         ch_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.bam
                                             .join(MERGE_LANES_INPUTBAM.out.bai)
+        ch_flagstat_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.flagstat
 
     } else {
-        ch_bams_from_input_lanemerged = Channel.empty()
-        ch_flagstat_input_bam         = Channel.empty()
+        ch_bams_from_input_lanemerged           = Channel.empty()
+        ch_flagstat_bams_from_input_lanemerged  = Channel.empty()
     }
 
 
@@ -391,7 +392,7 @@ workflow EAGER {
     //
 
     ch_flagstat_for_endorspy_raw    = MAP.out.flagstat
-                                            .mix( MERGE_LANES_INPUTBAM.out.flagstat )
+                                            .mix( ch_flagstat_bams_from_input_lanemerged )
 
     if (params.run_bamfiltering & !params.skip_deduplication) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw
