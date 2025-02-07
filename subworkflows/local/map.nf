@@ -117,6 +117,11 @@ workflow MAP {
 
     // Only run merge lanes if we have more than one BAM to merge!
     ch_input_for_lane_merge = ch_mapped_lane_bam
+                                .toSortedList {
+                                    a, b ->
+                                    a[0]['lane'] <=> b[0]['lane'] ?: a[0]['colour_chemistry'] <=> b[0]['colour_chemistry'] ?: a[0]['shard_number'] <=> b[0]['shard_number']
+                                }
+                                .flatMap()
                                 .map {
                                     meta, bam ->
                                     new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry', 'shard_number'] }
