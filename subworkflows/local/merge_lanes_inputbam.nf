@@ -2,10 +2,10 @@
 // Prepare reference indexing for downstream
 //
 
-include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_LANES        } from '../../modules/nf-core/samtools/merge/main'
-include { SAMTOOLS_SORT  as SAMTOOLS_SORT_MERGED_LANES  } from '../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED } from '../../modules/nf-core/samtools/flagstat/main'
+include { SAMTOOLS_MERGE    as SAMTOOLS_MERGE_LANES        } from '../../modules/nf-core/samtools/merge/main'
+include { SAMTOOLS_SORT     as SAMTOOLS_SORT_MERGED_LANES  } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MERGED_LANES } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED    } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow MERGE_LANES_INPUTBAM {
     take:
@@ -50,7 +50,7 @@ workflow MERGE_LANES_INPUTBAM {
 
     emit:
     bam        = ch_mapped_bam                            // [ [ meta ], bam ]
-    bai        = ch_mapped_bai                            // [ [ meta ], bai ]
+    bai        = ch_mapped_bai                            // [ [ meta ], bai/csi ]
     flagstat   = SAMTOOLS_FLAGSTAT_MAPPED.out.flagstat    // [ [ meta ], stats ]
     mqc        = ch_multiqc_files
     versions   = ch_versions
