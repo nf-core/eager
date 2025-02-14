@@ -11,8 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
-- [#1114](https://github.com/nf-core/eager/issues/1114) Removed bugged call to nf-core utils template function, behaving inconsistently across https and local input paths. not necessary for our samplesheet validation
-
 ### `Dependencies`
 
 ### `Deprecated`
