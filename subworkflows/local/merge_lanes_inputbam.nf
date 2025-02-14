@@ -5,7 +5,7 @@
 include { SAMTOOLS_MERGE    as SAMTOOLS_MERGE_LANES_BAMINPUT        } from '../../modules/nf-core/samtools/merge/main'
 include { SAMTOOLS_SORT     as SAMTOOLS_SORT_MERGED_LANES_BAMINPUT  } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MERGED_LANES_BAMINPUT } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MAPPED_BAMINPUT    } from '../../modules/nf-core/samtools/flagstat/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MERGED_LANES_BAMINPUT    } from '../../modules/nf-core/samtools/flagstat/main'
 
 workflow MERGE_LANES_INPUTBAM {
     take:
@@ -41,14 +41,14 @@ workflow MERGE_LANES_INPUTBAM {
 
     ch_input_for_flagstat = SAMTOOLS_SORT_MERGED_LANES_BAMINPUT.out.bam.join( SAMTOOLS_INDEX_MERGED_LANES_BAMINPUT.out.bai, failOnMismatch: true )
 
-    SAMTOOLS_FLAGSTAT_MAPPED_BAMINPUT ( ch_input_for_flagstat )
-    ch_versions.mix( SAMTOOLS_FLAGSTAT_MAPPED_BAMINPUT.out.versions.first() )
-    ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_MAPPED_BAMINPUT.out.flagstat )
+    SAMTOOLS_FLAGSTAT_MERGED_LANES_BAMINPUT ( ch_input_for_flagstat )
+    ch_versions.mix( SAMTOOLS_FLAGSTAT_MERGED_LANES_BAMINPUT.out.versions.first() )
+    ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_MERGED_LANES_BAMINPUT.out.flagstat )
 
     emit:
     bam        = ch_mapped_bam                            // [ [ meta ], bam ]
     bai        = ch_mapped_bai                            // [ [ meta ], bai/csi ]
-    flagstat   = SAMTOOLS_FLAGSTAT_MAPPED_BAMINPUT.out.flagstat    // [ [ meta ], stats ]
+    flagstat   = SAMTOOLS_FLAGSTAT_MERGED_LANES_BAMINPUT.out.flagstat    // [ [ meta ], stats ]
     mqc        = ch_multiqc_files
     versions   = ch_versions
 
