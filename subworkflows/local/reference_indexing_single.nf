@@ -3,7 +3,7 @@
 //
 include { grabUngzippedExtension          } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
 
-include { GUNZIP                          } from '../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_FASTA          } from '../../modules/nf-core/gunzip/main'
 include { BWA_INDEX                       } from '../../modules/nf-core/bwa/index/main'
 include { BOWTIE2_BUILD                   } from '../../modules/nf-core/bowtie2/build/main'
 include { SAMTOOLS_FAIDX                  } from '../../modules/nf-core/samtools/faidx/main'
@@ -27,9 +27,9 @@ workflow REFERENCE_INDEXING_SINGLE {
     // Detect if fasta is gzipped or not, unzip if necessary, and generate meta ID by sanitizing file
     if ( fasta.extension == 'gz' ) {
         ch_gz_ref = Channel.fromPath(fasta).map{[[], it]}
-        GUNZIP ( ch_gz_ref )
-        ch_ungz_ref = GUNZIP.out.gunzip.map{[[id: clean_name], it[1] ]}
-        ch_versions = ch_versions.mix( GUNZIP.out.versions.first())
+        GUNZIP_FASTA ( ch_gz_ref )
+        ch_ungz_ref = GUNZIP_FASTA.out.gunzip.map{[[id: clean_name], it[1] ]}
+        ch_versions = ch_versions.mix( GUNZIP_FASTA.out.versions.first())
     } else {
         ch_ungz_ref = Channel.fromPath(fasta).map{[[id: clean_name], it ]}
     }
