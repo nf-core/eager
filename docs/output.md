@@ -31,18 +31,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
-FastQC results in the `raw/` directory contain the results of running FastQC on the 'raw' input files (with no processing by the pipeline). The `processed/` directory is for reads run through either fastp or AdapterRemoval preprocessing, and therefore will only be present if preprocessing is executed. These FastQC results occur in both html (the report) and .zip format (raw data).
-
-![MultiQC - FastQC sequence counts plot](images/mqc_fastqc_counts.png)
-
-![MultiQC - FastQC mean quality scores plot](images/mqc_fastqc_quality.png)
-
-![MultiQC - FastQC adapter content plot](images/mqc_fastqc_adapter.png)
-
-:::note
-The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
-:::
-
 ### MultiQC
 
 <details markdown="1">

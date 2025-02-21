@@ -9,7 +9,6 @@ body:
 
         - [nf-core website: troubleshooting](https://nf-co.re/usage/troubleshooting)
         - [nf-core/eager pipeline documentation](https://nf-co.re/eager/usage)
-
   - type: textarea
     id: description
     attributes:
