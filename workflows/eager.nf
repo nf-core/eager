@@ -598,10 +598,10 @@ workflow EAGER {
             .map {
                 meta, fasta, fai, dict, mapindex, circular_target ->
                 [ meta, fasta, fai ]
-            }
+            }.dump(tag: 'reference_channel_consensus_sequence')
     CONSENSUS_SEQUENCE(
-                        GENOTYPE.out.vcf,
-                        REFERENCE_INDEXING.out.mva.ifEmpty([ [], [], [], [], [] ]),
+                        GENOTYPE.out.vcf.dump(tag: 'genotype_channel_consensus_sequence'),
+                        REFERENCE_INDEXING.out.mva.ifEmpty([ [], [], [], [], [] ]).dump(tag: 'mva_reference_files_consensus_sequences'),
                         ch_reference_for_consensus_sequence
     )
 
