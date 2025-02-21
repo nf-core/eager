@@ -27,7 +27,7 @@ include { MAP                                                 } from '../subwork
 include { FILTER_BAM                                          } from '../subworkflows/local/bamfiltering.nf'
 include { DEDUPLICATE                                         } from '../subworkflows/local/deduplicate'
 include { MANIPULATE_DAMAGE                                   } from '../subworkflows/local/manipulate_damage'
-include { METAGENOMICS_COMPLEXITYFILTER                       } from '../subworkflows/local/metagenomics_complexityfilter'
+include { METAGENOMICS                                        } from '../subworkflows/local/metagenomics'
 include { ESTIMATE_CONTAMINATION                              } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE                                    } from '../subworkflows/local/calculate_damage'
 include { RUN_SEXDETERRMINE                                   } from '../subworkflows/local/run_sex_determination'
@@ -432,14 +432,11 @@ workflow EAGER {
         ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_CCURVE.out.c_curve.collect { it[1] }.ifEmpty([]))
         ch_versions = ch_versions.mix(PRESEQ_CCURVE.out.versions)
     }
-    else {
-        (!params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'lc_extrap').call {
+    else if (!params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'lc_extrap') {
             PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map { [it[0], it[1]] })
             ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect { it[1] }.ifEmpty([]))
             ch_versions = ch_versions.mix(PRESEQ_LCEXTRAP.out.versions)
-        }
     }
-
 
     //
     // MODULE: Bedtools coverage

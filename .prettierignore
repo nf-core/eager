@@ -10,6 +10,6 @@ testing/
 testing*
 *.pyc
 bin/
-*.cff
+ro-crate-metadata.json
 test/
 dev_docs.md
