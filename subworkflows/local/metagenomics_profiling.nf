@@ -9,7 +9,7 @@ include { KRAKEN2_KRAKEN2                } from '../../modules/nf-core/kraken2/k
 include { KRAKENUNIQ_PRELOADEDKRAKENUNIQ } from '../../modules/nf-core/krakenuniq/preloadedkrakenuniq/main'
 include { METAPHLAN_METAPHLAN            } from '../../modules/nf-core/metaphlan/metaphlan/main'
 include { CAT_CAT as CAT_CAT_MALT        } from '../../modules/nf-core/cat/cat/main'
-include { UNTAR                          } from '../../modules/nf-core/untar/main'
+include { UNTAR as UNTAR_METAGENOMICS    } from '../../modules/nf-core/untar/main'
 
 workflow METAGENOMICS_PROFILING {
 
@@ -35,8 +35,8 @@ workflow METAGENOMICS_PROFILING {
     // untar the database
     ch_untar_input = ch_database.untar.map{ [[], it] }
 
-    UNTAR( ch_untar_input )
-    ch_untar_output = UNTAR.out.untar.map{ it[1] }
+    UNTAR_METAGENOMICS( ch_untar_input )
+    ch_untar_output = UNTAR_METAGENOMICS.out.untar.map{ it[1] }
 
     // back to the original database channel...
     ch_database = ch_database.base.mix(ch_untar_output)
