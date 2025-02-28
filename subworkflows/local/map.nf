@@ -43,30 +43,14 @@ workflow MAP {
             .groupTuple()
 
         ch_input_for_mapping = sharded_reads
-            .combine(index.map{ meta, index, fasta -> [ meta, index ] })
-            .multiMap {
-                meta, reads, meta2, index ->
-                    new_meta = meta.clone()
-                    new_meta.reference = meta2.id
-                    reads: [ new_meta, reads ]
-                    index: [ meta2, index ]
-            }
 
     } else {
         ch_input_for_mapping = reads
-            .combine(index.map{ meta, index, fasta -> [ meta, index ] })
-            .multiMap {
-                meta, reads, meta2, index ->
-                    new_meta = meta.clone()
-                    new_meta.reference = meta2.id
-                    reads: [ new_meta, reads ]
-                    index: [ meta2, index ]
-            }
     }
 
     if ( params.mapping_tool == 'bwaaln' ) {
         ch_index_for_mapping = index.map{ meta, index, fasta -> [ meta, index ] }
-        ch_reads_for_mapping = ch_input_for_mapping.reads
+        ch_reads_for_mapping = ch_input_for_mapping
 
         FASTQ_ALIGN_BWAALN ( ch_reads_for_mapping, ch_index_for_mapping )
         ch_versions        = ch_versions.mix ( FASTQ_ALIGN_BWAALN.out.versions.first() )
@@ -81,7 +65,7 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? FASTQ_ALIGN_BWAALN.out.csi : FASTQ_ALIGN_BWAALN.out.bai
 
     } else if ( params.mapping_tool == 'bwamem' ) {
-        ch_input_for_mapping = ch_input_for_mapping.reads
+        ch_input_for_mapping = ch_input_for_mapping
                             .combine( index )
                             .multiMap {
                                 meta, reads, meta2, index, fasta ->
@@ -100,7 +84,7 @@ workflow MAP {
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_MEM.out.csi : SAMTOOLS_INDEX_MEM.out.bai
 
     } else if ( params.mapping_tool == 'bowtie2' ) {
-        ch_input_for_mapping = ch_input_for_mapping.reads
+        ch_input_for_mapping = ch_input_for_mapping
                             .combine( index.map{ meta, index, fasta -> [ meta, index ] } )
                             .multiMap {
                                 meta, reads, meta2, index ->
@@ -124,7 +108,7 @@ workflow MAP {
                                 [ meta, elongated_index ]
                                 }
 
-        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, elongated_chr_list, ch_input_for_mapping.reads, params.fasta_circularmapper_elongationfactor )
+        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, elongated_chr_list, ch_input_for_mapping, params.fasta_circularmapper_elongationfactor )
         ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
         ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
         ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai // [ [ meta ], bai/csi ]
@@ -133,6 +117,11 @@ workflow MAP {
 
     // Only run merge lanes if we have more than one BAM to merge!
     ch_input_for_lane_merge = ch_mapped_lane_bam
+                                .toSortedList {
+                                    a, b ->
+                                    a[0]['lane'] <=> b[0]['lane'] ?: a[0]['colour_chemistry'] <=> b[0]['colour_chemistry'] ?: a[0]['shard_number'] <=> b[0]['shard_number']
+                                }
+                                .flatMap()
                                 .map {
                                     meta, bam ->
                                     new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry', 'shard_number'] }
