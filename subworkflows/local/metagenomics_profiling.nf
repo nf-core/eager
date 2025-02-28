@@ -50,8 +50,6 @@ workflow METAGENOMICS_PROFILING {
     // for each tool and make liberal use of multiMap to keep reads/database
     // channel element order in sync with each other
 
-    ch_reads.view()
-
     if ( params.metagenomics_profiling_tool == 'malt' ) {
 
         // Optional parallel run of malt available:
@@ -153,8 +151,6 @@ workflow METAGENOMICS_PROFILING {
                 [
                     meta, files.flatten()
                 ]}
-
-        ch_krakenuniq_input.view()
 
         ch_krakenuniq_input = ch_krakenuniq_input.combine(ch_database)
             .multiMap{
