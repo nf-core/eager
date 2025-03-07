@@ -37,7 +37,11 @@ workflow REFERENCE_INDEXING_MULTI {
             sexdet_bed = sexdet_bed != [] ? sexdet_bed : ""
             bedtools_feature = bedtools_feature != [] ? bedtools_feature : ""
             genotyping_gatk_dbsnp = genotyping_gatk_dbsnp != [] ? genotyping_gatk_dbsnp : ""
-            [meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp]
+            consensus_multivcfanalyzer_additional_vcf_files      = consensus_multivcfanalyzer_additional_vcf_files != [] ? consensus_multivcfanalyzer_additional_vcf_files : ""
+            consensus_multivcfanalyzer_reference_gff_annotations = consensus_multivcfanalyzer_reference_gff_annotations != [] ? consensus_multivcfanalyzer_reference_gff_annotations : ""
+            consensus_multivcfanalyzer_reference_gff_exclude     = consensus_multivcfanalyzer_reference_gff_exclude != [] ? consensus_multivcfanalyzer_reference_gff_exclude : ""
+            consensus_multivcfanalyzer_reference_snpeff_results  = consensus_multivcfanalyzer_reference_snpeff_results != [] ? consensus_multivcfanalyzer_reference_gff_exclude : ""
+            [meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
         }
 
     // GENERAL DESCRIPTION FOR NEXT SECTIONS
@@ -51,7 +55,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // DECOMPRESSION
     //
 
-    ch_input_from_referencesheet = ch_splitreferencesheet_for_branch.multiMap { meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
+    ch_input_from_referencesheet = ch_splitreferencesheet_for_branch.multiMap { meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ->
         generated: [meta, fasta, fai, dict, mapper_index]
         circularmapper: [meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex]
         mitochondrion_header: [meta, mitochondrion]
@@ -63,6 +67,7 @@ workflow REFERENCE_INDEXING_MULTI {
         sexdeterrmine_bed: [meta, sexdet_bed]
         bedtools_feature: [meta, bedtools_feature]
         dbsnp: [meta, genotyping_gatk_dbsnp]
+        mva: [meta, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results]
     }
 
     // Detect if fasta is gzipped or not
@@ -189,5 +194,6 @@ workflow REFERENCE_INDEXING_MULTI {
     sexdeterrmine_bed    = ch_input_from_referencesheet.sexdeterrmine_bed // [ meta, sexdet_bed ]
     bedtools_feature     = ch_input_from_referencesheet.bedtools_feature // [ meta, bedtools_feature ]
     dbsnp                = ch_input_from_referencesheet.dbsnp // [ meta, genotyping_gatk_dbsnp ]
+    mva                  = ch_input_from_referencesheet.mva
     versions             = ch_versions
 }

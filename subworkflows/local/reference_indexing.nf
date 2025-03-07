@@ -37,6 +37,7 @@ workflow REFERENCE_INDEXING {
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_MULTI.out.sexdeterrmine_bed
         ch_bedtools_feature      = REFERENCE_INDEXING_MULTI.out.bedtools_feature
         ch_dbsnp                 = REFERENCE_INDEXING_MULTI.out.dbsnp
+        ch_mva                   = REFERENCE_INDEXING_MULTI.out.mva
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_MULTI.out.versions )
     } else {
         // If input FASTA and/or indicies supplied
@@ -52,6 +53,7 @@ workflow REFERENCE_INDEXING {
         ch_bedtools_feature      = REFERENCE_INDEXING_SINGLE.out.bedtools_feature
         ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE.out.reference
         ch_dbsnp                 = REFERENCE_INDEXING_SINGLE.out.dbsnp
+        ch_mva                   = REFERENCE_INDEXING_SINGLE.out.mva
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }
 
@@ -163,6 +165,7 @@ workflow REFERENCE_INDEXING {
     sexdeterrmine_bed    = ch_sexdeterrmine_bed           // [ meta, sexdet_bed ]
     bedtools_feature     = ch_bedtools_feature            // [ meta, bedtools_feature ]
     dbsnp                = ch_dbsnp                       // [ meta, dbsnp ]
+    mva                  = ch_mva                         // [ meta, consensus_sequence_mva_additional_vcf, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
     versions             = ch_versions
 
 }

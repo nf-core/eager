@@ -71,14 +71,25 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     }
 
+    // Create channel for the additional VCFs for MultiVCFAnalyzer
+    if ( params.consensus_multivcfanalyzer_additional_vcf_files != null ){
+        ch_consensus_sequence_mva_additional_vcf   = Channel.fromPath("${params.consensus_multivcfanalyzer_additional_vcf_files}/*.{vcf.gz,vcf}")
+                                                    .map{[[id: clean_name], it ]}
+                                                    .groupTuple()
+    } else {
+        ch_consensus_sequence_mva_additional_vcf   = Channel.empty()
+                                                    .map{[[id: clean_name], it ]}
+    }
+
     // Join all together into a single map. failOnMismatch allows check if
     // a user supplies indicies with different 'base' names.
     ch_reference_for_mapping = ch_ungz_ref
                                 .join(ch_fasta_fai, failOnMismatch: true)
                                 .join(ch_fasta_dict, failOnMismatch: true)
                                 .join(ch_fasta_mapperindexdir, failOnMismatch: true)
+                                .join(ch_consensus_sequence_mva_additional_vcf)
                                 .map{
-                                    meta, fasta, fai, dict, mapper_index ->
+                                    meta, fasta, fai, dict, mapper_index, consensus_sequence_mva_additional_vcf ->
                                     def contamination_estimation_angsd_hapmap = params.contamination_estimation_angsd_hapmap != null ? file( params.contamination_estimation_angsd_hapmap, checkIfExists: true ) : ""
                                     def pmd_masked_fasta                      = params.damage_manipulation_pmdtools_masked_reference != null ? file(params.damage_manipulation_pmdtools_masked_reference, checkIfExists: true ) : ""
                                     def pmd_bed_for_masking                   = params.damage_manipulation_pmdtools_reference_mask != null ? file(params.damage_manipulation_pmdtools_reference_mask, checkIfExists: true ) : ""
@@ -91,12 +102,16 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     def genotyping_gatk_dbsnp                 = params.genotyping_gatk_dbsnp != null ? file(params.genotyping_gatk_dbsnp, checkIfExists: true ) : ""
                                     def circularmapper_elongated_fasta        = params.fasta_circularmapper_elongatedfasta != null ? file( params.fasta_circularmapper_elongatedfasta, checkIfExists: true ) : ""
                                     def circularmapper_elongated_index        = params.fasta_circularmapper_elongatedindex != null ? file( params.fasta_circularmapper_elongatedindex, checkIfExists: true ) : ""
-                                    [ meta + [ ploidy: genotyping_reference_ploidy ], fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index ]
+                                    //def consensus_sequence_mva_additional_vcf = params.consensus_multivcfanalyzer_additional_vcf_files !=null ? file( params.consensus_multivcfanalyzer_additional_vcf_files, checkIfExists: true ): ""
+                                    def consensus_multivcfanalyzer_reference_gff_annotations = params.consensus_multivcfanalyzer_reference_gff_annotations != null ? file(params.consensus_multivcfanalyzer_reference_gff_annotations, checkIfExists: true ) : ""
+                                    def consensus_multivcfanalyzer_reference_gff_exclude     = params.consensus_multivcfanalyzer_reference_gff_exclude != null ? file(params.consensus_multivcfanalyzer_reference_gff_exclude, checkIfExists: true ) : ""
+                                    def consensus_multivcfanalyzer_reference_snpeff_results  = params.consensus_multivcfanalyzer_snpeff_results != null ? file(params.consensus_multivcfanalyzer_snpeff_results, checkIfExists: true ) : ""
+                                    [ meta + [ ploidy: genotyping_reference_ploidy ], fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index, consensus_sequence_mva_additional_vcf, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
                                 }
 
     ch_ref_index_single = ch_reference_for_mapping
                                 .multiMap{
-                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index ->
+                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index, consensus_sequence_mva_additional_vcf, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ->
                                     reference:              [ meta, fasta, fai, dict, mapper_index ]
                                     circularmapper:         [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ]
                                     mito_header:            [ meta, mitochondrion_header ]
@@ -108,7 +123,9 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     sexdeterrmine_bed:      [ meta, sexdet_bed ]
                                     bedtools_feature:       [ meta, bedtools_feature ]
                                     dbsnp:                  [ meta, genotyping_gatk_dbsnp ]
+                                    mva:                    [ meta, consensus_sequence_mva_additional_vcf, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
                                 }
+
 
     emit:
     reference            = ch_ref_index_single.reference             // [ meta, fasta, fai, dict, mapindex ]
@@ -122,6 +139,7 @@ workflow REFERENCE_INDEXING_SINGLE {
     sexdeterrmine_bed    = ch_ref_index_single.sexdeterrmine_bed     // [ meta, sexdet_bed ]
     bedtools_feature     = ch_ref_index_single.bedtools_feature      // [ meta, bedtools_feature ]
     dbsnp                = ch_ref_index_single.dbsnp                 // [ meta, genotyping_gatk_dbsnp ]
+    mva                  = ch_ref_index_single.mva                   // [ meta, consensus_sequence_mva_additional_vcf, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
     versions             = ch_versions
 
 }
