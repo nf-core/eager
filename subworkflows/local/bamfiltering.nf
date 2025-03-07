@@ -9,6 +9,8 @@ include { SAMTOOLS_INDEX as SAMTOOLS_FILTER_INDEX         } from '../../modules/
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_FILTERED } from '../../modules/nf-core/samtools/flagstat/main'
 include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_UNMAPPED       } from '../../modules/nf-core/samtools/fastq/main'
 include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_MAPPED         } from '../../modules/nf-core/samtools/fastq/main'
+include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_METAGENOMICS   } from '../../modules/nf-core/samtools/fastq/main'
+include { CAT_FASTQ as CAT_FASTQ_METAGENOMICS             } from '../../modules/nf-core/cat/fastq'
 include { CAT_FASTQ as CAT_FASTQ_UNMAPPED                 } from '../../modules/nf-core/cat/fastq'
 include { CAT_FASTQ as CAT_FASTQ_MAPPED                   } from '../../modules/nf-core/cat/fastq'
 
@@ -69,56 +71,29 @@ workflow FILTER_BAM {
     //
     // Metagenomics FASTQ generation for metagenomics (or just generation)
     // - FASTQ generation is now separate from BAM filtering -
-    //    no length/quality filtering applies to metagenomic bam
-    //
+    //    No length/quality filtering applies to metagenomic bam files (could be extension)
+    //    All bam -> fastq filtering options (-F 4, -f 4 or none) will be dealt with within modules.config
 
-    // Generate unmapped bam (no additional filtering) if the unmapped bam OR unmapped for metagneomics selected
-    if ( params.bamfiltering_generateunmappedfastq || ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) ) {
-        SAMTOOLS_FASTQ_UNMAPPED ( bam.map{[ it[0], it[1] ]}, false )
-        ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_UNMAPPED.out.versions.first() )
-    }
+    SAMTOOLS_FASTQ_METAGENOMICS ( bam.map{[ it[0], it[1] ]}, false )
+    ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_METAGENOMICS.out.versions.first() )
 
-    // Solution to the Andrades Valtueña-Light Problem: mapped bam for metagenomics (with options for quality- and length filtered)
+    ch_paired_fastq_for_cat_metagenomics = SAMTOOLS_FASTQ_METAGENOMICS.out.fastq.filter { !it[0].single_end }
+    ch_single_fastq_for_cat_metagenomics = SAMTOOLS_FASTQ_METAGENOMICS.out.fastq
+                                .mix(SAMTOOLS_FASTQ_METAGENOMICS.out.singleton)
+                                .mix(SAMTOOLS_FASTQ_METAGENOMICS.out.other)
+                                .groupTuple()
+                                .filter{ it[0].single_end }
+    CAT_FASTQ_METAGENOMICS ( ch_single_fastq_for_cat_metagenomics )
 
-    if ( params.bamfiltering_generatemappedfastq || ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) ) {
-        SAMTOOLS_FASTQ_MAPPED ( bam.map{[ it[0], it[1] ]}, false )
-        ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_MAPPED.out.versions.first() )
-    }
-
-    if ( ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
-        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq.filter { !it[0].single_end }
-
-        ch_single_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq
-                                    .mix(SAMTOOLS_FASTQ_UNMAPPED.out.singleton)
-                                    .mix(SAMTOOLS_FASTQ_UNMAPPED.out.other)
-                                    .groupTuple()
-                                    .filter{ it[0].single_end }
-
-        CAT_FASTQ_UNMAPPED ( ch_single_fastq_for_cat )
-    }
-
-    if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_MAPPED.out.fastq.filter { !it[0].single_end }
-
-        ch_single_fastq_for_cat = SAMTOOLS_FASTQ_MAPPED.out.fastq
-                                    .mix(SAMTOOLS_FASTQ_MAPPED.out.singleton)
-                                    .mix(SAMTOOLS_FASTQ_MAPPED.out.other)
-                                    .groupTuple()
-                                    .filter{ it[0].single_end }
-
-        CAT_FASTQ_MAPPED ( ch_single_fastq_for_cat )
-    }
-
-    // Routing for metagenomic screening -> first accounting for paired-end mapping, then merged mapping, then no metagenomics
-    if ( ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
-        ch_fastq_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads.mix(ch_paired_fastq_for_cat)
-    } else if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_fastq_for_metagenomics = CAT_FASTQ_MAPPED.out.reads.mix(ch_paired_fastq_for_cat)
-    } else if ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) {
-        ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_UNMAPPED.out.other
-    } else if ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' )) {
-        ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_MAPPED.out.other
-    } else if ( !params.run_metagenomics ) {
+    if ( params.run_metagenomics )  {
+        if ( params.preprocessing_skippairmerging ) {
+            // separate libraries that are SE (all merged reads) from PE (separate forward & reverse reads with NO singletons) data
+            ch_fastq_for_metagenomics = CAT_FASTQ_METAGENOMICS.out.reads.mix( ch_paired_fastq_for_cat_metagenomics )
+        }
+        else {
+            ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_METAGENOMICS.out.other
+        }
+    } else {
         ch_fastq_for_metagenomics = Channel.empty()
     }
 
