@@ -34,69 +34,52 @@ nextflow_pipeline {
             // Define exclusion patterns for files with unstable contents
             // NOTE: When a section needs more than a couple of small patterns, consider adding a variable to store the patterns here
             //       This is particularly important if the patterns excluded in the stable content section should be included in the stable name section
-            // TODO Maybe these should be moved to files in the test-datasets? Just worried that is less transparent
             def unstable_patterns_auth = [
-                '**/qualimapReport.html',
                 '**/mapped_reads_gc-content_distribution.txt',
                 '**/genome_gc_content_per_window.png',
-                '**/*.{svg,pdf}',
+                '**/*.{svg,pdf,html}',
+                '*.{svg,pdf,html}',
                 '**/DamageProfiler.log',
                 ]
 
             // Check that no files are missing/added
-            // Command legend:                                       Result directory to index      , include dirs?, exclude patterns       , exclude pattern list           , include patterns
-            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , true         , ['pipeline_info/*']    , null                           , ['*', '**/*'] )
+            // Command legend:                                       Result directory to index      , include dirs?, exclude patterns       , exclude pattern list , include patterns
+            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , true         , ['pipeline_info/*']    , null                 , ['*', '**/*'] )
 
             // Authentication
-            def stable_content_auth             = getAllFilesFromDir("$outputDir/authentication"    , true         , unstable_patterns_auth , null                           , ['**/*'] )
-            def stable_name_auth                = getAllFilesFromDir("$outputDir/authentication"    , true         ,  null                  , null                           , unstable_patterns_auth)
+            def stable_content_authentication   = getAllFilesFromDir("$outputDir/authentication"    , true         , unstable_patterns_auth , null                 , ['*', '**/*'] )
+            def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , true         ,  null                  , null                 , unstable_patterns_auth)
 
             // Deduplication
-            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true         , null                   , null                           , ['*.flagstat'] )
-            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , true         , null                   , null                           , ['*.{bam,bai}'] )
+            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true         , null                   , null                 , ['*.flagstat']  )
+            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , true         , null                   , null                 , ['*.{bam,bai}'] )
             // def bams_deduplication              = getAllFilesFromDir("$outputDir/deduplication"     , true         , null                   , null                           , ['*.bam'] )
 
             // Final_bams
-            def stable_content_final_bams       = getAllFilesFromDir("$outputDir/final_bams"        , true         , null                   , null                           , ['**/*.flagstat']  )
-            def stable_name_final_bams          = getAllFilesFromDir("$outputDir/final_bams"        , true         , null                   , null                           , ['**/*.{bam,bai}']  )
+            def stable_content_final_bams       = getAllFilesFromDir("$outputDir/final_bams"        , true         , null                   , null                 , ['**/*.flagstat']  )
+            def stable_name_final_bams          = getAllFilesFromDir("$outputDir/final_bams"        , true         , null                   , null                 , ['**/*.{bam,bai}'] )
             // def bams_final_bams                 = getAllFilesFromDir("$outputDir/final_bams"        , true         , null                   , null                           , ['**/*.bam'] )
 
             // Mapping (incl. bam_input flasgstat)
-            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true         , null                   , null                           , ['**/*.flagstat'] )
-            def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , true         , null                   , null                           , ['**/*.{bam,bai}'] )
+            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true         , null                   , null                 , ['**/*.flagstat']  )
+            def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , true         , null                   , null                 , ['**/*.{bam,bai}'] )
             // def bams_mapping                    = getAllFilesFromDir("$outputDir/mapping"           , true         , null                   , null                           , ['**/*.bam'] )
+
+            // Preprocessing
+            // NOTE: FastQC html appears stable, but I worry it might just include a day timestamp instead of a full timestamp. To keep the expression simpler I removed both from checksum testing.
+            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true         , ['**/*.{zip,log,html}'], null                 , ['**/*'] )
+            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true         , null                   , null                 , ['**/*.{zip,log,html}'] )
+
+            // Read filtering
+            def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , true         , null                   , null                 , ['*.flagstat']  )
+            def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , true         , null                   , null                 , ['*.{bam,bai}'] )
 
             // MQC
             // preprocessing
             // read filtering
 
-            // // Bam filtering
-            // def stable_content_bamfiltering     = getAllFilesFromDir("$outputDir/bam_filtering"     , true         , ['*.{bam,bai}']                     , null                , ['*.flagstat'] )
-            // def stable_name_bamfiltering        = getAllFilesFromDir("$outputDir/bam_filtering"     , true         , ['*.flagstat']                      , null                , ['*.{bam,bai}'] )
-
-            // // Bam input stats
-            // def stable_content_baminputstats    = getAllFilesFromDir("$outputDir/bam_input_stats"   , true         , null                                , null                , ['*.flagstat'] )
-
-            // // Damage estimation
-            // def stable_content_damageestimation = getAllFilesFromDir("$outputDir/damage_estimation" , true         , ['**/*.{svg,pdf,log}']              , null                , ['**/*.{txt,json}'] )
-            // def stable_name_damageestimation    = getAllFilesFromDir("$outputDir/damage_estimation" , true         , ['**/*.{txt,json}']                 , null                , ['**/*.{svg,pdf,log}'] )
-
-
-            // // Mapping
-            // def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , true         , null                                , null                , ['**/*.flagstat'] )
-            // def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , true         , null                                , null                , ['**/*.{bam,bai}'] )
-
-            // // Mapstats
-            // // NOTE: GC content data and plot has minor changes between runs. I suspect this is because of the order of reads that start at the same position being unstable, but I am not sure.
-            // def stable_content_mapstats         = getAllFilesFromDir("$outputDir/mapstats"          , true         , ['**/*.html', '**/mapped_reads_gc-content_distribution.txt', '**/genome_gc_content_per_window.png'], null , ['**/*.{bed,json,txt,log,css,png,js}'] )
-            // def stable_name_mapstats            = getAllFilesFromDir("$outputDir/mapstats"          , true         , null                                                                                               , null , ['**/*.html', '**/mapped_reads_gc-content_distribution.txt', '**/genome_gc_content_per_window.png'] )
-
             // MultiQC
-            def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , true         , null                                , null                , ['*', '**/*'] )
-
-            // // Preprocessing
-            // def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true         , ['**/*.{zip,log}', '**/*fastp.html'], null                , ['**/*'] )
-            // def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true         , null                                , null                , ['**/*.{zip,log}', '**/*fastp.html'] )
+            def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , true         , null                    , null                          , ['*', '**/*'] )
 
             assertAll(
                 { assert workflow.success },
@@ -106,18 +89,16 @@ nextflow_pipeline {
 
                 // Checking changes to contents of each section
                 // NOTE: Keep the order of the sections in the alphanumeric order of the output directories.
-                //    Each section should first check stable_content, stable_name second (if applicable), and BAM header MD5 third (if applicable).
-                { assert snapshot( stable_content_auth               , stable_name_auth*.name             ).match("authentication") },
+                //    Each section should first check stable_content, stable_name second (if applicable).
+                { assert snapshot( stable_content_authentication     , stable_name_authentication*.name   ).match("authentication") },
                 { assert snapshot( stable_content_deduplication      , stable_name_deduplication*.name    ).match("deduplication") },
                 { assert snapshot( stable_content_final_bams         , stable_name_final_bams*.name       ).match("final_bams") },
                 // NOTE: The snapshot section for mapping cannot be named 'mapping'. See https://github.com/askimed/nf-test/issues/279
                 { assert snapshot( stable_content_mapping            , stable_name_mapping*.name          ).match("mapping_output") },
-                // { assert snapshot( stable_content_bamfiltering    , stable_name_bamfiltering*.name     ).match("bam_filtering") },
-                // { assert snapshot( stable_content_baminputstats   ).match("bam_input_stats") },
-                // { assert snapshot( stable_content_damageestimation, stable_name_damageestimation*.name ).match("damage_estimation") },
-                // { assert snapshot( stable_content_mapstats        , stable_name_mapstats*.name         ).match("mapstats") },
-                // { assert snapshot( stable_name_multiqc*.name      ).match("multiqc") },
-                // { assert snapshot( stable_content_preprocessing   , stable_name_preprocessing*.name    ).match("preprocessing") },
+                { assert snapshot( stable_content_preprocessing      , stable_name_preprocessing*.name    ).match("preprocessing") },
+                { assert snapshot( stable_content_readfiltering      , stable_name_readfiltering*.name    ).match("read_filtering") },
+
+                { assert snapshot( stable_name_multiqc*.name      ).match("multiqc") },
 
                 // Versions
                 { assert new File("$outputDir/pipeline_info/nf_core_eager_software_mqc_versions.yml").exists() },
@@ -126,7 +107,3 @@ nextflow_pipeline {
         }
     }
 }
-
-// , bams_deduplication.collect { bam(it.toString()).getReadsMD5() }
-// , bams_final_bams.collect    { bam(it.toString()).getReadsMD5() }
-// , bams_mapping.collect       { bam(it.toString()).getReadsMD5() }
