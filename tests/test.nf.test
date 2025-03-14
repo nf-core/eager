@@ -16,7 +16,12 @@ nextflow_pipeline {
 
         then {
 
-            // Each top level results directory should be tested with individual snapshots/variables
+            ///////////////////
+            // DOCUMENTATION //
+            ///////////////////
+
+            // The contents of each top level results directory should be tested with individually named snapshots.
+            // Within each snapshot, there should be two to three distinct variables, that contain the files to be tested.
             //    - stable_name_<dir> is for files with variable md5sums (i.e. content) so only names will be compared
             //    - stable_content_<dir> is for files with stable md5sums (i.e. content) so md5sums will be compared
             //    - bams_<dir> is for BAM files, where the headerMD5 is checked for stability (since the content can be unstable)
@@ -30,6 +35,10 @@ nextflow_pipeline {
             //   b) the order of the reads in the BAMs is not stable (sorted, but reads that share a start position can be in any order)
             //   point b) also causes BAIs to be unstable.
             //   c) Merging of multiple BAMs with duplicate @RG / @PG tags can cause the header to be unstable (particularly in the case of shards/lanes)
+
+            //////////////////////
+            // DEFINE VARIABLES //
+            //////////////////////
 
             // Define exclusion patterns for files with unstable contents
             // NOTE: When a section needs more than a couple of small patterns, consider adding a variable to store the patterns here
@@ -80,6 +89,10 @@ nextflow_pipeline {
 
             // MultiQC
             def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , true         , null                    , null                          , ['*', '**/*'] )
+
+            ///////////////////////
+            // DEFINE ASSERTIONS //
+            ///////////////////////
 
             assertAll(
                 { assert workflow.success },
