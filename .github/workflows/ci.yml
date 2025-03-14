@@ -31,7 +31,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: "temurin" # See 'Supported distributions' for available options
-          java-version: "17"
+          java-version: "11"
       - name: Check if Dockerfile or Conda environment changed
         uses: technote-space/get-diff-action@v4
         with:
