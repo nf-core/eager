@@ -59,7 +59,7 @@ nextflow_pipeline {
             def stable_content_authentication   = getAllFilesFromDir("$outputDir/authentication"    , true         , unstable_patterns_auth , null                 , ['*', '**/*'] )
             def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , true         ,  null                  , null                 , unstable_patterns_auth)
 
-            // Deduplication
+            // Deduplication - TODO -> snapshot both lists are empty!?
             def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , true         , null                   , null                 , ['*.flagstat']  )
             def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , true         , null                   , null                 , ['*.{bam,bai}'] )
             // def bams_deduplication              = getAllFilesFromDir("$outputDir/deduplication"     , true         , null                   , null                           , ['*.bam'] )
@@ -79,7 +79,7 @@ nextflow_pipeline {
             def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , true         , ['**/*.{zip,log,html}'], null                 , ['**/*'] )
             def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , true         , null                   , null                 , ['**/*.{zip,log,html}'] )
 
-            // Read filtering
+            // Read filtering - TODO -> snapshot both lists are empty!?
             def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , true         , null                   , null                 , ['*.flagstat']  )
             def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , true         , null                   , null                 , ['*.{bam,bai}'] )
 
