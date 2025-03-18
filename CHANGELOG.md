@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.5.3] - 2025-03-13
+
+### `Added`
+
+### `Fixed`
+
+- [#1119](https://github.com/nf-core/eager/issues/1119) - Fix typo in variable of IndelRealigner step of UnifiedGenotyper when generating a targetIntervals file (♥ to @Dog13Golf for reporting, fix by @jfy133).
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.5.2] - 2024-06-28
 
 ### `Added`

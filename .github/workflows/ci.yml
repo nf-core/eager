@@ -27,7 +27,11 @@ jobs:
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
-
+      - name: Install older Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin" # See 'Supported distributions' for available options
+          java-version: "11"
       - name: Check if Dockerfile or Conda environment changed
         uses: technote-space/get-diff-action@v4
         with:
@@ -37,19 +41,18 @@ jobs:
 
       - name: Build new docker image
         if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/eager:2.5.2
+        run: docker build --no-cache . -t nfcore/eager:2.5.3
 
       - name: Pull docker image
         if: ${{ !env.MATCHED_FILES }}
         run: |
           docker pull nfcore/eager:dev
-          docker tag nfcore/eager:dev nfcore/eager:2.5.2
-
+          docker tag nfcore/eager:dev nfcore/eager:2.5.3
       - name: Install Nextflow
         env:
           CAPSULE_LOG: none
         run: |
-          wget -qO- get.nextflow.io | bash
+          wget -qO- https://github.com/nextflow-io/nextflow/releases/download/v22.10.6/nextflow | bash
           sudo mv nextflow /usr/local/bin/
       - name: HELPTEXT Run with the help flag
         run: |
