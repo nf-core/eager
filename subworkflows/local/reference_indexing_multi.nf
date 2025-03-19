@@ -17,28 +17,32 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_versions = Channel.empty()
 
     // Import reference sheet and change empty arrays to empty strings for compatibility with single reference input
-    ch_splitreferencesheet_for_branch = Channel
-        .fromList(samplesheetToList(referencesheet, "${projectDir}/assets/schema_fasta.json"))
-        .map { meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
-            meta.ploidy = meta.genotyping_ploidy != null ? meta.genotyping_ploidy : params.genotyping_reference_ploidy
-            fai = fai != [] ? fai : ""
-            dict = dict != [] ? dict : ""
-            mapper_index = mapper_index != [] ? mapper_index : ""
-            circular_target = circular_target != [] ? circular_target : ""
-            circularmapper_elongatedfasta = circularmapper_elongatedfasta != [] ? circularmapper_elongatedfasta : ""
-            circularmapper_elongatedindex = circularmapper_elongatedindex != [] ? circularmapper_elongatedindex : ""
-            mitochondrion = mitochondrion != [] ? mitochondrion : ""
-            capture_bed = capture_bed != [] ? capture_bed : ""
-            pileupcaller_bed = pileupcaller_bed != [] ? pileupcaller_bed : ""
-            pileupcaller_snp = pileupcaller_snp != [] ? pileupcaller_snp : ""
-            hapmap = hapmap != [] ? hapmap : ""
-            pmd_masked_fasta = pmd_masked_fasta != [] ? pmd_masked_fasta : ""
-            pmd_bed_for_masking = pmd_bed_for_masking != [] ? pmd_bed_for_masking : ""
-            sexdet_bed = sexdet_bed != [] ? sexdet_bed : ""
-            bedtools_feature = bedtools_feature != [] ? bedtools_feature : ""
-            genotyping_gatk_dbsnp = genotyping_gatk_dbsnp != [] ? genotyping_gatk_dbsnp : ""
-            [meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp]
-        }
+    ch_splitreferencesheet_for_branch = Channel.fromSamplesheet("fasta_sheet")
+                                    .map{
+                                        meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ->
+                                            meta.ploidy                                          = meta.genotyping_ploidy != null ? meta.genotyping_ploidy : params.genotyping_reference_ploidy
+                                            fai                                                  = fai != [] ? fai : ""
+                                            dict                                                 = dict != [] ? dict : ""
+                                            mapper_index                                         = mapper_index != [] ? mapper_index : ""
+                                            circular_target                                      = circular_target != [] ? circular_target : ""
+                                            circularmapper_elongatedfasta                        = circularmapper_elongatedfasta != [] ? circularmapper_elongatedfasta : ""
+                                            circularmapper_elongatedindex                        = circularmapper_elongatedindex != [] ? circularmapper_elongatedindex : ""
+                                            mitochondrion                                        = mitochondrion != [] ? mitochondrion : ""
+                                            capture_bed                                          = capture_bed != [] ? capture_bed : ""
+                                            pileupcaller_bed                                     = pileupcaller_bed != [] ? pileupcaller_bed : ""
+                                            pileupcaller_snp                                     = pileupcaller_snp != [] ? pileupcaller_snp : ""
+                                            hapmap                                               = hapmap != [] ? hapmap : ""
+                                            pmd_masked_fasta                                     = pmd_masked_fasta != [] ? pmd_masked_fasta : ""
+                                            pmd_bed_for_masking                                  = pmd_bed_for_masking != [] ? pmd_bed_for_masking : ""
+                                            sexdet_bed                                           = sexdet_bed != [] ? sexdet_bed : ""
+                                            bedtools_feature                                     = bedtools_feature != [] ? bedtools_feature : ""
+                                            genotyping_gatk_dbsnp                                = genotyping_gatk_dbsnp != [] ? genotyping_gatk_dbsnp : ""
+                                            consensus_multivcfanalyzer_additional_vcf_files      = consensus_multivcfanalyzer_additional_vcf_files != [] ? consensus_multivcfanalyzer_additional_vcf_files : ""
+                                            consensus_multivcfanalyzer_reference_gff_annotations = consensus_multivcfanalyzer_reference_gff_annotations != [] ? consensus_multivcfanalyzer_reference_gff_annotations : ""
+                                            consensus_multivcfanalyzer_reference_gff_exclude     = consensus_multivcfanalyzer_reference_gff_exclude != [] ? consensus_multivcfanalyzer_reference_gff_exclude : ""
+                                            consensus_multivcfanalyzer_reference_snpeff_results  = consensus_multivcfanalyzer_reference_snpeff_results != [] ? consensus_multivcfanalyzer_reference_gff_exclude : ""
+                                        [ meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
+                                    }
 
     // GENERAL DESCRIPTION FOR NEXT SECTIONS
     // This will be the same scheme for all other generation steps, i.e.
@@ -51,19 +55,22 @@ workflow REFERENCE_INDEXING_MULTI {
     // DECOMPRESSION
     //
 
-    ch_input_from_referencesheet = ch_splitreferencesheet_for_branch.multiMap { meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
-        generated: [meta, fasta, fai, dict, mapper_index]
-        circularmapper: [meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex]
-        mitochondrion_header: [meta, mitochondrion]
-        angsd_hapmap: [meta, hapmap]
-        pmd_masked_fasta: [meta, pmd_masked_fasta]
-        pmd_bed_for_masking: [meta, pmd_bed_for_masking]
-        snp_bed: [meta, capture_bed]
-        pileupcaller_bed_snp: [meta, pileupcaller_bed, pileupcaller_snp]
-        sexdeterrmine_bed: [meta, sexdet_bed]
-        bedtools_feature: [meta, bedtools_feature]
-        dbsnp: [meta, genotyping_gatk_dbsnp]
-    }
+    ch_input_from_referencesheet = ch_splitreferencesheet_for_branch
+                            .multiMap {
+                                meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ->
+                                generated:            [ meta, fasta, fai, dict, mapper_index ]
+                                circularmapper:       [ meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex ]
+                                mitochondrion_header: [ meta, mitochondrion ]
+                                angsd_hapmap:         [ meta, hapmap ]
+                                pmd_masked_fasta:     [ meta, pmd_masked_fasta ]
+                                pmd_bed_for_masking:  [ meta, pmd_bed_for_masking ]
+                                snp_bed:              [ meta, capture_bed ]
+                                pileupcaller_bed_snp: [ meta, pileupcaller_bed, pileupcaller_snp ]
+                                sexdeterrmine_bed:    [ meta, sexdet_bed ]
+                                bedtools_feature:     [ meta, bedtools_feature ]
+                                dbsnp:                [ meta, genotyping_gatk_dbsnp ]
+                                mva:                  [ meta, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
+                            }
 
     // Detect if fasta is gzipped or not
     ch_fasta_for_gunzip = ch_input_from_referencesheet.generated.branch { meta, fasta, fai, dict, mapper_index ->
@@ -178,16 +185,17 @@ workflow REFERENCE_INDEXING_MULTI {
     ch_indexmapper_for_reference = ch_fasta_for_mapperindex.skip.mix(ch_indexed_formix)
 
     emit:
-    reference            = ch_indexmapper_for_reference // [ meta, fasta, fai, dict, mapindex ]
-    elongated_reference  = ch_input_from_referencesheet.circularmapper // [ meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex ]
-    mitochondrion_header = ch_input_from_referencesheet.mitochondrion_header // [ meta, mitochondrion ]
-    hapmap               = ch_input_from_referencesheet.angsd_hapmap // [ meta, hapmap ]
-    pmd_masked_fasta     = ch_input_from_referencesheet.pmd_masked_fasta // [ meta, pmd_masked_fasta ]
-    pmd_bed_for_masking  = ch_input_from_referencesheet.pmd_bed_for_masking // [ meta, pmd_bed_for_masking ]
-    snp_capture_bed      = ch_input_from_referencesheet.snp_bed // [ meta, capture_bed ]
-    pileupcaller_bed_snp = ch_input_from_referencesheet.pileupcaller_bed_snp // [ meta, pileupcaller_bed, pileupcaller_snp ]
-    sexdeterrmine_bed    = ch_input_from_referencesheet.sexdeterrmine_bed // [ meta, sexdet_bed ]
-    bedtools_feature     = ch_input_from_referencesheet.bedtools_feature // [ meta, bedtools_feature ]
-    dbsnp                = ch_input_from_referencesheet.dbsnp // [ meta, genotyping_gatk_dbsnp ]
+    reference            = ch_indexmapper_for_reference                          // [ meta, fasta, fai, dict, mapindex ]
+    elongated_reference  = ch_input_from_referencesheet.circularmapper           // [ meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex ]
+    mitochondrion_header = ch_input_from_referencesheet.mitochondrion_header     // [ meta, mitochondrion ]
+    hapmap               = ch_input_from_referencesheet.angsd_hapmap             // [ meta, hapmap ]
+    pmd_masked_fasta     = ch_input_from_referencesheet.pmd_masked_fasta         // [ meta, pmd_masked_fasta ]
+    pmd_bed_for_masking  = ch_input_from_referencesheet.pmd_bed_for_masking      // [ meta, pmd_bed_for_masking ]
+    snp_capture_bed      = ch_input_from_referencesheet.snp_bed                  // [ meta, capture_bed ]
+    pileupcaller_bed_snp = ch_input_from_referencesheet.pileupcaller_bed_snp     // [ meta, pileupcaller_bed, pileupcaller_snp ]
+    sexdeterrmine_bed    = ch_input_from_referencesheet.sexdeterrmine_bed        // [ meta, sexdet_bed ]
+    bedtools_feature     = ch_input_from_referencesheet.bedtools_feature         // [ meta, bedtools_feature ]
+    dbsnp                = ch_input_from_referencesheet.dbsnp                    // [ meta, genotyping_gatk_dbsnp ]
+    mva                  = ch_input_from_referencesheet.mva                      // [ meta, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
     versions             = ch_versions
 }

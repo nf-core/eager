@@ -776,3 +776,26 @@ When using pileupCaller for genotyping, single-stranded and double-stranded libr
 </details>
 
 [ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. It can estimate genotype likelihoods and allele frequencies from next-generation sequencing data. The output provided is a bgzipped genotype likelihood file, containing likelihoods across all samples per reference. Users can specify the model used for genotype likelihood estimation, as well as the output format. For more information on the available options, see the [ANGSD](https://www.popgen.dk/angsd/index.php/Genotype_Likelihoods).
+
+### Consensus Sequence Generation
+
+#### MultiVCFAnalyzer
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `consensus_sequence/`
+
+  - `fullAlignment.fasta.gz`: A fasta file containing the alignment of all positions contained in the VCF files i.e. including ref calls.
+  - `info.txt`: File containing information, e.g. parameters used, about the run.
+  - `snpAlignment.fasta.gz`: A fasta file containing the alignment of just SNP positions variable in the samples only. -`snpAlignmentIncludingRefGenome.fasta.gz`: A fasta file containing the alignment of just SNP positions variable between samples including the reference genome. -`snpStatistics.tsv`: Table containing some basic statistics about the SNP calls of each sample. -`snpTable.tsv`: Basic SNP table of combined positions taken from each VCF file. If SnpEff provided, it will also contain a columns on the effect of the detected SNP.
+  - `snpTableForSnpEff.tsv`: Input file for SnpEff analysis.
+  - `snpTableWithUncertaintyCalls.tsv`: Basic SNP table of combined positions taken from each VCF file, but with lower case characters indicating uncertain calls.
+  - `structureGenotypes.tsv`: Input file for STRUCTURE.
+  - `structureGenotypes_noMissingData-Columns.tsv`: Alternate input file for STRUCTURE.
+  - `MultiVCFAnalyzer.json`: Summary statistics in MultiQC JSON format,
+  - `versions.yml`: File containing software versions.
+
+</details>
+
+[MultiVCFAnalyzer](https://github.com/alexherbig/MultiVCFAnalyzer) is a SNP alignment generation tool, that allows further evaluation and filtering of SNP calls made by the GATK UnifiedGenotyper. More specifically it takes one or more VCF files as well as a reference genome, and will allow filtering of SNPs via a variety of metrics and produces a FASTA file with each sample as an entry containing ‘consensus calls’ at each position.

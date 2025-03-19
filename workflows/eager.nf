@@ -34,6 +34,7 @@ include { RUN_SEXDETERRMINE                                   } from '../subwork
 include { MERGE_LIBRARIES                                     } from '../subworkflows/local/merge_libraries'
 include { MERGE_LIBRARIES as MERGE_LIBRARIES_GENOTYPING       } from '../subworkflows/local/merge_libraries'
 include { GENOTYPE                                            } from '../subworkflows/local/genotype'
+include { CONSENSUS_SEQUENCE                            } from '../subworkflows/local/consensus_sequence'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -557,6 +558,45 @@ workflow EAGER {
 
         ch_versions = ch_versions.mix(GENOTYPE.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(GENOTYPE.out.mqc.collect { it[1] }.ifEmpty([]))
+    }
+
+    //
+    // SUBWORKFLOW: Consensus sequence
+    //
+    if ( params.run_consensus_sequence ) {
+        ch_reference_for_consensus_sequence = REFERENCE_INDEXING.out.reference
+            // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
+            .map {
+                meta, fasta, fai, dict, mapindex ->
+                [ meta, fasta, fai, dict ]
+            }
+        GENOTYPE(
+            ch_bams_for_genotyping,
+            ch_reference_for_genotyping,
+            REFERENCE_INDEXING.out.pileupcaller_bed_snp.ifEmpty([[], [], []]),
+            REFERENCE_INDEXING.out.dbsnp.ifEmpty([[], []])
+        )
+
+        ch_versions = ch_versions.mix(GENOTYPE.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(GENOTYPE.out.mqc.collect { it[1] }.ifEmpty([]))
+    }
+
+    //
+    // SUBWORKFLOW: Consensus sequence
+    //
+    if ( params.run_consensus_sequence ) {
+        ch_reference_for_consensus_sequence = REFERENCE_INDEXING.out.reference
+            // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
+            .map {
+                meta, fasta, fai, dict, mapindex, circular_target ->
+                [ meta, fasta, fai ]
+            }.dump(tag: 'reference_channel_consensus_sequence')
+    CONSENSUS_SEQUENCE(
+                        GENOTYPE.out.vcf.dump(tag: 'genotype_channel_consensus_sequence'),
+                        REFERENCE_INDEXING.out.mva.ifEmpty([ [], [], [], [], [] ]).dump(tag: 'mva_reference_files_consensus_sequences'),
+                        ch_reference_for_consensus_sequence
+    )
+
     }
 
     //

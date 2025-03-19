@@ -334,7 +334,7 @@
                     "type": "boolean",
                     "description": "Specify to skip read-pair merging.",
                     "fa_icon": "fas fa-forward",
-                    "help_text": "Turns off the paired-end read merging, and will result in paired-end mapping modes being used during reference of reads again alignment.\n\nThis can be useful in cases where you have long ancient DNA reads, modern DNA or when you want to utilise mate-pair 'spatial' information.\n\n ⚠️ If you run this with --preprocessing_minlength set to a value (as is by default!), you may end up removing single reads from either the pair1 or pair2 file. These reads will be NOT be mapped when aligning with either BWA or bowtie, as both can only accept one (forward) or two (forward and reverse) FASTQs as input in paired-end mode.\n\n> ⚠️ If you run metagenomic screening as well as skipping merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies AdapterRemoval parameter: `--collapse`\n> Modifies fastp parameter: `--merge`"
+                    "help_text": "Turns off the paired-end read merging, and will result in paired-end mapping modes being used during reference of reads again alignment.\n\nThis can be useful in cases where you have long ancient DNA reads, modern DNA or when you want to utilise mate-pair 'spatial' information.\n\n \u26a0\ufe0f If you run this with --preprocessing_minlength set to a value (as is by default!), you may end up removing single reads from either the pair1 or pair2 file. These reads will be NOT be mapped when aligning with either BWA or bowtie, as both can only accept one (forward) or two (forward and reverse) FASTQs as input in paired-end mode.\n\n> \u26a0\ufe0f If you run metagenomic screening as well as skipping merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies AdapterRemoval parameter: `--collapse`\n> Modifies fastp parameter: `--merge`"
                 },
                 "preprocessing_excludeunmerged": {
                     "type": "boolean",
@@ -377,7 +377,7 @@
                     "type": "integer",
                     "default": 0,
                     "description": "Specify number of bases to hard-trim from 5 prime or front of reads.",
-                    "help_text": "Specify number of bases to hard-trim from 5 prime or front of reads. Exact behaviour varies per tool, see documentation. By default set to `0` to not perform any hard trimming.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n ⚠️ When this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter). Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior to mapping (to allow more specific mapping), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie 2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 5p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore, this is more suitable for hard-removal of damage before mapping (however the Bowtie 2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim5p`\n> Modifies fastp parameters: `--trim_front1` and/or `--trim_front2`",
+                    "help_text": "Specify number of bases to hard-trim from 5 prime or front of reads. Exact behaviour varies per tool, see documentation. By default set to `0` to not perform any hard trimming.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n \u26a0\ufe0f When this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter). Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior to mapping (to allow more specific mapping), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie 2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 5p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore, this is more suitable for hard-removal of damage before mapping (however the Bowtie 2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim5p`\n> Modifies fastp parameters: `--trim_front1` and/or `--trim_front2`",
                     "fa_icon": "fas fa-cut"
                 },
                 "preprocessing_trim3p": {
@@ -385,7 +385,7 @@
                     "default": 0,
                     "description": "Specify number of bases to hard-trim from 3 prime or tail of reads.",
                     "fa_icon": "fas fa-cut",
-                    "help_text": "Specify number of bases to hard-trim from 3 prime or tail of reads. Exact behaviour varies per tool, see documentation. By default set to `0` to not perform any hard trimming.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n⚠️ When this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter). Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior to mapping (to allow more specific mapping), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie 2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 3p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore this is more suitable for hard-removal of damage before mapping (however the Bowtie 2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim3p`\n> Modifies fastp parameters: `--trim_tail1` and/or `--trim_tail2`"
+                    "help_text": "Specify number of bases to hard-trim from 3 prime or tail of reads. Exact behaviour varies per tool, see documentation. By default set to `0` to not perform any hard trimming.\n\nThis parameter allows users to 'hard' remove a number of bases from the beginning or end of reads, regardless of quality.\n\n\u26a0\ufe0f When this trimming occurs depends on the tool, i.e., the exact behaviour is not the same between AdapterRemoval and fastp.\n\nFor fastp: 5p/3p trimming occurs _prior_ to any other trimming (quality, poly-G, adapter). Please see the [fastp documentation](https://github.com/OpenGene/fastp#global-trimming) for more information. If you wish to use this to remove damage prior to mapping (to allow more specific mapping), ensure you have manually removed adapters/quality trimmed **prior** to giving the reads to nf-core/eager. Alternatively, you can use Bowtie 2's inbuilt pre-mapping read-end trimming functionality. Note that nf-core/eager only allows this hard trimming equally for both forward and reverse reads (i.e., you cannot provide different values for the 3p end for R1 and R2).\n\nFor AdapterRemoval, this trimming happens _after_ the removal of adapters, however prior to quality trimming. Therefore this is more suitable for hard-removal of damage before mapping (however the Bowtie 2 system will be more reliable).\n\n> Modifies AdapterRemoval parameters: `--trim3p`\n> Modifies fastp parameters: `--trim_tail1` and/or `--trim_tail2`"
                 },
                 "preprocessing_savepreprocessedreads": {
                     "type": "boolean",
@@ -608,12 +608,12 @@
                     "default": 4,
                     "fa_icon": "fas fa-flag",
                     "description": "Specify the SAM format flag of reads to remove during BAM filtering for downstream genomic steps.",
-                    "help_text": "Specify to customise the exact SAM format flag of reads you wish to _remove_ from your BAM file to for downstream _genomic_ analyses.\n\nYou can explore more using a tool from the Broad Institute [here](https://broadinstitute.github.io/picard/explain-flags.html)\n\n> ⚠️ Modify at your own risk, alternative flags are not necessarily supported in downstream steps!\n\n> Modifies samtools parameter: `-F`"
+                    "help_text": "Specify to customise the exact SAM format flag of reads you wish to _remove_ from your BAM file to for downstream _genomic_ analyses.\n\nYou can explore more using a tool from the Broad Institute [here](https://broadinstitute.github.io/picard/explain-flags.html)\n\n> \u26a0\ufe0f Modify at your own risk, alternative flags are not necessarily supported in downstream steps!\n\n> Modifies samtools parameter: `-F`"
                 },
                 "bamfiltering_retainunmappedgenomicbam": {
                     "type": "boolean",
                     "description": "Specify to retain unmapped reads in the BAM file used for downstream genomic analyses.",
-                    "help_text": "Specify to retain unmapped reads (optionally also length filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomics_input` is set to `all`.\n\n> ⚠️ This will likely slow down run time of downstream pipeline steps!\n\n> Modifies tool parameter(s):\n> - samtools view: `-f 4` / `-F 4`",
+                    "help_text": "Specify to retain unmapped reads (optionally also length filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomics_input` is set to `all`.\n\n> \u26a0\ufe0f This will likely slow down run time of downstream pipeline steps!\n\n> Modifies tool parameter(s):\n> - samtools view: `-f 4` / `-F 4`",
                     "fa_icon": "fas fa-piggy-bank"
                 },
                 "bamfiltering_generateunmappedfastq": {
@@ -655,7 +655,7 @@
                     "description": "Specify which type of reads to use for metagenomic screening.",
                     "enum": ["unmapped", "mapped", "all"],
                     "fa_icon": "fas fa-hand-pointer",
-                    "help_text": "Specify to select which mapped reads will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction) or all reads.\n\n> ⚠️ If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies samtools fastq parameters: `-f 4` / `-F 4`"
+                    "help_text": "Specify to select which mapped reads will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction) or all reads.\n\n> \u26a0\ufe0f If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies samtools fastq parameters: `-f 4` / `-F 4`"
                 },
                 "run_metagenomics_complexityfiltering": {
                     "type": "boolean",
@@ -827,14 +827,12 @@
                 "metagenomics_maltextract_taxonlist": {
                     "type": "string",
                     "description": "Path to a text file with taxa of interest (one taxon per row, NCBI taxonomy name format)",
-                    "default": null,
                     "help_text": "Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format corresponding to a taxonomic node in your MALT database. An example can be found on the [HOPS github](https://raw.githubusercontent.com/rhuebler/HOPS/external/Resources/default_list.txt).\\n\\nNecessary when `--metagenomics_profiling_tool malt` specified and `--metagenomics_run_postprocessing` flagged.\n\n Modifies tool parameter(s):\n> - MaltExtract: `-t`",
                     "fa_icon": "fas fa-align-left"
                 },
                 "metagenomics_maltextract_ncbidir": {
                     "type": "string",
                     "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; available: https://github.com/rhuebler/HOPS/)",
-                    "default": null,
                     "help_text": "Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).\\n\\nNecessary when `--metagenomics_profiling_tool malt` and `--metagenomics_run_postprocessing` specified.\n\n Modifies tool parameter(s):\n> - MaltExtract: `-r`",
                     "fa_icon": "fab fa-buffer"
                 },
@@ -884,7 +882,7 @@
                 },
                 "metagenomics_maltextract_minpercentidentity": {
                     "type": "number",
-                    "default": 85,
+                    "default": 85.0,
                     "description": "Minimum percent identity alignments are required to have to be reported as candidate reads. Recommended to set same as MALT parameter.",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `--minPI`"
                 },
@@ -912,7 +910,7 @@
                     "type": "string",
                     "default": "markduplicates",
                     "description": "Specify which tool to use for deduplication.",
-                    "help_text": "Specify which duplicate read removal tool to use. While `markduplicates` is set by default, an ancient DNA specific read deduplication tool `dedup` is offered (see [Peltzer et al. 2016](https://doi.org/10.1186/s13059-016-0918-z) for details). The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> ⚠️ DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
+                    "help_text": "Specify which duplicate read removal tool to use. While `markduplicates` is set by default, an ancient DNA specific read deduplication tool `dedup` is offered (see [Peltzer et al. 2016](https://doi.org/10.1186/s13059-016-0918-z) for details). The latter utilises both ends of paired-end data to remove duplicates (i.e. true exact duplicates, as markduplicates will over-zealously deduplicate anything with the same starting position even if the ends are different).\n\n> \u26a0\ufe0f DeDup can only be used on collapsed (i.e. merged) reads from paired-end sequencing.",
                     "enum": ["markduplicates", "dedup"],
                     "fa_icon": "fas fa-hammer"
                 }
@@ -930,7 +928,7 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-power-off",
                     "description": "Specify to turn on damage rescaling of BAM files using mapDamage2 to probabilistically remove damage.",
-                    "help_text": "Specify to turn on mapDamage2's BAM rescaling functionality. This probabilistically replaces Ts back to Cs depending on the likelihood this reference-mismatch was originally caused by damage. If the library is specified to be single-stranded, this will automatically use the `--single-stranded` mode.\nThis process will ameliorate the effects of aDNA damage, but also increase reference-bias.\n\n**This functionality does not have any MultiQC output.**\n ⚠️ Rescaled libraries will not be merged with non-scaled libraries of the same sample for downstream genotyping, as the model may be different for each library. If you wish to merge these, please do this manually and re-run nf-core/eager using the merged BAMs as input.\n\n> Modifies mapDamage2 parameter: `--rescale`"
+                    "help_text": "Specify to turn on mapDamage2's BAM rescaling functionality. This probabilistically replaces Ts back to Cs depending on the likelihood this reference-mismatch was originally caused by damage. If the library is specified to be single-stranded, this will automatically use the `--single-stranded` mode.\nThis process will ameliorate the effects of aDNA damage, but also increase reference-bias.\n\n**This functionality does not have any MultiQC output.**\n \u26a0\ufe0f Rescaled libraries will not be merged with non-scaled libraries of the same sample for downstream genotyping, as the model may be different for each library. If you wish to merge these, please do this manually and re-run nf-core/eager using the merged BAMs as input.\n\n> Modifies mapDamage2 parameter: `--rescale`"
                 },
                 "damage_manipulation_rescale_seqlength": {
                     "type": "integer",
@@ -1565,5 +1563,72 @@
         {
             "$ref": "#/$defs/human_sex_determination"
         }
-    ]
+    ],
+    "properties": {
+        "run_consensus_sequence": {
+            "type": "boolean",
+            "description": "Specify to create consensus sequence from VCF files",
+            "fa_icon": "fas fa-power-off",
+            "help_text": "Specify to create consensus sequence from VCF files."
+        },
+        "consensus_tool": {
+            "type": "string",
+            "description": "Speficy which tool to use to create consensus sequences: multivcfanalyzer, gencons",
+            "fa_icon": "fas fa-hammer",
+            "help_text": "Specify the tool to create the consensus sequence. Accepted values: multivcfanalyzer, gencons.\n\nNote: These tools currently only supports diploid GATK UnifiedGenotyper vcfs as input."
+        },
+        "consensus_multivcfanalyzer_write_allele_frequencies": {
+            "type": "boolean",
+            "fa_icon": "far fa-edit",
+            "help_text": "Turn on writing write allele frequencies in the SNP table produced by MultiVCFAnalyzer."
+        },
+        "consensus_multivcfanalyzer_min_genotype_quality": {
+            "type": "integer",
+            "default": 30,
+            "help_text": "Specify the minimum genotyping quality threshold for a SNP to be called.",
+            "fa_icon": "fas fa-medal"
+        },
+        "consensus_multivcfanalyzer_min_base_coverage": {
+            "type": "integer",
+            "default": 5,
+            "fa_icon": "fas fa-sort-amount-up",
+            "help_text": "Specify the minimum number of reads covering a position for it to  be considered for base calling."
+        },
+        "consensus_multivcfanalyzer_allele_freq_hom": {
+            "type": "number",
+            "default": 0.9,
+            "fa_icon": "fas fa-percentage",
+            "help_text": "Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call."
+        },
+        "consensus_multivcfanalyzer_allele_freq_het": {
+            "type": "number",
+            "default": 0.9,
+            "fa_icon": "fas fa-percentage",
+            "help_text": "Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call."
+        },
+        "consensus_multivcfanalyzer_additional_vcf_files": {
+            "type": "string",
+            "fa_icon": "fas fa-copy",
+            "help_text": "Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files e.g. `/path/to/*.vcf.gz`.",
+            "default": "NA"
+        },
+        "consensus_multivcfanalyzer_reference_gff_annotations": {
+            "type": "string",
+            "fa_icon": "fas fa-asterisk",
+            "help_text": "Specify path to the reference genome annotations in '.gff' format. Optional.",
+            "default": "NA"
+        },
+        "consensus_multivcfanalyzer_reference_gff_exclude": {
+            "type": "string",
+            "fa_icon": "fas fa-ban",
+            "help_text": "Specify path to the positions to be excluded in '.gff' format. Optional.",
+            "default": "NA"
+        },
+        "consensus_multivcfanalyzer_snpeff_results": {
+            "type": "string",
+            "fa_icon": "fas fa-poll",
+            "help_text": "Specify path to the output file from SNP effect analysis in '.txt' format. Optional.",
+            "default": "NA"
+        }
+    }
 }

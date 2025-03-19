@@ -37,21 +37,23 @@ workflow REFERENCE_INDEXING {
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_MULTI.out.sexdeterrmine_bed
         ch_bedtools_feature      = REFERENCE_INDEXING_MULTI.out.bedtools_feature
         ch_dbsnp                 = REFERENCE_INDEXING_MULTI.out.dbsnp
+        ch_mva                   = REFERENCE_INDEXING_MULTI.out.mva
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_MULTI.out.versions )
     } else {
         // If input FASTA and/or indicies supplied
         REFERENCE_INDEXING_SINGLE ( fasta, fasta_fai, fasta_dict, fasta_mapperindexdir )
         ch_reference_to_elongate  = REFERENCE_INDEXING_SINGLE.out.elongated_reference
-        ch_mitochondrion_header  = REFERENCE_INDEXING_SINGLE.out.mitochondrion_header
-        ch_hapmap                = REFERENCE_INDEXING_SINGLE.out.hapmap
-        ch_pmd_masked_fasta      = REFERENCE_INDEXING_SINGLE.out.pmd_masked_fasta
-        ch_pmd_bed_for_masking   = REFERENCE_INDEXING_SINGLE.out.pmd_bed_for_masking
-        ch_snp_capture_bed       = REFERENCE_INDEXING_SINGLE.out.snp_capture_bed
-        ch_pileupcaller_bed_snp  = REFERENCE_INDEXING_SINGLE.out.pileupcaller_bed_snp
-        ch_sexdeterrmine_bed     = REFERENCE_INDEXING_SINGLE.out.sexdeterrmine_bed
-        ch_bedtools_feature      = REFERENCE_INDEXING_SINGLE.out.bedtools_feature
-        ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE.out.reference
-        ch_dbsnp                 = REFERENCE_INDEXING_SINGLE.out.dbsnp
+        ch_mitochondrion_header   = REFERENCE_INDEXING_SINGLE.out.mitochondrion_header
+        ch_hapmap                 = REFERENCE_INDEXING_SINGLE.out.hapmap
+        ch_pmd_masked_fasta       = REFERENCE_INDEXING_SINGLE.out.pmd_masked_fasta
+        ch_pmd_bed_for_masking    = REFERENCE_INDEXING_SINGLE.out.pmd_bed_for_masking
+        ch_snp_capture_bed        = REFERENCE_INDEXING_SINGLE.out.snp_capture_bed
+        ch_pileupcaller_bed_snp   = REFERENCE_INDEXING_SINGLE.out.pileupcaller_bed_snp
+        ch_sexdeterrmine_bed      = REFERENCE_INDEXING_SINGLE.out.sexdeterrmine_bed
+        ch_bedtools_feature       = REFERENCE_INDEXING_SINGLE.out.bedtools_feature
+        ch_reference_for_mapping  = REFERENCE_INDEXING_SINGLE.out.reference
+        ch_dbsnp                  = REFERENCE_INDEXING_SINGLE.out.dbsnp
+        ch_mva                    = REFERENCE_INDEXING_SINGLE.out.mva
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }
 
@@ -163,6 +165,7 @@ workflow REFERENCE_INDEXING {
     sexdeterrmine_bed    = ch_sexdeterrmine_bed           // [ meta, sexdet_bed ]
     bedtools_feature     = ch_bedtools_feature            // [ meta, bedtools_feature ]
     dbsnp                = ch_dbsnp                       // [ meta, dbsnp ]
+    mva                  = ch_mva                         // [ meta, consensus_multivcfanalyzer_additional_vcf_files, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
     versions             = ch_versions
 
 }
