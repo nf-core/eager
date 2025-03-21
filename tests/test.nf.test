@@ -53,42 +53,42 @@ nextflow_pipeline {
 
             // Check that no files are missing/added
             // Command legend:                                       Result directory to index      , includeDir: include dirs?, ignore: exclude patterns       , ignoreFile: exclude pattern list , include: include patterns
-            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , includeDir: true         , ignore: ['pipeline_info/*']    , ignoreFile: null                 , include: ['*', '**/*'] )
+            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , includeDir: false         , ignore: ['pipeline_info/*']    , ignoreFile: null                 , include: ['*', '**/*'] )
 
             // Authentication
-            def stable_content_authentication   = getAllFilesFromDir("$outputDir/authentication"    , includeDir: true         , ignore: unstable_patterns_auth , ignoreFile: null                 , include: ['*', '**/*'] )
-            def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , includeDir: true         , ignore:  null                  , ignoreFile: null                 , include: unstable_patterns_auth)
+            def stable_content_authentication   = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: unstable_patterns_auth , ignoreFile: null                 , include: ['*', '**/*'] )
+            def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore:  null                  , ignoreFile: null                 , include: unstable_patterns_auth)
 
             // Deduplication - TODO -> snapshot both lists are empty!?
-            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['*.flagstat']  )
-            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['*.{bam,bai}'] )
-            // def bams_deduplication              = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: true         , ignore: null                   , ignoreFile: null                           , include: ['*.bam'] )
+            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*.flagstat']  )
+            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*.{bam,bai}'] )
+            // def bams_deduplication              = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                           , include: ['*.bam'] )
 
             // Final_bams
-            def stable_content_final_bams       = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
-            def stable_name_final_bams          = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
-            // def bams_final_bams                 = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: true         , ignore: null                   , ignoreFile: null                           , include: ['**/*.bam'] )
+            def stable_content_final_bams       = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_final_bams          = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+            // def bams_final_bams                 = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                           , include: ['**/*.bam'] )
 
             // Mapping (incl. bam_input flasgstat)
-            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
-            def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
-            // def bams_mapping                    = getAllFilesFromDir("$outputDir/mapping"           , includeDir: true         , ignore: null                   , ignoreFile: null                           , include: ['**/*.bam'] )
+            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+            // def bams_mapping                    = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                           , include: ['**/*.bam'] )
 
             // Preprocessing
             // NOTE: FastQC html appears stable, but I worry it might just include a day timestamp instead of a full timestamp. To keep the expression simpler I removed both from checksum testing.
-            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: true         , ignore: ['**/*.{zip,log,html}'], ignoreFile: null                 , include: ['**/*'] )
-            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
+            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: ['**/*.{zip,log,html}'], ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
 
             // Read filtering - TODO -> snapshot both lists are empty!?
-            def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['*.flagstat']  )
-            def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['*.{bam,bai}'] )
+            def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*.flagstat']  )
+            def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*.{bam,bai}'] )
 
             // MQC
             // preprocessing
             // read filtering
 
             // MultiQC
-            def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: true         , ignore: null                    , ignoreFile: null                , include: ['*', '**/*'] )
+            def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: false         , ignore: null                    , ignoreFile: null                , include: ['*', '**/*'] )
 
             ///////////////////////
             // DEFINE ASSERTIONS //
@@ -96,8 +96,8 @@ nextflow_pipeline {
 
             println("###################################################################################")
             println("UNSTABLE_PATTERNS_AUTH: " + unstable_patterns_auth)
-            println("DEF: def stable_content_authentication   = getAllFilesFromDir(${outputDir}/authentication    , includeDir: true         , ignore: ${unstable_patterns_auth} , ignoreFile: null                 , include: ['*', '**/*'] )")
-            println("DEF: def stable_name_mapping             = getAllFilesFromDir(${outputDir}/mapping           , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )")
+            println("DEF: def stable_content_authentication   = getAllFilesFromDir(${outputDir}/authentication    , includeDir: false         , ignore: ${unstable_patterns_auth} , ignoreFile: null                 , include: ['*', '**/*'] )")
+            println("DEF: def stable_name_mapping             = getAllFilesFromDir(${outputDir}/mapping           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )")
             println("STABLE_CONTENT_AUTHENTICATION: stable_content_authentication: " + stable_content_authentication)
             println("STABLE_NAME_AUTHENTICATION: stable_name_authentication: " + stable_name_authentication)
             println("###################################################################################")
