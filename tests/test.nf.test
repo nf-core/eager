@@ -98,7 +98,7 @@ nextflow_pipeline {
             println("UNSTABLE_PATTERNS_AUTH: " + unstable_patterns_auth)
             println("DEF: def stable_content_authentication   = getAllFilesFromDir(${outputDir}/authentication    , includeDir: true         , ignore: ${unstable_patterns_auth} , ignoreFile: null                 , include: ['*', '**/*'] )")
             println("DEF: def stable_name_mapping             = getAllFilesFromDir(${outputDir}/mapping           , includeDir: true         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )")
-            println("STABLE_NAME_AUTHENTICATION: stable_name_authentication: " + stable_content_authentication)
+            println("STABLE_CONTENT_AUTHENTICATION: stable_content_authentication: " + stable_content_authentication)
             println("STABLE_NAME_AUTHENTICATION: stable_name_authentication: " + stable_name_authentication)
             println("###################################################################################")
 
