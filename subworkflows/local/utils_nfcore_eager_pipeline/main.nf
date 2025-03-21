@@ -208,21 +208,21 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     genomeExistsError()
-    if ( !params.fasta                                     && !params.fasta_sheet ) { exit 1, "[nf-core/eager] ERROR: Neither FASTA file --fasta nor reference sheet --fasta_sheet have been provided."}
-    if ( params.fasta                                      && params.fasta_sheet ) { exit 1, "[nf-core/eager] ERROR: A FASTA file --fasta and a reference sheet --fasta_sheet have been provided. These parameters are mutually exclusive."}
-    if ( params.preprocessing_adapterlist                  && params.preprocessing_skipadaptertrim ) { log.warn("[nf-core/eager] WARNING: --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!") }
-    if ( params.deduplication_tool == 'dedup'              && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
-    if ( params.bamfiltering_retainunmappedgenomicbam      && params.bamfiltering_mappingquality > 0  ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
-    if ( params.genotyping_source == 'trimmed'             && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
-    if ( params.genotyping_source == 'pmd'                 && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
-    if ( params.genotyping_source == 'rescaled'            && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
-    if ( params.metagenomics_complexity_tool == 'prinseq'  && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
+    if ( !params.fasta                                    && !params.fasta_sheet                    ) { exit 1, "[nf-core/eager] ERROR: Neither FASTA file --fasta nor reference sheet --fasta_sheet have been provided."}
+    if ( params.fasta                                     && params.fasta_sheet                     ) { exit 1, "[nf-core/eager] ERROR: A FASTA file --fasta and a reference sheet --fasta_sheet have been provided. These parameters are mutually exclusive."}
+    if ( params.preprocessing_adapterlist                 && params.preprocessing_skipadaptertrim   ) { log.warn("[nf-core/eager] WARNING: --preprocessing_skipadaptertrim will override --preprocessing_adapterlist. Adapter trimming will be skipped!") }
+    if ( params.deduplication_tool == 'dedup'             && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads. For all other cases, please set --deduplication_tool to 'markduplicates'."}
+    if ( params.bamfiltering_retainunmappedgenomicbam     && params.bamfiltering_mappingquality > 0 ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
+    if ( params.bamfiltering_generatefastq                && params.run_bamfiltering                ) { exit 1, ("[nf-core/eager] ERROR: --bamfiltering_generatefastq will NOT generate a fastq file unless BAM filtering is turned on with `--run_bamfiltering`") }
+    if ( params.genotyping_source == 'trimmed'            && ! params.run_trim_bam                  ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
+    if ( params.genotyping_source == 'pmd'                && ! params.run_pmd_filtering             ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
+    if ( params.genotyping_source == 'rescaled'           && ! params.run_mapdamage_rescaling       ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
+    if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
         if (params.metagenomics_prinseq_dustscore == 0.5) { exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag") }
     }
     if ( params.metagenomics_complexity_tool == 'prinseq'  && params.metagenomics_prinseq_mode == 'entropy' && params.metagenomics_prinseq_dustscore != 0.5 ) {
         if (params.metagenomics_complexity_entropy == 0.3) { exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'entropy' mode but provided a dust score. Please specify an entropy filter threshold using the --metagenomics_complexity_entropy flag") }
     }
-    if ( params.run_metagenomics && params.preprocessing_skippairmerging ) { exit 1, ("[nf-core/eager] ERROR: Metagenomics: Currently no support for unmerged paired end reads inputs into Metagenomics subworkflow. Please rerun without --preprocessing_skippairmerging.") }
     if (
         params.metagenomics_run_postprocessing &&
         params.metagenomics_profiling_tool == 'malt' &&
@@ -231,8 +231,10 @@ def validateInputParameters() {
             !params.metagenomics_maltextract_ncbidir
         )
     ){ exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked MALT with postprocessing but didnt provided required input files. Please provide the --metagenomics_maltextract_taxonlist and --metagenomics_maltextract_ncbidir flags") }
-    if ( params.run_genotyping                        && ! params.genotyping_tool                ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
-    if ( params.run_genotyping                        && ! params.genotyping_source              ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
+    if ( params.run_metagenomics && params.preprocessing_skippairmerging ) { log.warn("[nf-core/eager] WARNING: --preprocessing_skippairmerging selected in combination for metagenomics! All singletons from paired end samples will be discarded prior to input for metagenomics screening! This may be inappropriate for metaphlan, which does not utilize paired-end information!") }
+    if ( params.run_metagenomics && params.preprocessing_skippairmerging && params.metagenomics_profiling_tool == 'malt' ) { exit 1, ("[nf-core/eager] ERROR: --preprocessing_skippairmerging selected in combination with MALT for metagenomics! MALT cannot accept separated read pair information, please remove --preprocessing_skippairmerging parameter.") }
+    if ( params.run_genotyping   && ! params.genotyping_tool                ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
+    if ( params.run_genotyping   && ! params.genotyping_source              ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
     if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
     if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
     if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }

@@ -137,20 +137,32 @@ workflow METAGENOMICS_PROFILING {
     }
 
     else if ( params.metagenomics_profiling_tool == 'krakenuniq' ) {
-        // run krakenuniq once for all samples
+        // run krakenuniq once for all samples, unless non-merged PE vs SE data
 
         ch_krakenuniq_input = ch_reads
             .map{ meta, file ->
                 [
-                    ['single_end':true],
+                    ['single_end':meta['single_end']], // retain single_end vs paired_end bools for input splitting
                     file
                 ]
             }
             .groupTuple(by:0)
+                .map { meta, files ->
+                [
+                    meta, files.flatten()
+                ]}
+
+        ch_krakenuniq_input = ch_krakenuniq_input.combine(ch_database)
+            .multiMap{
+                meta, files, database ->
+                    meta_files_input: [meta, files]
+                    database: database
+            }
 
         KRAKENUNIQ_PRELOADEDKRAKENUNIQ (
-            ch_krakenuniq_input,
-            ch_database,
+            ch_krakenuniq_input.meta_files_input,
+            'fastq', // only fastq files can get to the input channel
+            ch_krakenuniq_input.database,
             params.metagenomics_krakenuniq_ramchunksize,
             params.metagenomics_kraken2_savereads,
             true, // save read assignments

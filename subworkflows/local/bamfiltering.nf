@@ -2,15 +2,14 @@
 // Filter BAMs for mapping quality, length, unmapped etc.
 //
 
-include { FILTER_BAM_FRAGMENT_LENGTH                      } from '../../modules/local/filter_bam_fragment_length'
-include { SAMTOOLS_VIEW  as SAMTOOLS_VIEW_BAM_FILTERING   } from '../../modules/nf-core/samtools/view/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_LENGTH_FILTER_INDEX  } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_INDEX as SAMTOOLS_FILTER_INDEX         } from '../../modules/nf-core/samtools/index/main'
-include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_FILTERED } from '../../modules/nf-core/samtools/flagstat/main'
-include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_UNMAPPED       } from '../../modules/nf-core/samtools/fastq/main'
-include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_MAPPED         } from '../../modules/nf-core/samtools/fastq/main'
-include { CAT_FASTQ as CAT_FASTQ_UNMAPPED                 } from '../../modules/nf-core/cat/fastq'
-include { CAT_FASTQ as CAT_FASTQ_MAPPED                   } from '../../modules/nf-core/cat/fastq'
+include { FILTER_BAM_FRAGMENT_LENGTH                             } from '../../modules/local/filter_bam_fragment_length'
+include { SAMTOOLS_VIEW  as SAMTOOLS_VIEW_BAM_FILTERING          } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_LENGTH_FILTER_INDEX         } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX as SAMTOOLS_FILTER_INDEX                } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_FILTERED        } from '../../modules/nf-core/samtools/flagstat/main'
+include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_METAGENOMICS          } from '../../modules/nf-core/samtools/fastq/main'
+include { CAT_FASTQ as CAT_FASTQ_METAGENOMICS                    } from '../../modules/nf-core/cat/fastq'
+include { SAMTOOLS_FASTQ as SAMTOOLS_FASTQ_SAVEBAMFILTERINGREADS } from '../../modules/nf-core/samtools/fastq/main'
 
 
 workflow FILTER_BAM {
@@ -66,64 +65,41 @@ workflow FILTER_BAM {
         ch_flagstats_file = ch_flagstats_file.mix( SAMTOOLS_FLAGSTAT_FILTERED.out.flagstat )
     }
 
-    //
-    // Metagenomics FASTQ generation for metagenomics (or just generation)
+    // FASTQ generation for saving reads (INDEPENDENT of metagenomics)
+    // Output of reads is determined parameters are set by parameters for bamfiltering above (see SAMTOOLS_VIEW_BAM_FILTERING module config)
+    // Extension based on #945 possible here duirng hackathon
+    // Only possible with run_bamfiltering parameter set
+    if ( params.bamfiltering_generatefastq ) {
+        SAMTOOLS_FASTQ_SAVEBAMFILTERINGREADS ( SAMTOOLS_VIEW_BAM_FILTERING.out.bam, false )
+        ch_versions = ch_versions.mix ( SAMTOOLS_FASTQ_SAVEBAMFILTERINGREADS.out.versions.first() )
+    }
+
+    // FASTQ generation for metagenomics (OR just generation for saving mapped/unmapped reads)
     // - FASTQ generation is now separate from BAM filtering -
-    //    no length/quality filtering applies to metagenomic bam
-    //
+    //    No length/quality filtering applies to metagenomic bam files (could be extension)
+    //    All bam -> fastq filtering options (-F 4, -f 4 or none) will be dealt with within modules.config
 
-    // Generate unmapped bam (no additional filtering) if the unmapped bam OR unmapped for metagneomics selected
-    if ( params.bamfiltering_generateunmappedfastq || ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) ) {
-        SAMTOOLS_FASTQ_UNMAPPED ( bam.map{[ it[0], it[1] ]}, false )
-        ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_UNMAPPED.out.versions.first() )
-    }
+    if ( params.run_metagenomics )  {
+        // Execute fastq generation on original bam mapping (independent of above bamfiltering)
+        SAMTOOLS_FASTQ_METAGENOMICS ( bam.map{[ it[0], it[1] ]}, false )
+        ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_METAGENOMICS.out.versions.first() )
 
-    // Solution to the Andrades Valtueña-Light Problem: mapped bam for metagenomics (with options for quality- and length filtered)
-
-    if ( params.bamfiltering_generatemappedfastq ||  ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) ) {
-        SAMTOOLS_FASTQ_MAPPED ( bam.map{[ it[0], it[1] ]}, false )
-        ch_versions = ch_versions.mix( SAMTOOLS_FASTQ_MAPPED.out.versions.first() )
-    }
-
-    if ( ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
-        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_UNMAPPED.out.fastq
-                                    .mix(SAMTOOLS_FASTQ_UNMAPPED.out.singleton)
-                                    .mix(SAMTOOLS_FASTQ_UNMAPPED.out.other)
-                                    .groupTuple()
-                                    .map {
-                                        meta, fastqs ->
-                                            def meta_new = meta.clone()
-                                            meta_new['single_end'] = true
-                                        [ meta_new, fastqs.flatten() ]
-                                    }
-        CAT_FASTQ_UNMAPPED ( ch_paired_fastq_for_cat )
-    }
-
-    // TODO: see request https://github.com/nf-core/eager/issues/945
-    if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_paired_fastq_for_cat = SAMTOOLS_FASTQ_MAPPED.out.fastq
-                                    .mix(SAMTOOLS_FASTQ_MAPPED.out.singleton)
-                                    .mix(SAMTOOLS_FASTQ_MAPPED.out.other)
-                                    .groupTuple()
-                                    .map {
-                                        meta, fastqs ->
-                                            def meta_new = meta.clone()
-                                            meta_new['single_end'] = true
-                                        [ meta_new, fastqs.flatten() ]
-                                    }
-        CAT_FASTQ_MAPPED ( ch_paired_fastq_for_cat )
-    }
-
-    // Routing for metagenomic screening -> first accounting for paired-end mapping, then merged mapping, then no metagenomics
-    if ( ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) && params.preprocessing_skippairmerging ) {
-        ch_fastq_for_metagenomics = CAT_FASTQ_UNMAPPED.out.reads
-    } else if ( ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' ) ) && params.preprocessing_skippairmerging ) {
-        ch_fastq_for_metagenomics = CAT_FASTQ_MAPPED.out.reads
-    } else if ( params.run_metagenomics && params.metagenomics_input == 'unmapped' ) {
-        ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_UNMAPPED.out.other
-    } else if ( params.run_metagenomics && ( params.metagenomics_input == 'mapped' || params.metagenomics_input == 'all' )) {
-        ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_MAPPED.out.other
-    } else if ( !params.run_metagenomics ) {
+        if ( params.preprocessing_skippairmerging ) {
+            // Splitting of paired vs single end data
+            ch_paired_fastq_for_cat_metagenomics = SAMTOOLS_FASTQ_METAGENOMICS.out.fastq.filter { !it[0].single_end }
+            ch_single_fastq_for_cat_metagenomics = SAMTOOLS_FASTQ_METAGENOMICS.out.fastq
+                                        .mix(SAMTOOLS_FASTQ_METAGENOMICS.out.singleton)
+                                        .mix(SAMTOOLS_FASTQ_METAGENOMICS.out.other)
+                                        .groupTuple()
+                                        .filter{ it[0].single_end }
+            CAT_FASTQ_METAGENOMICS ( ch_single_fastq_for_cat_metagenomics )
+            ch_fastq_for_metagenomics = CAT_FASTQ_METAGENOMICS.out.reads.mix( ch_paired_fastq_for_cat_metagenomics )
+            ch_versions = ch_versions.mix( CAT_FASTQ_METAGENOMICS.out.versions.first() )
+        }
+        else {
+            ch_fastq_for_metagenomics = SAMTOOLS_FASTQ_METAGENOMICS.out.other
+        }
+    } else {
         ch_fastq_for_metagenomics = Channel.empty()
     }
 
