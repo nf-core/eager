@@ -118,10 +118,6 @@ workflow PIPELINE_INITIALISATION {
                 }
             [ meta, r1, r2, bam ]
         }
-        .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
 
     // - Only single-ended specified for BAM files
     ch_samplesheet_for_branch.bam
