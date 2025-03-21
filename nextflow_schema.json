@@ -470,9 +470,9 @@
                 "mapping_tool": {
                     "type": "string",
                     "default": "bwaaln",
-                    "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper"],
+                    "enum": ["bwaaln", "bwamem", "bowtie2", "circularmapper", "mapad"],
                     "description": "Specify which mapper to use.",
-                    "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), or Bowtie 2 ('`bowtie2`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing an extend-remap procedure (see [Peltzer et al 2016](https://doi.org/10.1186/s13059-016-0918-z) for details). Bowtie 2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming).\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)",
+                    "help_text": "Specify which mapping tool to use. Options are BWA aln ('`bwaaln`'), BWA mem ('`bwamem`'), circularmapper ('`circularmapper`'), Bowtie 2 ('`bowtie2`'), or mapAD ('`mapad`'). BWA aln is the default and highly suited for short-read ancient DNA. BWA mem can be quite useful for modern DNA, but is rarely used in projects for ancient DNA. CircularMapper enhances the mapping procedure to circular references, using the BWA algorithm but utilizing an extend-remap procedure (see [Peltzer et al 2016](https://doi.org/10.1186/s13059-016-0918-z) for details). Bowtie 2 is similar to BWA aln, and has recently been suggested to provide slightly better results under certain conditions ([Poullet and Orlando 2020](https://doi.org/10.3389/fevo.2020.00105)), as well as providing extra functionality (such as FASTQ trimming). mapAD is a short-read mapper tailored for highly damaged ancient DNA, and has been suggested to provide improved mapping results.\n\nMore documentation can be seen for each tool under:\n\n- [BWA aln](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml#3)\n- [CircularMapper](https://circularmapper.readthedocs.io/en/latest/contents/userguide.html)\n- [Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)\n- [mapAD](http://github.com/mpieva/mapad)",
                     "fa_icon": "fas fa-hammer"
                 },
                 "mapping_bwaaln_n": {
@@ -573,6 +573,88 @@
                     "fa_icon": "fas fa-filter",
                     "description": "Turn on to remove reads that did not map to the circularised genome.",
                     "help_text": "If you want to filter out reads that don't map to elongated/circularised chromosome (and also non-circular chromosome headers) from the resulting BAM file, turn this on.\n\n> Modifies `-f` and `-x` parameters of CircularMapper's RealignSAMFile"
+                },
+                "mapping_mapad_p": {
+                    "type": "number",
+                    "default": 0.03,
+                    "description": "Specify the -p parameter for mapAD, i.e. mismatch budget for the alignment.",
+                    "help_text": "Configures the `mapad map -p` parameter, defining how many mismatches are allowed in a read. Default is set following recommendations. \n\n> Modifies mapAD map parameter: `-p`",
+                    "fa_icon": "fas fa-sort-numeric-down"
+                },
+                "mapping_mapad_f": {
+                    "type": "number",
+                    "default": 0.5,
+                    "description": "Specify the -f parameter for mapAD, which sets the 5'-overhang length parameter of mapAD's aDNA scoring model.",
+                    "help_text": "Configures mapAD's 5' single-stranded overhang length parameter. Increased cytosine deamination rates are expected in single-stranded overhangs resulting from aDNA damage. The `-l` parameter adjusts the probability with which the scoring model expects a position in the read to be in a single-stranded overhang at the 5'-end (pos^`-f`). Default is set to 0.5.\n\n> Modifies mapAD map parameter: `-f`",
+                    "fa_icon": "fas fa-long-arrow-alt-left"
+                },
+                "mapping_mapad_t": {
+                    "type": "number",
+                    "default": 0.5,
+                    "description": "Specify the -t parameter for mapAD, which sets the 3'-overhang length parameter of mapAD's aDNA scoring model.",
+                    "help_text": "Configures mapAD's 3' single-stranded overhang length parameter. Increased cytosine deamination rates are expected in single-stranded overhangs resulting from aDNA damage. The `-t` parameter adjusts the probability with which the scoring model expects a position in the read to be in a single-stranded overhang at the 3'-end (pos^`-t`). Default is set to 0.5.\n\n> Modifies mapAD map parameter: `-t`",
+                    "fa_icon": "fas fa-long-arrow-alt-right"
+                },
+                "mapping_mapad_d": {
+                    "type": "number",
+                    "default": 0.02,
+                    "description": "Specify the -d parameter for mapAD, which sets the double-stranded deamination rate parameter of mapAD's aDNA scoring model.",
+                    "help_text": "Configures mapAD's double-stranded deamination rate parameter. The `-d` parameter adjusts the expected deamination rate in double-stranded central \"stems\" of aDNA fragments. Default is set to 0.02.\n\n> Modifies mapAD map parameter: `-d`",
+                    "fa_icon": "fas fa-equals"
+                },
+                "mapping_mapad_s": {
+                    "type": "number",
+                    "default": 1.0,
+                    "description": "Specify the -s parameter for mapAD, which sets the single-stranded deamination rate parameter of mapAD's aDNA scoring model.",
+                    "help_text": "Configures mapAD's single-stranded deamination rate parameter. The `-s` parameter adjusts the expected deamination rate in single-stranded overhangs of aDNA fragments (whose lengths are modeled via the `-f` and `-t` parameters). Default is set to 1.0.\n\n> Modifies mapAD map parameter: `-s`",
+                    "fa_icon": "fas fa-minus"
+                },
+                "mapping_mapad_i": {
+                    "type": "number",
+                    "default": 0.001,
+                    "description": "Specify the -i parameter for mapAD, which adjusts the expected indel rate between reads and reference.",
+                    "help_text": "Configures mapAD's expected InDel rate parameter. The `-i` parameter adjusts the gap open penalty of mapAD's affine gap model. Default is set to 0.001.\n\n> Modifies mapAD map parameter: `-i`",
+                    "fa_icon": "fas fa-ellipsis-h"
+                },
+                "mapping_mapad_x": {
+                    "type": "number",
+                    "default": 0.5,
+                    "description": "Specify the -x parameter for mapAD, which adjusts the gap extension penalty.",
+                    "help_text": "Configures mapAD's gap extension penalty. The `-x` parameter adjusts the gap extension penalty as a fraction of a representative mismatch penalty. Default is set to 0.5.\n\n> Modifies mapAD map parameter: `-x`",
+                    "fa_icon": "fas fa-angle-double-right"
+                },
+                "mapping_mapad_gapreadenddistance": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "Specify the --gap_dist_ends parameter for mapAD, which defines the distance from the read ends in which no gaps are permitted.",
+                    "help_text": "Configures mapAD's `--gap_dist_ends` parameter which defines the distance from the read ends in which no gaps are permitted. Default is set to mapAD's default (5).\n\n> Modifies mapAD map parameter: `--gap_dist_ends`",
+                    "fa_icon": "fas fa-step-forward"
+                },
+                "mapping_mapad_maxnumopengaps": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "Specify the number of gaps allowed for alignment with mapAD.",
+                    "help_text": "Specify the number of gaps allowed for mapping with mapAD. Default is set to mapAD's default (2).\n\n> Modifies mapAD map parameter: `--max_num_gaps_open`",
+                    "fa_icon": "fas fa-people-arrows"
+                },
+                "mapping_mapad_baseerrorrate": {
+                    "type": "number",
+                    "default": 0.02,
+                    "description": "Specify the base error rate parameter for mapAD.",
+                    "help_text": "Configures mapAD's base error rate parameter. The `-D` parameter adjusts the base error rate which is one of the underlying parts of mapAD's scoring model. Should not normally need to be adjusted. Default is set to mapAD's default (0.02).\n\n> Modifies mapAD map parameter: `-D`",
+                    "fa_icon": "fas fa-percentage"
+                },
+                "mapping_mapad_ignorebasequal": {
+                    "type": "boolean",
+                    "description": "Set the --ignore_base_quality flag, which instructs mapAD to ignore base quality values in its scoring model.",
+                    "help_text": "Without this flag, mapAD is more permissive in terms of mismatches if the quality of the base is low. Default is set to mapAD's default.\n\n> Modifies mapAD map parameter: `--ignore_base_quality`",
+                    "fa_icon": "fas fa-asterisk"
+                },
+                "mapping_mapad_stacklimitabort": {
+                    "type": "boolean",
+                    "description": "Set the --stack_limit_abort flag, which instructs mapAD to not try and recover from a full backtracking stack.",
+                    "help_text": "Without this flag, mapAD tries to recover from a full backtracking stack by removing low-scoring sub-alignments. This can help to recover from difficult to map reads, at the cost of a slower alignment. Setting this flag will speed up the alignment process. Default is set to mapAD's default.\n\n> Modifies mapAD map parameter: `--stack_limit_abort`",
+                    "fa_icon": "fab fa-stack-overflow"
                 }
             },
             "fa_icon": "fas fa-layer-group"

@@ -48,6 +48,7 @@ jobs:
           - " --preprocessing_tool adapterremoval --preprocessing_adapterlist 'https://github.com/nf-core/test-datasets/raw/modules/data/delete_me/adapterremoval/adapterremoval_adapterlist.txt' --sequencing_qc_tool falco --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'raw'"
           - " --mapping_tool bwamem --run_mapdamage_rescaling --run_pmd_filtering --run_trim_bam --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed'"
           - " --mapping_tool bowtie2 --damagecalculation_tool mapdamage --damagecalculation_mapdamage_downsample 100 --run_genotyping --genotyping_tool 'hc' --genotyping_source 'raw'"
+          - " --mapping_tool mapad"
           - " --mapping_tool circularmapper --skip_preprocessing --convert_inputbam --fasta_circular_target 'NC_007596.2' --fasta_circularmapper_elongationfactor 500"
           - "_humanbam --run_mtnucratio --run_contamination_estimation_angsd --snpcapture_bed 'https://raw.githubusercontent.com/nf-core/test-datasets/eager/reference/Human/1240K.pos.list_hs37d5.0based.bed.gz' --run_genotyping --genotyping_tool 'pileupcaller' --genotyping_source 'raw'"
           - "_humanbam --run_sexdeterrmine --run_genotyping --genotyping_tool 'angsd' --genotyping_source 'raw'"

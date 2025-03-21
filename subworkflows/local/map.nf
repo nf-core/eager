@@ -4,12 +4,15 @@
 
 include { SEQKIT_SPLIT2                                       } from '../../modules/nf-core/seqkit/split2/main'
 include { FASTQ_ALIGN_BWAALN                                  } from '../../subworkflows/nf-core/fastq_align_bwaaln/main'
+include { MAPAD_MAP                                           } from '../../modules/nf-core/mapad/map/main'
 include { BWA_MEM                                             } from '../../modules/nf-core/bwa/mem/main'
 include { BOWTIE2_ALIGN                                       } from '../../modules/nf-core/bowtie2/align/main'
 include { SAMTOOLS_MERGE    as SAMTOOLS_MERGE_LANES           } from '../../modules/nf-core/samtools/merge/main'
 include { SAMTOOLS_SORT     as SAMTOOLS_SORT_MERGED_LANES     } from '../../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_SORT     as SAMTOOLS_SORT_MAPAD            } from '../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MEM             } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_BT2             } from '../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MAPAD           } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_MERGED_LANES    } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_MERGED_LANES } from '../../modules/nf-core/samtools/flagstat/main'
 include { CIRCULARMAPPER                                      } from '../../subworkflows/local/circularmapper'
@@ -100,6 +103,49 @@ workflow MAP {
         SAMTOOLS_INDEX_BT2 ( ch_mapped_lane_bam )
         ch_versions        = ch_versions.mix(SAMTOOLS_INDEX_BT2.out.versions.first())
         ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_BT2.out.csi : SAMTOOLS_INDEX_BT2.out.bai
+
+    } else if ( params.mapping_tool == 'circularmapper' ) {
+        ch_elongated_reference_for_mapping = elogated_index
+                            .map {
+                                meta, elongated_fasta, elongated_index ->
+                                [ meta, elongated_index ]
+                                }
+
+        CIRCULARMAPPER( index, ch_elongated_reference_for_mapping, elongated_chr_list, reads, params.fasta_circularmapper_elongationfactor )
+        ch_versions        = ch_versions.mix ( CIRCULARMAPPER.out.versions )
+        ch_mapped_lane_bam      = CIRCULARMAPPER.out.bam
+        ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai // [ [ meta ], bai/csi ]
+    } else if ( params.mapping_tool == 'mapad' ) {
+        ch_input_for_mapping = ch_input_for_mapping
+                            .combine( index.map{ meta, index, fasta -> [ meta, index ] } )
+                            .multiMap {
+                                meta, reads, meta2, index ->
+                                    new_meta = meta + [ reference: meta2.id ]
+                                    reads: [ new_meta, reads ]
+                                    index: [ meta2, index ]
+                                    strandedness: meta.strandedness=="double"
+                            }
+
+        MAPAD_MAP (
+                ch_input_for_mapping.reads,
+                ch_input_for_mapping.index,
+                params.mapping_mapad_p,
+                ch_input_for_mapping.strandedness,
+                params.mapping_mapad_f,
+                params.mapping_mapad_t,
+                params.mapping_mapad_d,
+                params.mapping_mapad_s,
+                params.mapping_mapad_i
+                )
+        ch_versions        = ch_versions.mix ( MAPAD_MAP.out.versions.first() )
+
+        SAMTOOLS_SORT_MAPAD ( MAPAD_MAP.out.bam )
+        ch_mapped_lane_bam = SAMTOOLS_SORT_MAPAD.out.bam
+        ch_versions        = ch_versions.mix( SAMTOOLS_SORT_MAPAD.out.versions.first() )
+
+        SAMTOOLS_INDEX_MAPAD ( ch_mapped_lane_bam )
+        ch_versions        = ch_versions.mix( SAMTOOLS_INDEX_MAPAD.out.versions.first() )
+        ch_mapped_lane_bai = params.fasta_largeref ? SAMTOOLS_INDEX_MAPAD.out.csi : SAMTOOLS_INDEX_MAPAD.out.bai
 
     } else if ( params.mapping_tool == 'circularmapper' ) {
         ch_elongated_reference_for_mapping = elogated_index
