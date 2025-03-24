@@ -143,6 +143,20 @@ workflow PIPELINE_INITIALISATION {
                                 [ meta, singlestrand ]
                             }
 
+    // - No libraries with multiple UDG treatments (UDG treatment done as part of library generation)
+    ch_samplesheet_test = ch_samplesheet
+                            .map {
+                                meta, r1, r2, bam ->
+                                [ meta.subMap('library_id'), meta.subMap('damage_treatment') ]
+                            }
+                            .groupTuple()
+                            .map { meta, damage_treatment ->
+                                    if ( damage_treatment.toList().unique().size() > 1 ) {
+                                        exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Library IDs can only have a single UDG treatment across lanes."
+                                    }
+                                [ meta, damage_treatment ]
+                            }
+
     emit:
     samplesheet_fastqs = ch_samplesheet_fastqs
     samplesheet_bams   = ch_samplesheet_bams
@@ -235,6 +249,7 @@ def validateInputParameters() {
     if ( params.run_metagenomics && params.preprocessing_skippairmerging && params.metagenomics_profiling_tool == 'malt' ) { exit 1, ("[nf-core/eager] ERROR: --preprocessing_skippairmerging selected in combination with MALT for metagenomics! MALT cannot accept separated read pair information, please remove --preprocessing_skippairmerging parameter.") }
     if ( params.run_genotyping   && ! params.genotyping_tool                ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
     if ( params.run_genotyping   && ! params.genotyping_source              ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
+    if ( params.genotyping_source == 'raw'            && params.run_trim_bam || params.run_pmd_filtering || params.run_mapdamage_rescaling ) { log.warn("[nf-core/eager] WARNING: --genotyping_source is set to 'raw' AND damage correction carried out (rescaling, filtering, or trimming). The output of these tools will NOT be utilized for genotyping!") }
     if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
     if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
     if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
@@ -245,6 +260,8 @@ def validateInputParameters() {
 //
 // Validate channels from input samplesheet
 //
+// FROM NF-CORE TEMPLATE: THIS IS NOT NECESSARY
+// TODO: remove prior to 3.0
 def validateInputSamplesheet(input) {
     def (metas, fastqs) = input[1..2]
 
