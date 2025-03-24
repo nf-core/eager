@@ -12,6 +12,7 @@ include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DAMAGE_RESCALED     } from '../../
 include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DAMAGE_FILTERED     } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DAMAGE_TRIMMED      } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED  } from '../../modules/nf-core/samtools/flagstat/main'
+include { MERGE_LIBRARIES as MERGE_LIBRARIES_DAMAGE_MANIPULATION  } from '../../subworkflows/local/merge_libraries'
 
 // TODO: Add required channels and channel manipulations for reference-dependent bed masking before pmdtools. Requires multi-ref support before implementation.
 workflow MANIPULATE_DAMAGE {
@@ -21,11 +22,14 @@ workflow MANIPULATE_DAMAGE {
     ch_pmd_masking         // [ [ meta ], masked_fasta, bed_for_masking ]
 
     main:
-    ch_versions              = Channel.empty()
-    ch_rescaled_bams         = Channel.empty()
-    ch_pmd_filtered_bams     = Channel.empty()
-    ch_trimmed_bams          = Channel.empty()
-    ch_pmd_filtered_flagstat = Channel.empty() // Only run flagstat on pmd filtered bam, since rescaling and trimming does not change the number of reads
+    ch_versions                       = Channel.empty()
+    ch_rescaled_bams                  = Channel.empty()
+    ch_pmd_filtered_bams              = Channel.empty()
+    ch_trimmed_bams                   = Channel.empty()
+    ch_pmd_filtered_flagstat          = Channel.empty() // Only run flagstat on pmd filtered bam, since rescaling and trimming does not change the number of reads
+    ch_merged_damage_manipulated_bams = Channel.empty()
+    ch_multiqc_files                  = Channel.empty()
+
 
     // Ensure correct reference is associated with each bam_bai pair
     ch_refs = ch_fasta
@@ -169,10 +173,22 @@ workflow MANIPULATE_DAMAGE {
         ch_trimmed_bams  = BAMUTIL_TRIMBAM.out.bam.join( ch_trimmed_index )
     }
 
+    // SUBWORKFLOW: merge libraries for saving and potentially genotyping
+    MERGE_LIBRARIES_DAMAGE_MANIPULATION(ch_bams_for_library_merge)
+    ch_versions = ch_versions.mix(MERGE_LIBRARIES_DAMAGE_MANIPULATION.out.versions)
+    ch_merged_damage_manipulated_bams = MERGE_LIBRARIES_DAMAGE_MANIPULATION.out.bam_bai
+    ch_multiqc_files = ch_multiqc_files.mix(MERGE_LIBRARIES_DAMAGE_MANIPULATION.out.mqc.collect { it[1] }.ifEmpty([]))
+
+    // MAYBE solution here, just modifying it, removing from eager.nf
+    ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_merged_dedup_bams
+
+
     emit:
-    rescaled = ch_rescaled_bams         // [ meta, bam, bai ]
-    filtered = ch_pmd_filtered_bams     // [ meta, bam, bai ]
-    trimmed  = ch_trimmed_bams          // [ meta, bam, bai ]
-    flagstat = ch_pmd_filtered_flagstat // [ meta, flagstat ]
-    versions = ch_versions
+    rescaled    = ch_rescaled_bams         // [ meta, bam, bai ]
+    filtered    = ch_pmd_filtered_bams     // [ meta, bam, bai ]
+    trimmed     = ch_trimmed_bams          // [ meta, bam, bai ]
+    flagstat    = ch_pmd_filtered_flagstat // [ meta, flagstat ]
+    merged_bams = ch_merged_damage_manipulated_bams // [ meta, bam, bai ]
+    mqc         = ch_multiqc_files
+    versions    = ch_versions
 }

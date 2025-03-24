@@ -528,13 +528,11 @@ workflow EAGER {
         MANIPULATE_DAMAGE(ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masking)
         ch_multiqc_files = ch_multiqc_files.mix(MANIPULATE_DAMAGE.out.flagstat.collect { it[1] }.ifEmpty([]))
         ch_versions = ch_versions.mix(MANIPULATE_DAMAGE.out.versions)
-        ch_bams_for_library_merge = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_merged_dedup_bams
+// TODO: figure out splitting into genotyping source (merging already done within manipulate damage, so just getting the trimmed/rescaled/filtered --> ch_bams_for_genotyping)
+        ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_merged_dedup_bams
 
-        // SUBWORKFLOW: merge libraries for genotyping
-        MERGE_LIBRARIES_GENOTYPING(ch_bams_for_library_merge)
-        ch_versions = ch_versions.mix(MERGE_LIBRARIES_GENOTYPING.out.versions)
-        ch_bams_for_genotyping = MERGE_LIBRARIES_GENOTYPING.out.bam_bai
         ch_multiqc_files = ch_multiqc_files.mix(MERGE_LIBRARIES_GENOTYPING.out.mqc.collect { it[1] }.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(MERGE_LIBRARIES_DAMAGE_MANIPULATION.out.mqc.collect { it[1] }.ifEmpty([]))
     }
     else {
         ch_bams_for_genotyping = ch_merged_dedup_bams
