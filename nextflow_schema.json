@@ -1068,9 +1068,16 @@
                     "type": "string",
                     "default": "raw",
                     "description": "Specify which input BAM to use for genotyping.",
-                    "help_text": "Specify which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' (to use the reads used as input for damage manipulation); 'pmd' (for pmdtools output); 'trimmed' (for base-clipped BAMs. Base-clipped-PMD-filtered BAMs if both filtering and trimming are requested); 'rescaled' (for mapDamage2 rescaling output).\nWarning: Depending on the parameters you provided, 'raw' can refer to all mapped reads, filtered reads (if BAM filtering has been performed), or the deduplicated reads (if deduplication was performed).",
+                    "help_text": "Specify which BAM file to use for genotyping, depending on what BAM processing modules you have turned on. Options are: 'raw' (no damage manipulation - per-sample merged libraries, see Note below); 'pmd' (per-sample merged pmdtools output); 'trimmed' (for base-clipped BAMs); 'pmd-trimmed' (Base-clipped-PMD-filtered BAMs); 'rescaled' (mapDamage2 rescaling).\nNote: Depending on the parameters you provided, 'raw' can refer to all mapped reads, filtered reads (if BAM filtering has been performed), or the deduplicated reads (if deduplication was performed).",
                     "fa_icon": "fas fa-faucet",
-                    "enum": ["raw", "pmd", "trimmed", "rescaled"]
+                    "enum": ["raw", "pmd", "trimmed", "pmd_trimmed", "rescaled"]
+                },
+                "genotyping_use_unmerged_libraries": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-merge ",
+                    "default": false,
+                    "description": "Use unmerged mapped libraries for genotyping.",
+                    "help_text": "Rather than merging all mapped libraries into a single file per sample, data for each library will be genotyped separately. /nThis may be advisable when data for a single sample has both UDG and non-UDG treated libraries, or when damage rescaling is done and different libraries can have distinct damage models."
                 },
                 "genotyping_tool": {
                     "type": "string",
@@ -1079,7 +1086,7 @@
                     "help_text": "Specify which genotyper to use. Current options are: pileupCaller, ANGSD, GATK UnifiedGenotyper (v3.5), GATK HaplotypeCaller (v4) or FreeBayes.\n\n> Note that while UnifiedGenotyper is more suitable for low-coverage ancient DNA (HaplotypeCaller does de novo assembly around each variant site), be aware GATK v3.5 it is officially deprecated by the Broad Institute (but is used here for compatibility with MultiVCFAnalyzer).",
                     "description": "Specify which genotyper to use."
                 },
-                "skip_bcftools_stats": {
+                "genotyping_skip_bcftools_stats": {
                     "type": "boolean",
                     "fa_icon": "fas fa-forward",
                     "description": "Specify to skip generation of VCF-based variant calling statistics with bcftools.",

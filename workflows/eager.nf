@@ -32,7 +32,6 @@ include { ESTIMATE_CONTAMINATION                              } from '../subwork
 include { CALCULATE_DAMAGE                                    } from '../subworkflows/local/calculate_damage'
 include { RUN_SEXDETERRMINE                                   } from '../subworkflows/local/run_sex_determination'
 include { MERGE_LIBRARIES                                     } from '../subworkflows/local/merge_libraries'
-include { MERGE_LIBRARIES as MERGE_LIBRARIES_GENOTYPING       } from '../subworkflows/local/merge_libraries'
 include { GENOTYPE                                            } from '../subworkflows/local/genotype'
 
 /*
@@ -231,6 +230,7 @@ workflow EAGER {
         ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM.out.mqc.collect { it[1] }.ifEmpty([]))
     }
     else {
+        // TODO: more intuitive name for this?, since here we don't have filtered reads :P
         ch_bamfiltered_for_deduplication = MAP.out.bam
             .join(MAP.out.bai)
             .mix(ch_bams_from_input)
@@ -254,6 +254,7 @@ workflow EAGER {
         ch_versions = ch_versions.mix(DEDUPLICATE.out.versions)
     }
     else {
+        // TODO: more intuitive name for this, since here we don't have deduplicated reads :P
         ch_dedupped_bams = ch_reads_for_deduplication
         ch_dedupped_flagstat = Channel.empty()
     }
@@ -526,16 +527,8 @@ workflow EAGER {
 
     if (params.run_mapdamage_rescaling || params.run_pmd_filtering || params.run_trim_bam) {
         MANIPULATE_DAMAGE(ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masking)
-        ch_multiqc_files = ch_multiqc_files.mix(MANIPULATE_DAMAGE.out.flagstat.collect { it[1] }.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(MANIPULATE_DAMAGE.out.mqc.collect { it[1] }.ifEmpty([]))
         ch_versions = ch_versions.mix(MANIPULATE_DAMAGE.out.versions)
-// TODO: figure out splitting into genotyping source (merging already done within manipulate damage, so just getting the trimmed/rescaled/filtered --> ch_bams_for_genotyping)
-        ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_merged_dedup_bams
-
-        ch_multiqc_files = ch_multiqc_files.mix(MERGE_LIBRARIES_GENOTYPING.out.mqc.collect { it[1] }.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(MERGE_LIBRARIES_DAMAGE_MANIPULATION.out.mqc.collect { it[1] }.ifEmpty([]))
-    }
-    else {
-        ch_bams_for_genotyping = ch_merged_dedup_bams
     }
 
     //
@@ -543,9 +536,25 @@ workflow EAGER {
     //
 
     if (params.run_genotyping) {
+
+        if ( params.genotyping_use_unmerged_libraries ) {
+            // Get UNMERGED data from either initial mapping (post deduplication/filtering, if done), or post-damage manipulation after deduplication/filtering (if done) -- Note: the .out channels include libraries that are not damage manipulated (eg UDG-Full))
+            ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : params.genotyping_source == 'pmd_trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
+        }
+        else {
+            // Genotyping done on MERGED data, regardless of UDG-treatment vs not; damage manipulation per-library!
+            // Select input for genotyping: Default of raw is merged libraries post-deduplication; otherwise, merged libraries post damage manipulated
+            ch_bams_for_genotyping = params.genotyping_source != 'raw' ? MANIPULATE_DAMAGE.out.merged_bams.filter{ it[0]['damage_manipulation'] == params.genotyping_source } : ch_merged_dedup_bams
+        }
+
+        // ch_bams_for_genotyping.view()
+
         ch_reference_for_genotyping = REFERENCE_INDEXING.out.reference.map { meta, fasta, fai, dict, mapindex ->
             [meta, fasta, fai, dict]
         }
+
+        ch_reference_for_genotyping.view()
+
         GENOTYPE(
             ch_bams_for_genotyping,
             ch_reference_for_genotyping,

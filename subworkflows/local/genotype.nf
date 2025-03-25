@@ -418,7 +418,7 @@ workflow GENOTYPE {
     }
 
     // Run BCFTOOLS_STATS on output from GATK UG, HC and Freebayes
-    if ( !params.skip_bcftools_stats && ( params.genotyping_tool == 'hc' || params.genotyping_tool == 'ug' || params.genotyping_tool == 'freebayes' ) ) {
+    if ( !params.genotyping_skip_bcftools_stats && ( params.genotyping_tool == 'hc' || params.genotyping_tool == 'ug' || params.genotyping_tool == 'freebayes' ) ) {
         ch_bcftools_input= ch_genotypes_vcf
             .map {
                 addNewMetaFromAttributes( it, "reference" , "reference" , false )
