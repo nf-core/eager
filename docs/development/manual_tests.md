@@ -991,7 +991,7 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ## Gatk UG on trimmed reads. Skip bcftools stats.
 ## Expect: One VCF + .tbi index per sample/reference combination, based on the trimmed bams (this actually shows on the IndelRealigner step and not the UG step).  No IR directory. No bcftools_stats file per VCF.
 ## Checked that the input bam for the UG jobs indeed had trimmed reads. (The full UDG sample has untrimmed bams.)
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'trimmed' -ansi-log false -dump-channels --genotyping_skip_bcftools_stats \
   --run_trim_bam \
   --damage_manipulation_bamutils_trim_double_stranded_none_udg_left 5 \
   --damage_manipulation_bamutils_trim_double_stranded_none_udg_right 7 \
@@ -1030,7 +1030,7 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ```bash
 ## Attempt to run Gatk HC on trimmed reads, without activating trimming.
 ## Expect: FAILURE. Cannot set genotyping source to ;trimmed' without trimming.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' -ansi-log false -dump-channels --genotyping_skip_bcftools_stats \
   --genotyping_gatk_hc_emitrefconf 'BP_RESOLUTION' \
   --genotyping_gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES'
 ```
@@ -1039,7 +1039,7 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ## Gatk HC on trimmed reads, with different out mode and emit confidence. Skip bcftools stats.
 ## Expect: One VCF + .tbi index per sample/reference combination.
 ## Checked .command.sh for correct args.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' --run_trim_bam -ansi-log false -dump-channels --skip_bcftools_stats \
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'hc' --genotyping_source 'trimmed' --run_trim_bam -ansi-log false -dump-channels --genotyping_skip_bcftools_stats \
   --genotyping_gatk_hc_emitrefconf 'BP_RESOLUTION' \
   --genotyping_gatk_hc_out_mode 'EMIT_ALL_ACTIVE_SITES'
 ```
@@ -1063,7 +1063,7 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ## Freebayes on trimmed reads. Different options, and skip bcftools stats.
 ## Expect: One VCF + .tbi index per sample/reference combination.
 ## Checked .command.sh for correct args.
-nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'trimmed' -ansi-log false -dump-channels --skip_bcftools_stats \
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'freebayes' --genotyping_source 'trimmed' -ansi-log false -dump-channels --genotyping_skip_bcftools_stats \
   --run_trim_bam \
   --genotyping_freebayes_skip_coverage 10 \
   --genotyping_freebayes_min_alternate_count 2 \
