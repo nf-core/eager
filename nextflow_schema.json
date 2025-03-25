@@ -603,7 +603,7 @@
                     "help_text": "Specify a mapping quality threshold for mapped reads to be kept for downstream analysis.\n\nBy default all reads are retained and this option is therefore set to 0 to ensure no quality filtering is performed.\n\nNote that by default the output BAM files of this step are _not_ stored in the results directory (as it is assumed that deduplicated BAM files are preferred). See `--bamfiltering_savefilteredbams` if you wish to save these.\n\n> Modifies samtools view parameter: `-q`",
                     "fa_icon": "fas fa-filter"
                 },
-                "bamfilter_genomicbamfilterflag": {
+                "bamfiltering_genomicbamfilterflag": {
                     "type": "integer",
                     "default": 4,
                     "fa_icon": "fas fa-flag",
@@ -616,16 +616,10 @@
                     "help_text": "Specify to retain unmapped reads (optionally also length filtered) in the genomic BAM for downstream analysis. By default, the pipeline only keeps mapped reads for downstream analysis.\n\nThis is also turned on if `--metagenomics_input` is set to `all`.\n\n> ⚠️ This will likely slow down run time of downstream pipeline steps!\n\n> Modifies tool parameter(s):\n> - samtools view: `-f 4` / `-F 4`",
                     "fa_icon": "fas fa-piggy-bank"
                 },
-                "bamfiltering_generateunmappedfastq": {
+                "bamfiltering_generatefastq": {
                     "type": "boolean",
-                    "description": "Specify to generate FASTQ files containing only unmapped reads from the aligner generated BAM files.",
-                    "help_text": "Specify to turn on the generation and saving of FASTQs of only the unmapped reads from the mapping step in the results directory.\n\nThis can be useful if you wish to do other analysis of the unmapped reads independently of the pipeline.\n\nNote: the reads in these FASTQ files have _not_ undergone length of quality filtering\n\n> Modifies samtools fastq parameter: `-f 4`",
-                    "fa_icon": "fas fa-file-alt"
-                },
-                "bamfiltering_generatemappedfastq": {
-                    "type": "boolean",
-                    "description": "Specify to generate FASTQ files containing only mapped reads from the aligner generated BAM files.",
-                    "help_text": "Specify to turn on the generation and saving of FASTQs of only the mapped reads from the mapping step in the results directory.\n\nThis can be useful if you wish to do other analysis of the mapped reads independently of the pipeline, such as remapping with different parameters (whereby only including mapped reads will speed up computation time during the re-mapping due to reduced input data).\n\nNote the reads in these FASTQ files have _not_ undergone length of quality filtering\n\n> Modifies samtools fastq parameter: `-F 4`",
+                    "description": "Specify to generate FASTQ files from the filtered BAM files.",
+                    "help_text": "Specify to turn on the generation and saving of FASTQs from the mapping step (after optional filtering) in the results directory.\n\nThis can be useful if you wish to do other analysis of the reads independently of the pipeline, such as remapping with different parameters (whereby only including mapped reads will speed up computation time during the re-mapping due to reduced input data).\n\nNote the reads in these FASTQ files __may have__ undergone length of quality filtering based on the following parameters `bamfiltering_retainunmappedgenomicbam`, `bamfiltering_genomicbamfilterflag`, `bamfiltering_mappingquality`, `bamfiltering_minreadlength`./n/nOnly allowed with option `run_bamfiltering` turned on!",
                     "fa_icon": "far fa-file-alt"
                 },
                 "bamfiltering_savefilteredbams": {
@@ -655,7 +649,13 @@
                     "description": "Specify which type of reads to use for metagenomic screening.",
                     "enum": ["unmapped", "mapped", "all"],
                     "fa_icon": "fas fa-hand-pointer",
-                    "help_text": "Specify to select which mapped reads will be sent for metagenomic analysis.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction) or all reads.\n\n> ⚠️ If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies samtools fastq parameters: `-f 4` / `-F 4`"
+                    "help_text": "Specify to select which mapped reads will be sent for metagenomic analysis OR saved in combination with `bamfiltering_generatedfastq`.\n\nThis influences which reads are sent to this step, whether you want unmapped reads (used in most cases, as 'host reads' can often be contaminants in microbial genomes), mapped reads (e.g, when doing competitive against a genomic reference of multiple genomes and which to apply LCA correction) or all reads.\n\n> ⚠️ If you skip paired-end merging, all reads will be screened as independent reads - not as pairs! - as all FASTQ files from BAM filtering are merged into one. This merged file is _not_ saved in results directory.\n\n> Modifies samtools fastq parameters: `-f 4` / `-F 4`"
+                },
+                "metagenomics_input_savefastq": {
+                    "type": "boolean",
+                    "description": "Specify to turn on saving of input for metagenomics.",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "Specify to turn on the saving of input files used for metagenomics screening subworkflow of the pipeline.\n\nThe reads saved will be PRIOR to any complexity filtering steps part of the metagenomics pipeline. Please see `metagenomics_complexity_savefastq` if you are interesting in saving only post-complexity filtered reads."
                 },
                 "run_metagenomics_complexityfiltering": {
                     "type": "boolean",
