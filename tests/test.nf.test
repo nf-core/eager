@@ -60,8 +60,8 @@ nextflow_pipeline {
             def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore:  null                  , ignoreFile: null                 , include: unstable_patterns_auth)
 
             // Deduplication - TODO -> snapshot both lists are empty!?
-            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*.flagstat']  )
-            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*.{bam,bai}'] )
+            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
             // def bams_deduplication              = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                           , include: ['*.bam'] )
 
             // Final_bams
@@ -80,8 +80,8 @@ nextflow_pipeline {
             def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
 
             // Read filtering - TODO -> snapshot both lists are empty!?
-            def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*.flagstat']  )
-            def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*.{bam,bai}'] )
+            def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
 
             // MQC
             // preprocessing
