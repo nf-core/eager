@@ -433,9 +433,9 @@ workflow EAGER {
         ch_versions = ch_versions.mix(PRESEQ_CCURVE.out.versions)
     }
     else if (!params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'lc_extrap') {
-            PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map { [it[0], it[1]] })
-            ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect { it[1] }.ifEmpty([]))
-            ch_versions = ch_versions.mix(PRESEQ_LCEXTRAP.out.versions)
+        PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map { [it[0], it[1]] })
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect { it[1] }.ifEmpty([]))
+        ch_versions = ch_versions.mix(PRESEQ_LCEXTRAP.out.versions)
     }
 
     //
@@ -525,7 +525,7 @@ workflow EAGER {
     //
 
     if (params.run_mapdamage_rescaling || params.run_pmd_filtering || params.run_trim_bam) {
-        MANIPULATE_DAMAGE(ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.pmd_masking)
+        MANIPULATE_DAMAGE(ch_dedupped_bams, ch_fasta_for_deduplication.fasta, REFERENCE_INDEXING.out.reference, REFERENCE_INDEXING.out.pmd_masking)
         ch_multiqc_files = ch_multiqc_files.mix(MANIPULATE_DAMAGE.out.flagstat.collect { it[1] }.ifEmpty([]))
         ch_versions = ch_versions.mix(MANIPULATE_DAMAGE.out.versions)
         ch_bams_for_library_merge = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_merged_dedup_bams
@@ -552,7 +552,7 @@ workflow EAGER {
             ch_bams_for_genotyping,
             ch_reference_for_genotyping,
             REFERENCE_INDEXING.out.pileupcaller_bed_snp.ifEmpty([[], [], []]),
-            REFERENCE_INDEXING.out.dbsnp.ifEmpty([[], []])
+            REFERENCE_INDEXING.out.dbsnp.ifEmpty([[], []]),
         )
 
         ch_versions = ch_versions.mix(GENOTYPE.out.versions)
@@ -565,9 +565,9 @@ workflow EAGER {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_'  +  'eager_software_'  + 'mqc_'  + 'versions.yml',
+            name: 'nf_core_' + 'eager_software_' + 'mqc_' + 'versions.yml',
             sort: true,
-            newLine: true
+            newLine: true,
         )
         .set { ch_collated_versions }
 
@@ -605,7 +605,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_methods_description.collectFile(
             name: 'methods_description_mqc.yaml',
-            sort: true
+            sort: true,
         )
     )
 
@@ -619,7 +619,7 @@ workflow EAGER {
         ch_multiqc_custom_config.toList(),
         ch_multiqc_logo.toList(),
         [],
-        []
+        [],
     )
 
     emit:
