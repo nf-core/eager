@@ -233,7 +233,7 @@ def validateInputParameters() {
     if ( params.genotyping_source == 'trimmed'            && ! params.run_trim_bam                  ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
     if ( params.genotyping_source == 'pmd'                && ! params.run_pmd_filtering             ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is turned on with `--run_pmd_filtering`.") }
     if ( params.genotyping_source == 'rescaled'           && ! params.run_mapdamage_rescaling       ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is turned on with `--run_mapdamage_rescaling`.") }
-    if ( params.genotyping_source == 'pmd_trimmed' && ! params.run_pmd_filtering || ! params.run_trim_bam ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd_trimmed' unless PMD-filtering is turned on with `--run_pmd_filtering` and BAM trimming is turned on with `--run_trim_bam`.") }
+    if ( params.genotyping_source == 'pmd_trimmed' && ! ( params.run_pmd_filtering && params.run_trim_bam ) ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd_trimmed' unless PMD-filtering is turned on with `--run_pmd_filtering` and BAM trimming is turned on with `--run_trim_bam`.") }
 
     // genotyping
     if ( params.run_genotyping                  && ! params.genotyping_tool   ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
