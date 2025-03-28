@@ -146,7 +146,7 @@ workflow EAGER {
 
     REFERENCE_INDEXING(fasta_fn, fasta_fai, fasta_dict, fasta_mapperindexdir)
     ch_versions = ch_versions.mix(REFERENCE_INDEXING.out.versions)
-    REFERENCE_INDEXING.out.mva.dump(tag: 'reference_mva')
+
     //
     // MODULE: Run FastQC or Falco
     //
@@ -183,7 +183,7 @@ workflow EAGER {
         [meta, index, fasta]
     }
 
-    MAP(ch_reads_for_mapping, ch_reference_for_mapping.dump(tag:"ReferenceMapping"), REFERENCE_INDEXING.out.elongated_reference, REFERENCE_INDEXING.out.elongated_chr_list)
+    MAP(ch_reads_for_mapping, ch_reference_for_mapping, REFERENCE_INDEXING.out.elongated_reference, REFERENCE_INDEXING.out.elongated_chr_list)
 
     ch_versions = ch_versions.mix(MAP.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(MAP.out.mqc.collect { it[1] }.ifEmpty([]))
@@ -237,7 +237,7 @@ workflow EAGER {
             .mix(ch_bams_from_input)
     }
 
-    ch_reads_for_deduplication = ch_bamfiltered_for_deduplication.dump(tag:"dedupInput")
+    ch_reads_for_deduplication = ch_bamfiltered_for_deduplication
 
     //
     // SUBWORKFLOW: genomic BAM deduplication
@@ -560,9 +560,6 @@ workflow EAGER {
         ch_multiqc_files = ch_multiqc_files.mix(GENOTYPE.out.mqc.collect { it[1] }.ifEmpty([]))
     }
 
-    GENOTYPE.out.vcf.dump(tag: 'genotype_channel_consensus_sequence')
-
-
     //
     // SUBWORKFLOW: Consensus sequence
     //
@@ -572,7 +569,7 @@ workflow EAGER {
             .map {
                 meta, fasta, fai, dict, mapindex ->
                 [ meta, fasta ]
-            }.dump(tag: 'reference_channel_consensus_sequence')
+            }
 
         ch_vcf_for_consensus_sequence = GENOTYPE.out.vcf
                                         .map {
@@ -580,11 +577,11 @@ workflow EAGER {
                                             }
                                         .groupTuple()
                                         .map{
-                                            metaref, meta, vcfs ->
-                                            metaref, vcfs
+                                            metaref, meta, vcfs, vcf_index ->
+                                            [ metaref, vcfs ]
                                         }
     CONSENSUS_SEQUENCE(
-                        ch_vcf_for_consensus_sequence.dump(tag:"mva_input_vcfs"),
+                        ch_vcf_for_consensus_sequence,
                         REFERENCE_INDEXING.out.mva.ifEmpty([ [], [], [], [], [] ]).dump(tag: 'mva_reference_files_consensus_sequences'),
                         ch_reference_for_consensus_sequence
                         )

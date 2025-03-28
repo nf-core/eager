@@ -27,23 +27,30 @@ workflow CONSENSUS_SEQUENCE {
         ch_mva_input = ch_mva_files.dump(tag:"consensus_sequences_ref_input")
                             .multiMap{
                                 meta, additional_vcf, reference_gff, reference_gff_exclude, reference_snpeff_results ->
-                                vcfs:                      [ meta, additional_vcf ]
-                                reference_gff:             [ meta, reference_gff ]
-                                reference_gff_exclude:     [ meta, reference_gff_exclude ]
-                                reference_snpeff_results : [ meta, reference_snpeff_results ]
+                                vcfs:                      [ meta, additional_vcf ?: [] ]
+                                reference_gff:             [ meta, reference_gff ?: [] ]
+                                reference_gff_exclude:     [ meta, reference_gff_exclude ?: [] ]
+                                reference_snpeff_results : [ meta, reference_snpeff_results ?: [] ]
                             }
 
-        ch_mva_input.vcfs.dump(tag:"consensus_sequence_vcfs")
+        ch_mva_ref_vcfs = ch_mva_input.vcfs
+                                            .map {
+                                                    meta, vcfs ->
+                                                    def new_meta = meta.subMap( ['id'] )
+                                                    [ [reference: new_meta.id], vcfs ]
+                                                }.dump(tag:"consensus_sequence_vcfs")
         ch_genotypes_vcf.dump(tag:"consensus_sequence_input_vcfs")
         //Mix in the vcf from the additional vcf channel
         ch_mva_vcf  = ch_genotypes_vcf
-                        .combine(
-                            ch_mva_input.vcfs //Mix additional vcfs
-                        )
-//                        .map{
-//                            meta, -->
-//                            meta,
-//                        }.groupTuple(by: 1)
+                        .mix(
+                            ch_mva_ref_vcfs //Mix additional vcfs
+                        ).dump(tag:"consensus_sequence_postmix")
+                        .groupTuple(by: 0).dump(tag:"consensus_sequence_grouptupple")
+                        .map{
+                            meta, vcfs ->
+                                def newvcfs = vcfs[0] + vcfs[1]
+                            [ meta, newvcfs ]
+                        }.dump(tag:"consensus_sequence_final")
 
         MULTIVCFANALYZER ( ch_mva_vcf,
                     fasta,
