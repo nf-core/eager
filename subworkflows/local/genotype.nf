@@ -2,6 +2,7 @@
 // Genotype the input data using the requested genotyper.
 //
 
+include { PICARD_ADDORREPLACEREADGROUPS                     } from '../../modules/nf-core/picard/addorreplacereadgroups/main'
 include { SAMTOOLS_MPILEUP as SAMTOOLS_MPILEUP_PILEUPCALLER } from '../../modules/nf-core/samtools/mpileup/main'
 include { EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE     } from '../../modules/nf-core/eigenstratdatabasetools/eigenstratsnpcoverage/main'
 include { SEQUENCETOOLS_PILEUPCALLER                        } from '../../modules/nf-core/sequencetools/pileupcaller/main'
@@ -35,6 +36,13 @@ workflow GENOTYPE {
 
     if ( params.genotyping_tool == 'pileupcaller' ) {
 
+            // TODO: if running per-library, necessary to update readgroups
+            // reassign readgroups to be unique per library (eg rewrite any SM field from sample to SAMPLEID_LIBID)
+            // some tools (eg pileupcaller) break when multiple .bams input have the same SM field for read groups
+            // PICARD_ADDORREPLACEREADGROUPS(ch_bams_for_genotyping)
+            // ch_bams_for_genotyping = PICARD_ADDORREPLACEREADGROUPS.out
+
+
         // Compile together all reference based files
         ch_refs_prep = ch_fasta_plus
             // Because aux files are optional, the channel can be [[],[],[]]. remainder:true will output both the empty list and the fasta_plus channel with an added 'null'.
@@ -61,85 +69,118 @@ workflow GENOTYPE {
             } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, bed, snp ]
 
         // Prepare collect bams for mpileup
-        ch_mpileup_inputs_bams = ch_bam_bai
+        // Recreate Read Group headers if no genotyping input is library-by-library
+        if ( params.genotyping_use_unmerged_libraries ) {
+            ch_input_for_rewriting_readgroups = ch_bam_bai
             .map {
-                addNewMetaFromAttributes( it, ["reference", "strandedness"] , ["reference", "strandedness"] , false )
+                addNewMetaFromAttributes( it, "reference", "reference" , false )
             }
-            .groupTuple()
-            .map {
-                combo_meta, metas, bams, bais ->
-                def ids = metas.collect { meta -> meta.sample_id }
-                [ combo_meta + [sample_id: ids], bams ] // Drop bais
-            } // Collect all IDs into a list in meta.sample_id. Useful when running pileupCaller later
+            .combine( ch_refs_for_mpileup_pileupcaller , by:0 )
+            .multiMap {
+                ignore_me, combo_meta, bams, bais, ref_meta, fasta, fai, dict, bed, snp ->
+                    bams:  [ combo_meta, bams ]
+                    fasta: [ ref_meta, fasta ]
+                    fai:   [ ref_meta, fai ]
+            }
 
-            // Combine prepped bams and references
-            ch_mpileup_inputs = ch_mpileup_inputs_bams
+            PICARD_ADDORREPLACEREADGROUPS(ch_input_for_rewriting_readgroups.bams, ch_input_for_rewriting_readgroups.fasta, ch_input_for_rewriting_readgroups.fai)
+
+            ch_mpileup_inputs_bams = PICARD_ADDORREPLACEREADGROUPS.out.bam
                 .map {
-                    addNewMetaFromAttributes( it, "reference", "reference" , false )
-                }
-                .combine( ch_refs_for_mpileup_pileupcaller , by:0 )
-                // do not run if no bed file is provided
-                .filter { it[7] != []}
-                .multiMap {
-                    ignore_me, combo_meta, bams, ref_meta, fasta, fai, dict, bed, snp ->
-                        def bedfile = bed != "" ? bed : []
-                        bams:  [ combo_meta, bams, bedfile ]
-                        fasta: [ fasta ]
-                }
-
-            SAMTOOLS_MPILEUP_PILEUPCALLER(
-                ch_mpileup_inputs.bams,
-                ch_mpileup_inputs.fasta,
-            )
-            ch_versions = ch_versions.mix( SAMTOOLS_MPILEUP_PILEUPCALLER.out.versions.first() )
-
-            ch_pileupcaller_input = SAMTOOLS_MPILEUP_PILEUPCALLER.out.mpileup
-                .map {
-                    addNewMetaFromAttributes( it, "reference", "reference" , false )
-                }
-                .combine( ch_refs_for_mpileup_pileupcaller, by:0 )
-                .multiMap {
-                    ignore_me, meta, mpileup, ref_meta, fasta, fai, dict, bed, snp ->
-                        // def snpfile = snp != "" ? snp : []
-                        mpileup: [ meta, mpileup ]
-                        snpfile: snp
-                }
-
-            // Run PileupCaller
-            SEQUENCETOOLS_PILEUPCALLER(
-                ch_pileupcaller_input.mpileup,
-                ch_pileupcaller_input.snpfile,
-                []
-            )
-            ch_versions = ch_versions.mix( SEQUENCETOOLS_PILEUPCALLER.out.versions.first() )
-
-            // Merge/rename genotyping datasets
-            ch_final_genotypes = SEQUENCETOOLS_PILEUPCALLER.out.eigenstrat
-                .map {
-                    addNewMetaFromAttributes( it, "reference" , "reference" , false )
+                    addNewMetaFromAttributes( it, ["reference", "strandedness"] , ["reference", "strandedness"] , false )
                 }
                 .groupTuple()
                 .map {
-                    combo_meta, metas, geno, snp, ind ->
-                    [ combo_meta, geno, snp, ind ]
+                    combo_meta, metas, bams ->
+                    def ids = metas.collect { meta -> meta.library_id }
+                    [ combo_meta + [sample_id: ids], bams ]
+                } // Collect all LIBRARY IDs into a list in meta.sample_id. Useful when running pileupCaller later
+                // distinct from running merged libraries as single sample -- libraries must be unique
+        }
+        else {
+            ch_mpileup_inputs_bams = ch_bam_bai
+                .map {
+                    addNewMetaFromAttributes( it, ["reference", "strandedness"] , ["reference", "strandedness"] , false )
                 }
+                .groupTuple()
+                .map {
+                    combo_meta, metas, bams, bais ->
+                    def ids = metas.collect { meta -> meta.sample_id }
+                    [ combo_meta + [sample_id: ids], bams ] // Drop bais
+                } // Collect all IDs into a list in meta.sample_id. Useful when running pileupCaller later
+        }
 
-            COLLECT_GENOTYPES( ch_final_genotypes )
-            // Add genotyper info to the meta
-            ch_pileupcaller_genotypes = COLLECT_GENOTYPES.out.collected
+        ch_mpileup_inputs_bams.view()
+
+        // Combine prepped bams and references
+        ch_mpileup_inputs = ch_mpileup_inputs_bams
             .map {
-                meta, geno, snp, ind ->
-                [ meta + [ genotyper: "pileupcaller" ], geno , snp, ind ]
+                addNewMetaFromAttributes( it, "reference", "reference" , false )
             }
-            ch_versions               = ch_versions.mix( COLLECT_GENOTYPES.out.versions.first() )
+            .combine( ch_refs_for_mpileup_pileupcaller , by:0 )
+            // do not run if no bed file is provided
+            .filter { it[7] != []}
+            .multiMap {
+                ignore_me, combo_meta, bams, ref_meta, fasta, fai, dict, bed, snp ->
+                    def bedfile = bed != "" ? bed : []
+                    bams:  [ combo_meta, bams, bedfile ]
+                    fasta: [ fasta ]
+            }
 
-            // Calculate coverage stats for collected eigenstrat dataset
-            EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE(
-                ch_pileupcaller_genotypes
-            )
-            ch_eigenstrat_coverage_stats = EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE.out.tsv
-            ch_versions                  = ch_versions.mix( EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE.out.versions.first() )
-            ch_multiqc_files             = ch_multiqc_files.mix( EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE.out.json )
+
+        SAMTOOLS_MPILEUP_PILEUPCALLER(
+            ch_mpileup_inputs.bams,
+            ch_mpileup_inputs.fasta,
+        )
+        ch_versions = ch_versions.mix( SAMTOOLS_MPILEUP_PILEUPCALLER.out.versions.first() )
+
+        ch_pileupcaller_input = SAMTOOLS_MPILEUP_PILEUPCALLER.out.mpileup
+            .map {
+                addNewMetaFromAttributes( it, "reference", "reference" , false )
+            }
+            .combine( ch_refs_for_mpileup_pileupcaller, by:0 )
+            .multiMap {
+                ignore_me, meta, mpileup, ref_meta, fasta, fai, dict, bed, snp ->
+                    // def snpfile = snp != "" ? snp : []
+                    mpileup: [ meta, mpileup ]
+                    snpfile: snp
+            }
+
+        // Run PileupCaller
+        SEQUENCETOOLS_PILEUPCALLER(
+            ch_pileupcaller_input.mpileup,
+            ch_pileupcaller_input.snpfile,
+            []
+        )
+        ch_versions = ch_versions.mix( SEQUENCETOOLS_PILEUPCALLER.out.versions.first() )
+
+        // Merge/rename genotyping datasets
+        ch_final_genotypes = SEQUENCETOOLS_PILEUPCALLER.out.eigenstrat
+            .map {
+                addNewMetaFromAttributes( it, "reference" , "reference" , false )
+            }
+            .groupTuple()
+            .map {
+                combo_meta, metas, geno, snp, ind ->
+                [ combo_meta, geno, snp, ind ]
+            }
+
+        COLLECT_GENOTYPES( ch_final_genotypes )
+        // Add genotyper info to the meta
+        ch_pileupcaller_genotypes = COLLECT_GENOTYPES.out.collected
+        .map {
+            meta, geno, snp, ind ->
+            [ meta + [ genotyper: "pileupcaller" ], geno , snp, ind ]
+        }
+        ch_versions               = ch_versions.mix( COLLECT_GENOTYPES.out.versions.first() )
+
+        // Calculate coverage stats for collected eigenstrat dataset
+        EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE(
+            ch_pileupcaller_genotypes
+        )
+        ch_eigenstrat_coverage_stats = EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE.out.tsv
+        ch_versions                  = ch_versions.mix( EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE.out.versions.first() )
+        ch_multiqc_files             = ch_multiqc_files.mix( EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE.out.json )
     }
 
     if ( params.genotyping_tool == 'ug' ) {
@@ -400,6 +441,8 @@ workflow GENOTYPE {
                     bam:   [ meta, bam ]
                     fasta: [ ref_meta, fasta ]
             }
+
+        ch_input_for_angsd.bam.view()
 
         ANGSD_GL(
             ch_input_for_angsd.bam,

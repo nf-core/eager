@@ -540,6 +540,9 @@ workflow EAGER {
         if ( params.genotyping_use_unmerged_libraries ) {
             // Get UNMERGED data from either initial mapping (post deduplication/filtering, if done), or post-damage manipulation after deduplication/filtering (if done) -- Note: the .out channels include libraries that are not damage manipulated (eg UDG-Full))
             ch_bams_for_genotyping = params.genotyping_source == 'rescaled' ? MANIPULATE_DAMAGE.out.rescaled : params.genotyping_source == 'pmd' ? MANIPULATE_DAMAGE.out.filtered : params.genotyping_source == 'trimmed' ? MANIPULATE_DAMAGE.out.trimmed : params.genotyping_source == 'pmd_trimmed' ? MANIPULATE_DAMAGE.out.trimmed : ch_dedupped_bams
+
+            // ch_bams_for_genotyping.view()
+
         }
         else {
             // Genotyping done on MERGED data, regardless of UDG-treatment vs not; damage manipulation per-library!
@@ -553,7 +556,7 @@ workflow EAGER {
             [meta, fasta, fai, dict]
         }
 
-        ch_reference_for_genotyping.view()
+        // ch_reference_for_genotyping.view()
 
         GENOTYPE(
             ch_bams_for_genotyping,
