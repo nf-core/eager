@@ -1088,7 +1088,7 @@
                     "type": "integer",
                     "default": 2,
                     "description": "Specify the ploidy of the reference organism.",
-                    "help_text": "Specify the desired ploidy value of your reference organism for genotyping with GATK or FreeBayes. E.g. if you want to allow heterozygous calls this value should be >= 2.\n\n> Modifies GATK UnifiedGenotyper parameter: `--sample_ploidy`\n> Modifies GATK HaplotypeCaller parameter: `--sample-ploidy`\n> Modifies FreeBayes parameter: `-p`",
+                    "help_text": "Specify the desired ploidy value of your reference organism for genotyping with GATK or FreeBayes. E.g. if you want to allow heterozygous calls this value should be >= 2.\n\n> Modifies GATK UnifiedGenotyper parameter: `--sample_ploidy`\n> Modifies GATK HaplotypeCaller parameter: `--sample_ploidy`\n> Modifies FreeBayes parameter: `-p`",
                     "fa_icon": "fas fa-pastafarianism"
                 },
                 "genotyping_pileupcaller_min_base_quality": {
