@@ -36,13 +36,6 @@ workflow GENOTYPE {
 
     if ( params.genotyping_tool == 'pileupcaller' ) {
 
-            // TODO: if running per-library, necessary to update readgroups
-            // reassign readgroups to be unique per library (eg rewrite any SM field from sample to SAMPLEID_LIBID)
-            // some tools (eg pileupcaller) break when multiple .bams input have the same SM field for read groups
-            // PICARD_ADDORREPLACEREADGROUPS(ch_bams_for_genotyping)
-            // ch_bams_for_genotyping = PICARD_ADDORREPLACEREADGROUPS.out
-
-
         // Compile together all reference based files
         ch_refs_prep = ch_fasta_plus
             // Because aux files are optional, the channel can be [[],[],[]]. remainder:true will output both the empty list and the fasta_plus channel with an added 'null'.
@@ -109,8 +102,6 @@ workflow GENOTYPE {
                     [ combo_meta + [sample_id: ids], bams ] // Drop bais
                 } // Collect all IDs into a list in meta.sample_id. Useful when running pileupCaller later
         }
-
-        ch_mpileup_inputs_bams.view()
 
         // Combine prepped bams and references
         ch_mpileup_inputs = ch_mpileup_inputs_bams
@@ -442,8 +433,6 @@ workflow GENOTYPE {
                     bam:   [ meta, bam ]
                     fasta: [ ref_meta, fasta ]
             }
-
-        ch_input_for_angsd.bam.view()
 
         ANGSD_GL(
             ch_input_for_angsd.bam,
