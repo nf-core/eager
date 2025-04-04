@@ -564,26 +564,10 @@ workflow EAGER {
     // SUBWORKFLOW: Consensus sequence
     //
     if ( params.run_consensus_sequence ) {
-        ch_reference_for_consensus_sequence = REFERENCE_INDEXING.out.reference
-            // Remove unnecessary files from the reference channel, so SWF doesn't break with each change to reference channel.
-            .map {
-                meta, fasta, fai, dict, mapindex ->
-                [ meta, fasta ]
-            }
-
-        ch_vcf_for_consensus_sequence = GENOTYPE.out.vcf
-                                        .map {
-                                            addNewMetaFromAttributes( it, "reference", "reference" , false )
-                                            }
-                                        .groupTuple()
-                                        .map{
-                                            metaref, meta, vcfs, vcf_index ->
-                                            [ metaref, vcfs ]
-                                        }
     CONSENSUS_SEQUENCE(
-                        ch_vcf_for_consensus_sequence,
-                        REFERENCE_INDEXING.out.mva.ifEmpty([ [], [], [], [], [] ]).dump(tag: 'mva_reference_files_consensus_sequences'),
-                        ch_reference_for_consensus_sequence
+                        GENOTYPE.out.vcf,
+                        REFERENCE_INDEXING.out.mva,
+                        REFERENCE_INDEXING.out.reference
                         )
     }
 

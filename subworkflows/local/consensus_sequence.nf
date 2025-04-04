@@ -15,7 +15,7 @@ workflow CONSENSUS_SEQUENCE {
     take:
         ch_genotypes_vcf
         ch_mva_files // [meta, additional_vcf, reference_gff, reference_gff_exclude ]
-        fasta // [ meta, fasta, fai  ]
+        ch_fasta // [ meta, fasta ]
 
     main:
     ch_versions       = Channel.empty()
@@ -24,36 +24,54 @@ workflow CONSENSUS_SEQUENCE {
     if ( params.consensus_tool == 'multivcfanalyzer' ) {
 
         write_allele_frequencies = params.consensus_multivcfanalyzer_write_allele_frequencies ? "T" : "F"
-        ch_mva_input = ch_mva_files.dump(tag:"consensus_sequences_ref_input")
+
+        ch_genotypes_vcf_final = ch_genotypes_vcf
+                                        .map {
+                                            addNewMetaFromAttributes( it, "reference", "reference" , false )
+                                            }
+                                        .groupTuple()
+                                        .map{
+                                            metaref, meta, vcfs, vcf_index ->
+                                            [ metaref, vcfs ]
+                                        }.dump(tag:"consensus_genotyped_vcfs")
+        ch_fasta_final = ch_fasta
+                                .map{
+                                    meta, fasta, fai, dict, mapindex ->
+                                        def new_meta = meta.subMap( ['id'] )
+                                    [ [reference: new_meta.id], fasta ]
+                                }.dump(tag:"consensus_fasta")
+
+        ch_mva_input = ch_mva_files.dump(tag:"consensus_ref_vcfs_related_files")
+                                    .map {
+                                        meta, additional_vcf, reference_gff, reference_gff_exclude, reference_snpeff_results ->
+                                            def new_meta = meta.subMap( ['id'] )
+                                            [ [reference: new_meta.id], additional_vcf, reference_gff, reference_gff_exclude, reference_snpeff_results ]
+                                    }
+                                    .join( ch_genotypes_vcf_final ).dump(tag:"consensus_postjoin")
+                                    .join( ch_fasta_final ).dump(tag:"consensus_postjoin2")
                             .multiMap{
-                                meta, additional_vcf, reference_gff, reference_gff_exclude, reference_snpeff_results ->
-                                vcfs:                      [ meta, additional_vcf ?: [] ]
+                                meta, additional_vcf, reference_gff, reference_gff_exclude, reference_snpeff_results, ug_vcfs, fasta ->
+                                vcfs:                      [ meta, additional_vcf + ug_vcfs ]
                                 reference_gff:             [ meta, reference_gff ?: [] ]
                                 reference_gff_exclude:     [ meta, reference_gff_exclude ?: [] ]
                                 reference_snpeff_results : [ meta, reference_snpeff_results ?: [] ]
-                            }
+                                reference_fasta:           [ meta, fasta ]
+                            }//.dump(tag:"consensus_sequence_final")
 
-        ch_mva_ref_vcfs = ch_mva_input.vcfs
-                                            .map {
-                                                    meta, vcfs ->
-                                                    def new_meta = meta.subMap( ['id'] )
-                                                    [ [reference: new_meta.id], vcfs ]
-                                                }.dump(tag:"consensus_sequence_vcfs")
-        ch_genotypes_vcf.dump(tag:"consensus_sequence_input_vcfs")
         //Mix in the vcf from the additional vcf channel
-        ch_mva_vcf  = ch_genotypes_vcf
-                        .mix(
-                            ch_mva_ref_vcfs //Mix additional vcfs
-                        ).dump(tag:"consensus_sequence_postmix")
-                        .groupTuple(by: 0).dump(tag:"consensus_sequence_grouptupple")
-                        .map{
-                            meta, vcfs ->
-                                def newvcfs = vcfs[0] + vcfs[1]
-                            [ meta, newvcfs ]
-                        }.dump(tag:"consensus_sequence_final")
+//        ch_mva_vcf  = ch_genotypes_vcf
+//                        .mix(
+//                            ch_mva_ref_vcfs //Mix additional vcfs
+//                        ).dump(tag:"consensus_sequence_postmix")
+//                        .groupTuple(by: 0).dump(tag:"consensus_sequence_grouptupple")
+//                        .map{
+//                            meta, vcfs ->
+//                                def newvcfs = vcfs[0] + vcfs[1]
+//                            [ meta, newvcfs ]
+//                        }.dump(tag:"consensus_sequence_final")
 
-        MULTIVCFANALYZER ( ch_mva_vcf,
-                    fasta,
+        MULTIVCFANALYZER ( ch_mva_input.vcfs,
+                    ch_mva_input.reference_fasta,
                     ch_mva_input.reference_snpeff_results,
                     ch_mva_input.reference_gff,
                     write_allele_frequencies,
