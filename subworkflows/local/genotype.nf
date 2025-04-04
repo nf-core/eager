@@ -409,7 +409,8 @@ workflow GENOTYPE {
                 .map {
                     combo_meta, metas, bams, bais ->
                     def new_map = [:]
-                    def ids = metas.collect { meta -> meta.sample_id }
+                    // ids will either be sampleID or libraryID depending on desired input for genotyping (default is use meta.sample_id, for merged sample data)
+                    def ids = params.genotyping_use_unmerged_libraries ? metas.collect { meta -> meta.library_id } : metas.collect { meta -> meta.sample_id }
                     def strandedness = metas.collect { meta -> meta.strandedness }
                     def single_ends = metas.collect { meta -> meta.single_end }
                     def reference = combo_meta.reference
