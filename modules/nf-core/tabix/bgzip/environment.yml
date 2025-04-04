@@ -3,6 +3,7 @@
 channels:
   - conda-forge
   - bioconda
+
 dependencies:
-  - bioconda::gatk=3.5
+  - bioconda::htslib=1.21
   - bioconda::tabix=1.11

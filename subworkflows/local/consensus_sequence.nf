@@ -4,6 +4,8 @@
 
 include { MULTIVCFANALYZER         } from '../../modules/nf-core/multivcfanalyzer'
 include { addNewMetaFromAttributes } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
+include { TABIX_BGZIP as UG_BGZIP  } from '../../modules/nf-core/tabix/bgzip'
+include { GUNZIP as REF_GUNZIP     } from '../../modules/nf-core/gunzip'
 
 workflow CONSENSUS_SEQUENCE {
     //
@@ -25,13 +27,18 @@ workflow CONSENSUS_SEQUENCE {
 
         write_allele_frequencies = params.consensus_multivcfanalyzer_write_allele_frequencies ? "T" : "F"
 
-        ch_genotypes_vcf_final = ch_genotypes_vcf
+        ch_genotypes_unzip = ch_genotypes_vcf
+                                            .map{
+                                                meta, vcfs, vcf_index ->
+                                                [ meta, vcfs ]
+                                            }
+        ch_genotypes_vcf_final = UG_BGZIP(ch_genotypes_unzip).output
                                         .map {
                                             addNewMetaFromAttributes( it, "reference", "reference" , false )
                                             }
                                         .groupTuple()
                                         .map{
-                                            metaref, meta, vcfs, vcf_index ->
+                                            metaref, meta, vcfs ->
                                             [ metaref, vcfs ]
                                         }.dump(tag:"consensus_genotyped_vcfs")
         ch_fasta_final = ch_fasta
@@ -57,18 +64,6 @@ workflow CONSENSUS_SEQUENCE {
                                 reference_snpeff_results : [ meta, reference_snpeff_results ?: [] ]
                                 reference_fasta:           [ meta, fasta ]
                             }//.dump(tag:"consensus_sequence_final")
-
-        //Mix in the vcf from the additional vcf channel
-//        ch_mva_vcf  = ch_genotypes_vcf
-//                        .mix(
-//                            ch_mva_ref_vcfs //Mix additional vcfs
-//                        ).dump(tag:"consensus_sequence_postmix")
-//                        .groupTuple(by: 0).dump(tag:"consensus_sequence_grouptupple")
-//                        .map{
-//                            meta, vcfs ->
-//                                def newvcfs = vcfs[0] + vcfs[1]
-//                            [ meta, newvcfs ]
-//                        }.dump(tag:"consensus_sequence_final")
 
         MULTIVCFANALYZER ( ch_mva_input.vcfs,
                     ch_mva_input.reference_fasta,
