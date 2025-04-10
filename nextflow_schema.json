@@ -650,10 +650,10 @@
                     "help_text": "Without this flag, mapAD is more permissive in terms of mismatches if the quality of the base is low. Default is set to mapAD's default.\n\n> Modifies mapAD map parameter: `--ignore_base_quality`",
                     "fa_icon": "fas fa-asterisk"
                 },
-                "mapping_mapad_stacklimitabort": {
+                "mapping_mapad_nosearchlimitrecovery": {
                     "type": "boolean",
-                    "description": "Set the --stack_limit_abort flag, which instructs mapAD to not try and recover from a full backtracking stack.",
-                    "help_text": "Without this flag, mapAD tries to recover from a full backtracking stack by removing low-scoring sub-alignments. This can help to recover from difficult to map reads, at the cost of a slower alignment. Setting this flag will speed up the alignment process. Default is set to mapAD's default.\n\n> Modifies mapAD map parameter: `--stack_limit_abort`",
+                    "description": "Set the --no_search_limit_recovery flag, which instructs mapAD to abort instead of trying to recover from full internal data structures.",
+                    "help_text": "Mapping of reads which are particularly difficult to align can exceed the limits of the internal search space. By default, mapAD attempts to recover from these cases by discarding the lowest scoring sub-alignments. If this flag is set, these reads are instead immediately reported as unmapped, which slightly increases the mapping speed at the cost of decreasing sensitivity. Default is set to mapAD's default.\n\n> Modifies mapAD map parameter: `--no_search_limit_recovery`",
                     "fa_icon": "fab fa-stack-overflow"
                 }
             },
