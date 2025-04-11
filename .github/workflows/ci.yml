@@ -40,6 +40,7 @@ jobs:
           - "test_microbial"
           - "test_shortdna"
           - "test_humanpopgen"
+          - "test_long"
         isMaster:
           - ${{ github.base_ref == 'master' }}
         # Exclude conda and singularity on dev
