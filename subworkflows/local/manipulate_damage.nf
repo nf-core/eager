@@ -30,7 +30,7 @@ workflow MANIPULATE_DAMAGE {
     // Only run flagstat on pmd filtered bam, since rescaling and trimming does not change the number of reads
 
     // Ensure correct reference is associated with each bam_bai pair
-    if (params.run_mapdamage_rescaling) {
+    if (params.mapping_tool == 'circularmapper') {
         ch_refs = ch_fasta_elongated.map {
             // Prepend a new meta that contains the meta.id value as the new_meta.reference attribute
             addNewMetaFromAttributes(it, "id", "reference", false)
