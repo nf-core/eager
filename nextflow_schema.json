@@ -1590,6 +1590,21 @@
             },
             "fa_icon": "fas fa-transgender-alt",
             "help_text": ""
+        },
+        "mtdna_haplogroup_options": {
+            "title": "mtDNA Haplogroup Classification",
+            "type": "object",
+            "description": "Options for classifying mitochondrial haplogroups using Haplogrep3.",
+            "default": "",
+            "fa_icon": "fas fa-dna",
+            "properties": {
+                "run_mtdna_haplogroup": {
+                    "type": "boolean",
+                    "description": "Run Haplogrep3 to determine mitochondrial haplogroups from VCF files.",
+                    "fa_icon": "fas fa-dna",
+                    "default": false
+                }
+            }
         }
     },
     "allOf": [
@@ -1646,6 +1661,9 @@
         },
         {
             "$ref": "#/$defs/human_sex_determination"
+        },
+        {
+            "$ref": "#/$defs/mtdna_haplogroup_options"
         }
     ]
 }
