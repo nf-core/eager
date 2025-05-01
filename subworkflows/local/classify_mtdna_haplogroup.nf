@@ -7,7 +7,7 @@
 include { addNewMetaFromAttributes      } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
 include { HAPLOGREP3_CLASSIFY           } from '../../modules/nf-core/haplogrep3/classify/main'
 
-workflow HAPLOTYPE_HUMAN_MTDNA {
+workflow CLASSIFY_MTDNA_HAPLOGROUP {
 
     take:
     ch_mtdna_vcf

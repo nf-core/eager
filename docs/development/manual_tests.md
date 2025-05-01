@@ -1136,6 +1136,8 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ --convert_
 
 ### MTDNA HAPLOGROUP CLASSIFICATION
 
+#### ALAINA TODO: ADD SOMETHING HERE
+
 ```bash
 #### MTDNA HAPLOGROUP CLASSIFICATION with default settings
 ## Expect: Directory created 'mtdna_haplogroup/<reference>/<sample_id>' containing a .txt file for each sample with haplogroup assignments
@@ -1146,10 +1148,4 @@ nextflow run main.nf -profile docker,test --outdir ./results/mtdna_haplogroup_te
 ## Expect: Directory created 'mtdna_haplogroup/<reference>/<sample_id>' containing a .txt file for each sample with haplogroup assignments
 ## Expect: The haplogroup assignment may differ based on the classification settings
 nextflow run main.nf -profile docker,test --outdir ./results/mtdna_haplogroup_test_args --run_mtdna_haplogroup --haplogrep_args '--extend-report' -resume
-
-#### MTDNA HAPLOGROUP CLASSIFICATION with custom VCF input
-## Use as input a version of the TSV that contains mitochondrial VCF files
-## Expect: Directory created 'mtdna_haplogroup/<reference>/<sample_id>' containing a .txt file for each sample with haplogroup assignments
-## Expect: The haplogroup assignment should reflect the variants in the input VCF files
-nextflow run main.nf -profile docker,test --input ~/eager_dsl2_testing/input/mtdna/mtdna_vcf_samples.tsv --outdir ./results/mtdna_haplogroup_vcf_test --run_mtdna_haplogroup -resume
 ```
