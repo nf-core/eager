@@ -32,7 +32,7 @@ include { METAGENOMICS                                        } from '../subwork
 include { ESTIMATE_CONTAMINATION                              } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE                                    } from '../subworkflows/local/calculate_damage'
 include { RUN_SEXDETERRMINE                                   } from '../subworkflows/local/run_sex_determination'
-include { HAPLOTYPE_HUMAN_MTDNA                               } from '../subworkflows/local/haplotype_human_mtdna'
+include { CLASSIFY_MTDNA_HAPLOGROUP                          } from '../subworkflows/local/classify_mtdna_haplogroup'
 include { MERGE_LIBRARIES                                     } from '../subworkflows/local/merge_libraries'
 include { MERGE_LIBRARIES as MERGE_LIBRARIES_GENOTYPING       } from '../subworkflows/local/merge_libraries'
 include { GENOTYPE                                            } from '../subworkflows/local/genotype'
@@ -586,8 +586,8 @@ workflow EAGER {
                 [ meta, vcf ]
             }
 
-        HAPLOTYPE_HUMAN_MTDNA(ch_mtdna_haplogroup_input)
-        ch_versions = ch_versions.mix(HAPLOTYPE_HUMAN_MTDNA.out.versions)
+        CLASSIFY_MTDNA_HAPLOGROUP(ch_mtdna_haplogroup_input)
+        ch_versions = ch_versions.mix(CLASSIFY_MTDNA_HAPLOGROUP.out.versions)
     }
 
     //
