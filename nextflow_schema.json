@@ -1598,9 +1598,9 @@
             "default": "",
             "fa_icon": "fas fa-dna",
             "properties": {
-                "run_mtdna_haplogroup": {
+                "run_mtdna_haplogroup_classification": {
                     "type": "boolean",
-                    "description": "Run Haplogrep3 to determine mitochondrial haplogroups from VCF files.",
+                    "description": "Run Haplogrep3 to determine mitochondrial haplogroups.",
                     "fa_icon": "fas fa-dna",
                     "default": false
                 }
