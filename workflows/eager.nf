@@ -32,6 +32,7 @@ include { METAGENOMICS                                        } from '../subwork
 include { ESTIMATE_CONTAMINATION                              } from '../subworkflows/local/estimate_contamination'
 include { CALCULATE_DAMAGE                                    } from '../subworkflows/local/calculate_damage'
 include { RUN_SEXDETERRMINE                                   } from '../subworkflows/local/run_sex_determination'
+include { HAPLOTYPE_HUMAN_MTDNA                               } from '../subworkflows/local/haplotype_human_mtdna'
 include { MERGE_LIBRARIES                                     } from '../subworkflows/local/merge_libraries'
 include { MERGE_LIBRARIES as MERGE_LIBRARIES_GENOTYPING       } from '../subworkflows/local/merge_libraries'
 include { GENOTYPE                                            } from '../subworkflows/local/genotype'
@@ -558,6 +559,35 @@ workflow EAGER {
 
         ch_versions = ch_versions.mix(GENOTYPE.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(GENOTYPE.out.mqc.collect { it[1] }.ifEmpty([]))
+    }
+
+    //
+    // SUBWORKFLOW: Run mtDNA Haplogroup Classification
+    //
+
+    if (params.run_mtdna_haplogroup) {
+        if (!params.run_genotyping) {
+            error "Cannot run mtDNA haplogroup classification (--run_mtdna_haplogroup) without running genotyping (--run_genotyping). VCF files are required as input."
+        }
+
+        ch_mito_header_for_filter = REFERENCE_INDEXING.out.mitochondrion_header
+            .map { meta, header -> [ meta.id, header ] }
+
+        ch_mtdna_haplogroup_input = GENOTYPE.out.vcf
+            .map { meta, vcf, tbi ->
+                def reference_id = meta.reference
+                [ reference_id, meta, vcf ]
+            }
+            .join(ch_mito_header_for_filter)
+            .filter { ref_id, meta, vcf, mito_header ->
+                vcf.name.contains(meta.id)
+            }
+            .map { ref_id, meta, vcf, mito_header ->
+                [ meta, vcf ]
+            }
+
+        HAPLOTYPE_HUMAN_MTDNA(ch_mtdna_haplogroup_input)
+        ch_versions = ch_versions.mix(HAPLOTYPE_HUMAN_MTDNA.out.versions)
     }
 
     //
