@@ -28,7 +28,7 @@ jobs:
       matrix:
         NXF_VER:
           - "24.04.2"
-        #  - "latest-everything" commenting due to Nextflow regression in edge version as of 25th April 2025
+          - "latest-everything"
         profile:
           - "conda"
           - "docker"
