@@ -721,7 +721,7 @@ HOP001 ERR8958750 0 4 paired double half /workspace/eager/testing/test_data/ERR8
 HOP001 ERR8958751 0 2 paired double half /workspace/eager/testing/test_data/ERR8958751_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958751_2.fastq.gz_reduced.fastq.gz NA NA
 HOP001 ERR8958752 0 2 paired double half /workspace/eager/testing/test_data/ERR8958752_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958752_2.fastq.gz_reduced.fastq.gz NA NA
 HOP001 ERR8958753 0 2 paired double half /workspace/eager/testing/test_data/ERR8958753_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958753_2.fastq.gz_reduced.fastq.gz NA NA
-HOP001 ERR8958754 0 2 paired double none /workspace/eager/testing/test_data/ERR8958754_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958754_2.fastq.gz_reduced.fastq.gz NA NA" | sed 's/ /\t/g' > test.tsv
+HOP001 ERR8958754 0 2 paired double none /workspace/eager/testing/test_data/ERR8958754_1.fastq.gz_reduced.fastq.gz /workspace/eager/testing/test_data/ERR8958754_2.fastq.gz_reduced.fastq.gz NA NA" | sed 's/NA/ /g' | sed 's/ /\t/g'  > test.tsv
 
 nextflow run ../main.nf -profile docker \
   --input test.tsv \
@@ -737,6 +737,16 @@ nextflow run ../main.nf -profile docker \
   --skip_qualimap \
   --metagenomics_malt_group_size 3
 ```
+
+# kraken2
+
+nextflow run main.nf -profile docker \
+ --input testing/test.tsv \
+ --outdir ./out \
+ --run_metagenomics \
+ --metagenomics_profiling_tool kraken2 \
+ --metagenomics_profiling_database /workspace/eager/testing/eager_test.tar.gz
+--preprocessing_skippairmerging
 
 ## Mapping statistics
 
