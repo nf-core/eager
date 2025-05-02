@@ -73,6 +73,18 @@
                 "type": "string",
                 "meta": ["bam_reference_id"],
                 "errorMessage": "A BAM reference ID (corresponding to what is supplied to `--fasta`) must always be provided when providing a BAM file."
+            },
+            "vcf": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.vcf.gz$",
+                "exists": true,
+                "errorMessage": "VCFs files cannot contain any spaces and must have extension '.vcf.gz' and be gzip zipped."
+            },
+            "vcf_reference_id": {
+                "type": "string",
+                "meta": ["vcf_reference_id"],
+                "errorMessage": "A VCF reference ID (corresponding to what is supplied to `--fasta`) must always be provided when providing a VCF file."
             }
         },
         "required": [
@@ -90,18 +102,24 @@
             },
             {
                 "required": ["bam"]
+            },
+            {
+                "required": ["vcf"]
             }
         ],
         "dependentRequired": {
             "r2": ["r1"],
             "bam": ["bam_reference_id"],
-            "bam_reference_id": ["bam"]
+            "bam_reference_id": ["bam"],
+            "vcf" : ["vcf_reference_id"],
+            "vcf_reference_id" : ["vcf"]
         }
     },
     "allOf": [
         { "uniqueEntries": ["lane", "library_id"] },
         { "uniqueEntries": "r1" },
         { "uniqueEntries": "r2" },
-        { "uniqueEntries": "bam" }
+        { "uniqueEntries": "bam" },
+        { "uniqueEntries": "vcf" }
     ]
 }

@@ -5,7 +5,7 @@
 include { MULTIVCFANALYZER         } from '../../modules/nf-core/multivcfanalyzer'
 include { addNewMetaFromAttributes } from '../../subworkflows/local/utils_nfcore_eager_pipeline/main'
 include { TABIX_BGZIP as UG_BGZIP  } from '../../modules/nf-core/tabix/bgzip'
-include { GUNZIP as REF_GUNZIP     } from '../../modules/nf-core/gunzip'
+include { GUNZIP as REF_MVA_GUNZIP     } from '../../modules/nf-core/gunzip'
 
 workflow CONSENSUS_SEQUENCE {
     //
@@ -16,7 +16,8 @@ workflow CONSENSUS_SEQUENCE {
 
     take:
         ch_genotypes_vcf
-        ch_mva_files // [meta, additional_vcf, reference_gff, reference_gff_exclude ]
+        ch_samplesheet_vcfs // [meta, additional_vcf]
+        ch_mva_files // [meta, reference_gff, reference_gff_exclude,  ]
         ch_fasta // [ meta, fasta ]
 
     main:
@@ -41,6 +42,8 @@ workflow CONSENSUS_SEQUENCE {
                                             metaref, meta, vcfs ->
                                             [ metaref, vcfs ]
                                         }.dump(tag:"consensus_genotyped_vcfs")
+        ch_additional_vcfs = REF_MVA_GUNZIP(ch_samplesheet_vcfs)
+
         ch_fasta_final = ch_fasta
                                 .map{
                                     meta, fasta, fai, dict, mapindex ->
@@ -48,16 +51,17 @@ workflow CONSENSUS_SEQUENCE {
                                     [ [reference: new_meta.id], fasta ]
                                 }.dump(tag:"consensus_fasta")
 
-        ch_mva_input = ch_mva_files.dump(tag:"consensus_ref_vcfs_related_files")
+        ch_mva_input = ch_mva_files.dump(tag:"consensus_ref_related_files")
                                     .map {
-                                        meta, additional_vcf, reference_gff, reference_gff_exclude, reference_snpeff_results ->
+                                        meta, reference_gff, reference_gff_exclude, reference_snpeff_results ->
                                             def new_meta = meta.subMap( ['id'] )
-                                            [ [reference: new_meta.id], additional_vcf, reference_gff, reference_gff_exclude, reference_snpeff_results ]
+                                            [ [reference: new_meta.id], reference_gff, reference_gff_exclude, reference_snpeff_results ]
                                     }
                                     .join( ch_genotypes_vcf_final ).dump(tag:"consensus_postjoin")
+                                    .join( ch_additional_vcfs )
                                     .join( ch_fasta_final ).dump(tag:"consensus_postjoin2")
                             .multiMap{
-                                meta, additional_vcf, reference_gff, reference_gff_exclude, reference_snpeff_results, ug_vcfs, fasta ->
+                                meta, reference_gff, reference_gff_exclude, reference_snpeff_results, ug_vcfs, additional_vcf, fasta ->
                                 vcfs:                      [ meta, additional_vcf + ug_vcfs ]
                                 reference_gff:             [ meta, reference_gff ?: [] ]
                                 reference_gff_exclude:     [ meta, reference_gff_exclude ?: [] ]

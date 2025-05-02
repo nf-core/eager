@@ -74,6 +74,7 @@ workflow EAGER {
     take:
     ch_samplesheet_fastqs // channel: samplesheet FASTQ entries read in from --input
     ch_samplesheet_bams   // channel: samplesheet BAM entries read in from --input
+    ch_samplesheet_vcfs   // channel: samplesheet VCFs entries read in from --input
 
     main:
 
@@ -563,13 +564,15 @@ workflow EAGER {
     //
     // SUBWORKFLOW: Consensus sequence
     //
-    if ( params.run_consensus_sequence ) {
-    CONSENSUS_SEQUENCE(
-                        GENOTYPE.out.vcf,
-                        REFERENCE_INDEXING.out.mva,
-                        REFERENCE_INDEXING.out.reference
-                        )
-    }
+    ch_samplesheet_vcfs.dump(tag:"vcfs_additional_samplesheet")
+//   if ( params.run_consensus_sequence ) {
+//    CONSENSUS_SEQUENCE(
+//                        GENOTYPE.out.vcf,
+//                        ch_samplesheet_vcfs,
+//                        REFERENCE_INDEXING.out.mva,
+//                        REFERENCE_INDEXING.out.reference
+//                        )
+//    }
 
 
 
