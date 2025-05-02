@@ -81,7 +81,9 @@ nextflow_pipeline {
 
             // Genotyping
             def stable_content_genotyping       = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: ['**/*.{tbi,vcf.gz}']  , ignoreFile: null                 , include: ['**/*'] )
-            def stable_name_genotyping          = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{tbi,vcf.gz}'] )
+            def stable_name_genotyping          = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.tbi'] )
+            // We need to collect the vcfs separately to run more specific md5sum checks on the header (contnts are unstable due to same reasons as BAMs, explained above).
+            def genotyping_vcfs                 = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.vcf.gz'] )
 
             // Metagenomics
             def stable_content_metagenomics    = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: ['**/*.biom']          , ignoreFile: null                 , include: ['**/*'] )
@@ -111,6 +113,23 @@ nextflow_pipeline {
                 { assert snapshot( stable_content_preprocessing      , stable_name_preprocessing*.name    ).match("preprocessing") },
                 { assert snapshot( stable_content_readfiltering      , stable_name_readfiltering*.name    ).match("read_filtering") },
                 { assert snapshot( stable_content_genotyping         , stable_name_genotyping*.name       ).match("genotyping") },
+                // Additional checks on the genotyping VCFs for content. Specifically the md5sums of the header FORMAT and INFO lines
+                { assert snapshot(
+                    genotyping_vcfs.collect {
+                        file ->
+                        def vcf_head = path(file.toString()).vcf.header
+                        // The header contains lines in the "OTHER" category, which contain a timestamp, so we need to filter those out, then calculate md5sums.
+                        def header_md5 = [
+                            vcf_head.getFormatHeaderLines().toString(),
+                            vcf_head.getInfoHeaderLines().toString(),
+                            vcf_head.getFilterLines().toString(),
+                            vcf_head.getIDHeaderLines().toString(),
+                            vcf_head.getGenotypeSamples().toString(),
+                            vcf_head.getContigLines().toString(),
+                        ].join(' ').md5()
+                        file.getName() + ":header_md5," + header_md5
+                    }
+                ).match("genotyping_vcfs")},
                 { assert snapshot( stable_content_metagenomics       , stable_name_metagenomics*.name     ).match("metagenomics") },
                 { assert snapshot( stable_name_multiqc*.name         ).match("multiqc") },
 
