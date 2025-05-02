@@ -44,6 +44,8 @@ nextflow_pipeline {
             // NOTE: When a section needs more than a couple of small patterns, consider adding a variable to store the patterns here
             //       This is particularly important if the patterns excluded in the stable content section should be included in the stable name section
             def unstable_patterns_auth = [
+                '**/mapped_reads_gc-content_distribution.txt',
+                '**/genome_gc_content_per_window.png',
                 '**/*.{svg,pdf,html}',
                 '**/DamageProfiler.log',
                 ]
