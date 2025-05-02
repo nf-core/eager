@@ -27,11 +27,11 @@ The alias should ideally make it intuitive to understand which subworkflow the m
 
 - The unique module names specified above should make it possible to always configure modules without the need for a regex/glob when using `withName`. Exception to this is modules named within nf-core subworkflows, which should be configured with a regex/glob.
 - The order of attributes within configuration blocks should always be the following:
-  1.  tag (mandatory)
-  2.  ext.args\* (optional. Followed by ext.args{2,3,...} in ascending order)
-  3.  ext.prefix (optional)
-  4.  publishDir (optional)
-  5.  any other attributes go to the end.
+  1. tag (mandatory)
+  2. ext.args\* (optional. Followed by ext.args{2,3,...} in ascending order)
+  3. ext.prefix (optional)
+  4. publishDir (optional)
+  5. any other attributes go to the end.
 - NEVER use `meta.id` in module configuration (`tag`,`ext.*`), but instead the full explicit combination of unique attributes expected. `meta.sample_id` is fine to use and is equivalent to `meta.id`, but should be supplemented by `meta.library_id` and `meta.lane` etc, as required.
 - Every process that is reference-specific MUST include `${meta.reference}` in its `tag` and `ext.prefix` attributes. This is to avoid confusion when running the pipeline with multiple references.
   - Tags that include reference and sample information should be formatted as `${meta.reference}|${meta.sample_id}_*`. Reference specific attributes go on the left-hand-side of the tag, data-specific attributes on the right-hand-side.
