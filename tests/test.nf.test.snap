@@ -417,7 +417,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:11.954401"
+        "timestamp": "2025-05-02T18:00:27.479034"
     },
     "read_filtering": {
         "content": [
@@ -445,7 +445,20 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:12.749607"
+        "timestamp": "2025-05-02T18:00:28.170536"
+    },
+    "genotyping_vcfs": {
+        "content": [
+            [
+                "JK2782_Mammoth_MT_Krause.vcf.gz:header_md5,8609dbc6545f4377b8550705d22b36af",
+                "JK2802_Mammoth_MT_Krause.vcf.gz:header_md5,0e9477480129e4e3e2e3336c8267a31b"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-05-02T18:37:30.913859"
     },
     "preprocessing": {
         "content": [
@@ -470,7 +483,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:12.676357"
+        "timestamp": "2025-05-02T18:00:28.106823"
     },
     "metagenomics": {
         "content": [
@@ -481,7 +494,7 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_profile.txt:md5,7f5afed9aee22450d9f72b6e84524665",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.bowtie2out.txt:md5,7b7855eb48245bcc1d42a12d95f72828",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_profile.txt:md5,a7d079740ec761ff2f5ec6b9e0c1e326",
-                "metaphlan_taxpasta_table.tsv:md5,8d22357debfc4335b12911c5597be5ec"
+                "metaphlan_taxpasta_table.tsv:md5,06fe2012389d40a4b65787b07cfc09b8"
             ],
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.biom",
@@ -493,7 +506,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:12.990551"
+        "timestamp": "2025-05-02T18:06:30.307781"
     },
     "genotyping": {
         "content": [
@@ -502,9 +515,7 @@
                 "JK2802_Mammoth_MT_Krause.bcftools_stats.txt:md5,4243921f94935b20d7b6fe2e3da5f7c3"
             ],
             [
-                "JK2782_Mammoth_MT_Krause.vcf.gz",
                 "JK2782_Mammoth_MT_Krause.vcf.gz.tbi",
-                "JK2802_Mammoth_MT_Krause.vcf.gz",
                 "JK2802_Mammoth_MT_Krause.vcf.gz.tbi"
             ]
         ],
@@ -512,7 +523,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:12.859928"
+        "timestamp": "2025-05-02T18:00:28.250765"
     },
     "final_bams": {
         "content": [
@@ -531,7 +542,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:12.424662"
+        "timestamp": "2025-05-02T18:00:27.935792"
     },
     "deduplication": {
         "content": [
@@ -553,7 +564,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:12.301001"
+        "timestamp": "2025-05-02T18:00:27.731757"
     },
     "multiqc": {
         "content": [
@@ -750,7 +761,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:13.0428"
+        "timestamp": "2025-05-02T18:00:28.534131"
     },
     "mapping_output": {
         "content": [
@@ -772,7 +783,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:12.587763"
+        "timestamp": "2025-05-02T18:00:28.037021"
     },
     "authentication": {
         "content": [
@@ -941,6 +952,6 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-02T17:14:12.061667"
+        "timestamp": "2025-05-02T18:06:29.751856"
     }
 }
