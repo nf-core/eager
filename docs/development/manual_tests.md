@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Manual Tests
 
 Here is a list of manual tests we can run with the expect output commands
@@ -1147,3 +1148,4 @@ nextflow run main.nf -profile docker,test --outdir ./results/mtdna_haplogroup_te
 ## Expect: The haplogroup assignment may differ based on the classification settings
 nextflow run main.nf -profile docker,test --outdir ./results/mtdna_haplogroup_test --run_classify_mtdna_haplogroup --run_genotyping --genotyping_tool ug --genotyping_source raw --haplogrep3_tree_id phylotree-fu-rcrs@1.2 -resume
 ```
+<!-- markdownlint-enable -->

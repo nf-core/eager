@@ -16,7 +16,7 @@ To add new input files or options to the reference sheet, you have to complete a
 
 ### Multi-reference input workflow
 
-1. Add new column named <SOFTWARE_FILETYPE> and test data to the test reference sheet (https://github.com/nf-core/test-datasets/blob/eager/reference/reference_sheet_multiref.csv).
+1. Add new column named <SOFTWARE_FILETYPE> and test data to the test reference sheet (<https://github.com/nf-core/test-datasets/blob/eager/reference/reference_sheet_multiref.csv>).
 2. Read in new input via nf-validation plugin within the reference_indexing_multi local subworkflow.
     1. Add new "property" <SOFTWARE_FILETYPE> to the fasta validation schema (assets/schema_fasta.json).
         1. Add "type" of your object, e.g. `"type": "string"` for file paths and `"type": "integer"` for numbers.
