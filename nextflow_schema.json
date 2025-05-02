@@ -1603,6 +1603,21 @@
                     "description": "Run Haplogrep3 to determine mitochondrial haplogroups.",
                     "fa_icon": "fas fa-dna",
                     "default": false
+                },
+                "human_mtdna_reference": {
+                    "type": "string",
+                    "description": "Specify the human mitochondrial reference sequence used for alignment (e.g., rCRS or RSRS). Determines default phylotree for Haplogrep3.",
+                    "fa_icon": "fas fa-dna",
+                    "enum": ["rcrs", "rsrs"],
+                    "default": "rcrs",
+                    "help_text": "Select 'rcrs' (Reconstructed Sapiens Reference Sequence) or 'rsrs' (revised Cambridge Reference Sequence). This choice influences the default phylotree used by Haplogrep3 if --haplogrep3_phylotree is not explicitly set. Defaults are 'phylotree-fu-rcrs@1.2' for rCRS and 'phylotree-rsrs@17.1' for RSRS."
+                },
+                "human_mtdna_phylotree": {
+                    "type": ["string", "null"],
+                    "description": "Specify the exact Phylotree version for Haplogrep3 to use.",
+                    "fa_icon": "fas fa-project-diagram",
+                    "default": null,
+                    "help_text": "Overrides the default phylotree selection based on --human_mtdna_reference. Provide the specific tree name (e.g., 'phylotree-fu-rcrs@1.2'). Available trees can be listed with 'haplogrep3 list trees'."
                 }
             }
         }
