@@ -44,10 +44,7 @@ nextflow_pipeline {
             // NOTE: When a section needs more than a couple of small patterns, consider adding a variable to store the patterns here
             //       This is particularly important if the patterns excluded in the stable content section should be included in the stable name section
             def unstable_patterns_auth = [
-                '**/mapped_reads_gc-content_distribution.txt',
-                '**/genome_gc_content_per_window.png',
                 '**/*.{svg,pdf,html}',
-                '*.{svg,pdf,html}',
                 '**/DamageProfiler.log',
                 ]
 
@@ -80,6 +77,14 @@ nextflow_pipeline {
             def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
             def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
 
+            // Genotyping
+            def stable_content_genotyping       = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: ['**/*.{tbi,vcf.gz}']  , ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_genotyping          = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{tbi,vcf.gz}'] )
+
+            // Metagenomics
+            def stable_content_metagenomics    = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: ['**/*.biom']          , ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_metagenomics       = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.biom'] )
+
             // MultiQC
             def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: false         , ignore: null                    , ignoreFile: null                , include: ['*', '**/*'] )
 
@@ -91,7 +96,7 @@ nextflow_pipeline {
                 { assert workflow.success },
                 // This checks that there are no missing or additional output files.
                 // Also a good starting point to look at all the files in the output folder than need to be checked in subsequent sections.
-                { assert snapshot( stable_name_all*.name            ).match("all_files") },
+                { assert snapshot( stable_name_all*.name             ).match("all_files") },
 
                 // Checking changes to contents of each section
                 // NOTE: Keep the order of the sections in the alphanumeric order of the output directories.
@@ -103,8 +108,9 @@ nextflow_pipeline {
                 { assert snapshot( stable_content_mapping            , stable_name_mapping*.name          ).match("mapping_output") },
                 { assert snapshot( stable_content_preprocessing      , stable_name_preprocessing*.name    ).match("preprocessing") },
                 { assert snapshot( stable_content_readfiltering      , stable_name_readfiltering*.name    ).match("read_filtering") },
-
-                { assert snapshot( stable_name_multiqc*.name      ).match("multiqc") },
+                { assert snapshot( stable_content_genotyping         , stable_name_genotyping*.name       ).match("genotyping") },
+                { assert snapshot( stable_content_metagenomics       , stable_name_metagenomics*.name     ).match("metagenomics") },
+                { assert snapshot( stable_name_multiqc*.name         ).match("multiqc") },
 
                 // Versions
                 { assert new File("$outputDir/pipeline_info/nf_core_eager_software_mqc_versions.yml").exists() },
