@@ -393,7 +393,7 @@ workflow GENOTYPE {
                 addNewMetaFromAttributes( it, "id" , "reference" , false )
             } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
 
-        // TO DO: Module fails if we don't give the fai but the fasta. However is not specified atm. Re-add fasta once this issue is solved.
+        // TODO: Module fails if we don't give the fai but the fasta. However is not specified atm. Re-add fasta once this issue is solved.
         ch_input_for_angsd = ch_bams_for_multimap
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
