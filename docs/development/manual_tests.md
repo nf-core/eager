@@ -1141,11 +1141,11 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ --convert_
 #### MTDNA HAPLOGROUP CLASSIFICATION with default settings
 ## Expect: Directory created 'mtdna_haplogroup/<reference>/<sample_id>' containing a .txt file for each sample with haplogroup assignments
 ## Expect: The haplogroup .txt file contains at minimum columns for rank, name, quality, range, and details of the haplogroup assignment
-nextflow run main.nf -profile docker,test --outdir ./results/mtdna_haplogroup_test --run_classify_mtdna_haplogroup --run_genotyping --genotyping_tool ug --genotyping_source raw -resume
+nextflow run main.nf -profile docker,test --outdir ./results/mtdna_haplogroup_test --run_genotyping --genotyping_tool ug --genotyping_source raw --run_classify_mtdna_haplogroup  -resume
 
 #### MTDNA HAPLOGROUP CLASSIFICATION with specific arguments
 ## Expect: Directory created 'mtdna_haplogroup/<reference>/<sample_id>' containing a .txt file for each sample with haplogroup assignments
 ## Expect: The haplogroup assignment may differ based on the classification settings
-nextflow run main.nf -profile docker,test --outdir ./results/mtdna_haplogroup_test --run_classify_mtdna_haplogroup --run_genotyping --genotyping_tool ug --genotyping_source raw --haplogrep3_tree_id phylotree-fu-rcrs@1.2 -resume
+nextflow run main.nf -profile docker,test --outdir ./results/mtdna_haplogroup_test --run_classify_mtdna_haplogroup --run_genotyping --genotyping_tool ug --genotyping_source raw --run_classify_mtdna_haplogroup --human_mtdna_reference rsrs --human_mtdna_phylotree phylotree-rsrs@1.0 -resume
 ```
 <!-- markdownlint-enable -->
