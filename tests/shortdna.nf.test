@@ -81,10 +81,6 @@ nextflow_pipeline {
             def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: ['**/*.{zip,log,html}'], ignoreFile: null                 , include: ['**/*'] )
             def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
 
-            // Read filtering
-            def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
-            def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
-
             // Genotyping
             def stable_content_genotyping       = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: ['**/*.{tbi,vcf.gz}']  , ignoreFile: null                 , include: ['**/*'] )
             def stable_name_genotyping          = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.tbi'] )
