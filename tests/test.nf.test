@@ -50,6 +50,7 @@ nextflow_pipeline {
                 '**/*.{svg,pdf,html,png}',
                 '**/DamageProfiler.log',
                 '**/3p_freq_misincorporations.txt',
+                '**/5p_freq_misincorporations.txt',
                 '**/DNA_comp_genome.txt',
                 '**/DNA_composition_sample.txt',
                 '**/misincorporation.txt',
