@@ -83,8 +83,8 @@ workflow PIPELINE_INITIALISATION {
                                     .branch {
                                         meta, r1, r2, bam, vcf ->
                                             bam: bam.toString().endsWith(".bam")
-                                            fastq: true
                                             vcf: vcf.toString().endsWith(".vcf.gz")
+                                            fastq: true
                                     }
 
     ch_samplesheet_fastqs = ch_samplesheet_for_branch.fastq

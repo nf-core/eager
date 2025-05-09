@@ -148,7 +148,7 @@ workflow EAGER {
     REFERENCE_INDEXING(fasta_fn, fasta_fai, fasta_dict, fasta_mapperindexdir)
     ch_versions = ch_versions.mix(REFERENCE_INDEXING.out.versions)
 
-    REFERENCE_INDEXING.out.reference.dump(tag:"indexing_reference")
+    REFERENCE_INDEXING.out.reference.dump(tag: "indexing_reference")
 
     //
     // MODULE: Run FastQC or Falco
@@ -209,13 +209,12 @@ workflow EAGER {
         // SUBWORKFLOW: Merging lanes for ch_bams_from_input
 
         MERGE_LANES_INPUTBAM(ch_bams_from_input)
-        ch_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.bam
-                                            .join(MERGE_LANES_INPUTBAM.out.bai)
+        ch_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.bam.join(MERGE_LANES_INPUTBAM.out.bai)
         ch_flagstat_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.flagstat
-
-    } else {
-        ch_bams_from_input_lanemerged           = Channel.empty()
-        ch_flagstat_bams_from_input_lanemerged  = Channel.empty()
+    }
+    else {
+        ch_bams_from_input_lanemerged = Channel.empty()
+        ch_flagstat_bams_from_input_lanemerged = Channel.empty()
     }
 
 
@@ -226,8 +225,8 @@ workflow EAGER {
     if (params.run_bamfiltering || params.run_metagenomics) {
 
         ch_mapped_for_bamfilter = MAP.out.bam
-                                    .join(MAP.out.bai)
-                                    .mix(ch_bams_from_input_lanemerged)
+            .join(MAP.out.bai)
+            .mix(ch_bams_from_input_lanemerged)
         FILTER_BAM(ch_mapped_for_bamfilter)
         ch_bamfiltered_for_deduplication = FILTER_BAM.out.genomics
         ch_bamfiltered_for_metagenomics = FILTER_BAM.out.metagenomics
@@ -236,8 +235,8 @@ workflow EAGER {
     }
     else {
         ch_bamfiltered_for_deduplication = MAP.out.bam
-                                                .join(MAP.out.bai)
-                                                .mix(ch_bams_from_input_lanemerged)
+            .join(MAP.out.bai)
+            .mix(ch_bams_from_input_lanemerged)
     }
 
     ch_reads_for_deduplication = ch_bamfiltered_for_deduplication
@@ -395,8 +394,7 @@ workflow EAGER {
     // MODULE: ENDORSPY (raw, filtered, deduplicated)
     //
 
-    ch_flagstat_for_endorspy_raw    = MAP.out.flagstat
-                                            .mix( ch_flagstat_bams_from_input_lanemerged )
+    ch_flagstat_for_endorspy_raw = MAP.out.flagstat.mix(ch_flagstat_bams_from_input_lanemerged)
 
     if (params.run_bamfiltering & !params.skip_deduplication) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw
@@ -438,9 +436,9 @@ workflow EAGER {
         ch_versions = ch_versions.mix(PRESEQ_CCURVE.out.versions)
     }
     else if (!params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'lc_extrap') {
-            PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map { [it[0], it[1]] })
-            ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect { it[1] }.ifEmpty([]))
-            ch_versions = ch_versions.mix(PRESEQ_LCEXTRAP.out.versions)
+        PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map { [it[0], it[1]] })
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect { it[1] }.ifEmpty([]))
+        ch_versions = ch_versions.mix(PRESEQ_LCEXTRAP.out.versions)
     }
 
     //
@@ -557,7 +555,7 @@ workflow EAGER {
             ch_bams_for_genotyping,
             ch_reference_for_genotyping,
             REFERENCE_INDEXING.out.pileupcaller_bed_snp.ifEmpty([[], [], []]),
-            REFERENCE_INDEXING.out.dbsnp.ifEmpty([[], []])
+            REFERENCE_INDEXING.out.dbsnp.ifEmpty([[], []]),
         )
 
         ch_versions = ch_versions.mix(GENOTYPE.out.versions)
@@ -567,15 +565,15 @@ workflow EAGER {
     //
     // SUBWORKFLOW: Consensus sequence
     //
-    ch_samplesheet_vcfs.dump(tag:"vcfs_additional_samplesheet")
-//   if ( params.run_consensus_sequence ) {
-//    CONSENSUS_SEQUENCE(
-//                        GENOTYPE.out.vcf,
-//                        ch_samplesheet_vcfs,
-//                        REFERENCE_INDEXING.out.mva,
-//                        REFERENCE_INDEXING.out.reference
-//                        )
-//    }
+    ch_samplesheet_vcfs.dump(tag: "vcfs_additional_samplesheet")
+    if (params.run_consensus_sequence) {
+        CONSENSUS_SEQUENCE(
+            GENOTYPE.out.vcf,
+            ch_samplesheet_vcfs,
+            REFERENCE_INDEXING.out.mva,
+            REFERENCE_INDEXING.out.reference,
+        )
+    }
 
 
 
@@ -585,9 +583,9 @@ workflow EAGER {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_'  +  'eager_software_'  + 'mqc_'  + 'versions.yml',
+            name: 'nf_core_' + 'eager_software_' + 'mqc_' + 'versions.yml',
             sort: true,
-            newLine: true
+            newLine: true,
         )
         .set { ch_collated_versions }
 
@@ -625,7 +623,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_methods_description.collectFile(
             name: 'methods_description_mqc.yaml',
-            sort: true
+            sort: true,
         )
     )
 
@@ -639,7 +637,7 @@ workflow EAGER {
         ch_multiqc_custom_config.toList(),
         ch_multiqc_logo.toList(),
         [],
-        []
+        [],
     )
 
     emit:
