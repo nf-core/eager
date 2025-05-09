@@ -119,12 +119,12 @@ nextflow_pipeline {
                 { assert snapshot( stable_content_preprocessing      , stable_name_preprocessing*.name    ).match("preprocessing") },
                 { assert snapshot( stable_content_readfiltering      , stable_name_readfiltering*.name    ).match("read_filtering") },
                 { assert snapshot( stable_content_genotyping         , stable_name_genotyping*.name       ).match("genotyping") },
-                // Additional checks on the genotyping VCFs for content. Specifically the md5sums of the header FORMAT and INFO lines
+                // Additional checks on the genotyping VCFs for content. Specifically the md5sums of the header FORMAT, INFO, FILTER, CONTIG lines, and sample names
                 { assert snapshot(
                     genotyping_vcfs.collect {
                         file ->
                         def vcf_head = path(file.toString()).vcf.header
-                        // The header contains lines in the "OTHER" category, which contain a timestamp, so we need to filter those out, then calculate md5sums.
+                        // The header contains lines in the "OTHER" category, which contain a timestamp and/or work dir paths, so we need to filter those out, then calculate md5sums.
                         def header_md5 = [
                             vcf_head.getFormatHeaderLines().toString(),
                             vcf_head.getInfoHeaderLines().toString(),
