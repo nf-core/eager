@@ -426,17 +426,17 @@ workflow GENOTYPE {
                 addNewMetaFromAttributes( it, "id" , "reference" , false )
             } // RESULT: [ [combination_meta], [ref_meta], fasta, fai, dict, dbsnp ]
 
+        // TODO: Module fails if we don't give the fai but the fasta. However is not specified atm. Re-add fasta once this issue is solved.
         ch_input_for_angsd = ch_bams_for_multimap
             .combine( ch_fasta_for_multimap , by:0 )
             .multiMap {
                 ignore_me, meta, bam, bai, ref_meta, fasta, fai, dict, dbsnp ->
                     bam:   [ meta, bam ]
-                    fasta: [ ref_meta, fasta ]
             }
 
         ANGSD_GL(
             ch_input_for_angsd.bam,
-            ch_input_for_angsd.fasta,
+            [[], []], // No fasta file
             [[], []], // No errors file
         )
         ch_angsd_genotype_likelihoods = ANGSD_GL.out.genotype_likelihood

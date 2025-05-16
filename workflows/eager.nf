@@ -435,9 +435,9 @@ workflow EAGER {
         ch_versions = ch_versions.mix(PRESEQ_CCURVE.out.versions)
     }
     else if (!params.mapstats_skip_preseq && params.mapstats_preseq_mode == 'lc_extrap') {
-            PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map { [it[0], it[1]] })
-            ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect { it[1] }.ifEmpty([]))
-            ch_versions = ch_versions.mix(PRESEQ_LCEXTRAP.out.versions)
+        PRESEQ_LCEXTRAP(ch_reads_for_deduplication.map { [it[0], it[1]] })
+        ch_multiqc_files = ch_multiqc_files.mix(PRESEQ_LCEXTRAP.out.lc_extrap.collect { it[1] }.ifEmpty([]))
+        ch_versions = ch_versions.mix(PRESEQ_LCEXTRAP.out.versions)
     }
 
     //
@@ -557,7 +557,7 @@ workflow EAGER {
             ch_bams_for_genotyping,
             ch_reference_for_genotyping,
             REFERENCE_INDEXING.out.pileupcaller_bed_snp.ifEmpty([[], [], []]),
-            REFERENCE_INDEXING.out.dbsnp.ifEmpty([[], []])
+            REFERENCE_INDEXING.out.dbsnp.ifEmpty([[], []]),
         )
 
         ch_versions = ch_versions.mix(GENOTYPE.out.versions)
@@ -570,9 +570,9 @@ workflow EAGER {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_'  +  'eager_software_'  + 'mqc_'  + 'versions.yml',
+            name: 'nf_core_' + 'eager_software_' + 'mqc_' + 'versions.yml',
             sort: true,
-            newLine: true
+            newLine: true,
         )
         .set { ch_collated_versions }
 
@@ -610,7 +610,7 @@ workflow EAGER {
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_methods_description.collectFile(
             name: 'methods_description_mqc.yaml',
-            sort: true
+            sort: true,
         )
     )
 
@@ -624,7 +624,7 @@ workflow EAGER {
         ch_multiqc_custom_config.toList(),
         ch_multiqc_logo.toList(),
         [],
-        []
+        [],
     )
 
     emit:
