@@ -66,7 +66,7 @@ nextflow_pipeline {
             // Command legend:                                       Result directory to index      , includeDir: include dirs?, ignore: exclude patterns       , ignoreFile: exclude pattern list , include: include patterns
             def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , includeDir: false         , ignore: ['pipeline_info/*']    , ignoreFile: null                 , include: ['*', '**/*'] )
 
-             // Authentication
+            // Authentication
             def stable_content_authentication   = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: unstable_patterns_auth , ignoreFile: null                 , include: ['*', '**/*'] )
             def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: unstable_patterns_auth)
 
