@@ -302,28 +302,25 @@
     "genotyping": {
         "content": [
             [
-                "pileupcaller_genotypes_hs37d5_chr21-MT.geno:md5,242578419851a5778619d3b3b31e2f73",
-                "pileupcaller_genotypes_hs37d5_chr21-MT.ind:md5,15eaec5196fdd95b4914a3714464b721",
-                "pileupcaller_genotypes_hs37d5_chr21-MT.snp:md5,c100677fddc9dafe928c5b0a85621c72",
-                "pileupcaller_genotypes_hs37d5_chr21-MT_coverage.tsv:md5,6b3362405ca6ab80306d7bf658918d4d"
+                
             ],
             [
-                
+                "pileupcaller_genotypes_hs37d5_chr21-MT.geno",
+                "pileupcaller_genotypes_hs37d5_chr21-MT.ind",
+                "pileupcaller_genotypes_hs37d5_chr21-MT.snp",
+                "pileupcaller_genotypes_hs37d5_chr21-MT_coverage.tsv"
             ]
         ],
         "meta": {
             "nf-test": "0.8.4",
             "nextflow": "25.04.0"
         },
-        "timestamp": "2025-05-23T10:23:08.46738"
+        "timestamp": "2025-05-23T11:48:39.954805"
     },
     "damage_manipulation": {
         "content": [
             [
-                "JK2067_JK2067_hs37d5_chr21-MT_trimmed.bam:md5,e4b0a68714ed18e46c2cfe812cdae7aa",
-                "JK2067_JK2067_hs37d5_chr21-MT_trimmed.bam.bai:md5,877d54dca22c55dae49f727ef835aed4",
-                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_trimmed.bam:md5,0ede97d89412001b9e3d575f21478b77",
-                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_trimmed.bam.bai:md5,b7ff326b850a8d3c58c342a5ef48ae58"
+                
             ],
             [
                 "JK2067_JK2067_hs37d5_chr21-MT_trimmed.bam",
@@ -336,7 +333,7 @@
             "nf-test": "0.8.4",
             "nextflow": "25.04.0"
         },
-        "timestamp": "2025-05-23T10:46:43.00917"
+        "timestamp": "2025-05-23T11:48:39.584699"
     },
     "final_bams": {
         "content": [
