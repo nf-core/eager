@@ -95,18 +95,19 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-09T11:09:20.101987"
+        "timestamp": "2025-05-23T10:36:48.672625"
     },
     "preprocessing": {
         "content": [
             [
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html:md5,c07d84ebecfefc2a22b51cffc2f1319c",
-                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html:md5,8b0f7e15d4152b2c093e8e70d9367f44",
-                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html:md5,c39a3f6a74d5fc637fa300a090dbc9f4"
+                
             ],
             [
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html",
                 "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.zip",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html",
                 "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.zip",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html",
                 "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip"
             ]
         ],
@@ -114,7 +115,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-09T11:54:03.015872"
+        "timestamp": "2025-05-23T10:36:48.803481"
     },
     "final_bams": {
         "content": [
@@ -133,7 +134,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-09T11:54:02.825374"
+        "timestamp": "2025-05-23T10:36:48.749353"
     },
     "multiqc": {
         "content": [
@@ -207,7 +208,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-09T11:09:20.164329"
+        "timestamp": "2025-05-23T10:36:48.824552"
     },
     "mapping_output": {
         "content": [
@@ -229,7 +230,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-09T11:54:02.88841"
+        "timestamp": "2025-05-23T10:36:48.771636"
     },
     "authentication": {
         "content": [
@@ -243,6 +244,6 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-05-09T11:45:50.078897"
+        "timestamp": "2025-05-23T10:36:48.717265"
     }
 }
