@@ -5,8 +5,9 @@ nextflow_pipeline {
     tag "pipeline"
     tag "nfcore_eager"
     tag "test_minimal"
+    profile "test_minimal"
 
-    test("test_minimal_profile") {
+    test("-profile test_minimal") {
 
         when {
             params {
