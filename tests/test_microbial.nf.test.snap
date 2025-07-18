@@ -374,10 +374,8 @@
     "metagenomics": {
         "content": [
             [
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.krakenuniq.report.txt:md5,b1e7642b1411262ea533b2f7f6dbb01e",
-                "JK2782_JK2782_TGGCCGATCAACGA_hs37d5_chr21-MT_metagenomics_fastq_unmapped_other.krakenuniq.report.txt:md5,1eac7636038d877f3aeed669f1ce9fea"
-            ],
-            [
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.krakenuniq.report.txt",
+                "JK2782_JK2782_TGGCCGATCAACGA_hs37d5_chr21-MT_metagenomics_fastq_unmapped_other.krakenuniq.report.txt",
                 "krakenuniq_taxpasta_table.tsv"
             ]
         ],
@@ -385,7 +383,7 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-06-20T11:36:35.964266"
+        "timestamp": "2025-07-18T11:45:53.966751"
     },
     "genotyping": {
         "content": [

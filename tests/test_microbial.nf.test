@@ -77,24 +77,24 @@ nextflow_pipeline {
             def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
             def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
 
-            // // Preprocessing
-            // // NOTE: FastQC html appears stable, but I worry it might just include a day timestamp instead of a full timestamp. To keep the expression simpler I removed both from checksum testing.
+            // Preprocessing
+            // NOTE: FastQC html appears stable, but I worry it might just include a day timestamp instead of a full timestamp. To keep the expression simpler I removed both from checksum testing.
             def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: ['**/*.{zip,log,html}'], ignoreFile: null                 , include: ['**/*'] )
             def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
 
-            // // Read filtering
+            // Read filtering
             def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
             def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
 
-            // // Genotyping
+            // Genotyping
             def stable_content_genotyping       = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: ['**/*.{tbi,vcf.gz}']  , ignoreFile: null                 , include: ['**/*'] )
             def stable_name_genotyping          = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.tbi'] )
             // We need to collect the vcfs separately to run more specific md5sum checks on the header (contnts are unstable due to same reasons as BAMs, explained above).
             def genotyping_vcfs                 = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.vcf.gz'] )
 
-            // // Metagenomics
-            def stable_content_metagenomics    = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: ['**/*table.tsv']      , ignoreFile: null                 , include: ['**/*'] )
-            def stable_name_metagenomics       = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*table.tsv'] )
+            // Metagenomics
+            // This section has no stable content, because the kraken report files contain a timestamp, and  the taxpasta results change ever so slightly because of inconsistent BAM files.
+            def stable_name_metagenomics       = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*'] )
 
             // MultiQC
             def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: false         , ignore: null                    , ignoreFile: null                , include: ['*', '**/*'] )
@@ -137,7 +137,7 @@ nextflow_pipeline {
                         file.getName() + ":header_md5," + header_md5
                     }
                 ).match("genotyping_vcfs")},
-                { assert snapshot( stable_content_metagenomics       , stable_name_metagenomics*.name     ).match("metagenomics") },
+                { assert snapshot(                                     stable_name_metagenomics*.name     ).match("metagenomics") },
                 { assert snapshot( stable_name_multiqc*.name         ).match("multiqc") },
 
                 // Versions
