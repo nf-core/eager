@@ -1,0 +1,99 @@
+nextflow_pipeline {
+
+    name "Test pipeline: NFCORE_EAGER"
+    script "main.nf"
+    tag "pipeline"
+    tag "nfcore_eager"
+    tag "test_minimal"
+
+    test("test_minimal_profile") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+
+            ///////////////////
+            // DOCUMENTATION //
+            ///////////////////
+
+            // The contents of each top level results directory should be tested with individually named snapshots.
+            // Within each snapshot, there should be two to three distinct variables, that contain the files to be tested.
+            //    - stable_name_<dir> is for files with variable md5sums (i.e. content) so only names will be compared
+            //    - stable_content_<dir> is for files with stable md5sums (i.e. content) so md5sums will be compared
+            //    - bams_<dir> is for BAM files, where the headerMD5 is checked for stability (since the content can be unstable)
+            // If a directory is fully stable, you can drop `stable_name_*`
+            // If a directory contains no BAMs, you can drop `bams_*`
+
+            // Generate with: nf-test test --tag test_minimal --profile docker,test_minimal --update-snapshot
+            // Test with:     nf-test test --tag test_minimal --profile docker,test_minimal
+            // NOTE: BAMs are always only stable in name, because:
+            //   a) sharding breaks header since the shard that was first is named in the header (Fixed in https://github.com/nf-core/eager/pull/1112)
+            //   b) the order of the reads in the BAMs is not stable (sorted, but reads that share a start position can be in any order)
+            //   point b) also causes BAIs to be unstable.
+            //   c) Merging of multiple BAMs with duplicate @RG / @PG tags can cause the header to be unstable (particularly in the case of shards/lanes)
+
+            //////////////////////
+            // DEFINE VARIABLES //
+            //////////////////////
+
+            // Define exclusion patterns for files with unstable contents
+            // NOTE: When a section needs more than a couple of small patterns, consider adding a variable to store the patterns here
+            //       This is particularly important if the patterns excluded in the stable content section should be included in the stable name section
+
+
+            // Check that no files are missing/added
+            // Command legend:                                       Result directory to index      , includeDir: include dirs?, ignore: exclude patterns       , ignoreFile: exclude pattern list , include: include patterns
+            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , includeDir: false         , ignore: ['pipeline_info/*']    , ignoreFile: null                 , include: ['*', '**/*'] )
+
+            // Authentication
+            def stable_content_authentication   = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*', '**/*'] )
+            // def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: unstable_patterns_auth)
+
+            // Final_bams
+            def stable_content_final_bams       = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_final_bams          = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+
+            // Mapping (incl. bam_input flasgstat)
+            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+
+            // Preprocessing
+            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: ['**/*.{zip,html}']           , ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,html}'] )
+
+            // MultiQC
+            def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: false         , ignore: null                    , ignoreFile: null                , include: ['*', '**/*'] )
+
+            ///////////////////////
+            // DEFINE ASSERTIONS //
+            ///////////////////////
+
+            assertAll(
+                { assert workflow.success },
+                // This checks that there are no missing or additional output files.
+                // Also a good starting point to look at all the files in the output folder than need to be checked in subsequent sections.
+                { assert snapshot( stable_name_all*.name             ).match("all_files") },
+
+                // Checking changes to contents of each section
+                // NOTE: Keep the order of the sections in the alphanumeric order of the output directories.
+                //    Each section should first check stable_content, stable_name second (if applicable).
+                { assert snapshot( stable_content_authentication     ).match("authentication") },
+                { assert snapshot( stable_content_final_bams         , stable_name_final_bams*.name       ).match("final_bams") },
+                // NOTE: The snapshot section for mapping cannot be named 'mapping'. See https://github.com/askimed/nf-test/issues/279
+                { assert snapshot( stable_content_mapping            , stable_name_mapping*.name          ).match("mapping_output") },
+                { assert snapshot( stable_content_preprocessing      , stable_name_preprocessing*.name    ).match("preprocessing") },
+
+                // MultiQC
+                { assert snapshot( stable_name_multiqc*.name         ).match("multiqc") },
+
+                // Versions
+                { assert new File("$outputDir/pipeline_info/nf_core_eager_software_mqc_versions.yml").exists() },
+
+            )
+        }
+    }
+}
