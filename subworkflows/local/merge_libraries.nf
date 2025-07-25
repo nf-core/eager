@@ -18,9 +18,9 @@ workflow MERGE_LIBRARIES {
     ch_multiqc_files = Channel.empty()
 
     ch_library_merge_input = ch_bam_bai
-        .map { addNewMetaFromAttributes( it, ["id", "sample_id", "strandedness", "reference"], ["id", "sample_id", "strandedness", "reference"], false ) }
+        .map { addNewMetaFromAttributes( it, ["id", "sample_id", "strandedness", "reference", "damage_manipulation"], ["id", "sample_id", "strandedness", "reference", "damage_manipulation"], false ) }
         .groupTuple(by: 0)
-        // Discrad library-level metas, and bais. Add single_end: true to all metas (no SE/PE distinction from here on)
+        // Discrad library-level metas, and bais. Add single_end: true to all metas (no SE/PE distinction from here on), preserve damage maniupulation tool info for downstream output sorting
         .map {
             meta, lib_metas, bam, bai ->
             [ meta + [ 'single_end': true ], bam ]

@@ -12,6 +12,7 @@ include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DAMAGE_RESCALED     } from '../../
 include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DAMAGE_FILTERED     } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_INDEX    as SAMTOOLS_INDEX_DAMAGE_TRIMMED      } from '../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_FLAGSTAT as SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED  } from '../../modules/nf-core/samtools/flagstat/main'
+include { MERGE_LIBRARIES as MERGE_LIBRARIES_DAMAGE_MANIPULATION  } from '../../subworkflows/local/merge_libraries'
 
 // TODO: Add required channels and channel manipulations for reference-dependent bed masking before pmdtools. Requires multi-ref support before implementation.
 workflow MANIPULATE_DAMAGE {
@@ -21,11 +22,14 @@ workflow MANIPULATE_DAMAGE {
     ch_pmd_masking         // [ [ meta ], masked_fasta, bed_for_masking ]
 
     main:
-    ch_versions              = Channel.empty()
-    ch_rescaled_bams         = Channel.empty()
-    ch_pmd_filtered_bams     = Channel.empty()
-    ch_trimmed_bams          = Channel.empty()
-    ch_pmd_filtered_flagstat = Channel.empty() // Only run flagstat on pmd filtered bam, since rescaling and trimming does not change the number of reads
+    ch_versions                       = Channel.empty()
+    ch_rescaled_bams                  = Channel.empty()
+    ch_pmd_filtered_bams              = Channel.empty()
+    ch_trimmed_bams                   = Channel.empty()
+    ch_merged_damage_manipulated_bams = Channel.empty()
+    ch_pmd_filtered_flagstat          = Channel.empty() // Only run flagstat on pmd filtered bam, since rescaling and trimming does not change the number of reads
+    ch_multiqc_files                  = Channel.empty()
+
 
     // Ensure correct reference is associated with each bam_bai pair
     ch_refs = ch_fasta
@@ -58,7 +62,7 @@ workflow MANIPULATE_DAMAGE {
         ch_mapdamage_input = ch_mapdamage_prep.no_skip
             .multiMap {
                 ignore_me, meta, bam, bai, ref_meta, fasta ->
-                    bam: [ meta, bam ]
+                    bam: [ meta + [ 'damage_manipulation' : 'rescaled' ], bam ]
                     fasta: fasta
             }
 
@@ -69,7 +73,8 @@ workflow MANIPULATE_DAMAGE {
         ch_versions       = ch_versions.mix( SAMTOOLS_INDEX_DAMAGE_RESCALED.out.versions.first() )
         ch_rescaled_index = params.fasta_largeref ? SAMTOOLS_INDEX_DAMAGE_RESCALED.out.csi : SAMTOOLS_INDEX_DAMAGE_RESCALED.out.bai
 
-        // TODO When adding library-level data merging pre-genotyping, make sure that rescaled bams are not merged in any way as the underlying damage model could differ between libraries
+        // It may be inappropriate to merge different rescaled libraries (or rescaled and non-rescaled libs) for genotyping/downstream analysis
+        // Distinct libraries may have distinct damage models!
         ch_rescaled_bams  = MAPDAMAGE2.out.rescaled.join(ch_rescaled_index)
             .mix(ch_skip_rescale) // Should these be mixed actually, or excluded? Might not make sense to take rescaled and non-rescaled bams togetehr for anything downstream.
     }
@@ -118,7 +123,7 @@ workflow MANIPULATE_DAMAGE {
                     .combine( ch_pmd_fastas, by: 0 ) // [ [combine_meta], [meta], bam, bai, [ref_meta] fasta ]
                     .multiMap {
                         combine_meta, meta, bam, bai, ref_meta, fasta ->
-                        bam: [ meta, bam, bai ]
+                        bam: [ meta + [ 'damage_manipulation' : 'pmd' ] , bam, bai ]
                         fasta: fasta
                     }
 
@@ -133,21 +138,24 @@ workflow MANIPULATE_DAMAGE {
 
         SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED( ch_pmd_filtered_bams )
         ch_pmd_filtered_flagstat = SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED.out.flagstat
+        ch_multiqc_files         = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED.out.flagstat )
         ch_versions              = ch_versions.mix( SAMTOOLS_FLAGSTAT_DAMAGE_FILTERED.out.versions.first() )
     }
 
     if ( params.run_trim_bam ) {
-        if ( params.run_pmd_filtering ) {
+        // only run trimming on pmd reads if used downstream in genotyping
+        // must be explicilty asked for, since other tools not combined like this (eg mapdamage + trimming)
+        if ( params.genotyping_source == 'pmd_trimmed' ) {
             ch_to_trim = ch_pmd_filtered_bams
                 .map{
                     meta, bam, bai ->
-                    [ meta, bam ]
+                    [ meta + ['damage_manipulation' : 'pmd_trimmed'], bam ]
                 }
         } else {
             ch_to_trim = ch_bam_bai
                 .map {
                     meta, bam, bai ->
-                    [ meta, bam ]
+                    [ meta + ['damage_manipulation' : 'trimmed'], bam ]
                 }
         }
 
@@ -169,10 +177,21 @@ workflow MANIPULATE_DAMAGE {
         ch_trimmed_bams  = BAMUTIL_TRIMBAM.out.bam.join( ch_trimmed_index )
     }
 
+    // SUBWORKFLOW: merge libraries for saving (in final bams) and (potentially) genotyping
+
+    ch_for_merging = ch_rescaled_bams.mix(ch_pmd_filtered_bams).mix(ch_trimmed_bams)
+
+    MERGE_LIBRARIES_DAMAGE_MANIPULATION(ch_for_merging)
+    ch_versions = ch_versions.mix(MERGE_LIBRARIES_DAMAGE_MANIPULATION.out.versions)
+    ch_merged_damage_manipulated_bams = MERGE_LIBRARIES_DAMAGE_MANIPULATION.out.bam_bai
+    ch_multiqc_files = ch_multiqc_files.mix(MERGE_LIBRARIES_DAMAGE_MANIPULATION.out.mqc.collect { it[1] }.ifEmpty([]))
+
     emit:
-    rescaled = ch_rescaled_bams         // [ meta, bam, bai ]
-    filtered = ch_pmd_filtered_bams     // [ meta, bam, bai ]
-    trimmed  = ch_trimmed_bams          // [ meta, bam, bai ]
-    flagstat = ch_pmd_filtered_flagstat // [ meta, flagstat ]
-    versions = ch_versions
+    rescaled    = ch_rescaled_bams                  // [ meta, bam, bai ]
+    filtered    = ch_pmd_filtered_bams              // [ meta, bam, bai ]
+    trimmed     = ch_trimmed_bams                   // [ meta, bam, bai ]
+    merged_bams = ch_merged_damage_manipulated_bams // [ meta, bam, bai ] // per-tool
+    flagstat    = ch_pmd_filtered_flagstat          // [ meta, flagstat ]
+    mqc         = ch_multiqc_files
+    versions    = ch_versions
 }

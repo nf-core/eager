@@ -143,6 +143,20 @@ workflow PIPELINE_INITIALISATION {
                                 [ meta, singlestrand ]
                             }
 
+    // - No libraries with multiple UDG treatments (UDG treatment done as part of library generation)
+    ch_samplesheet_test = ch_samplesheet
+                            .map {
+                                meta, r1, r2, bam ->
+                                [ meta.subMap('library_id'), meta.subMap('damage_treatment') ]
+                            }
+                            .groupTuple()
+                            .map { meta, damage_treatment ->
+                                    if ( damage_treatment.toList().unique().size() > 1 ) {
+                                        exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Library IDs can only have a single UDG treatment across lanes."
+                                    }
+                                [ meta, damage_treatment ]
+                            }
+
     emit:
     samplesheet_fastqs = ch_samplesheet_fastqs
     samplesheet_bams   = ch_samplesheet_bams
@@ -214,9 +228,25 @@ def validateInputParameters() {
     if ( params.deduplication_tool == 'dedup'             && ! params.preprocessing_excludeunmerged ) { exit 1, "[nf-core/eager] ERROR: Dedup can only be used on collapsed (i.e. merged) PE reads without singletons. If you want to use Dedup, please provide --preprocessing_excludeunmerged. For all other cases, please set --deduplication_tool to 'markduplicates'."}
     if ( params.bamfiltering_retainunmappedgenomicbam     && params.bamfiltering_mappingquality > 0 ) { exit 1, ("[nf-core/eager] ERROR: You cannot both retain unmapped reads and perform quality filtering, as unmapped reads have a mapping quality of 0. Pick one or the other functionality.") }
     if ( params.bamfiltering_generatefastq                && params.run_bamfiltering                ) { exit 1, ("[nf-core/eager] ERROR: --bamfiltering_generatefastq will NOT generate a fastq file unless BAM filtering is turned on with `--run_bamfiltering`") }
+
+    // damage manipulation
     if ( params.genotyping_source == 'trimmed'            && ! params.run_trim_bam                  ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
-    if ( params.genotyping_source == 'pmd'                && ! params.run_pmd_filtering             ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
-    if ( params.genotyping_source == 'rescaled'           && ! params.run_mapdamage_rescaling       ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
+    if ( params.genotyping_source == 'pmd'                && ! params.run_pmd_filtering             ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is turned on with `--run_pmd_filtering`.") }
+    if ( params.genotyping_source == 'rescaled'           && ! params.run_mapdamage_rescaling       ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is turned on with `--run_mapdamage_rescaling`.") }
+    if ( params.genotyping_source == 'pmd_trimmed' && ! ( params.run_pmd_filtering && params.run_trim_bam ) ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd_trimmed' unless PMD-filtering is turned on with `--run_pmd_filtering` and BAM trimming is turned on with `--run_trim_bam`.") }
+
+    // genotyping
+    if ( params.run_genotyping                  && ! params.genotyping_tool   ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
+    if ( params.run_genotyping                  && ! params.genotyping_source ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
+    if ( params.genotyping_source == 'raw'      && ( params.run_trim_bam || params.run_pmd_filtering || params.run_mapdamage_rescaling ) ) { log.warn("[nf-core/eager] WARNING: --genotyping_source is set to 'raw' AND damage correction carried out (rescaling, filtering, or trimming). The output of these tools will NOT be utilized for genotyping!") }
+    if ( params.genotyping_source == 'trimmed'  && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
+    if ( params.genotyping_source == 'pmd'      && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
+    if ( params.genotyping_source == 'rescaled' && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
+    if ( ( params.genotyping_source == 'rescaled' || params.genotyping_source == 'pmd_timmed' || params.genotyping_source == 'pmd' ) && ! params.genotyping_use_unmerged_libraries ) { log.warn("[nf-core/eager] WARNING: Combining multiple libraries with rescaled damage for genotyping may be inappropriate!") }
+    // if ( params.fasta && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
+    if ( params.fasta && params.mapping_tool == "circularmapper" && !params.fasta_circular_target ) { exit 1, ("[nf-core/eager] ERROR: Mapping with circularmapper requires --fasta_circular_target to be provided.") }
+
+    // metagenomics
     if ( params.metagenomics_complexity_tool == 'prinseq' && params.metagenomics_prinseq_mode == 'dust' && params.metagenomics_complexity_entropy != 0.3 ) {
         if (params.metagenomics_prinseq_dustscore == 0.5) { exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked PRINSEQ++ with 'dust' mode but provided an entropy score. Please specify a dust filter threshold using the --metagenomics_prinseq_dustscore flag") }
     }
@@ -233,18 +263,13 @@ def validateInputParameters() {
     ){ exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked MALT with postprocessing but didnt provided required input files. Please provide the --metagenomics_maltextract_taxonlist and --metagenomics_maltextract_ncbidir flags") }
     if ( params.run_metagenomics && params.preprocessing_skippairmerging ) { log.warn("[nf-core/eager] WARNING: --preprocessing_skippairmerging selected in combination for metagenomics! All singletons from paired end samples will be discarded prior to input for metagenomics screening! This may be inappropriate for metaphlan, which does not utilize paired-end information!") }
     if ( params.run_metagenomics && params.preprocessing_skippairmerging && params.metagenomics_profiling_tool == 'malt' ) { exit 1, ("[nf-core/eager] ERROR: --preprocessing_skippairmerging selected in combination with MALT for metagenomics! MALT cannot accept separated read pair information, please remove --preprocessing_skippairmerging parameter.") }
-    if ( params.run_genotyping   && ! params.genotyping_tool                ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
-    if ( params.run_genotyping   && ! params.genotyping_source              ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
-    if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
-    if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
-    if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
-    if ( params.fasta && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
-    if ( params.fasta && params.mapping_tool == "circularmapper" && !params.fasta_circular_target ) { exit 1, ("[nf-core/eager] ERROR: Mapping with circularmapper requires --fasta_circular_target to be provided.") }
 }
 
 //
 // Validate channels from input samplesheet
 //
+// FROM NF-CORE TEMPLATE: THIS IS NOT NECESSARY
+// TODO: remove prior to 3.0
 def validateInputSamplesheet(input) {
     def (metas, fastqs) = input[1..2]
 
@@ -397,7 +422,6 @@ def addNewMetaFromAttributes( ArrayList row, Object source_attributes, Object ta
     } else {
         // Option D: Not both the same type or acceptable types. Error.
         throw new IllegalArgumentException("Error: target_attributes and source_attributes must be of same type (both Strings or both Lists).")
-
     }
 
     def new_row = [ meta2 ] + row
