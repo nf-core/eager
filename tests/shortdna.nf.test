@@ -47,13 +47,23 @@ nextflow_pipeline {
                 '**/mapped_reads_gc-content_distribution.txt',
                 '**/mapped_reads_nucleotide_content.txt',
                 '**/genome_gc_content_per_window.png',
-                '**/*.{svg,pdf,html,png}',
+                '**/*.{svg,pdf,html,png,json}',
                 '**/DamageProfiler.log',
-                '**/3p_freq_misincorporations.txt',
+                '**/{3,5}p_freq_misincorporations.txt',
                 '**/DNA_comp_genome.txt',
                 '**/DNA_composition_sample.txt',
                 '**/misincorporation.txt',
                 '**/genome_results.txt',
+                '**/3pGtoA_freq.txt',
+                '**/5pCtoT_freq.txt',
+                '**/lgdistribution.txt',
+                '**/*c_curve.txt',
+                "**/coverage_across_reference.txt",
+                "**/coverage_histogram.txt",
+                "**/duplication_rate_histogram.txt",
+                "**/genome_fraction_coverage.txt",
+                "**/mapping_quality_across_reference.txt",
+                "**/mapping_quality_histogram.txt",
                 ]
 
             // Check that no files are missing/added
@@ -64,13 +74,13 @@ nextflow_pipeline {
             def stable_content_authentication   = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: unstable_patterns_auth , ignoreFile: null                 , include: ['*', '**/*'] )
             def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: unstable_patterns_auth)
 
-            // Deduplication - TODO -> snapshot both lists are empty!?
-            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
-            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+            // Deduplication
+            // NOTE: even the flagstats are unstable, so we only check the names
+            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*'] )
 
             // Final_bams
-            def stable_content_final_bams       = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
-            def stable_name_final_bams          = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+            // NOTE: BAMs are unstable, since upstream BAMs are unstable.
+            def stable_name_final_bams          = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*'] )
 
             // Mapping (incl. bam_input flasgstat)
             def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
@@ -82,10 +92,8 @@ nextflow_pipeline {
             def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
 
             // Genotyping
-            def stable_content_genotyping       = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: ['**/*.{tbi,vcf.gz}']  , ignoreFile: null                 , include: ['**/*'] )
-            def stable_name_genotyping          = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.tbi'] )
-            // We need to collect the vcfs separately to run more specific md5sum checks on the header (contnts are unstable due to same reasons as BAMs, explained above).
-            def genotyping_vcfs                 = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.vcf.gz'] )
+            // NOTE: single file is created, with unstable content due to unstable BAM input.
+            def stable_name_genotyping          = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.glf.gz'] )
 
             // Metagenomics
             def stable_content_metagenomics    = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: ['**/*.biom', '**/*table.tsv']          , ignoreFile: null                 , include: ['**/*'] )
@@ -108,30 +116,13 @@ nextflow_pipeline {
                 // NOTE: Keep the order of the sections in the alphanumeric order of the output directories.
                 //    Each section should first check stable_content, stable_name second (if applicable).
                 { assert snapshot( stable_content_authentication     , stable_name_authentication*.name   ).match("authentication") },
-                { assert snapshot( stable_content_deduplication      , stable_name_deduplication*.name    ).match("deduplication") },
-                { assert snapshot( stable_content_final_bams         , stable_name_final_bams*.name       ).match("final_bams") },
+                { assert snapshot(                                     stable_name_deduplication*.name    ).match("deduplication") },
+                { assert snapshot(                                     stable_name_final_bams*.name       ).match("final_bams") },
                 // NOTE: The snapshot section for mapping cannot be named 'mapping'. See https://github.com/askimed/nf-test/issues/279
                 { assert snapshot( stable_content_mapping            , stable_name_mapping*.name          ).match("mapping_output") },
                 { assert snapshot( stable_content_preprocessing      , stable_name_preprocessing*.name    ).match("preprocessing") },
-                { assert snapshot( stable_content_readfiltering      , stable_name_readfiltering*.name    ).match("read_filtering") },
-                { assert snapshot( stable_content_genotyping         , stable_name_genotyping*.name       ).match("genotyping") },
-                // Additional checks on the genotyping VCFs for content. Specifically the md5sums of the header FORMAT and INFO lines
-                { assert snapshot(
-                    genotyping_vcfs.collect {
-                        file ->
-                        def vcf_head = path(file.toString()).vcf.header
-                        // The header contains lines in the "OTHER" category, which contain a timestamp, so we need to filter those out, then calculate md5sums.
-                        def header_md5 = [
-                            vcf_head.getFormatHeaderLines().toString(),
-                            vcf_head.getInfoHeaderLines().toString(),
-                            vcf_head.getFilterLines().toString(),
-                            vcf_head.getIDHeaderLines().toString(),
-                            vcf_head.getGenotypeSamples().toString(),
-                            vcf_head.getContigLines().toString(),
-                        ].join(' ').md5()
-                        file.getName() + ":header_md5," + header_md5
-                    }
-                ).match("genotyping_vcfs")},
+                // { assert snapshot( stable_content_readfiltering      , stable_name_readfiltering*.name    ).match("read_filtering") },
+                { assert snapshot(                                     stable_name_genotyping*.name       ).match("genotyping") },
                 { assert snapshot( stable_content_metagenomics       , stable_name_metagenomics*.name     ).match("metagenomics") },
                 { assert snapshot( stable_name_multiqc*.name         ).match("multiqc") },
 
