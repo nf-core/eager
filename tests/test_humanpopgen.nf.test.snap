@@ -1,0 +1,586 @@
+{
+    "all_files": {
+        "content": [
+            [
+                "JK2067_JK2067_hs37d5_chr21-MT.txt",
+                "nuclear_contamination.txt",
+                "nuclear_contamination_mqc.json",
+                "JK2067_JK2067_hs37d5_chr21-MT_percent_on_target_mqc.json",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_percent_on_target_mqc.json",
+                "3pGtoA_freq.txt",
+                "5pCtoT_freq.txt",
+                "Fragmisincorporation_plot.pdf",
+                "Length_plot.pdf",
+                "Runtime_log.txt",
+                "dnacomp.txt",
+                "lgdistribution.txt",
+                "misincorporation.txt",
+                "3pGtoA_freq.txt",
+                "5pCtoT_freq.txt",
+                "Fragmisincorporation_plot.pdf",
+                "Length_plot.pdf",
+                "Runtime_log.txt",
+                "dnacomp.txt",
+                "lgdistribution.txt",
+                "misincorporation.txt",
+                "JK2067_JK2067_hs37d5_chr21-MT.c_curve.txt",
+                "JK2067_JK2067_hs37d5_chr21-MT.command.log",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.c_curve.txt",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.command.log",
+                "agogo.css",
+                "ajax-loader.gif",
+                "basic.css",
+                "bgfooter.png",
+                "bgtop.png",
+                "comment-bright.png",
+                "comment-close.png",
+                "comment.png",
+                "doctools.js",
+                "down-pressed.png",
+                "down.png",
+                "file.png",
+                "jquery.js",
+                "minus.png",
+                "plus.png",
+                "pygments.css",
+                "qualimap_logo_small.png",
+                "report.css",
+                "searchtools.js",
+                "underscore.js",
+                "up-pressed.png",
+                "up.png",
+                "websupport.js",
+                "genome_results.txt",
+                "genome_coverage_0to50_histogram.png",
+                "genome_coverage_across_reference.png",
+                "genome_coverage_histogram.png",
+                "genome_coverage_quotes.png",
+                "genome_gc_content_per_window.png",
+                "genome_homopolymer_indels.png",
+                "genome_mapping_quality_across_reference.png",
+                "genome_mapping_quality_histogram.png",
+                "genome_reads_clipping_profile.png",
+                "genome_reads_content_per_read_position.png",
+                "genome_uniq_read_starts_histogram.png",
+                "qualimapReport.html",
+                "coverage_across_reference.txt",
+                "coverage_histogram.txt",
+                "duplication_rate_histogram.txt",
+                "genome_fraction_coverage.txt",
+                "homopolymer_indels.txt",
+                "mapped_reads_clipping_profile.txt",
+                "mapped_reads_gc-content_distribution.txt",
+                "mapped_reads_nucleotide_content.txt",
+                "mapping_quality_across_reference.txt",
+                "mapping_quality_histogram.txt",
+                "agogo.css",
+                "ajax-loader.gif",
+                "basic.css",
+                "bgfooter.png",
+                "bgtop.png",
+                "comment-bright.png",
+                "comment-close.png",
+                "comment.png",
+                "doctools.js",
+                "down-pressed.png",
+                "down.png",
+                "file.png",
+                "jquery.js",
+                "minus.png",
+                "plus.png",
+                "pygments.css",
+                "qualimap_logo_small.png",
+                "report.css",
+                "searchtools.js",
+                "underscore.js",
+                "up-pressed.png",
+                "up.png",
+                "websupport.js",
+                "genome_results.txt",
+                "genome_coverage_0to50_histogram.png",
+                "genome_coverage_across_reference.png",
+                "genome_coverage_histogram.png",
+                "genome_coverage_quotes.png",
+                "genome_gc_content_per_window.png",
+                "genome_homopolymer_indels.png",
+                "genome_mapping_quality_across_reference.png",
+                "genome_mapping_quality_histogram.png",
+                "genome_reads_clipping_profile.png",
+                "genome_reads_content_per_read_position.png",
+                "genome_uniq_read_starts_histogram.png",
+                "qualimapReport.html",
+                "coverage_across_reference.txt",
+                "coverage_histogram.txt",
+                "duplication_rate_histogram.txt",
+                "genome_fraction_coverage.txt",
+                "homopolymer_indels.txt",
+                "mapped_reads_clipping_profile.txt",
+                "mapped_reads_gc-content_distribution.txt",
+                "mapped_reads_nucleotide_content.txt",
+                "mapping_quality_across_reference.txt",
+                "mapping_quality_histogram.txt",
+                "hs37d5_chr21-MT_sexdeterrmine.tsv",
+                "JK2067_JK2067_hs37d5_chr21-MT_trimmed.bam",
+                "JK2067_JK2067_hs37d5_chr21-MT_trimmed.bam.bai",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_trimmed.bam",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_trimmed.bam.bai",
+                "JK2067_JK2067_hs37d5_chr21-MT_dedupped.bam",
+                "JK2067_JK2067_hs37d5_chr21-MT_dedupped.bam.bai",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_dedupped.bam",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_dedupped.bam.bai",
+                "JK2067_JK2067_hs37d5_chr21-MT_dedupped.flagstat",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_dedupped.flagstat",
+                "JK2067_downsampled_hs37d5_chr21-MT.bam",
+                "JK2067_downsampled_hs37d5_chr21-MT.bam.bai",
+                "JK2067_hs37d5_chr21-MT.bam",
+                "JK2067_hs37d5_chr21-MT.bam.bai",
+                "JK2067_downsampled_hs37d5_chr21-MT.flagstat",
+                "JK2067_hs37d5_chr21-MT.flagstat",
+                "JK2067_downsampled_hs37d5_chr21-MT.bam",
+                "JK2067_downsampled_hs37d5_chr21-MT.bam.bai",
+                "JK2067_hs37d5_chr21-MT.bam",
+                "JK2067_hs37d5_chr21-MT.bam.bai",
+                "JK2067_downsampled_hs37d5_chr21-MT.flagstat",
+                "JK2067_hs37d5_chr21-MT.flagstat",
+                "pileupcaller_genotypes_hs37d5_chr21-MT.geno",
+                "pileupcaller_genotypes_hs37d5_chr21-MT.ind",
+                "pileupcaller_genotypes_hs37d5_chr21-MT.snp",
+                "pileupcaller_genotypes_hs37d5_chr21-MT_coverage.tsv",
+                "JK2067_JK2067_hs37d5_chr21-MT_sorted.bam",
+                "JK2067_JK2067_hs37d5_chr21-MT_sorted.bam.bai",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_sorted.bam",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_sorted.bam.bai",
+                "JK2067_JK2067_hs37d5_chr21-MT_sorted.flagstat",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_sorted.flagstat",
+                "JK2067_JK2067_hs37d5_chr21-MT.kraken2.report.txt",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.kraken2.report.txt",
+                "kraken2_taxpasta_table.tsv",
+                "fastp-seq-content-gc-plot_Read_1_After_filtering.txt",
+                "fastp-seq-content-gc-plot_Read_1_Before_filtering.txt",
+                "fastp-seq-content-n-plot_Read_1_After_filtering.txt",
+                "fastp-seq-content-n-plot_Read_1_Before_filtering.txt",
+                "fastp-seq-quality-plot_Read_1_After_filtering.txt",
+                "fastp-seq-quality-plot_Read_1_Before_filtering.txt",
+                "fastp_filtered_reads_plot.txt",
+                "fastqc-status-check-heatmap.txt",
+                "fastqc_adapter_content_plot.txt",
+                "fastqc_overrepresented_sequences_plot.txt",
+                "fastqc_per_base_n_content_plot.txt",
+                "fastqc_per_base_sequence_quality_plot.txt",
+                "fastqc_per_sequence_gc_content_plot_Counts.txt",
+                "fastqc_per_sequence_gc_content_plot_Percentages.txt",
+                "fastqc_per_sequence_quality_scores_plot.txt",
+                "fastqc_sequence_counts_plot.txt",
+                "fastqc_sequence_duplication_levels_plot.txt",
+                "fastqc_sequence_length_distribution_plot.txt",
+                "fastqc_top_overrepresented_sequences_table.txt",
+                "kraken-top-n-plot.txt",
+                "multiqc.log",
+                "multiqc_citations.txt",
+                "multiqc_data.json",
+                "multiqc_fastp.txt",
+                "multiqc_fastqc.txt",
+                "multiqc_general_stats.txt",
+                "multiqc_kraken.txt",
+                "multiqc_qualimap_bamqc_genome_results.txt",
+                "multiqc_samtools_flagstat.txt",
+                "multiqc_sexdeter_metrics.txt",
+                "multiqc_software_versions.txt",
+                "multiqc_sources.txt",
+                "preseq.txt",
+                "preseq_complexity_plot_molecules.txt",
+                "qualimap_coverage_histogram.txt",
+                "qualimap_gc_content.txt",
+                "qualimap_genome_fraction.txt",
+                "samtools-flagstat-dp_Percentage_of_total.txt",
+                "samtools-flagstat-dp_Read_counts.txt",
+                "sexdeterrmine-rate-plot.txt",
+                "sexdeterrmine-readcounts-plot.txt",
+                "sexdeterrmine-snps-plot.txt",
+                "multiqc_report.html",
+                "JK2067_JK2067_L1.fastp.html",
+                "JK2067_JK2067_L1.fastp.json",
+                "JK2067_JK2067_L1.fastp.log",
+                "JK2067_downsampled_JK2067_downsampled_L1.fastp.html",
+                "JK2067_downsampled_JK2067_downsampled_L1.fastp.json",
+                "JK2067_downsampled_JK2067_downsampled_L1.fastp.log",
+                "JK2067_JK2067_L1_fastqc.html",
+                "JK2067_JK2067_L1_fastqc.zip",
+                "JK2067_downsampled_JK2067_downsampled_L1_fastqc.html",
+                "JK2067_downsampled_JK2067_downsampled_L1_fastqc.zip",
+                "JK2067_JK2067_L1_fastqc.html",
+                "JK2067_JK2067_L1_fastqc.zip",
+                "JK2067_downsampled_JK2067_downsampled_L1_fastqc.html",
+                "JK2067_downsampled_JK2067_downsampled_L1_fastqc.zip",
+                "JK2067_JK2067_hs37d5_chr21-MT_filtered.flagstat",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_filtered.flagstat",
+                "JK2067.bam",
+                "JK2067_downsampled.bam"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-09T12:09:31.785539"
+    },
+    "read_filtering": {
+        "content": [
+            [
+                "JK2067_JK2067_hs37d5_chr21-MT_filtered.flagstat:md5,7bfcb98518da1effa455877940f59540",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_filtered.flagstat:md5,ff3c4174ff6487ed9cc6f75cf6fb8112"
+            ],
+            [
+                
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-09T12:09:32.976174"
+    },
+    "preprocessing": {
+        "content": [
+            [
+                "JK2067_JK2067_L1.fastp.json:md5,bd5b6096106d9ae77b01bb0931531d49",
+                "JK2067_downsampled_JK2067_downsampled_L1.fastp.json:md5,f0e81dea32c29842d89b81514610d313"
+            ],
+            [
+                "JK2067_JK2067_L1.fastp.html",
+                "JK2067_JK2067_L1.fastp.log",
+                "JK2067_downsampled_JK2067_downsampled_L1.fastp.html",
+                "JK2067_downsampled_JK2067_downsampled_L1.fastp.log",
+                "JK2067_JK2067_L1_fastqc.html",
+                "JK2067_JK2067_L1_fastqc.zip",
+                "JK2067_downsampled_JK2067_downsampled_L1_fastqc.html",
+                "JK2067_downsampled_JK2067_downsampled_L1_fastqc.zip",
+                "JK2067_JK2067_L1_fastqc.html",
+                "JK2067_JK2067_L1_fastqc.zip",
+                "JK2067_downsampled_JK2067_downsampled_L1_fastqc.html",
+                "JK2067_downsampled_JK2067_downsampled_L1_fastqc.zip"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-09T12:09:32.89726"
+    },
+    "metagenomics": {
+        "content": [
+            [
+                "JK2067_JK2067_hs37d5_chr21-MT.kraken2.report.txt:md5,0dfee3834b130c291e2dff5f2625cb97",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.kraken2.report.txt:md5,5e35ba5bd6f2df3b725dfe778561e9ea"
+            ],
+            [
+                "kraken2_taxpasta_table.tsv"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-09T12:09:32.791156"
+    },
+    "samtools": {
+        "content": [
+            [
+                "JK2067.bam:md5,bf03c7d5b291074fcd9d2dfe61df9e84",
+                "JK2067_downsampled.bam:md5,cf377208d6fb476944babed7ef437f96"
+            ],
+            [
+                
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-23T10:46:43.216777"
+    },
+    "genotyping": {
+        "content": [
+            [
+                
+            ],
+            [
+                "pileupcaller_genotypes_hs37d5_chr21-MT.geno",
+                "pileupcaller_genotypes_hs37d5_chr21-MT.ind",
+                "pileupcaller_genotypes_hs37d5_chr21-MT.snp",
+                "pileupcaller_genotypes_hs37d5_chr21-MT_coverage.tsv"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-23T11:48:39.954805"
+    },
+    "damage_manipulation": {
+        "content": [
+            [
+                
+            ],
+            [
+                "JK2067_JK2067_hs37d5_chr21-MT_trimmed.bam",
+                "JK2067_JK2067_hs37d5_chr21-MT_trimmed.bam.bai",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_trimmed.bam",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_trimmed.bam.bai"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-23T11:48:39.584699"
+    },
+    "final_bams": {
+        "content": [
+            [
+                "JK2067_downsampled_hs37d5_chr21-MT.flagstat:md5,fd0ef26c9aeb43d4ae29b7f2ebe77f97",
+                "JK2067_hs37d5_chr21-MT.flagstat:md5,e7cffe3c84399253db5eeb3e50c56e9e",
+                "JK2067_downsampled_hs37d5_chr21-MT.flagstat:md5,fd0ef26c9aeb43d4ae29b7f2ebe77f97",
+                "JK2067_hs37d5_chr21-MT.flagstat:md5,e7cffe3c84399253db5eeb3e50c56e9e"
+            ],
+            [
+                "JK2067_downsampled_hs37d5_chr21-MT.bam",
+                "JK2067_downsampled_hs37d5_chr21-MT.bam.bai",
+                "JK2067_hs37d5_chr21-MT.bam",
+                "JK2067_hs37d5_chr21-MT.bam.bai",
+                "JK2067_downsampled_hs37d5_chr21-MT.bam",
+                "JK2067_downsampled_hs37d5_chr21-MT.bam.bai",
+                "JK2067_hs37d5_chr21-MT.bam",
+                "JK2067_hs37d5_chr21-MT.bam.bai"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-09T12:09:32.468183"
+    },
+    "deduplication": {
+        "content": [
+            [
+                "JK2067_JK2067_hs37d5_chr21-MT_dedupped.flagstat:md5,e7cffe3c84399253db5eeb3e50c56e9e",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_dedupped.flagstat:md5,fd0ef26c9aeb43d4ae29b7f2ebe77f97"
+            ],
+            [
+                "JK2067_JK2067_hs37d5_chr21-MT_dedupped.bam",
+                "JK2067_JK2067_hs37d5_chr21-MT_dedupped.bam.bai",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_dedupped.bam",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_dedupped.bam.bai"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-09T12:09:32.35429"
+    },
+    "multiqc": {
+        "content": [
+            [
+                "fastp-seq-content-gc-plot_Read_1_After_filtering.txt",
+                "fastp-seq-content-gc-plot_Read_1_Before_filtering.txt",
+                "fastp-seq-content-n-plot_Read_1_After_filtering.txt",
+                "fastp-seq-content-n-plot_Read_1_Before_filtering.txt",
+                "fastp-seq-quality-plot_Read_1_After_filtering.txt",
+                "fastp-seq-quality-plot_Read_1_Before_filtering.txt",
+                "fastp_filtered_reads_plot.txt",
+                "fastqc-status-check-heatmap.txt",
+                "fastqc_adapter_content_plot.txt",
+                "fastqc_overrepresented_sequences_plot.txt",
+                "fastqc_per_base_n_content_plot.txt",
+                "fastqc_per_base_sequence_quality_plot.txt",
+                "fastqc_per_sequence_gc_content_plot_Counts.txt",
+                "fastqc_per_sequence_gc_content_plot_Percentages.txt",
+                "fastqc_per_sequence_quality_scores_plot.txt",
+                "fastqc_sequence_counts_plot.txt",
+                "fastqc_sequence_duplication_levels_plot.txt",
+                "fastqc_sequence_length_distribution_plot.txt",
+                "fastqc_top_overrepresented_sequences_table.txt",
+                "kraken-top-n-plot.txt",
+                "multiqc.log",
+                "multiqc_citations.txt",
+                "multiqc_data.json",
+                "multiqc_fastp.txt",
+                "multiqc_fastqc.txt",
+                "multiqc_general_stats.txt",
+                "multiqc_kraken.txt",
+                "multiqc_qualimap_bamqc_genome_results.txt",
+                "multiqc_samtools_flagstat.txt",
+                "multiqc_sexdeter_metrics.txt",
+                "multiqc_software_versions.txt",
+                "multiqc_sources.txt",
+                "preseq.txt",
+                "preseq_complexity_plot_molecules.txt",
+                "qualimap_coverage_histogram.txt",
+                "qualimap_gc_content.txt",
+                "qualimap_genome_fraction.txt",
+                "samtools-flagstat-dp_Percentage_of_total.txt",
+                "samtools-flagstat-dp_Read_counts.txt",
+                "sexdeterrmine-rate-plot.txt",
+                "sexdeterrmine-readcounts-plot.txt",
+                "sexdeterrmine-snps-plot.txt",
+                "multiqc_report.html"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-09T12:09:33.176535"
+    },
+    "mapping_output": {
+        "content": [
+            [
+                "JK2067_JK2067_hs37d5_chr21-MT_sorted.flagstat:md5,f5fd5eb0506f75cb1ff549258a4cad94",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_sorted.flagstat:md5,6cc4612fbc5f28dcba4659796fafcd91"
+            ],
+            [
+                "JK2067_JK2067_hs37d5_chr21-MT_sorted.bam",
+                "JK2067_JK2067_hs37d5_chr21-MT_sorted.bam.bai",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_sorted.bam",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_sorted.bam.bai"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-09T12:09:32.684865"
+    },
+    "authentication": {
+        "content": [
+            [
+                "JK2067_JK2067_hs37d5_chr21-MT.txt:md5,1989edd81ff1c31f3ad591cb85a10571",
+                "nuclear_contamination.txt:md5,a556d98cf65911939076d6e66ef02082",
+                "nuclear_contamination_mqc.json:md5,17b375d14aba284892a3ac889eceb25a",
+                "JK2067_JK2067_hs37d5_chr21-MT_percent_on_target_mqc.json:md5,d796c89b343f15329df91d5e79f5200c",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_percent_on_target_mqc.json:md5,67fc863363b85e952f1a6a06e79aa696",
+                "lgdistribution.txt:md5,b9d061b7f6eca7b55d16be7ae3b5c8e3",
+                "lgdistribution.txt:md5,c7de663fd9c20073ae89066af2828904",
+                "JK2067_JK2067_hs37d5_chr21-MT.c_curve.txt:md5,bfb7054f2a6723e8d29697f9a3107ef8",
+                "JK2067_JK2067_hs37d5_chr21-MT.command.log:md5,ddf651020afae06c28be5d3e3365874c",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.c_curve.txt:md5,cf4743abdd355595d6ec1fb3f38e66e5",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.command.log:md5,ddf651020afae06c28be5d3e3365874c",
+                "agogo.css:md5,bd757b1a7ce6fdc0288ba148680f4583",
+                "ajax-loader.gif:md5,ae6667053ad118020b8e68ccf307b519",
+                "basic.css:md5,25b2823342c0604924a2870eeb4e7e94",
+                "doctools.js:md5,5ff571aa60e63f69c1890283e240ff8d",
+                "jquery.js:md5,10092eee563dec2dca82b77d2cf5a1ae",
+                "pygments.css:md5,d625a0adb949f181bd0d3f1432b0fa7f",
+                "report.css:md5,7a5f09eaf7c176f966f4e8854168b812",
+                "searchtools.js:md5,d550841adeedc8ed47c40ee607620937",
+                "underscore.js:md5,db5ba047a66617d4cd3e8c5099cc51db",
+                "websupport.js:md5,9e61e1e8a7433c56bd7e5a615affcf85",
+                "coverage_across_reference.txt:md5,e50d6b2b34ca7dc5987acb32dc6e7986",
+                "coverage_histogram.txt:md5,efc7c6d0a7c409dca57e4456a664cc88",
+                "duplication_rate_histogram.txt:md5,ef4ffbb82e6fc94faee75543b5e4dd38",
+                "genome_fraction_coverage.txt:md5,4857ba624aa2c84d6d25ce2e60c8269b",
+                "homopolymer_indels.txt:md5,4486a4ba037b71eb7fe64cbd0d92cce4",
+                "mapped_reads_clipping_profile.txt:md5,cd72082640b245c9d9f4d328406c01d6",
+                "mapping_quality_across_reference.txt:md5,03d3e62c859c0a487367ae5f9c92a557",
+                "mapping_quality_histogram.txt:md5,c6916c99da72c60fdbd2030cb58abf96",
+                "agogo.css:md5,bd757b1a7ce6fdc0288ba148680f4583",
+                "ajax-loader.gif:md5,ae6667053ad118020b8e68ccf307b519",
+                "basic.css:md5,25b2823342c0604924a2870eeb4e7e94",
+                "doctools.js:md5,5ff571aa60e63f69c1890283e240ff8d",
+                "jquery.js:md5,10092eee563dec2dca82b77d2cf5a1ae",
+                "pygments.css:md5,d625a0adb949f181bd0d3f1432b0fa7f",
+                "report.css:md5,7a5f09eaf7c176f966f4e8854168b812",
+                "searchtools.js:md5,d550841adeedc8ed47c40ee607620937",
+                "underscore.js:md5,db5ba047a66617d4cd3e8c5099cc51db",
+                "websupport.js:md5,9e61e1e8a7433c56bd7e5a615affcf85",
+                "coverage_across_reference.txt:md5,9d545368354b64d1b7b9b403894a3d2b",
+                "coverage_histogram.txt:md5,006f2aaff0c1dc340c329da00fbef92d",
+                "duplication_rate_histogram.txt:md5,8a023114a7a7833886f6faa915713ba9",
+                "genome_fraction_coverage.txt:md5,f38d0b862860f4c7b3aead9a08a52591",
+                "homopolymer_indels.txt:md5,12b02d88477f31cfa9a37a4534769548",
+                "mapped_reads_clipping_profile.txt:md5,7bec3e1b9f4819404bf354ebd17ec2a9",
+                "mapping_quality_across_reference.txt:md5,6e8f8d88ec82fbaf3e8c4886a7c7f7ae",
+                "mapping_quality_histogram.txt:md5,94440fea2edec0799d504e2ac1ecc09a"
+            ],
+            [
+                "3pGtoA_freq.txt",
+                "5pCtoT_freq.txt",
+                "Fragmisincorporation_plot.pdf",
+                "Length_plot.pdf",
+                "Runtime_log.txt",
+                "dnacomp.txt",
+                "misincorporation.txt",
+                "3pGtoA_freq.txt",
+                "5pCtoT_freq.txt",
+                "Fragmisincorporation_plot.pdf",
+                "Length_plot.pdf",
+                "Runtime_log.txt",
+                "dnacomp.txt",
+                "misincorporation.txt",
+                "bgfooter.png",
+                "bgtop.png",
+                "comment-bright.png",
+                "comment-close.png",
+                "comment.png",
+                "down-pressed.png",
+                "down.png",
+                "file.png",
+                "minus.png",
+                "plus.png",
+                "qualimap_logo_small.png",
+                "up-pressed.png",
+                "up.png",
+                "genome_results.txt",
+                "genome_coverage_0to50_histogram.png",
+                "genome_coverage_across_reference.png",
+                "genome_coverage_histogram.png",
+                "genome_coverage_quotes.png",
+                "genome_gc_content_per_window.png",
+                "genome_homopolymer_indels.png",
+                "genome_mapping_quality_across_reference.png",
+                "genome_mapping_quality_histogram.png",
+                "genome_reads_clipping_profile.png",
+                "genome_reads_content_per_read_position.png",
+                "genome_uniq_read_starts_histogram.png",
+                "qualimapReport.html",
+                "mapped_reads_gc-content_distribution.txt",
+                "mapped_reads_nucleotide_content.txt",
+                "bgfooter.png",
+                "bgtop.png",
+                "comment-bright.png",
+                "comment-close.png",
+                "comment.png",
+                "down-pressed.png",
+                "down.png",
+                "file.png",
+                "minus.png",
+                "plus.png",
+                "qualimap_logo_small.png",
+                "up-pressed.png",
+                "up.png",
+                "genome_results.txt",
+                "genome_coverage_0to50_histogram.png",
+                "genome_coverage_across_reference.png",
+                "genome_coverage_histogram.png",
+                "genome_coverage_quotes.png",
+                "genome_gc_content_per_window.png",
+                "genome_homopolymer_indels.png",
+                "genome_mapping_quality_across_reference.png",
+                "genome_mapping_quality_histogram.png",
+                "genome_reads_clipping_profile.png",
+                "genome_reads_content_per_read_position.png",
+                "genome_uniq_read_starts_histogram.png",
+                "qualimapReport.html",
+                "mapped_reads_gc-content_distribution.txt",
+                "mapped_reads_nucleotide_content.txt",
+                "hs37d5_chr21-MT_sexdeterrmine.tsv"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "25.04.0"
+        },
+        "timestamp": "2025-05-09T12:09:31.904337"
+    }
+}
