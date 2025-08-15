@@ -654,8 +654,6 @@
                 "nuclear_contamination_mqc.json:md5,17b375d14aba284892a3ac889eceb25a",
                 "JK2067_JK2067_hs37d5_chr21-MT_percent_on_target_mqc.json:md5,d796c89b343f15329df91d5e79f5200c",
                 "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_percent_on_target_mqc.json:md5,67fc863363b85e952f1a6a06e79aa696",
-                "lgdistribution.txt:md5,b9d061b7f6eca7b55d16be7ae3b5c8e3",
-                "lgdistribution.txt:md5,c7de663fd9c20073ae89066af2828904",
                 "JK2067_JK2067_hs37d5_chr21-MT.c_curve.txt:md5,bfb7054f2a6723e8d29697f9a3107ef8",
                 "JK2067_JK2067_hs37d5_chr21-MT.command.log:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.c_curve.txt:md5,cf4743abdd355595d6ec1fb3f38e66e5",
@@ -704,6 +702,7 @@
                 "Length_plot.pdf",
                 "Runtime_log.txt",
                 "dnacomp.txt",
+                "lgdistribution.txt",
                 "misincorporation.txt",
                 "3pGtoA_freq.txt",
                 "5pCtoT_freq.txt",
@@ -711,6 +710,7 @@
                 "Length_plot.pdf",
                 "Runtime_log.txt",
                 "dnacomp.txt",
+                "lgdistribution.txt",
                 "misincorporation.txt",
                 "bgfooter.png",
                 "bgtop.png",
@@ -775,6 +775,6 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.6"
         },
-        "timestamp": "2025-08-15T10:45:17.839812"
+        "timestamp": "2025-08-15T11:27:48.403762"
     }
 }

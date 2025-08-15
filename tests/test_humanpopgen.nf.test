@@ -57,7 +57,7 @@ nextflow_pipeline {
                 '**/3pGtoA_freq.txt',
                 '**/5pCtoT_freq.txt',
                 '**/dnacomp.txt',
-                '**/Igdistribution',
+                '**/lgdistribution.txt',
                 '**/misincorporation.txt',
                 '**/*sexdeterrmine.tsv',
                 ]
