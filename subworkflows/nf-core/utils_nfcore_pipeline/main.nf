@@ -352,6 +352,8 @@ def completionSummary(monochrome_logs=true) {
     else {
         log.info("-${colors.purple}[${workflow.manifest.name}]${colors.red} Pipeline completed with errors${colors.reset}-")
     }
+    // https://en.wiktionary.org/wiki/jw.f_pw
+    log.info("𓂻 𓅱 𓆑 𓊪 𓅱")
 }
 
 //
