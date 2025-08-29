@@ -96,11 +96,17 @@ nextflow_pipeline {
             def stable_name_genotyping          = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.glf.gz'] )
 
             // Metagenomics
-            def stable_content_metagenomics    = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: ['**/*.biom', '**/*table.tsv']          , ignoreFile: null                 , include: ['**/*'] )
-            def stable_name_metagenomics       = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.biom', '**/*table.tsv'] )
+            def unstable_patterns_meta = [ // contain the creation date
+                '**/*.{biom,log,megan,rma6}', 
+                '**/*table.tsv',
+                '**/log.txt'
+            ]
+
+            def stable_content_metagenomics    = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: unstable_patterns_meta , ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_metagenomics       = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: unstable_patterns_meta )
 
             // MultiQC
-            def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: false         , ignore: null                    , ignoreFile: null                , include: ['*', '**/*'] )
+            def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['*', '**/*'] )
 
             ///////////////////////
             // DEFINE ASSERTIONS //
