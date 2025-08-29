@@ -97,7 +97,7 @@ nextflow_pipeline {
 
             // Metagenomics
             def unstable_patterns_meta = [ // contain the creation date
-                '**/*.{biom,log,megan,rma6}', 
+                '**/*.{biom,log,megan,rma6}',
                 '**/*table.tsv',
                 '**/log.txt'
             ]
@@ -127,7 +127,7 @@ nextflow_pipeline {
                 // NOTE: The snapshot section for mapping cannot be named 'mapping'. See https://github.com/askimed/nf-test/issues/279
                 { assert snapshot( stable_content_mapping            , stable_name_mapping*.name          ).match("mapping_output") },
                 { assert snapshot( stable_content_preprocessing      , stable_name_preprocessing*.name    ).match("preprocessing") },
-                // { assert snapshot( stable_content_readfiltering      , stable_name_readfiltering*.name    ).match("read_filtering") },
+                // { assert snapshot( stable_content_readfiltering   , stable_name_readfiltering*.name    ).match("read_filtering") },
                 { assert snapshot(                                     stable_name_genotyping*.name       ).match("genotyping") },
                 { assert snapshot( stable_content_metagenomics       , stable_name_metagenomics*.name     ).match("metagenomics") },
                 { assert snapshot( stable_name_multiqc*.name         ).match("multiqc") },
