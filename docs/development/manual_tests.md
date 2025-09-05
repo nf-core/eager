@@ -54,10 +54,12 @@ Tool Specific combinations
 - fastp
   - with/without complexity filtering ✅
 - AdapterRemoval
+
   - with/without skipqualitytim ✅
   - with/without skipntrimming ✅
 
 - Markduplicates
+
   - With FastP
     - SE&PE data ✅
     - SE&PE data + preprocessing_excludeunmerged ✅
@@ -69,6 +71,7 @@ Tool Specific combinations
     - PE_only + preprocessing_excludeunmerged ✅
 
 - Dedup
+
   - With FastP
     - SE&PE data ✅ (expected failure)
     - SE&PE data + preprocessing_excludeunmerged ✅ (expected failure)
@@ -79,17 +82,21 @@ Tool Specific combinations
     - PE_only + preprocessing_excludeunmerged ✅
 
 - Damage Manipulation
+
   - MapDamage2
+
     - mapdamage2 rescaling with default parameters
     - mapdamage2 rescaling with changed parameters
 
   - PMD filtering
+
     - with default parameters
     - with stricter threshold
     - with fasta masking
     - with fasta masking for 1 of 2 references
 
   - BAM trimming
+
     - with default parameters
     - different length by udg treatment
 

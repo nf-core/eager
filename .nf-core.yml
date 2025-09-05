@@ -1,5 +1,6 @@
 lint:
-  nextflow_config: false ## Until fix in https://github.com/nf-core/tools/pull/3213 is stable tools release
+  nextflow_config:
+    false ## Until fix in https://github.com/nf-core/tools/pull/3213 is stable tools release
     # - config_defaults:
     #     - params.contamination_estimation_angsd_hapmap
   schema_params: false ## Until fix in https://github.com/nf-core/tools/pull/3213 is stable tools release
