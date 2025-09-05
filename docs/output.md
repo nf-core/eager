@@ -168,7 +168,6 @@ The resulting FASTQ files will only be present in your results directory if you 
 <summary>Output files</summary>
 
 - `mapping/bwa{aln,mem}/`
-
   - `*.bam`: Sorted reads aligned against a reference genome in BAM format with no additional filtering.
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
   - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
