@@ -15,6 +15,8 @@
 
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23eager-4A154B?logo=slack)](https://nfcore.slack.com/channels/eager)
 
+![HiRSE Code Promo Badge](https://img.shields.io/badge/Promo-8db427?style=plastic&label=HiRSE&labelColor=005aa0&link=https%3A%2F%2Fgo.fzj.de%2FCodePromo)
+
 >[!IMPORTANT]  
 > nf-core/eager versions 2.* are only compatible with Nextflow versions up to 22.10.6!
 
