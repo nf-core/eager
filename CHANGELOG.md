@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.5.4] - 2025-09-05
+
+### `Added`
+
+### `Fixed`
+
+- Corrected the citation for the default values used in `bwaalnn` and `bwaalnk` stated in the documentation (♥ to @meret-haeusler reporting, fix by @jfy133).
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## [2.5.3] - 2025-03-18
 
 ### `Added`
