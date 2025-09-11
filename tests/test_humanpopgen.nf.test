@@ -6,7 +6,7 @@ nextflow_pipeline {
     tag "nfcore_eager"
     tag "test_humanpopgen"
 
-    test("test_humanmpopgen_profile") {
+    test("test_humanpopgen_profile") {
 
         when {
             params {
