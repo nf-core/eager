@@ -44,4 +44,3 @@ workflow PREPROCESSING {
     versions = ch_versions          // channel: [ versions.yml ]
     mqc  = ch_multiqc_files
 }
-
