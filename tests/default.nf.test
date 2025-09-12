@@ -4,9 +4,10 @@ nextflow_pipeline {
     script "main.nf"
     tag "pipeline"
     tag "nfcore_eager"
-    tag "test"
+    tag "test"      // Tag containing the name of the profile to test. Should match the profile name below
+    profile "test"  // The name of the profile used when testing
 
-    test("test_profile") {
+    test("Test `test` profile:") {
 
         when {
             params {
@@ -28,8 +29,8 @@ nextflow_pipeline {
             // If a directory is fully stable, you can drop `stable_name_*`
             // If a directory contains no BAMs, you can drop `bams_*`
 
-            // Generate with: nf-test test --tag test --profile docker,test --update-snapshot
-            // Test with:     nf-test test --tag test --profile docker,test
+            // Generate with: nf-test test --profile +docker --tag test --update-snapshot
+            // Test with:     nf-test test --profile +docker --tag test
             // NOTE: BAMs are always only stable in name, because:
             //   a) sharding breaks header since the shard that was first is named in the header (Fixed in https://github.com/nf-core/eager/pull/1112)
             //   b) the order of the reads in the BAMs is not stable (sorted, but reads that share a start position can be in any order)
@@ -55,6 +56,7 @@ nextflow_pipeline {
                 '**/DNA_composition_sample.txt',
                 '**/misincorporation.txt',
                 '**/genome_results.txt',
+                '**/*command.log',
                 ]
 
             // Check that no files are missing/added
