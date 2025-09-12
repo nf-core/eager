@@ -7,7 +7,7 @@ nextflow_pipeline {
     tag "test_humanpopgen"
     profile "test_humanpopgen"
 
-    test("test_humanpopgen_profile") {
+    test("Test `test_humanpopgen` profile:") {
 
         when {
             params {
