@@ -61,6 +61,7 @@ nextflow_pipeline {
                 '**/lgdistribution.txt',
                 '**/misincorporation.txt',
                 '**/*sexdeterrmine.tsv',
+                '**/*command.log',
                 ]
 
             // Check that no files are missing/added
