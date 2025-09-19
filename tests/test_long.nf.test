@@ -74,7 +74,7 @@ nextflow_pipeline {
             // Damage_manipulation
             def stable_content_damage_manipulation  = getAllFilesFromDir("$outputDir/damage_manipulation"   , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*csv']  )
             def stable_name_damage_manipulation     = getAllFilesFromDir("$outputDir/damage_manipulation"   , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
-            
+
             // Final_bams
             def stable_content_final_bams           = getAllFilesFromDir("$outputDir/final_bams"            , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
             def stable_name_final_bams              = getAllFilesFromDir("$outputDir/final_bams"            , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
