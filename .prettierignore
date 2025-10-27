@@ -12,3 +12,5 @@ testing*
 bin/
 .nf-test/
 ro-crate-metadata.json
+test/
+dev_docs.md

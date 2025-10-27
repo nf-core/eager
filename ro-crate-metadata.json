@@ -121,7 +121,11 @@
         },
         {
             "@id": "main.nf",
-            "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+            "@type": [
+                "File",
+                "SoftwareSourceCode",
+                "ComputationalWorkflow"
+            ],
             "creator": [
                 {
                     "@id": "https://orcid.org/0000-0002-6503-2180"
@@ -144,16 +148,25 @@
                 "pathogen-genomics",
                 "population-genetics"
             ],
-            "license": ["MIT"],
-            "name": ["nf-core/eager"],
+            "license": [
+                "MIT"
+            ],
+            "name": [
+                "nf-core/eager"
+            ],
             "programmingLanguage": {
                 "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
             },
             "sdPublisher": {
                 "@id": "https://nf-co.re/"
             },
-            "url": ["https://github.com/nf-core/eager", "https://nf-co.re/eager/dev/"],
-            "version": ["3.0.0dev"]
+            "url": [
+                "https://github.com/nf-core/eager",
+                "https://nf-co.re/eager/dev/"
+            ],
+            "version": [
+                "3.0.0dev"
+            ]
         },
         {
             "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow",

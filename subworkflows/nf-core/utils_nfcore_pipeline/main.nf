@@ -417,3 +417,14 @@ def imNotification(summary_params, hook_url) {
         log.warn(post.getErrorStream().getText())
     }
 }
+
+// Custom easter egg function
+def easterEgg(monochrome_logs) {
+    def colors = logColours(monochrome_logs) as Map
+    if (workflow.stats.ignoredCount == 0) {
+            if (workflow.success) {
+                // https://en.wiktionary.org/wiki/jw.f_pw
+                log.info("-${colors.green}𓂻 𓅱 𓆑 𓊪 𓅱${colors.reset}-")
+            }
+    }
+}
