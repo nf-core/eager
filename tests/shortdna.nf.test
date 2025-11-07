@@ -28,8 +28,8 @@ nextflow_pipeline {
             // If a directory is fully stable, you can drop `stable_name_*`
             // If a directory contains no BAMs, you can drop `bams_*`
 
-            // Generate with: nf-test test --tag test --profile docker,test --update-snapshot
-            // Test with:     nf-test test --tag test --profile docker,test
+            // Generate with: nf-test test --tag test_shortdna_profile --profile docker,test --update-snapshot
+            // Test with:     nf-test test --tag test_shortdna_profile --profile docker,test
             // NOTE: BAMs are always only stable in name, because:
             //   a) sharding breaks header since the shard that was first is named in the header (Fixed in https://github.com/nf-core/eager/pull/1112)
             //   b) the order of the reads in the BAMs is not stable (sorted, but reads that share a start position can be in any order)
