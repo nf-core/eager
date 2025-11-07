@@ -149,7 +149,6 @@ The resulting FASTQ files will only be present in your results directory if you 
 <summary>Output files</summary>
 
 - `preprocessing/`
-
   - `*.{log,html,json}`: Log files of the AdapterRemoval execution containing trimming, merging, and other read summary statistics. The three files contain the same information stored in different formats.
   - `*.merged.fastq.gz`: Final FASTQ file of paired-end data that have undergone quality trimming, and merging. May, or may not include unmerged reads (singletons), depending on your parameters. These are the final reads used downstream for paired-end data.
   - `*.fastp.fastq.gz`: Final FASTQ file of single-end data that have undergone quality trimming. These are the final reads used downstream for single-end data.
@@ -169,7 +168,6 @@ The resulting FASTQ files will only be present in your results directory if you 
 <summary>Output files</summary>
 
 - `mapping/bwa{aln,mem}/`
-
   - `*.bam`: Sorted reads aligned against a reference genome in BAM format with no additional filtering.
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
   - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
@@ -184,7 +182,6 @@ The resulting FASTQ files will only be present in your results directory if you 
 <summary>Output files</summary>
 
 - `mapping/bowtie2/`
-
   - `*.bam`: Sorted reads aligned against a reference genome in BAM format with no additional filtering.
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
   - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
@@ -199,7 +196,6 @@ The resulting FASTQ files will only be present in your results directory if you 
 <summary>Output files</summary>
 
 - `mapping/circularmapper/`
-
   - `*.bam`: Sorted reads aligned against an elongated reference genome in BAM format with no additional filtering.
   - `*.{bai,csi}`: Index file corresponding to a BAM file which is for faster downstream steps (e.g. SAMtools).
   - `*.flagstat`: Statistics of aligned reads from SAMtools `flagstat`.
@@ -214,7 +210,6 @@ The resulting FASTQ files will only be present in your results directory if you 
 <summary>Output files</summary>
 
 - `host_removal/`
-
   - `*.fq.gz`: FASTQ files containing only reads that did not map
     to the reference genome.
 
@@ -234,7 +229,6 @@ Alternatively you could use the resulting files for manual metagenomic screen ou
 <summary>Output files</summary>
 
 - `endorspy`
-
   - `*.json`: json file per sample containing all the calculated percent on target, clonality and percent duplicates
 
 </details>
@@ -302,7 +296,6 @@ Percent Duplicates (%)
 <summary>Output files</summary>
 
 - `bam_filtering/`
-
   - `*length.filtered.bam`: BAM file containing length-filtered mapped and unmapped reads.
   - `*.filtered.bam`: BAM file containing mapped quality filtered reads (and optionally length filtering and unmapped reads, if specified by the user with the corresponding parameters).
   - `*.{bai,csi}`: Corresponding index files of any generated BAM files.
@@ -332,7 +325,6 @@ You may also receive the files above if metagenomic screening is turned on.
 <summary>Output files</summary>
 
 - `metagenomics/complexity_filter/bbduk`
-
   - `*_complexity.fastq.gz`: FASTQ file containing the complexity filtered reads
   - `*.log`: LOG file containing filter stats
 
@@ -354,7 +346,6 @@ Using complexity-filtered fastq-files as input for metagenomic classifiers can r
 <summary>Output files</summary>
 
 - `metagenomics/complexity_filter/prinseq`
-
   - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
   - `*_complexity.log`: LOG file containing filter stats
 
@@ -490,7 +481,6 @@ The main files of interest are within the `pdf_candidate_profiles` directory. Th
 <summary>Output files</summary>
 
 - `deduplication/`
-
   - `*.dedupped.bam`: Unique reads aligned to a reference genome in BAM format.
   - `*.dedupped.bam.{bai,csi}`: Index file corresponding to the BAM file.
   - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
@@ -513,7 +503,6 @@ Deduplication is carried by two possible tools, as described below. However the 
 <summary>Output files</summary>
 
 - `mapping/`
-
   - `*.{c_curve,lc_extrap}.txt`: A two column text file with the first column representing sequencing depth and the second an estimate of unique reads.
 
 </details>
@@ -532,7 +521,6 @@ These curves will be displayed in the pipeline run's MultiQC report, however you
 <summary>Output files</summary>
 
 - `qualimap/`
-
   - `<sample_id>/`
     - `*.html`: in-depth report including percent coverage, depth coverage, GC content, etc. of mapped reads
     - `genome_results.txt`
@@ -559,7 +547,6 @@ You will receive output for each sample. This means you will statistics of dedup
 <summary>Output file</summary>
 
 - `mapstats/bedtools/`
-
   - `*.breadth.gz`: This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature.
   - `*.depth.gz`: This file will have the the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
 
@@ -581,7 +568,6 @@ There are three different options for manipulation of ancient DNA damage.
 <summary>Output files</summary>
 
 - `damage_manipulation/`
-
   - `*_rescaled.bam`: Reads with their base qualities rescaled according to the bayesian aDNA damage model, in BAM format.
   - `*_rescaled.bam.{bai,csi}`: Index file corresponding to the BAM file.
   - `results_*/Stats_out_MCMC_*{.pdf,.csv}`: CSV and PDF files containing information about the damage model used in rescaling.
@@ -603,7 +589,6 @@ Be advised that this process introduces reference bias in the resulting rescaled
 <summary>Output files</summary>
 
 - `damage_manipulation/`
-
   - `*_pmdfiltered.bam`: Reads aligned to a reference genome that pass the post-mortem-damage threshold, in BAM format.
   - `*_pmdfiltered.bam.{bai,csi}`: Index file corresponding to the BAM file.
   - `*_pmdfiltered.flagstat`: Statistics of aligned reads after from SAMtools `flagstat`, after filtering for post-mortem damage.
@@ -620,7 +605,6 @@ By default, all positions are assessed for damage, but it is possible to provide
 <summary>Output files</summary>
 
 - `damage_manipulation/`
-
   - `*{_pmdfiltered,}_trimmed.bam`: Reads whose ends have been trimmed to mitigate the effects of aDNA damage, in BAM format.
   - `*{_pmdfiltered,}_trimmed.bam.{bai,csi}`: Index file corresponding to the BAM file.
 
@@ -638,7 +622,6 @@ Within nf-core/eager, when BAM trimming is activated alongside PMD-filtering, tr
 <summary>Output files</summary>
 
 - `damage_estimation/damageprofiler/`: this contains sample specific directories containing raw statistics and damage plots from DamageProfiler.
-
   - `*.pdf`: can be used to visualise C to T miscoding lesions or read length distributions of your mapped reads. All raw statistics used for the PDF plots are contained in the `.txt` files.
 
 </details>
@@ -652,7 +635,6 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
 <summary>Output files</summary>
 
 - `damage_estimation/mapDamage2/`: this contains sample specific directories containing raw statistics and damage plots from mapDamage2.
-
   - `Fragmisincorporation_plot.pdf`: a pdf file that displays both fragmentation and misincorporation patterns.
   - `Length_plot.pdf`: a pdf file that displays length distribution of singleton reads per strand and cumulative frequencies of C->T at 5'-end and G->A at 3'-end are also displayed per strand.
   - `misincorporation.txt`: contains a table with occurrences for each type of mutations and relative positions from the reads ends.
@@ -674,7 +656,6 @@ is a tool which calculates a variety of standard 'aDNA' metrics from a BAM file.
 <summary>Output files</summary>
 
 - `contamination_estimation/angsd/`
-
   - `*.txt`: Text file containing the results of nuclear contamination estimation with ANGSD for each library.
   - `nuclear_contamination.txt`: Text file containing a summary table of contamination estimates for all libraries.
   - `nuclear_contamination_mqc.json`: JSON file containing a summary table of contamination estimates for all libraries.
@@ -707,7 +688,6 @@ When a bedfile of specific sites is provided, Sex.DetERRmine runs much faster an
 <summary>Output files</summary>
 
 - `genotyping/`
-
   - `*.geno`: Eigenstrat-formatted file containing the table of genotype calls.
   - `*.snp`: Eigenstrat-formatted file containing the SNP annotation of the genotype table.
   - `*.ind`: Eigenstrat-formatted file containing the individual annotation of the genotype table.
@@ -725,7 +705,6 @@ When using pileupCaller for genotyping, single-stranded and double-stranded libr
 <summary>Output files</summary>
 
 - `genotyping/`
-
   - `*.vcf.gz`: VCF file containing the genotype calls for each sample.
   - `*.vcf.gz.tbi`: Tabix index file for the VCF file.
   - `*.stats.txt`: Statistics of the VCF file from bcftools stats.
@@ -740,7 +719,6 @@ When using pileupCaller for genotyping, single-stranded and double-stranded libr
 <summary>Output files</summary>
 
 - `genotyping/`
-
   - `*.vcf.gz`: VCF file containing the genotype calls for each sample.
   - `*.vcf.gz.tbi`: Tabix index file for the VCF file.
   - `*.stats.txt`: Statistics of the VCF file from bcftools stats.
@@ -755,7 +733,6 @@ When using pileupCaller for genotyping, single-stranded and double-stranded libr
 <summary>Output files</summary>
 
 - `genotyping/`
-
   - `*.vcf.gz`: VCF file containing the genotype calls for each sample.
   - `*.vcf.gz.tbi`: Tabix index file for the VCF file.
   - `*.stats.txt`: Statistics of the VCF file from bcftools stats.
@@ -770,7 +747,6 @@ When using pileupCaller for genotyping, single-stranded and double-stranded libr
 <summary>Output files</summary>
 
 - `genotyping/`
-
   - `*.{glf,beagle}.gz`: Genotype likelihood file, containing likelihoods across all samples per reference.
 
 </details>
