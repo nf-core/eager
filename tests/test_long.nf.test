@@ -29,8 +29,8 @@ nextflow_pipeline {
             // If a directory is fully stable, you can drop `stable_name_*`
             // If a directory contains no BAMs, you can drop `bams_*`
 
-            // Generate with: nf-test test --profile +docker --tag test --update-snapshot
-            // Test with:     nf-test test --profile +docker --tag test
+            // Generate with: nf-test test --profile +docker --tag test_long --update-snapshot
+            // Test with:     nf-test test --profile +docker --tag test_long
             // NOTE: BAMs are always only stable in name, because:
             //   a) sharding breaks header since the shard that was first is named in the header (Fixed in https://github.com/nf-core/eager/pull/1112)
             //   b) the order of the reads in the BAMs is not stable (sorted, but reads that share a start position can be in any order)
@@ -57,7 +57,6 @@ nextflow_pipeline {
                 '**/misincorporation.txt',
                 '**/genome_results.txt',
                 '**/*command.log',
-                '**/*out_MCMC_*.csv',
                 ]
 
             // Check that no files are missing/added
@@ -70,21 +69,21 @@ nextflow_pipeline {
 
             // Damage_manipulation
             // def stable_content_damage_manipulation  = getAllFilesFromDir("$outputDir/damage_manipulation"   , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*csv']  )
-            def stable_content_damage_manipulation       = getAllFilesFromDir("$outputDir/damage_manipulation"        , includeDir: false         , ignore: unstable_patterns_auth , ignoreFile: null                 , include: ['*', '**/*'] )
-            def stable_name_damage_manipulation     = getAllFilesFromDir("$outputDir/damage_manipulation"   , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+            def stable_content_damage_manipulation  = getAllFilesFromDir("$outputDir/damage_manipulation"   , includeDir: false         , ignore: ['**/*out_MCMC_*.csv'], ignoreFile: null                 , include: ['*', '**/*'] )
+            def stable_name_damage_manipulation     = getAllFilesFromDir("$outputDir/damage_manipulation"   , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai,csv}'] )
 
             // Final_bams
             def stable_content_final_bams           = getAllFilesFromDir("$outputDir/final_bams"            , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
             def stable_name_final_bams              = getAllFilesFromDir("$outputDir/final_bams"            , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
 
             // // Mapping (incl. bam_input flasgstat)
-            // def stable_content_mapping              = getAllFilesFromDir("$outputDir/mapping"               , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
-            // def stable_name_mapping                 = getAllFilesFromDir("$outputDir/mapping"               , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+            def stable_content_mapping              = getAllFilesFromDir("$outputDir/mapping"               , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_mapping                 = getAllFilesFromDir("$outputDir/mapping"               , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
 
             // // Preprocessing
             // // NOTE: FastQC html appears stable, but I worry it might just include a day timestamp instead of a full timestamp. To keep the expression simpler I removed both from checksum testing.
-            // def stable_content_preprocessing        = getAllFilesFromDir("$outputDir/preprocessing"         , includeDir: false         , ignore: ['**/*.{zip,log,html}'], ignoreFile: null                 , include: ['**/*'] )
-            // def stable_name_preprocessing           = getAllFilesFromDir("$outputDir/preprocessing"         , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
+            def stable_content_preprocessing        = getAllFilesFromDir("$outputDir/preprocessing"         , includeDir: false         , ignore: ['**/*.{zip,log,html}'], ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_preprocessing           = getAllFilesFromDir("$outputDir/preprocessing"         , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
 
             // Genotyping
             def stable_content_genotyping           = getAllFilesFromDir("$outputDir/genotyping"            , includeDir: false         , ignore: ['**/*.{tbi,vcf.gz}']  , ignoreFile: null                 , include: ['**/*'] )
@@ -112,8 +111,8 @@ nextflow_pipeline {
                 { assert snapshot( stable_content_damage_manipulation   , stable_name_damage_manipulation*.name ).match("damage_manipulation") },
                 { assert snapshot( stable_content_final_bams            , stable_name_final_bams*.name          ).match("final_bams") },
                 // NOTE: The snapshot section for mapping cannot be named 'mapping'. See https://github.com/askimed/nf-test/issues/279
-                // { assert snapshot( stable_content_mapping               , stable_name_mapping*.name             ).match("mapping_output") },
-                //{ assert snapshot( stable_content_preprocessing         , stable_name_preprocessing*.name       ).match("preprocessing") },
+                { assert snapshot( stable_content_mapping               , stable_name_mapping*.name             ).match("mapping_output") },
+                { assert snapshot( stable_content_preprocessing         , stable_name_preprocessing*.name       ).match("preprocessing") },
                 { assert snapshot( stable_content_genotyping            , stable_name_genotyping*.name          ).match("genotyping") },
                 // Additional checks on the genotyping VCFs for content. Specifically the md5sums of the header FORMAT, INFO, FILTER, CONTIG lines, and sample names
                 { assert snapshot(
