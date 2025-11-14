@@ -7,7 +7,7 @@ nextflow_pipeline {
     tag "test_shortdna"
     profile "test_shortdna"
 
-    test("test_shortdna_profile") {
+    test("Test `test_shortdna` profile:") {
 
         when {
             params {
