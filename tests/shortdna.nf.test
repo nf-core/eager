@@ -65,6 +65,7 @@ nextflow_pipeline {
                 "**/genome_fraction_coverage.txt",
                 "**/mapping_quality_across_reference.txt",
                 "**/mapping_quality_histogram.txt",
+                '**/*command.log',
                 ]
 
             // Check that no files are missing/added
