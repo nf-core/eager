@@ -63,6 +63,10 @@ nextflow_pipeline {
             // Command legend:                                       Result directory to index      , includeDir: include dirs?, ignore: exclude patterns       , ignoreFile: exclude pattern list , include: include patterns
             def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , includeDir: false         , ignore: ['pipeline_info/*']    , ignoreFile: null                 , include: ['*', '**/*'] )
 
+            // Authentication
+            def stable_content_authentication   = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: unstable_patterns_auth , ignoreFile: null                 , include: ['*', '**/*'] )
+            def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: unstable_patterns_auth)
+
             // Deduplication
             def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
             def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
@@ -97,6 +101,7 @@ nextflow_pipeline {
                 // Checking changes to contents of each section
                 // NOTE: Keep the order of the sections in the alphanumeric order of the output directories.
                 //    Each section should first check stable_content, stable_name second (if applicable).
+                { assert snapshot( stable_content_authentication     ).match("authentication") },
                 { assert snapshot( stable_content_deduplication      , stable_name_deduplication*.name    ).match("deduplication") },
                 { assert snapshot( stable_content_final_bams         , stable_name_final_bams*.name       ).match("final_bams") },
                 // NOTE: The snapshot section for mapping cannot be named 'mapping'. See https://github.com/askimed/nf-test/issues/279

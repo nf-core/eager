@@ -80,7 +80,6 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.flagstat",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam.bai",
-                "BETA-multiqc.parquet",
                 "bcftools-stats-subtypes.txt",
                 "bcftools_stats_indel-lengths.txt",
                 "bcftools_stats_variant_depths.txt",
@@ -91,11 +90,13 @@
                 "fiveprime_misinc_plot.txt",
                 "length-distribution-Forward.txt",
                 "length-distribution-Reverse.txt",
+                "llms-full.txt",
                 "mapdamage-fiveprime_misinc_plot.txt",
                 "mapdamage-length-distribution-Forward.txt",
                 "mapdamage-length-distribution-Reverse.txt",
                 "mapdamage-threeprime_misinc_plot.txt",
                 "multiqc.log",
+                "multiqc.parquet",
                 "multiqc_bcftools_stats.txt",
                 "multiqc_citations.txt",
                 "multiqc_damageprofiler_metrics.txt",
@@ -189,7 +190,7 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-10-24T09:31:18.845531036"
+        "timestamp": "2025-11-14T09:32:18.690658462"
     },
     "genotyping_vcfs": {
         "content": [
@@ -253,7 +254,6 @@
     "multiqc": {
         "content": [
             [
-                "BETA-multiqc.parquet",
                 "bcftools-stats-subtypes.txt",
                 "bcftools_stats_indel-lengths.txt",
                 "bcftools_stats_variant_depths.txt",
@@ -264,11 +264,13 @@
                 "fiveprime_misinc_plot.txt",
                 "length-distribution-Forward.txt",
                 "length-distribution-Reverse.txt",
+                "llms-full.txt",
                 "mapdamage-fiveprime_misinc_plot.txt",
                 "mapdamage-length-distribution-Forward.txt",
                 "mapdamage-length-distribution-Reverse.txt",
                 "mapdamage-threeprime_misinc_plot.txt",
                 "multiqc.log",
+                "multiqc.parquet",
                 "multiqc_bcftools_stats.txt",
                 "multiqc_citations.txt",
                 "multiqc_damageprofiler_metrics.txt",
@@ -362,7 +364,7 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-10-24T09:31:19.164190166"
+        "timestamp": "2025-11-14T09:32:19.045203027"
     },
     "mapping_output": {
         "content": [
@@ -379,5 +381,40 @@
             "nextflow": "25.04.6"
         },
         "timestamp": "2025-10-24T09:31:18.940549002"
+    },
+    "authentication": {
+        "content": [
+            [
+                "3pGtoA_freq.txt:md5,f66d3c680c5c93587f4a7edfb310c75f",
+                "5pCtoT_freq.txt:md5,db2d50666bd31a4295614ec65aaa1359",
+                "dmgprof.json:md5,3bf9e6252f48aba08627957f5c4834cf",
+                "editDistance.txt:md5,7c00cd7cc4bd87c2da4debaa2704a66a",
+                "lgdistribution.txt:md5,835cb5b6dec7fa901091f915e7ca51a2",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_percent_on_target_mqc.json:md5,1ba4cc8117b76f89ba9415f2b800ef1f",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.c_curve.txt:md5,a303d107a83477f3b9535d771a1ca82a",
+                "agogo.css:md5,bd757b1a7ce6fdc0288ba148680f4583",
+                "ajax-loader.gif:md5,ae6667053ad118020b8e68ccf307b519",
+                "basic.css:md5,25b2823342c0604924a2870eeb4e7e94",
+                "doctools.js:md5,5ff571aa60e63f69c1890283e240ff8d",
+                "jquery.js:md5,10092eee563dec2dca82b77d2cf5a1ae",
+                "pygments.css:md5,d625a0adb949f181bd0d3f1432b0fa7f",
+                "report.css:md5,7a5f09eaf7c176f966f4e8854168b812",
+                "searchtools.js:md5,d550841adeedc8ed47c40ee607620937",
+                "underscore.js:md5,db5ba047a66617d4cd3e8c5099cc51db",
+                "websupport.js:md5,9e61e1e8a7433c56bd7e5a615affcf85",
+                "coverage_across_reference.txt:md5,f0a2dc6e523af57df603e403807139be",
+                "coverage_histogram.txt:md5,b8b99bcd4643edf2f09f8feb8c46e36d",
+                "duplication_rate_histogram.txt:md5,f342d718392629bd982d363e4d9ef27e",
+                "genome_fraction_coverage.txt:md5,271e60f18de911ebfa90b5be77bfa21d",
+                "homopolymer_indels.txt:md5,28817a010a023836fcf6aac4e1e3976f",
+                "mapping_quality_across_reference.txt:md5,b0670d4adfeeecb4825d7aedb0933145",
+                "mapping_quality_histogram.txt:md5,49a46418edd03774e110ae4010193e10"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.6"
+        },
+        "timestamp": "2025-11-14T10:11:39.459311849"
     }
 }
