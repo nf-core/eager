@@ -108,6 +108,26 @@
         },
         "timestamp": "2025-10-27T12:32:55.121018"
     },
+    "preprocessing": {
+        "content": [
+            [
+                
+            ],
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.html",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_1_fastqc.zip",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.html",
+                "JK2782_JK2782_TGGCCGATCAACGA_L1_2_fastqc.zip",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.html",
+                "JK2802_JK2802_AGAATAACCTACCA_L2_fastqc.zip"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.8"
+        },
+        "timestamp": "2025-11-14T15:08:42.801217"
+    },
     "genotyping": {
         "content": [
             [
@@ -128,25 +148,35 @@
     "damage_manipulation": {
         "content": [
             [
-                "Stats_out_MCMC_correct_prob.csv:md5,bcbd3115231c585ad5adea7d44572889",
-                "Stats_out_MCMC_iter.csv:md5,fec2756adcaf7b035cdcb41f76bfa33a",
-                "Stats_out_MCMC_iter_summ_stat.csv:md5,84e22197297a8ef233ce052eea0d139f",
-                "Stats_out_MCMC_correct_prob.csv:md5,2baa236c1536b8cd1d797693944be569",
-                "Stats_out_MCMC_iter.csv:md5,549be47324136e2db331434454897c9a",
-                "Stats_out_MCMC_iter_summ_stat.csv:md5,e7ae071d21d60e99ae54b3faaf16b6f2"
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_rescaled.bam:md5,d391ec8555f37645402bd5a0d9a342d3",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_rescaled.bam.bai:md5,ee6aa08aefedc416b57a2176f654f8f0",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_rescaled.bam:md5,5f1375bcd87d8365aed1710e5e4b7402",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_rescaled.bam.bai:md5,c340381bc6f3913a32d4b407ae2f4aee",
+                "Stats_out_MCMC_hist.pdf:md5,9f73df3d3f4492a455144a08086e80b9",
+                "Stats_out_MCMC_post_pred.pdf:md5,eb845a474c0961301c74ad711a951939",
+                "Stats_out_MCMC_trace.pdf:md5,290b78be9107159e8ceaa06538bb0a8f",
+                "Stats_out_MCMC_hist.pdf:md5,2a14b02c2a5ffa1b558f36adb4d8be35",
+                "Stats_out_MCMC_post_pred.pdf:md5,1845a9bdcf2288c1f2fc340413fc4441",
+                "Stats_out_MCMC_trace.pdf:md5,4a553c2c16c7aab8c6cde7d0f4f5d06a"
             ],
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_rescaled.bam",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_rescaled.bam.bai",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_rescaled.bam",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_rescaled.bam.bai"
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_rescaled.bam.bai",
+                "Stats_out_MCMC_correct_prob.csv",
+                "Stats_out_MCMC_iter.csv",
+                "Stats_out_MCMC_iter_summ_stat.csv",
+                "Stats_out_MCMC_correct_prob.csv",
+                "Stats_out_MCMC_iter.csv",
+                "Stats_out_MCMC_iter_summ_stat.csv"
             ]
         ],
         "meta": {
             "nf-test": "0.9.2",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2025-10-27T12:32:53.899645"
+        "timestamp": "2025-11-14T15:08:42.561348"
     },
     "final_bams": {
         "content": [
@@ -214,6 +244,28 @@
             "nextflow": "25.04.8"
         },
         "timestamp": "2025-10-27T12:32:55.413159"
+    },
+    "mapping_output": {
+        "content": [
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.flagstat:md5,9a10991f5670a52975a622a8b056e2bc",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.flagstat:md5,274942e6f459e1f85bffd0719ea24038",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.flagstat:md5,51816d63f34b4818ed6f1ec968f05fc0"
+            ],
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.bam.bai",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.bam",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.bam.bai"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.8"
+        },
+        "timestamp": "2025-11-14T15:08:42.742475"
     },
     "authentication": {
         "content": [
