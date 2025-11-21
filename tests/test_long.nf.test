@@ -86,8 +86,8 @@ nextflow_pipeline {
             def stable_name_preprocessing           = getAllFilesFromDir("$outputDir/preprocessing"         , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
 
             // Genotyping
-            def stable_content_genotyping           = getAllFilesFromDir("$outputDir/genotyping"            , includeDir: false         , ignore: ['**/*.{tbi,vcf.gz}']  , ignoreFile: null                 , include: ['**/*'] )
-            def stable_name_genotyping              = getAllFilesFromDir("$outputDir/genotyping"            , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.tbi'] )
+            def stable_content_genotyping           = getAllFilesFromDir("$outputDir/genotyping"            , includeDir: false         , ignore: ['**/*.{tbi,vcf.gz,stats.txt}']  , ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_genotyping              = getAllFilesFromDir("$outputDir/genotyping"            , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{tbi,stats.txt}'] )
             // We need to collect the vcfs separately to run more specific md5sum checks on the header (contnts are unstable due to same reasons as BAMs, explained above).
             def genotyping_vcfs                     = getAllFilesFromDir("$outputDir/genotyping"            , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.vcf.gz'] )
 
