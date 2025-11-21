@@ -131,10 +131,11 @@
     "genotyping": {
         "content": [
             [
-                "JK2782_Mammoth_MT_Krause.bcftools_stats.txt:md5,0209763fc0b335ce95da0ebc77a35085",
-                "JK2802_Mammoth_MT_Krause.bcftools_stats.txt:md5,b0692b1f9382add5d456397e320854f3"
+                
             ],
             [
+                "JK2782_Mammoth_MT_Krause.bcftools_stats.txt",
+                "JK2802_Mammoth_MT_Krause.bcftools_stats.txt",
                 "JK2782_Mammoth_MT_Krause.vcf.gz.tbi",
                 "JK2802_Mammoth_MT_Krause.vcf.gz.tbi"
             ]
@@ -143,21 +144,12 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2025-11-21T09:52:57.182743"
+        "timestamp": "2025-11-21T12:25:09.798359"
     },
     "damage_manipulation": {
         "content": [
             [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_rescaled.bam:md5,6d72046d47139efaebe0942f523f7c5c",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_rescaled.bam.bai:md5,2995466253f1dd5e3a98b4ac3bc5ecc8",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_rescaled.bam:md5,ea89b8755d5e43705f3582eabed381d2",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_rescaled.bam.bai:md5,b5d36ad74aad6dbff018936dacd653f3",
-                "Stats_out_MCMC_hist.pdf:md5,851d6989eabc80e932f56f5d7c231967",
-                "Stats_out_MCMC_post_pred.pdf:md5,28d30f5902e9e007de5625d3653a67af",
-                "Stats_out_MCMC_trace.pdf:md5,27eea4b15a8493f2f63d083154533851",
-                "Stats_out_MCMC_hist.pdf:md5,e0075e072ebe30b37d99fe73ff73a8c9",
-                "Stats_out_MCMC_post_pred.pdf:md5,9d95b808d833534f7cfcd42edcd597bb",
-                "Stats_out_MCMC_trace.pdf:md5,a02c59b1902b4a6b1ff36943a06e43fb"
+                
             ],
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_rescaled.bam",
@@ -176,7 +168,7 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2025-11-21T09:52:56.93062"
+        "timestamp": "2025-11-21T12:25:09.714361"
     },
     "final_bams": {
         "content": [
