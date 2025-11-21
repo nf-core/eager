@@ -32,6 +32,9 @@
                     "@id": "assets/"
                 },
                 {
+                    "@id": "bin/"
+                },
+                {
                     "@id": "conf/"
                 },
                 {
@@ -42,6 +45,9 @@
                 },
                 {
                     "@id": "modules/"
+                },
+                {
+                    "@id": "modules/local/"
                 },
                 {
                     "@id": "modules/nf-core/"
@@ -121,10 +127,20 @@
         },
         {
             "@id": "main.nf",
-            "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+            "@type": [
+                "File",
+                "SoftwareSourceCode",
+                "ComputationalWorkflow"
+            ],
             "creator": [
                 {
+                    "@id": "#jfy133@gmail.com"
+                },
+                {
                     "@id": "https://orcid.org/0000-0002-6503-2180"
+                },
+                {
+                    "@id": "https://orcid.org/0000-0003-4485-8570"
                 },
                 {
                     "@id": "#jfy133@gmail.com"
@@ -144,16 +160,36 @@
                 "pathogen-genomics",
                 "population-genetics"
             ],
-            "license": ["MIT"],
-            "name": ["nf-core/eager"],
+            "license": [
+                "MIT"
+            ],
+            "maintainer": [
+                {
+                    "@id": "#jfy133@gmail.com"
+                },
+                {
+                    "@id": "https://orcid.org/0000-0002-6503-2180"
+                },
+                {
+                    "@id": "https://orcid.org/0000-0003-4485-8570"
+                }
+            ],
+            "name": [
+                "nf-core/eager"
+            ],
             "programmingLanguage": {
                 "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
             },
             "sdPublisher": {
                 "@id": "https://nf-co.re/"
             },
-            "url": ["https://github.com/nf-core/eager", "https://nf-co.re/eager/dev/"],
-            "version": ["3.0.0dev"]
+            "url": [
+                "https://github.com/nf-core/eager",
+                "https://nf-co.re/eager/dev/"
+            ],
+            "version": [
+                "3.0.0dev"
+            ]
         },
         {
             "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow",
@@ -165,7 +201,7 @@
             "url": {
                 "@id": "https://www.nextflow.io/"
             },
-            "version": "!>=25.04.0"
+            "version": "!>=25.04.2"
         },
         {
             "@id": "#df15299b-225a-46fd-8de7-0041637a7a6b",
@@ -204,6 +240,11 @@
             "description": "Additional files"
         },
         {
+            "@id": "bin/",
+            "@type": "Dataset",
+            "description": "Scripts that must be callable from a pipeline process"
+        },
+        {
             "@id": "conf/",
             "@type": "Dataset",
             "description": "Configuration files"
@@ -222,6 +263,11 @@
             "@id": "modules/",
             "@type": "Dataset",
             "description": "Modules used by the pipeline"
+        },
+        {
+            "@id": "modules/local/",
+            "@type": "Dataset",
+            "description": "Pipeline-specific modules"
         },
         {
             "@id": "modules/nf-core/",
@@ -310,16 +356,22 @@
             "url": "https://nf-co.re/"
         },
         {
-            "@id": "https://orcid.org/0000-0002-6503-2180",
-            "@type": "Person",
-            "email": "alexander.peltzer@uni-tuebingen.de",
-            "name": "Alexander Peltzer"
-        },
-        {
             "@id": "#jfy133@gmail.com",
             "@type": "Person",
             "email": "jfy133@gmail.com",
             "name": "James Fellows Yates"
+        },
+        {
+            "@id": "https://orcid.org/0000-0002-6503-2180",
+            "@type": "Person",
+            "email": "apeltzer@users.noreply.github.com",
+            "name": "Alexander Peltzer"
+        },
+        {
+            "@id": "https://orcid.org/0000-0003-4485-8570",
+            "@type": "Person",
+            "email": "thisseass@gmail.com",
+            "name": "Thiseas C. Lamnidis"
         }
     ]
 }
