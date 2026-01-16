@@ -9,7 +9,9 @@ import pysam
 
 def get_args():
     """This function parses and return arguments passed in"""
-    parser = argparse.ArgumentParser(prog="bam_filter", description="Filter bam on fragment length")
+    parser = argparse.ArgumentParser(
+        prog="bam_filter", description="Filter bam on fragment length"
+    )
     parser.add_argument("bam", help="Bam aligment file")
     parser.add_argument(
         "-l",
