@@ -5,7 +5,7 @@ process GATK_UNIFIEDGENOTYPER {
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
         ? 'https://depot.galaxyproject.org/singularity/mulled-v2-5e3fd88c6b8af48bb5982d5721ca5e36da94029b:c496eeb8cc9067e0720d35121dbff7732a7ebdb0-0'
-        : 'biocontainers/mulled-v2-5e3fd88c6b8af48bb5982d5721ca5e36da94029b:c496eeb8cc9067e0720d35121dbff7732a7ebdb0-0'}"
+        : 'community.wave.seqera.io/library/gatk_samtools:ab75862f8f5eebdb'}"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -24,7 +24,7 @@ process GATK_UNIFIEDGENOTYPER {
     when:
     task.ext.when == null || task.ext.when
 
-    script:
+    script:s
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def contamination_file = contamination ? "-contaminationFile ${contamination}" : ""
