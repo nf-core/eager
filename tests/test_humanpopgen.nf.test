@@ -134,7 +134,10 @@ nextflow_pipeline {
                 { assert snapshot( stable_name_multiqc*.name ).match("multiqc") },
 
                 // Versions
-                { assert new File("$outputDir/pipeline_info/nf_core_eager_software_mqc_versions.yml").exists() },
+                { assert snapshot(
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_eager_software_mqc_versions.yml"),
+                ).match() },
 
             )
         }
