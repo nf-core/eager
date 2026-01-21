@@ -24,7 +24,7 @@ process GATK_UNIFIEDGENOTYPER {
     when:
     task.ext.when == null || task.ext.when
 
-    script:s
+    script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def contamination_file = contamination ? "-contaminationFile ${contamination}" : ""
