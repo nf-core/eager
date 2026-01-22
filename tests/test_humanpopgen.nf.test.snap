@@ -155,7 +155,6 @@
                 "JK2067_JK2067_hs37d5_chr21-MT.kraken2.report.txt",
                 "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.kraken2.report.txt",
                 "kraken2_taxpasta_table.tsv",
-                "BETA-multiqc.parquet",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.txt",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.txt",
                 "fastp-seq-content-n-plot_Read_1_After_filtering.txt",
@@ -176,7 +175,9 @@
                 "fastqc_sequence_length_distribution_plot.txt",
                 "fastqc_top_overrepresented_sequences_table.txt",
                 "kraken-top-n-plot.txt",
+                "llms-full.txt",
                 "multiqc.log",
+                "multiqc.parquet",
                 "multiqc_citations.txt",
                 "multiqc_data.json",
                 "multiqc_fastp.txt",
@@ -206,7 +207,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.pdf",
                 "fastp_filtered_reads_plot-cnt.pdf",
                 "fastp_filtered_reads_plot-pct.pdf",
-                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_overrepresented_sequences_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
@@ -240,7 +240,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.png",
                 "fastp_filtered_reads_plot-cnt.png",
                 "fastp_filtered_reads_plot-pct.png",
-                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_overrepresented_sequences_plot.png",
                 "fastqc_per_base_n_content_plot.png",
@@ -274,7 +273,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.svg",
                 "fastp_filtered_reads_plot-cnt.svg",
                 "fastp_filtered_reads_plot-pct.svg",
-                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_overrepresented_sequences_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
@@ -322,10 +320,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.04.7"
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.0"
         },
-        "timestamp": "2025-09-12T11:00:18.111975"
+        "timestamp": "2026-01-16T11:11:57.073263"
     },
     "read_filtering": {
         "content": [
@@ -342,6 +340,156 @@
             "nextflow": "24.10.6"
         },
         "timestamp": "2025-08-15T10:45:18.829647"
+    },
+    "Test `test_humanpopgen` profile:": {
+        "content": [
+            {
+                "ANGSD_CONTAMINATION": {
+                    "angsd": 0.939
+                },
+                "ANGSD_DOCOUNTS": {
+                    "angsd": 0.939
+                },
+                "BAMUTIL_TRIMBAM": {
+                    "bamutil": "1.0.15"
+                },
+                "BOWTIE2_ALIGN": {
+                    "bowtie2": "2.5.2",
+                    "samtools": 1.18,
+                    "pigz": 2.6
+                },
+                "BOWTIE2_BUILD": {
+                    "bowtie2": "2.5.2"
+                },
+                "BUILD_INTERVALS": {
+                    "gawk": "5.1.0"
+                },
+                "CALCULATE_MAPDAMAGE2": {
+                    "mapdamage2": "2.2.1"
+                },
+                "COLLECT_GENOTYPES": {
+                    "collect_genotypes.py": "1.0.0"
+                },
+                "EIGENSTRATDATABASETOOLS_EIGENSTRATSNPCOVERAGE": {
+                    "eigenstratdatabasetools": "1.1.0)"
+                },
+                "ENDORSPY": {
+                    "endorspy": 1.3
+                },
+                "FASTP_SINGLE": {
+                    "fastp": "0.23.4"
+                },
+                "FASTQC": {
+                    "fastqc": "0.12.1"
+                },
+                "FASTQC_PROCESSED": {
+                    "fastqc": "0.12.1"
+                },
+                "FILTER_BAM_FRAGMENT_LENGTH": {
+                    "python": "3.9.15",
+                    "pysam": "0.20.0"
+                },
+                "GUNZIP_FASTA": {
+                    "gunzip": 1.1
+                },
+                "KRAKEN2_KRAKEN2": {
+                    "kraken2": "2.1.2",
+                    "pigz": 2.6
+                },
+                "MTNUCRATIO": {
+                    "mtnucratio": "0.7 Please provide the (coordinate) sorted input SAM File, as well as the MT identifier. No further parameters are necessary! Make sure that your input file has an appropriate SAM/BAM file header, or the SAMRecords will be set to '*'!"
+                },
+                "PICARD_CREATESEQUENCEDICTIONARY": {
+                    "picard": "3.1.1"
+                },
+                "PICARD_MARKDUPLICATES": {
+                    "picard": "3.1.1"
+                },
+                "PRESEQ_CCURVE": {
+                    "preseq": "3.1.1"
+                },
+                "PRINT_CONTAMINATION_ANGSD": {
+                    "python": "3.8.3"
+                },
+                "QUALIMAP_BAMQC_NOBED": {
+                    "qualimap": 2.3
+                },
+                "SAMTOOLS_DEPTH_SEXDETERRMINE": {
+                    "samtools": 1.17
+                },
+                "SAMTOOLS_FAIDX": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_FASTQ_METAGENOMICS": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_FILTER_INDEX": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_FLAGSTAT_DEDUPPED": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_FLAGSTAT_FILTERED": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_FLAGSTAT_MERGED_LIBRARIES": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_INDEX": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_INDEX_BT2": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_INDEX_DAMAGE_TRIMMED": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_INDEX_DEDUPPED": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_INDEX_MERGED_LIBRARIES": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_LENGTH_FILTER_INDEX": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_MERGE_DEDUPPED": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_MERGE_LIBRARIES": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_MPILEUP_PILEUPCALLER": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_SORT_DEDUPPED": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_SORT_MERGED_LIBRARIES": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_VIEW": {
+                    "samtools": 1.18
+                },
+                "SAMTOOLS_VIEW_BAM_FILTERING": {
+                    "samtools": 1.18
+                },
+                "SEQUENCETOOLS_PILEUPCALLER": {
+                    "sequencetools": "1.5.2"
+                },
+                "SEXDETERRMINE": {
+                    "sexdeterrmine": "1.1.2"
+                },
+                "Workflow": {
+                    "nf-core/eager": "v3.0.0dev"
+                }
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.04.8"
+        },
+        "timestamp": "2025-11-07T10:43:56.555303"
     },
     "preprocessing": {
         "content": [
@@ -469,7 +617,6 @@
     "multiqc": {
         "content": [
             [
-                "BETA-multiqc.parquet",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.txt",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.txt",
                 "fastp-seq-content-n-plot_Read_1_After_filtering.txt",
@@ -490,7 +637,9 @@
                 "fastqc_sequence_length_distribution_plot.txt",
                 "fastqc_top_overrepresented_sequences_table.txt",
                 "kraken-top-n-plot.txt",
+                "llms-full.txt",
                 "multiqc.log",
+                "multiqc.parquet",
                 "multiqc_citations.txt",
                 "multiqc_data.json",
                 "multiqc_fastp.txt",
@@ -520,7 +669,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.pdf",
                 "fastp_filtered_reads_plot-cnt.pdf",
                 "fastp_filtered_reads_plot-pct.pdf",
-                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_overrepresented_sequences_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
@@ -554,7 +702,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.png",
                 "fastp_filtered_reads_plot-cnt.png",
                 "fastp_filtered_reads_plot-pct.png",
-                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_overrepresented_sequences_plot.png",
                 "fastqc_per_base_n_content_plot.png",
@@ -588,7 +735,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.svg",
                 "fastp_filtered_reads_plot-cnt.svg",
                 "fastp_filtered_reads_plot-pct.svg",
-                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_overrepresented_sequences_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
@@ -618,10 +764,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.04.7"
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.0"
         },
-        "timestamp": "2025-09-12T11:00:18.586234"
+        "timestamp": "2026-01-16T11:11:57.305175"
     },
     "mapping_output": {
         "content": [
