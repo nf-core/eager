@@ -1,10 +1,7 @@
 lint:
-  nextflow_config:
-    false ## Until fix in https://github.com/nf-core/tools/pull/3213 is stable tools release
-    # - config_defaults:
-    #     - params.contamination_estimation_angsd_hapmap
-  schema_params: false ## Until fix in https://github.com/nf-core/tools/pull/3213 is stable tools release
-nf_core_version: 3.3.2 ## NOTE: Reactivate nextflow_config and schema_params linting in next release of nf-core/tools
+  nextflow_config: false
+  schema_params: false
+nf_core_version: 3.5.1
 repository_type: pipeline
 template:
   author: The nf-core/eager community
