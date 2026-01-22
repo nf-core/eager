@@ -31,7 +31,7 @@ nextflow_pipeline {
 
             // Due to the very long runtime of the full test, the snapshots were generated on the EVA computational cluster.
             // Generate with: nf-test test --profile=+eva,archgen --tag test_full --update-snapshot
-            // Test with:     nf-test test --profile=+eva,archgen --tag test_full 
+            // Test with:     nf-test test --profile=+eva,archgen --tag test_full
             // NOTE: BAMs are always only stable in name, because:
             //   a) sharding breaks header since the shard that was first is named in the header (Fixed in https://github.com/nf-core/eager/pull/1112)
             //   b) the order of the reads in the BAMs is not stable (sorted, but reads that share a start position can be in any order)
