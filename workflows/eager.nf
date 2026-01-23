@@ -78,8 +78,8 @@ workflow EAGER {
 
     log.info("Schaffa, Schaffa, Genome Baua!")
 
-    ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
+    ch_versions = channel.empty()
+    ch_multiqc_files = channel.empty()
 
     // Reference
     fasta_fn = params.fasta ? file(params.fasta, checkIfExists: true) : params.fasta_sheet ? file(params.fasta_sheet, checkIfExists: true) : []
@@ -210,8 +210,8 @@ workflow EAGER {
         ch_flagstat_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.flagstat
 
     } else {
-        ch_bams_from_input_lanemerged           = Channel.empty()
-        ch_flagstat_bams_from_input_lanemerged  = Channel.empty()
+        ch_bams_from_input_lanemerged           = channel.empty()
+        ch_flagstat_bams_from_input_lanemerged  = channel.empty()
     }
 
 
@@ -255,7 +255,7 @@ workflow EAGER {
     }
     else {
         ch_dedupped_bams = ch_reads_for_deduplication
-        ch_dedupped_flagstat = Channel.empty()
+        ch_dedupped_flagstat = channel.empty()
     }
 
     //
@@ -345,15 +345,15 @@ workflow EAGER {
 
     if (params.run_metagenomics) {
 
-        ch_database = Channel.fromPath(params.metagenomics_profiling_database)
+        ch_database = channel.fromPath(params.metagenomics_profiling_database)
 
         // this is for MALT
-        ch_tax_list = Channel.empty()
-        ch_ncbi_dir = Channel.empty()
+        ch_tax_list = channel.empty()
+        ch_ncbi_dir = channel.empty()
 
         if (params.metagenomics_run_postprocessing && params.metagenomics_profiling_tool == 'malt') {
-            ch_tax_list = Channel.fromPath(params.metagenomics_maltextract_taxonlist, checkIfExists: true)
-            ch_ncbi_dir = Channel.fromPath(params.metagenomics_maltextract_ncbidir, checkIfExists: true)
+            ch_tax_list = channel.fromPath(params.metagenomics_maltextract_taxonlist, checkIfExists: true)
+            ch_ncbi_dir = channel.fromPath(params.metagenomics_maltextract_ncbidir, checkIfExists: true)
         }
 
         METAGENOMICS(ch_bamfiltered_for_metagenomics, ch_database, ch_tax_list, ch_ncbi_dir)
@@ -563,7 +563,25 @@ workflow EAGER {
     //
     // Collate and save software versions
     //
-    softwareVersionsToYAML(ch_versions)
+    def topic_versions = channel.topic("versions")
+        .distinct()
+        .branch { entry ->
+            versions_file: entry instanceof Path
+            versions_tuple: true
+        }
+
+    def topic_versions_string = topic_versions.versions_tuple
+        .map { process, tool, version ->
+            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+        }
+        .groupTuple(by:0)
+        .map { process, tool_versions ->
+            tool_versions.unique().sort()
+            "${process}:\n${tool_versions.join('\n')}"
+        }
+
+    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+        .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
             name: 'nf_core_' + 'eager_software_' + 'mqc_' + 'versions.yml',
@@ -576,31 +594,25 @@ workflow EAGER {
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config = Channel.fromPath(
-        "${projectDir}/assets/multiqc_config.yml",
-        checkIfExists: true
-    )
-    ch_multiqc_custom_config = params.multiqc_config
-        ? Channel.fromPath(params.multiqc_config, checkIfExists: true)
-        : Channel.empty()
-    ch_multiqc_logo = params.multiqc_logo
-        ? Channel.fromPath(params.multiqc_logo, checkIfExists: true)
-        : Channel.empty()
+    ch_multiqc_config        = channel.fromPath(
+        "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_custom_config = params.multiqc_config ?
+        channel.fromPath(params.multiqc_config, checkIfExists: true) :
+        channel.empty()
+    ch_multiqc_logo          = params.multiqc_logo ?
+        channel.fromPath(params.multiqc_logo, checkIfExists: true) :
+        channel.empty()
 
-    summary_params = paramsSummaryMap(
-        workflow,
-        parameters_schema: "nextflow_schema.json"
-    )
-    ch_workflow_summary = Channel.value(paramsSummaryMultiqc(summary_params))
+    summary_params      = paramsSummaryMap(
+        workflow, parameters_schema: "nextflow_schema.json")
+    ch_workflow_summary = channel.value(paramsSummaryMultiqc(summary_params))
     ch_multiqc_files = ch_multiqc_files.mix(
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')
-    )
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description
-        ? file(params.multiqc_methods_description, checkIfExists: true)
-        : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description = Channel.value(
-        methodsDescriptionText(ch_multiqc_custom_methods_description)
-    )
+        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
+        file(params.multiqc_methods_description, checkIfExists: true) :
+        file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    ch_methods_description                = channel.value(
+        methodsDescriptionText(ch_multiqc_custom_methods_description))
 
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     ch_multiqc_files = ch_multiqc_files.mix(
