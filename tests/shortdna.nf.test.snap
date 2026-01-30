@@ -351,7 +351,6 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.pdf",
                 "fastp_filtered_reads_plot-cnt.pdf",
                 "fastp_filtered_reads_plot-pct.pdf",
-                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
                 "fastqc_per_base_sequence_quality_plot.pdf",
@@ -396,7 +395,6 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.png",
                 "fastp_filtered_reads_plot-cnt.png",
                 "fastp_filtered_reads_plot-pct.png",
-                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_per_base_n_content_plot.png",
                 "fastqc_per_base_sequence_quality_plot.png",
@@ -441,7 +439,6 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.svg",
                 "fastp_filtered_reads_plot-cnt.svg",
                 "fastp_filtered_reads_plot-pct.svg",
-                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
                 "fastqc_per_base_sequence_quality_plot.svg",
@@ -494,9 +491,9 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.10.0"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2025-11-07T11:52:16.17488484"
+        "timestamp": "2026-01-30T11:02:22.578559171"
     },
     "preprocessing": {
         "content": [
@@ -753,7 +750,6 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.pdf",
                 "fastp_filtered_reads_plot-cnt.pdf",
                 "fastp_filtered_reads_plot-pct.pdf",
-                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
                 "fastqc_per_base_sequence_quality_plot.pdf",
@@ -798,7 +794,6 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.png",
                 "fastp_filtered_reads_plot-cnt.png",
                 "fastp_filtered_reads_plot-pct.png",
-                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_per_base_n_content_plot.png",
                 "fastqc_per_base_sequence_quality_plot.png",
@@ -843,7 +838,6 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.svg",
                 "fastp_filtered_reads_plot-cnt.svg",
                 "fastp_filtered_reads_plot-pct.svg",
-                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
                 "fastqc_per_base_sequence_quality_plot.svg",
@@ -878,9 +872,9 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.10.0"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2025-11-07T11:52:16.760651767"
+        "timestamp": "2026-01-30T11:02:22.875676292"
     },
     "mapping_output": {
         "content": [
@@ -910,9 +904,6 @@
                 "editDistance.txt:md5,7c00cd7cc4bd87c2da4debaa2704a66a",
                 "editDistance.txt:md5,833f352ebb7799478d67efc5d7c7d0b1",
                 "editDistance.txt:md5,e7090bc74ce941845b8ca12069ee3376",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.command.log:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.command.log:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.command.log:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "agogo.css:md5,bd757b1a7ce6fdc0288ba148680f4583",
                 "ajax-loader.gif:md5,ae6667053ad118020b8e68ccf307b519",
                 "basic.css:md5,25b2823342c0604924a2870eeb4e7e94",
@@ -995,8 +986,11 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_percent_on_target_mqc.json",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_percent_on_target_mqc.json",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.c_curve.txt",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.command.log",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.c_curve.txt",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.command.log",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.c_curve.txt",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.command.log",
                 "bgfooter.png",
                 "bgtop.png",
                 "comment-bright.png",
@@ -1067,8 +1061,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.10.0"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2025-11-07T11:52:16.289524627"
+        "timestamp": "2026-01-30T11:02:22.713704193"
     }
 }
