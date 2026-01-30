@@ -12,5 +12,7 @@ testing*
 bin/
 .nf-test/
 ro-crate-metadata.json
+modules/nf-core/
+subworkflows/nf-core/
 test/
 dev_docs.md

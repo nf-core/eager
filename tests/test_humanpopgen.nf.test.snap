@@ -207,7 +207,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.pdf",
                 "fastp_filtered_reads_plot-cnt.pdf",
                 "fastp_filtered_reads_plot-pct.pdf",
-                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_overrepresented_sequences_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
@@ -241,7 +240,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.png",
                 "fastp_filtered_reads_plot-cnt.png",
                 "fastp_filtered_reads_plot-pct.png",
-                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_overrepresented_sequences_plot.png",
                 "fastqc_per_base_n_content_plot.png",
@@ -275,7 +273,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.svg",
                 "fastp_filtered_reads_plot-cnt.svg",
                 "fastp_filtered_reads_plot-pct.svg",
-                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_overrepresented_sequences_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
@@ -324,9 +321,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "25.10.0"
         },
-        "timestamp": "2025-11-07T10:43:56.273034"
+        "timestamp": "2026-01-16T11:11:57.073263"
     },
     "read_filtering": {
         "content": [
@@ -672,7 +669,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.pdf",
                 "fastp_filtered_reads_plot-cnt.pdf",
                 "fastp_filtered_reads_plot-pct.pdf",
-                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_overrepresented_sequences_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
@@ -706,7 +702,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.png",
                 "fastp_filtered_reads_plot-cnt.png",
                 "fastp_filtered_reads_plot-pct.png",
-                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_overrepresented_sequences_plot.png",
                 "fastqc_per_base_n_content_plot.png",
@@ -740,7 +735,6 @@
                 "fastp-seq-quality-plot_Read_1_Before_filtering.svg",
                 "fastp_filtered_reads_plot-cnt.svg",
                 "fastp_filtered_reads_plot-pct.svg",
-                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_overrepresented_sequences_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
@@ -771,9 +765,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "25.10.0"
         },
-        "timestamp": "2025-11-07T10:43:56.448287"
+        "timestamp": "2026-01-16T11:11:57.305175"
     },
     "mapping_output": {
         "content": [

@@ -271,7 +271,6 @@
                 "bcftools_stats_vqc_Count_SNP.pdf",
                 "bcftools_stats_vqc_Count_Transitions.pdf",
                 "bcftools_stats_vqc_Count_Transversions.pdf",
-                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
                 "fastqc_per_base_sequence_quality_plot.pdf",
@@ -315,7 +314,6 @@
                 "bcftools_stats_vqc_Count_SNP.png",
                 "bcftools_stats_vqc_Count_Transitions.png",
                 "bcftools_stats_vqc_Count_Transversions.png",
-                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_per_base_n_content_plot.png",
                 "fastqc_per_base_sequence_quality_plot.png",
@@ -359,7 +357,6 @@
                 "bcftools_stats_vqc_Count_SNP.svg",
                 "bcftools_stats_vqc_Count_Transitions.svg",
                 "bcftools_stats_vqc_Count_Transversions.svg",
-                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
                 "fastqc_per_base_sequence_quality_plot.svg",
@@ -417,9 +414,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "25.10.0"
         },
-        "timestamp": "2025-11-07T10:22:21.984388"
+        "timestamp": "2026-01-16T10:41:27.319877"
     },
     "read_filtering": {
         "content": [
@@ -773,7 +770,6 @@
                 "bcftools_stats_vqc_Count_SNP.pdf",
                 "bcftools_stats_vqc_Count_Transitions.pdf",
                 "bcftools_stats_vqc_Count_Transversions.pdf",
-                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
                 "fastqc_per_base_sequence_quality_plot.pdf",
@@ -817,7 +813,6 @@
                 "bcftools_stats_vqc_Count_SNP.png",
                 "bcftools_stats_vqc_Count_Transitions.png",
                 "bcftools_stats_vqc_Count_Transversions.png",
-                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_per_base_n_content_plot.png",
                 "fastqc_per_base_sequence_quality_plot.png",
@@ -861,7 +856,6 @@
                 "bcftools_stats_vqc_Count_SNP.svg",
                 "bcftools_stats_vqc_Count_Transitions.svg",
                 "bcftools_stats_vqc_Count_Transversions.svg",
-                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
                 "fastqc_per_base_sequence_quality_plot.svg",
@@ -892,9 +886,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "25.10.0"
         },
-        "timestamp": "2025-11-07T10:22:22.307696"
+        "timestamp": "2026-01-16T10:41:27.690948"
     },
     "mapping_output": {
         "content": [
