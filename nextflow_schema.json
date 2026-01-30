@@ -1002,6 +1002,11 @@
                     "description": "Specify to skip the removal of PCR duplicates.",
                     "fa_icon": "fas fa-forward"
                 },
+                "deduplication_mergejobs": {
+                    "type": "boolean",
+                    "description": "Specify to run deduplicaiton without splitting bams by contig (default behavior).",
+                    "fa_icon": "fas fa-forward"
+                },
                 "deduplication_tool": {
                     "type": "string",
                     "default": "markduplicates",
