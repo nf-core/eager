@@ -86,20 +86,7 @@ for fn in Input_files:
             "Method2_ML_estimate": ml2,
             "Method2_ML_SE": err_ml2,
         }
-        print(
-            Ind,
-            nSNPs,
-            mom1,
-            err_mom1,
-            ml1,
-            err_ml1,
-            mom2,
-            err_mom2,
-            ml2,
-            err_ml2,
-            sep="\t",
-            file=output,
-        )
+        print(Ind, nSNPs, mom1, err_mom1, ml1, err_ml1, mom2, err_mom2, ml2, err_ml2, sep="\t", file=output)
 
 
 jsonOut = {
