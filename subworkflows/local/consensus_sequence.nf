@@ -24,7 +24,10 @@ workflow CONSENSUS_SEQUENCE {
         ch_genotypes_unzip = ch_genotypes_vcf.map { meta, vcfs, vcf_index ->
             [meta, vcfs]
         }
-        ch_genotypes_vcf_final = UG_BGZIP(ch_genotypes_unzip).output
+
+        UG_BGZIP(ch_genotypes_unzip)
+
+        ch_genotypes_vcf_final = UG_BGZIP.out.output
             .map {
                 addNewMetaFromAttributes(it, "reference", "reference", false)
             }
@@ -33,7 +36,10 @@ workflow CONSENSUS_SEQUENCE {
                 [metaref, vcfs]
             }
             .dump(tag: "consensus_genotyped_vcfs")
-        ch_additional_vcfs = REF_MVA_GUNZIP(ch_samplesheet_vcfs).gunzip
+
+        REF_MVA_GUNZIP(ch_samplesheet_vcfs)
+        
+        ch_additional_vcfs = REF_MVA_GUNZIP.out.gunzip
             .dump(tag: "additional_vcfs")
 
         ch_fasta_final = ch_fasta
