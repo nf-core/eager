@@ -33,7 +33,8 @@ workflow CONSENSUS_SEQUENCE {
                 [metaref, vcfs]
             }
             .dump(tag: "consensus_genotyped_vcfs")
-        ch_additional_vcfs = REF_MVA_GUNZIP(ch_samplesheet_vcfs)
+        ch_additional_vcfs = REF_MVA_GUNZIP(ch_samplesheet_vcfs).gunzip
+            .dump(tag: "additional_vcfs")
 
         ch_fasta_final = ch_fasta
             .map { meta, fasta, fai, dict, mapindex ->
@@ -53,40 +54,40 @@ workflow CONSENSUS_SEQUENCE {
             .join(ch_additional_vcfs)
             .join(ch_fasta_final)
             .dump(tag: "consensus_postjoin2")
-            .multiMap { meta, reference_gff, reference_gff_exclude, reference_snpeff_results, ug_vcfs, additional_vcf, fasta ->
-                vcfs: [meta, additional_vcf + ug_vcfs]
-                reference_gff: [meta, reference_gff ?: []]
-                reference_gff_exclude: [meta, reference_gff_exclude ?: []]
-                reference_snpeff_results: [meta, reference_snpeff_results ?: []]
-                reference_fasta: [meta, fasta]
-            }
-            .dump(tag: "consensus_sequence_final")
+//            .multiMap { meta, reference_gff, reference_gff_exclude, reference_snpeff_results, ug_vcfs, additional_vcf, fasta ->
+//                vcfs: [meta, additional_vcf + ug_vcfs]
+//                reference_gff: [meta, reference_gff ?: []]
+//                reference_gff_exclude: [meta, reference_gff_exclude ?: []]
+//                reference_snpeff_results: [meta, reference_snpeff_results ?: []]
+//                reference_fasta: [meta, fasta]
+//            }
+//            .dump(tag: "consensus_sequence_final")
 
-        MULTIVCFANALYZER(
-            ch_mva_input.vcfs,
-            ch_mva_input.reference_fasta,
-            ch_mva_input.reference_snpeff_results,
-            ch_mva_input.reference_gff,
-            write_allele_frequencies,
-            params.consensus_multivcfanalyzer_min_genotype_quality,
-            params.consensus_multivcfanalyzer_min_base_coverage,
-            params.consensus_multivcfanalyzer_allele_freq_hom,
-            params.consensus_multivcfanalyzer_allele_freq_het,
-            ch_mva_input.reference_gff_exclude,
-        )
+//        MULTIVCFANALYZER(
+//            ch_mva_input.vcfs,
+//            ch_mva_input.reference_fasta,
+//            ch_mva_input.reference_snpeff_results,
+//            ch_mva_input.reference_gff,
+//            write_allele_frequencies,
+//            params.consensus_multivcfanalyzer_min_genotype_quality,
+//            params.consensus_multivcfanalyzer_min_base_coverage,
+//            params.consensus_multivcfanalyzer_allele_freq_hom,
+//            params.consensus_multivcfanalyzer_allele_freq_het,
+//            ch_mva_input.reference_gff_exclude,
+//        )
 
-        ch_full_alignment_mva = MULTIVCFANALYZER.out.full_alignment
-        ch_info_mva = MULTIVCFANALYZER.out.info_txt
-        ch_snp_alignment_mva = MULTIVCFANALYZER.out.snp_alignment
-        ch_snp_genome_alignment_mva = MULTIVCFANALYZER.out.snp_genome_alignment
-        ch_snp_statistics_mva = MULTIVCFANALYZER.out.snpstatistics
-        ch_snp_table_mva = MULTIVCFANALYZER.out.snptable
-        ch_snp_table_snpeff_mva = MULTIVCFANALYZER.out.snptable_snpeff
-        ch_snp_table_uncertainty_mva = MULTIVCFANALYZER.out.snptable_uncertainty
-        ch_structure_genotypes_mva = MULTIVCFANALYZER.out.structure_genotypes
-        ch_structure_genotypes_nomissing_mva = MULTIVCFANALYZER.out.structure_genotypes_nomissing
-        ch_versions = ch_versions.mix(MULTIVCFANALYZER.out.versions)
-        ch_multiqc_files = ch_multiqc_files.mix(MULTIVCFANALYZER.out.json)
+//      ch_full_alignment_mva = MULTIVCFANALYZER.out.full_alignment
+//      ch_info_mva = MULTIVCFANALYZER.out.info_txt
+//      ch_snp_alignment_mva = MULTIVCFANALYZER.out.snp_alignment
+//      ch_snp_genome_alignment_mva = MULTIVCFANALYZER.out.snp_genome_alignment
+//      ch_snp_statistics_mva = MULTIVCFANALYZER.out.snpstatistics
+//      ch_snp_table_mva = MULTIVCFANALYZER.out.snptable
+//      ch_snp_table_snpeff_mva = MULTIVCFANALYZER.out.snptable_snpeff
+//      ch_snp_table_uncertainty_mva = MULTIVCFANALYZER.out.snptable_uncertainty
+//      ch_structure_genotypes_mva = MULTIVCFANALYZER.out.structure_genotypes
+//      ch_structure_genotypes_nomissing_mva = MULTIVCFANALYZER.out.structure_genotypes_nomissing
+//      ch_versions = ch_versions.mix(MULTIVCFANALYZER.out.versions)
+//      ch_multiqc_files = ch_multiqc_files.mix(MULTIVCFANALYZER.out.json)
     }
 
     emit:

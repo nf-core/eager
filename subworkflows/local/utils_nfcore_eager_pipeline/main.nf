@@ -93,6 +93,7 @@ workflow PIPELINE_INITIALISATION {
                                         reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
                                     [ meta - meta.subMap('pairment', 'bam_reference_id'), reads ]
                                 }
+                                .dump(tag:"fastq_samplesheet")
 
     ch_samplesheet_bams = ch_samplesheet_for_branch.bam
                             .map {
@@ -101,6 +102,7 @@ workflow PIPELINE_INITIALISATION {
                                     meta.id_index = meta.bam_reference_id
                                 [ meta - meta.subMap('pairment', 'bam_reference_id'), bam ]
                             }
+                            .dump(tag:"bams_samplesheet")
 
     ch_samplesheet_vcfs = ch_samplesheet_for_branch.vcf
                             .map {
@@ -109,6 +111,7 @@ workflow PIPELINE_INITIALISATION {
                                     meta.id_index = meta.vcf_reference_id
                                 [ meta - meta.subMap('pairment', 'vcf_reference_id'), vcf ]
                             }
+                            .dump(tag: "additional_vcfs_samplesheet")
 
 
     // Extra validation
