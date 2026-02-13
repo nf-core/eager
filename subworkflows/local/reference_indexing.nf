@@ -19,6 +19,7 @@ workflow REFERENCE_INDEXING {
     main:
     ch_versions = Channel.empty()
 
+    println "start indexing reference"
     // Warn user if they've given a reference sheet that already includes fai/dict/mapper index etc.
     if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && ( fasta_fai || fasta_dict || fasta_mapperindexdir )) log.warn("A TSV or CSV has been supplied to `--fasta_sheet` as well as e.g. `--fasta_fai`. --fasta_sheet CSV/TSV takes priority and --fasta_* parameters will be ignored.")
     if ( ( fasta.extension == 'csv' || fasta.extension == 'tsv' ) && ( params.mitochondrion_header || params.contamination_estimation_angsd_hapmap || params.damage_manipulation_pmdtools_reference_mask || params.damage_manipulation_pmdtools_reference_mask || params.snpcapture_bed || params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile || params.sexdeterrmine_bedfile || params.mapstats_bedtools_featurefile || params.genotyping_reference_ploidy || params.genotyping_gatk_dbsnp || params.fasta_circular_target || params.circularmapper_elongated_fasta || params.circularmapper_elongated_fai )) log.warn("A TSV or CSV has been supplied to `--fasta_sheet` as well as individual reference-specific input files, e.g. `--contamination_estimation_angsd_hapmap`. Input files specified in the --fasta_sheet CSV/TSV take priority and other input parameters will be ignored.")
@@ -37,6 +38,7 @@ workflow REFERENCE_INDEXING {
         ch_sexdeterrmine_bed     = REFERENCE_INDEXING_MULTI.out.sexdeterrmine_bed
         ch_bedtools_feature      = REFERENCE_INDEXING_MULTI.out.bedtools_feature
         ch_dbsnp                 = REFERENCE_INDEXING_MULTI.out.dbsnp
+        ch_mva                   = REFERENCE_INDEXING_MULTI.out.mva
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_MULTI.out.versions )
     } else {
         // If input FASTA and/or indicies supplied
@@ -52,6 +54,7 @@ workflow REFERENCE_INDEXING {
         ch_bedtools_feature      = REFERENCE_INDEXING_SINGLE.out.bedtools_feature
         ch_reference_for_mapping = REFERENCE_INDEXING_SINGLE.out.reference
         ch_dbsnp                 = REFERENCE_INDEXING_SINGLE.out.dbsnp
+        ch_mva                   = REFERENCE_INDEXING_SINGLE.out.mva
         ch_versions = ch_versions.mix( REFERENCE_INDEXING_SINGLE.out.versions )
     }
 
@@ -149,6 +152,7 @@ workflow REFERENCE_INDEXING {
         ch_elongated_indexed_reference = ch_reference_to_elongate
         ch_elongated_chr_list = Channel.empty()
     }
+    println "end indexing reference"
 
     emit:
     reference            = ch_reference_for_mapping       // [ meta, fasta, fai, dict, mapindex ]
@@ -163,6 +167,7 @@ workflow REFERENCE_INDEXING {
     sexdeterrmine_bed    = ch_sexdeterrmine_bed           // [ meta, sexdet_bed ]
     bedtools_feature     = ch_bedtools_feature            // [ meta, bedtools_feature ]
     dbsnp                = ch_dbsnp                       // [ meta, dbsnp ]
+    mva                  = ch_mva                         // [ meta, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
     versions             = ch_versions
 
 }

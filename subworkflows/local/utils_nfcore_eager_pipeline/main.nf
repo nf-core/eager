@@ -103,40 +103,53 @@ workflow PIPELINE_INITIALISATION {
     //
     ch_samplesheet = channel.fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
                                     .map {
-                                        meta, r1, r2, bam ->
+                                        meta, r1, r2, bam, vcf ->
                                             meta.single_end = meta.pairment == "single" ? true : false
                                             meta.id = meta.sample_id
-                                        [ meta, r1, r2, bam ]
+                                        [ meta, r1, r2, bam, vcf ]
                                     }
 
     ch_samplesheet_for_branch = ch_samplesheet
                                     .branch {
-                                        meta, r1, r2, bam ->
+                                        meta, r1, r2, bam, vcf ->
                                             bam: bam.toString().endsWith(".bam")
+                                            vcf: vcf.toString().endsWith(".vcf.gz")
                                             fastq: true
                                     }
 
     ch_samplesheet_fastqs = ch_samplesheet_for_branch.fastq
                                 .map {
-                                    meta, r1, r2, bam ->
+                                    meta, r1, r2, bam, vcf ->
                                         reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
                                     [ meta - meta.subMap('pairment', 'bam_reference_id'), reads ]
                                 }
+                                .dump(tag:"fastq_samplesheet")
 
     ch_samplesheet_bams = ch_samplesheet_for_branch.bam
                             .map {
-                                meta, r1, r2, bam ->
+                                meta, r1, r2, bam, vcf ->
                                     meta.reference = meta.bam_reference_id
                                     meta.id_index = meta.bam_reference_id
                                 [ meta - meta.subMap('pairment', 'bam_reference_id'), bam ]
                             }
+                            .dump(tag:"bams_samplesheet")
+
+    ch_samplesheet_vcfs = ch_samplesheet_for_branch.vcf
+                            .map {
+                                meta, r1, r2, bam, vcf ->
+                                    meta.reference = meta.vcf_reference_id
+                                    meta.id_index = meta.vcf_reference_id
+                                [ meta - meta.subMap('pairment', 'vcf_reference_id'), vcf ]
+                            }
+                            .dump(tag: "additional_vcfs_samplesheet")
+
 
     // Extra validation
     // - Only paired end specified when R2 provided
     // - No single-ended data allowed when using dedup
     ch_samplesheet_for_branch.fastq
         .map {
-            meta, r1, r2, bam ->
+            meta, r1, r2, bam, vcf ->
                 if ( meta.pairment == "single" && r2 != [] ) {
                     exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Reads 2 cannot be provided when sequencing pairment is set to 'single'."
                 }
@@ -146,23 +159,33 @@ workflow PIPELINE_INITIALISATION {
                 if ( meta.pairment == "single" && params.deduplication_tool == "dedup" ) {
                     exit 1, "[nf-core] ERROR: Invalid input/parameter combination. '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use 'markduplicates' for runs with both SE and PE data or separate SE and PE data into separate runs."
                 }
-            [ meta, r1, r2, bam ]
+            [ meta, r1, r2, bam, vcf ]
         }
 
     // - Only single-ended specified for BAM files
     ch_samplesheet_for_branch.bam
         .map {
-            meta, r1, r2, bam ->
+            meta, r1, r2, bam, vcf ->
                 if ( meta.pairment == "paired" && bam != [] ) {
                     exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sequencing pairment has to be 'single' when BAM files are provided."
                 }
-            [ meta, r1, r2, bam ]
+            [ meta, r1, r2, bam, vcf ]
+        }
+
+    // - Only single-ended specified for VCF files
+    ch_samplesheet_for_branch.vcf
+        .map {
+            meta, r1, r2, bam, vcf ->
+                if ( meta.pairment == "paired" && vcf != [] ) {
+                    exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sequencing pairment has to be 'single' when VCF files are provided."
+                }
+            [ meta, r1, r2, bam, vcf ]
         }
 
     // - No single- and double-stranded libraries with same sample ID
     ch_samplesheet_test = ch_samplesheet
                             .map {
-                                meta, r1, r2, bam ->
+                                meta, r1, r2, bam, vcf ->
                                 [ meta.subMap('sample_id'), meta.subMap('strandedness') ]
                             }
                             .groupTuple()
@@ -176,6 +199,7 @@ workflow PIPELINE_INITIALISATION {
     emit:
     samplesheet_fastqs = ch_samplesheet_fastqs
     samplesheet_bams   = ch_samplesheet_bams
+    samplesheet_vcfs   = ch_samplesheet_vcfs
     versions           = ch_versions
 }
 
