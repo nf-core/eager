@@ -111,8 +111,8 @@
             "r2": ["r1"],
             "bam": ["bam_reference_id"],
             "bam_reference_id": ["bam"],
-            "vcf" : ["vcf_reference_id"],
-            "vcf_reference_id" : ["vcf"]
+            "vcf": ["vcf_reference_id"],
+            "vcf_reference_id": ["vcf"]
         }
     },
     "allOf": [
