@@ -1,0 +1,154 @@
+nextflow_pipeline {
+
+    name "Test pipeline: NFCORE_EAGER"
+    script "main.nf"
+    tag "pipeline"
+    tag "nfcore_eager"
+    tag "test"      // Tag containing the name of the profile to test. Should match the profile name below
+    profile "test"  // The name of the profile used when testing
+
+    test("Test `test` profile:") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+
+            ///////////////////
+            // DOCUMENTATION //
+            ///////////////////
+
+            // The contents of each top level results directory should be tested with individually named snapshots.
+            // Within each snapshot, there should be two to three distinct variables, that contain the files to be tested.
+            //    - stable_name_<dir> is for files with variable md5sums (i.e. content) so only names will be compared
+            //    - stable_content_<dir> is for files with stable md5sums (i.e. content) so md5sums will be compared
+            //    - bams_<dir> is for BAM files, where the headerMD5 is checked for stability (since the content can be unstable)
+            // If a directory is fully stable, you can drop `stable_name_*`
+            // If a directory contains no BAMs, you can drop `bams_*`
+
+            // Generate with: nf-test test --profile +docker --tag test --update-snapshot
+            // Test with:     nf-test test --profile +docker --tag test
+            // NOTE: BAMs are always only stable in name, because:
+            //   a) sharding breaks header since the shard that was first is named in the header (Fixed in https://github.com/nf-core/eager/pull/1112)
+            //   b) the order of the reads in the BAMs is not stable (sorted, but reads that share a start position can be in any order)
+            //   point b) also causes BAIs to be unstable.
+            //   c) Merging of multiple BAMs with duplicate @RG / @PG tags can cause the header to be unstable (particularly in the case of shards/lanes)
+
+            //////////////////////
+            // DEFINE VARIABLES //
+            //////////////////////
+
+            // Define exclusion patterns for files with unstable contents
+            // NOTE: When a section needs more than a couple of small patterns, consider adding a variable to store the patterns here
+            //       This is particularly important if the patterns excluded in the stable content section should be included in the stable name section
+            def unstable_patterns_auth = [
+                '**/mapped_reads_gc-content_distribution.txt',
+                '**/mapped_reads_nucleotide_content.txt',
+                '**/genome_gc_content_per_window.png',
+                '**/*.{svg,pdf,html,png}',
+                '**/DamageProfiler.log',
+                '**/3p_freq_misincorporations.txt',
+                '**/5p_freq_misincorporations.txt',
+                '**/DNA_comp_genome.txt',
+                '**/DNA_composition_sample.txt',
+                '**/misincorporation.txt',
+                '**/genome_results.txt',
+                '**/*command.log',
+                ]
+
+            // Check that no files are missing/added
+            // Command legend:                                       Result directory to index      , includeDir: include dirs?, ignore: exclude patterns       , ignoreFile: exclude pattern list , include: include patterns
+            def stable_name_all                 = getAllFilesFromDir("$outputDir/"                  , includeDir: false         , ignore: ['pipeline_info/*']    , ignoreFile: null                 , include: ['*', '**/*'] )
+
+            // Authentication
+            def stable_content_authentication   = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: unstable_patterns_auth , ignoreFile: null                 , include: ['*', '**/*'] )
+            def stable_name_authentication      = getAllFilesFromDir("$outputDir/authentication"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: unstable_patterns_auth)
+
+            // Deduplication
+            def stable_content_deduplication    = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_deduplication       = getAllFilesFromDir("$outputDir/deduplication"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+
+            // Final_bams
+            def stable_content_final_bams       = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_final_bams          = getAllFilesFromDir("$outputDir/final_bams"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+
+            // Mapping (incl. bam_input flasgstat)
+            def stable_content_mapping          = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_mapping             = getAllFilesFromDir("$outputDir/mapping"           , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+
+            // Preprocessing
+            // NOTE: FastQC html appears stable, but I worry it might just include a day timestamp instead of a full timestamp. To keep the expression simpler I removed both from checksum testing.
+            def stable_content_preprocessing    = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: ['**/*.{zip,log,html}'], ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_preprocessing       = getAllFilesFromDir("$outputDir/preprocessing"     , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{zip,log,html}'] )
+
+            // Read filtering
+            def stable_content_readfiltering    = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.flagstat']  )
+            def stable_name_readfiltering       = getAllFilesFromDir("$outputDir/read_filtering"    , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
+
+            // Genotyping
+            def stable_content_genotyping       = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: ['**/*.{tbi,vcf.gz}']  , ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_genotyping          = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.tbi'] )
+            // We need to collect the vcfs separately to run more specific md5sum checks on the header (contnts are unstable due to same reasons as BAMs, explained above).
+            def genotyping_vcfs                 = getAllFilesFromDir("$outputDir/genotyping"        , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.vcf.gz'] )
+
+            // Metagenomics
+            def stable_content_metagenomics    = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: ['**/*.biom', '**/*table.tsv']          , ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_metagenomics       = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.biom', '**/*table.tsv'] )
+
+            // MultiQC
+            def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: false         , ignore: null                    , ignoreFile: null                , include: ['*', '**/*'] )
+
+            ///////////////////////
+            // DEFINE ASSERTIONS //
+            ///////////////////////
+
+            assertAll(
+                { assert workflow.success },
+                // This checks that there are no missing or additional output files.
+                // Also a good starting point to look at all the files in the output folder than need to be checked in subsequent sections.
+                { assert snapshot( stable_name_all*.name             ).match("all_files") },
+
+                // Checking changes to contents of each section
+                // NOTE: Keep the order of the sections in the alphanumeric order of the output directories.
+                //    Each section should first check stable_content, stable_name second (if applicable).
+                { assert snapshot( stable_content_authentication     , stable_name_authentication*.name   ).match("authentication") },
+                { assert snapshot( stable_content_deduplication      , stable_name_deduplication*.name    ).match("deduplication") },
+                { assert snapshot( stable_content_final_bams         , stable_name_final_bams*.name       ).match("final_bams") },
+                // NOTE: The snapshot section for mapping cannot be named 'mapping'. See https://github.com/askimed/nf-test/issues/279
+                { assert snapshot( stable_content_mapping            , stable_name_mapping*.name          ).match("mapping_output") },
+                { assert snapshot( stable_content_preprocessing      , stable_name_preprocessing*.name    ).match("preprocessing") },
+                { assert snapshot( stable_content_readfiltering      , stable_name_readfiltering*.name    ).match("read_filtering") },
+                { assert snapshot( stable_content_genotyping         , stable_name_genotyping*.name       ).match("genotyping") },
+                // Additional checks on the genotyping VCFs for content. Specifically the md5sums of the header FORMAT, INFO, FILTER, CONTIG lines, and sample names
+                { assert snapshot(
+                    genotyping_vcfs.collect {
+                        file ->
+                        def vcf_head = path(file.toString()).vcf.header
+                        // The header contains lines in the "OTHER" category, which contain a timestamp and/or work dir paths, so we need to filter those out, then calculate md5sums.
+                        def header_md5 = [
+                            vcf_head.getFormatHeaderLines().toString(),
+                            vcf_head.getInfoHeaderLines().toString(),
+                            vcf_head.getFilterLines().toString(),
+                            vcf_head.getIDHeaderLines().toString(),
+                            vcf_head.getGenotypeSamples().toString(),
+                            vcf_head.getContigLines().toString(),
+                        ].join(' ').md5()
+                        file.getName() + ":header_md5," + header_md5
+                    }
+                ).match("genotyping_vcfs")},
+                { assert snapshot( stable_content_metagenomics       , stable_name_metagenomics*.name     ).match("metagenomics") },
+                { assert snapshot( stable_name_multiqc*.name         ).match("multiqc") },
+
+                // Versions
+                { assert snapshot(
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_eager_software_mqc_versions.yml"),
+                ).match() },
+
+            )
+        }
+    }
+}

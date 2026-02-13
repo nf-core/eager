@@ -1,0 +1,27 @@
+Changes in component 'nf-core/utils_nfcore_pipeline'
+'subworkflows/nf-core/utils_nfcore_pipeline/meta.yml' is unchanged
+Changes in 'utils_nfcore_pipeline/main.nf':
+--- subworkflows/nf-core/utils_nfcore_pipeline/main.nf
++++ subworkflows/nf-core/utils_nfcore_pipeline/main.nf
+@@ -417,3 +417,14 @@
+         log.warn(post.getErrorStream().getText())
+     }
+ }
++
++// Custom easter egg function
++def easterEgg(monochrome_logs) {
++    def colors = logColours(monochrome_logs) as Map
++    if (workflow.stats.ignoredCount == 0) {
++            if (workflow.success) {
++                // https://en.wiktionary.org/wiki/jw.f_pw
++                log.info("-${colors.green}𓂻 𓅱 𓆑 𓊪 𓅱${colors.reset}-")
++            }
++    }
++}
+
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test.snap' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test.snap' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/nextflow.config' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test' is unchanged
+************************************************************
