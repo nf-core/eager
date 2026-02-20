@@ -19,12 +19,14 @@ workflow CONSENSUS_SEQUENCE {
     ch_multiqc_files = Channel.empty()
     if (params.consensus_tool == 'multivcfanalyzer') {
 
-        write_allele_frequencies = params.consensus_multivcfanalyzer_write_allele_frequencies ? "T" : "F"
+        // NOTE: I think this bit is unnecessary?
+        // write_allele_frequencies = params.consensus_multivcfanalyzer_write_allele_frequencies ? "T" : "F"
 
         ch_genotypes_unzip = ch_genotypes_vcf.map { meta, vcfs, vcf_index ->
             [meta, vcfs]
         }
 
+        // TODO: Remove unzipping and rezipping once MVCFA is updated to 0.88
         UG_BGZIP(ch_genotypes_unzip)
 
         ch_genotypes_vcf_final = UG_BGZIP.out.output
@@ -39,6 +41,7 @@ workflow CONSENSUS_SEQUENCE {
 
         REF_MVA_GUNZIP(ch_samplesheet_vcfs)
         
+        // NOTE: This might need an ifEmpty?
         ch_additional_vcfs = REF_MVA_GUNZIP.out.gunzip
             .dump(tag: "additional_vcfs")
 
@@ -60,21 +63,21 @@ workflow CONSENSUS_SEQUENCE {
             .join(ch_additional_vcfs)
             .join(ch_fasta_final)
             .dump(tag: "consensus_postjoin2")
-//            .multiMap { meta, reference_gff, reference_gff_exclude, reference_snpeff_results, ug_vcfs, additional_vcf, fasta ->
-//                vcfs: [meta, additional_vcf + ug_vcfs]
-//                reference_gff: [meta, reference_gff ?: []]
-//                reference_gff_exclude: [meta, reference_gff_exclude ?: []]
-//                reference_snpeff_results: [meta, reference_snpeff_results ?: []]
-//                reference_fasta: [meta, fasta]
-//            }
-//            .dump(tag: "consensus_sequence_final")
+            .multiMap({ meta, reference_gff, reference_gff_exclude, reference_snpeff_results, ug_vcfs, additional_vcf, fasta ->
+                vcfs: [meta, additional_vcf + ug_vcfs]
+                reference_gff: [meta, reference_gff ?: []]
+                reference_gff_exclude: [meta, reference_gff_exclude ?: []]
+                reference_snpeff_results: [meta, reference_snpeff_results ?: []]
+                reference_fasta: [meta, fasta]
+            })
+            // .dump(tag: "consensus_sequence_final")
 
 //        MULTIVCFANALYZER(
 //            ch_mva_input.vcfs,
 //            ch_mva_input.reference_fasta,
 //            ch_mva_input.reference_snpeff_results,
 //            ch_mva_input.reference_gff,
-//            write_allele_frequencies,
+//            params.consensus_multivcfanalyzer_write_allele_frequencies,
 //            params.consensus_multivcfanalyzer_min_genotype_quality,
 //            params.consensus_multivcfanalyzer_min_base_coverage,
 //            params.consensus_multivcfanalyzer_allele_freq_hom,
