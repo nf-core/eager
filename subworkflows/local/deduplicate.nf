@@ -30,12 +30,12 @@ workflow DEDUPLICATE {
     }
 
     if ( params.deduplication_mergejobs ) {
-        
+
         // No splitting of .bam files by contig, deduplicate all in one
         input_for_deduplication = ch_bam_bai
 
     } else {
-        
+
         // Create genomic regions file for splitting the bam before deduplication
         BUILD_INTERVALS( fasta_fai )
         ch_versions      = ch_versions.mix( BUILD_INTERVALS.out.versions.first() )
@@ -93,9 +93,9 @@ workflow DEDUPLICATE {
                 ch_markduplicates_input.fasta,
                 ch_markduplicates_input.fasta_fai
             )
-            ch_versions             = ch_versions.mix( PICARD_MARKDUPLICATES.out.versions.first() )
+            ch_versions     = ch_versions.mix( PICARD_MARKDUPLICATES.out.versions.first() )
 
-            ch_dedupped_bam  = PICARD_MARKDUPLICATES.out.bam
+            ch_dedupped_bam = PICARD_MARKDUPLICATES.out.bam
 
     } else if ( params.deduplication_tool == "dedup" ) {
         ch_dedup_input = input_for_deduplication
@@ -105,7 +105,7 @@ workflow DEDUPLICATE {
             }
 
         DEDUP( ch_dedup_input )
-        ch_versions            = ch_versions.mix( DEDUP.out.versions.first() )
+        ch_versions     = ch_versions.mix( DEDUP.out.versions.first() )
 
         ch_dedupped_bam = DEDUP.out.bam
     }
@@ -147,12 +147,11 @@ workflow DEDUPLICATE {
             ch_input_for_samtools_merge.fasta,
             ch_input_for_samtools_merge.fasta_fai
         )
-        ch_versions   = ch_versions.mix( SAMTOOLS_MERGE_DEDUPPED.out.versions )
+        ch_versions                         = ch_versions.mix( SAMTOOLS_MERGE_DEDUPPED.out.versions )
 
         ch_input_for_samtools_sort_dedupped = SAMTOOLS_MERGE_DEDUPPED.out.bam
 
     }
-
 
 
     // Sort the merged bam and index
@@ -162,7 +161,7 @@ workflow DEDUPLICATE {
 
     SAMTOOLS_INDEX_DEDUPPED ( ch_dedup_bam )
     ch_versions   = ch_versions.mix( SAMTOOLS_INDEX_DEDUPPED.out.versions )
-    ch_dedup_bai  =  params.fasta_largeref ? SAMTOOLS_INDEX_DEDUPPED.out.csi : SAMTOOLS_INDEX_DEDUPPED.out.bai
+    ch_dedup_bai  = params.fasta_largeref ? SAMTOOLS_INDEX_DEDUPPED.out.csi : SAMTOOLS_INDEX_DEDUPPED.out.bai
 
     // Finally run flagstat on the dedupped bam
     ch_input_for_samtools_flagstat = ch_dedup_bam.join( ch_dedup_bai )
@@ -170,6 +169,7 @@ workflow DEDUPLICATE {
     SAMTOOLS_FLAGSTAT_DEDUPPED(
         ch_input_for_samtools_flagstat
     )
+
     ch_versions       = ch_versions.mix( SAMTOOLS_FLAGSTAT_DEDUPPED.out.versions )
     ch_multiqc_files  = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_DEDUPPED.out.flagstat )
     ch_dedup_flagstat = SAMTOOLS_FLAGSTAT_DEDUPPED.out.flagstat
