@@ -237,7 +237,7 @@
                     },
                     "multivcfanalyzer": {
                         "branch": "master",
-                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "git_sha": "069d050de4ac1c4ba4042740f437b510447e4c15",
                         "installed_by": ["modules"]
                     },
                     "picard/createsequencedictionary": {
