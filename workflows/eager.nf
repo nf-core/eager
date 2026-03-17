@@ -569,7 +569,7 @@ workflow EAGER {
     if (params.run_consensus_sequence) {
         CONSENSUS_SEQUENCE(
             GENOTYPE.out.vcf,
-            ch_samplesheet_vcfs,
+            ch_samplesheet_vcfs.ifEmpty([["vcf_reference_id":""], []]),
             REFERENCE_INDEXING.out.mva,
             REFERENCE_INDEXING.out.reference,
         )
