@@ -34,6 +34,7 @@ workflow CONSENSUS_SEQUENCE {
                         addNewMetaFromAttributes(it, "vcf_reference_id", "reference", true)
                     }
             )
+            // Filter out lines with missing VCF. Serves to remove the ifEmpty input of ch_samplesheet_vcfs.
             .filter{ 
                 merge_meta, vcfs ->
                 vcfs != []
