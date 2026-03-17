@@ -1123,3 +1123,12 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ## Expect: BAM input shows up in FastQC -> mapping results.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ --convert_inputbam --skip_deduplication -resume -ansi-log false -dump-channels
 ```
+
+# MultiVCFAnalyzer
+
+Based on GATK_UG test, but with added consensus sequence.
+```bash
+## BAM input converted to FastQ and remapped.
+## Expect: BAM input shows up in FastQC -> mapping results.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels --run_consensus_sequence --consensus_tool 'multivcfanalyzer'
+```
