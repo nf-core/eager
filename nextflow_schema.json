@@ -1655,12 +1655,6 @@
                     "help_text": "Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call.",
                     "fa_icon": "fas fa-percent"
                 },
-                "consensus_multivcfanalyzer_additional_vcf_files": {
-                    "type": "string",
-                    "fa_icon": "fas fa-copy",
-                    "description": "Specify paths do additional VCF files",
-                    "help_text": "Specify paths to additional pre-made VCF files to be included in the SNP table generation. Use wildcard(s) for multiple files e.g. `/path/to/*.vcf.gz`. Optional."
-                },
                 "consensus_multivcfanalyzer_reference_gff_annotations": {
                     "type": "string",
                     "fa_icon": "fas fa-asterisk",
