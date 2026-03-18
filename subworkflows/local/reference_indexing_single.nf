@@ -25,7 +25,6 @@ workflow REFERENCE_INDEXING_SINGLE {
     def fasta_ext = grabUngzippedExtension(fasta)
     def clean_name = fasta.name.toString() - fasta_ext
 
-    println "start indexing single"
     // Detect if fasta is gzipped or not, unzip if necessary, and generate meta ID by sanitizing file
     if ( fasta.extension == 'gz' ) {
         ch_gz_ref = Channel.fromPath(fasta).map{[[], it]}
@@ -123,8 +122,6 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     dbsnp:                  [ meta, genotyping_gatk_dbsnp ]
                                     mva:                    [ meta, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
                                 }
-
-    println "End single indexing"
 
     emit:
     reference            = ch_ref_index_single.reference             // [ meta, fasta, fai, dict, mapindex ]
