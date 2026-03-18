@@ -20,7 +20,7 @@ workflow CONSENSUS_SEQUENCE {
     if (params.consensus_tool == 'multivcfanalyzer') {
         // Prepare VCF sets for MVCFA input.
         ch_mvcfa_vcf_input = ch_genotypes_vcf
-            .map { 
+            .map {
                 meta, vcfs, vcf_index ->
                 [meta, vcfs]
             }
@@ -30,12 +30,12 @@ workflow CONSENSUS_SEQUENCE {
             .mix(
                 // Mix in any additional VCFs
                 ch_samplesheet_vcfs
-                    .map { 
+                    .map {
                         addNewMetaFromAttributes(it, "vcf_reference_id", "reference", true)
                     }
             )
             // Filter out lines with missing VCF. Serves to remove the ifEmpty input of ch_samplesheet_vcfs.
-            .filter{ 
+            .filter{
                 merge_meta, vcfs ->
                 vcfs != []
             }
