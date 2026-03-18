@@ -1136,8 +1136,8 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 
 Based on test_microbial, but forcing GATK_UG genotyping. Multi Reference.
 ```bash
-## Gatk UG on raw reads
+## Gatk UG on raw reads. Use BWA because circularmapper runs into issues with BWA, due to difference in MT chrom length.
 ## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
 ## Expect: MVCFA runs.
-nextflow run main.nf -profile test_microbial,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels --run_consensus_sequence --consensus_tool 'multivcfanalyzer' 
+nextflow run main.nf -profile test_microbial,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels --run_consensus_sequence --consensus_tool 'multivcfanalyzer' --mapper 'bwaaln'
 ```
