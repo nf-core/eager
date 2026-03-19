@@ -20,13 +20,13 @@ process SAMTOOLS_MPILEUP {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def intervals = intervals ? "-l ${intervals}" : ""
+    def intervals_opt = intervals ? "-l ${intervals}" : ""
     """
     samtools mpileup \\
         --fasta-ref $fasta \\
         --output ${prefix}.mpileup \\
         $args \\
-        $intervals \\
+        $intervals_opt \\
         $input
     bgzip ${prefix}.mpileup
     cat <<-END_VERSIONS > versions.yml

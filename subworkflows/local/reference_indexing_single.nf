@@ -87,7 +87,7 @@ workflow REFERENCE_INDEXING_SINGLE {
                                 .join(ch_fasta_dict, failOnMismatch: true)
                                 .join(ch_fasta_mapperindexdir, failOnMismatch: true)
                                 .map{
-                                    meta, fasta, fai, dict, mapper_index ->
+                                    meta, fasta_, fai, dict, mapper_index ->
                                     def contamination_estimation_angsd_hapmap = params.contamination_estimation_angsd_hapmap != null ? file( params.contamination_estimation_angsd_hapmap, checkIfExists: true ) : ""
                                     def pmd_masked_fasta                      = params.damage_manipulation_pmdtools_masked_reference != null ? file(params.damage_manipulation_pmdtools_masked_reference, checkIfExists: true ) : ""
                                     def pmd_bed_for_masking                   = params.damage_manipulation_pmdtools_reference_mask != null ? file(params.damage_manipulation_pmdtools_reference_mask, checkIfExists: true ) : ""
@@ -100,13 +100,13 @@ workflow REFERENCE_INDEXING_SINGLE {
                                     def genotyping_gatk_dbsnp                 = params.genotyping_gatk_dbsnp != null ? file(params.genotyping_gatk_dbsnp, checkIfExists: true ) : ""
                                     def circularmapper_elongated_fasta        = params.fasta_circularmapper_elongatedfasta != null ? file( params.fasta_circularmapper_elongatedfasta, checkIfExists: true ) : ""
                                     def circularmapper_elongated_index        = params.fasta_circularmapper_elongatedindex != null ? file( params.fasta_circularmapper_elongatedindex, checkIfExists: true ) : ""
-                                    [ meta + [ ploidy: genotyping_reference_ploidy ], fasta, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index ]
+                                    [ meta + [ ploidy: genotyping_reference_ploidy ], fasta_, fai, dict, mapper_index, params.fasta_circular_target, params.mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index ]
                                 }
 
     ch_ref_index_single = ch_reference_for_mapping
                                 .multiMap{
-                                    meta, fasta, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index ->
-                                    reference:              [ meta, fasta, fai, dict, mapper_index ]
+                                    meta, fasta_, fai, dict, mapper_index, circular_target, mitochondrion_header, contamination_estimation_angsd_hapmap, pmd_masked_fasta, pmd_bed_for_masking, capture_bed, pileupcaller_bed, pileupcaller_snp, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, circularmapper_elongated_fasta, circularmapper_elongated_index ->
+                                    reference:              [ meta, fasta_, fai, dict, mapper_index ]
                                     circularmapper:         [ meta, circular_target, circularmapper_elongated_fasta, circularmapper_elongated_index ]
                                     mito_header:            [ meta, mitochondrion_header ]
                                     hapmap:                 [ meta, contamination_estimation_angsd_hapmap ]

@@ -32,10 +32,10 @@ workflow PREPROCESSING_FASTP {
     if ( !params.preprocessing_skippairmerging ) {
         ch_fastp_reads_prepped_pe = FASTP_PAIRED.out.reads_merged
                                         .map {
-                                            meta, reads ->
+                                            meta, reads_ ->
                                                 def meta_new = meta.clone()
                                                 meta_new['single_end'] = true
-                                                [ meta_new, [ reads ].flatten() ]
+                                                [ meta_new, [ reads_ ].flatten() ]
                                         }
 
         ch_fastp_reads_prepped = ch_fastp_reads_prepped_pe.mix( FASTP_SINGLE.out.reads )

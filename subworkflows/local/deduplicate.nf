@@ -71,10 +71,10 @@ workflow DEDUPLICATE {
                 ch_refs
             )
             .multiMap{
-                ignore_me, meta, bam, bai, meta2, fasta, fasta_fai ->
+                ignore_me, meta, bam, bai, meta2, fasta_, fasta_fai_ ->
                 bam: [ meta, bam ]
-                fasta: [ meta2, fasta ]
-                fasta_fai: [ meta2, fasta_fai ]
+                fasta: [ meta2, fasta_ ]
+                fasta_fai: [ meta2, fasta_fai_ ]
             }
 
             // Dedup each bam
@@ -103,7 +103,7 @@ workflow DEDUPLICATE {
     ch_input_for_samtools_merge = ch_dedupped_region_bam
         .map {
             meta, bam ->
-            meta2 = meta.clone().findAll{ it.key != 'genomic_region' }
+            def meta2 = meta.clone().findAll{ it.key != 'genomic_region' }
             [ meta2, bam ]
         }
         .groupTuple()
@@ -117,10 +117,10 @@ workflow DEDUPLICATE {
         )
         .multiMap{
             // bam here is a list of bams
-            ignore_me, meta, bam, meta2, fasta, fasta_fai ->
+            ignore_me, meta, bam, meta2, fasta_, fasta_fai_ ->
             bam:        [ meta, bam ]
-            fasta:      [ meta2, fasta ]
-            fasta_fai:  [ meta2, fasta_fai ]
+            fasta:      [ meta2, fasta_ ]
+            fasta_fai:  [ meta2, fasta_fai_ ]
         }
 
     // Merge the bams for each region into one bam

@@ -38,10 +38,10 @@ workflow MAP {
         sharded_reads = SEQKIT_SPLIT2.out.reads
             .transpose()
             .map {
-                meta, reads ->
-                    new_meta = meta.clone()
-                    new_meta.shard_number = reads.getName().replaceAll(/.*(part_\d+).(?:fastq|fq).gz/, '$1')
-                    [ new_meta, reads ]
+                meta, reads_ ->
+                    def new_meta = meta.clone()
+                    new_meta.shard_number = reads_.getName().replaceAll(/.*(part_\d+).(?:fastq|fq).gz/, '$1')
+                    [ new_meta, reads_ ]
             }
             .groupTuple()
 
@@ -52,7 +52,7 @@ workflow MAP {
     }
 
     if ( params.mapping_tool == 'bwaaln' ) {
-        ch_index_for_mapping = index.map{ meta, index, fasta -> [ meta, index ] }
+        ch_index_for_mapping = index.map{ meta, index_, fasta -> [ meta, index_ ] }
         ch_reads_for_mapping = ch_input_for_mapping
 
         FASTQ_ALIGN_BWAALN ( ch_reads_for_mapping, ch_index_for_mapping )
@@ -61,7 +61,7 @@ workflow MAP {
                                 .map{
                                     // create meta consistent with rest of workflow
                                     meta, bam ->
-                                    new_meta = meta + [ reference: meta.id_index ]
+                                    def new_meta = meta + [ reference: meta.id_index ]
                                 [ new_meta, bam ]
                                 }
 
@@ -71,10 +71,10 @@ workflow MAP {
         ch_input_for_mapping = ch_input_for_mapping
                             .combine( index )
                             .multiMap {
-                                meta, reads, meta2, index, fasta ->
-                                    new_meta = meta + [ reference: meta2.id ]
-                                    reads: [ new_meta, reads ]
-                                    index: [ meta2, index ]
+                                meta, reads_, meta2, index_, fasta ->
+                                    def new_meta = meta + [ reference: meta2.id ]
+                                    reads: [ new_meta, reads_ ]
+                                    index: [ meta2, index_ ]
                                     fasta: [ meta2, fasta ]
                             }
 
@@ -88,12 +88,12 @@ workflow MAP {
 
     } else if ( params.mapping_tool == 'bowtie2' ) {
         ch_input_for_mapping = ch_input_for_mapping
-                            .combine( index.map{ meta, index, fasta -> [ meta, index ] } )
+                            .combine( index.map{ meta, index_, fasta -> [ meta, index_ ] } )
                             .multiMap {
-                                meta, reads, meta2, index ->
-                                    new_meta = meta + [ reference: meta2.id ]
-                                    reads: [ new_meta, reads ]
-                                    index: [ meta2, index ]
+                                meta, reads_, meta2, index_ ->
+                                    def new_meta = meta + [ reference: meta2.id ]
+                                    reads: [ new_meta, reads_ ]
+                                    index: [ meta2, index_ ]
                             }
 
         BOWTIE2_ALIGN ( ch_input_for_mapping.reads, ch_input_for_mapping.index, false, true )
@@ -117,12 +117,12 @@ workflow MAP {
         ch_mapped_lane_bai      = CIRCULARMAPPER.out.bai // [ [ meta ], bai/csi ]
     } else if ( params.mapping_tool == 'mapad' ) {
         ch_input_for_mapping = ch_input_for_mapping
-                            .combine( index.map{ meta, index, fasta -> [ meta, index ] } )
+                            .combine( index.map{ meta, index_, fasta -> [ meta, index_ ] } )
                             .multiMap {
-                                meta, reads, meta2, index ->
-                                    new_meta = meta + [ reference: meta2.id ]
-                                    reads: [ new_meta, reads ]
-                                    index: [ meta2, index ]
+                                meta, reads_, meta2, index_ ->
+                                    def new_meta = meta + [ reference: meta2.id ]
+                                    reads: [ new_meta, reads_ ]
+                                    index: [ meta2, index_ ]
                                     strandedness: meta.strandedness=="double"
                             }
 
@@ -159,7 +159,7 @@ workflow MAP {
                                 .flatMap()
                                 .map {
                                     meta, bam ->
-                                    new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry', 'shard_number'] }
+                                    def new_meta = meta.clone().findAll{ it.key !in ['lane', 'colour_chemistry', 'shard_number'] }
                                     [ new_meta, bam ]
                                 }
                                 .groupTuple()
