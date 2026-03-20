@@ -1127,6 +1127,7 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ --convert_
 # MultiVCFAnalyzer
 
 Based on GATK_UG test, but with added consensus sequence.
+
 ```bash
 ## Gatk UG on raw reads
 ## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
@@ -1135,6 +1136,7 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ```
 
 Based on test_microbial, but forcing GATK_UG genotyping. Multi Reference.
+
 ```bash
 ## Gatk UG on raw reads. Use BWA because circularmapper runs into issues with BWA, due to difference in MT chrom length.
 ## Expect: One VCF + .tbi index per sample/reference combination. Also 1 bcftools_stats file per VCF. Additional IR/ subdirectory with 1 bam and 1 bai per sample/reference combination.
