@@ -158,6 +158,16 @@
                 "mapped_reads_nucleotide_content.txt",
                 "mapping_quality_across_reference.txt",
                 "mapping_quality_histogram.txt",
+                "multivcfanalyzer_Mammoth_MT_Krause_fullAlignment.fasta.gz",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpAlignment.fasta.gz",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpAlignmentIncludingRefGenome.fasta.gz",
+                "multivcfanalyzer_Mammoth_MT_Krause_info.txt",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpStatistics.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpTable.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpTableForSnpEff.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpTableWithUncertaintyCalls.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes_noMissingData-Columns.tsv",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam.bai",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam",
@@ -414,9 +424,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2026-01-16T10:41:27.319877"
+        "timestamp": "2026-03-26T14:55:24.666714"
     },
     "read_filtering": {
         "content": [
@@ -511,6 +521,10 @@
                 "METAPHLAN_METAPHLAN": {
                     "metaphlan": "4.0.6"
                 },
+                "MULTIVCFANALYZER": {
+                    "multivcfanalyzer": "0.89.0",
+                    "tabix": 1.23
+                },
                 "PICARD_CREATESEQUENCEDICTIONARY": {
                     "picard": "3.1.1"
                 },
@@ -584,9 +598,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2025-11-07T10:31:40.88452"
+        "timestamp": "2026-03-26T14:55:25.16583"
     },
     "preprocessing": {
         "content": [
