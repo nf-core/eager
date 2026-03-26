@@ -98,6 +98,9 @@ nextflow_pipeline {
             def stable_content_metagenomics    = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: ['**/*.biom', '**/*table.tsv']          , ignoreFile: null                 , include: ['**/*'] )
             def stable_name_metagenomics       = getAllFilesFromDir("$outputDir/metagenomics"       , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.biom', '**/*table.tsv'] )
 
+            def stable_content_consensus       = getAllFilesFromDir("$outputDir/consensus_sequence"          , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*'] )
+            // def stable_name_consensus       = getAllFilesFromDir("$outputDir/consensus_sequence"          , includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.biom', '**/*table.tsv'] )
+
             // MultiQC
             def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: false         , ignore: null                    , ignoreFile: null                , include: ['*', '**/*'] )
 
@@ -140,6 +143,7 @@ nextflow_pipeline {
                     }
                 ).match("genotyping_vcfs")},
                 { assert snapshot( stable_content_metagenomics       , stable_name_metagenomics*.name     ).match("metagenomics") },
+                { assert snapshot( stable_content_consensus          ).match("consensus_sequence") }, //, stable_name_consensus*.name     ).match("consensus") },
                 { assert snapshot( stable_name_multiqc*.name         ).match("multiqc") },
 
                 // Versions

@@ -428,34 +428,6 @@
         },
         "timestamp": "2026-03-26T14:55:24.666714"
     },
-    "read_filtering": {
-        "content": [
-            [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.flagstat:md5,39fd430cc77fc71f71d75a221c1b7880",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.flagstat:md5,071212e66306927c86551163f1c815c5",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.flagstat:md5,528dc9643f8ba062637f0d477f260622"
-            ],
-            [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam.bai",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam.bai",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam.bai",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai"
-            ]
-        ],
-        "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.6"
-        },
-        "timestamp": "2025-05-02T18:00:28.170536"
-    },
     "genotyping_vcfs": {
         "content": [
             [
@@ -627,29 +599,6 @@
         },
         "timestamp": "2025-05-02T18:00:28.106823"
     },
-    "metagenomics": {
-        "content": [
-            [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.bowtie2out.txt:md5,425fb9641154896ccadc44225cd91865",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_profile.txt:md5,e825e9fcfea16008c28de1b22603b431",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.bowtie2out.txt:md5,0387726acd3919b086534e2bac18b04f",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_profile.txt:md5,7f5afed9aee22450d9f72b6e84524665",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.bowtie2out.txt:md5,7b7855eb48245bcc1d42a12d95f72828",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_profile.txt:md5,a7d079740ec761ff2f5ec6b9e0c1e326"
-            ],
-            [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.biom",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.biom",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.biom",
-                "metaphlan_taxpasta_table.tsv"
-            ]
-        ],
-        "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.6"
-        },
-        "timestamp": "2025-05-08T17:35:54.004625"
-    },
     "genotyping": {
         "content": [
             [
@@ -686,6 +635,27 @@
         },
         "timestamp": "2025-05-02T18:00:27.935792"
     },
+    "consensus_sequence": {
+        "content": [
+            [
+                "multivcfanalyzer_Mammoth_MT_Krause_fullAlignment.fasta.gz:md5,252786f408af4ec39aa65cf4d82ae2e3",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpAlignment.fasta.gz:md5,84722bf9f9d6a9b45c9c458967b7ff1c",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpAlignmentIncludingRefGenome.fasta.gz:md5,dfd55ba523afb96b55240a755b1cc239",
+                "multivcfanalyzer_Mammoth_MT_Krause_info.txt:md5,ddc9cb3c96d1dedbef099a787a995778",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpStatistics.tsv:md5,ab8bb611fa9ce205429f078431f6a5c2",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpTable.tsv:md5,24a5cbf56991689a7f450edbd6bb4c36",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpTableForSnpEff.tsv:md5,45065e7284578c205be58cb8a135829a",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpTableWithUncertaintyCalls.tsv:md5,b2a7bed2149eda22c7398d5e9b2530cf",
+                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes.tsv:md5,a73557d04f321eaf8f8153f6b92a0b82",
+                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes_noMissingData-Columns.tsv:md5,331923a5e63343b545aaac529663036c"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.3"
+        },
+        "timestamp": "2026-03-26T15:37:31.582708"
+    },
     "deduplication": {
         "content": [
             [
@@ -707,6 +677,79 @@
             "nextflow": "24.10.6"
         },
         "timestamp": "2025-05-02T18:00:27.731757"
+    },
+    "mapping_output": {
+        "content": [
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.flagstat:md5,9a10991f5670a52975a622a8b056e2bc",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.flagstat:md5,4f01c378326b6cb2f9de15293d222064",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.flagstat:md5,879b79f9fcd14dc7ffe4a1044fadffd8"
+            ],
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.bam.bai",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.bam",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.bam.bai"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-05-02T18:00:28.037021"
+    },
+    "read_filtering": {
+        "content": [
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.flagstat:md5,39fd430cc77fc71f71d75a221c1b7880",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.flagstat:md5,071212e66306927c86551163f1c815c5",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.flagstat:md5,528dc9643f8ba062637f0d477f260622"
+            ],
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_filtered.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_lengthonly.filtered.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_filtered.bam.bai",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_lengthonly.filtered.bam.bai"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-05-02T18:00:28.170536"
+    },
+    "metagenomics": {
+        "content": [
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.bowtie2out.txt:md5,425fb9641154896ccadc44225cd91865",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_profile.txt:md5,e825e9fcfea16008c28de1b22603b431",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.bowtie2out.txt:md5,0387726acd3919b086534e2bac18b04f",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_profile.txt:md5,7f5afed9aee22450d9f72b6e84524665",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.bowtie2out.txt:md5,7b7855eb48245bcc1d42a12d95f72828",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_profile.txt:md5,a7d079740ec761ff2f5ec6b9e0c1e326"
+            ],
+            [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause.biom",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.biom",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause.biom",
+                "metaphlan_taxpasta_table.tsv"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.6"
+        },
+        "timestamp": "2025-05-08T17:35:54.004625"
     },
     "multiqc": {
         "content": [
@@ -903,28 +946,6 @@
             "nextflow": "25.10.0"
         },
         "timestamp": "2026-01-16T10:41:27.690948"
-    },
-    "mapping_output": {
-        "content": [
-            [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.flagstat:md5,9a10991f5670a52975a622a8b056e2bc",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.flagstat:md5,4f01c378326b6cb2f9de15293d222064",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.flagstat:md5,879b79f9fcd14dc7ffe4a1044fadffd8"
-            ],
-            [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam.bai",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.bam",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_sorted.bam.bai",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.bam",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_sorted.bam.bai"
-            ]
-        ],
-        "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.6"
-        },
-        "timestamp": "2025-05-02T18:00:28.037021"
     },
     "authentication": {
         "content": [
