@@ -638,23 +638,23 @@
     "consensus_sequence": {
         "content": [
             [
-                "multivcfanalyzer_Mammoth_MT_Krause_fullAlignment.fasta.gz:md5,252786f408af4ec39aa65cf4d82ae2e3",
-                "multivcfanalyzer_Mammoth_MT_Krause_snpAlignment.fasta.gz:md5,84722bf9f9d6a9b45c9c458967b7ff1c",
-                "multivcfanalyzer_Mammoth_MT_Krause_snpAlignmentIncludingRefGenome.fasta.gz:md5,dfd55ba523afb96b55240a755b1cc239",
-                "multivcfanalyzer_Mammoth_MT_Krause_info.txt:md5,ddc9cb3c96d1dedbef099a787a995778",
-                "multivcfanalyzer_Mammoth_MT_Krause_snpStatistics.tsv:md5,ab8bb611fa9ce205429f078431f6a5c2",
-                "multivcfanalyzer_Mammoth_MT_Krause_snpTable.tsv:md5,24a5cbf56991689a7f450edbd6bb4c36",
-                "multivcfanalyzer_Mammoth_MT_Krause_snpTableForSnpEff.tsv:md5,45065e7284578c205be58cb8a135829a",
-                "multivcfanalyzer_Mammoth_MT_Krause_snpTableWithUncertaintyCalls.tsv:md5,b2a7bed2149eda22c7398d5e9b2530cf",
-                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes.tsv:md5,a73557d04f321eaf8f8153f6b92a0b82",
-                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes_noMissingData-Columns.tsv:md5,331923a5e63343b545aaac529663036c"
+                "multivcfanalyzer_Mammoth_MT_Krause_fullAlignment.fasta.gz",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpAlignment.fasta.gz",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpAlignmentIncludingRefGenome.fasta.gz",
+                "multivcfanalyzer_Mammoth_MT_Krause_info.txt",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpStatistics.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpTable.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpTableForSnpEff.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpTableWithUncertaintyCalls.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes_noMissingData-Columns.tsv"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.3"
         },
-        "timestamp": "2026-03-26T15:37:31.582708"
+        "timestamp": "2026-03-27T15:04:37.119992"
     },
     "deduplication": {
         "content": [
