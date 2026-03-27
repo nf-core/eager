@@ -29,7 +29,7 @@ workflow DEDUPLICATE {
         addNewMetaFromAttributes( it, "id" , "reference" , false )
     }
 
-    if ( params.deduplication_mergejobs ) {
+    if ( params.deduplication_skipregionsplit ) {
 
         // No splitting of .bam files by contig, deduplicate all in one
         input_for_deduplication = ch_bam_bai
@@ -110,7 +110,7 @@ workflow DEDUPLICATE {
         ch_dedupped_bam = DEDUP.out.bam
     }
 
-    if ( params.deduplication_mergejobs ) {
+    if ( params.deduplication_skipregionsplit ) {
 
         // Bams were never split by region, so bypass of re-merging
         ch_input_for_samtools_sort_dedupped = ch_dedupped_bam
