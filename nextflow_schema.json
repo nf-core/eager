@@ -1612,12 +1612,12 @@
                     "type": "boolean",
                     "description": "Specify to create consensus sequence from VCF files",
                     "fa_icon": "fas fa-power-off",
-                    "help_text": "Specify to create consensus sequence from VCF files."
+                    "help_text": "Utilize reference genome and generated VCF files to create consensus sequence at set quality thresholds."
                 },
                 "consensus_tool": {
                     "type": "string",
                     "fa_icon": "fas fa-hammer",
-                    "description": "Speficy which tool to use to create consensus sequences: multivcfanalyzer, gencons",
+                    "description": "Specify which tool to use to create consensus sequences: multivcfanalyzer, gencons",
                     "enum": ["multivcfanalyzer", "gencons"],
                     "help_text": "Specify the tool to create the consensus sequence. Accepted values: multivcfanalyzer, gencons.\n\nNote: These tools currently only supports diploid GATK UnifiedGenotyper vcfs as input."
                 },

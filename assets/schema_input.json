@@ -79,7 +79,7 @@
                 "format": "file-path",
                 "pattern": "^\\S+\\.vcf.gz$",
                 "exists": true,
-                "errorMessage": "VCFs files cannot contain any spaces and must have extension '.vcf.gz' and be gzip zipped."
+                "errorMessage": "VCFs files cannot contain any spaces and must have extension '.vcf.gz' and be gzip compressed."
             },
             "vcf_reference_id": {
                 "type": "string",
