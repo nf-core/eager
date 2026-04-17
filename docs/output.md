@@ -752,3 +752,28 @@ When using pileupCaller for genotyping, single-stranded and double-stranded libr
 </details>
 
 [ANGSD](http://www.popgen.dk/angsd/index.php/ANGSD) is a software for analyzing next generation sequencing data. It can estimate genotype likelihoods and allele frequencies from next-generation sequencing data. The output provided is a bgzipped genotype likelihood file, containing likelihoods across all samples per reference. Users can specify the model used for genotype likelihood estimation, as well as the output format. For more information on the available options, see the [ANGSD](https://www.popgen.dk/angsd/index.php/Genotype_Likelihoods).
+
+### Consensus calling
+
+#### MultiVCFAnalyzer
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `consensus_sequence/multivcfanalyzer/`
+  - `data/`
+    - `*fullAlignment.fasta.gz`: FASTA file of all positions contained in the VCF files i.e. including ref calls
+    - `*snpAlignment.fasta.gz`: FASTA file of only SNP positions including only the calls of the samples. 
+    - `*snpAlignmentIncludingRefGenome.fasta.gz`: FASTA file of just SNP positions including reference genome calls.
+  - `stats/`
+    - `*info.txt`: File with information about the run
+    - `*snpStatistics.tsv`: File containing basic statistics about the SNP calls of each sample.
+    - `*snpTableForSnpEff.tsv`: Input file for SnpEff.
+    - `*snpTable.tsv`: SNP table of combined positions taken from each VCF file, in TSV format.
+    - `*snpTableWithUncertaintyCalls.tsv`:  SNP table of combined positions taken from each VCF file, in TSV format, but with lower case characters indicating uncertain calls
+    - `*structureGenotypes_noMissingData-Columns.tsv`: Alternate input file for STRUCTURE.
+    - `*structureGenotypes.tsv`: Input file for STRUCTURE.
+
+</details>
+
+[MultiVCFAnalyzer](https://github.com/alexherbig/MultiVCFAnalyzer) is a SNP filtering and SNP alignment generation tool, designed around (but not limited to) low coverage ancient DNA data. MultiVCFanalyzer reads multiple VCF files as produced by GATK UnifiedGenotyper, performs filtering based on a number of criteria, and provides the combined genotype calls in a number of formats that are suitable for follow-up analyses such as phylogenetic reconstruction, SNP effect analyses, population genetic analyses etc. Furthermore, the results are provided in the form of various tables for manual inspection and presentation/publication purposes.
