@@ -161,13 +161,13 @@
                 "multivcfanalyzer_Mammoth_MT_Krause_fullAlignment.fasta.gz",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpAlignment.fasta.gz",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpAlignmentIncludingRefGenome.fasta.gz",
-                "multivcfanalyzer_Mammoth_MT_Krause_info.txt",
-                "multivcfanalyzer_Mammoth_MT_Krause_snpStatistics.tsv",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpTable.tsv",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpTableForSnpEff.tsv",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpTableWithUncertaintyCalls.tsv",
                 "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes.tsv",
                 "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes_noMissingData-Columns.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_info.txt",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpStatistics.tsv",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_dedupped.bam.bai",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_dedupped.bam",
@@ -426,7 +426,7 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.3"
         },
-        "timestamp": "2026-03-26T14:55:24.666714"
+        "timestamp": "2026-04-17T12:44:23.866727"
     },
     "genotyping_vcfs": {
         "content": [
@@ -641,20 +641,20 @@
                 "multivcfanalyzer_Mammoth_MT_Krause_fullAlignment.fasta.gz",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpAlignment.fasta.gz",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpAlignmentIncludingRefGenome.fasta.gz",
-                "multivcfanalyzer_Mammoth_MT_Krause_info.txt",
-                "multivcfanalyzer_Mammoth_MT_Krause_snpStatistics.tsv",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpTable.tsv",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpTableForSnpEff.tsv",
                 "multivcfanalyzer_Mammoth_MT_Krause_snpTableWithUncertaintyCalls.tsv",
                 "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes.tsv",
-                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes_noMissingData-Columns.tsv"
+                "multivcfanalyzer_Mammoth_MT_Krause_structureGenotypes_noMissingData-Columns.tsv",
+                "multivcfanalyzer_Mammoth_MT_Krause_info.txt",
+                "multivcfanalyzer_Mammoth_MT_Krause_snpStatistics.tsv"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.3"
         },
-        "timestamp": "2026-03-27T15:04:37.119992"
+        "timestamp": "2026-04-17T12:44:24.365858"
     },
     "deduplication": {
         "content": [
