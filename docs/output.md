@@ -763,14 +763,14 @@ When using pileupCaller for genotyping, single-stranded and double-stranded libr
 - `consensus_sequence/multivcfanalyzer/`
   - `data/`
     - `*fullAlignment.fasta.gz`: FASTA file of all positions contained in the VCF files i.e. including ref calls
-    - `*snpAlignment.fasta.gz`: FASTA file of only SNP positions including only the calls of the samples. 
+    - `*snpAlignment.fasta.gz`: FASTA file of only SNP positions including only the calls of the samples.
     - `*snpAlignmentIncludingRefGenome.fasta.gz`: FASTA file of just SNP positions including reference genome calls.
   - `stats/`
     - `*info.txt`: File with information about the run
     - `*snpStatistics.tsv`: File containing basic statistics about the SNP calls of each sample.
     - `*snpTableForSnpEff.tsv`: Input file for SnpEff.
     - `*snpTable.tsv`: SNP table of combined positions taken from each VCF file, in TSV format.
-    - `*snpTableWithUncertaintyCalls.tsv`:  SNP table of combined positions taken from each VCF file, in TSV format, but with lower case characters indicating uncertain calls
+    - `*snpTableWithUncertaintyCalls.tsv`: SNP table of combined positions taken from each VCF file, in TSV format, but with lower case characters indicating uncertain calls
     - `*structureGenotypes_noMissingData-Columns.tsv`: Alternate input file for STRUCTURE.
     - `*structureGenotypes.tsv`: Input file for STRUCTURE.
 
