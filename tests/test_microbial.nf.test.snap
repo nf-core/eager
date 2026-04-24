@@ -636,9 +636,6 @@
                 "BEDTOOLS_COVERAGE_DEPTH": {
                     "bedtools": "2.31.1)"
                 },
-                "BUILD_INTERVALS": {
-                    "gawk": "5.1.0"
-                },
                 "BWA_ALN": {
                     "bwa": "0.7.18-r1243-dirty"
                 },
@@ -697,9 +694,6 @@
                 "SAMTOOLS_FLAGSTAT_MERGED_LIBRARIES": {
                     "samtools": 1.18
                 },
-                "SAMTOOLS_INDEX": {
-                    "samtools": 1.18
-                },
                 "SAMTOOLS_INDEX_DEDUPPED": {
                     "samtools": 1.18
                 },
@@ -712,9 +706,6 @@
                 "SAMTOOLS_LENGTH_FILTER_INDEX": {
                     "samtools": 1.18
                 },
-                "SAMTOOLS_MERGE_DEDUPPED": {
-                    "samtools": 1.18
-                },
                 "SAMTOOLS_MERGE_LIBRARIES": {
                     "samtools": 1.18
                 },
@@ -722,9 +713,6 @@
                     "samtools": 1.18
                 },
                 "SAMTOOLS_SORT_MERGED_LIBRARIES": {
-                    "samtools": 1.18
-                },
-                "SAMTOOLS_VIEW": {
                     "samtools": 1.18
                 },
                 "SAMTOOLS_VIEW_BAM_FILTERING": {
@@ -740,9 +728,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2025-11-07T11:08:47.368306"
+        "timestamp": "2026-02-13T09:52:11.74559929"
     },
     "authentication": {
         "content": [
