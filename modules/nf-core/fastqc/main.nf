@@ -41,7 +41,7 @@ process FASTQC {
     fastqc \\
         ${args} \\
         --threads ${task.cpus} \\
-        --memory ${fastqc_memory} \\
+        --memory ${fastqc_memory.toInteger()} \\
         ${renamed_files}
 
     cat <<-END_VERSIONS > versions.yml
