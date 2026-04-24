@@ -100,7 +100,7 @@ nextflow_pipeline {
 
             // Consensus sequence generation
             // All files have unstable content due to the inclusion of timestamps and/or inconsistent order of input files, causing different ordering in the outputs.
-            def stable_name_consensus           = getAllFilesFromDir("$outputDir/consensus_sequence", includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_consensus           = getAllFilesFromDir("$outputDir/consensus_sequence", includeDir: false         , ignore: null                   , ignoreFile: null                 , include: ['**/*.{fasta.gz,txt,tsv}'] )
 
             // MultiQC
             def stable_name_multiqc             = getAllFilesFromDir("$outputDir/multiqc"           , includeDir: false         , ignore: null                    , ignoreFile: null                , include: ['*', '**/*'] )
