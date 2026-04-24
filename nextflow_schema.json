@@ -299,6 +299,18 @@
                     "fa_icon": "far calendar",
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
+                },
+                "help": {
+                    "type": ["boolean", "string"],
+                    "description": "Display the help message."
+                },
+                "help_full": {
+                    "type": "boolean",
+                    "description": "Display the full detailed help message."
+                },
+                "show_hidden": {
+                    "type": "boolean",
+                    "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
                 }
             }
         },
@@ -989,6 +1001,12 @@
                     "type": "boolean",
                     "description": "Specify to skip the removal of PCR duplicates.",
                     "fa_icon": "fas fa-forward"
+                },
+                "deduplication_skipregionsplit": {
+                    "type": "boolean",
+                    "description": "Specify to run deduplicaiton without splitting bams by contig (default behavior).",
+                    "fa_icon": "fas fa-forward",
+                    "help_text": "Run deduplication steps bam-by-bam rather than contig-by-contig for each bam file. This reduces the total number of jobs submitted to a cluster, but increases the computational runtime. If you use a shared cluster with limited resources, running many low-resource jobs can slow down the overall runtime of eager due to scheduling constraints.\nAlso applicable for poor-quality reference genomes."
                 },
                 "deduplication_tool": {
                     "type": "string",
