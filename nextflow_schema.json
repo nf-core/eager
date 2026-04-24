@@ -1623,9 +1623,9 @@
                 "consensus_tool": {
                     "type": "string",
                     "fa_icon": "fas fa-hammer",
-                    "description": "Specify which tool to use to create consensus sequences: multivcfanalyzer, gencons",
-                    "enum": ["multivcfanalyzer", "gencons"],
-                    "help_text": "Specify the tool to create the consensus sequence. Accepted values: multivcfanalyzer, gencons.\n\nNote: These tools currently only supports diploid GATK UnifiedGenotyper vcfs as input."
+                    "description": "Specify which tool to use to create consensus sequences: multivcfanalyzer",
+                    "enum": ["multivcfanalyzer"],
+                    "help_text": "Specify the tool to create the consensus sequence. Accepted values: multivcfanalyzer.\n\nNote: These tools currently only supports diploid GATK UnifiedGenotyper vcfs as input."
                 },
                 "consensus_multivcfanalyzer_write_allele_frequencies": {
                     "type": "boolean",
@@ -1645,7 +1645,7 @@
                     "default": 5,
                     "fa_icon": "fas fa-sort-amount-up",
                     "description": "Specify the minum number of reads required for base calling",
-                    "help_text": "Specify the minimum number of reads covering a position for it to  be considered for base calling."
+                    "help_text": "Specify the minimum number of reads covering a position for it to be considered for base calling."
                 },
                 "consensus_multivcfanalyzer_allele_freq_hom": {
                     "type": "number",
@@ -1658,7 +1658,7 @@
                     "type": "number",
                     "default": 0.9,
                     "description": "Specify the minimum allele frequency required for a base to be called as 'heterozygous'",
-                    "help_text": "Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call.",
+                    "help_text": "Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Please note, heterozygous sites are only called within the range of `consensus_multivcfanalyzer_allele_freq_het` < allele frequency < `consensus_multivcfanalyzer_allele_freq_hom`, so proper adjustment of both these parameters is necessary. By default no heterozygous sites will be called.",
                     "fa_icon": "fas fa-percent"
                 },
                 "consensus_multivcfanalyzer_reference_gff_annotations": {
