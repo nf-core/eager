@@ -35,6 +35,7 @@ include { RUN_SEXDETERRMINE                                   } from '../subwork
 include { MERGE_LIBRARIES                                     } from '../subworkflows/local/merge_libraries'
 include { MERGE_LIBRARIES as MERGE_LIBRARIES_GENOTYPING       } from '../subworkflows/local/merge_libraries'
 include { GENOTYPE                                            } from '../subworkflows/local/genotype'
+include { CONSENSUS_SEQUENCE                                  } from '../subworkflows/local/consensus_sequence'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,6 +74,7 @@ workflow EAGER {
     take:
     ch_samplesheet_fastqs // channel: samplesheet FASTQ entries read in from --input
     ch_samplesheet_bams   // channel: samplesheet BAM entries read in from --input
+    ch_samplesheet_vcfs   // channel: samplesheet VCFs entries read in from --input
 
     main:
 
@@ -146,6 +148,8 @@ workflow EAGER {
     REFERENCE_INDEXING(fasta_fn, fasta_fai, fasta_dict, fasta_mapperindexdir)
     ch_versions = ch_versions.mix(REFERENCE_INDEXING.out.versions)
 
+    REFERENCE_INDEXING.out.reference.dump(tag: "indexing_reference")
+
     //
     // MODULE: Run FastQC or Falco
     //
@@ -205,8 +209,7 @@ workflow EAGER {
         // SUBWORKFLOW: Merging lanes for ch_bams_from_input
 
         MERGE_LANES_INPUTBAM(ch_bams_from_input)
-        ch_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.bam
-                                            .join(MERGE_LANES_INPUTBAM.out.bai)
+        ch_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.bam.join(MERGE_LANES_INPUTBAM.out.bai)
         ch_flagstat_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.flagstat
 
     } else {
@@ -222,8 +225,8 @@ workflow EAGER {
     if (params.run_bamfiltering || params.run_metagenomics) {
 
         ch_mapped_for_bamfilter = MAP.out.bam
-                                    .join(MAP.out.bai)
-                                    .mix(ch_bams_from_input_lanemerged)
+            .join(MAP.out.bai)
+            .mix(ch_bams_from_input_lanemerged)
         FILTER_BAM(ch_mapped_for_bamfilter)
         ch_bamfiltered_for_deduplication = FILTER_BAM.out.genomics
         ch_bamfiltered_for_metagenomics = FILTER_BAM.out.metagenomics
@@ -232,8 +235,8 @@ workflow EAGER {
     }
     else {
         ch_bamfiltered_for_deduplication = MAP.out.bam
-                                                .join(MAP.out.bai)
-                                                .mix(ch_bams_from_input_lanemerged)
+            .join(MAP.out.bai)
+            .mix(ch_bams_from_input_lanemerged)
     }
 
     ch_reads_for_deduplication = ch_bamfiltered_for_deduplication
@@ -391,8 +394,7 @@ workflow EAGER {
     // MODULE: ENDORSPY (raw, filtered, deduplicated)
     //
 
-    ch_flagstat_for_endorspy_raw    = MAP.out.flagstat
-                                            .mix( ch_flagstat_bams_from_input_lanemerged )
+    ch_flagstat_for_endorspy_raw = MAP.out.flagstat.mix(ch_flagstat_bams_from_input_lanemerged)
 
     if (params.run_bamfiltering & !params.skip_deduplication) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw
@@ -559,6 +561,21 @@ workflow EAGER {
         ch_versions = ch_versions.mix(GENOTYPE.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(GENOTYPE.out.mqc.collect { it[1] }.ifEmpty([]))
     }
+
+    //
+    // SUBWORKFLOW: Consensus sequence
+    //
+    ch_samplesheet_vcfs.dump(tag: "vcfs_additional_samplesheet")
+    if (params.run_consensus_sequence) {
+        CONSENSUS_SEQUENCE(
+            GENOTYPE.out.vcf,
+            ch_samplesheet_vcfs.ifEmpty([["vcf_reference_id":""], []]),
+            REFERENCE_INDEXING.out.mva,
+            REFERENCE_INDEXING.out.reference,
+        )
+    }
+
+
 
     //
     // Collate and save software versions

@@ -424,7 +424,7 @@ def easterEgg(monochrome_logs) {
     if (workflow.stats.ignoredCount == 0) {
             if (workflow.success) {
                 // https://en.wiktionary.org/wiki/jw.f_pw
-                log.info("-${colors.green}𓂻 𓅱 𓆑 𓊪 𓅱${colors.reset}-")
+                log.info("- ${colors.green}𓂻 𓅱 𓆑 𓊪 𓅱${colors.reset} -")
             }
     }
 }

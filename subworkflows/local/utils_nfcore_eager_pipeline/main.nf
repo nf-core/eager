@@ -103,32 +103,41 @@ workflow PIPELINE_INITIALISATION {
     //
     ch_samplesheet = channel.fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
                                     .map {
-                                        meta, r1, r2, bam ->
+                                        meta, r1, r2, bam, vcf ->
                                             meta.single_end = meta.pairment == "single" ? true : false
                                             meta.id = meta.sample_id
-                                        [ meta, r1, r2, bam ]
+                                        [ meta, r1, r2, bam, vcf ]
                                     }
 
     ch_samplesheet_for_branch = ch_samplesheet
                                     .branch {
-                                        meta, r1, r2, bam ->
+                                        meta, r1, r2, bam, vcf ->
                                             bam: bam.toString().endsWith(".bam")
+                                            vcf: vcf.toString().endsWith(".vcf.gz")
                                             fastq: true
                                     }
 
     ch_samplesheet_fastqs = ch_samplesheet_for_branch.fastq
                                 .map {
-                                    meta, r1, r2, bam ->
+                                    meta, r1, r2, bam, vcf ->
                                         reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
                                     [ meta - meta.subMap('pairment', 'bam_reference_id'), reads ]
                                 }
 
     ch_samplesheet_bams = ch_samplesheet_for_branch.bam
                             .map {
-                                meta, r1, r2, bam ->
+                                meta, r1, r2, bam, vcf ->
                                     meta.reference = meta.bam_reference_id
                                     meta.id_index = meta.bam_reference_id
                                 [ meta - meta.subMap('pairment', 'bam_reference_id'), bam ]
+                            }
+
+    ch_samplesheet_vcfs = ch_samplesheet_for_branch.vcf
+                            .map {
+                                meta, r1, r2, bam, vcf ->
+                                    meta.reference = meta.vcf_reference_id
+                                    meta.id_index = meta.vcf_reference_id
+                                [ meta - meta.subMap('pairment', 'vcf_reference_id'), vcf ]
                             }
 
     // Extra validation
@@ -136,7 +145,7 @@ workflow PIPELINE_INITIALISATION {
     // - No single-ended data allowed when using dedup
     ch_samplesheet_for_branch.fastq
         .map {
-            meta, r1, r2, bam ->
+            meta, r1, r2, bam, vcf ->
                 if ( meta.pairment == "single" && r2 != [] ) {
                     exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Reads 2 cannot be provided when sequencing pairment is set to 'single'."
                 }
@@ -146,23 +155,33 @@ workflow PIPELINE_INITIALISATION {
                 if ( meta.pairment == "single" && params.deduplication_tool == "dedup" ) {
                     exit 1, "[nf-core] ERROR: Invalid input/parameter combination. '--deduplication_tool' cannot be 'dedup' on runs that include SE data. Use 'markduplicates' for runs with both SE and PE data or separate SE and PE data into separate runs."
                 }
-            [ meta, r1, r2, bam ]
+            [ meta, r1, r2, bam, vcf ]
         }
 
     // - Only single-ended specified for BAM files
     ch_samplesheet_for_branch.bam
         .map {
-            meta, r1, r2, bam ->
+            meta, r1, r2, bam, vcf ->
                 if ( meta.pairment == "paired" && bam != [] ) {
                     exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sequencing pairment has to be 'single' when BAM files are provided."
                 }
-            [ meta, r1, r2, bam ]
+            [ meta, r1, r2, bam, vcf ]
+        }
+
+    // - Only single-ended specified for VCF files
+    ch_samplesheet_for_branch.vcf
+        .map {
+            meta, r1, r2, bam, vcf ->
+                if ( meta.pairment == "paired" && vcf != [] ) {
+                    exit 1, "[nf-core] ERROR: Validation of 'input' file failed. Sequencing pairment has to be 'single' when VCF files are provided."
+                }
+            [ meta, r1, r2, bam, vcf ]
         }
 
     // - No single- and double-stranded libraries with same sample ID
     ch_samplesheet_test = ch_samplesheet
                             .map {
-                                meta, r1, r2, bam ->
+                                meta, r1, r2, bam, vcf ->
                                 [ meta.subMap('sample_id'), meta.subMap('strandedness') ]
                             }
                             .groupTuple()
@@ -176,6 +195,7 @@ workflow PIPELINE_INITIALISATION {
     emit:
     samplesheet_fastqs = ch_samplesheet_fastqs
     samplesheet_bams   = ch_samplesheet_bams
+    samplesheet_vcfs   = ch_samplesheet_vcfs
     versions           = ch_versions
 }
 
@@ -262,15 +282,17 @@ def validateInputParameters() {
             !params.metagenomics_maltextract_ncbidir
         )
     ){ exit 1, ("[nf-core/eager] ERROR: Metagenomics: You picked MALT with postprocessing but didnt provided required input files. Please provide the --metagenomics_maltextract_taxonlist and --metagenomics_maltextract_ncbidir flags") }
-    if ( params.run_metagenomics && params.preprocessing_skippairmerging ) { log.warn("[nf-core/eager] WARNING: --preprocessing_skippairmerging selected in combination for metagenomics! All singletons from paired end samples will be discarded prior to input for metagenomics screening! This may be inappropriate for metaphlan, which does not utilize paired-end information!") }
-    if ( params.run_metagenomics && params.preprocessing_skippairmerging && params.metagenomics_profiling_tool == 'malt' ) { exit 1, ("[nf-core/eager] ERROR: --preprocessing_skippairmerging selected in combination with MALT for metagenomics! MALT cannot accept separated read pair information, please remove --preprocessing_skippairmerging parameter.") }
-    if ( params.run_genotyping   && ! params.genotyping_tool                ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
-    if ( params.run_genotyping   && ! params.genotyping_source              ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
-    if ( params.genotyping_source == 'trimmed'        && ! params.run_trim_bam                   ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
-    if ( params.genotyping_source == 'pmd'            && ! params.run_pmd_filtering              ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
-    if ( params.genotyping_source == 'rescaled'       && ! params.run_mapdamage_rescaling        ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
-    if ( params.fasta && params.run_genotyping && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
-    if ( params.fasta && params.mapping_tool == "circularmapper" && !params.fasta_circular_target ) { exit 1, ("[nf-core/eager] ERROR: Mapping with circularmapper requires --fasta_circular_target to be provided.") }
+    if ( params.run_metagenomics                && params.preprocessing_skippairmerging ) { log.warn("[nf-core/eager] WARNING: --preprocessing_skippairmerging selected in combination for metagenomics! All singletons from paired end samples will be discarded prior to input for metagenomics screening! This may be inappropriate for metaphlan, which does not utilize paired-end information!") }
+    if ( params.run_metagenomics                && params.preprocessing_skippairmerging        && params.metagenomics_profiling_tool == 'malt' ) { exit 1, ("[nf-core/eager] ERROR: --preprocessing_skippairmerging selected in combination with MALT for metagenomics! MALT cannot accept separated read pair information, please remove --preprocessing_skippairmerging parameter.") }
+    if ( params.run_genotyping                  && ! params.genotyping_tool             ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_tool was specified.") }
+    if ( params.run_genotyping                  && ! params.genotyping_source           ) { exit 1, ("[nf-core/eager] ERROR: --run_genotyping was specified, but no --genotyping_source was specified.") }
+    if ( params.genotyping_source == 'trimmed'  && ! params.run_trim_bam                ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'trimmed' unless BAM trimming is turned on with `--run_trim_bam`.") }
+    if ( params.genotyping_source == 'pmd'      && ! params.run_pmd_filtering           ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'pmd' unless PMD-filtering is ran.") }
+    if ( params.genotyping_source == 'rescaled' && ! params.run_mapdamage_rescaling     ) { exit 1, ("[nf-core/eager] ERROR: --genotyping_source cannot be 'rescaled' unless aDNA damage rescaling is ran.") }
+    if ( params.fasta                           && params.run_genotyping                       && params.genotyping_tool == 'pileupcaller' && ! (params.genotyping_pileupcaller_bedfile || params.genotyping_pileupcaller_snpfile ) ) { exit 1, ("[nf-core/eager] ERROR: Genotyping with pileupcaller requires both '--genotyping_pileupcaller_bedfile' AND '--genotyping_pileupcaller_snpfile' to be provided.") }
+    if ( params.fasta                           && params.mapping_tool == "circularmapper"     && !params.fasta_circular_target ) { exit 1, ("[nf-core/eager] ERROR: Mapping with circularmapper requires --fasta_circular_target to be provided.") }
+    if ( params.run_consensus_sequence          && ! params.consensus_tool              ) { exit 1, ("[nf-core/eager] ERROR: --run_consensus_sequence was specified, but no --consensus_tool was specified.") }
+    if ( params.run_consensus_sequence          && params.consensus_tool == 'multivcfanalyzer' && params.run_genotyping && params.genotyping_tool != 'ug') { exit 1, ("[nf-core/eager] ERROR: Consensus sequence generation with multivcfanalyzer requires --genotyping_tool to be 'ug'.") }
 }
 
 //

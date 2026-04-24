@@ -132,6 +132,27 @@
                 "pattern": "^\\S+\\.vcf$",
                 "exists": true,
                 "errorMessage": "SNP annotation files for GATK must not contain any spaces and have file extension '.vcf'."
+            },
+            "consensus_multivcfanalyzer_reference_gff_annotations": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.gff(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "GFF annotation files for MultiVCFAnalyzer must not contain any spaces and have file extensions '.gff' or '.gff.gz'."
+            },
+            "consensus_multivcfanalyzer_reference_gff_exclude": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.bed(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "BED files for exclusion in MultiVCFAnalyzer must not contain any spaces and have file extensions '.bed' or '.bed.gz'."
+            },
+            "consensus_multivcfanalyzer_reference_snpeff_results": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.txt(\\.gz)?$",
+                "exists": true,
+                "errorMessage": "SNPeff results files for MultiVCFAnalyzer must not contain any spaces and have file extensions '.txt' or '.txt.gz'."
             }
         },
         "required": ["reference_name", "fasta"],

@@ -1123,3 +1123,21 @@ nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --
 ## Expect: BAM input shows up in FastQC -> mapping results.
 nextflow run main.nf -profile test,docker --outdir ./results -w work/ --convert_inputbam --skip_deduplication -resume -ansi-log false -dump-channels
 ```
+
+# MultiVCFAnalyzer
+
+Based on GATK_UG test, but with added consensus sequence.
+
+```bash
+## Gatk UG on raw reads
+## Expect: MVCFA runs. Results include three fastq.gz files in the data section, 3 snpTable TSV and 2 strcutureGenotypes TSV files in data section, two tsv/txt files in the stats section of the results.
+nextflow run main.nf -profile test,docker --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels --run_consensus_sequence --consensus_tool 'multivcfanalyzer'
+```
+
+Based on test_microbial, but forcing GATK_UG genotyping. Multi Reference.
+
+```bash
+## Gatk UG on raw reads. Use BWA because circularmapper runs into issues with BWA, due to difference in MT chrom length. Custom input to test multiple samples/lanes.
+## Expect: MVCFA runs. Two sets of outputs, one per reference. MVCFA runs into potential out of memory issues with the multi contig reference hs37d5_chr22-MT, so I had to run this on an HPC, with increased resources.
+nextflow run main.nf -profile test_microbial,eva_grace --outdir ./results -w work/ -resume --run_genotyping --genotyping_tool 'ug' --genotyping_source 'raw' --genotyping_gatk_ug_keeprealignbam -ansi-log false -dump-channels --run_consensus_sequence --consensus_tool 'multivcfanalyzer' --mapping_tool 'bwaaln' --input "https://github.com/nf-core/test-datasets/raw/refs/heads/eager/testdata/Mammoth/samplesheet_v3.tsv" --deduplication_tool 'markduplicates'
+```
