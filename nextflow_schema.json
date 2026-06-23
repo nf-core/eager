@@ -408,15 +408,35 @@
                 "preprocessing_fastp_complexityfilter": {
                     "type": "boolean",
                     "description": "Specify to turn on sequence complexity filtering of reads.",
-                    "help_text": "Performs a poly-G tail removal step in the beginning of the pipeline using fastp.\n\nThis can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs or NovaSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.\n\n> Modifies fastp parameter: `--trim_poly_g`",
+                    "help_text": "Performs a read complexity filtering step using fastp.\n\nThis can be useful for trimming ploy-G tails from short-fragments sequenced on two-colour Illumina chemistry such as NextSeqs or NovaSeqs (where no-fluorescence is read as a G on two-colour chemistry), which can inflate reported GC content values.\n\n> Modifies fastp parameter: `--trim_poly_g`",
                     "fa_icon": "fas fa-power-off"
                 },
                 "preprocessing_fastp_complexityfilter_threshold": {
                     "type": "integer",
                     "default": 10,
                     "description": "Specify the complexity threshold that must be reached or exceeded to retain reads.",
-                    "help_text": "This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming.\n\n> Modifies fastp parameter: `--poly_g_min_len`",
+                    "help_text": "This option can be used to define the complexity of a read to be retained for downstream analysis.\n\n> Modifies fastp parameter: `--complexity_threshold`",
                     "fa_icon": "fas fa-filter"
+                },
+                "preprocessing_fastp_disable_polygfilter": {
+                    "type": "boolean",
+                    "description": "Specify to disable poly-G filtering of 2 colour chemistry reads.",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "This option will disable fastp-based poly-G trimming carried out by default on all 2 colour chemistry sequencing data.\n\n> Modifies fastp parameter: `--disable_trim_poly_g`"
+                },
+                "preprocessing_fastp_polygfilter_minlength": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Specify length of poly-g min for clipping to be performed on 2 colour chemistry datasets.",
+                    "help_text": "This option can be used to define the minimum length of a poly-G tail to begin low complexity trimming on 2 colour chemistry datasets..\n\n> Modifies fastp parameter: `--poly_g_min_len`",
+                    "fa_icon": "fas fa-ruler-horizontal"
+                },
+                "preprocessing_fastp_polyxfilter_minlength": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Specify the complexity threshold that must be reached or exceeded to retain reads.",
+                    "help_text": "This option can be used to define the minimum length of a poly-X (A,T,C,N) tail to begin low complexity trimming following poly-G trimming (if performed). This would be carried out on all sequencing data, regardless of the colour chemistry.\n\n> Modifies fastp parameter: `--trim_poly_x` and `--poly_x_min_len`",
+                    "fa_icon": "fas fa-ruler-horizontal"
                 },
                 "preprocessing_adapterremoval_preserve5p": {
                     "type": "boolean",
