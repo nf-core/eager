@@ -77,7 +77,7 @@
                     },
                     "bwa/index": {
                         "branch": "master",
-                        "git_sha": "e0ff65e1fb313677de09f5f477ae3da30ce19b7b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "bwa/mem": {
@@ -317,7 +317,7 @@
                     },
                     "samtools/mpileup": {
                         "branch": "master",
-                        "git_sha": "ce0b1aed7d504883061e748f492a31bf44c5777c",
+                        "git_sha": "f0393b4566f19f0d08986c839f28a14d44901bff",
                         "installed_by": ["modules"]
                     },
                     "samtools/sort": {
@@ -328,7 +328,8 @@
                     "samtools/view": {
                         "branch": "master",
                         "git_sha": "8d8f0ae52d6c9342bd41c33dda0b74b07e32153d",
-                        "installed_by": ["bam_split_by_region"]
+                        "installed_by": ["bam_split_by_region"],
+                        "patch": "modules/nf-core/samtools/view/samtools-view.diff"
                     },
                     "seqkit/split2": {
                         "branch": "master",

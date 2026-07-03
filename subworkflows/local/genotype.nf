@@ -84,7 +84,7 @@ workflow GENOTYPE {
                     ignore_me, combo_meta, bams, ref_meta, fasta, fai, dict, bed, snp ->
                         def bedfile = bed != "" ? bed : []
                         bams:  [ combo_meta, bams, bedfile ]
-                        fasta: [ fasta ]
+                        fasta: [ ref_meta, fasta ]
                 }
 
             SAMTOOLS_MPILEUP_PILEUPCALLER(
