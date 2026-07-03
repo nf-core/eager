@@ -164,7 +164,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
     if (params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" || params.mapping_tool == "circularmapper") {
         BWA_INDEX(ch_mapindex_input.index)
-        ch_version = ch_versions.mix(BWA_INDEX.out.versions)
+        ch_version = ch_versions.mix(BWA_INDEX.out.versions_bwa)
         ch_indexed_forremap = BWA_INDEX.out.index
     }
     else if (params.mapping_tool == "bowtie2") {
