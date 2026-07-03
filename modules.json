@@ -235,6 +235,11 @@
                         "git_sha": "af27af1be706e6a2bb8fe454175b0cdf77f47b49",
                         "installed_by": ["modules"]
                     },
+                    "multivcfanalyzer": {
+                        "branch": "master",
+                        "git_sha": "de26d9dc50ba49a6ffaac64d473f784ab97a9d61",
+                        "installed_by": ["modules"]
+                    },
                     "picard/createsequencedictionary": {
                         "branch": "master",
                         "git_sha": "20b0918591d4ba20047d7e13e5094bcceba81447",
@@ -338,6 +343,11 @@
                     "sexdeterrmine": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "tabix/bgzip": {
+                        "branch": "master",
+                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
                         "installed_by": ["modules"]
                     },
                     "taxpasta/merge": {

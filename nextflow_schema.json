@@ -921,14 +921,12 @@
                 "metagenomics_maltextract_taxonlist": {
                     "type": "string",
                     "description": "Path to a text file with taxa of interest (one taxon per row, NCBI taxonomy name format)",
-                    "default": null,
                     "help_text": "Path to a `.txt` file with taxa of interest you wish to assess for aDNA characteristics. In `.txt` file should be one taxon per row, and the taxon should be in a valid [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) name format corresponding to a taxonomic node in your MALT database. An example can be found on the [HOPS github](https://raw.githubusercontent.com/rhuebler/HOPS/external/Resources/default_list.txt).\\n\\nNecessary when `--metagenomics_profiling_tool malt` specified and `--metagenomics_run_postprocessing` flagged.\n\n Modifies tool parameter(s):\n> - MaltExtract: `-t`",
                     "fa_icon": "fas fa-align-left"
                 },
                 "metagenomics_maltextract_ncbidir": {
                     "type": "string",
                     "description": "Path to directory containing containing NCBI resource files (ncbi.tre and ncbi.map; available: https://github.com/rhuebler/HOPS/)",
-                    "default": null,
                     "help_text": "Path to directory containing containing the NCBI resource tree and taxonomy table files (ncbi.tre and ncbi.map; available at the [HOPS repository](https://github.com/rhuebler/HOPS/Resources)).\\n\\nNecessary when `--metagenomics_profiling_tool malt` and `--metagenomics_run_postprocessing` specified.\n\n Modifies tool parameter(s):\n> - MaltExtract: `-r`",
                     "fa_icon": "fab fa-buffer"
                 },
@@ -1001,6 +999,12 @@
                     "type": "boolean",
                     "description": "Specify to skip the removal of PCR duplicates.",
                     "fa_icon": "fas fa-forward"
+                },
+                "deduplication_skipregionsplit": {
+                    "type": "boolean",
+                    "description": "Specify to run deduplicaiton without splitting bams by contig (default behavior).",
+                    "fa_icon": "fas fa-forward",
+                    "help_text": "Run deduplication steps bam-by-bam rather than contig-by-contig for each bam file. This reduces the total number of jobs submitted to a cluster, but increases the computational runtime. If you use a shared cluster with limited resources, running many low-resource jobs can slow down the overall runtime of eager due to scheduling constraints.\nAlso applicable for poor-quality reference genomes."
                 },
                 "deduplication_tool": {
                     "type": "string",
@@ -1602,6 +1606,81 @@
             },
             "fa_icon": "fas fa-transgender-alt",
             "help_text": ""
+        },
+        "consensus_sequence": {
+            "title": "Consensus sequence",
+            "type": "object",
+            "description": "Options to create a consensus sequence from a VCF file.",
+            "default": "",
+            "fa_icon": "far fa-handshake",
+            "properties": {
+                "run_consensus_sequence": {
+                    "type": "boolean",
+                    "description": "Specify to create consensus sequence from VCF files",
+                    "fa_icon": "fas fa-power-off",
+                    "help_text": "Utilize reference genome and generated VCF files to create consensus sequence at set quality thresholds."
+                },
+                "consensus_tool": {
+                    "type": "string",
+                    "fa_icon": "fas fa-hammer",
+                    "description": "Specify which tool to use to create consensus sequences: multivcfanalyzer",
+                    "enum": ["multivcfanalyzer"],
+                    "help_text": "Specify the tool to create the consensus sequence. Accepted values: multivcfanalyzer.\n\nNote: These tools currently only supports diploid GATK UnifiedGenotyper vcfs as input."
+                },
+                "consensus_multivcfanalyzer_write_allele_frequencies": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-edit",
+                    "description": "Speficy to write the allele frequencies in the SNP table",
+                    "help_text": "Turn on writing write allele frequencies in the SNP table produced by MultiVCFAnalyzer."
+                },
+                "consensus_multivcfanalyzer_min_genotype_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "fa_icon": "fas fa-medal",
+                    "description": "Specify the mininum genotyping quality for base calling.",
+                    "help_text": "Specify the minimum genotyping quality threshold for a position to be considered for base calling."
+                },
+                "consensus_multivcfanalyzer_min_base_coverage": {
+                    "type": "integer",
+                    "default": 5,
+                    "fa_icon": "fas fa-sort-amount-up",
+                    "description": "Specify the minum number of reads required for base calling",
+                    "help_text": "Specify the minimum number of reads covering a position for it to be considered for base calling."
+                },
+                "consensus_multivcfanalyzer_allele_freq_hom": {
+                    "type": "number",
+                    "default": 0.9,
+                    "fa_icon": "fas fa-percent",
+                    "description": "Specify the minimum allele frequency required for a base to be called as 'homozygous'",
+                    "help_text": "Specify the minimum allele frequency that a base requires to be considered a 'homozygous' call."
+                },
+                "consensus_multivcfanalyzer_allele_freq_het": {
+                    "type": "number",
+                    "default": 0.9,
+                    "description": "Specify the minimum allele frequency required for a base to be called as 'heterozygous'",
+                    "help_text": "Specify the minimum allele frequency that a base requires to be considered a 'heterozygous' call. Please note, heterozygous sites are only called within the range of `consensus_multivcfanalyzer_allele_freq_het` < allele frequency < `consensus_multivcfanalyzer_allele_freq_hom`, so proper adjustment of both these parameters is necessary. By default no heterozygous sites will be called.",
+                    "fa_icon": "fas fa-percent"
+                },
+                "consensus_multivcfanalyzer_reference_gff_annotations": {
+                    "type": "string",
+                    "fa_icon": "fas fa-asterisk",
+                    "description": "Specify path to GFF reference file",
+                    "help_text": "Specify path to the reference genome annotations in '.gff' format. Optional."
+                },
+                "consensus_multivcfanalyzer_reference_gff_exclude": {
+                    "type": "string",
+                    "description": "Specify path to GFF with positions to be excluded",
+                    "help_text": "Specify path to the positions to be excluded in '.gff' format. Optional.",
+                    "fa_icon": "fas fa-ban"
+                },
+                "consensus_multivcfanalyzer_snpeff_results": {
+                    "type": "string",
+                    "fa_icon": "fas fa-poll-h",
+                    "description": "Specify path to SNP effect output",
+                    "help_text": "Specify path to the output file from SNPEff containing SNP effects in '.txt' format. Optional."
+                }
+            },
+            "help_text": ""
         }
     },
     "allOf": [
@@ -1658,6 +1737,9 @@
         },
         {
             "$ref": "#/$defs/human_sex_determination"
+        },
+        {
+            "$ref": "#/$defs/consensus_sequence"
         }
     ]
 }

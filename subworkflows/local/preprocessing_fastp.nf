@@ -2,8 +2,8 @@
 // Process short raw reads with FastP
 //
 
-include { FASTP as FASTP_SINGLE       } from '../../modules/nf-core/fastp/main'
-include { FASTP as FASTP_PAIRED       } from '../../modules/nf-core/fastp/main'
+include { FASTP as FASTP_SINGLE } from '../../modules/nf-core/fastp/main'
+include { FASTP as FASTP_PAIRED } from '../../modules/nf-core/fastp/main'
 
 workflow PREPROCESSING_FASTP {
     take:
@@ -11,21 +11,20 @@ workflow PREPROCESSING_FASTP {
     adapterlist // <adapterlist>.fasta
 
     main:
-    ch_versions           = Channel.empty()
-    ch_multiqc_files      = Channel.empty()
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
 
-    ch_input_for_fastp = reads
-                            .branch{
-                                single: it[0]['single_end'] == true
-                                paired: it[0]['single_end'] == false
-                            }
+    ch_input_for_fastp = reads.branch {
+        single: it[0]['single_end'] == true
+        paired: it[0]['single_end'] == false
+    }
 
-    FASTP_SINGLE ( ch_input_for_fastp.single, adapterlist, false, false )
+    FASTP_SINGLE(ch_input_for_fastp.single, adapterlist, false, false)
     ch_versions = ch_versions.mix(FASTP_SINGLE.out.versions.first())
-    ch_multiqc_files = ch_multiqc_files.mix( FASTP_SINGLE.out.json )
+    ch_multiqc_files = ch_multiqc_files.mix(FASTP_SINGLE.out.json)
 
     // Last parameter here turns on merging of PE data
-    FASTP_PAIRED ( ch_input_for_fastp.paired, adapterlist, false, !params.preprocessing_skippairmerging )
+    FASTP_PAIRED(ch_input_for_fastp.paired, adapterlist, false, !params.preprocessing_skippairmerging)
     ch_versions = ch_versions.mix(FASTP_PAIRED.out.versions.first())
     ch_multiqc_files = ch_multiqc_files.mix( FASTP_PAIRED.out.json )
 
@@ -46,7 +45,7 @@ workflow PREPROCESSING_FASTP {
     }
 
     emit:
-    reads    = ch_fastp_reads_prepped   // channel: [ val(meta), [ reads ] ]
-    versions = ch_versions          // channel: [ versions.yml ]
+    reads    = ch_fastp_reads_prepped // channel: [ val(meta), [ reads ] ]
+    versions = ch_versions // channel: [ versions.yml ]
     mqc      = ch_multiqc_files
 }
