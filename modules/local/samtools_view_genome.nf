@@ -22,7 +22,6 @@ process SAMTOOLS_VIEW_GENOME {
     """
     samtools \\
         view \\
-        ${args} \\
         --threads ${task.cpus-1} \\
         -H \\
         $input | grep '@SQ' | sed 's#@SQ\tSN:\\|LN:##g' > genome.txt

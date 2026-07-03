@@ -60,7 +60,7 @@ include { HOST_REMOVAL                                        } from '../modules
 include { ENDORSPY                                            } from '../modules/nf-core/endorspy/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH        } from '../modules/nf-core/bedtools/coverage/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH      } from '../modules/nf-core/bedtools/coverage/main'
-include { SAMTOOLS_VIEW_GENOME                                } from '../modules/local/bam_infer_SQ.nf' // File was renamed as the old name samtools_view_genome caused issues in `nf-core p lint`
+include { SAMTOOLS_VIEW_GENOME                                } from '../modules/local/samtools_view_genome.nf'
 include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED              } from '../modules/nf-core/qualimap/bamqc/main'
 include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED            } from '../modules/nf-core/qualimap/bamqc/main'
 
