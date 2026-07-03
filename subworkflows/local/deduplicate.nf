@@ -121,7 +121,7 @@ workflow DEDUPLICATE {
         ch_input_for_samtools_merge = ch_dedupped_bam
             .map {
                 meta, bam ->
-                meta2 = meta.clone().findAll{ it.key != 'genomic_region' }
+                def meta2 = meta.clone().findAll{ it.key != 'genomic_region' }
                 [ meta2, bam ]
             }
             .groupTuple()
@@ -135,10 +135,10 @@ workflow DEDUPLICATE {
             )
             .multiMap{
                 // bam here is a list of bams
-                ignore_me, meta, bam, meta2, fasta, fasta_fai ->
-                bam:        [ meta, bam ]
-                fasta:      [ meta2, fasta ]
-                fasta_fai:  [ meta2, fasta_fai ]
+                _ignore_me, merged_meta, merged_bam, reference_meta, reference_fasta, reference_fasta_fai ->
+                bam:        [ merged_meta, merged_bam ]
+                fasta:      [ reference_meta, reference_fasta ]
+                fasta_fai:  [ reference_meta, reference_fasta_fai ]
             }
 
         // Merge the bams for each region into one bam

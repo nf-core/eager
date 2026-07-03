@@ -55,13 +55,13 @@ workflow CONSENSUS_SEQUENCE {
             }
             .join(ch_mvcfa_vcf_input)
             .join(ch_fasta_final)
-            .multiMap({ meta, reference_gff, reference_gff_exclude, reference_snpeff_results, vcf_inputs, fasta ->
+            .multiMap{ meta, reference_gff, reference_gff_exclude, reference_snpeff_results, vcf_inputs, fasta ->
                 vcfs: [meta, vcf_inputs]
                 reference_gff: [meta, reference_gff ?: []]
                 reference_gff_exclude: [meta, reference_gff_exclude ?: []]
                 reference_snpeff_results: [meta, reference_snpeff_results ?: []]
                 reference_fasta: [meta, fasta]
-            })
+            }
 
         MULTIVCFANALYZER(
             ch_mva_input.vcfs,

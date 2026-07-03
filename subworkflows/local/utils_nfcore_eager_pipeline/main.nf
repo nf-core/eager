@@ -120,7 +120,7 @@ workflow PIPELINE_INITIALISATION {
     ch_samplesheet_fastqs = ch_samplesheet_for_branch.fastq
                                 .map {
                                     meta, r1, r2, bam, vcf ->
-                                        reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
+                                        def reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
                                     [ meta - meta.subMap('pairment', 'bam_reference_id'), reads ]
                                 }
 
