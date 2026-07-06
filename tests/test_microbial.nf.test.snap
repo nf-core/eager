@@ -179,15 +179,11 @@
                 "multiqc_data.json",
                 "multiqc_fastp.txt",
                 "multiqc_general_stats.txt",
-                "multiqc_qualimap_bamqc_genome_results.txt",
                 "multiqc_samtools_flagstat.txt",
                 "multiqc_software_versions.txt",
                 "multiqc_sources.txt",
                 "preseq.txt",
                 "preseq_complexity_plot_molecules.txt",
-                "qualimap_coverage_histogram.txt",
-                "qualimap_gc_content.txt",
-                "qualimap_genome_fraction.txt",
                 "samtools-flagstat-pct-table.txt",
                 "samtools-flagstat-table.txt",
                 "threeprime_misinc_plot.txt",
@@ -220,9 +216,6 @@
                 "mapdamage-length-distribution-Reverse.pdf",
                 "mapdamage-threeprime_misinc_plot.pdf",
                 "preseq_complexity_plot_molecules.pdf",
-                "qualimap_coverage_histogram.pdf",
-                "qualimap_gc_content.pdf",
-                "qualimap_genome_fraction.pdf",
                 "samtools-flagstat-pct-table.pdf",
                 "samtools-flagstat-table.pdf",
                 "threeprime_misinc_plot.pdf",
@@ -255,9 +248,6 @@
                 "mapdamage-length-distribution-Reverse.png",
                 "mapdamage-threeprime_misinc_plot.png",
                 "preseq_complexity_plot_molecules.png",
-                "qualimap_coverage_histogram.png",
-                "qualimap_gc_content.png",
-                "qualimap_genome_fraction.png",
                 "samtools-flagstat-pct-table.png",
                 "samtools-flagstat-table.png",
                 "threeprime_misinc_plot.png",
@@ -290,9 +280,6 @@
                 "mapdamage-length-distribution-Reverse.svg",
                 "mapdamage-threeprime_misinc_plot.svg",
                 "preseq_complexity_plot_molecules.svg",
-                "qualimap_coverage_histogram.svg",
-                "qualimap_gc_content.svg",
-                "qualimap_genome_fraction.svg",
                 "samtools-flagstat-pct-table.svg",
                 "samtools-flagstat-table.svg",
                 "threeprime_misinc_plot.svg",
@@ -315,9 +302,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2025-11-07T11:08:46.462542"
+        "timestamp": "2026-07-06T14:34:16.91349"
     },
     "read_filtering": {
         "content": [
@@ -390,8 +377,8 @@
     "genotyping": {
         "content": [
             [
-                "JK2782_Mammoth_MT_Krause.bcftools_stats.txt:md5,61ea79d61d3db9758e2ef15b5e895580",
-                "JK2782_hs37d5_chr21-MT.bcftools_stats.txt:md5,f8570bcd90546d6543ee4e8aa3363c28"
+                "JK2782_Mammoth_MT_Krause.bcftools_stats.txt:md5,d3ca07e5075a741027e8d55ffd35754a",
+                "JK2782_hs37d5_chr21-MT.bcftools_stats.txt:md5,f38b838893ca595d0852155ba6581735"
             ],
             [
                 "JK2782_Mammoth_MT_Krause.vcf.gz.tbi",
@@ -399,10 +386,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.6"
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2025-06-20T11:36:35.632792"
+        "timestamp": "2026-07-06T14:34:17.233255"
     },
     "final_bams": {
         "content": [
@@ -479,15 +466,11 @@
                 "multiqc_data.json",
                 "multiqc_fastp.txt",
                 "multiqc_general_stats.txt",
-                "multiqc_qualimap_bamqc_genome_results.txt",
                 "multiqc_samtools_flagstat.txt",
                 "multiqc_software_versions.txt",
                 "multiqc_sources.txt",
                 "preseq.txt",
                 "preseq_complexity_plot_molecules.txt",
-                "qualimap_coverage_histogram.txt",
-                "qualimap_gc_content.txt",
-                "qualimap_genome_fraction.txt",
                 "samtools-flagstat-pct-table.txt",
                 "samtools-flagstat-table.txt",
                 "threeprime_misinc_plot.txt",
@@ -520,9 +503,6 @@
                 "mapdamage-length-distribution-Reverse.pdf",
                 "mapdamage-threeprime_misinc_plot.pdf",
                 "preseq_complexity_plot_molecules.pdf",
-                "qualimap_coverage_histogram.pdf",
-                "qualimap_gc_content.pdf",
-                "qualimap_genome_fraction.pdf",
                 "samtools-flagstat-pct-table.pdf",
                 "samtools-flagstat-table.pdf",
                 "threeprime_misinc_plot.pdf",
@@ -555,9 +535,6 @@
                 "mapdamage-length-distribution-Reverse.png",
                 "mapdamage-threeprime_misinc_plot.png",
                 "preseq_complexity_plot_molecules.png",
-                "qualimap_coverage_histogram.png",
-                "qualimap_gc_content.png",
-                "qualimap_genome_fraction.png",
                 "samtools-flagstat-pct-table.png",
                 "samtools-flagstat-table.png",
                 "threeprime_misinc_plot.png",
@@ -590,9 +567,6 @@
                 "mapdamage-length-distribution-Reverse.svg",
                 "mapdamage-threeprime_misinc_plot.svg",
                 "preseq_complexity_plot_molecules.svg",
-                "qualimap_coverage_histogram.svg",
-                "qualimap_gc_content.svg",
-                "qualimap_genome_fraction.svg",
                 "samtools-flagstat-pct-table.svg",
                 "samtools-flagstat-table.svg",
                 "threeprime_misinc_plot.svg",
@@ -601,9 +575,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2025-11-07T11:08:46.930107"
+        "timestamp": "2026-07-06T14:34:17.826576"
     },
     "mapping_output": {
         "content": [
@@ -639,6 +613,12 @@
                 "BWA_ALN": {
                     "bwa": "0.7.18-r1243-dirty"
                 },
+                "BWA_INDEX": {
+                    "bwa": "0.7.19-r1273"
+                },
+                "BWA_INDEX_CIRCULARISED": {
+                    "bwa": "0.7.19-r1273"
+                },
                 "CIRCULARMAPPER_REALIGNSAMFILE": {
                     "CircularMapper": "1.93.5"
                 },
@@ -667,8 +647,14 @@
                 "FREEBAYES": {
                     "freebayes": "1.3.6"
                 },
+                "GUNZIP_FASTA": {
+                    "gunzip": 1.1
+                },
                 "KRAKENUNIQ_PRELOADEDKRAKENUNIQ": {
                     "krakenuniq": "1.0.4"
+                },
+                "PICARD_CREATESEQUENCEDICTIONARY": {
+                    "picard": "3.1.1"
                 },
                 "PRESEQ_CCURVE": {
                     "preseq": "3.1.1"
@@ -678,6 +664,9 @@
                 },
                 "QUALIMAP_BAMQC_WITHBED": {
                     "qualimap": 2.3
+                },
+                "SAMTOOLS_FAIDX": {
+                    "samtools": 1.18
                 },
                 "SAMTOOLS_FASTQ_METAGENOMICS": {
                     "samtools": 1.18
@@ -728,9 +717,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.10.3"
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2026-02-13T09:52:11.74559929"
+        "timestamp": "2026-07-06T14:34:17.971957"
     },
     "authentication": {
         "content": [
