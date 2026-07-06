@@ -91,7 +91,7 @@ workflow GENOTYPE {
                 ch_mpileup_inputs.bams,
                 ch_mpileup_inputs.fasta,
             )
-            ch_versions = ch_versions.mix( SAMTOOLS_MPILEUP_PILEUPCALLER.out.versions_samtools.first() )
+            // ch_versions = ch_versions.mix( SAMTOOLS_MPILEUP_PILEUPCALLER.out.versions.first() )
 
             ch_pileupcaller_input = SAMTOOLS_MPILEUP_PILEUPCALLER.out.mpileup
                 .map {

@@ -86,7 +86,7 @@ workflow CONSENSUS_SEQUENCE {
         ch_snp_table_uncertainty_mva         = MULTIVCFANALYZER.out.snptable_uncertainty
         ch_structure_genotypes_mva           = MULTIVCFANALYZER.out.structure_genotypes
         ch_structure_genotypes_nomissing_mva = MULTIVCFANALYZER.out.structure_genotypes_nomissing
-        ch_versions                          = ch_versions.mix(MULTIVCFANALYZER.out.versions_multivcfanalyzer, MULTIVCFANALYZER.out.versions_tabix)
+        // ch_versions                          = ch_versions.mix(MULTIVCFANALYZER.out.versions, MULTIVCFANALYZER.out.versions)
         ch_multiqc_files                     = ch_multiqc_files.mix(MULTIVCFANALYZER.out.json)
     }
 

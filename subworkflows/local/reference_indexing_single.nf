@@ -56,7 +56,7 @@ workflow REFERENCE_INDEXING_SINGLE {
 
         if ( !fasta_mapperindexdir ) {
             ch_fasta_mapperindexdir = BWA_INDEX ( ch_ungz_ref ).index
-            ch_versions = ch_versions.mix( BWA_INDEX.out.versions_bwa.first())
+            // ch_versions = ch_versions.mix( BWA_INDEX.out.versions_bwa.first())
         } else {
             ch_fasta_mapperindexdir = Channel.fromPath(fasta_mapperindexdir).map{[[id: clean_name], it ]}
         }

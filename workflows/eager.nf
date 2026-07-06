@@ -165,7 +165,7 @@ workflow EAGER {
     }
     else {
         FASTQC(ch_fastqs_for_preprocessing)
-        ch_versions = ch_versions.mix(FASTQC.out.versions_fastqc.first())
+        // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
         ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect { it[1] }.ifEmpty([]))
     }
 
