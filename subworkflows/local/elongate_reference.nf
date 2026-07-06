@@ -128,7 +128,7 @@ workflow ELONGATE_REFERENCE {
                             .mix( CIRCULARMAPPER_CIRCULARGENERATOR.out.fasta )
 
     BWA_INDEX_CIRCULARISED(ch_input_for_circular_indexing)
-    ch_versions = ch_versions.mix( BWA_INDEX_CIRCULARISED.out.versions.first() )
+    ch_versions = ch_versions.mix( BWA_INDEX_CIRCULARISED.out.versions_bwa.first() )
 
     ch_indexed_references = ch_input_for_circular_indexing
                             .join( BWA_INDEX_CIRCULARISED.out.index )
