@@ -65,7 +65,7 @@ jobs:
       - runs-on=${{ github.run_id }}-nf-test
       - runner=4cpu-linux-x64
       - volume=80gb
-      - ram=8 ## Needed for MALT.
+      - ram=12 ## Needed for MALT.
     strategy:
       fail-fast: false
       matrix:
