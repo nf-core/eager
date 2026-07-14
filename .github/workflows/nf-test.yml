@@ -64,8 +64,8 @@ jobs:
     runs-on: # use self-hosted runners
       - runs-on=${{ github.run_id }}-nf-test
       - runner=4cpu-linux-x64
-      - volume=100gb
-      - ram=16 ## Needed for MALT.
+      - volume=80gb
+      - ram=20 ## Needed for MALT.
     strategy:
       fail-fast: false
       matrix:
