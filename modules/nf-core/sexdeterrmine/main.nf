@@ -14,7 +14,7 @@ process SEXDETERRMINE {
     output:
     tuple val(meta), path("*.json"), emit: json
     tuple val(meta), path("*.tsv") , emit: tsv
-    path "versions.yml"            , emit: versions
+    tuple val("${task.process}"), val('sexdeterrmine'), eval('sexdeterrmine --version 2>&1'), topic: versions, emit: versions_sexdeterrmine
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,10 +31,5 @@ process SEXDETERRMINE {
         $sample_list \\
         $args \\
         > ${prefix}.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        sexdeterrmine: \$(echo \$(sexdeterrmine --version 2>&1))
-    END_VERSIONS
     """
 }
