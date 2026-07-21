@@ -49,7 +49,7 @@ workflow RUN_SEXDETERRMINE {
 
         SAMTOOLS_DEPTH_SEXDETERRMINE(ch_samtoolsdepth_input.bam, ch_samtoolsdepth_input.bed)
         ch_sex_determine_input = SAMTOOLS_DEPTH_SEXDETERRMINE.out.tsv
-        ch_versions            = ch_versions.mix( SAMTOOLS_DEPTH_SEXDETERRMINE.out.versions )
+        ch_versions            = ch_versions.mix( SAMTOOLS_DEPTH_SEXDETERRMINE.out.versions_sexdeterrmine )
 
         // Run sex determination with samtools depth input
         SEXDETERRMINE(ch_sex_determine_input, [])
