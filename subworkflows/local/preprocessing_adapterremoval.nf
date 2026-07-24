@@ -45,10 +45,10 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
                 ADAPTERREMOVAL_PAIRED.out.singles_truncated,
                 ADAPTERREMOVAL_PAIRED.out.paired_truncated
             )
-            .map { meta, reads ->
+            .map { meta, reads_ ->
                 def meta_new = meta.clone()
                 meta_new.single_end = true
-                [meta_new, reads]
+                [meta_new, reads_]
             }
             .groupTuple()
             // Paired-end reads cause a nested tuple during grouping.
@@ -69,10 +69,10 @@ workflow PREPROCESSING_ADAPTERREMOVAL {
                 ADAPTERREMOVAL_PAIRED.out.collapsed,
                 ADAPTERREMOVAL_PAIRED.out.collapsed_truncated
             )
-            .map { meta, reads ->
+            .map { meta, reads_ ->
                 def meta_new = meta.clone()
                 meta_new.single_end = true
-                [meta_new, reads]
+                [meta_new, reads_]
             }
             .groupTuple()
             .map { meta, fastq -> [meta, fastq.flatten()] }

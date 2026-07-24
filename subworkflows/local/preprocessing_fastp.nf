@@ -26,19 +26,22 @@ workflow PREPROCESSING_FASTP {
     // Last parameter here turns on merging of PE data
     FASTP_PAIRED(ch_input_for_fastp.paired, adapterlist, false, !params.preprocessing_skippairmerging)
     ch_versions = ch_versions.mix(FASTP_PAIRED.out.versions.first())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTP_PAIRED.out.json)
+    ch_multiqc_files = ch_multiqc_files.mix( FASTP_PAIRED.out.json )
 
-    if (!params.preprocessing_skippairmerging) {
-        ch_fastp_reads_prepped_pe = FASTP_PAIRED.out.reads_merged.map { meta, reads ->
-            def meta_new = meta.clone()
-            meta_new['single_end'] = true
-            [meta_new, [reads].flatten()]
-        }
+    if ( !params.preprocessing_skippairmerging ) {
+        ch_fastp_reads_prepped_pe = FASTP_PAIRED.out.reads_merged
+                                        .map {
+                                            meta, reads_ ->
+                                                def meta_new = meta.clone()
+                                                meta_new['single_end'] = true
+                                                [ meta_new, [ reads_ ].flatten() ]
+                                        }
 
-        ch_fastp_reads_prepped = ch_fastp_reads_prepped_pe.mix(FASTP_SINGLE.out.reads)
-    }
-    else {
-        ch_fastp_reads_prepped = FASTP_PAIRED.out.reads.mix(FASTP_SINGLE.out.reads)
+        ch_fastp_reads_prepped = ch_fastp_reads_prepped_pe.mix( FASTP_SINGLE.out.reads )
+
+    } else {
+        ch_fastp_reads_prepped = FASTP_PAIRED.out.reads
+                                    .mix( FASTP_SINGLE.out.reads )
     }
 
     emit:

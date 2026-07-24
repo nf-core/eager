@@ -55,13 +55,13 @@ workflow CONSENSUS_SEQUENCE {
             }
             .join(ch_mvcfa_vcf_input)
             .join(ch_fasta_final)
-            .multiMap({ meta, reference_gff, reference_gff_exclude, reference_snpeff_results, vcf_inputs, fasta ->
+            .multiMap{ meta, reference_gff, reference_gff_exclude, reference_snpeff_results, vcf_inputs, fasta ->
                 vcfs: [meta, vcf_inputs]
                 reference_gff: [meta, reference_gff ?: []]
                 reference_gff_exclude: [meta, reference_gff_exclude ?: []]
                 reference_snpeff_results: [meta, reference_snpeff_results ?: []]
                 reference_fasta: [meta, fasta]
-            })
+            }
 
         MULTIVCFANALYZER(
             ch_mva_input.vcfs,
@@ -86,7 +86,7 @@ workflow CONSENSUS_SEQUENCE {
         ch_snp_table_uncertainty_mva         = MULTIVCFANALYZER.out.snptable_uncertainty
         ch_structure_genotypes_mva           = MULTIVCFANALYZER.out.structure_genotypes
         ch_structure_genotypes_nomissing_mva = MULTIVCFANALYZER.out.structure_genotypes_nomissing
-        ch_versions                          = ch_versions.mix(MULTIVCFANALYZER.out.versions_multivcfanalyzer, MULTIVCFANALYZER.out.versions_tabix)
+        // ch_versions                          = ch_versions.mix(MULTIVCFANALYZER.out.versions, MULTIVCFANALYZER.out.versions)
         ch_multiqc_files                     = ch_multiqc_files.mix(MULTIVCFANALYZER.out.json)
     }
 

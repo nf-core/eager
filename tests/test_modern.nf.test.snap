@@ -102,15 +102,11 @@
                 "multiqc_damageprofiler_metrics.txt",
                 "multiqc_data.json",
                 "multiqc_general_stats.txt",
-                "multiqc_qualimap_bamqc_genome_results.txt",
                 "multiqc_samtools_flagstat.txt",
                 "multiqc_software_versions.txt",
                 "multiqc_sources.txt",
                 "preseq.txt",
                 "preseq_complexity_plot_molecules.txt",
-                "qualimap_coverage_histogram.txt",
-                "qualimap_gc_content.txt",
-                "qualimap_genome_fraction.txt",
                 "samtools-flagstat-pct-table.txt",
                 "samtools-flagstat-table.txt",
                 "threeprime_misinc_plot.txt",
@@ -131,9 +127,6 @@
                 "mapdamage-length-distribution-Reverse.pdf",
                 "mapdamage-threeprime_misinc_plot.pdf",
                 "preseq_complexity_plot_molecules.pdf",
-                "qualimap_coverage_histogram.pdf",
-                "qualimap_gc_content.pdf",
-                "qualimap_genome_fraction.pdf",
                 "samtools-flagstat-pct-table.pdf",
                 "samtools-flagstat-table.pdf",
                 "threeprime_misinc_plot.pdf",
@@ -154,9 +147,6 @@
                 "mapdamage-length-distribution-Reverse.png",
                 "mapdamage-threeprime_misinc_plot.png",
                 "preseq_complexity_plot_molecules.png",
-                "qualimap_coverage_histogram.png",
-                "qualimap_gc_content.png",
-                "qualimap_genome_fraction.png",
                 "samtools-flagstat-pct-table.png",
                 "samtools-flagstat-table.png",
                 "threeprime_misinc_plot.png",
@@ -177,9 +167,6 @@
                 "mapdamage-length-distribution-Reverse.svg",
                 "mapdamage-threeprime_misinc_plot.svg",
                 "preseq_complexity_plot_molecules.svg",
-                "qualimap_coverage_histogram.svg",
-                "qualimap_gc_content.svg",
-                "qualimap_genome_fraction.svg",
                 "samtools-flagstat-pct-table.svg",
                 "samtools-flagstat-table.svg",
                 "threeprime_misinc_plot.svg",
@@ -187,10 +174,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.04.6"
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2025-11-14T09:32:18.690658462"
+        "timestamp": "2026-07-06T17:46:37.559191"
     },
     "genotyping_vcfs": {
         "content": [
@@ -276,15 +263,11 @@
                 "multiqc_damageprofiler_metrics.txt",
                 "multiqc_data.json",
                 "multiqc_general_stats.txt",
-                "multiqc_qualimap_bamqc_genome_results.txt",
                 "multiqc_samtools_flagstat.txt",
                 "multiqc_software_versions.txt",
                 "multiqc_sources.txt",
                 "preseq.txt",
                 "preseq_complexity_plot_molecules.txt",
-                "qualimap_coverage_histogram.txt",
-                "qualimap_gc_content.txt",
-                "qualimap_genome_fraction.txt",
                 "samtools-flagstat-pct-table.txt",
                 "samtools-flagstat-table.txt",
                 "threeprime_misinc_plot.txt",
@@ -305,9 +288,6 @@
                 "mapdamage-length-distribution-Reverse.pdf",
                 "mapdamage-threeprime_misinc_plot.pdf",
                 "preseq_complexity_plot_molecules.pdf",
-                "qualimap_coverage_histogram.pdf",
-                "qualimap_gc_content.pdf",
-                "qualimap_genome_fraction.pdf",
                 "samtools-flagstat-pct-table.pdf",
                 "samtools-flagstat-table.pdf",
                 "threeprime_misinc_plot.pdf",
@@ -328,9 +308,6 @@
                 "mapdamage-length-distribution-Reverse.png",
                 "mapdamage-threeprime_misinc_plot.png",
                 "preseq_complexity_plot_molecules.png",
-                "qualimap_coverage_histogram.png",
-                "qualimap_gc_content.png",
-                "qualimap_genome_fraction.png",
                 "samtools-flagstat-pct-table.png",
                 "samtools-flagstat-table.png",
                 "threeprime_misinc_plot.png",
@@ -351,9 +328,6 @@
                 "mapdamage-length-distribution-Reverse.svg",
                 "mapdamage-threeprime_misinc_plot.svg",
                 "preseq_complexity_plot_molecules.svg",
-                "qualimap_coverage_histogram.svg",
-                "qualimap_gc_content.svg",
-                "qualimap_genome_fraction.svg",
                 "samtools-flagstat-pct-table.svg",
                 "samtools-flagstat-table.svg",
                 "threeprime_misinc_plot.svg",
@@ -361,10 +335,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.04.6"
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2025-11-14T09:32:19.045203027"
+        "timestamp": "2026-07-06T17:46:38.077514"
     },
     "mapping_output": {
         "content": [

@@ -6,9 +6,10 @@ include { MEGAN_RMA2INFO       } from '../../modules/nf-core/megan/rma2info/main
 
 workflow METAGENOMICS_POSTPROCESSING {
 
-    take: ch_postprocessing_input // different between each profiling --> postprocessing tool, defined in metagenomics profiling subworkflow
-    take: ch_tax_list
-    take: ch_ncbi_dir
+    take:
+    ch_postprocessing_input // different between each profiling --> postprocessing tool, defined in metagenomics profiling subworkflow
+    ch_tax_list
+    ch_ncbi_dir
 
     main:
     ch_versions      = Channel.empty()

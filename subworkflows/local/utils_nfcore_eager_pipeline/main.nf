@@ -126,7 +126,7 @@ workflow PIPELINE_INITIALISATION {
     ch_samplesheet_fastqs = ch_samplesheet_for_branch.fastq
                                 .map {
                                     meta, r1, r2, bam, vcf ->
-                                        reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
+                                        def reads = meta.single_end ? [ r1 ] : [ r1, r2 ]
                                     [ meta - meta.subMap('pairment', 'bam_reference_id'), reads ]
                                 }
 
@@ -441,7 +441,7 @@ def addNewMetaFromAttributes( ArrayList row, Object source_attributes, Object ta
 
     } else if ((source_attributes instanceof List) && (target_attributes instanceof List)) {
         if (source_attributes.size() == target_attributes.size()) {
-            for (int i = 0; i < source_attributes.size(); i++) {
+            (0..<source_attributes.size()).each { i ->
                 // Option B: Both are lists of same size
                 meta2[target_attributes[i]] = meta[source_attributes[i]]
             }

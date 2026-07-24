@@ -201,6 +201,12 @@
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.rma6",
                 "eager_test.tar_doublestranded_0-run-malt-run.log",
                 "eager_test.tar_runtime_log_concatenated.log",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.megan",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.megan",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.megan",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz",
                 "RunSummary.txt",
                 "TotalCount.txt",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.rma6_coverageHist.txt",
@@ -273,12 +279,6 @@
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.rma6_readLengthStat.txt",
                 "error.txt",
                 "log.txt",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.megan",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.megan",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.megan",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz",
                 "megan6_taxpasta_table.tsv",
                 "fastp-insert-size-plot.txt",
                 "fastp-seq-content-gc-plot_Merged_and_filtered.txt",
@@ -324,15 +324,11 @@
                 "multiqc_fastp.txt",
                 "multiqc_fastqc.txt",
                 "multiqc_general_stats.txt",
-                "multiqc_qualimap_bamqc_genome_results.txt",
                 "multiqc_samtools_flagstat.txt",
                 "multiqc_software_versions.txt",
                 "multiqc_sources.txt",
                 "preseq.txt",
                 "preseq_complexity_plot_molecules.txt",
-                "qualimap_coverage_histogram.txt",
-                "qualimap_gc_content.txt",
-                "qualimap_genome_fraction.txt",
                 "samtools-flagstat-pct-table.txt",
                 "samtools-flagstat-table.txt",
                 "threeprime_misinc_plot.txt",
@@ -351,6 +347,7 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.pdf",
                 "fastp_filtered_reads_plot-cnt.pdf",
                 "fastp_filtered_reads_plot-pct.pdf",
+                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
                 "fastqc_per_base_sequence_quality_plot.pdf",
@@ -374,9 +371,6 @@
                 "mapdamage-length-distribution-Reverse.pdf",
                 "mapdamage-threeprime_misinc_plot.pdf",
                 "preseq_complexity_plot_molecules.pdf",
-                "qualimap_coverage_histogram.pdf",
-                "qualimap_gc_content.pdf",
-                "qualimap_genome_fraction.pdf",
                 "samtools-flagstat-pct-table.pdf",
                 "samtools-flagstat-table.pdf",
                 "threeprime_misinc_plot.pdf",
@@ -395,6 +389,7 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.png",
                 "fastp_filtered_reads_plot-cnt.png",
                 "fastp_filtered_reads_plot-pct.png",
+                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_per_base_n_content_plot.png",
                 "fastqc_per_base_sequence_quality_plot.png",
@@ -418,9 +413,6 @@
                 "mapdamage-length-distribution-Reverse.png",
                 "mapdamage-threeprime_misinc_plot.png",
                 "preseq_complexity_plot_molecules.png",
-                "qualimap_coverage_histogram.png",
-                "qualimap_gc_content.png",
-                "qualimap_genome_fraction.png",
                 "samtools-flagstat-pct-table.png",
                 "samtools-flagstat-table.png",
                 "threeprime_misinc_plot.png",
@@ -439,6 +431,7 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.svg",
                 "fastp_filtered_reads_plot-cnt.svg",
                 "fastp_filtered_reads_plot-pct.svg",
+                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
                 "fastqc_per_base_sequence_quality_plot.svg",
@@ -462,9 +455,6 @@
                 "mapdamage-length-distribution-Reverse.svg",
                 "mapdamage-threeprime_misinc_plot.svg",
                 "preseq_complexity_plot_molecules.svg",
-                "qualimap_coverage_histogram.svg",
-                "qualimap_gc_content.svg",
-                "qualimap_genome_fraction.svg",
                 "samtools-flagstat-pct-table.svg",
                 "samtools-flagstat-table.svg",
                 "threeprime_misinc_plot.svg",
@@ -490,10 +480,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.10.3"
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2026-01-30T11:02:22.578559171"
+        "timestamp": "2026-07-06T17:42:34.093663"
     },
     "preprocessing": {
         "content": [
@@ -527,6 +517,9 @@
     "metagenomics": {
         "content": [
             [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz:md5,02a0855243e79316a7fb11cf229b692b",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz:md5,898cff61ad66dce7617b695026623eeb",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz:md5,a122f5a89977814fcc91fc49653576a9",
                 "RunSummary.txt:md5,79b84d2f76336c57b11d90779cf680d7",
                 "TotalCount.txt:md5,558fa11de08e21d76ed5c4ecf320ec6e",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.rma6_coverageHist.txt:md5,0dfeef0e05d01e17a39abe414f97e132",
@@ -597,10 +590,7 @@
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.rma6_alignmentDist.txt:md5,5e86aab32b673c47e322ef0ca5e341c7",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.rma6_readLengthDist.txt:md5,175a49571e69ad91506f086a9e1e651e",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.rma6_readLengthStat.txt:md5,7521a73348ccc76dbe436a3357177a05",
-                "error.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz:md5,02a0855243e79316a7fb11cf229b692b",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz:md5,898cff61ad66dce7617b695026623eeb",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.txt.gz:md5,a122f5a89977814fcc91fc49653576a9"
+                "error.txt:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
             [
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.rma6",
@@ -608,18 +598,18 @@
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.rma6",
                 "eager_test.tar_doublestranded_0-run-malt-run.log",
                 "eager_test.tar_runtime_log_concatenated.log",
-                "log.txt",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.megan",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.megan",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_metagenomics_fastq_unmapped_other.megan",
+                "log.txt",
                 "megan6_taxpasta_table.tsv"
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.10.0"
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2025-11-07T11:52:16.681128908"
+        "timestamp": "2026-07-06T17:42:34.431927"
     },
     "genotyping": {
         "content": [
@@ -723,15 +713,11 @@
                 "multiqc_fastp.txt",
                 "multiqc_fastqc.txt",
                 "multiqc_general_stats.txt",
-                "multiqc_qualimap_bamqc_genome_results.txt",
                 "multiqc_samtools_flagstat.txt",
                 "multiqc_software_versions.txt",
                 "multiqc_sources.txt",
                 "preseq.txt",
                 "preseq_complexity_plot_molecules.txt",
-                "qualimap_coverage_histogram.txt",
-                "qualimap_gc_content.txt",
-                "qualimap_genome_fraction.txt",
                 "samtools-flagstat-pct-table.txt",
                 "samtools-flagstat-table.txt",
                 "threeprime_misinc_plot.txt",
@@ -750,6 +736,7 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.pdf",
                 "fastp_filtered_reads_plot-cnt.pdf",
                 "fastp_filtered_reads_plot-pct.pdf",
+                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
                 "fastqc_per_base_sequence_quality_plot.pdf",
@@ -773,9 +760,6 @@
                 "mapdamage-length-distribution-Reverse.pdf",
                 "mapdamage-threeprime_misinc_plot.pdf",
                 "preseq_complexity_plot_molecules.pdf",
-                "qualimap_coverage_histogram.pdf",
-                "qualimap_gc_content.pdf",
-                "qualimap_genome_fraction.pdf",
                 "samtools-flagstat-pct-table.pdf",
                 "samtools-flagstat-table.pdf",
                 "threeprime_misinc_plot.pdf",
@@ -794,6 +778,7 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.png",
                 "fastp_filtered_reads_plot-cnt.png",
                 "fastp_filtered_reads_plot-pct.png",
+                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_per_base_n_content_plot.png",
                 "fastqc_per_base_sequence_quality_plot.png",
@@ -817,9 +802,6 @@
                 "mapdamage-length-distribution-Reverse.png",
                 "mapdamage-threeprime_misinc_plot.png",
                 "preseq_complexity_plot_molecules.png",
-                "qualimap_coverage_histogram.png",
-                "qualimap_gc_content.png",
-                "qualimap_genome_fraction.png",
                 "samtools-flagstat-pct-table.png",
                 "samtools-flagstat-table.png",
                 "threeprime_misinc_plot.png",
@@ -838,6 +820,7 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.svg",
                 "fastp_filtered_reads_plot-cnt.svg",
                 "fastp_filtered_reads_plot-pct.svg",
+                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
                 "fastqc_per_base_sequence_quality_plot.svg",
@@ -861,9 +844,6 @@
                 "mapdamage-length-distribution-Reverse.svg",
                 "mapdamage-threeprime_misinc_plot.svg",
                 "preseq_complexity_plot_molecules.svg",
-                "qualimap_coverage_histogram.svg",
-                "qualimap_gc_content.svg",
-                "qualimap_genome_fraction.svg",
                 "samtools-flagstat-pct-table.svg",
                 "samtools-flagstat-table.svg",
                 "threeprime_misinc_plot.svg",
@@ -871,10 +851,10 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.10.3"
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2026-01-30T11:02:22.875676292"
+        "timestamp": "2026-07-06T17:42:34.586903"
     },
     "mapping_output": {
         "content": [
