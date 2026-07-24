@@ -1,6 +1,6 @@
 {
     "@context": [
-        "https://w3id.org/ro/crate/1.2/context",
+        "https://w3id.org/ro/crate/1.1/context",
         {
             "GithubService": "https://w3id.org/ro/terms/test#GithubService",
             "JenkinsService": "https://w3id.org/ro/terms/test#JenkinsService",
@@ -105,7 +105,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#6ebe2000-3d8e-465b-a5bb-46c55b47c83b"
+                    "@id": "#d2f84652-3893-4520-a198-b6e46ca93c21"
                 }
             ],
             "name": "nf-core/eager"
@@ -118,7 +118,7 @@
             },
             "conformsTo": [
                 {
-                    "@id": "https://w3id.org/ro/crate/1.2"
+                    "@id": "https://w3id.org/ro/crate/1.1"
                 },
                 {
                     "@id": "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
@@ -134,11 +134,11 @@
             ],
             "contributor": [
                 {
-                    "@id": "#dcbb6173-b7b6-4538-9968-2a4f58edc1ed"
+                    "@id": "#f1da4bad-b422-4ddb-b5b9-30a015389d45"
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2026-04-30T13:32:45Z",
+            "dateModified": "2026-07-24T15:39:58Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
@@ -195,11 +195,11 @@
             "version": "!>=25.10.4"
         },
         {
-            "@id": "#6ebe2000-3d8e-465b-a5bb-46c55b47c83b",
+            "@id": "#d2f84652-3893-4520-a198-b6e46ca93c21",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#ac3ae307-e0be-4a46-a1fc-bf56c7094366"
+                    "@id": "#ec6ea28f-2d33-46b9-9680-8f390238d53e"
                 }
             ],
             "mainEntity": {
@@ -208,7 +208,7 @@
             "name": "Test suite for nf-core/eager"
         },
         {
-            "@id": "#ac3ae307-e0be-4a46-a1fc-bf56c7094366",
+            "@id": "#ec6ea28f-2d33-46b9-9680-8f390238d53e",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/eager",
             "resource": "repos/nf-core/eager/actions/workflows/nf-test.yml",
@@ -347,7 +347,7 @@
             "url": "https://nf-co.re/"
         },
         {
-            "@id": "#dcbb6173-b7b6-4538-9968-2a4f58edc1ed",
+            "@id": "#f1da4bad-b422-4ddb-b5b9-30a015389d45",
             "@type": "Person",
             "name": "The nf-core/eager community"
         }
