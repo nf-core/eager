@@ -84,14 +84,14 @@ workflow GENOTYPE {
                     ignore_me, combo_meta, bams, ref_meta, fasta, fai, dict, bed, snp ->
                         def bedfile = bed != "" ? bed : []
                         bams:  [ combo_meta, bams, bedfile ]
-                        fasta: [ fasta ]
+                        fasta: [ ref_meta, fasta ]
                 }
 
             SAMTOOLS_MPILEUP_PILEUPCALLER(
                 ch_mpileup_inputs.bams,
                 ch_mpileup_inputs.fasta,
             )
-            ch_versions = ch_versions.mix( SAMTOOLS_MPILEUP_PILEUPCALLER.out.versions.first() )
+            // ch_versions = ch_versions.mix( SAMTOOLS_MPILEUP_PILEUPCALLER.out.versions.first() )
 
             ch_pileupcaller_input = SAMTOOLS_MPILEUP_PILEUPCALLER.out.mpileup
                 .map {
@@ -372,7 +372,7 @@ workflow GENOTYPE {
                     def strandedness = metas.collect { meta -> meta.strandedness }
                     def single_ends = metas.collect { meta -> meta.single_end }
                     def reference = combo_meta.reference
-                    new_meta = [ sample_id: ids, strandedness: strandedness, single_end: single_ends, reference: reference ]
+                    def new_meta = [ sample_id: ids, strandedness: strandedness, single_end: single_ends, reference: reference ]
 
                     [ combo_meta, new_meta, bams, bais ] // Drop bais
                 } // Collect all IDs into a list in meta.sample_id.

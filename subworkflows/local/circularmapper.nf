@@ -41,7 +41,7 @@ workflow CIRCULARMAPPER {
                                 .map{
                                     // create meta consistent with rest of MAP workflow
                                     meta, bam ->
-                                        new_meta = meta + [ reference: meta.id_index ]
+                                        def new_meta = meta + [ reference: meta.id_index ]
                                     [ new_meta, bam ]
                                 }
                                 .map {

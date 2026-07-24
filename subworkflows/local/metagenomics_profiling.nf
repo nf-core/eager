@@ -78,14 +78,16 @@ workflow METAGENOMICS_PROFILING {
         // could be prevented by branching early and running the lower part twice for ss and ds individually
         // but this is an edge-case and might never be relevant...
         ch_input_for_malt = ch_reads.combine(ch_tmp_groups).map{ meta, reads, n_groups ->
-            [
+            def result = [
                 [
                     label: label,
                     strandedness:meta.strandedness,
-                    id:"${meta.strandedness}stranded_${groups_counter++%n_groups}"
+                    id:"${meta.strandedness}stranded_${groups_counter % n_groups}"
                 ],
                 reads
             ]
+            groups_counter += 1
+            return result
         }
         .groupTuple(by:0)
 

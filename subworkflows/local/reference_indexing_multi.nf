@@ -84,7 +84,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
 
     GUNZIP_FASTA(ch_gunzip_input.gunzip)
-    ch_version = ch_versions.mix(GUNZIP_FASTA.out.versions)
+    ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
 
     // Mix back gunzipped fasta with remaining files, and then mix back with pre-gunzipped references
     ch_gunzippedfasta_formix = GUNZIP_FASTA.out.gunzip.join(ch_gunzip_input.remainder, failOnMismatch: true)
@@ -107,7 +107,7 @@ workflow REFERENCE_INDEXING_MULTI {
     }
 
     SAMTOOLS_FAIDX(ch_faidx_input.faidx, [[], []])
-    ch_version = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
+    ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
 
     // Rejoin output channel with main reference indicies channel elements
     ch_faidxed_formix = SAMTOOLS_FAIDX.out.fai
@@ -135,7 +135,7 @@ workflow REFERENCE_INDEXING_MULTI {
     }
 
     PICARD_CREATESEQUENCEDICTIONARY(ch_dict_input.dict)
-    ch_version = ch_versions.mix(PICARD_CREATESEQUENCEDICTIONARY.out.versions)
+    ch_versions = ch_versions.mix(PICARD_CREATESEQUENCEDICTIONARY.out.versions)
 
     ch_dicted_formix = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
         .join(ch_dict_input.remainder, failOnMismatch: true)
@@ -164,16 +164,16 @@ workflow REFERENCE_INDEXING_MULTI {
 
     if (params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" || params.mapping_tool == "circularmapper") {
         BWA_INDEX(ch_mapindex_input.index)
-        ch_version = ch_versions.mix(BWA_INDEX.out.versions)
+        // ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
         ch_indexed_forremap = BWA_INDEX.out.index
     }
     else if (params.mapping_tool == "bowtie2") {
         BOWTIE2_BUILD(ch_mapindex_input.index)
-        ch_version = ch_versions.mix(BOWTIE2_BUILD.out.versions)
+        ch_versions = ch_versions.mix(BOWTIE2_BUILD.out.versions)
         ch_indexed_forremap = BOWTIE2_BUILD.out.index
     } else if (params.mapping_tool == "mapad") {
         MAPAD_INDEX (ch_mapindex_input.index)
-        ch_version = ch_versions.mix( MAPAD_INDEX.out.versions )
+        ch_versions = ch_versions.mix( MAPAD_INDEX.out.versions )
         ch_indexed_forremap = MAPAD_INDEX.out.index
     }
 
