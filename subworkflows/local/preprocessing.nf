@@ -35,7 +35,7 @@ workflow PREPROCESSING {
         ch_multiqc_files = ch_multiqc_files.mix( FALCO_PROCESSED.out.txt )
     } else {
         FASTQC_PROCESSED ( ch_processed_reads )
-        ch_versions = ch_versions.mix( FASTQC_PROCESSED.out.versions )
+        // ch_versions = ch_versions.mix( FASTQC_PROCESSED.out.versions )
         ch_multiqc_files = ch_multiqc_files.mix( FASTQC_PROCESSED.out.zip )
     }
 

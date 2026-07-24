@@ -34,10 +34,10 @@ workflow CALCULATE_DAMAGE {
                 ch_refs
             )
             .multiMap{
-                ignore_me, meta, bam, bai, meta2, fasta, fasta_fai ->
+                ignore_me, meta, bam, bai, meta2, fasta_, fasta_fai_ ->
                 bam: [ meta, bam ]
-                fasta: fasta
-                fasta_fai: fasta_fai
+                fasta: fasta_
+                fasta_fai: fasta_fai_
             }
     // Calculate damage
     if ( params.damagecalculation_tool == 'damageprofiler' ) {

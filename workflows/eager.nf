@@ -60,7 +60,7 @@ include { HOST_REMOVAL                                        } from '../modules
 include { ENDORSPY                                            } from '../modules/nf-core/endorspy/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_DEPTH        } from '../modules/nf-core/bedtools/coverage/main'
 include { BEDTOOLS_COVERAGE as BEDTOOLS_COVERAGE_BREADTH      } from '../modules/nf-core/bedtools/coverage/main'
-include { SAMTOOLS_VIEW_GENOME                                } from '../modules/local/samtools_view_genome.nf'
+include { SAMTOOLS_VIEW_GENOME                                } from '../modules/local/samtools_view_genome'
 include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_NOBED              } from '../modules/nf-core/qualimap/bamqc/main'
 include { QUALIMAP_BAMQC as QUALIMAP_BAMQC_WITHBED            } from '../modules/nf-core/qualimap/bamqc/main'
 
@@ -75,6 +75,10 @@ workflow EAGER {
     ch_samplesheet_fastqs // channel: samplesheet FASTQ entries read in from --input
     ch_samplesheet_bams   // channel: samplesheet BAM entries read in from --input
     ch_samplesheet_vcfs   // channel: samplesheet VCFs entries read in from --input
+    multiqc_config
+    multiqc_logo
+    multiqc_methods_description
+    outdir
 
     main:
 
@@ -161,7 +165,7 @@ workflow EAGER {
     }
     else {
         FASTQC(ch_fastqs_for_preprocessing)
-        ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+        // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
         ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect { it[1] }.ifEmpty([]))
     }
 
@@ -319,14 +323,14 @@ workflow EAGER {
         ch_bam_for_host_removal = MAP.out.bam
             .join(MAP.out.bai)
             .map { meta, bam, bai ->
-                new_meta = meta.clone().findAll { it.key !in ['single_end', 'reference'] }
+                def new_meta = meta.clone().findAll { it.key !in ['single_end', 'reference'] }
                 [new_meta, meta, bam, bai]
             }
         // Preparing fastq channel for host removal to be combined with the bam channel
         // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
         // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
         ch_fastqs_for_host_removal = ch_fastqs_for_preprocessing.map { meta, fastqs ->
-            new_meta = meta.clone().findAll { it.key !in ['lane', 'colour_chemistry', 'single_end'] }
+            def new_meta = meta.clone().findAll { it.key !in ['lane', 'colour_chemistry', 'single_end'] }
             [new_meta, meta, fastqs]
         }
         // We join the bam and fastq channel with now matching metas (new_meta) referred as meta_join
@@ -597,62 +601,41 @@ workflow EAGER {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+    def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
         .mix(topic_versions_string)
         .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_' + 'eager_software_' + 'mqc_' + 'versions.yml',
+            storeDir: "${outdir}/pipeline_info",
+            name: 'nf_core_'  +  'eager_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
-            newLine: true,
+            newLine: true
         )
-        .set { ch_collated_versions }
-
 
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config        = channel.fromPath(
-        "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config = params.multiqc_config ?
-        channel.fromPath(params.multiqc_config, checkIfExists: true) :
-        channel.empty()
-    ch_multiqc_logo          = params.multiqc_logo ?
-        channel.fromPath(params.multiqc_logo, checkIfExists: true) :
-        channel.empty()
-
-    summary_params      = paramsSummaryMap(
-        workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary = channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
-        file(params.multiqc_methods_description, checkIfExists: true) :
-        file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = channel.value(
-        methodsDescriptionText(ch_multiqc_custom_methods_description))
-
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_methods_description.collectFile(
-            name: 'methods_description_mqc.yaml',
-            sort: true,
-        )
-    )
-
-    if (!params.skip_qualimap) {
-        ch_multiqc_files = ch_multiqc_files.mix(ch_qualimap_output.collect { it[1] }.ifEmpty([]))
-    }
-
+    def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    def ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    def ch_multiqc_custom_methods_description = multiqc_methods_description
+        ? file(multiqc_methods_description, checkIfExists: true)
+        : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
+    def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
     MULTIQC(
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        [],
-        [],
+        ch_multiqc_files.flatten().collect().map { files ->
+            [
+                [id: 'eager'],
+                files,
+                multiqc_config
+                    ? file(multiqc_config, checkIfExists: true)
+                    : file("${projectDir}/assets/multiqc_config.yml", checkIfExists: true),
+                multiqc_logo ? file(multiqc_logo, checkIfExists: true) : [],
+                [],
+                [],
+            ]
+        }
     )
-
-    emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions // channel: [ path(versions.yml) ]
+    emit:multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
+    versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
