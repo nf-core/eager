@@ -45,6 +45,7 @@ workflow NFCORE_EAGER {
     take:
     samplesheet_fastqs // channel: samplesheet read in from --input
     samplesheet_bams
+    samplesheet_vcfs
 
     main:
 
@@ -53,7 +54,12 @@ workflow NFCORE_EAGER {
     //
     EAGER (
         samplesheet_fastqs,
-        samplesheet_bams
+        samplesheet_bams,
+        samplesheet_vcfs,
+        params.multiqc_config,
+        params.multiqc_logo,
+        params.multiqc_methods_description,
+        params.outdir,
     )
     emit:
     multiqc_report = EAGER.out.multiqc_report // channel: /path/to/multiqc_report.html
@@ -88,6 +94,7 @@ workflow {
     NFCORE_EAGER (
         PIPELINE_INITIALISATION.out.samplesheet_fastqs,
         PIPELINE_INITIALISATION.out.samplesheet_bams,
+        PIPELINE_INITIALISATION.out.samplesheet_vcfs
     )
     //
     // SUBWORKFLOW: Run completion tasks
@@ -98,7 +105,6 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
         NFCORE_EAGER.out.multiqc_report
     )
 }

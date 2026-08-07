@@ -4,34 +4,38 @@ process SAMTOOLS_MPILEUP {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/samtools:1.18--h50ea8bc_1' :
-        'biocontainers/samtools:1.18--h50ea8bc_1' }"
+        'https://depot.galaxyproject.org/singularity/samtools:1.22.1--h96c455f_0' :
+        'biocontainers/samtools:1.22.1--h96c455f_0' }"
+
     input:
     tuple val(meta), path(input), path(intervals)
-    path  fasta
+    tuple val(meta2), path(fasta)
 
     output:
     tuple val(meta), path("*.mpileup.gz"), emit: mpileup
-    path  "versions.yml"                           , emit: versions
+    tuple val("${task.process}"), val('samtools'), eval('samtools --version | head -1 | sed -e "s/samtools //"'), emit: versions_samtools, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def intervals = intervals ? "-l ${intervals}" : ""
+    def args          = task.ext.args   ?: ''
+    def prefix        = task.ext.prefix ?: "${meta.id}"
+    def fasta_cmd     = fasta           ? "--fasta-ref $fasta" : ""
+    def intervals_cmd = intervals       ? "-l ${intervals}" : ""
     """
     samtools mpileup \\
-        --fasta-ref $fasta \\
+        $fasta_cmd \\
         --output ${prefix}.mpileup \\
         $args \\
-        $intervals \\
+        $intervals_cmd \\
         $input
     bgzip ${prefix}.mpileup
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-    END_VERSIONS
+    """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    echo | gzip > ${prefix}.mpileup.gz
     """
 }

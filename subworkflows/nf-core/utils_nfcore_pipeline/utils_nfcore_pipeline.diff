@@ -1,10 +1,9 @@
 Changes in component 'nf-core/utils_nfcore_pipeline'
-'subworkflows/nf-core/utils_nfcore_pipeline/meta.yml' is unchanged
 Changes in 'utils_nfcore_pipeline/main.nf':
 --- subworkflows/nf-core/utils_nfcore_pipeline/main.nf
 +++ subworkflows/nf-core/utils_nfcore_pipeline/main.nf
-@@ -417,3 +417,14 @@
-         log.warn(post.getErrorStream().getText())
+@@ -353,3 +353,14 @@
+         log.info("-${colors.purple}[${workflow.manifest.name}]${colors.red} Pipeline completed with errors${colors.reset}-")
      }
  }
 +
@@ -14,14 +13,17 @@ Changes in 'utils_nfcore_pipeline/main.nf':
 +    if (workflow.stats.ignoredCount == 0) {
 +            if (workflow.success) {
 +                // https://en.wiktionary.org/wiki/jw.f_pw
-+                log.info("-${colors.green}𓂻 𓅱 𓆑 𓊪 𓅱${colors.reset}-")
++                log.info("- ${colors.green}𓂻 𓅱 𓆑 𓊪 𓅱${colors.reset} -")
 +            }
 +    }
 +}
 
-'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test' is unchanged
-'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test.snap' is unchanged
-'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test.snap' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/meta.yml' is unchanged
 'subworkflows/nf-core/utils_nfcore_pipeline/tests/nextflow.config' is unchanged
-'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test.snap' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test.snap' was created
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.nf.test' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.nf.test.snap' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test' was created
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test' is unchanged
 ************************************************************

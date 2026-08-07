@@ -42,6 +42,7 @@
                 "multiqc_sources.txt",
                 "samtools-flagstat-pct-table.txt",
                 "samtools-flagstat-table.txt",
+                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
                 "fastqc_per_base_sequence_quality_plot.pdf",
@@ -54,6 +55,7 @@
                 "fastqc_top_overrepresented_sequences_table.pdf",
                 "samtools-flagstat-pct-table.pdf",
                 "samtools-flagstat-table.pdf",
+                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_per_base_n_content_plot.png",
                 "fastqc_per_base_sequence_quality_plot.png",
@@ -66,6 +68,7 @@
                 "fastqc_top_overrepresented_sequences_table.png",
                 "samtools-flagstat-pct-table.png",
                 "samtools-flagstat-table.png",
+                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
                 "fastqc_per_base_sequence_quality_plot.svg",
@@ -89,9 +92,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2026-01-16T11:01:55.552197"
+        "timestamp": "2026-07-06T13:51:06.597958"
     },
     "preprocessing": {
         "content": [
@@ -157,6 +160,7 @@
                 "multiqc_sources.txt",
                 "samtools-flagstat-pct-table.txt",
                 "samtools-flagstat-table.txt",
+                "fastqc-status-check-heatmap.pdf",
                 "fastqc_adapter_content_plot.pdf",
                 "fastqc_per_base_n_content_plot.pdf",
                 "fastqc_per_base_sequence_quality_plot.pdf",
@@ -169,6 +173,7 @@
                 "fastqc_top_overrepresented_sequences_table.pdf",
                 "samtools-flagstat-pct-table.pdf",
                 "samtools-flagstat-table.pdf",
+                "fastqc-status-check-heatmap.png",
                 "fastqc_adapter_content_plot.png",
                 "fastqc_per_base_n_content_plot.png",
                 "fastqc_per_base_sequence_quality_plot.png",
@@ -181,6 +186,7 @@
                 "fastqc_top_overrepresented_sequences_table.png",
                 "samtools-flagstat-pct-table.png",
                 "samtools-flagstat-table.png",
+                "fastqc-status-check-heatmap.svg",
                 "fastqc_adapter_content_plot.svg",
                 "fastqc_per_base_n_content_plot.svg",
                 "fastqc_per_base_sequence_quality_plot.svg",
@@ -198,9 +204,9 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.10.0"
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2026-01-16T11:01:55.639262"
+        "timestamp": "2026-07-06T13:51:06.685993"
     },
     "mapping_output": {
         "content": [
@@ -245,7 +251,7 @@
                     "bwa": "0.7.18-r1243-dirty"
                 },
                 "BWA_INDEX": {
-                    "bwa": "0.7.18-r1243-dirty"
+                    "bwa": "0.7.19-r1273"
                 },
                 "ENDORSPY": {
                     "endorspy": 1.3
@@ -281,8 +287,8 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "26.04.4"
         },
-        "timestamp": "2025-11-07T11:11:09.956496"
+        "timestamp": "2026-07-06T13:51:06.802426"
     }
 }

@@ -20,7 +20,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // Import reference sheet and change empty arrays to empty strings for compatibility with single reference input
     ch_splitreferencesheet_for_branch = Channel
         .fromList(samplesheetToList(referencesheet, "${projectDir}/assets/schema_fasta.json"))
-        .map { meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
+        .map { meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results  ->
             meta.ploidy = meta.genotyping_ploidy != null ? meta.genotyping_ploidy : params.genotyping_reference_ploidy
             fai = fai != [] ? fai : ""
             dict = dict != [] ? dict : ""
@@ -38,7 +38,10 @@ workflow REFERENCE_INDEXING_MULTI {
             sexdet_bed = sexdet_bed != [] ? sexdet_bed : ""
             bedtools_feature = bedtools_feature != [] ? bedtools_feature : ""
             genotyping_gatk_dbsnp = genotyping_gatk_dbsnp != [] ? genotyping_gatk_dbsnp : ""
-            [meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp]
+            consensus_multivcfanalyzer_reference_gff_annotations = consensus_multivcfanalyzer_reference_gff_annotations != [] ? consensus_multivcfanalyzer_reference_gff_annotations : ""
+            consensus_multivcfanalyzer_reference_gff_exclude     = consensus_multivcfanalyzer_reference_gff_exclude != [] ? consensus_multivcfanalyzer_reference_gff_exclude : ""
+            consensus_multivcfanalyzer_reference_snpeff_results  = consensus_multivcfanalyzer_reference_snpeff_results != [] ? consensus_multivcfanalyzer_reference_snpeff_results : ""
+            [meta - meta.subMap('genotyping_ploidy'), fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ]
         }
 
     // GENERAL DESCRIPTION FOR NEXT SECTIONS
@@ -52,7 +55,7 @@ workflow REFERENCE_INDEXING_MULTI {
     // DECOMPRESSION
     //
 
-    ch_input_from_referencesheet = ch_splitreferencesheet_for_branch.multiMap { meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp ->
+    ch_input_from_referencesheet = ch_splitreferencesheet_for_branch.multiMap { meta, fasta, fai, dict, mapper_index, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex, mitochondrion, capture_bed, pileupcaller_bed, pileupcaller_snp, hapmap, pmd_masked_fasta, pmd_bed_for_masking, sexdet_bed, bedtools_feature, genotyping_gatk_dbsnp, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results ->
         generated: [meta, fasta, fai, dict, mapper_index]
         circularmapper: [meta, circular_target, circularmapper_elongatedfasta, circularmapper_elongatedindex]
         mitochondrion_header: [meta, mitochondrion]
@@ -64,6 +67,7 @@ workflow REFERENCE_INDEXING_MULTI {
         sexdeterrmine_bed: [meta, sexdet_bed]
         bedtools_feature: [meta, bedtools_feature]
         dbsnp: [meta, genotyping_gatk_dbsnp]
+        mva: [meta, consensus_multivcfanalyzer_reference_gff_annotations, consensus_multivcfanalyzer_reference_gff_exclude, consensus_multivcfanalyzer_reference_snpeff_results]
     }
 
     // Detect if fasta is gzipped or not
@@ -80,7 +84,7 @@ workflow REFERENCE_INDEXING_MULTI {
 
 
     GUNZIP_FASTA(ch_gunzip_input.gunzip)
-    ch_version = ch_versions.mix(GUNZIP_FASTA.out.versions)
+    ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
 
     // Mix back gunzipped fasta with remaining files, and then mix back with pre-gunzipped references
     ch_gunzippedfasta_formix = GUNZIP_FASTA.out.gunzip.join(ch_gunzip_input.remainder, failOnMismatch: true)
@@ -103,7 +107,7 @@ workflow REFERENCE_INDEXING_MULTI {
     }
 
     SAMTOOLS_FAIDX(ch_faidx_input.faidx, [[], []])
-    ch_version = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
+    ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
 
     // Rejoin output channel with main reference indicies channel elements
     ch_faidxed_formix = SAMTOOLS_FAIDX.out.fai
@@ -131,7 +135,7 @@ workflow REFERENCE_INDEXING_MULTI {
     }
 
     PICARD_CREATESEQUENCEDICTIONARY(ch_dict_input.dict)
-    ch_version = ch_versions.mix(PICARD_CREATESEQUENCEDICTIONARY.out.versions)
+    ch_versions = ch_versions.mix(PICARD_CREATESEQUENCEDICTIONARY.out.versions)
 
     ch_dicted_formix = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
         .join(ch_dict_input.remainder, failOnMismatch: true)
@@ -160,16 +164,16 @@ workflow REFERENCE_INDEXING_MULTI {
 
     if (params.mapping_tool == "bwaaln" || params.mapping_tool == "bwamem" || params.mapping_tool == "circularmapper") {
         BWA_INDEX(ch_mapindex_input.index)
-        ch_version = ch_versions.mix(BWA_INDEX.out.versions)
+        // ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
         ch_indexed_forremap = BWA_INDEX.out.index
     }
     else if (params.mapping_tool == "bowtie2") {
         BOWTIE2_BUILD(ch_mapindex_input.index)
-        ch_version = ch_versions.mix(BOWTIE2_BUILD.out.versions)
+        ch_versions = ch_versions.mix(BOWTIE2_BUILD.out.versions)
         ch_indexed_forremap = BOWTIE2_BUILD.out.index
     } else if (params.mapping_tool == "mapad") {
         MAPAD_INDEX (ch_mapindex_input.index)
-        ch_version = ch_versions.mix( MAPAD_INDEX.out.versions )
+        ch_versions = ch_versions.mix( MAPAD_INDEX.out.versions )
         ch_indexed_forremap = MAPAD_INDEX.out.index
     }
 
@@ -194,5 +198,6 @@ workflow REFERENCE_INDEXING_MULTI {
     sexdeterrmine_bed    = ch_input_from_referencesheet.sexdeterrmine_bed // [ meta, sexdet_bed ]
     bedtools_feature     = ch_input_from_referencesheet.bedtools_feature // [ meta, bedtools_feature ]
     dbsnp                = ch_input_from_referencesheet.dbsnp // [ meta, genotyping_gatk_dbsnp ]
+    mva                  = ch_input_from_referencesheet.mva
     versions             = ch_versions
 }
