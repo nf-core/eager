@@ -6,32 +6,45 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+Eager is a workflow designed for reproducible, portable, and efficient ancient genome reconstruction.
+
+It is a complete end-to-end pipeline that takes raw FASTQ files as input and produces a variety of outputs, including mapped BAM files, genotypes, quality control and aDNA authenticity metrics.
+Given the inherent heterogeneity of ancient DNA data and their uses, eager is designed to be flexible and modular, allowing users to run only the steps they need for their specific analysis.
+Although primarily designed for ancient DNA, it is possible to configure eager for use with modern DNA data as well.
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline.
+Use this parameter to specify its location.
+It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
 ```bash
---input '[path to samplesheet file]'
+--input '<path to samplesheet file>'
 ```
 
 ### Multiple runs of the same sample
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
+The `sample_id` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth.
+The pipeline will concatenate the raw reads before mapping. Below is an example for the same sample sequenced across 3 lanes:
 
 ```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+sample_id,library_id,lane,colour_chemistry,pairment,strandedness,damage_treatment,r1,r2,bam,bam_reference_id
+CONTROL_REP1,CONTROL_REP1_LIB1,1,4,paired,double,none,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+CONTROL_REP1,CONTROL_REP1_LIB1,2,4,paired,double,none,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
+CONTROL_REP1,CONTROL_REP1_LIB1,3,4,paired,double,none,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
 ```
 
 ### Supplying BAM input
 
-It is possible to also supply BAM files as input to nf-core/eager. This can allow you to skip earlier steps of the pipeline (preprocessing and mapping) when desired - e.g. when re-processing public data. You can also convert input BAM files back to FASTQ files to re-undergo preprocessing and mapping. This may be desired when you want to standardise the mapping parameters between your own and previously published data.
+It is possible to also supply BAM files as input to nf-core/eager.
+To do so, you can specify the path to the BAM file in the `bam` column of the samplesheet, along with the corresponding `bam_reference_id` (e.g. `hs37d5`).
+This can allow you to skip earlier steps of the pipeline (preprocessing and mapping) when desired - e.g. when re-processing public data.
+You can also convert input BAM files back to FASTQ files to re-undergo preprocessing and mapping.
+This may be desired when you want to standardise the mapping parameters between your own and previously published data.
 
-You will still need to fill the `pairment` column in the input TSV sheet for the BAM files. If you do not convert the BAM files back to FASTQ, you must specify the column as `single`. If you do do the conversion, you must specify the type of reads the BAM file contains, i.e.:
+You will still need to fill the `pairment` column in the input TSV sheet for the BAM files.
+If you do not convert the BAM files back to FASTQ, you must specify the column as `single`.
+If you do do the conversion, you must specify the type of reads the BAM file contains, i.e.:
 
 - If the mapped reads in the BAM file are single end then specify `single`
 - If the mapped reads in the BAM file are paired-end _but merged pairs_ (i.e. overlapping pairs collapsed to a single read), then you must also supply `single`
@@ -41,26 +54,40 @@ Note that if you do not specify to merge BAM converted paired-end FASTQs (i.e., 
 
 ### Full samplesheet
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+The pipeline will detect whether a sample is single- or paired-end, sequenced using 2-colour or 4-colour chemistry, and/or damage-treated using the information provided in the samplesheet.
+A valid samplesheet must contain the columns `sample_id`, `library_id`, `lane`, `colour_chemistry`, `pairment`, `strandedness`, and `damage_treatment`, as well as at least one of `r1`, `r2`, and `bam` (see table below for descriptions).
+If you are supplying BAM files, you must also provide the `bam_reference_id` column.
+A table containing the descriptions of each column is provided below.
+Beyond those columns, the samplesheet can have as many columns as you desire, which will be ignored by the pipeline.
 
 A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
 
 ```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+sample_id,library_id,lane,colour_chemistry,pairment,strandedness,damage_treatment,r1,r2
+CONTROL_REP1,CONTROL_REP1_LIB1,1,4,paired,double,none,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+CONTROL_REP2,CONTROL_REP2_LIB1,1,4,paired,double,none,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
+CONTROL_REP3,CONTROL_REP3_LIB3,1,4,paired,double,none,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
+TREATMENT_REP1,TREATMENT_REP1_LIB1,1,4,single,double,none,AEG588A4_S4_L003_R1_001.fastq.gz,
+TREATMENT_REP2,TREATMENT_REP2_LIB1,1,4,single,double,none,AEG588A5_S5_L003_R1_001.fastq.gz,
+TREATMENT_REP3,TREATMENT_REP3_LIB1,1,4,single,double,none,AEG588A6_S6_L003_R1_001.fastq.gz,
+TREATMENT_REP3,TREATMENT_REP3_LIB1,1,4,single,double,none,AEG588A6_S6_L004_R1_001.fastq.gz,
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| Column             | Description                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sample_id`        | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`).     |
+| `library_id`       | Custom library name. This entry will be identical for multiple sequencing runs from the same library. Spaces in library names are automatically converted to underscores (`_`).            |
+| `lane`             | The lane number of the sequencing run the data belongs to.                                                                                                                                 |
+| `colour_chemistry` | The colour chemistry of the sequencer used in the production of the data.                                                                                                                  |
+| `pairment`         | Whether the reads are paired-end or single-end. Must be one of `paired` or `single`.                                                                                                       |
+| `strandedness`     | The strandedness of the aDNA libraries. Unless the data was produced using single-stranded lbrary preparation, which field should be set to `double`. Must be one of `double` or `single`. |
+| `damage_treatment` | The type of damage treatment applied to the samples. Must be one of `none`, `half`, or `full`.                                                                                             |
+| `r1`               | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                                 |
+| `r2`               | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                                 |
+| `bam`              | Full path to BAM file.                                                                                                                                                                     |
+| `bam_reference_id` | Custom reference name for the BAM file. This is required for BAM input files.                                                                                                              |
+| `vcf`              | Full path to input VCF file.                                                                                                                                                               |
+| `vcf_reference_id` | Custom reference name for the VCF file. This is required for VCF input files.                                                                                                              |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
