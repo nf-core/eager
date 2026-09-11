@@ -108,7 +108,7 @@ Additionally, many other reference-specific parameters can be supplied in the re
 Note that passing a reference sheet to the pipeline with `--fasta_sheet` will _override_ any corresponding directly-supplied reference-related parameters (e.g. `--fasta_fai`, `--fasta_dict`).
 
 Any columns that are not provided in the reference sheet are assumed to be empty.
-Beyond those columns, the samplesheet can have as many columns as you desire, which will be ignored by the pipeline.
+Beyond those columns, the reference sheet can have as many columns as you desire, which will be ignored by the pipeline.
 
 An example of a reference sheet in `csv` format is as follows:
 
