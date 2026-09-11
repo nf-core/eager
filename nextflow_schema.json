@@ -151,9 +151,9 @@
                 },
                 "fasta_circularmapper_elongatedindex": {
                     "type": "string",
-                    "description": "Specify a samtools index for the elongated FASTA file.",
+                    "description": "Specify a bwa index directory for the elongated FASTA file.",
                     "help_text": "Specify the index for an already elongated FASTA file to avoid regeneration.",
-                    "fa_icon": "fas fa-address-book"
+                    "fa_icon": "fas fa-folder-open"
                 }
             }
         },
