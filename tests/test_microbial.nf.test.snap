@@ -2,6 +2,7 @@
     "all_files": {
         "content": [
             [
+                "JK2782_Mammoth_MT_Krause_breadth.bed",
                 "JK2782_Mammoth_MT_Krause_depth.bed",
                 "3pGtoA_freq.txt",
                 "3p_freq_misincorporations.txt",
@@ -44,9 +45,7 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_percent_on_target_mqc.json",
                 "JK2782_JK2782_TGGCCGATCAACGA_hs37d5_chr21-MT_percent_on_target_mqc.json",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.c_curve.txt",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.command.log",
                 "JK2782_JK2782_TGGCCGATCAACGA_hs37d5_chr21-MT.c_curve.txt",
-                "JK2782_JK2782_TGGCCGATCAACGA_hs37d5_chr21-MT.command.log",
                 "agogo.css",
                 "ajax-loader.gif",
                 "basic.css",
@@ -300,9 +299,9 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_hs37d5_chr21-MT_filtered.flagstat"
             ]
         ],
-        "timestamp": "2026-07-06T14:34:16.91349",
+        "timestamp": "2026-09-11T19:28:11.537775",
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.5",
             "nextflow": "26.04.4"
         }
     },
@@ -377,18 +376,18 @@
     "genotyping": {
         "content": [
             [
-                "JK2782_Mammoth_MT_Krause.bcftools_stats.txt:md5,61ea79d61d3db9758e2ef15b5e895580",
-                "JK2782_hs37d5_chr21-MT.bcftools_stats.txt:md5,f8570bcd90546d6543ee4e8aa3363c28"
+                "JK2782_Mammoth_MT_Krause.bcftools_stats.txt:md5,d3ca07e5075a741027e8d55ffd35754a",
+                "JK2782_hs37d5_chr21-MT.bcftools_stats.txt:md5,f38b838893ca595d0852155ba6581735"
             ],
             [
                 "JK2782_Mammoth_MT_Krause.vcf.gz.tbi",
                 "JK2782_hs37d5_chr21-MT.vcf.gz.tbi"
             ]
         ],
-        "timestamp": "2026-07-24T08:59:33.007487875",
+        "timestamp": "2026-09-11T19:28:11.99225",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "25.10.4"
+            "nextflow": "26.04.4"
         }
     },
     "final_bams": {
@@ -607,6 +606,9 @@
                 "BCFTOOLS_STATS_GENOTYPING": {
                     "bcftools": 1.18
                 },
+                "BEDTOOLS_COVERAGE_BREADTH": {
+                    "bedtools": "2.31.1)"
+                },
                 "BEDTOOLS_COVERAGE_DEPTH": {
                     "bedtools": "2.31.1)"
                 },
@@ -715,15 +717,16 @@
                 }
             }
         ],
-        "timestamp": "2026-07-06T14:34:17.971957",
+        "timestamp": "2026-09-11T19:28:12.309673",
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.5",
             "nextflow": "26.04.4"
         }
     },
     "authentication": {
         "content": [
             [
+                "JK2782_Mammoth_MT_Krause_breadth.bed:md5,e0c6f2732b8ddbc9ac10a6f2107ec900",
                 "JK2782_Mammoth_MT_Krause_depth.bed:md5,fb8622fe4f5c61d492dccaf4aada12f8",
                 "3pGtoA_freq.txt:md5,25a4caf935e2f9e515b0ae3296eaaefa",
                 "5pCtoT_freq.txt:md5,96e6e1f7a092c2d74c8c1b6d92107b4f",
@@ -797,8 +800,6 @@
                 "edit_distance.pdf",
                 "edit_distance.svg",
                 "misincorporation.txt",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause.command.log",
-                "JK2782_JK2782_TGGCCGATCAACGA_hs37d5_chr21-MT.command.log",
                 "bgfooter.png",
                 "bgtop.png",
                 "comment-bright.png",
@@ -844,10 +845,10 @@
                 "qualimapReport.html"
             ]
         ],
-        "timestamp": "2025-09-16T13:00:10.465714",
+        "timestamp": "2026-09-11T19:28:11.86939",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.04.7"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
         }
     }
 }
