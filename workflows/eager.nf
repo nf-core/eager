@@ -319,24 +319,26 @@ workflow EAGER {
     if (params.run_host_removal) {
         // Preparing bam channel for host removal to be combined with the input fastq channel
         // The bam channel consist of [meta, bam, bai] and in the meta we have in addition 'single_end' always set as TRUE and 'reference' set
-        // To be able to join it with fastq channel, we need to remove them from the meta (done in map) and stored in new_meta
+        // To be able to combine it with fastq channel, we need to remove them from the meta (done in map) and stored in new_meta
         ch_bam_for_host_removal = MAP.out.bam
             .join(MAP.out.bai)
-            .map { meta, bam, bai ->
-                def new_meta = meta.clone().findAll { it.key !in ['single_end', 'reference'] }
-                [new_meta, meta, bam, bai]
-            }
+            .map {
+                def meta_attributes=['sample_id','library_id','strandedness','damage_treatment','vcf_reference_id','id']
+                addNewMetaFromAttributes(it, meta_attributes, meta_attributes, false)
+            } // [ new_meta, bam_meta, bam, bai]
         // Preparing fastq channel for host removal to be combined with the bam channel
         // The meta of the fastq channel contains additional fields when compared to the meta from the bam channel: lane, colour_chemistry,
         // and not necessarily matching single_end. Those fields are dropped of the meta in the map and stored in new_meta
-        ch_fastqs_for_host_removal = ch_fastqs_for_preprocessing.map { meta, fastqs ->
-            def new_meta = meta.clone().findAll { it.key !in ['lane', 'colour_chemistry', 'single_end'] }
-            [new_meta, meta, fastqs]
-        }
-        // We join the bam and fastq channel with now matching metas (new_meta) referred as meta_join
-        // and remove the meta_join from the final channel, keeping the original metas for the bam and the fastqs
+        ch_fastqs_for_host_removal = ch_fastqs_for_preprocessing
+            .map {
+                    def meta_attributes=['sample_id','library_id','strandedness','damage_treatment','vcf_reference_id','id']
+                    addNewMetaFromAttributes(it, meta_attributes, meta_attributes, false)
+            } // [ new_meta, fq_meta, [r1, r2]]
+        // We combine the bam and fastq channel with now matching metas (new_meta) referred as meta_join
+        // and remove the meta_join from the final channel, keeping the original metas for the bam and the fastqs.
+        // A combine is needed here for multiple references, as there are then n host removals that need to be ran on the same set of FastQs.
         ch_input_for_host_removal = ch_bam_for_host_removal
-            .join(ch_fastqs_for_host_removal)
+            .combine(ch_fastqs_for_host_removal, by:0)
             .map { meta_join, meta_bam, bam, bai, meta_fastq, fastqs ->
                 [meta_bam, bam, bai, meta_fastq, fastqs]
             }
