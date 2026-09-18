@@ -1,4 +1,6 @@
 lint:
+  files_unchanges:
+    - .github/workflows/linting.yml
   nextflow_config: false
   schema_params: false
 nf_core_version: 4.1.0
