@@ -27,9 +27,9 @@ workflow REFERENCE_INDEXING_SINGLE {
 
     // Detect if fasta is gzipped or not, unzip if necessary, and generate meta ID by sanitizing file
     if ( fasta.extension == 'gz' ) {
-        ch_gz_ref = Channel.fromPath(fasta).map{[[], it]}
+        ch_gz_ref = Channel.fromPath(fasta).map{[[id: clean_name], it]}
         GUNZIP_FASTA ( ch_gz_ref )
-        ch_ungz_ref = GUNZIP_FASTA.out.gunzip.map{[[id: clean_name], it[1] ]}
+        ch_ungz_ref = GUNZIP_FASTA.out.gunzip
         ch_versions = ch_versions.mix( GUNZIP_FASTA.out.versions.first())
     } else {
         ch_ungz_ref = Channel.fromPath(fasta).map{[[id: clean_name], it ]}
