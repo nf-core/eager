@@ -21,7 +21,7 @@ jobs:
           # nested inside the publishDir lists of conf/modules.config
           # (nextflow-io/nextflow#7474). Fixed on edge by nextflow-io/nextflow#7375 and
           # backported by nextflow-io/nextflow#7554; drop this pin once 26.04.7 is out.
-          version: "25.10.7"
+          version: "25.10.4"
 
       - name: Run prek
         uses: j178/prek-action@5337cb91e0fa35a7ff31b9ca345126d8bbbcdf16 # v2
