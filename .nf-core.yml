@@ -1,5 +1,5 @@
 lint:
-  files_unchanges:
+  files_unchanged:
     - .github/workflows/linting.yml
   nextflow_config: false
   schema_params: false
