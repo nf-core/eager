@@ -353,3 +353,14 @@ def completionSummary(monochrome_logs=true) {
         log.info("-${colors.purple}[${workflow.manifest.name}]${colors.red} Pipeline completed with errors${colors.reset}-")
     }
 }
+
+// Custom easter egg function
+def easterEgg(monochrome_logs) {
+    def colors = logColours(monochrome_logs) as Map
+    if (workflow.stats.ignoredCount == 0) {
+            if (workflow.success) {
+                // https://en.wiktionary.org/wiki/jw.f_pw
+                log.info("- ${colors.green}𓂻 𓅱 𓆑 𓊪 𓅱${colors.reset} -")
+            }
+    }
+}
