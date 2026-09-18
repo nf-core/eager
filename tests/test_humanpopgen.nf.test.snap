@@ -401,7 +401,7 @@
                 "PRINT_CONTAMINATION_ANGSD": {
                     "python": "3.8.3"
                 },
-                "QUALIMAP_BAMQC_NOBED": {
+                "QUALIMAP_BAMQC_WITHBED": {
                     "qualimap": 2.3
                 },
                 "SAMTOOLS_DEPTH_SEXDETERRMINE": {
@@ -475,10 +475,10 @@
                 }
             }
         ],
-        "timestamp": "2026-07-24T08:52:44.070817601",
+        "timestamp": "2026-09-18T13:32:46.479401516",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "25.10.4"
+            "nextflow": "26.04.6"
         }
     },
     "preprocessing": {
@@ -788,14 +788,14 @@
                 "searchtools.js:md5,d550841adeedc8ed47c40ee607620937",
                 "underscore.js:md5,db5ba047a66617d4cd3e8c5099cc51db",
                 "websupport.js:md5,9e61e1e8a7433c56bd7e5a615affcf85",
-                "coverage_across_reference.txt:md5,e50d6b2b34ca7dc5987acb32dc6e7986",
-                "coverage_histogram.txt:md5,efc7c6d0a7c409dca57e4456a664cc88",
-                "duplication_rate_histogram.txt:md5,ef4ffbb82e6fc94faee75543b5e4dd38",
-                "genome_fraction_coverage.txt:md5,4857ba624aa2c84d6d25ce2e60c8269b",
-                "homopolymer_indels.txt:md5,4486a4ba037b71eb7fe64cbd0d92cce4",
-                "mapped_reads_clipping_profile.txt:md5,cd72082640b245c9d9f4d328406c01d6",
-                "mapping_quality_across_reference.txt:md5,03d3e62c859c0a487367ae5f9c92a557",
-                "mapping_quality_histogram.txt:md5,c6916c99da72c60fdbd2030cb58abf96",
+                "coverage_across_reference.txt:md5,2db4d8d1c7bdfe221df858358aa9e735",
+                "coverage_histogram.txt:md5,4fc00e950f6f0e3228599d6db266e4af",
+                "duplication_rate_histogram.txt:md5,87c0f3dd8fa6d23e87f944bde7c0ad86",
+                "genome_fraction_coverage.txt:md5,276b22243079ee24125f4895c065b0e8",
+                "homopolymer_indels.txt:md5,47c66357e580006681f58757bfa4373d",
+                "mapped_reads_clipping_profile.txt:md5,7c60692bae8ef0aad3b9f306a1a7b5fd",
+                "mapping_quality_across_reference.txt:md5,bf111e13345ed1c9a484b0361e788f4a",
+                "mapping_quality_histogram.txt:md5,b140f47fa81e1341735d376eb204879d",
                 "agogo.css:md5,bd757b1a7ce6fdc0288ba148680f4583",
                 "ajax-loader.gif:md5,ae6667053ad118020b8e68ccf307b519",
                 "basic.css:md5,25b2823342c0604924a2870eeb4e7e94",
@@ -806,14 +806,14 @@
                 "searchtools.js:md5,d550841adeedc8ed47c40ee607620937",
                 "underscore.js:md5,db5ba047a66617d4cd3e8c5099cc51db",
                 "websupport.js:md5,9e61e1e8a7433c56bd7e5a615affcf85",
-                "coverage_across_reference.txt:md5,9d545368354b64d1b7b9b403894a3d2b",
-                "coverage_histogram.txt:md5,006f2aaff0c1dc340c329da00fbef92d",
-                "duplication_rate_histogram.txt:md5,8a023114a7a7833886f6faa915713ba9",
-                "genome_fraction_coverage.txt:md5,f38d0b862860f4c7b3aead9a08a52591",
-                "homopolymer_indels.txt:md5,12b02d88477f31cfa9a37a4534769548",
-                "mapped_reads_clipping_profile.txt:md5,7bec3e1b9f4819404bf354ebd17ec2a9",
-                "mapping_quality_across_reference.txt:md5,6e8f8d88ec82fbaf3e8c4886a7c7f7ae",
-                "mapping_quality_histogram.txt:md5,94440fea2edec0799d504e2ac1ecc09a"
+                "coverage_across_reference.txt:md5,5df8bfc0df76370ecb69655e599126ca",
+                "coverage_histogram.txt:md5,ee85ca368584968072edd5e9e767c930",
+                "duplication_rate_histogram.txt:md5,c41988b1165c3878aef40ae57d50bf92",
+                "genome_fraction_coverage.txt:md5,555e97d95ec4d9de8c0fe50de4ad2966",
+                "homopolymer_indels.txt:md5,3de2d420631680eac0363fc63e3aeb0d",
+                "mapped_reads_clipping_profile.txt:md5,05d00af875471f31349c72988defacc4",
+                "mapping_quality_across_reference.txt:md5,b55b65df268a6876fb48571a1cc430a0",
+                "mapping_quality_histogram.txt:md5,42d82308e7a2a765cce2f2b9f9689b42"
             ],
             [
                 "3pGtoA_freq.txt",
@@ -893,10 +893,10 @@
                 "hs37d5_chr21-MT_sexdeterrmine.tsv"
             ]
         ],
-        "timestamp": "2025-09-12T13:06:18.772238",
+        "timestamp": "2026-09-18T13:32:46.176208544",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.04.7"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
         }
     }
 }
