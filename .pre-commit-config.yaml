@@ -20,6 +20,7 @@ repos:
       - id: end-of-file-fixer
         exclude: |
           (?x)^(
+              .*\.manual$
               .*ro-crate-metadata.json$|
               modules/(?!local/).*|
               subworkflows/(?!local/).*|
