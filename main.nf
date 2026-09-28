@@ -15,7 +15,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { EAGER  } from './workflows/eager'
+include { EAGER                   } from './workflows/eager'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_eager_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_eager_pipeline'
 include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_eager_pipeline'
