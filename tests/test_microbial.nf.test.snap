@@ -421,18 +421,21 @@
     "genotyping": {
         "content": [
             [
-                "JK2782_Mammoth_MT_Krause.bcftools_stats.txt:md5,d3ca07e5075a741027e8d55ffd35754a",
-                "JK2782_hs37d5_chr21-MT.bcftools_stats.txt:md5,f38b838893ca595d0852155ba6581735"
+                
             ],
             [
+                "JK2782_Mammoth_MT_Krause.bcftools_stats.txt",
+                "JK2782_hs37d5_chr21-MT.bcftools_stats.txt",
+                "JK2782_Mammoth_MT_Krause.vcf.gz",
                 "JK2782_Mammoth_MT_Krause.vcf.gz.tbi",
+                "JK2782_hs37d5_chr21-MT.vcf.gz",
                 "JK2782_hs37d5_chr21-MT.vcf.gz.tbi"
             ]
         ],
-        "timestamp": "2026-09-25T09:22:44.925293254",
+        "timestamp": "2026-10-09T10:23:00.526060636",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
+            "nextflow": "26.04.7"
         }
     },
     "final_bams": {
