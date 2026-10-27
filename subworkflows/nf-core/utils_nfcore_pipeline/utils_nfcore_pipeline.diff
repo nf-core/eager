@@ -1,0 +1,29 @@
+Changes in component 'nf-core/utils_nfcore_pipeline'
+Changes in 'utils_nfcore_pipeline/main.nf':
+--- subworkflows/nf-core/utils_nfcore_pipeline/main.nf
++++ subworkflows/nf-core/utils_nfcore_pipeline/main.nf
+@@ -353,3 +353,14 @@
+         log.info("-${colors.purple}[${workflow.manifest.name}]${colors.red} Pipeline completed with errors${colors.reset}-")
+     }
+ }
++
++// Custom easter egg function
++def easterEgg(monochrome_logs) {
++    def colors = logColours(monochrome_logs) as Map
++    if (workflow.stats.ignoredCount == 0) {
++            if (workflow.success) {
++                // https://en.wiktionary.org/wiki/jw.f_pw
++                log.info("- ${colors.green}𓂻 𓅱 𓆑 𓊪 𓅱${colors.reset} -")
++            }
++    }
++}
+
+'subworkflows/nf-core/utils_nfcore_pipeline/meta.yml' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/nextflow.config' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test.snap' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test.snap' was created
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.nf.test' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.nf.test.snap' is unchanged
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test' was created
+'subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test' is unchanged
+************************************************************
