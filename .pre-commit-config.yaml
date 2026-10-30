@@ -23,7 +23,8 @@ repos:
               .*ro-crate-metadata.json$|
               modules/(?!local/).*|
               subworkflows/(?!local/).*|
-              .*\.snap$
+              .*\.snap$|
+              .*\.manual$
           )$
       - id: check-added-large-files
         args: [--maxkb=5000]
