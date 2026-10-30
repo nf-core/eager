@@ -730,13 +730,15 @@ nextflow run ../main.nf -profile docker \
 
 # kraken2
 
+```bash
 nextflow run main.nf -profile docker \
- --input testing/test.tsv \
- --outdir ./out \
- --run_metagenomics \
- --metagenomics_profiling_tool kraken2 \
- --metagenomics_profiling_database /workspace/eager/testing/eager_test.tar.gz
---preprocessing_skippairmerging
+  --input testing/test.tsv \
+  --outdir ./out \
+  --run_metagenomics \
+  --metagenomics_profiling_tool kraken2 \
+  --metagenomics_profiling_database /workspace/eager/testing/eager_test.tar.gz
+  --preprocessing_skippairmerging
+```
 
 ## Mapping statistics
 
