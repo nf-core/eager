@@ -345,8 +345,8 @@
                 },
                 "BOWTIE2_ALIGN": {
                     "bowtie2": "2.5.2",
-                    "samtools": 1.18,
-                    "pigz": 2.6
+                    "pigz": 2.6,
+                    "samtools": 1.18
                 },
                 "BOWTIE2_BUILD": {
                     "bowtie2": "2.5.2"
@@ -370,14 +370,14 @@
                     "fastp": "0.23.4"
                 },
                 "FASTQC": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "FASTQC_PROCESSED": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "FILTER_BAM_FRAGMENT_LENGTH": {
-                    "python": "3.9.15",
-                    "pysam": "0.20.0"
+                    "pysam": "0.20.0",
+                    "python": "3.9.15"
                 },
                 "GUNZIP_FASTA": {
                     "gunzip": 1.1
@@ -475,10 +475,10 @@
                 }
             }
         ],
-        "timestamp": "2026-09-18T13:32:46.479401516",
+        "timestamp": "2026-10-30T10:50:09.039365824",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
+            "nextflow": "26.10.4"
         }
     },
     "preprocessing": {
@@ -893,10 +893,10 @@
                 "hs37d5_chr21-MT_sexdeterrmine.tsv"
             ]
         ],
-        "timestamp": "2026-09-18T13:32:46.176208544",
+        "timestamp": "2026-10-30T10:50:08.770064528",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
+            "nextflow": "26.10.4"
         }
     }
 }
