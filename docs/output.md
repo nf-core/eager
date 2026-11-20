@@ -365,13 +365,11 @@ Additionally, please note that removal of PCR duplicates in nf-core/eager will a
 
 Please be aware, that intermediate length and mapping quality filtered genomic BAM files are _not_ saved in the results directory automatically, with the assumption that downstream deduplicated BAM files are preferred for further analyses - see the [parameters](https://nf-co.re/eager/parameters) page for more information if you wish to save these.
 
-You may also receive the files above if metagenomic screening is turned on, as that implicitly activates the BAM filtering step to generate the FastQs used for metagenomic classification.
+BAM Fitlering output may also be generated if metagenomic screening is turned on, as that implicitly activates the BAM filtering step to generate the FastQs used for metagenomic classification.
 
 ### Metagenomics Complexity Filtering
 
 #### BBDuk
-
-[BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) “Duk” stands for Decontamination Using Kmers. BBDuk was developed to combine most common data-quality-related trimming, filtering, and masking operations into a single high-performance tool.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -384,7 +382,9 @@ You may also receive the files above if metagenomic screening is turned on, as t
 
 </details>
 
-The entropy filter of [BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) is used to remove reads from the fastq-files for metagenomics screening that don't pass the `--metagenomics_complexity_entropy` threshold. When ommiting the flag, a default value of 0.3 is applied.
+[BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) is an Adapter trimming, quality filtering, and contaminant removal tool, which was developed to combine most common data-quality-related trimming, filtering, and masking operations into a single high-performance tool.
+The “Duk” in the name stands for "Decontamination Using Kmers". 
+The entropy filter of BBDuk is used to remove reads from the fastq-files for metagenomics screening that don't pass the `--metagenomics_complexity_entropy` threshold. When ommiting the flag, a default value of 0.3 is applied.
 To cite the docs:
 
 > A homopolymer such as AAAAAAAAAAAAAA would have entropy of zero; completely random sequence would have entropy approaching 1.
@@ -397,18 +397,21 @@ Otherwise, only the log file will be saved.
 
 #### PRINSEQ++
 
-[PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus) is a C++ implementation of the prinseq-lite.pl program. It can be used to filter, reformat or trim genomic and metagenomic sequence data.
-
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics/complexity_filter/prinseq`
-  - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
-  - `*_complexity.log`: LOG file containing filter stats
+- `metagenomics/prinseq`
+  - `data/`
+    - `*_complexity_good_out.fastq.gz`: FASTQ file containing the complexity filtered reads
+  - `stats/`
+    - `*_complexity.log`: LOG file containing filter stats
 
 </details>
 
-[PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus#readme) is an alternative to BBDuk for filtering the fastq files before metagenomics classification. From PRINSEQ++ we implemented filtering by the `dust` algorithm or by `entropy`, as explained above in the BBDuk section.
+[PRINSEQ++](https://github.com/Adrian-Cantu/PRINSEQ-plus-plus) is a C++ implementation of the prinseq-lite.pl program.
+It can be used to filter, reformat or trim genomic and metagenomic sequence data.
+PRINSEQ++ is an alternative to BBDuk for filtering the fastq files before metagenomics classification.
+Specifically, within nf-core/eager we have implemented  PRINSEQ++ filtering using the `dust` algorithm, or by `entropy` (as explained in the BBDuk section above).
 
 Using complexity-filtered fastq-files as input for metagenomic classifiers can reduce the number of false positive classifications, resulting in more precise taxonomic assignments of the sample.
 Save the complexity-filtered fastq-files to the output directory to perform additional downstream analyses, such as testing multiple metagenomic profilers (see the [nf-core/taxprofiler](https://github.com/nf-core/taxprofiler) pipeline).
@@ -428,20 +431,23 @@ Otherwise, only the log file will be saved.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics/profiling/malt/`
-  - `<sample_id>.rma6`: binary file containing all alignments and taxonomic information of hits that can be loaded into the [MEGAN6](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/) interactive viewer
-  - `<sample_id>.blastn.sam`: sparse SAM file containing alignments of each hit (if `--metagenomics_malt_savereads`)
-  - `*.log`: LOG files containing the log of the MALT execution. NOTE: If you are running parallel malt runs with `--metagenomics_malt_group_size` set above 0, you will obtain a log file named `<database>_<strandedness>_<group_id>-run-malt-run.log` for each group of the parallel executions. The `<database>_runtime_log_concatenated.log` file contains the concatenated logs of all the groups.
+- `metagenomics/malt/`
+  - `data/`
+    - `*.rma6`: binary file containing all alignments and taxonomic information of hits that can be loaded into the [MEGAN6](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/megan6/) interactive viewer.
+    - `*.blastn.sam`: sparse SAM file containing alignments of each hit (if `--metagenomics_malt_savereads`)
+  - `stats/`
+    - `*.log`: LOG files containing the log of the MALT execution. NOTE: If you are running parallel malt runs with `--metagenomics_malt_group_size` set above 0, you will obtain a log file named `<database>_<strandedness>_<group_id>-run-malt-run.log` for each group of the parallel executions. The `<database>_runtime_log_concatenated.log` file contains the concatenated logs of all the groups.
 
 </details>
 
-MALT is a metagenomic aligner (equivalent to BLAST, but much faster). It produces direct alignments of sequencing reads in a reference genome. It is often used for metagenomic profiling or pathogen screening, and specifically in nf-core/eager, of off-target reads from genome mapping. It is popular by palaeogenomicists as the alignment information can be used for damage pattern and other authentication criteria analysis.
+MALT is a metagenomic aligner (equivalent to BLAST, but much faster), which produces direct alignments of sequencing reads in a reference genome.
+It is often used for metagenomic profiling or pathogen screening on the set of reads specified with `--metagenomics_input`.
+The alignment information produced by MALT can be used to assess damage patterns in classifies reads and to apply other authentication criteria.
 
-You will receive output for each library. This means that if you use TSV input and have one library sequenced over multiple lanes and sequencing types, these are merged and you will get mapping statistics of all lanes and sequencing configurations in one value.
+The main output of MALT is the `.rma6` file format, which can be only loaded into MEGAN and it's related tools.
+The rma-file is further processed by the taxpasta module to provide a standardised tabular output for the MEGAN classifications
 
-The main output of MALT is the `.rma6` file format, which can be only loaded into MEGAN and it's related tools. The rma-file is further processed by the taxpasta module to provide a standardised tabular output for the MEGAN classifications
-
-You will only receive the `.sam` files if you supply `--metagenomics_malt_savereads` parameters to the pipeline.
+The `.sam` files will only be generated if you supply the `--metagenomics_malt_savereads` parameter to the pipeline.
 
 ### MetaPhlAn
 
@@ -450,54 +456,67 @@ You will only receive the `.sam` files if you supply `--metagenomics_malt_savere
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics/profiling/metaphlan/`
-  - `<sample_id>.biom`: taxonomic profile in BIOM format
-  - `<sample_id>.bowtie2out.txt`: BowTie2 alignment information (can be re-used for skipping alignment when re-running MetaPhlAn with different parameters)
-  - `<sample_id>_profile.txt`: MetaPhlAn taxonomic profile including abundance estimates
+- `metagenomics/metaphlan/`
+  - `stats/`
+    - `*.biom`: taxonomic profile in BIOM format
+    - `*.bowtie2out.txt`: BowTie2 alignment information (can be re-used for skipping alignment when re-running MetaPhlAn with different parameters)
+    - `*_profile.txt`: MetaPhlAn taxonomic profile including abundance estimates
 
 </details>
 
-The main taxonomic profiling file from MetaPhlAn is the `*_profile.txt` file. This provides the abundance estimates from MetaPhlAn however does not include raw counts by default. The profiling-file is further processed by the taxpasta module to provide a standardised tabular output for the Metaphlan abundance estimates.
+The main taxonomic profiling file from MetaPhlAn is the `*_profile.txt` file.
+This provides the abundance estimates from MetaPhlAn however does not include raw counts by default.
+The profiling-file is further processed by the taxpasta module to provide a standardised tabular output for the Metaphlan abundance estimates.
 
-Raw counts can be inferred from the Bowtie2 output `.bowtie2out.txt`, which presents a condensed representation of the mapping results of the sequencing reads to MetaPhlAn's marker gene sequences. The alignments are listed in tab-separated columns, including Read ID and Marker Gene ID, with each alignment represented on a separate line. No hits to the marker genes results in an empty file.
+Raw counts can be inferred from the Bowtie2 output `.bowtie2out.txt`, which presents a condensed representation of the mapping results of the sequencing reads to MetaPhlAn's marker gene sequences.
+The alignments are listed in tab-separated columns, including Read ID and Marker Gene ID, with each alignment represented on a separate line. No hits to the marker genes results in an empty file.
 
 #### Kraken2
 
-[Kraken](https://ccb.jhu.edu/software/kraken2/) is a taxonomic sequence classifier that assigns taxonomic labels to DNA sequences. Kraken examines the k-mers within a query sequence and uses the information within those k-mers to query a database. That database maps -mers to the lowest common ancestor (LCA) of all genomes known to contain a given k-mer.
-
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics/profiling/kraken2/`
-  - `<sample_id>.classified.fastq.gz`: FASTQ file containing all reads that had a hit against a reference in the database for a given sample
-  - `<sample_id>.unclassified.fastq.gz`: FASTQ file containing all reads that did not have a hit in the database for a given sample
-  - `<sample_id>.report.txt`: A Kraken2 report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits in the Kraken2 run for a given sample. Will be 6 column rather than 8 if `--metagenomics_kraken2_saveminimizers` specified.
-  - `<sample_id>.classifiedreads.txt`: A list of read IDs and the hits each read had against each database for a given sample
+- `metagenomics/kraken2/`
+  -`data/`
+    - `*.classified.fastq.gz`: FASTQ file containing all reads that had a hit against a reference in the database for a given sample
+    - `*.unclassified.fastq.gz`: FASTQ file containing all reads that did not have a hit in the database for a given sample
+  - `stats/`
+    - `*.report.txt`: A Kraken2 report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits in the Kraken2 run for a given sample. Will contain 8 columns rather than 6 if `--metagenomics_kraken2_saveminimizers` specified.
+    - `*.classifiedreads.txt`: A list of read IDs and the hits each read had against each database for a given sample
 
 </details>
 
-The main taxonomic classification file from Kraken2 is the `_combined_reports.txt` or `*report.txt` file. The former provides you the broadest over view of the taxonomic classification results across all samples against a single database, where you get two columns for each sample e.g. `2_all` and `2_lvl`, as well as a summarised column summing up across all samples `tot_all` and `tot_lvl`. The latter gives you the most information for a single sample. The report file is also used for the taxpasta step.
+[Kraken2](https://ccb.jhu.edu/software/kraken2/) is a taxonomic sequence classifier that assigns taxonomic labels to DNA sequences. Kraken examines the k-mers within a query sequence and uses the information within those k-mers to query a database.
+That database maps k-mers to the lowest common ancestor (LCA) of all genomes known to contain a given k-mer.
 
-You will only receive the `.fastq` and `*classifiedreads.txt` file if you supply `--metagenomics_kraken2_savereads` and/or `--metagenomics_kraken_save_readclassifications` parameters to the pipeline.
+The main taxonomic classification file from Kraken2 is the `*_combined_reports.txt` or `*.report.txt` file
+The former provides you the broadest over view of the taxonomic classification results across all samples against a single database, where you get two columns for each sample (e.g. `2_all` and `2_lvl`), as well as a summarised column summing up across all samples (`tot_all` and `tot_lvl`).
+The latter gives you the most information for a single sample.
+The report file is also used as input for taxpasta.
+
+The `.fastq` and `*classifiedreads.txt` files will only be generated if you supply the paramteres `--metagenomics_kraken2_savereads` and `--metagenomics_kraken2_savereadclassifications` to the pipeline respectively.
 
 #### KrakenUniq
 
-[KrakenUniq](https://github.com/fbreitwieser/krakenuniq) (formerly KrakenHLL) is an extenson to the fast k-mer-based classification [Kraken](https://github.com/DerrickWood/kraken) with an efficient algorithm for additionally assessing the coverage of unique k-mers found in each species in a dataset.
-
 <details markdown="1">
 <summary>Output files</summary>
 
-- `metagenomics/profiling/krakenuniq/`
-  - `<sample_id>.classified.fastq.gz`: FASTQ file containing all reads that had a hit against a reference in the database for a given sample
-  - `<sample_id>.unclassified.fastq.gz`: FASTQ file containing all reads that did not have a hit in the database for a given sample
-  - `<sample_id>.report.txt`: A Kraken2-style report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits, with an additional column for k-mer coverage, that allows for more accurate distinguishing between false-positive/true-postitive hits
-  - `<sample_id>.classifiedreads.txt`: A list of read IDs and the hits each read had against each database for a given sample
+- `metagenomics/krakenuniq/`
+  - `data/`
+    - `*.classified.fastq.gz`: FASTQ file containing all reads that had a hit against a reference in the database for a given sample
+    - `*.unclassified.fastq.gz`: FASTQ file containing all reads that did not have a hit in the database for a given sample
+  - `stats/`
+    - `*.report.txt`: A Kraken2-style report that summarises the fraction abundance, taxonomic ID, number of Kmers, taxonomic path of all the hits, with an additional column for k-mer coverage, that allows for more accurate distinguishing between false-positive/true-postitive hits
+    - `*.classifiedreads.txt`: A list of read IDs and the hits each read had against each database for a given sample
 
 </details>
 
-The main taxonomic classification file from KrakenUniq is the `*report.txt` file. This is an extension of the Kraken2 report with the additional k-mer coverage information that provides more information about the accuracy of hits.
+[KrakenUniq](https://github.com/fbreitwieser/krakenuniq) (formerly KrakenHLL) is an extenson to the fast k-mer-based classification in [Kraken](https://github.com/DerrickWood/kraken), with an efficient algorithm for additionally assessing the coverage of unique k-mers found in each species in a dataset.
 
-You will only receive the `*.fastq.gz` and `*.classifiedreads.txt` file if you supply `--metagenomics_kraken2_savereads` and/or `--metagenomics_kraken2_savereadclassifications` parameters to the pipeline.
+The main taxonomic classification file from KrakenUniq is the `*report.txt` file.
+This is an extension of the Kraken2 report with the additional k-mer coverage information that provides more information about the accuracy of hits.
+
+The `.fastq` and `*classifiedreads.txt` files will only be generated if you supply the paramteres `--metagenomics_kraken2_savereads` and `--metagenomics_kraken_save_readclassifications` to the pipeline respectively.
 
 :::info
 The output system of KrakenUniq can result in other `stdout` or `stderr` logging information being saved in the report file, therefore you must check your report files before downstream use!
