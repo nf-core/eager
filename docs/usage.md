@@ -27,6 +27,18 @@ CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
 CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
 ```
 
+### Supplying BAM input
+
+It is possible to also supply BAM files as input to nf-core/eager. This can allow you to skip earlier steps of the pipeline (preprocessing and mapping) when desired - e.g. when re-processing public data. You can also convert input BAM files back to FASTQ files to re-undergo preprocessing and mapping. This may be desired when you want to standardise the mapping parameters between your own and previously published data.
+
+You will still need to fill the `pairment` column in the input TSV sheet for the BAM files. If you do not convert the BAM files back to FASTQ, you must specify the column as `single`. If you do do the conversion, you must specify the type of reads the BAM file contains, i.e.:
+
+- If the mapped reads in the BAM file are single end then specify `single`
+- If the mapped reads in the BAM file are paired-end _but merged pairs_ (i.e. overlapping pairs collapsed to a single read), then you must also supply `single`
+- If the mapped reads in the BAM file are paired-end and are _not_ merged (i.e., paired-end mapping was originally performed), then you must specify `paired`
+
+Note that if you do not specify to merge BAM converted paired-end FASTQs (i.e., request paired-end mapping), only forward and reverse pairs will be used - singletons in the BAMs will be discarded!
+
 ### Full samplesheet
 
 The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
@@ -51,6 +63,58 @@ TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
 | `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+
+## Reference input
+
+nf-core/eager supports two methods of supplying reference FASTA files.
+The first is a direct path to a single FASTA file with optional prebuilt indicies via `--fasta`, `--fasta_fai`, `--fasta_dict`, etc., and the second is via a reference sheet.
+
+Providing a reference sheet to `--fasta_sheet` allows users to align their input reads to _multiple_ reference genomes in the same run. The reference sheet must be in the format of a comma- or tab-separated table, and the file extension must be `csv` or `tsv` respectively.
+
+In addition to including the path to the FASTA, the reference sheet can also be used to specify paths to pre-built indices of each reference (namely, `.fai` from `samtools faidx`, `.dict` from `picard CreateSequenceDictionary`, and/or a directory pointing to a directory containing the indices for the given mapper - e.g. created with `bwa index`).
+
+Note that passing a reference sheet to the pipeline with `--fasta_sheet` will _override_ any corresponding directly-supplied parameters specifying user-build indices (`--fasta_fai`, `--fasta_dict`).
+
+An example of a reference sheet in `csv` format is as follows:
+
+```txt
+reference_name,fasta,fai,dict,mapper_index,circular_target, mitochondrion_header
+Mammoth_MT_Krause,//<path>/<to>/data/Mammoth_MT_Krause.fasta,/<path>/<to>/data/Mammoth_MT_Krause.fasta.fai,/<path>/<to>/data/Mammoth_MT_Krause.dict,/<path>/<to>/data/,NC_007596.2,NC_007596.2
+Human_MT,/<path>/<to>/data/Human_MT.fasta.gz,,,,,
+```
+
+Only the `reference_name`, and `fasta` columns are mandatory, whereas all other cells can be empty depending on your context.
+
+| Header                      | Required | Description                                                                                                                |
+| --------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| reference_name              | Yes      | Name of the reference to be used in file names and nextflow console log                                                    |
+| fasta                       | Yes      | Path to FASTA of reference. Can be optionally gzipped                                                                      |
+| fai                         | No       | Optional path to pre-build SAMtools `fai` index file corresponding to the FASTA                                            |
+| dict                        | No       | Optional path to pre-build picard `dict` index file corresponding to the FASTA                                             |
+| mapper_index                | No       | Optional path to _directory_ containing pre-build mapper index files corresponding to the FASTA                            |
+| circular_target             | No       | Optional string, and only required for CircularMapper, with name of entry in FASTA to extend (up to first space in header) |
+| mitochondrion_header        | No       | Optional string, and only required for MTNucRatio, with name of entry in FASTA of mitochondrion entry's header             |
+| snpcapture_bed              | No       | Optional path to BED file with SNP capture positions, only required for QualiMap                                           |
+| pileupcaller_bedfile        | No       | Optional path to BED file with SNP capture positions for genotyping with pileupCaller                                      |
+| pileupcaller_snpfile        | No       | Optional path to EIGENSTRAT SNP panel file for genotyping with pileupCaller                                                |
+| hapmap_file                 | No       | Optional path to HapMap files for contamination estimation with ANGSD                                                      |
+| pmdtools_masked_fasta       | No       | Optional path to masked FASTA files for PMDtools                                                                           |
+| pmdtools_bed_for_masking    | No       | Optional path to SNP capture BED file to mask the reference for PMDtools                                                   |
+| sexdeterrmine_snp_bed       | No       | Optional path to SNP capture bed files for genetic sex estimation with SexDetERRmine                                       |
+| bedtools_feature_file       | No       | Optional path to feature file for coverage calculation with bedtools                                                       |
+| genotyping_reference_ploidy | No       | Optional integer to specify organism ploidy for genotyping with GATK or FreeBayes                                          |
+| genotyping_gatk_dbsnp       | No       | Optional path to SNP annotation file for genotyping with GATK                                                              |
+
+Files for `fai`, `dict`, `mapper_index` will be generated by the pipeline for you if not specified.
+
+A real-world example could look as follows, where a user-supplied `.dict` file and `circular_target ` and `mitochondrion_header` are not specified:
+
+```txt
+reference_name,fasta,fai,dict,mapper_index,circular_target,mitochondrion
+tannerella_forsythia,/home/james/data/reference/tannerella_forstythia.fasta,/home/james/data/reference/tannerella_forstythia.fasta.fai,,/home/james/data/reference/,,
+```
+
+> ⚠️ The names of the files in the `mapper_index` directory must have the same basename as the FASTA itself! e.g. if FASTA is Mammoth_MT_Krause.fasta, then each BWA index file should be Mammoth_MT_Krause.fasta.\<suffix\>
 
 ## Running the pipeline
 

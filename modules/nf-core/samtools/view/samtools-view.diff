@@ -1,0 +1,939 @@
+Changes in component 'nf-core/samtools/view'
+Changes in 'samtools/view/main.nf':
+--- modules/nf-core/samtools/view/main.nf
++++ modules/nf-core/samtools/view/main.nf
+@@ -61,11 +61,11 @@
+                     input.getExtension()
+     if ("$input" == "${prefix}.${file_type}") error "Input and output names are the same, use \"task.ext.prefix\" to disambiguate!"
+ 
+-    def index = args.contains("--write-index") ? "touch ${prefix}.csi" : ""
++    def index_cmd = args.contains("--write-index") ? "touch ${prefix}.csi" : ""
+ 
+     """
+     touch ${prefix}.${file_type}
+-    ${index}
++    ${index_cmd}
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+
+'modules/nf-core/samtools/view/environment.yml' is unchanged
+'modules/nf-core/samtools/view/meta.yml' is unchanged
+'modules/nf-core/samtools/view/tests/tags.yml' is unchanged
+Changes in 'samtools/view/tests/main.nf.test':
+--- modules/nf-core/samtools/view/tests/main.nf.test
++++ modules/nf-core/samtools/view/tests/main.nf.test
+@@ -9,16 +9,16 @@
+     tag "samtools"
+     tag "samtools/view"
+ 
+-    test("bam") {
+-
+-        when {
+-            process {
+-                """
+-                input[0] = Channel.of([
++    test("sarscov2 - [bam, []], [], []") {
++
++        when {
++            process {
++                """
++                input[0] = [
+                     [ id:'test', single_end:false ], // meta map
+-                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.bam', checkIfExists: true),
+-                    []
+-                ])
++                    file(params.test_data['sarscov2']['illumina']['test_paired_end_bam'], checkIfExists: true),
++                    []
++                ]
+                 input[1] = [[],[]]
+                 input[2] = []
+                 """
+@@ -28,136 +28,148 @@
+         then {
+             assertAll(
+                 { assert process.success },
+-                { assert snapshot(file(process.out.bam[0][1]).name).match("bam_bam") },
+-                { assert snapshot(process.out.bai).match("bam_bai") },
+-                { assert snapshot(process.out.crai).match("bam_crai") },
+-                { assert snapshot(process.out.cram).match("bam_cram") },
+-                { assert snapshot(process.out.csi).match("bam_csi") },
+-                { assert snapshot(process.out.sam).match("bam_sam") },
+-                { assert snapshot(process.out.versions).match("bam_versions") }
+-            )
+-        }
+-    }
+-
+-    test("cram") {
+-
+-        when {
+-            process {
+-                """
+-                input[0] = Channel.of([
+-                    [ id:'test', single_end:false ], // meta map
+-                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/cram/test.paired_end.sorted.cram', checkIfExists: true),
+-                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/cram/test.paired_end.sorted.cram.crai', checkIfExists: true)
+-                ])
+-                input[1] = Channel.of([
+-                    [ id:'genome' ], // meta map
+-                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+-                ])
+-                input[2] = []
+-                """
+-            }
+-        }
+-
+-        then {
+-            assertAll(
+-                { assert process.success },
+-                { assert snapshot(file(process.out.cram[0][1]).name).match("cram_cram") },
+-                { assert snapshot(process.out.bai).match("cram_bai") },
+-                { assert snapshot(process.out.bam).match("cram_bam") },
+-                { assert snapshot(process.out.crai).match("cram_crai") },
+-                { assert snapshot(process.out.csi).match("cram_csi") },
+-                { assert snapshot(process.out.sam).match("cram_sam") },
+-                { assert snapshot(process.out.versions).match("cram_versions") }
+-            )
+-        }
+-    }
+-
+-    test("cram_to_bam") {
++                { assert snapshot(
++                    file(process.out.bam[0][1]).name,
++                    process.out.cram,
++                    process.out.sam,
++                    process.out.bai,
++                    process.out.crai,
++                    process.out.csi,
++                    process.out.versions
++                ).match() }
++            )
++        }
++
++    }
++
++    test("homo_sapiens - [cram, crai], fasta, []") {
++
++        when {
++            process {
++                """
++                input[0] = [
++                    [ id: 'test' ], // meta map
++                    file(params.test_data['homo_sapiens']['illumina']['test_paired_end_sorted_cram'], checkIfExists: true),
++                    file(params.test_data['homo_sapiens']['illumina']['test_paired_end_sorted_cram_crai'], checkIfExists: true)
++                ]
++                input[1] = [
++                    [ id:'genome' ],
++                    file(params.test_data['homo_sapiens']['genome']['genome_fasta'], checkIfExists: true)
++                ]
++                input[2] = []
++                """
++            }
++        }
++
++        then {
++            assertAll(
++                { assert process.success },
++                { assert snapshot(
++                    file(process.out.cram[0][1]).name,
++                    process.out.bam,
++                    process.out.sam,
++                    process.out.bai,
++                    process.out.crai,
++                    process.out.csi,
++                    process.out.versions
++                ).match() }
++            )
++        }
++
++    }
++
++    test("homo_sapiens - [cram, []], fasta, [] - bam output") {
+ 
+         config "./bam.config"
+ 
+         when {
+             process {
+                 """
+-                input[0] = Channel.of([
+-                    [ id:'test', single_end:false ], // meta map
+-                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/cram/test.paired_end.sorted.cram', checkIfExists: true),
+-                    []
+-                ])
+-                input[1] = Channel.of([
+-                    [ id:'genome' ], // meta map
+-                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+-                ])
+-                input[2] = []
+-                """
+-            }
+-        }
+-
+-        then {
+-            assertAll(
+-                { assert process.success },
+-                { assert snapshot(file(process.out.bam[0][1]).name).match("cram_to_bam_bam") },
+-                { assert snapshot(process.out.bai).match("cram_to_bam_bai") },
+-                { assert snapshot(process.out.crai).match("cram_to_bam_crai") },
+-                { assert snapshot(process.out.cram).match("cram_to_bam_cram") },
+-                { assert snapshot(process.out.csi).match("cram_to_bam_csi") },
+-                { assert snapshot(process.out.sam).match("cram_to_bam_sam") },
+-                { assert snapshot(process.out.versions).match("cram_to_bam_versions") }
+-            )
+-        }
+-    }
+-
+-    test("cram_to_bam_index") {
++                input[0] = [
++                    [ id: 'test' ], // meta map
++                    file(params.test_data['homo_sapiens']['illumina']['test_paired_end_sorted_cram'], checkIfExists: true),
++                    []
++                ]
++                input[1] = [
++                    [ id:'genome' ],
++                    file(params.test_data['homo_sapiens']['genome']['genome_fasta'], checkIfExists: true)
++                ]
++                input[2] = []
++                """
++            }
++        }
++
++        then {
++            assertAll(
++                { assert process.success },
++                { assert snapshot(
++                    file(process.out.bam[0][1]).name,
++                    process.out.cram,
++                    process.out.sam,
++                    process.out.bai,
++                    process.out.crai,
++                    process.out.csi,
++                    process.out.versions
++                ).match() }
++            )
++        }
++
++    }
++
++    test("homo_sapiens - [cram, []], fasta, [] - bam & index output") {
+ 
+         config "./bam_index.config"
+ 
+         when {
+             process {
+                 """
+-                input[0] = Channel.of([
+-                    [ id:'test', single_end:false ], // meta map
+-                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/cram/test.paired_end.sorted.cram', checkIfExists: true),
+-                    []
+-                ])
+-                input[1] = Channel.of([
+-                    [ id:'genome' ], // meta map
+-                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+-                ])
+-                input[2] = []
+-                """
+-            }
+-        }
+-
+-        then {
+-            assertAll(
+-                { assert process.success },
+-                { assert snapshot(file(process.out.bam[0][1]).name).match("cram_to_bam_index_bam") },
+-                { assert snapshot(file(process.out.csi[0][1]).name).match("cram_to_bam_index_csi") },
+-                { assert snapshot(process.out.bai).match("cram_to_bam_index_bai") },
+-                { assert snapshot(process.out.crai).match("cram_to_bam_index_crai") },
+-                { assert snapshot(process.out.cram).match("cram_to_bam_index_cram") },
+-                { assert snapshot(process.out.sam).match("cram_to_bam_index_sam") },
+-                { assert snapshot(process.out.versions).match("cram_to_bam_index_versions") }
+-            )
+-        }
+-    }
+-
+-    test("cram_to_bam_index_qname") {
++                input[0] = [
++                    [ id: 'test' ], // meta map
++                    file(params.test_data['homo_sapiens']['illumina']['test_paired_end_sorted_cram'], checkIfExists: true),
++                    []
++                ]
++                input[1] = [
++                    [ id:'genome' ],
++                    file(params.test_data['homo_sapiens']['genome']['genome_fasta'], checkIfExists: true)
++                ]
++                input[2] = []
++                """
++            }
++        }
++
++        then {
++            assertAll(
++                { assert process.success },
++                { assert snapshot(
++                    file(process.out.bam[0][1]).name,
++                    process.out.cram,
++                    process.out.sam,
++                    file(process.out.csi[0][1]).name,
++                    process.out.crai,
++                    process.out.bai,
++                    process.out.versions
++                ).match() }
++            )
++        }
++
++    }
++
++    test("homo_sapiens - [cram, []], fasta, qname - bam & index output") {
+ 
+         config "./bam_index.config"
+ 
+         when {
+             process {
+                 """
+-                input[0] = Channel.of([
+-                    [ id:'test', single_end:false ], // meta map
+-                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/cram/test.paired_end.sorted.cram', checkIfExists: true),
+-                    []
+-                ])
+-                input[1] = Channel.of([
+-                    [ id:'genome' ], // meta map
+-                    file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)
+-                ])
++                input[0] = [
++                    [ id: 'test' ], // meta map
++                    file(params.test_data['homo_sapiens']['illumina']['test_paired_end_sorted_cram'], checkIfExists: true),
++                    []
++                ]
++                input[1] = [
++                    [ id:'genome' ],
++                    file(params.test_data['homo_sapiens']['genome']['genome_fasta'], checkIfExists: true)
++                ]
+                 input[2] = Channel.of("testN:2817", "testN:2814").collectFile(name: "readnames.list", newLine: true)
+                 """
+             }
+@@ -166,18 +178,21 @@
+         then {
+             assertAll(
+                 { assert process.success },
+-                { assert snapshot(file(process.out.bam[0][1]).name).match("cram_to_bam_index_qname_bam") },
+-                { assert snapshot(file(process.out.csi[0][1]).name).match("cram_to_bam_index_qname_csi") },
+-                { assert snapshot(process.out.bai).match("cram_to_bam_index_qname_bai") },
+-                { assert snapshot(process.out.crai).match("cram_to_bam_index_qname_crai") },
+-                { assert snapshot(process.out.cram).match("cram_to_bam_index_qname_cram") },
+-                { assert snapshot(process.out.sam).match("cram_to_bam_index_qname_sam") },
+-                { assert snapshot(process.out.versions).match("cram_to_bam_index_qname_versions") }
+-            )
+-        }
+-    }
+-
+-    test("bam_stub") {
++                { assert snapshot(
++                    file(process.out.bam[0][1]).name,
++                    process.out.cram,
++                    process.out.sam,
++                    file(process.out.csi[0][1]).name,
++                    process.out.crai,
++                    process.out.bai,
++                    process.out.versions
++                ).match() }
++            )
++        }
++
++    }
++
++    test("sarscov2 - [bam, []], [], [] - stub") {
+ 
+         options "-stub"
+         config "./bam_index.config"
+@@ -199,14 +214,18 @@
+         then {
+             assertAll(
+                 { assert process.success },
+-                { assert snapshot(file(process.out.bam[0][1]).name).match("bam_stub_bam") },
+-                { assert snapshot(file(process.out.csi[0][1]).name).match("bam_stub_csi") },
+-                { assert snapshot(process.out.bai).match("bam_stub_bai") },
+-                { assert snapshot(process.out.crai).match("bam_stub_crai") },
+-                { assert snapshot(process.out.cram).match("bam_stub_cram") },
+-                { assert snapshot(process.out.sam).match("bam_stub_sam") },
+-                { assert snapshot(process.out.versions).match("bam_stub_versions") }
+-            )
+-        }
+-    }
++                { assert snapshot(
++                    file(process.out.bam[0][1]).name,
++                    process.out.cram,
++                    process.out.sam,
++                    file(process.out.csi[0][1]).name,
++                    process.out.crai,
++                    process.out.bai,
++                    process.out.versions
++                ).match() }
++            )
++        }
++
++    }
++
+ }
+
+'modules/nf-core/samtools/view/tests/bam_index.config' is unchanged
+'modules/nf-core/samtools/view/tests/bam.config' is unchanged
+Changes in 'samtools/view/tests/main.nf.test.snap':
+--- modules/nf-core/samtools/view/tests/main.nf.test.snap
++++ modules/nf-core/samtools/view/tests/main.nf.test.snap
+@@ -1,488 +1,140 @@
+ {
+-    "bam_bam": {
++    "homo_sapiens - [cram, []], fasta, [] - bam output": {
+         "content": [
+-            "test.bam"
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:51.256068"
+-    },
+-    "cram_to_bam_index_csi": {
+-        "content": [
+-            "test.bam.csi"
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:12.958617"
+-    },
+-    "bam_stub_bam": {
+-        "content": [
+-            "test.bam"
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:32.065301"
+-    },
+-    "bam_bai": {
+-        "content": [
++            "test.bam",
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:51.258578"
+-    },
+-    "bam_stub_bai": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:32.071284"
+-    },
+-    "bam_stub_versions": {
+-        "content": [
++            ],
++            [
++                
++            ],
++            [
++                
++            ],
++            [
++                
++            ],
+             [
+                 "versions.yml:md5,06b9049228b111e7bed5c52fe8a98d9b"
+             ]
+         ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:32.082144"
++        "timestamp": "2023-12-04T17:41:17.563069206"
+     },
+-    "cram_to_bam_index_cram": {
++    "sarscov2 - [bam, []], [], []": {
+         "content": [
++            "test.bam",
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:12.972288"
+-    },
+-    "cram_to_bam_sam": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:04.999247"
+-    },
+-    "cram_to_bam_index_sam": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:12.976457"
+-    },
+-    "cram_crai": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:56.497581"
+-    },
+-    "cram_csi": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:56.50038"
+-    },
+-    "cram_to_bam_cram": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:04.992239"
+-    },
+-    "cram_to_bam_index_qname_csi": {
+-        "content": [
+-            "test.bam.csi"
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:23.325496"
+-    },
+-    "bam_stub_sam": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:32.079529"
+-    },
+-    "cram_cram": {
+-        "content": [
+-            "test.cram"
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:56.490286"
+-    },
+-    "bam_csi": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:51.262882"
+-    },
+-    "cram_to_bam_crai": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:04.989247"
+-    },
+-    "cram_to_bam_index_crai": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:12.967681"
+-    },
+-    "cram_to_bam_index_qname_versions": {
+-        "content": [
++            ],
+             [
+                 "versions.yml:md5,06b9049228b111e7bed5c52fe8a98d9b"
+             ]
+         ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:23.340612"
++        "timestamp": "2023-12-04T17:41:03.206994564"
+     },
+-    "cram_to_bam_bam": {
++    "homo_sapiens - [cram, []], fasta, qname - bam & index output": {
+         "content": [
+-            "test.bam"
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:04.982361"
+-    },
+-    "cram_to_bam_index_bam": {
+-        "content": [
+-            "test.bam"
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:12.95456"
+-    },
+-    "cram_to_bam_index_versions": {
+-        "content": [
++            "test.bam",
++            [
++                
++            ],
++            [
++                
++            ],
++            "test.bam.csi",
++            [
++                
++            ],
++            [
++                
++            ],
+             [
+                 "versions.yml:md5,06b9049228b111e7bed5c52fe8a98d9b"
+             ]
+         ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:12.981253"
++        "timestamp": "2023-12-04T17:44:39.165289759"
+     },
+-    "cram_to_bam_bai": {
++    "homo_sapiens - [cram, []], fasta, [] - bam & index output": {
+         "content": [
++            "test.bam",
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:04.98601"
+-    },
+-    "cram_to_bam_versions": {
+-        "content": [
++            ],
++            [
++                
++            ],
++            "test.bam.csi",
++            [
++                
++            ],
++            [
++                
++            ],
+             [
+                 "versions.yml:md5,06b9049228b111e7bed5c52fe8a98d9b"
+             ]
+         ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:05.002788"
++        "timestamp": "2023-12-04T17:44:32.25731224"
+     },
+-    "cram_bam": {
++    "sarscov2 - [bam, []], [], [] - stub": {
+         "content": [
++            "test.bam",
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:56.495512"
+-    },
+-    "bam_stub_cram": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:32.076908"
+-    },
+-    "cram_to_bam_index_qname_bai": {
+-        "content": [
++            ],
++            "test.csi",
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:23.328458"
+-    },
+-    "cram_to_bam_index_qname_crai": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:23.330789"
+-    },
+-    "cram_bai": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:56.493129"
+-    },
+-    "bam_stub_crai": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:32.074313"
+-    },
+-    "cram_to_bam_index_qname_bam": {
+-        "content": [
+-            "test.bam"
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:23.322874"
+-    },
+-    "bam_versions": {
+-        "content": [
++            ],
+             [
+                 "versions.yml:md5,06b9049228b111e7bed5c52fe8a98d9b"
+             ]
+         ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:51.267129"
++        "timestamp": "2023-12-04T17:44:45.81037195"
+     },
+-    "cram_to_bam_index_qname_cram": {
++    "homo_sapiens - [cram, crai], fasta, []": {
+         "content": [
++            "test.cram",
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:23.333248"
+-    },
+-    "bam_crai": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:51.259774"
+-    },
+-    "bam_cram": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:51.261287"
+-    },
+-    "cram_to_bam_csi": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:04.995454"
+-    },
+-    "cram_sam": {
+-        "content": [
++            ],
+             [
+                 
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:56.502625"
+-    },
+-    "cram_versions": {
+-        "content": [
++            ],
+             [
+                 "versions.yml:md5,06b9049228b111e7bed5c52fe8a98d9b"
+             ]
+         ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:56.504946"
+-    },
+-    "bam_sam": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:37:51.264651"
+-    },
+-    "cram_to_bam_index_bai": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:12.962863"
+-    },
+-    "cram_to_bam_index_qname_sam": {
+-        "content": [
+-            [
+-                
+-            ]
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:23.337634"
+-    },
+-    "bam_stub_csi": {
+-        "content": [
+-            "test.csi"
+-        ],
+-        "meta": {
+-            "nf-test": "0.8.4",
+-            "nextflow": "23.04.3"
+-        },
+-        "timestamp": "2024-02-12T19:38:32.068596"
++        "timestamp": "2023-12-04T17:41:10.730011823"
+     }
+ }
+************************************************************
