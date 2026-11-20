@@ -271,7 +271,7 @@ Below is a list of profiles that are available across nf-core pipelines:
 - `apptainer`
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
 - `wave`
-  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow ` 24.03.0-edge` or later).
+  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow `24.03.0-edge` or later).
 - `conda`
   - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
 
