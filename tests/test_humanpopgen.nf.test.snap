@@ -154,6 +154,8 @@
                 "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_sorted.flagstat",
                 "JK2067_JK2067_hs37d5_chr21-MT.kraken2.report.txt",
                 "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.kraken2.report.txt",
+                "JK2067_JK2067_hs37d5_chr21-MT_complexity.log",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_complexity.log",
                 "kraken2_taxpasta_table.tsv",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.txt",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.txt",
@@ -309,10 +311,10 @@
                 "JK2067_downsampled.bam"
             ]
         ],
-        "timestamp": "2026-07-24T08:52:43.768709518",
+        "timestamp": "2026-11-20T10:18:46.707738544",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "25.10.4"
+            "nextflow": "26.10.6"
         }
     },
     "read_filtering": {
@@ -382,10 +384,6 @@
                 "GUNZIP_FASTA": {
                     "gunzip": 1.1
                 },
-                "KRAKEN2_KRAKEN2": {
-                    "kraken2": "2.1.2",
-                    "pigz": 2.6
-                },
                 "MTNUCRATIO": {
                     "mtnucratio": "0.7 Please provide the (coordinate) sorted input SAM File, as well as the MT identifier. No further parameters are necessary! Make sure that your input file has an appropriate SAM/BAM file header, or the SAMRecords will be set to '*'!"
                 },
@@ -397,6 +395,9 @@
                 },
                 "PRESEQ_CCURVE": {
                     "preseq": "3.1.1"
+                },
+                "PRINSEQPLUSPLUS": {
+                    "prinseqplusplus": 1.2
                 },
                 "PRINT_CONTAMINATION_ANGSD": {
                     "python": "3.8.3"
@@ -475,10 +476,10 @@
                 }
             }
         ],
-        "timestamp": "2026-10-30T10:50:09.039365824",
+        "timestamp": "2026-11-20T10:18:47.010858603",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.10.4"
+            "nextflow": "26.10.6"
         }
     },
     "preprocessing": {
@@ -512,16 +513,18 @@
         "content": [
             [
                 "JK2067_JK2067_hs37d5_chr21-MT.kraken2.report.txt:md5,0dfee3834b130c291e2dff5f2625cb97",
-                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.kraken2.report.txt:md5,5e35ba5bd6f2df3b725dfe778561e9ea"
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.kraken2.report.txt:md5,5e35ba5bd6f2df3b725dfe778561e9ea",
+                "JK2067_JK2067_hs37d5_chr21-MT_complexity.log:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_complexity.log:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
             [
                 "kraken2_taxpasta_table.tsv"
             ]
         ],
-        "timestamp": "2025-08-15T10:45:18.69957",
+        "timestamp": "2026-11-20T10:18:46.889245172",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.6"
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.6"
         }
     },
     "genotyping": {
