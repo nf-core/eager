@@ -158,9 +158,7 @@
         "required": ["reference_name", "fasta"],
         "dependentRequired": {
             "pileupcaller_snpfile": ["pileupcaller_bedfile"],
-            "pileupcaller_bedfile": ["pileupcaller_snpfile"],
-            "bam": ["bam_reference_id"],
-            "bam_reference_id": ["bam"]
+            "pileupcaller_bedfile": ["pileupcaller_snpfile"]
         }
     },
     "uniqueEntries": ["reference_name", "fasta"]
