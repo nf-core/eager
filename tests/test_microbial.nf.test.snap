@@ -341,7 +341,11 @@
                 "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.json",
                 "JK2782_JK2782_TGGCCGATCAACGA_L1.fastp.log",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_filtered.flagstat",
-                "JK2782_JK2782_TGGCCGATCAACGA_hs37d5_chr21-MT_filtered.flagstat"
+                "JK2782_JK2782_TGGCCGATCAACGA_hs37d5_chr21-MT_filtered.flagstat",
+                "JK2782_Mammoth_MT_Krause_hostremoved.r1.fq.gz",
+                "JK2782_Mammoth_MT_Krause_hostremoved.r2.fq.gz",
+                "JK2782_hs37d5_chr21-MT_hostremoved.r1.fq.gz",
+                "JK2782_hs37d5_chr21-MT_hostremoved.r2.fq.gz"
             ]
         ],
         "timestamp": "2026-09-25T09:22:44.797759307",
@@ -421,7 +425,8 @@
     "genotyping": {
         "content": [
             [
-                
+                "JK2782_Mammoth_MT_Krause.bcftools_stats.txt:md5,d3ca07e5075a741027e8d55ffd35754a",
+                "JK2782_hs37d5_chr21-MT.bcftools_stats.txt:md5,f38b838893ca595d0852155ba6581735"
             ],
             [
                 "JK2782_Mammoth_MT_Krause.bcftools_stats.txt",
@@ -741,6 +746,11 @@
                 "GUNZIP_FASTA": {
                     "gunzip": 1.1
                 },
+                "HOST_REMOVAL": {
+                    "python": "3.9.15",
+                    "pysam": "0.16.0",
+                    "xopen": "1.1.0"
+                },
                 "KRAKENUNIQ_PRELOADEDKRAKENUNIQ": {
                     "krakenuniq": "1.0.4"
                 },
@@ -806,10 +816,10 @@
                 }
             }
         ],
-        "timestamp": "2026-07-06T14:34:17.971957",
+        "timestamp": "2026-09-11T16:13:06.952588553",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.4"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
         }
     },
     "authentication": {
