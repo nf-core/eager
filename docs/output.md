@@ -252,14 +252,17 @@ If a BAM input is provided, the sorted input BAM file, its index, and flagstat s
 
 ### Mapping statistics
 
+The outputs of mapping statistics tools are provided in the `authentication/` output directory.
+
 #### EndorSpy
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `endorspy/`
-  - `stats/`
-    - `*.json`: json file per sample containing all the calculated percent on target, clonality and percent duplicates
+- `authentication/`
+  - `endorspy/`
+    - `stats/`
+      - `*.json`: json file per sample containing all the calculated percent on target, clonality and percent duplicates
 
 </details>
 
@@ -316,23 +319,92 @@ The combination of reported statistics will vary depending on the steps of the p
 
 > ⚠️ Warning: When bam input is provided, please keep in mind it is assumed that this is an **unfiltered** bam. If you provide an already filtered bam, the percent on target calculations will be wrong since the original total number of reads in the initial fastq/bam cannot be inferred.
 
-### Read Filtering
-
-### Host Removal
+#### Preseq
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `read_filtering/host_removal/`
-  - `data/`
-    - `*.fq.gz`: FASTQ files containing only reads that did not map
-    to the reference genome.
+- `mapping/`
+  - `*.{c_curve,lc_extrap}.txt`: A two column text file with the first column representing sequencing depth and the second an estimate of unique reads.
 
 </details>
 
-The nf-core/eager host removal step removes any reads from the original input FASTQ files that mapped to the provided reference. This step is performed by a custom python script [extract_map_reads.py](https://github.com/nf-core/eager/blob/master/bin/extract_map_reads.py).
+[Preseq](https://github.com/smithlabcode/preseq) Preseq is a collection of tools that allow assessment of the complexity of a library, where complexity means the number of unique molecules in your library (i.e. molecules with different starting position, length, and sequence).
+Within nf-core/eager, two separate algorithms are implemented: `c_curve` and `lc_extrap`.
+The former algorithm calculates the complexity curve for your _existing_ sequencing data, producing the number of unique reads at each sequencing depth.
+The latter algorithm performs library complexity extrapolation, using the data generated so far to extrapolate the expected number of unique reads you would get with _additional_ sequencing efforts.
 
-The resulting FASTQ files can be used for data sharing purposes where the host DNA should not be made publically available for ethical reasons (for example when you do not have permission to analyse the host DNA but only analysis on the metagenomic content were agreed) or for due to identifiability reasons (for example, for individuals that died in recent times and could be identified based on their DNA alone).
+The resulting histogram file contains estimated unique read counts at different sequencing depths, and can be used to plot the complexity curve for a library.
+These curves are displayed in the MultiQC report of your run, but you can also use the output histogram file for further exploration e.g. in R to find your sequencing target depth.
+
+#### QualiMap
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `qualimap/`
+  - `stats/`
+    - `<reference_id>/`
+      - `<sample_id>/`
+        - `*.html`: in-depth report including percent coverage, depth coverage, GC content, etc. of mapped reads
+        - `genome_results.txt`
+        - `css/`: HTML CSS styling used for the report
+        - `images_qualimapReport/`: PNG version of images from the HTML report.
+        - `raw_data_qualimapReport/`: The raw data used to render the HTML report as TXT files.
+
+</details>
+
+[QualiMap](http://qualimap.bioinfo.cipf.es/) is a tool which provides statistics on the quality of the mapping of your reads to your reference genome.
+It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read), and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth).
+Together, these outputs allow you to make decision about the quality of your data and its viability for downstream applications like genotyping, as well as how to adjust the parameters for those tools.
+
+> NB: Neither fold coverage nor percent coverage on its own is sufficient to assess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or un-removed-adapter-containing reference genomes can artificially inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
+
+**Note that many of the statistics from this module are displayed in the General Stats table, as they represent single values that are not plottable.**
+
+Qualimap is ran on the merged BAM file of all libraries for a given sample, meaning the output values represent all types of libraries/sequencing data of a sample combined into a single merged file (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
+
+> ⚠️ Warning: If your library has no reads mapping to the reference, this will result in an empty BAM file. Qualimap will therefore not produce any output even if a BAM exists!
+
+#### Bedtools
+
+<details markdown="1">
+<summary>Output file</summary>
+
+- `mapstats/bedtools/`
+  - `stats/`
+    - `*.breadth.gz`: This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature.
+    - `*.depth.gz`: This file will have the the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
+
+</details>
+
+[bedtools](https://github.com/arq5x/bedtools2) utilities are a swiss-army knife of tools for a wide-range of genomics analysis tasks.
+Bedtools allows one to intersect, merge, count, complement, and shuffle genomic intervals from multiple files in widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF.
+
+The `bedtools coverage` tool computes both the depth and breadth of coverage of features.
+Depth of coverage is the number of reads that overlap each reference position, while breadth of coverage is the fraction of reference positions that are covered at a given coverage.
+By default, the calculated values are based on the entire genome, unless a feature file was provided with `--mapstats_bedtools_featurefile`, in which case, additional coverage statistics will be computed for the specified regions.
+
+The output from this module can be useful for things such as checking for the presence/absence of virulence factors in ancient pathogen genomes, or getting coverage statistics on SNP capture positions.
+
+### Read Filtering
+
+#### Host Removal
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `read_filtering/`
+  - `host_removal/`
+    - `data/`
+      - `*.fq.gz`: FASTQ files containing only reads that did not map to the reference genome.
+
+</details>
+
+The nf-core/eager host removal step removes any reads from the original input FASTQ files that mapped to the provided reference.
+This step is performed by a custom python script [extract_map_reads.py](https://github.com/nf-core/eager/blob/master/bin/extract_map_reads.py).
+
+The resulting FASTQ files can be used for data sharing purposes where the host DNA should not be made publically available for ethical reasons (for example when you do not have permission to analyse the host DNA but only analysis on the metagenomic content were agreed) or due to identifiability reasons (for example, for individuals that died in recent times and could be identified based on their DNA alone).
 
 Alternatively you could use the resulting files for manual metagenomic screen outside of nf-core/eager (e.g. when your preferred taxonomic classifier isn't supported by nf-core/eager).
 
@@ -341,27 +413,25 @@ Alternatively you could use the resulting files for manual metagenomic screen ou
 <details markdown="1">
 <summary>Output files</summary>
 
-- `read_filtering/filtered_bams/`
-  - `data/`
-    - `*length.filtered.bam`: BAM file containing length-filtered mapped and unmapped reads.
-    - `*.filtered.bam`: BAM file containing mapped quality filtered reads (and optionally length filtering and unmapped reads, if specified by the user with the corresponding parameters).
-    - `*.{bai,csi}`: Corresponding index files of any generated BAM files.
-  - `stats/`
-    - `*filtered.flagstat`: Statistics of aligned reads from `samtools flagstat`.
-
-- `read_filtering/fastq/`
-  - `data/`
-    - `*.unmapped_other_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only unmapped reads, if specified for generation, without length filtering.
-      - If you do read merging or have single-end data you will only get one file containing (`*_other*`) containing all reads (the others will be empty).
-      - If you skip merging for _paired-end data_ you'll get reads separately (`_1`, `_2`, `_singleton`), with `other` being empty.
-    - `*mapped_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only mapped reads, if specified for generation, without length or quality filtering. If you do read merging you will only get one file containing (`*_other*`) containing all reads. If you skip merging you'll get them separately (`_1`, `_2` etc.).
+- `read_filtering/`
+  - `filtered_bams/`
+    - `data`
+      - `*_lengthonly.filtered.bam`: BAM file containing length-filtered mapped and unmapped reads.
+      - `*.filtered.bam`: BAM file containing mapped quality filtered reads (and optionally length filtering and unmapped reads, if specified by the user with the corresponding parameters).
+      - `*.{bai,csi}`: Corresponding index files of any generated BAM files.
+      - `*.unmapped_other_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only unmapped reads, if specified for generation, without length filtering.
+        - If you do read merging or have single-end data you will only get one file containing (`*_other*`) containing all reads (the others will be empty).
+        - If you skip merging for _paired-end data_ you'll get reads separately (`_1`, `_2`, `_singleton`), with `other` being empty.
+      - `*mapped_{1,2,other,singleton}.fastq.gz`: FASTQ file containing only mapped reads, if specified for generation, without length or quality filtering. If you do read merging you will only get one file containing (`*_other*`) containing all reads. If you skip merging you'll get them separately (`_1`, `_2` etc.).
+    - `stats`
+      - `*filtered.flagstat`: Statistics of aligned reads from `samtools flagstat`.
 
 </details>
 
 nf-core/eager can perform a range of different length, quality, and/or mapped-unmapped filtering of BAM files, and generate converted FASTQ files for manual analysis outside the pipeline.
 
 If bam filtering is turned on, by default only mapped reads are retained for downstream genomic analysis.
-Additionally, please note that removal of PCR duplicates in nf-core/eager will also filter for mapped reads only.
+> ⚠️ Additionally, please note that removal of PCR duplicates in nf-core/eager will additionally filter for mapped reads only!
 
 Please be aware, that intermediate length and mapping quality filtered genomic BAM files are _not_ saved in the results directory automatically, with the assumption that downstream deduplicated BAM files are preferred for further analyses - see the [parameters](https://nf-co.re/eager/parameters) page for more information if you wish to save these.
 
@@ -561,17 +631,24 @@ Results are highly dependent upon the taxon being analyzed, as different microbi
 
 ### Deduplication
 
+Deduplication is carried by two possible tools, as described below.
+The expected output files are the same in both cases.
+
+#### picard MarkDuplicates
+
 <details markdown="1">
 <summary>Output files</summary>
 
 - `deduplication/`
-  - `*.dedupped.bam`: Unique reads aligned to a reference genome in BAM format.
-  - `*.dedupped.bam.{bai,csi}`: Index file corresponding to the BAM file.
-  - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
+  - `data/`
+    - `*.dedupped.bam`: Unique reads aligned to a reference genome in BAM format.
+    - `*.dedupped.bam.{bai,csi}`: Index file corresponding to the BAM file.
+  - `stats/`
+    - `*.dedupped.flagstat`: Statistics of aligned reads from SAMtools `flagstat`, after removal of PCR duplicates.
 
 </details>
 
-Deduplication is carried by two possible tools, as described below. However the expected output files are should be the same.
+Deduplication is carried by two possible tools, as described below. However the expected output files are the same for both.
 
 #### picard MarkDuplicates
 
@@ -580,67 +657,6 @@ Deduplication is carried by two possible tools, as described below. However the 
 #### DeDup
 
 [DeDup](https://github.com/apeltzer/DeDup) is a merged-read deduplication tool capable of performing merged-read deduplication on paired-end sequencing data in BAM files.
-
-#### Preseq
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `mapping/`
-  - `*.{c_curve,lc_extrap}.txt`: A two column text file with the first column representing sequencing depth and the second an estimate of unique reads.
-
-</details>
-
-[Preseq](https://github.com/smithlabcode/preseq) Preseq is a collection of tools that allow assessment of the complexity of the library, where complexity means the number of unique molecules in your library (i.e. not molecules with the exact same length and sequence). There are two algorithms from the tools we use: `c_curve` and `lc_extrap`. The former gives you the expected number of unique reads if you were to repeated sequencing but with fewer reads than your first sequencing run. The latter tries to extrapolate the decay in the number of unique reads you would get with re-sequencing but with more reads than your initial sequencing run.
-
-The resulting histogram file will contain estimated deduplication statistics at different theoretical sequencing depths, and can be used to generate a complexity curve for estimating the amount unique reads that will be yield if the library is re-sequenced.
-
-These curves will be displayed in the pipeline run's MultiQC report, however you can also use this file for plotting yourself for further exploration e.g. in R to find your sequencing target depth.
-
-### Mapping Statistics
-
-#### QualiMap
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `qualimap/`
-  - `<sample_id>/`
-    - `*.html`: in-depth report including percent coverage, depth coverage, GC content, etc. of mapped reads
-    - `genome_results.txt`
-  - `css/`: HTML CSS styling used for the report
-  - `images_qualimapReport/`: PNG version of images from the HTML report.
-  - `raw_data_qualimapReport/`: The raw data used to render the HTML report as TXT files.
-
-</details>
-
-[QualiMap](http://qualimap.bioinfo.cipf.es/)
-is a tool which provides statistics on the quality of the mapping of your reads to your reference genome. It allows you to assess how well covered your reference genome is by your data, both in 'fold' depth (average number of times a given base on the reference is covered by a read) and 'percentage' (the percentage of all bases on the reference genome that is covered at a given fold depth). These outputs allow you to make decision if you have enough quality data for downstream applications like genotyping, and how to adjust the parameters for those tools accordingly.
-
-> NB: Neither fold coverage nor percent coverage on its own is sufficient to assess whether you have a high quality mapping. Abnormally high fold coverages of a smaller region such as highly conserved genes or un-removed-adapter-containing reference genomes can artificially inflate the mean coverage, yet a high percent coverage is not useful if all bases of the genome are covered at just 1x coverage.
-
-**Note that many of the statistics from this module are displayed in the General Stats table, as they represent single values that are not plottable.**
-
-You will receive output for each sample. This means you will statistics of deduplicated values of all types of libraries combined in a single value (i.e. non-UDG treated, full-UDG, paired-end, single-end all together).
-
-> ⚠️ Warning: If your library has no reads mapping to the reference, this will result in an empty BAM file. Qualimap will therefore not produce any output even if a BAM exists!
-
-#### Bedtools
-
-<details markdown="1">
-<summary>Output file</summary>
-
-- `mapstats/bedtools/`
-  - `*.breadth.gz`: This file will have the contents of your annotation file (e.g. BED/GFF), and the following subsequent columns: no. reads on feature, # bases at depth, length of feature, and % of feature.
-  - `*.depth.gz`: This file will have the the contents of your annotation file (e.g. BED/GFF), and an additional column which is mean depth coverage (i.e. average number of reads covering each position).
-
-</details>
-
-[bedtools](https://github.com/arq5x/bedtools2) utilities are a swiss-army knife of tools for a wide-range of genomics analysis tasks. Bedtools allows one to intersect, merge, count, complement, and shuffle genomic intervals from multiple files in widely-used genomic file formats such as BAM, BED, GFF/GTF, VCF.
-
-The `bedtools coverage` tool computes both the depth and breadth of coverage of features in file B (alignment file) on the features in file A (provied by `--mapstats_bedtools_featurefile` when running the eager workflow). One advantage that bedtools coverage offers is that it not only counts the number of features that overlap an interval in file A, it also computes the fraction of bases in the interval in A that were overlapped by one or more features. Thus, bedtools coverage also computes the breadth of coverage observed for each interval in A.
-
-The output from this module can be useful for things such as checking for the presence/absence of virulence factors in ancient pathogen genomes, or getting statistics on SNP capture positions.
 
 ### Damage Manipulation
 
@@ -672,31 +688,38 @@ Be advised that this process introduces reference bias in the resulting rescaled
 <details markdown="1">
 <summary>Output files</summary>
 
-- `damage_manipulation/`
-  - `*_pmdfiltered.bam`: Reads aligned to a reference genome that pass the post-mortem-damage threshold, in BAM format.
-  - `*_pmdfiltered.bam.{bai,csi}`: Index file corresponding to the BAM file.
-  - `*_pmdfiltered.flagstat`: Statistics of aligned reads after from SAMtools `flagstat`, after filtering for post-mortem damage.
+- `damage_manipulation/pmdtools/`
+  - `data/`
+    - `*_pmdfiltered.bam`: Reads aligned to a reference genome that pass the post-mortem-damage threshold, in BAM format.
+    - `*_pmdfiltered.bam.{bai,csi}`: Index file corresponding to the BAM file.
+  - `stats/`
+    - `*_pmdfiltered.flagstat`: Statistics of aligned reads after from SAMtools `flagstat`, after filtering for post-mortem damage.
 
 </details>
 
-[pmdtools](https://github.com/pontussk/PMDtools) implements a likelihood framework incorporating a postmortem damage (PMD) score, base quality scores and biological polymorphism to identify degraded DNA sequences that are unlikely to originate from modern contamination. Using the model, each sequence is assigned a PMD score, for which positive values indicate support for the sequence being genuinely ancient.
+[pmdtools](https://github.com/pontussk/PMDtools) implements a likelihood framework incorporating a postmortem damage (PMD) score, base quality scores and biological polymorphism to identify degraded DNA sequences that are unlikely to originate from modern contamination.
+Using the model, each sequence is assigned a PMD score, for which positive values indicate support for the sequence being genuinely ancient.
 By filtering a BAM file for damaged reads in this way, it is possible to ameliorate the effects of present-day contamination, and isolate sequences of likely ancient origin to be used downstream.
-By default, all positions are assessed for damage, but it is possible to provide a FASTA file masked for specific references (`--damage_manipulation_pmdtools_masked_reference`) or a BED file to mask the reference FASTA within nf-core/eager (`--damage_manipulation_pmdtools_reference_mask`). This can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a SNP to be counted as damage when it is a transition.
+By default, all positions are assessed for damage, but it is possible to provide a FASTA file masked for specific references (`--damage_manipulation_pmdtools_masked_reference`) or a BED file to mask the reference FASTA within nf-core/eager (`--damage_manipulation_pmdtools_reference_mask`).
+This can alleviate reference bias when running PMD filtering on capture data, where you might not want the allele of a SNP to be counted as damage when it is a transition.
 
 ### Base Trimming
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `damage_manipulation/`
-  - `*{_pmdfiltered,}_trimmed.bam`: Reads whose ends have been trimmed to mitigate the effects of aDNA damage, in BAM format.
-  - `*{_pmdfiltered,}_trimmed.bam.{bai,csi}`: Index file corresponding to the BAM file.
+- `damage_manipulation/bamutils_trimbam/`
+  - `data/`
+    - `*{_pmdfiltered,}_trimmed.bam`: Reads whose ends have been trimmed to mitigate the effects of aDNA damage, in BAM format.
+    - `*{_pmdfiltered,}_trimmed.bam.{bai,csi}`: Index file corresponding to the BAM file.
 
 </details>
 
-[bamUtil trimBam](https://genome.sph.umich.edu/wiki/BamUtil) trims the end of reads in a SAM/BAM file, changing read ends to `N` and quality to `!`, or by soft clipping (if command-line option, `--clip` is specified). By default reverse strands are reversed and then the left & right are trimmed. This means that `--left` actually trims from the right of the read in the SAM/BAM for reverse reads.
+[bamUtil trimBam](https://genome.sph.umich.edu/wiki/BamUtil) trims the end of reads in a SAM/BAM file, changing read ends to `N` and quality to `!`, or by soft clipping (if the nf-core/eager option`--damage_manipulation_bamutils_softclip` is specified).
+By default reverse strands are reversed and then the left & right are trimmed.
+This means that `--left` actually trims from the right of the read in the SAM/BAM for reverse reads.
 
-Within nf-core/eager, when BAM trimming is activated alongside PMD-filtering, trimming is performed on the PMD-filtered reads only.
+> ⚠️ Within nf-core/eager, when BAM trimming is activated alongside PMD-filtering, trimming is performed _only_ on the PMD-filtered reads.
 
 ### Damage Estimation
 
