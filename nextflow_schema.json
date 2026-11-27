@@ -151,9 +151,9 @@
                 },
                 "fasta_circularmapper_elongatedindex": {
                     "type": "string",
-                    "description": "Specify a samtools index for the elongated FASTA file.",
+                    "description": "Specify a bwa index directory for the elongated FASTA file.",
                     "help_text": "Specify the index for an already elongated FASTA file to avoid regeneration.",
-                    "fa_icon": "fas fa-address-book"
+                    "fa_icon": "fas fa-folder-open"
                 }
             }
         },
@@ -630,14 +630,14 @@
                 },
                 "mapping_mapad_gapreadenddistance": {
                     "type": "number",
-                    "default": 5,
+                    "default": 5.0,
                     "description": "Specify the --gap_dist_ends parameter for mapAD, which defines the distance from the read ends in which no gaps are permitted.",
                     "help_text": "Configures mapAD's `--gap_dist_ends` parameter which defines the distance from the read ends in which no gaps are permitted. Default is set to mapAD's default (5).\n\n> Modifies mapAD map parameter: `--gap_dist_ends`",
                     "fa_icon": "fas fa-step-forward"
                 },
                 "mapping_mapad_maxnumopengaps": {
                     "type": "number",
-                    "default": 2,
+                    "default": 2.0,
                     "description": "Specify the number of gaps allowed for alignment with mapAD.",
                     "help_text": "Specify the number of gaps allowed for mapping with mapAD. Default is set to mapAD's default (2).\n\n> Modifies mapAD map parameter: `--max_num_gaps_open`",
                     "fa_icon": "fas fa-people-arrows"
@@ -804,7 +804,7 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
                     "description": "Turn on saving reads assigned by KrakenUniq or Kraken2",
-                    "help_text": "Save reads that do and do not have a taxonomic classification in your output results directory in FASTQ format.\n\n> Modifies tool parameter(s):\n> - krakenuniq: `--classified-out` and `--unclassified-out`"
+                    "help_text": "Save reads that do and do not have a taxonomic classification in your output results directory in FASTQ format.\n\n> Modifies tool parameter(s):\n> - kraken2 and krakenuniq: `--classified-out` and `--unclassified-out`"
                 },
                 "metagenomics_kraken2_savereadclassifications": {
                     "type": "boolean",
@@ -969,7 +969,7 @@
                 },
                 "metagenomics_maltextract_minpercentidentity": {
                     "type": "number",
-                    "default": 85,
+                    "default": 85.0,
                     "description": "Minimum percent identity alignments are required to have to be reported as candidate reads. Recommended to set same as MALT parameter.",
                     "help_text": "Minimum percent identity alignments are required to have to be reported. Higher values allows fewer mismatches between read and reference sequence, but therefore will provide greater confidence in the hit. Lower values allow more mismatches, which can account for damage and divergence of a related strain/species to the reference. Recommended to set same as MALT parameter or higher.\\n\\nOnly when `--metagenomics_profiling_tool malt` is also supplied.\n\n> Modifies tool parameter(s):\n> - MaltExtract: `--minPI`"
                 },
