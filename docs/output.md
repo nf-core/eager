@@ -526,33 +526,38 @@ The output system of KrakenUniq can result in other `stdout` or `stderr` logging
 
 #### taxpasta
 
-The output created by the `taxpasta merge` or `taxpasta standardise` command. It combines the results of all the samples analyzed with a given metagenomic classifer by nf-core/eager in a standardised tabular taxon-table format. The file provides an overview of the classification results for all samples combined
+The output created by the `taxpasta merge` or `taxpasta standardise` command.
+It combines the results of all the samples analyzed with a given metagenomic classifer in a standardised tabular taxon-table format.
+The file provides an overview of the classification results for all analysed samples combined.
 
 <details markdown=1>
 <summary>Output files</summary>
 
-- `metagenomics/postprocessing/taxpasta/`
-  - `{metaphlan,krakenuniq,kraken2,megan6}_taxpasta_table.tsv`
+- `metagenomics/taxpasta/`
+  - `stats/`
+    - `{metaphlan,krakenuniq,kraken2,megan6}_taxpasta_table.tsv`
 
 </details>
 
 #### maltExtract
 
-The output directory for maltExtract, as implemented under [HOPS](https://github.com/rhuebler/HOPS), which applies various heuristics of ancient authenticity and presence to MEGAN read assignments across a given set of candidate taxon.
-
+The output directory for maltExtract, as implemented under [HOPS](https://github.com/rhuebler/HOPS).
+maltExtract applies various heuristics of ancient authenticity and presence to MEGAN read assignments, across a given set of candidate taxon.
+<!-- TODO: The MaltEXract section still needs updating-->
 <details markdown="1">
 <summary>Output files</summary>
 
 - `metagenomics/postprocessing/maltextract/`
-  - `results`: Results output by maltextract
-    - `default`: Directory containing summary TSV tables for all reads
-    - `ancient`: Directory containing summary TSV tables for reads with evidence of aDNA damage
-    - `pdf_candidate_profiles`: Directory containing directories for each candidate taxon with varying levels of support for presence of genetic material for a given sample
+  - `stats/`: Results output by maltextract
+    - `ancient/`: Directory containing summary TSV tables for reads with evidence of aDNA damage
+    - `default/`: Directory containing summary TSV tables for all reads
+    - `pdf_candidate_profiles/`: Directory containing directories for each candidate taxon with varying levels of support for presence of genetic material for a given sample
     - `count_table.tsv`: TSV containing reads assigned to each node in candidate taxon list across all samples
 
 </details>
 
-The main files of interest are within the `pdf_candidate_profiles` directory. The file prefixes declare various levels of confidence in a given sample, with stp1 being less confidently ancient and present than stp2, than stp3. Results are highly dependent upon the taxon being analyzed, as different microbial genera are more liable to cross mapping and contamination than others.
+The main files of interest are within the `pdf_candidate_profiles` directory. The file prefixes declare various levels of confidence in a given sample, with stp1 being less confidently ancient and present than stp2, than stp3.
+Results are highly dependent upon the taxon being analyzed, as different microbial genera are more liable to cross mapping and contamination than others.
 
 ### Deduplication
 
