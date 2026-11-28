@@ -150,8 +150,11 @@ workflow METAGENOMICS_PROFILING {
             }
             .groupTuple(by:0)
                 .map { meta, files ->
+                // groupTuple order depends on task completion order. Sort by file name so that
+                // the input (and thus the task hash) is stable and the task can be cached on -resume.
+                def sorted_files = files.sort(false) { entry -> (entry instanceof List ? entry[0] : entry).name }
                 [
-                    meta, files.flatten()
+                    meta, sorted_files.flatten()
                 ]}
 
         ch_krakenuniq_input = ch_krakenuniq_input.combine(ch_database)
