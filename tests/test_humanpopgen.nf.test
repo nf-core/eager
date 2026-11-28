@@ -93,8 +93,8 @@ nextflow_pipeline {
             def stable_name_mapping                  = getAllFilesFromDir("$outputDir/mapping"                , includeDir: false         , ignore: null                          , ignoreFile: null                 , include: ['**/*.{bam,bai}'] )
 
             // Metagenomics
-            def stable_content_metagenomics          = getAllFilesFromDir("$outputDir/metagenomics"           , includeDir: false         , ignore: ['**/*.biom', '**/*table.tsv'], ignoreFile: null                 , include: ['**/*'] )
-            def stable_name_metagenomics             = getAllFilesFromDir("$outputDir/metagenomics"           , includeDir: false         , ignore: null                          , ignoreFile: null                 , include: ['**/*.biom', '**/*table.tsv'] )
+            def stable_content_metagenomics          = getAllFilesFromDir("$outputDir/metagenomics"           , includeDir: false         , ignore: ['**/*.biom', '**/*table.tsv', '**/*.fastq.gz'], ignoreFile: null                 , include: ['**/*'] )
+            def stable_name_metagenomics             = getAllFilesFromDir("$outputDir/metagenomics"           , includeDir: false         , ignore: null                          , ignoreFile: null                 , include: ['**/*.biom', '**/*table.tsv', '**/*.fastq.gz'] )
 
             // Preprocessing
             // NOTE: FastQC html appears stable, but I worry it might just include a day timestamp instead of a full timestamp. To keep the expression simpler I removed both from checksum testing.
