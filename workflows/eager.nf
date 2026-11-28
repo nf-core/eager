@@ -203,16 +203,9 @@ workflow EAGER {
         SAMTOOLS_INDEX_BAM_INPUT(ch_samplesheet_bams)
         ch_versions = ch_versions.mix(SAMTOOLS_INDEX_BAM_INPUT.out.versions)
 
-        if (params.fasta_largeref) {
-            ch_bams_from_input = ch_samplesheet_bams.join(SAMTOOLS_INDEX_BAM_INPUT.out.csi)
-        }
-        else {
-            ch_bams_from_input = ch_samplesheet_bams
-        }
+        // SUBWORKFLOW: Merging lanes for input BAMs. This (re-)sorts and indexes the BAMs, so the index above is not needed here.
 
-        // SUBWORKFLOW: Merging lanes for ch_bams_from_input
-
-        MERGE_LANES_INPUTBAM(ch_bams_from_input)
+        MERGE_LANES_INPUTBAM(ch_samplesheet_bams)
         ch_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.bam.join(MERGE_LANES_INPUTBAM.out.bai)
         ch_flagstat_bams_from_input_lanemerged = MERGE_LANES_INPUTBAM.out.flagstat
 
