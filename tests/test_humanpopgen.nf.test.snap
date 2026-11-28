@@ -516,12 +516,12 @@
             [
                 "JK2067_JK2067_hs37d5_chr21-MT.kraken2.report.txt:md5,0dfee3834b130c291e2dff5f2625cb97",
                 "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT.kraken2.report.txt:md5,5e35ba5bd6f2df3b725dfe778561e9ea",
-                "JK2067_JK2067_hs37d5_chr21-MT_complexity_good_out.fastq.gz:md5,d3421b5e9762deb6400ee56eb67a63fc",
-                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_complexity_good_out.fastq.gz:md5,678c44ce360051fade6c95f92a58c8e1",
                 "JK2067_JK2067_hs37d5_chr21-MT_complexity.log:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_complexity.log:md5,d41d8cd98f00b204e9800998ecf8427e"
             ],
             [
+                "JK2067_JK2067_hs37d5_chr21-MT_complexity_good_out.fastq.gz",
+                "JK2067_downsampled_JK2067_downsampled_hs37d5_chr21-MT_complexity_good_out.fastq.gz",
                 "kraken2_taxpasta_table.tsv"
             ]
         ],

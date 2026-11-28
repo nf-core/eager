@@ -523,9 +523,6 @@
     "metagenomics": {
         "content": [
             [
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_complexity.fastq.gz:md5,40586d18a18bf80d6a94ff75aaa127fe",
-                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_complexity.fastq.gz:md5,9c4c086f164bb2717ec0e06331db35d1",
-                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_complexity.fastq.gz:md5,e6e04ccc1e661fb7fa62f2427e14e5cd",
                 "RunSummary.txt:md5,440262f771c816c12f73c9907676f0a7",
                 "TotalCount.txt:md5,a86598fa53e5a210ec056b0b92f9d50f",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_complexity.rma6_coverageHist.txt:md5,0dfeef0e05d01e17a39abe414f97e132",
@@ -602,6 +599,9 @@
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_complexity.txt.gz:md5,a122f5a89977814fcc91fc49653576a9"
             ],
             [
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_complexity.fastq.gz",
+                "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_complexity.fastq.gz",
+                "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_complexity.fastq.gz",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_complexity.bbduk.log",
                 "JK2782_JK2782_TGGCCGATCAACGA_Mammoth_MT_Krause_complexity.bbduk.log",
                 "JK2802_JK2802_AGAATAACCTACCA_Mammoth_MT_Krause_complexity.bbduk.log",
