@@ -77,9 +77,9 @@
                 "JK2782_Mammoth_MT_Krause.bcftools_stats.txt",
                 "JK2782_Mammoth_MT_Krause.vcf.gz",
                 "JK2782_Mammoth_MT_Krause.vcf.gz.tbi",
-                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.flagstat",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam",
                 "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.bam.bai",
+                "JK2782_JK2782_TGGCCGATCAACGA_BAM_Mammoth_MT_Krause_sorted.flagstat",
                 "bcftools-stats-subtypes.txt",
                 "bcftools_stats_indel-lengths.txt",
                 "bcftools_stats_variant_depths.txt",
@@ -173,10 +173,10 @@
                 "multiqc_report.html"
             ]
         ],
-        "timestamp": "2026-10-30T10:30:07.396522962",
+        "timestamp": "2026-11-27T14:13:43.148890711",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.10.4"
+            "nextflow": "26.10.7"
         }
     },
     "genotyping_vcfs": {
