@@ -53,7 +53,9 @@ workflow CALCULATE_DAMAGE {
         CALCULATE_MAPDAMAGE2 ( ch_damagetool_input.bam, ch_damagetool_input.fasta )
 
         ch_versions      = ch_versions.mix( CALCULATE_MAPDAMAGE2.out.versions.first() )
-        ch_multiqc_files = ch_multiqc_files.mix( CALCULATE_MAPDAMAGE2.out.folder )
+        // MultiQC takes the sample name from the results directory name, so pass the whole directory.
+        // NOTE: the `folder` output of the module (`*/`) does not emit anything, so derive it from the runtime log.
+        ch_multiqc_files = ch_multiqc_files.mix( CALCULATE_MAPDAMAGE2.out.runtime_log.map { meta, runtime_log -> [ meta, runtime_log.parent ] } )
     }
 
     emit:
