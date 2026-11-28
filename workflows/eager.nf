@@ -402,19 +402,22 @@ workflow EAGER {
 
     ch_flagstat_for_endorspy_raw = MAP.out.flagstat.mix(ch_flagstat_bams_from_input_lanemerged)
 
-    if (params.run_bamfiltering & !params.skip_deduplication) {
+    // FILTER_BAM only emits a flagstat when mapped reads can actually be removed (see bamfiltering.nf)
+    def has_filtered_flagstat = params.run_bamfiltering && (params.bamfiltering_mappingquality != 0 || params.bamfiltering_minreadlength != 0)
+
+    if (has_filtered_flagstat && !params.skip_deduplication) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw
             .join(FILTER_BAM.out.flagstat)
             .join(DEDUPLICATE.out.flagstat)
     }
-    else if (params.run_bamfiltering & params.skip_deduplication) {
+    else if (has_filtered_flagstat && params.skip_deduplication) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw
             .join(FILTER_BAM.out.flagstat)
             .map { meta, flags_raw, flags_filtered ->
                 [meta, flags_raw, flags_filtered, []]
             }
     }
-    else if (!params.run_bamfiltering & !params.skip_deduplication) {
+    else if (!has_filtered_flagstat && !params.skip_deduplication) {
         ch_for_endorspy = ch_flagstat_for_endorspy_raw
             .join(DEDUPLICATE.out.flagstat)
             .map { meta, flags_raw, flags_dedup ->
