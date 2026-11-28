@@ -39,7 +39,7 @@ workflow MERGE_LANES_INPUTBAM {
     ch_mapped_bai =  params.fasta_largeref ? SAMTOOLS_INDEX_MERGED_LANES_BAMINPUT.out.csi : SAMTOOLS_INDEX_MERGED_LANES_BAMINPUT.out.bai
     ch_versions.mix( SAMTOOLS_INDEX_MERGED_LANES_BAMINPUT.out.versions )
 
-    ch_input_for_flagstat = SAMTOOLS_SORT_MERGED_LANES_BAMINPUT.out.bam.join( SAMTOOLS_INDEX_MERGED_LANES_BAMINPUT.out.bai, failOnMismatch: true )
+    ch_input_for_flagstat = ch_mapped_bam.join( ch_mapped_bai, failOnMismatch: true )
 
     SAMTOOLS_FLAGSTAT_MERGED_LANES_BAMINPUT( ch_input_for_flagstat )
     ch_versions.mix(SAMTOOLS_FLAGSTAT_MERGED_LANES_BAMINPUT.out.versions.first() )

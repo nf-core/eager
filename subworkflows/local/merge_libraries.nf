@@ -35,9 +35,11 @@ workflow MERGE_LIBRARIES {
     SAMTOOLS_INDEX_MERGED_LIBRARIES ( SAMTOOLS_SORT_MERGED_LIBRARIES.out.bam )
     ch_versions = ch_versions.mix( SAMTOOLS_INDEX_MERGED_LIBRARIES.out.versions.first() )
 
+    ch_merged_bai = params.fasta_largeref ? SAMTOOLS_INDEX_MERGED_LIBRARIES.out.csi : SAMTOOLS_INDEX_MERGED_LIBRARIES.out.bai
+
     // Join merged sample-level bams and their bais for genotyping
     ch_merged_bams = SAMTOOLS_SORT_MERGED_LIBRARIES.out.bam
-        .join( SAMTOOLS_INDEX_MERGED_LIBRARIES.out.bai )
+        .join( ch_merged_bai )
 
     // Not sure if FLAGSTAT is really needed, but added here for completeness
     SAMTOOLS_FLAGSTAT_MERGED_LIBRARIES ( ch_merged_bams )
@@ -47,7 +49,7 @@ workflow MERGE_LIBRARIES {
     ch_multiqc_files = ch_multiqc_files.mix( SAMTOOLS_FLAGSTAT_MERGED_LIBRARIES.out.flagstat )
 
     emit:
-    bam_bai  = ch_merged_bams       // [ [ meta ], bam , bai ]
+    bam_bai  = ch_merged_bams       // [ [ meta ], bam , bai/csi ]
     flagstat = ch_merged_flagstat   // [ [ meta ], flagstat ]
     versions = ch_versions
     mqc      = ch_multiqc_files // Same as flagstat
