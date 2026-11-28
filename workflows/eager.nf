@@ -152,8 +152,6 @@ workflow EAGER {
     REFERENCE_INDEXING(fasta_fn, fasta_fai, fasta_dict, fasta_mapperindexdir)
     ch_versions = ch_versions.mix(REFERENCE_INDEXING.out.versions)
 
-    REFERENCE_INDEXING.out.reference.dump(tag: "indexing_reference")
-
     //
     // MODULE: Run FastQC or Falco
     //
@@ -572,7 +570,6 @@ workflow EAGER {
     //
     // SUBWORKFLOW: Consensus sequence
     //
-    ch_samplesheet_vcfs.dump(tag: "vcfs_additional_samplesheet")
     if (params.run_consensus_sequence) {
         CONSENSUS_SEQUENCE(
             GENOTYPE.out.vcf,
